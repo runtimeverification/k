@@ -3,13 +3,14 @@ package org.kframework.parser.utils;
 
 import java.io.*;
 
+import org.kframework.parser.concrete.DefinitionLocalKParser;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class ResourceExtractor {
 
     public static void Extract(String resource, File destination) {
         try (
-            InputStream k2 = new BufferedInputStream(Object.class.getResourceAsStream(resource));
+            InputStream k2 = new BufferedInputStream(DefinitionLocalKParser.resourceDomain().getResourceAsStream(resource));
             OutputStream os = new BufferedOutputStream(new FileOutputStream(destination))) {
 
             while (true) {

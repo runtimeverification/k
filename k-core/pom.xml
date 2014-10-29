@@ -13,12 +13,6 @@
 
   <name>K Framework Tool Core</name>
 
-  <properties>
-    <sdf.resource.dir>${basedir}/src/main/sdf/syntax</sdf.resource.dir>
-    <stratego.src.dir>${basedir}/target/generated-sources/sdf</stratego.src.dir>
-    <stratego.package.dir>${stratego.src.dir}/org/kframework/parser/concrete/lib</stratego.package.dir>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -124,11 +118,6 @@
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
-      <artifactId>strategoxt</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
       <artifactId>maude</artifactId>
       <version>2.6</version>
       <type>zip</type>
@@ -182,36 +171,10 @@
   <build>
     <resources>
       <resource>
-        <directory>${sdf.resource.dir}</directory>
-      </resource>
-      <resource>
         <directory>src/main/resources</directory>
       </resource>
     </resources>
     <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-          <execution>
-            <id>generate-sdf</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <target>
-                <property name="compile_classpath" refid="maven.compile.classpath" />
-                <copy todir="target/sdf" preservelastmodified="true">
-                  <fileset dir="src/main/sdf" />
-                </copy>
-                <ant antfile="buildsig.xml" dir="target/sdf" />
-                <ant antfile="buildstr.xml" dir="target/sdf" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>javacc-maven-plugin</artifactId>
@@ -222,25 +185,6 @@
             <goals>
               <goal>javacc</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.9</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${stratego.src.dir}</source>
-              </sources>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -291,75 +235,7 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>copy-build-dependencies</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <phase>initialize</phase>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.kframework.dependencies</groupId>
-                  <artifactId>sdf2table</artifactId>
-                  <version>1.0</version>
-                  <type>${native.exe.type}</type>
-                  <classifier>${native.os.classifier}</classifier>
-                  <destFileName>sdf2table${native.exe.extension}</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.kframework.dependencies</groupId>
-                  <artifactId>implodePT</artifactId>
-                  <version>1.0</version>
-                  <type>${native.exe.type}</type>
-                  <classifier>${native.os.classifier}</classifier>
-                  <destFileName>implodePT${native.exe.extension}</destFileName>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>target/sdf/bin</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile> 
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <dependencies>
-      </dependencies>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.8</version>
-            <executions>
-              <execution>
-                <id>copy-windows-dependencies</id>
-                <goals>
-                  <goal>copy-dependencies</goal>
-                </goals>
-                <phase>initialize</phase>
-                <configuration>
-                  <includeArtifactIds>cygwin1</includeArtifactIds>
-                  <outputDirectory>target/sdf/bin</outputDirectory>
-                  <stripVersion>true</stripVersion>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
 

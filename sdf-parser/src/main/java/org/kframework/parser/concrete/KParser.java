@@ -41,7 +41,7 @@ public class KParser {
         return ImportTbl(kompiled.getAbsolutePath() + "/Rule.tbl");
     }
 
-    public static String ImportTbl(String filePath) {
+    public synchronized static String ImportTbl(String filePath) {
 
         if (!tables.contains(filePath)) {
             tables.add(filePath);
@@ -79,7 +79,7 @@ public class KParser {
         return null;
     }
 
-    public static String ImportTblPgm(File kompiled) {
+    public synchronized static String ImportTblPgm(File kompiled) {
         String filePath = kompiled.getAbsolutePath() + "/Program.tbl";
         if (!tables.contains(filePath)) {
             tables.add(filePath);
@@ -117,7 +117,7 @@ public class KParser {
         return null;
     }
 
-    public static String ImportTblGround(File kompiled) {
+    public synchronized static String ImportTblGround(File kompiled) {
         String filePath = kompiled.getAbsolutePath() + "/Ground.tbl";
 
         if (!tables.contains(filePath)) {
@@ -156,7 +156,7 @@ public class KParser {
         return null;
     }
 
-    public static String ParseKoreString(String kDefinition) {
+    public synchronized static String ParseKoreString(String kDefinition) {
         init();
         String rez = "";
         context.setStandAlone(true);
@@ -189,7 +189,7 @@ public class KParser {
         return rez;
     }
 
-    public static String ParseKConfigString(String kDefinition) {
+    public synchronized static String ParseKConfigString(String kDefinition) {
         init();
         String rez = "";
         context.setStandAlone(true);
@@ -222,7 +222,7 @@ public class KParser {
         return rez;
     }
 
-    public static String ParseKRuleString(String kDefinition) {
+    public synchronized static String ParseKRuleString(String kDefinition) {
         init();
         String rez = "";
         context.setStandAlone(true);
@@ -262,7 +262,7 @@ public class KParser {
      *            The string content of the term.
      * @return The xml representation of the parsed term, or an error in the xml format.
      */
-    public static String ParseKCmdString(String argument) {
+    public synchronized static String ParseKCmdString(String argument) {
         init();
         String rez = "";
         context.setStandAlone(true);
@@ -295,7 +295,7 @@ public class KParser {
         return rez;
     }
 
-    public static String ParseProgramString(String program, String startSymbol) {
+    public synchronized static String ParseProgramString(String program, String startSymbol) {
         init();
         String rez = "";
         context.setStandAlone(true);

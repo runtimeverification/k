@@ -63,12 +63,12 @@ public class ParseRulesFilter extends ParseForestTransformer {
             if (ss.containsAttribute("kore")) {
 
                 long koreStartTime = System.currentTimeMillis();
-                parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
                 if (context.globalOptions.verbose)
                     System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
             } else {
                 try {
-                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
                 } catch (RuntimeException  e) {
                     String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
                     throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
