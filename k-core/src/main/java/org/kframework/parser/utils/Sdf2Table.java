@@ -8,16 +8,26 @@ import java.io.InputStream;
 import org.kframework.utils.OS;
 import org.kframework.utils.ThreadedStreamCapturer;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 public class Sdf2Table {
 
-    public static void run_sdf2table(File startDir, String mainFile) {
+    private final Provider<ProcessBuilder> pb;
+
+    @Inject
+    public Sdf2Table(Provider<ProcessBuilder> pb) {
+        this.pb = pb;
+    }
+
+    public void run_sdf2table(File startDir, String mainFile) {
         ThreadedStreamCapturer errorStreamHandler;
 
         try {
             String f = OS.current().getNativeExecutable("sdf2table");
 
             // create process
-            ProcessBuilder pb = new ProcessBuilder(f, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
+            ProcessBuilder pb = this.pb.get().command(f, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
             pb.directory(startDir);
 
             // start sdf2table process
@@ -42,9 +52,8 @@ public class Sdf2Table {
         }
     }
 
-    public static Thread run_sdf2table_parallel(File startDir, String mainFile) {
-        Sdf2Table st = new Sdf2Table();
-        Sdf2tableRunner sr = st.new Sdf2tableRunner(startDir, mainFile);
+    public Thread run_sdf2table_parallel(File startDir, String mainFile) {
+        Sdf2tableRunner sr = new Sdf2tableRunner(startDir, mainFile);
 
         sr.start();
 

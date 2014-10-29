@@ -2,6 +2,7 @@
 package org.kframework.ktest.Config;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.*;
 import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
@@ -34,10 +35,12 @@ public class ConfigPreProcessor extends XMLFilterImpl {
     private final Stack<Element> elementStack = new Stack<>();
     private final UserDataHandler dataHandler = new LocationDataHandler();
     private final Map<String, String> env;
+    private final FileUtil files;
 
-    ConfigPreProcessor(XMLReader xmlReader, Document dom, Map<String, String> env) {
+    ConfigPreProcessor(XMLReader xmlReader, Document dom, Map<String, String> env, FileUtil files) {
         super(xmlReader);
         this.env = env;
+        this.files = files;
 
         // Add listener to DOM, so we know which node was added.
         EventListener modListener = new EventListener() {
@@ -78,7 +81,7 @@ public class ConfigPreProcessor extends XMLFilterImpl {
             Locator startLocator = locatorStack.pop();
 
             LocationData location = new LocationData(
-                    startLocator.getSystemId(),
+                    files.resolveWorkingDirectory(startLocator.getSystemId()),
                     startLocator.getLineNumber(),
                     startLocator.getColumnNumber(),
                     locator.getLineNumber(),

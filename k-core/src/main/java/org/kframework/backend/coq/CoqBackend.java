@@ -21,15 +21,17 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class CoqBackend extends BasicBackend {
-    private final KExceptionManager kem;
+
     private final FileUtil files;
+    private final Provider<ProcessBuilder> pb;
 
     @Inject
-    public CoqBackend(Stopwatch sw, Context context, KExceptionManager kem, FileUtil files) {
+    public CoqBackend(Stopwatch sw, Context context, Provider<ProcessBuilder> pb, FileUtil files) {
         super(sw, context);
-        this.kem = kem;
+        this.pb = pb;
         this.files = files;
     }
 
@@ -50,7 +52,7 @@ public class CoqBackend extends BasicBackend {
         File directory = definition.getMainFile().getParentFile();
 
         try {
-            Process p = new ProcessBuilder(kcoq,"syntax","--recursive",
+            Process p = pb.get().command(kcoq,"syntax","--recursive",
                     definition.getMainFile().getAbsolutePath(),domainFile)
               .inheritIO().directory(directory).start();
             int result;
@@ -68,7 +70,7 @@ public class CoqBackend extends BasicBackend {
             throw KExceptionManager.criticalError("Error generating Coq syntax definition", e);
         }
         try {
-            Process p = new ProcessBuilder(kcoq,"rules","--lang-name",langName,"--recursive",
+            Process p = pb.get().command(kcoq,"rules","--lang-name",langName,"--recursive",
                     definition.getMainFile().getAbsolutePath(),"--rules-from",labelFile,ruleFile)
               .inheritIO().directory(directory).start();
             int result;

@@ -9,30 +9,32 @@ import org.kframework.krun.ioserver.main.IOServer;
 import org.kframework.utils.maude.MaudeRun;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 public class KRunner {
     private final FileUtil files;
     private final KompileOptions kompileOptions;
     private final KRunOptions krunOptions;
     private final IOServer server;
+    private final Provider<ProcessBuilder> pb;
 
     @Inject
     public KRunner(
             FileUtil files,
             KompileOptions kompileOptions,
             KRunOptions krunOptions,
-            IOServer server) {
+            IOServer server,
+            Provider<ProcessBuilder> pb) {
         this.files = files;
         this.kompileOptions = kompileOptions;
         this.krunOptions = krunOptions;
         this.server = server;
+        this.pb = pb;
     }
 
     Thread startServer() {
@@ -42,13 +44,11 @@ public class KRunner {
     }
 
     private Process runMaude() throws IOException {
-        ProcessBuilder maude = new ProcessBuilder();
-        List<String> commands = new ArrayList<String>();
-        commands.add(MaudeRun.initializeMaudeExecutable());
-        commands.add("-no-wrap");
-        commands.add("-no-banner");
-        commands.add("-xml-log=" + files.resolveTemp("maudeoutput.xml").getAbsolutePath());
-        maude.command(commands);
+        ProcessBuilder maude = pb.get().command(
+                MaudeRun.initializeMaudeExecutable(),
+                "-no-wrap",
+                "-no-banner",
+                "-xml-log=" + files.resolveTemp("maudeoutput.xml").getAbsolutePath());
         maude.redirectOutput(files.resolveTemp("maude_out"));
         maude.redirectError(files.resolveTemp("maude_err"));
 

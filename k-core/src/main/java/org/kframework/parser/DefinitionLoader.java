@@ -53,6 +53,7 @@ public class DefinitionLoader {
     private final boolean documentation;
     private final boolean autoinclude;
     private final FileUtil files;
+    private final Sdf2Table sdf2Table;
 
     @Inject
     public DefinitionLoader(
@@ -62,7 +63,8 @@ public class DefinitionLoader {
             OuterParser outer,
             @Backend.Documentation boolean documentation,
             @Backend.Autoinclude boolean autoinclude,
-            FileUtil files) {
+            FileUtil files,
+            Sdf2Table sdf2Table) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
@@ -70,6 +72,7 @@ public class DefinitionLoader {
         this.documentation = documentation;
         this.autoinclude = autoinclude;
         this.files = files;
+        this.sdf2Table = sdf2Table;
     }
 
     public Definition loadDefinition(File mainFile, String lang, Context context) {
@@ -175,7 +178,7 @@ public class DefinitionLoader {
                 sw.printIntermediate("File Gen Pgm");
 
                 if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
-                    Sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
+                    sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
                     files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
                     files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
                     sw.printIntermediate("Generate TBLPgm");
@@ -207,9 +210,9 @@ public class DefinitionLoader {
                         throw KExceptionManager.criticalError("Could not delete file " + cache);
                     }
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                    Thread t1 = Sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
+                    Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
                     if (!documentation) {
-                        Thread t2 = Sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
+                        Thread t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
                         t2.join();
                         files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
                     }

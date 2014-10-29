@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @Singleton
 public class FileUtil {
 
@@ -30,9 +32,9 @@ public class FileUtil {
     @Inject
     FileUtil(
             @TempDir File tempDir,
-            @DefinitionDir Provider<File> definitionDir,
+            @DefinitionDir @Nullable Provider<File> definitionDir,
             @WorkingDir File workingDir,
-            @KompiledDir Provider<File> kompiledDir,
+            @KompiledDir @Nullable Provider<File> kompiledDir,
             GlobalOptions options,
             KExceptionManager kem) {
         this.tempDir = tempDir;

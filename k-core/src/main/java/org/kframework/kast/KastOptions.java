@@ -62,7 +62,7 @@ public final class KastOptions {
         if (expression != null) {
             return Sources.fromCommandLine("-e");
         } else {
-            return Sources.fromFile(parameters.get(0));
+            return Sources.fromFile(files.resolveWorkingDirectory(parameters.get(0)));
         }
     }
 

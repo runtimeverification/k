@@ -19,8 +19,8 @@ import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.WorkingDir;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,15 +46,13 @@ public class RunProcess {
 
     private final KExceptionManager kem;
     private final ProgramLoader loader;
-    private final Map<String, String> env;
-    private final File workingDir;
+    private final Provider<ProcessBuilder> pb;
 
     @Inject
-    public RunProcess(KExceptionManager kem, ProgramLoader loader, @Environment Map<String, String> env, @WorkingDir File workingDir) {
+    public RunProcess(KExceptionManager kem, ProgramLoader loader, Provider<ProcessBuilder> pb) {
         this.kem = kem;
         this.loader = loader;
-        this.env = env;
-        this.workingDir = workingDir;
+        this.pb = pb;
     }
 
     public KExceptionManager getKem() {
@@ -71,14 +69,9 @@ public class RunProcess {
             }
 
             // create process
-            ProcessBuilder pb = new ProcessBuilder(commands);
+            ProcessBuilder pb = this.pb.get().command(commands);
             Map<String, String> realEnvironment = pb.environment();
-            realEnvironment.clear();
-            realEnvironment.putAll(env);
             realEnvironment.putAll(environment);
-
-            // set execution directory to current user dir
-            pb.directory(workingDir);
 
             // start process
             Process process = pb.start();
@@ -132,7 +125,7 @@ public class RunProcess {
             case "kast":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
-                    source = Sources.fromFile(value);
+                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
@@ -142,7 +135,7 @@ public class RunProcess {
             case "kast --parser ground":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
-                    source = Sources.fromFile(value);
+                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
@@ -152,14 +145,14 @@ public class RunProcess {
             case "kast --parser rules":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
-                    source = Sources.fromFile(value);
+                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
-                    source = Sources.fromFile(value);
+                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;
