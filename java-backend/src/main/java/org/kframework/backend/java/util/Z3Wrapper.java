@@ -1,9 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.microsoft.z3.Params;
@@ -14,6 +12,7 @@ import com.microsoft.z3.Z3Exception;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.*;
@@ -39,21 +38,14 @@ public class Z3Wrapper {
             SMTOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            Provider<ProcessBuilder> pb) {
+            Provider<ProcessBuilder> pb,
+            FileUtil files) {
         this.options = options;
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.pb = pb;
 
-        String s = "";
-        try {
-            if (options.smtPrelude() != null) {
-                s = Files.toString(options.smtPrelude(), Charsets.UTF_8);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        SMT_PRELUDE = s;
+        SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
     }
 
     public boolean checkQuery(String query, int timeout) {
