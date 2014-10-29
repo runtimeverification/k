@@ -418,32 +418,6 @@ public class StringUtil {
         return StringUtil.unEscapeSortName(ret);
     }
 
-    private static int number = 0;
-
-    /**
-     * Generate incremental numbers that doesn't contain the number 1
-     *
-     * @return an integer that doesn't contain the number 1
-     */
-    public static int getUniqueId() {
-        boolean valid = false;
-        while (!valid) {
-            int nr = number;
-            while (nr > 0) {
-                if (nr % 10 == 1) {
-                    number++;
-                    break;
-                } else {
-                    nr /= 10;
-                }
-            }
-            if (nr == 0) {
-                valid = true;
-            }
-        }
-        return number++;
-    }
-
     /**
      * Takes a string as input and creates a continuous token for the maude lexer.
      * Adds a backquote character to the following characters: ( ) [ ] { } , `
