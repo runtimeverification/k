@@ -9,7 +9,7 @@
   <name>K Framework Tool Parent</name>
 
   <modules>
-    <module>k-core</module>
+    <module>kernel</module>
     <module>k-distribution</module>
     <module>java-backend</module>
     <module>maude-backend</module>

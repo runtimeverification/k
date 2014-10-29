@@ -8,10 +8,10 @@
     <artifactId>parent</artifactId>
     <version>3.5-SNAPSHOT</version>
   </parent>
-  <artifactId>k-core</artifactId>
+  <artifactId>kernel</artifactId>
   <packaging>jar</packaging>
 
-  <name>K Framework Tool Core</name>
+  <name>K Framework Tool Kernel</name>
 
   <dependencies>
     <dependency>
