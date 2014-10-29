@@ -22,10 +22,12 @@ public class TestSuite {
     private final KTestOptions options;
     private final ReportGen reportGen;
 
+    public static final String REPORT_DIR = "junit-reports";
+
     public TestSuite(List<TestCase> tests, KTestOptions options, FileUtil files) {
         this.tests = tests;
         this.options = options;
-        reportGen = options.getGenerateReport() ? new ReportGen(files.resolveWorkingDirectory("junit-reports")) : null;
+        reportGen = options.getGenerateReport() ? new ReportGen(files.resolveWorkingDirectory(REPORT_DIR)) : null;
     }
 
     public boolean run() throws IOException, TransformerException, ParserConfigurationException {
