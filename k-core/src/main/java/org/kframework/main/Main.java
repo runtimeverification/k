@@ -40,12 +40,15 @@ public class Main {
                 boolean succeeded = injector.getInstance(FrontEnd.class).main();
                 System.exit(succeeded ? 0 : 1);
             } catch (ProvisionException e) {
-                kem.print();
                 for (Message m : e.getErrorMessages()) {
                     if (!(m.getCause() instanceof KEMException)) {
                         throw e;
+                    } else {
+                        KEMException ex = (KEMException) m.getCause();
+                        ex.register(kem);
                     }
                 }
+                kem.print();
                 System.exit(1);
             }
         }
