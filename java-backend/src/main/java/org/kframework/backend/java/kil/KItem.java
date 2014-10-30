@@ -70,7 +70,7 @@ public final class KItem extends Term {
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator();
+                return kLabelConstant.getListTerminator(termContext.definition().context());
             }
         }
 

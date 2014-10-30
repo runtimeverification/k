@@ -61,12 +61,6 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     private final boolean isListLabel;
 
-    /**
-     * Stores the associated list terminator if this {@code KLabelConstant} is a
-     * list label.
-     */
-    private final KItem listTerminator;
-
     private KLabelConstant(String label, ImmutableSet<Production> productions, Context context) {
         this.label = label;
         this.productions = productions;
@@ -120,8 +114,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isPattern = isPattern;
         this.smtlib = smtlib;
 
-        this.listTerminator = buildListTerminator(context);
-        this.isListLabel = listTerminator != null;
+        this.isListLabel = !context.listKLabels.get(label).isEmpty();
     }
 
     private KItem buildListTerminator(Context context) {
@@ -214,8 +207,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * Returns the associated list terminator if this {@code KLabelConstant} is
      * a list label; otherwise, {@code null}.
      */
-    public KItem getListTerminator() {
-        return listTerminator;
+    public KItem getListTerminator(Context context) {
+        return buildListTerminator(context);
     }
 
     public String label() {
