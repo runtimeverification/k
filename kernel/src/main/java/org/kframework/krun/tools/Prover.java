@@ -21,6 +21,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public interface Prover {
 
@@ -40,7 +41,7 @@ public interface Prover {
         private final KRunOptions options;
         private final Context context;
         private final Stopwatch sw;
-        private final Term initialConfiguration;
+        private final Provider<Term> initialConfiguration;
         private final Prover prover;
         private final FileUtil files;
         private final TermLoader termLoader;
@@ -50,7 +51,7 @@ public interface Prover {
                 KRunOptions options,
                 @Main Context context,
                 Stopwatch sw,
-                @Main Term initialConfiguration,
+                @Main Provider<Term> initialConfiguration,
                 @Main Prover prover,
                 @Main FileUtil files,
                 TermLoader termLoader) {
@@ -72,7 +73,7 @@ public interface Prover {
                 Definition parsed = termLoader.parseString(content,
                         Sources.fromFile(files.resolveWorkingDirectory(proofFile)), context);
                 Module mod = parsed.getSingletonModule();
-                KRunProofResult<Set<Term>> result = prover.prove(mod, initialConfiguration);
+                KRunProofResult<Set<Term>> result = prover.prove(mod, initialConfiguration.get());
                 sw.printIntermediate("Proof total");
                 return result;
             } catch (KRunExecutionException e) {
