@@ -691,6 +691,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     private static Rule evaluateRule(Rule rule, GlobalContext globalContext) {
         TermContext termContext = TermContext.of(globalContext);
         // TODO(AndreiS): some evaluation is required in the LHS as well
+        // TODO(YilongL): cannot simply uncomment the following code because it
+        // may evaluate the LHS using the rule itself
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
 
         Rule origRule = rule;
