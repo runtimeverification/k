@@ -690,8 +690,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      */
     private static Rule evaluateRule(Rule rule, GlobalContext globalContext) {
         TermContext termContext = TermContext.of(globalContext);
-        // TODO(AndreiS): some evaluation is required in the LHS as well
-        //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+        Term leftHandSide = rule.leftHandSide().evaluate(termContext);
 
         Rule origRule = rule;
         Term rightHandSide = rule.rightHandSide().evaluate(termContext);
@@ -720,7 +719,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Rule newRule = new Rule(
                 rule.label(),
-                rule.leftHandSide(),
+                leftHandSide,
                 rightHandSide,
                 requires,
                 ensures,
