@@ -64,38 +64,48 @@ public class Profiler {
 
         private final String name;
 
-        private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+        private final ThreadLocal<Stopwatch> stopwatch = new ThreadLocal<Stopwatch>() {
+            @Override
+            protected Stopwatch initialValue() {
+                return Stopwatch.createUnstarted();
+            }
+        };
 
-        private int count = 0;
+        private ThreadLocal<Integer> count = new ThreadLocal<Integer>() {
+            @Override
+            protected Integer initialValue() {
+                return 0;
+            }
+        };
 
         public ReentrantStopwatch(String name) {
             this.name = name;
         }
 
         public void start() {
-            count++;
-            if (count == 1) {
-                stopwatch.start();
+            count.set(count.get() + 1);
+            if (count.get() == 1) {
+                stopwatch.get().start();
             }
         }
 
         public void stop() {
-            count--;
-            if (count == 0) {
-                stopwatch.stop();
-            } else if (count < 0) {
+            count.set(count.get() - 1);
+            if (count.get() == 0) {
+                stopwatch.get().stop();
+            } else if (count.get() < 0) {
                 throw new AssertionError("Unable to stop timer: " + name + "\nTimer already stopped.");
             }
         }
 
         public void reset() {
-            count = 0;
-            stopwatch.reset();
+            count.set(0);
+            stopwatch.get().reset();
         }
 
         @Override
         public String toString() {
-            return stopwatch.toString();
+            return stopwatch.get().toString();
         }
     }
 
