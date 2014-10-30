@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,9 +25,9 @@ import org.kframework.utils.file.JarInfo;
  *
  * Note that a consequence of this is that if you use many definitions in
  * the same process, you will use up a lot of memory dedicated to the JVM code cache.
- * Currently the implementation of this class does not expire classloaders
- * when too many of them have been instantiated. It also does not behave correctly
- * if a single definition is modified and then parsed again. These are future optimizations
+ * We get around this by expiring old classes and therefore old classloaders.
+ * Note that it also does not behave correctly if a single definition is modified
+ * and then parsed again. This is a future optimization
  * that can potentially be made to this class, however, what it does currently
  * is sufficient to allow a single process to be used for an entire KTest test suite,
  * which is the primary goal of this class.
@@ -38,18 +37,27 @@ import org.kframework.utils.file.JarInfo;
  */
 public class DefinitionLocalKParser {
 
-    private static final Map<File, Class<?>> impl = new HashMap<>();
+    private static final Map<File, Class<?>> impl = new LinkedHashMap<File, Class<?>>() {
+        protected boolean removeEldestEntry(Map.Entry<File,java.lang.Class<?>> eldest) {
+            return size() > Runtime.getRuntime().availableProcessors() * 2;
+        }
+    };
 
-    public static void init(File kompiled) {
+    private static Class<?> resourceDomain;
+
+    public static Class<?> init(File kompiled) {
         ClassLoader cl;
         try {
-            if (impl.containsKey(kompiled.getCanonicalFile())) return;
+            Class<?> cached = impl.get(kompiled.getCanonicalFile());
+            if (cached != null) return cached;
             cl = new URLClassLoader(new URL[] {
                     new File(JarInfo.getKBase(false), "lib/java/dynamic/strategoxt.jar").toURI().toURL(),
                     new File(JarInfo.getKBase(false), "lib/java/dynamic/sdf-parser.jar").toURI().toURL()
             });
             Class<?> kparser = Class.forName("org.kframework.parser.concrete.KParser", true, cl);
+            if (resourceDomain == null) resourceDomain = kparser;
             impl.put(kompiled.getCanonicalFile(), kparser);
+            return kparser;
         } catch (ClassNotFoundException | IOException e) {
             throw KExceptionManager.internalError("Failed to localize JSGLR to a thread", e);
         }
@@ -61,37 +69,35 @@ public class DefinitionLocalKParser {
      * @return
      */
     public static Class<?> resourceDomain() {
-        Iterator<Class<?>> i = impl.values().iterator();
-        assert i.hasNext();
-        return i.next();
+        return resourceDomain;
     }
 
-    private static String invokeReflective(String methodName, File kompiled, Object... args) {
+    private static String invokeReflective(String methodName, Class<?> kparser, Object... args) {
         try {
             List<Class<?>> classes = Arrays.asList(args).stream().map(o -> o.getClass()).collect(Collectors.toList());
-            Method m = impl.get(kompiled.getCanonicalFile()).getMethod(methodName, classes.toArray(new Class<?>[classes.size()]));
+            Method m = kparser.getMethod(methodName, classes.toArray(new Class<?>[classes.size()]));
             return (String) m.invoke(null, args);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw KExceptionManager.internalError("Failed to localize JSGLR to a thread", e);
         }
     }
 
     public static String ParseKoreString(String kDefinition, File kompiled) {
-        init(kompiled);
-        invokeReflective("ImportTblRule", kompiled, kompiled);
-        return invokeReflective("ParseKoreString", kompiled, kDefinition);
+        Class<?> kparser = init(kompiled);
+        invokeReflective("ImportTblRule", kparser, kompiled);
+        return invokeReflective("ParseKoreString", kparser, kDefinition);
     }
 
     public static String ParseKConfigString(String kDefinition, File kompiled) {
-        init(kompiled);
-        invokeReflective("ImportTblRule", kompiled, kompiled);
-        return invokeReflective("ParseKConfigString", kompiled, kDefinition);
+        Class<?> kparser = init(kompiled);
+        invokeReflective("ImportTblRule", kparser, kompiled);
+        return invokeReflective("ParseKConfigString", kparser, kDefinition);
     }
 
     public static String ParseKRuleString(String kDefinition, File kompiled) {
-        init(kompiled);
-        invokeReflective("ImportTblRule", kompiled, kompiled);
-        return invokeReflective("ParseKRuleString", kompiled, kDefinition);
+        Class<?> kparser = init(kompiled);
+        invokeReflective("ImportTblRule", kparser, kompiled);
+        return invokeReflective("ParseKRuleString", kparser, kDefinition);
     }
 
     /**
@@ -102,14 +108,14 @@ public class DefinitionLocalKParser {
      * @return The xml representation of the parsed term, or an error in the xml format.
      */
     public static String ParseKCmdString(String argument, File kompiled) {
-        init(kompiled);
-        invokeReflective("ImportTblGround", kompiled, kompiled);
-        return invokeReflective("ParseKCmdString", kompiled, argument);
+        Class<?> kparser = init(kompiled);
+        invokeReflective("ImportTblGround", kparser, kompiled);
+        return invokeReflective("ParseKCmdString", kparser, argument);
     }
 
     public static String ParseProgramString(String program, String startSymbol, File kompiled) {
-        init(kompiled);
-        invokeReflective("ImportTblPgm", kompiled, kompiled);
-        return invokeReflective("ParseProgramString", kompiled, program, startSymbol);
+        Class<?> kparser = init(kompiled);
+        invokeReflective("ImportTblPgm", kparser, kompiled);
+        return invokeReflective("ParseProgramString", kparser, program, startSymbol);
     }
 }
