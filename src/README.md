@@ -91,6 +91,9 @@ This normally takes roughly 30 minutes on a fast machine. If you are interested 
 in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
+# Changing the KORE data structures
+once [#1133](https://github.com/kframework/k/pull/1133) is merged, see the [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures)
+
 # Work on Maude code
 Modify the Maude files found in src/main/maude and rerun `mvn package`.
 
