@@ -1,8 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -15,6 +17,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 
@@ -26,13 +29,13 @@ import com.google.common.collect.Multimap;
 public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
-    private static final PatriciaTrie<KLabelConstant> cache = new PatriciaTrie<>();
+    private static final Map<ImmutableSet<Production>, PatriciaTrie<KLabelConstant>> cache = new HashMap<>();
 
     /* un-escaped label */
     private final String label;
 
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
-    private final ImmutableList<Production> productions;
+    private final ImmutableSet<Production> productions;
 
     /*
      * boolean flag set iff a production tagged with "function" or "predicate"
@@ -58,17 +61,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     private final boolean isListLabel;
 
-    /**
-     * Stores the associated list terminator if this {@code KLabelConstant} is a
-     * list label.
-     */
-    private final KItem listTerminator;
-
-    private KLabelConstant(String label, Context context) {
+    private KLabelConstant(String label, ImmutableSet<Production> productions, Context context) {
         this.label = label;
-        productions = context != null ?
-                ImmutableList.<Production>copyOf(context.productionsOf(label)) :
-                ImmutableList.<Production>of();
+        this.productions = productions;
 
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -119,8 +114,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isPattern = isPattern;
         this.smtlib = smtlib;
 
-        this.listTerminator = buildListTerminator(context);
-        this.isListLabel = listTerminator != null;
+        this.isListLabel = !context.listKLabels.get(label).isEmpty();
     }
 
     private KItem buildListTerminator(Context context) {
@@ -143,10 +137,16 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     public static KLabelConstant of(String label, Context context) {
         assert label != null;
 
-        KLabelConstant kLabelConstant = cache.get(label);
+        ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
+        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
+        if (trie == null) {
+            trie = new PatriciaTrie<>();
+            cache.put(productions, trie);
+        }
+        KLabelConstant kLabelConstant = trie.get(label);
         if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, context);
-            cache.put(label, kLabelConstant);
+            kLabelConstant = new KLabelConstant(label, productions, context);
+            trie.put(label, kLabelConstant);
         }
         return kLabelConstant;
     }
@@ -207,8 +207,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * Returns the associated list terminator if this {@code KLabelConstant} is
      * a list label; otherwise, {@code null}.
      */
-    public KItem getListTerminator() {
-        return listTerminator;
+    public KItem getListTerminator(Context context) {
+        return buildListTerminator(context);
     }
 
     public String label() {
@@ -219,7 +219,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * Returns a list of productions generating this {@code KLabelConstant}.
      */
     public List<Production> productions() {
-        return productions;
+        return ImmutableList.copyOf(productions);
     }
 
     @Override
@@ -268,10 +268,15 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        KLabelConstant kLabelConstant = cache.get(label);
+        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
+        if (trie == null) {
+            trie = new PatriciaTrie<>();
+            cache.put(productions, trie);
+        }
+        KLabelConstant kLabelConstant = trie.get(label);
         if (kLabelConstant == null) {
             kLabelConstant = this;
-            cache.put(label, kLabelConstant);
+            trie.put(label, kLabelConstant);
         }
         return kLabelConstant;
     }
