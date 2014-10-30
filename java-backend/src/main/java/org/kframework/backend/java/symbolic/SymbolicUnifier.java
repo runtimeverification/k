@@ -41,6 +41,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
 
 
@@ -299,21 +300,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         Multiset<Variable> variables = set.collectionVariables();
         Multiset<Variable> otherVariables = otherSet.collectionVariables();
-        Set<Variable> commonVariables = Sets.intersection(
-                ImmutableSet.copyOf(variables),
-                ImmutableSet.copyOf(otherVariables));
-        List<Variable> remainingVariables = new ArrayList<>();
-        List<Variable> otherRemainingVariables = new ArrayList<>();
-        for (Variable variable : variables) {
-            if (!commonVariables.contains(variable)) {
-                remainingVariables.add(variable);
-            }
-        }
-        for (Variable otherVariable : otherVariables) {
-            if (!commonVariables.contains(otherVariable)) {
-                otherRemainingVariables.add(otherVariable);
-            }
-        }
+        Multiset<Variable> commonVariables = Multisets.intersection(variables, otherVariables);
+        Multiset<Variable> remainingVariables = Multisets.difference(variables, commonVariables);
+        Multiset<Variable> otherRemainingVariables = Multisets.difference(otherVariables, commonVariables);
 
         if (remainingElements.isEmpty()
                 && remainingPatterns.isEmpty()
@@ -454,21 +443,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         Multiset<Variable> variables = map.collectionVariables();
         Multiset<Variable> otherVariables = otherMap.collectionVariables();
-        Set<Variable> commonVariables = Sets.intersection(
-                ImmutableSet.copyOf(variables),
-                ImmutableSet.copyOf(otherVariables));
-        List<Variable> remainingVariables = new ArrayList<>();
-        List<Variable> otherRemainingVariables = new ArrayList<>();
-        for (Variable variable : variables) {
-            if (!commonVariables.contains(variable)) {
-                remainingVariables.add(variable);
-            }
-        }
-        for (Variable otherVariable : otherVariables) {
-            if (!commonVariables.contains(otherVariable)) {
-                otherRemainingVariables.add(otherVariable);
-            }
-        }
+        Multiset<Variable> commonVariables = Multisets.intersection(variables, otherVariables);
+        Multiset<Variable> remainingVariables = Multisets.difference(variables, commonVariables);
+        Multiset<Variable> otherRemainingVariables = Multisets.difference(otherVariables, commonVariables);
 
         if (remainingEntries.isEmpty()
                 && remainingPatterns.isEmpty()
