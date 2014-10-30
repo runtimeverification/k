@@ -17,6 +17,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
@@ -89,7 +90,7 @@ public class JavaSymbolicProver implements Prover {
 
         SymbolicRewriter symbolicRewriter = executor.getSymbolicRewriter();
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
-            if (!(moduleItem instanceof org.kframework.kil.Rule)) {
+            if (!(moduleItem instanceof org.kframework.kil.Rule) || moduleItem.containsAttribute(Attribute.TRUSTED_KEY)) {
                 continue;
             }
 
