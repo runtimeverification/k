@@ -21,7 +21,7 @@
   <dependencies>
     <dependency>
       <groupId>org.kframework.k</groupId>
-      <artifactId>k-core</artifactId>
+      <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
