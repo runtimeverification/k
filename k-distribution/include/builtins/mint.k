@@ -26,8 +26,8 @@ module MINT
    *           2^(bitwidth - 1) - 1
    *   uvalue  returns an integer between 0 and 2^bitwidth - 1
    */
-  syntax Int ::= svalueMInt(MInt)     [function, hook(#MINT:svalue)]
-               | uvalueMInt(MInt)     [function, hook(#MINT:uvalue)]
+  syntax Int ::= svalueMInt(MInt)     [function, hook(#MINT:svalue), smtlib(bv2int)]
+               | uvalueMInt(MInt)     [function, hook(#MINT:uvalue), smtlib(bv2int)]
 
   /* Checks whether a machine integer is zero */
   syntax Bool ::= zeroMInt(MInt)    [function, hook(#MINT:zero)]
@@ -189,4 +189,3 @@ module MINT
     concatenateMInt(MI1, mIntOfDigits(ListItem(MI2) L))
   rule mIntOfDigits(ListItem(MI:MInt)) => MI
 endmodule
-

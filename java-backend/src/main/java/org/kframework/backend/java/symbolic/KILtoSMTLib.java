@@ -42,7 +42,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BOOL,
             Sort.INT,
             Sort.BIT_VECTOR,
-            Sort.of("IntSet"),
+            Sort.of("IntSet"), Sort.of("MIntSet"),
             Sort.of("IntSeq"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
             Sort.LIST,
@@ -108,17 +108,17 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             /* bit vector extras */
             "mint_signed_of_unsigned",
             /* set theory */
-            "smt_set_mem",
-            "smt_set_add",
-            "smt_set_emp",
-            "smt_set_cup",
-            "smt_set_cap",
-            "smt_set_com",
-            "smt_set_ele",
-            "smt_set_dif",
-            "smt_set_sub",
-            "smt_set_lt",
-            "smt_set_le",
+            "smt_set_mem", "smt_miset_mem",
+            "smt_set_add", "smt_miset_add",
+            "smt_set_emp", "smt_miset_emp",
+            "smt_set_cup", "smt_miset_cup",
+            "smt_set_cap", "smt_miset_cap",
+            "smt_set_com", "smt_miset_com",
+            "smt_set_ele", "smt_miset_ele",
+            "smt_set_dif", "smt_miset_dif",
+            "smt_set_sub", "smt_miset_sub",
+            "smt_set_lt", "smt_miset_lt",
+            "smt_set_le", "smt_miset_le",
             /* associative sequence theory */
             "smt_seq_concat",
             "smt_seq_elem",
