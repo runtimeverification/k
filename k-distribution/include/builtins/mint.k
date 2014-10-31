@@ -26,7 +26,7 @@ module MINT
    *           2^(bitwidth - 1) - 1
    *   uvalue  returns an integer between 0 and 2^bitwidth - 1
    */
-  syntax Int ::= svalueMInt(MInt)     [function, hook(#MINT:svalue), smtlib(bv2int)]
+  syntax Int ::= svalueMInt(MInt)     [function, hook(#MINT:svalue)]
                | uvalueMInt(MInt)     [function, hook(#MINT:uvalue), smtlib(bv2int)]
 
   /* Checks whether a machine integer is zero */
