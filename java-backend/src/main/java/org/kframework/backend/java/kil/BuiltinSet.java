@@ -52,6 +52,20 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         return builder.build();
     }
 
+    /**
+     * TODO(YilongL): implement it properly!
+     */
+    public boolean isUnifiableByCurrentAlgorithm() {
+        return true;
+    }
+
+    public static boolean isSetUnifiableByCurrentAlgorithm(Term term, Term otherTerm) {
+        return term instanceof BuiltinSet
+                && ((BuiltinSet) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinSet
+                && ((BuiltinSet) term).isUnifiableByCurrentAlgorithm();
+    }
+
     public boolean contains(Term element) {
         return elements.contains(element);
     }

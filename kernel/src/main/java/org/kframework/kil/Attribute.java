@@ -28,6 +28,7 @@ public class Attribute<T> extends ASTNode {
     public static final String HOOK_KEY = "hook";
     public static final String MACRO_KEY = "macro";
     public static final String LEMMA_KEY = "lemma";
+    public static final String TRUSTED_KEY = "trusted";
     public static final String SIMPLIFICATION_KEY = "simplification";
     public static final String FRESH_GENERATOR = "freshGenerator";
     public static final String BITWIDTH_KEY = "bitwidth";
@@ -42,6 +43,7 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");
     public static final Attribute<String> PREDICATE = Attribute.of(PREDICATE_KEY, "");
     public static final Attribute<String> PATTERN = Attribute.of(PATTERN_KEY, "");
+    public static final Attribute<String> TRUSTED = Attribute.of(TRUSTED_KEY, "");
     public static final Attribute<String> MACRO = Attribute.of(MACRO_KEY, "");
     public static final Attribute<String> ANYWHERE = Attribute.of("anywhere", "");
     public static final Attribute<String> TRANSITION = Attribute.of("transition", "");

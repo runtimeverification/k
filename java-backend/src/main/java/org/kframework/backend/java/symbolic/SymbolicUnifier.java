@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +41,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
 
 
@@ -140,6 +142,11 @@ public class SymbolicUnifier extends AbstractUnifier {
         // TODO(YilongL): how should I implement BuiltinList#isUnifiableByCurrentAlgorithm?
         if (BuiltinList.isListUnifiableByCurrentAlgorithm(term, otherTerm)) {
             unifyList((BuiltinList) term, (BuiltinList) otherTerm);
+            return;
+        }
+
+        if (BuiltinSet.isSetUnifiableByCurrentAlgorithm(term, otherTerm)) {
+            unifySet((BuiltinSet) term, (BuiltinSet) otherTerm);
             return;
         }
 
@@ -251,6 +258,89 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
+    private void unifySet(BuiltinSet set, BuiltinSet otherSet) {
+        assert set.collectionFunctions().isEmpty() && otherSet.collectionFunctions().isEmpty();
+
+        Set<Term> elements = set.elements();
+        Set<Term> otherElements = otherSet.elements();
+        Set<Term> remainingElements = elements.stream()
+                .filter(e -> !otherElements.contains(e)).collect(Collectors.toSet());
+        Set<Term> otherRemainingElements = otherElements.stream()
+                .filter(e -> !elements.contains(e)).collect(Collectors.toSet());
+
+        Multiset<KItem> patterns = set.collectionPatterns();
+        Multiset<KItem> otherPatterns = otherSet.collectionPatterns();
+        Set<KItem> unifiedPatterns = new HashSet<>();
+        Set<KItem> otherUnifiedPatterns = new HashSet<>();
+        List<KItem> remainingPatterns = new ArrayList<>();
+        List<KItem> otherRemainingPatterns = new ArrayList<>();
+        for (KItem pattern : patterns) {
+            for (KItem otherPattern : otherPatterns) {
+                if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
+                    List<Term> patternOutput = pattern.getPatternOutput();
+                    List<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                    for (int i = 0; i < patternOutput.size(); ++i) {
+                        unify(patternOutput.get(i), otherPatternOutput.get(i));
+                    }
+                    unifiedPatterns.add(pattern);
+                    otherUnifiedPatterns.add(otherPattern);
+                }
+            }
+        }
+        for (KItem pattern : patterns) {
+            if (!unifiedPatterns.contains(pattern)) {
+                remainingPatterns.add(pattern);
+            }
+        }
+        for (KItem otherPattern : otherPatterns) {
+            if (!otherUnifiedPatterns.contains(otherPattern)) {
+                otherRemainingPatterns.add(otherPattern);
+            }
+        }
+
+        Multiset<Variable> variables = set.collectionVariables();
+        Multiset<Variable> otherVariables = otherSet.collectionVariables();
+        Multiset<Variable> commonVariables = Multisets.intersection(variables, otherVariables);
+        Multiset<Variable> remainingVariables = Multisets.difference(variables, commonVariables);
+        Multiset<Variable> otherRemainingVariables = Multisets.difference(otherVariables, commonVariables);
+
+        if (remainingElements.isEmpty()
+                && remainingPatterns.isEmpty()
+                && remainingVariables.isEmpty()
+                && !otherRemainingElements.isEmpty()) {
+            fail(set, otherSet);
+        }
+        if (otherRemainingElements.isEmpty()
+                && otherRemainingPatterns.isEmpty()
+                && otherRemainingVariables.isEmpty()
+                && !remainingElements.isEmpty()) {
+            fail(set, otherSet);
+        }
+
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.addAll(remainingElements);
+        builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
+        builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
+        Term remainingSet = builder.build();
+
+        BuiltinSet.Builder otherBuilder = BuiltinSet.builder();
+        otherBuilder.addAll(otherRemainingElements);
+        otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
+        otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
+        Term otherRemainingSet = otherBuilder.build();
+
+        if (!remainingSet.equals(BuiltinSet.EMPTY_SET) || !otherRemainingSet.equals(BuiltinSet.EMPTY_SET)) {
+            if (remainingSet instanceof Variable || otherRemainingSet instanceof Variable || partialSimpl) {
+                // set equality resolved or partial simplification enabled
+                fConstraint.add(remainingSet, otherRemainingSet);
+            } else {
+                /* unable to dissolve the entire map equality; thus, we need to
+                 * preserve the original set terms for pattern folding */
+                fConstraint.add(set, otherSet);
+            }
+        }
+    }
+
     private void unifyMapModuloPatternFolding(BuiltinMap map, BuiltinMap otherMap) {
         if (!patternFold) {
             unifyMap(map, otherMap);
@@ -353,21 +443,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         Multiset<Variable> variables = map.collectionVariables();
         Multiset<Variable> otherVariables = otherMap.collectionVariables();
-        Set<Variable> commonVariables = Sets.intersection(
-                ImmutableSet.copyOf(variables),
-                ImmutableSet.copyOf(otherVariables));
-        List<Variable> remainingVariables = new ArrayList<>();
-        List<Variable> otherRemainingVariables = new ArrayList<>();
-        for (Variable variable : variables) {
-            if (!commonVariables.contains(variable)) {
-                remainingVariables.add(variable);
-            }
-        }
-        for (Variable otherVariable : otherVariables) {
-            if (!commonVariables.contains(otherVariable)) {
-                otherRemainingVariables.add(otherVariable);
-            }
-        }
+        Multiset<Variable> commonVariables = Multisets.intersection(variables, otherVariables);
+        Multiset<Variable> remainingVariables = Multisets.difference(variables, commonVariables);
+        Multiset<Variable> otherRemainingVariables = Multisets.difference(otherVariables, commonVariables);
 
         if (remainingEntries.isEmpty()
                 && remainingPatterns.isEmpty()
