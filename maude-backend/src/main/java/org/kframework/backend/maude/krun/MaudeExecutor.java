@@ -51,6 +51,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
@@ -410,6 +411,8 @@ public class MaudeExecutor implements Executor {
                 assertXMLTerm(list.size() == 0 && sort.equals(Sort.KITEM.toString()));
                 //return new Hole(sort);
                 return Hole.KITEM_HOLE;
+            } else if (op.matches(".*:.*") && op.endsWith(sort) && context.definedSorts.contains(Sort.of(sort))) {
+                return new Variable(op.substring(0, op.indexOf(":")), Sort.of(sort));
             } else {
                 Set<Production> prods = context.klabels.get(StringUtil.unescapeMaude(op));
                 Set<Production> validProds = new HashSet<>();

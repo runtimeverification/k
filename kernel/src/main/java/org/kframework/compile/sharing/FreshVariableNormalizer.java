@@ -54,7 +54,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
      * Class implementing a visitor which constructs a substitution mapping the fresh variables
      * into variables with indices the number in the range [0, this.counter].
      */
-    class FreshVariableCounter extends NonCachingVisitor {
+    public class FreshVariableCounter extends NonCachingVisitor {
 
         public FreshVariableCounter(Context context) {
             super(context);
