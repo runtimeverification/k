@@ -6,11 +6,12 @@ import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.Proc;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -95,7 +96,7 @@ public class TaskQueue {
         } else {
             nThreads = options.getThreads();
         }
-        this.tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
+        this.tpe = new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>());
     }
 
     /**
@@ -188,8 +189,8 @@ public class TaskQueue {
      * @param scriptStep Script step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
-    private Runnable wrapScriptStep(Proc<TestCase> scriptStep) {
-        return new Runnable() {
+    private KTestQueueItem wrapScriptStep(Proc<TestCase> scriptStep) {
+        return new KTestQueueItem() {
             @Override
             public void run() {
                 scriptProcs.add(scriptStep);
@@ -197,6 +198,11 @@ public class TaskQueue {
                 if (scriptStep.isSuccess()) {
                     continueFromKompileStep(scriptStep.getObj());
                 }
+            }
+
+            @Override
+            protected int priority() {
+                return 1;
             }
         };
     }
@@ -213,8 +219,8 @@ public class TaskQueue {
      * @param kompileStep Kompile step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
-    private Runnable wrapKompileStep(Proc<TestCase> kompileStep) {
-        return new Runnable() {
+    private KTestQueueItem wrapKompileStep(Proc<TestCase> kompileStep) {
+        return new KTestQueueItem() {
             @Override
             public void run() {
                 String kompilePath = kompileStep.getObj().getKompileDirFullPath();
@@ -244,7 +250,23 @@ public class TaskQueue {
                     throw new RuntimeException("Unhandled case in TaskQueue.wrapKompileStep");
                 }
             }
+
+            @Override
+            protected int priority() {
+                return 1;
+            }
         };
+    }
+
+    private static abstract class KTestQueueItem implements Runnable, Comparable<KTestQueueItem> {
+
+        protected abstract int priority();
+
+        @Override
+        public int compareTo(KTestQueueItem o) {
+            return Integer.compare(priority(), o.priority());
+        }
+
     }
 
     /**
@@ -271,14 +293,19 @@ public class TaskQueue {
      * @param pdfStep PDF step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
-    private Runnable wrapPDFStep(Proc<TestCase> pdfStep) {
-        return new Runnable() {
+    private KTestQueueItem wrapPDFStep(Proc<TestCase> pdfStep) {
+        return new KTestQueueItem() {
             @Override
             public void run() {
                 pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
                 pdfProcs.add(pdfStep);
                 pdfStep.run();
                 lastTestFinished = System.currentTimeMillis();
+            }
+
+            @Override
+            protected int priority() {
+                return 1;
             }
         };
     }
@@ -301,8 +328,8 @@ public class TaskQueue {
      * @param krunStep KRun step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
-    private Runnable wrapKRunStep(Proc<KRunProgram> krunStep) {
-        return new Runnable() {
+    private KTestQueueItem wrapKRunStep(Proc<KRunProgram> krunStep) {
+        return new KTestQueueItem() {
             @Override
             public void run() {
                 // Don't check for `-kompiled` directory when in --dry mode. This is because
@@ -315,6 +342,11 @@ public class TaskQueue {
                 } else {
                     executeKompileStep(krunStep.getObj().testCase);
                 }
+            }
+
+            @Override
+            protected int priority() {
+                return 0;
             }
         };
     }
