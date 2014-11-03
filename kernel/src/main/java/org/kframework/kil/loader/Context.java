@@ -67,11 +67,11 @@ public class Context implements Serializable {
      */
     public SetMultimap<String, Production> klabels = HashMultimap.create();
     public SetMultimap<String, Production> tags = HashMultimap.create();
-    public Map<String, Cell> cells = new HashMap<String, Cell>();
+    public Map<String, Cell> cells = new HashMap<>();
     public Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
-    public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
+    public Map<String, ASTNode> locations = new HashMap<>();
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
@@ -311,10 +311,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if the two klabels are in the wrong order according to the priority filter.
-     *
-     * @param klabelParent
-     * @param klabelChild
-     * @return
      */
     public boolean isPriorityWrong(String klabelParent, String klabelChild) {
         return priorities.isInRelation(klabelParent, klabelChild);
@@ -362,10 +358,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted to bigSort (strict)
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSubsorted(Sort bigSort, Sort smallSort) {
         return subsorts.isInRelation(bigSort, smallSort);
@@ -373,10 +365,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted or equal to bigSort
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
@@ -390,9 +378,6 @@ public class Context implements Serializable {
      * In particular, elements of a user cons list are syntactically
      * but not semantically subsorted to the list type.
      *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSyntacticSubsorted(Sort bigSort, Sort smallSort) {
         return syntacticSubsorts.isInRelation(bigSort, smallSort);
@@ -403,10 +388,6 @@ public class Context implements Serializable {
      * (any term parsing as smallSort also parses as bigSort).
      * In particular, elements of a user cons list are syntactically
      * but not semantically subsorted to the list type.
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSyntacticSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
@@ -440,7 +421,7 @@ public class Context implements Serializable {
     }
 
     public void setDataStructureSorts(Map<Sort, DataStructureSort> dataStructureSorts) {
-        this.dataStructureSorts = new HashMap<Sort, DataStructureSort>(dataStructureSorts);
+        this.dataStructureSorts = new HashMap<>(dataStructureSorts);
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {

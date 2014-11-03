@@ -3,22 +3,14 @@ package org.kframework.kil.loader;
 
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Andrei
- * Date: 14.11.2013
- * Time: 10:37
- * To change this template use File | Settings | File Templates.
- */
 public class ResolveVariableAttribute extends CopyOnWriteTransformer {
     public ResolveVariableAttribute(Context context) {
         super("Resolve 'variable' attribute", context);
     }
 
-    @java.lang.Override
+    @Override
     public ASTNode visit(KApp kapp, Void _)  {
         if (kapp.getLabel() instanceof Token) {
             Token node = (Token) kapp.getLabel();
