@@ -79,7 +79,6 @@ public class Context implements Serializable {
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
-    public Sort startSymbolPgm = Sort.K;
     public Map<String, Sort> configVarSorts = new HashMap<>();
     @Deprecated
     public transient FileUtil files;
@@ -141,6 +140,10 @@ public class Context implements Serializable {
     public Context() {
         initSubsorts(subsorts);
         initSubsorts(syntacticSubsorts);
+    }
+
+    public Sort startSymbolPgm() {
+        return configVarSorts.getOrDefault("PGM", Sort.K);
     }
 
     public void addProduction(Production p) {
