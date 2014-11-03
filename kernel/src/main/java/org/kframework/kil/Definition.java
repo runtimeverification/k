@@ -123,9 +123,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
 
         context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
-
-        /* set the initialized flag */
-        context.initialized = true;
     }
 
     public Map<String, Module> getModulesMap() {

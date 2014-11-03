@@ -83,7 +83,6 @@ public class Context implements Serializable {
     public Map<String, Sort> configVarSorts = new HashMap<>();
     @Deprecated
     public transient FileUtil files;
-    public boolean initialized = false;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
@@ -441,19 +440,14 @@ public class Context implements Serializable {
     }
 
     public void setDataStructureSorts(Map<Sort, DataStructureSort> dataStructureSorts) {
-        assert !initialized;
-
         this.dataStructureSorts = new HashMap<Sort, DataStructureSort>(dataStructureSorts);
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {
-        assert initialized : "Context is not initialized yet";
-
         return dataStructureSorts.get(sort);
     }
 
     public DataStructureSort dataStructureListSortOf(Sort sort) {
-        assert initialized : "Context is not initialized yet";
         DataStructureSort dataStructSort = dataStructureSorts.get(sort);
         if (dataStructSort == null) return null;
         if (!dataStructSort.type().equals(Sort.LIST)) return null;
@@ -468,8 +462,6 @@ public class Context implements Serializable {
     }
 
     public void setTokenSorts(Set<Sort> tokenSorts) {
-        assert !initialized;
-
         this.tokenSorts = new HashSet<>(tokenSorts);
     }
 

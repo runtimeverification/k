@@ -81,9 +81,6 @@ public class TermLoader {
     }
 
     public Term parseCmdString(String content, Source source, Sort startSymbol, Context context) throws ParseFailedException {
-        if (!context.initialized) {
-            assert false : "You need to load the definition before you call parsePattern!";
-        }
         String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKCmdString(content, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -123,10 +120,6 @@ public class TermLoader {
     }
 
     public ASTNode parsePattern(String pattern, Source source, Sort startSymbol, Context context) throws ParseFailedException {
-        if (!context.initialized) {
-            assert false : "You need to load the definition before you call parsePattern!";
-        }
-
         String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
@@ -167,10 +160,6 @@ public class TermLoader {
     }
 
     public ASTNode parsePatternAmbiguous(String pattern, Context context) throws ParseFailedException {
-        if (!context.initialized) {
-            assert false : "You need to load the definition before you call parsePattern!";
-        }
-
         String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
