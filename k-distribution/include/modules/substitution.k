@@ -261,7 +261,7 @@ module SUBSTITUTION
 
   rule #substitutePlain(X:K, X:K |-> Y:K _) => Y
   rule #substitutePlain(K:K, M:Map) => #substitutePlainList(K, M)
-    when isId(K) =/=K true orElseBool K in keys(M) =/=K true
+    when (isId(K) =/=K true) orElseBool (K in keys(M) =/=K true)
 
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)
