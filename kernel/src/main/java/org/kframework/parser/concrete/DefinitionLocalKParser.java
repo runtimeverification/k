@@ -77,8 +77,10 @@ public class DefinitionLocalKParser {
             List<Class<?>> classes = Arrays.asList(args).stream().map(o -> o.getClass()).collect(Collectors.toList());
             Method m = kparser.getMethod(methodName, classes.toArray(new Class<?>[classes.size()]));
             return (String) m.invoke(null, args);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException e) {
             throw KExceptionManager.internalError("Failed to localize JSGLR to a thread", e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException("JSGLR failed to parse term", e);
         }
     }
 
