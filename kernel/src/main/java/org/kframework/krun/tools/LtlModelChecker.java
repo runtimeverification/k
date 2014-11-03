@@ -17,6 +17,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public interface LtlModelChecker {
 
@@ -36,7 +37,7 @@ public interface LtlModelChecker {
     public static class Tool implements Transformation<Void, KRunResult<?>> {
 
         private final KRunOptions options;
-        private final Term initialConfiguration;
+        private final Provider<Term> initialConfiguration;
         private final Context context;
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
@@ -46,7 +47,7 @@ public interface LtlModelChecker {
         @Inject
         protected Tool(
                 KRunOptions options,
-                @Main Term initialConfiguration,
+                @Main Provider<Term> initialConfiguration,
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
@@ -69,7 +70,7 @@ public interface LtlModelChecker {
                         options.experimental.ltlmc(), false, Sort.of("LtlFormula"), context);
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 formula,
-                                initialConfiguration);
+                                initialConfiguration.get());
                 sw.printIntermediate("Model checking total");
                 return result;
             } catch (KRunExecutionException e) {

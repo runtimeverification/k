@@ -37,6 +37,7 @@ import org.kframework.utils.inject.Main;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 public interface Debugger {
@@ -121,7 +122,7 @@ public interface Debugger {
     public static class Tool implements Transformation<Void, Void> {
 
         private final KExceptionManager kem;
-        private final Term initialConfiguration;
+        private final Provider<Term> initialConfiguration;
         private final KompileOptions kompileOptions;
         private final BinaryLoader loader;
         @InjectGeneric private Transformation<KRunState, String> statePrinter;
@@ -135,7 +136,7 @@ public interface Debugger {
         @Inject
         Tool(
                 KExceptionManager kem,
-                @Main Term initialConfiguration,
+                @Main Provider<Term> initialConfiguration,
                 @Main KompileOptions kompileOptions,
                 BinaryLoader loader,
                 @Main Debugger debugger,
@@ -152,7 +153,7 @@ public interface Debugger {
 
         Tool(
                 KExceptionManager kem,
-                @Main Term initialConfiguration,
+                @Main Provider<Term> initialConfiguration,
                 @Main KompileOptions kompileOptions,
                 BinaryLoader loader,
                 Transformation<KRunState, String> statePrinter,
@@ -196,7 +197,7 @@ public interface Debugger {
             reader.addCompletor(new MultiCompletor(completors));
 
             try {
-                debugger.start(initialConfiguration);
+                debugger.start(initialConfiguration.get());
                 System.out.println("After running one step of execution the result is:\n");
                 System.out.println(statePrinter.run(debugger.getState(debugger.getCurrentState()), a));
             } catch (UnsupportedBackendOptionException e) {
