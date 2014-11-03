@@ -85,29 +85,28 @@ public class KompileFrontEnd extends FrontEnd {
 
         context.files = files;
 
-        genericCompile(options.experimental.step);
+        Definition def = genericCompile(options.experimental.step);
 
         loader.saveOrDie(files.resolveKompiled("context.bin"), context);
 
-        verbose();
+        verbose(def);
         return true;
     }
 
-    private void verbose() {
+    private void verbose(Definition def) {
         sw.printTotal("Total");
         if (context.globalOptions.verbose) {
-            context.printStatistics();
+            CountNodesVisitor visitor = new CountNodesVisitor();
+            visitor.visitNode(def);
+            visitor.printStatistics();
         }
     }
 
-
-    private void genericCompile(String step) {
+    private Definition genericCompile(String step) {
         org.kframework.kil.Definition javaDef;
         sw.start();
         javaDef = defLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 context);
-
-        new CountNodesVisitor(context).visitNode(javaDef);
 
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
@@ -125,6 +124,7 @@ public class KompileFrontEnd extends FrontEnd {
 
         backend.run(javaDef);
 
+        return javaDef;
     }
 }
 

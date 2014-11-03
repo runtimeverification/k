@@ -23,7 +23,6 @@ import org.kframework.utils.file.FileUtil;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -91,17 +90,6 @@ public class Context implements Serializable {
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
 
     private BiMap<String, Production> conses;
-
-    public int numModules, numSentences, numProductions, numCells;
-
-    public void printStatistics() {
-        Formatter f = new Formatter(System.out);
-        f.format("%n");
-        f.format("%-60s = %5d%n", "Number of Modules", numModules);
-        f.format("%-60s = %5d%n", "Number of Sentences", numSentences);
-        f.format("%-60s = %5d%n", "Number of Productions", numProductions);
-        f.format("%-60s = %5d%n", "Number of Cells", numCells);
-    }
 
     /**
      * The two structures below are populated by the InitializeConfigurationStructure step of the compilation.

@@ -111,7 +111,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         new CollectStartSymbolPgmVisitor(context).visitNode(this);
         new CollectConfigCellsVisitor(context).visitNode(this);
         new CollectLocationsVisitor(context).visitNode(this);
-        new CountNodesVisitor(context).visitNode(this);
         new CollectVariableTokens(context).visitNode(this);
 
         /* collect lexical token sorts */
