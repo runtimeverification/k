@@ -574,6 +574,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         // TODO(AndreiS): this assertion should not fail
         assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
         truthValue = TruthValue.FALSE;
+        isNormal = true;
         falsifyingEquality = equality;
     }
 
@@ -788,7 +789,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> oldEqualities = null;
 
         normalize();
-        while (true) {
+        while (truthValue == TruthValue.UNKNOWN) {
             assert isNormal;
             if (oldSubst != null && oldEqualities != null
                     && substitution.equals(oldSubst)
