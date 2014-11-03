@@ -24,6 +24,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.BiMap;
@@ -118,21 +119,26 @@ public class SymbolicRewriter {
             ArrayList<Rule> rules = Lists.newArrayList(strategy.next());
 //            System.out.println("rules.size: " + rules.size());
             for (Rule rule : rules) {
-                ruleStopwatch.reset();
-                ruleStopwatch.start();
+                try {
+                    ruleStopwatch.reset();
+                    ruleStopwatch.start();
 
-                ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+                    ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
 
-                for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
-                    /* compute all results */
-                    ConstrainedTerm result = buildResult(
-                            rule,
-                            unifConstraint);
-                    results.add(result);
-                    appliedRules.add(rule);
-                    if (results.size() == successorBound) {
-                        return;
+                    for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
+                        /* compute all results */
+                        ConstrainedTerm result = buildResult(
+                                rule,
+                                unifConstraint);
+                        results.add(result);
+                        appliedRules.add(rule);
+                        if (results.size() == successorBound) {
+                            return;
+                        }
                     }
+                } catch (KEMException e) {
+                    e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
+                    throw e;
                 }
             }
             // If we've found matching results from one equivalence class then
