@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.compile.sharing.FreshVariableNormalizer;
 import org.kframework.compile.transformers.DataStructure2Cell;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
@@ -52,6 +53,9 @@ public class ConcretizeTerm {
     }
 
     public Term concretize(Context context, Term result) {
+        FreshVariableNormalizer normalizer = new FreshVariableNormalizer(context);
+        normalizer.new FreshVariableCounter(context).visitNode(result);
+        result = (Term) normalizer.visitNode(result);
         result = (Term) new DataStructure2Cell(context).visitNode(result);
         result = (Term) new ConcretizeSyntax(context).visitNode(result);
         result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
