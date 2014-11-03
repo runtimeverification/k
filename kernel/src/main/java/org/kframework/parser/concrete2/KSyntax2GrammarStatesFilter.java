@@ -42,7 +42,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         this.kem = kem;
 
         // create a NonTerminal for every declared sort
-        for (Sort sort : context.definedSorts) {
+        for (Sort sort : context.getAllSorts()) {
             grammar.add(new NonTerminal(sort.getName()));
         }
     }

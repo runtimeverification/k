@@ -413,7 +413,7 @@ public class MaudeExecutor implements Executor {
                 assertXMLTerm(list.size() == 0 && sort.equals(Sort.KITEM.toString()));
                 //return new Hole(sort);
                 return Hole.KITEM_HOLE;
-            } else if (op.matches(".*:.*") && op.endsWith(sort) && context.definedSorts.contains(Sort.of(sort))) {
+            } else if (op.matches(".*:.*") && op.endsWith(sort) && context.getAllSorts().contains(Sort.of(sort))) {
                 return new Variable(op.substring(0, op.indexOf(":")), Sort.of(sort));
             } else {
                 Set<Production> prods = context.klabels.get(StringUtil.unescapeMaude(op));

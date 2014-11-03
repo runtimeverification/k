@@ -76,7 +76,6 @@ public class Context implements Serializable {
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
     private Poset<Sort> syntacticSubsorts = Poset.create();
-    public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();

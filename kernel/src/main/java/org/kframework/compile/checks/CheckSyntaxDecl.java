@@ -90,7 +90,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 sorts++;
                 NonTerminal s = (NonTerminal) pi;
                 if (!s.getSort().isCellSort()) {
-                    if (!context.definedSorts.contains(s.getSort())) {
+                    if (!context.getAllSorts().contains(s.getSort())) {
                         String msg = "Undefined sort " + s;
                         throw KExceptionManager.compilerError(msg, this, s);
                     }
@@ -103,7 +103,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (pi instanceof UserList) {
                 sorts++;
                 UserList s = (UserList) pi;
-                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
+                if (!s.getSort().getName().startsWith("#") && !context.getAllSorts().contains(s.getSort())) {
                     String msg = "Undefined sort " + s.getSort();
                     throw KExceptionManager.compilerError(msg, this, s);
                 }
