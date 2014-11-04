@@ -3,5 +3,5 @@
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 libraryDependencies ++= Seq(
-   "junit" % "junit" % "4.8.1" % "test"
+   "junit" % "junit" % "4.11" % "test"
 )
