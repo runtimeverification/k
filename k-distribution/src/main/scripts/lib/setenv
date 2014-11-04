@@ -5,7 +5,7 @@ else
   ARCH=32;
 fi
 
-K_LIB_DIR="$(cd $(dirname "$0"); pwd)"
+K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
 if [ `uname` = 'Darwin' ]; then
   export PATH=$PATH:"$K_LIB_DIR/native/osx"
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
