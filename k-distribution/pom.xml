@@ -51,6 +51,23 @@
         <version>1.7</version>
         <executions>
           <execution>
+            <id>prepare-ktest</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
+                  <arg value="2113" />
+                  <arg value="100000" />
+                </exec>
+                <sleep seconds="1" />
+              </target>
+              <skip>${skipKTest}</skip>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
             <id>exec-ktest</id>
             <phase>integration-test</phase>
             <configuration>
@@ -60,10 +77,10 @@
                   <arg value="-v" />
                   <arg value="--report" />
                   <arg value="--debug" />
+                  <env key="K_NAILGUN" value="true" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
-              <failOnError>false</failOnError>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -74,7 +91,10 @@
             <phase>post-integration-test</phase>
             <configuration>
               <target>
-                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
+                <move file="${ktestDir}/junit-reports" tofile="target/failsafe-reports" failonerror="false" />
+                <exec executable="${project.build.directory}/release/k/lib/native/${native.os.classifier}/ng${native.exe.extension}">
+                  <arg value="ng-stop" />
+                </exec>
               </target>
             </configuration>
             <goals>
@@ -105,6 +125,7 @@
             </goals>
             <configuration>
               <skipITs>${skipKTest}</skipITs>
+              <testClassesDirectory>${project.build.directory}</testClassesDirectory>
               <reportsDirectory>${project.build.directory}/ktest-reports</reportsDirectory>
               <summaryFile>${project.build.directory}/ktest-reports/summary.xml</summaryFile>
             </configuration>
