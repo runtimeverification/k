@@ -22,7 +22,7 @@ trait KORETransformer[T] {
 
 trait KOREVisitor extends KORETransformer[Nothing] {
   def visit(k: K) {
-    transform(null: K)
+    transform(k)
   }
 }
 
