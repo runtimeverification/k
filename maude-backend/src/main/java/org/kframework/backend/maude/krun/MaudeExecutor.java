@@ -3,6 +3,7 @@ package org.kframework.backend.maude.krun;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -91,7 +92,6 @@ public class MaudeExecutor implements Executor {
     public static final String outFile = "maude_out";
     public static final String errFile = "maude_err";
     public static final String xmlOutFile = "maudeoutput.xml";
-    public static final String processedXmlOutFile = "maudeoutput_simplified.xml";
 
     private final KExceptionManager kem;
     private final KRunOptions options;
@@ -100,6 +100,7 @@ public class MaudeExecutor implements Executor {
     private final Context context;
     private final FileUtil files;
     private final KRunner runner;
+    private final File processedXmlOutFile;
 
     private int counter = 0;
 
@@ -119,6 +120,7 @@ public class MaudeExecutor implements Executor {
         this.maudeOptions = maudeOptions;
         this.files = files;
         this.runner = runner;
+        this.processedXmlOutFile = files.resolveTemp("maudeoutput_simplified.xml");
     }
 
     void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
@@ -536,14 +538,14 @@ public class MaudeExecutor implements Executor {
                     + " and write to " + processedXmlOutFile, e);
         }
 
-        Document doc = XmlUtil.readXMLFromFile(files.resolveTemp(processedXmlOutFile).getAbsolutePath());
+        Document doc = XmlUtil.readXMLFromFile(processedXmlOutFile.getAbsolutePath());
         NodeList list;
         Node nod;
         list = doc.getElementsByTagName("graphml");
         assertXML(list.getLength() == 1);
         nod = list.item(0);
         assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
-        XmlUtil.serializeXML(nod, files.resolveTemp(processedXmlOutFile).getAbsolutePath());
+        XmlUtil.serializeXML(nod, processedXmlOutFile.getAbsolutePath());
 
         Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() {
             @Override
