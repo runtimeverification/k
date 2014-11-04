@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Map;
 
+import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
@@ -43,6 +44,11 @@ public class DefinitionLoadingModule extends AbstractModule {
 
         sw.printIntermediate("Initializing definition paths");
         return context;
+    }
+
+    @Provides
+    Definition definition(BinaryLoader loader, FileUtil files) {
+        return loader.loadOrDie(Definition.class, files.resolveKompiled("definition.bin"));
     }
 
     @Provides

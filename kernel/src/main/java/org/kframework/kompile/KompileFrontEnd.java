@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +87,7 @@ public class KompileFrontEnd extends FrontEnd {
         Definition def = genericCompile(options.experimental.step);
 
         loader.saveOrDie(files.resolveKompiled("context.bin"), context);
+        loader.saveOrDie(files.resolveKompiled("definition.bin"), def);
 
         verbose(def);
         return true;

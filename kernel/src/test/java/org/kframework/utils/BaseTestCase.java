@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.RunProcess;
@@ -24,6 +25,9 @@ public abstract class BaseTestCase {
 
     @Mock
     protected Context context;
+
+    @Mock
+    protected Definition definition;
 
     @Mock
     protected Configuration configuration;
@@ -59,6 +63,7 @@ public abstract class BaseTestCase {
         @Override
         protected void configure() {
             bind(Context.class).toInstance(context);
+            bind(Definition.class).toInstance(definition);
             bind(Configuration.class).toInstance(configuration);
         }
 

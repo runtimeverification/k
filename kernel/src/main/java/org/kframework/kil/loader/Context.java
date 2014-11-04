@@ -2,7 +2,6 @@
 package org.kframework.kil.loader;
 
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Cell;
@@ -71,7 +70,6 @@ public class Context implements Serializable {
     public Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
-    public Map<String, ASTNode> locations = new HashMap<>();
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
