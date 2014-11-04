@@ -2,11 +2,13 @@
 
 package org.kframework.kore;
 
-/***
- * 
- * Helper constructors for KORE classes. The class is meant to be imported statically.
+/**
+ *
+ * Helper constructors for KORE classes. The class is meant to be imported
+ * statically.
+ *
  * @see org.kframework.kore.InterfaceTest
- * 
+ *
  */
 
 public class Interface {
