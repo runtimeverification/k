@@ -15,6 +15,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -103,51 +104,56 @@ public class FastDestructiveRewriter extends AbstractRewriter {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
-                boolean succeed = false;
-                if (rule.isCompiledForFastRewriting()) {
-                    /* compute reference results using old algorithm under DEBUG mode */
-                    List<Term> referenceResults = null;
-                    if (ENABLE_DEBUG_MODE) {
-                        referenceResults = Lists.newArrayList();
-                        for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                            Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst), termContext);
-                            referenceResults.add(ref);
-                        }
-
-                        /* eliminate sharing of mutable terms between subject and reference results */
-                        subject = DeepCloner.clone(subject);
-                    }
-
-                    Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                    if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
-                        results.add(subject);
-
-                        /* the result of rewrite machine must be in the reference results */
+                try {
+                    boolean succeed = false;
+                    if (rule.isCompiledForFastRewriting()) {
+                        /* compute reference results using old algorithm under DEBUG mode */
+                        List<Term> referenceResults = null;
                         if (ENABLE_DEBUG_MODE) {
-                            assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext));
+                            referenceResults = Lists.newArrayList();
+                            for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
+                                Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst), termContext);
+                                referenceResults.add(ref);
+                            }
+
+                            /* eliminate sharing of mutable terms between subject and reference results */
+                            subject = DeepCloner.clone(subject);
                         }
+
+                        Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
+                        if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
+                            results.add(subject);
+
+                            /* the result of rewrite machine must be in the reference results */
+                            if (ENABLE_DEBUG_MODE) {
+                                assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext));
+                            }
+                        } else {
+                            if (ENABLE_DEBUG_MODE) {
+                                assert referenceResults.isEmpty();
+                            }
+                        }
+                        Profiler.stopTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
                     } else {
-                        if (ENABLE_DEBUG_MODE) {
-                            assert referenceResults.isEmpty();
+                        Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
+                        for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
+                            subject = constructNewSubjectTerm(rule, subst);
+                            results.add(subject);
+                            succeed = true;
+                            break;
                         }
+                        Profiler.stopTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
                     }
-                    Profiler.stopTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                } else {
-                    Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
-                    for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                        subject = constructNewSubjectTerm(rule, subst);
-                        results.add(subject);
-                        succeed = true;
-                        break;
-                    }
-                    Profiler.stopTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
-                }
 
-                if (succeed) {
-                    if (rule.modifyCellStructure()) {
-                        computeIndexingCells(subject);
+                    if (succeed) {
+                        if (rule.modifyCellStructure()) {
+                            computeIndexingCells(subject);
+                        }
+                        return;
                     }
-                    return;
+                } catch (KEMException e) {
+                    e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
+                    throw e;
                 }
             }
         }
