@@ -25,6 +25,7 @@ trait SyntaxProductionToString {
   override def toString = "" + items.mkString(" ") + attributes
 }
 
+// commented out until we figure out how to encode associativity
 //trait BlockToString {
 //  self: SyntaxProduction =>
 //  override def toString = {

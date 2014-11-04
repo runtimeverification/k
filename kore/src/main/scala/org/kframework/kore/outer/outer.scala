@@ -40,6 +40,7 @@ case class Import(what: String, attributes: Attributes = Attributes()) extends S
 
 case class SyntaxPriority(higher: String, lower: String, attributes: Attributes = Attributes()) extends Sentence with ParserPiece
 
+// will be needed once we figure out how to encode associtivity
 //object Associativity extends Enumeration {
 //  val Left, Right, NonAssoc, Unspecified = Value
 //}
@@ -51,17 +52,8 @@ case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], attributes: 
 
 sealed trait ProductionItem // marker
 
-//trait Production {
-//  val attributes: kast.Attributes
-//  def klabel: String
-//}
-
-//case class UserList(sort: Sort, separator: String, attributes: kast.Attributes) extends Production { // different from kast core!
-//  def klabel = "'_" + separator + "_"
-//}
-
-case class NonTerminal(sort: Sort) extends ProductionItem // hooked but it seems we have an extra "name" here
-case class RegexTerminal(regex: String) extends ProductionItem // the equivalent for this is actually a KProduction in kore kast
+case class NonTerminal(sort: Sort) extends ProductionItem 
+case class RegexTerminal(regex: String) extends ProductionItem 
 case class Terminal(value: String) extends ProductionItem // hooked
   with TerminalToString
 
