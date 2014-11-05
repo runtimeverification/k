@@ -12,7 +12,7 @@ trait DefinitionToString {
 
 trait RuleToString {
   self: Rule =>
-  override def toString = "  rule " + body + attributes
+  override def toString = "  " + Seq("rule", body, "requires", requires, "ensures", ensures, attributes).mkString(" ")
 }
 
 trait ConfigurationToString {

@@ -28,6 +28,8 @@ trait Sentence { // marker
 case class Rule(
   label: String,
   body: kore.K,
+  requires: kore.K,
+  ensures: kore.K,
   attributes: Attributes) extends Sentence
   with RuleToString
 
