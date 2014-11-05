@@ -68,6 +68,8 @@ public class Main {
             }
 
             int result = runApplication(injector);
+            System.out.flush();
+            System.err.flush();
             System.exit(result);
             return;
         }
