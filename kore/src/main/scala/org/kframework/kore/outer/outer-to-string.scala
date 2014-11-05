@@ -2,12 +2,12 @@ package org.kframework.kore.outer
 
 trait ModuleToString {
   self: Module =>
-  override def toString = "module " + name + "\n" + sentences.toList.sortBy(_.toString).reverse.mkString("\n\n") + "\n\nendmodule"
+  override def toString = "module " + name + " " + att + "\n" + sentences.toList.sortBy(_.toString).reverse.mkString("\n\n") + "\n\nendmodule"
 }
 
 trait DefinitionToString {
   self: Definition =>
-  override def toString = modules.mkString("\n\n\n")
+  override def toString = requires + "\n\n" + modules.mkString("\n\n\n")
 }
 
 trait RuleToString {
