@@ -33,9 +33,6 @@ case class Rule(
   attributes: Attributes) extends Sentence
   with RuleToString
 
-case class Configuration(contents: kore.K, attributes: Attributes = Attributes()) extends Sentence // hooked
-  with ConfigurationToString
-
 case class ModuleComment(comment: String, attributes: Attributes = Attributes()) extends Sentence
 
 case class Import(what: String, attributes: Attributes = Attributes()) extends Sentence // hooked

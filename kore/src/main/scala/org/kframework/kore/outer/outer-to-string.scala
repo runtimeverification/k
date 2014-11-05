@@ -15,11 +15,6 @@ trait RuleToString {
   override def toString = "  " + Seq("rule", body, "requires", requires, "ensures", ensures, attributes).mkString(" ")
 }
 
-trait ConfigurationToString {
-  self: Configuration =>
-  override def toString = "  configuration " + contents
-}
-
 trait SyntaxProductionToString {
   self: SyntaxProduction =>
   override def toString = "" + items.mkString(" ") + attributes
