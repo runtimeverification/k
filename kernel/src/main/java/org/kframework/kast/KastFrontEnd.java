@@ -107,7 +107,7 @@ public class KastFrontEnd extends FrontEnd {
             if (env.get("KRUN_SORT") != null) {
                 sort = Sort.of(env.get("KRUN_SORT"));
             } else {
-                sort = context.startSymbolPgm;
+                sort = context.startSymbolPgm();
             }
         }
         return sort;

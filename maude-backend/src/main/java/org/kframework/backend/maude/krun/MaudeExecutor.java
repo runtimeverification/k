@@ -1,25 +1,14 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude.krun;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.inject.Inject;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.io.GraphIOException;
+import edu.uci.ics.jung.io.graphml.EdgeMetadata;
+import edu.uci.ics.jung.io.graphml.GraphMLReader2;
+import edu.uci.ics.jung.io.graphml.GraphMetadata;
+import edu.uci.ics.jung.io.graphml.HyperEdgeMetadata;
+import edu.uci.ics.jung.io.graphml.NodeMetadata;
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.maude.MaudeKRunOptions;
@@ -32,6 +21,7 @@ import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.Definition;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.FreezerLabel;
 import org.kframework.kil.GenericToken;
@@ -76,15 +66,24 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.inject.Inject;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.io.GraphIOException;
-import edu.uci.ics.jung.io.graphml.EdgeMetadata;
-import edu.uci.ics.jung.io.graphml.GraphMLReader2;
-import edu.uci.ics.jung.io.graphml.GraphMetadata;
-import edu.uci.ics.jung.io.graphml.HyperEdgeMetadata;
-import edu.uci.ics.jung.io.graphml.NodeMetadata;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MaudeExecutor implements Executor {
 
@@ -101,6 +100,7 @@ public class MaudeExecutor implements Executor {
     private final FileUtil files;
     private final KRunner runner;
     private final File processedXmlOutFile;
+    private final Definition def;
 
     private int counter = 0;
 
@@ -112,7 +112,8 @@ public class MaudeExecutor implements Executor {
             KExceptionManager kem,
             MaudeKRunOptions maudeOptions,
             FileUtil files,
-            KRunner runner) {
+            KRunner runner,
+            Definition def) {
         this.options = options;
         this.sw = sw;
         this.context = context;
@@ -121,6 +122,7 @@ public class MaudeExecutor implements Executor {
         this.files = files;
         this.runner = runner;
         this.processedXmlOutFile = files.resolveTemp("maudeoutput_simplified.xml");
+        this.def = def;
     }
 
     void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
@@ -413,7 +415,7 @@ public class MaudeExecutor implements Executor {
                 assertXMLTerm(list.size() == 0 && sort.equals(Sort.KITEM.toString()));
                 //return new Hole(sort);
                 return Hole.KITEM_HOLE;
-            } else if (op.matches(".*:.*") && op.endsWith(sort) && context.definedSorts.contains(Sort.of(sort))) {
+            } else if (op.matches(".*:.*") && op.endsWith(sort) && context.getAllSorts().contains(Sort.of(sort))) {
                 return new Variable(op.substring(0, op.indexOf(":")), Sort.of(sort));
             } else {
                 Set<Production> prods = context.klabels.get(StringUtil.unescapeMaude(op));
@@ -592,7 +594,7 @@ public class MaudeExecutor implements Executor {
                         return Transition.label(labelAttribute);
                     }
                 }
-                return Transition.rule(context.locations.get(filename + ":(" + location + ")"));
+                return Transition.rule(def.locations.get(filename + ":(" + location + ")"));
             }
         };
 

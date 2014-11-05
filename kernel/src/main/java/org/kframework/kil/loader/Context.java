@@ -2,7 +2,6 @@
 package org.kframework.kil.loader;
 
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Cell;
@@ -23,7 +22,6 @@ import org.kframework.utils.file.FileUtil;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -68,40 +66,25 @@ public class Context implements Serializable {
      */
     public SetMultimap<String, Production> klabels = HashMultimap.create();
     public SetMultimap<String, Production> tags = HashMultimap.create();
-    public Map<String, Cell> cells = new HashMap<String, Cell>();
+    public Map<String, Cell> cells = new HashMap<>();
     public Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
-    public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
     private Poset<Sort> syntacticSubsorts = Poset.create();
-    public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
-    public Sort startSymbolPgm = Sort.K;
     public Map<String, Sort> configVarSorts = new HashMap<>();
     @Deprecated
     public transient FileUtil files;
-    public boolean initialized = false;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
 
     private BiMap<String, Production> conses;
-
-    public int numModules, numSentences, numProductions, numCells;
-
-    public void printStatistics() {
-        Formatter f = new Formatter(System.out);
-        f.format("%n");
-        f.format("%-60s = %5d%n", "Number of Modules", numModules);
-        f.format("%-60s = %5d%n", "Number of Sentences", numSentences);
-        f.format("%-60s = %5d%n", "Number of Productions", numProductions);
-        f.format("%-60s = %5d%n", "Number of Cells", numCells);
-    }
 
     /**
      * The two structures below are populated by the InitializeConfigurationStructure step of the compilation.
@@ -155,6 +138,10 @@ public class Context implements Serializable {
     public Context() {
         initSubsorts(subsorts);
         initSubsorts(syntacticSubsorts);
+    }
+
+    public Sort startSymbolPgm() {
+        return configVarSorts.getOrDefault("PGM", Sort.K);
     }
 
     public void addProduction(Production p) {
@@ -325,10 +312,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if the two klabels are in the wrong order according to the priority filter.
-     *
-     * @param klabelParent
-     * @param klabelChild
-     * @return
      */
     public boolean isPriorityWrong(String klabelParent, String klabelChild) {
         return priorities.isInRelation(klabelParent, klabelChild);
@@ -376,10 +359,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted to bigSort (strict)
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSubsorted(Sort bigSort, Sort smallSort) {
         return subsorts.isInRelation(bigSort, smallSort);
@@ -387,10 +366,6 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted or equal to bigSort
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
@@ -404,9 +379,6 @@ public class Context implements Serializable {
      * In particular, elements of a user cons list are syntactically
      * but not semantically subsorted to the list type.
      *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSyntacticSubsorted(Sort bigSort, Sort smallSort) {
         return syntacticSubsorts.isInRelation(bigSort, smallSort);
@@ -417,10 +389,6 @@ public class Context implements Serializable {
      * (any term parsing as smallSort also parses as bigSort).
      * In particular, elements of a user cons list are syntactically
      * but not semantically subsorted to the list type.
-     *
-     * @param bigSort
-     * @param smallSort
-     * @return
      */
     public boolean isSyntacticSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
@@ -454,19 +422,14 @@ public class Context implements Serializable {
     }
 
     public void setDataStructureSorts(Map<Sort, DataStructureSort> dataStructureSorts) {
-        assert !initialized;
-
-        this.dataStructureSorts = new HashMap<Sort, DataStructureSort>(dataStructureSorts);
+        this.dataStructureSorts = new HashMap<>(dataStructureSorts);
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {
-        assert initialized : "Context is not initialized yet";
-
         return dataStructureSorts.get(sort);
     }
 
     public DataStructureSort dataStructureListSortOf(Sort sort) {
-        assert initialized : "Context is not initialized yet";
         DataStructureSort dataStructSort = dataStructureSorts.get(sort);
         if (dataStructSort == null) return null;
         if (!dataStructSort.type().equals(Sort.LIST)) return null;
@@ -481,8 +444,6 @@ public class Context implements Serializable {
     }
 
     public void setTokenSorts(Set<Sort> tokenSorts) {
-        assert !initialized;
-
         this.tokenSorts = new HashSet<>(tokenSorts);
     }
 

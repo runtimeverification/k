@@ -116,7 +116,7 @@ public class RunProcess {
         Term term;
 
         if (startSymbol == null) {
-            startSymbol = context.startSymbolPgm;
+            startSymbol = context.startSymbolPgm();
         }
         String content = value;
         Source source = Sources.fromCommandLine("parameters");

@@ -107,7 +107,7 @@ public class ProgramLoader {
     public Term processPgm(String content, Source source, Sort startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         sw.printIntermediate("Importing Files");
-        if (!context.definedSorts.contains(startSymbol)) {
+        if (!context.getAllSorts().contains(startSymbol)) {
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
