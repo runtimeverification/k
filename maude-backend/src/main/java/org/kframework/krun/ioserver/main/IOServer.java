@@ -219,9 +219,12 @@ public class IOServer implements Runnable {
 
     @Override
     public void run() {
-        createServer();
-        synchronized(this) {
-            this.notify();
+        try {
+            createServer();
+        } finally {
+            synchronized(this) {
+                this.notifyAll();
+            }
         }
         try {
             acceptConnections();
