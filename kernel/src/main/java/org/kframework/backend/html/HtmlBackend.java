@@ -2,14 +2,15 @@
 package org.kframework.backend.html;
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.backend.BasicBackend;
+import org.kframework.backend.PosterBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
+
 import com.google.inject.Inject;
 
-public class HtmlBackend extends BasicBackend {
+public class HtmlBackend extends PosterBackend {
 
     private final FileUtil files;
 
@@ -31,20 +32,5 @@ public class HtmlBackend extends BasicBackend {
 
         sw.printIntermediate("Generating HTML");
 
-    }
-
-    @Override
-    public String getDefaultStep() {
-        return "FirstStep";
-    }
-
-    @Override
-    public boolean documentation() {
-        return true;
-    }
-
-    @Override
-    public boolean generatesDefinition() {
-        return false;
     }
 }

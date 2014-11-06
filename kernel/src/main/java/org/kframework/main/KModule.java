@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface KModule {
 
+    public List<Module> getKDocModules();
     public List<Module> getKompileModules();
     public List<Module> getKastModules();
     public List<Module> getKRunModules(List<Module> definitionSpecificModules);

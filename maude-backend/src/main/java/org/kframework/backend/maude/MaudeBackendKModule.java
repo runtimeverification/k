@@ -16,7 +16,7 @@ public class MaudeBackendKModule extends AbstractKModule {
 
     @Override
     public List<Pair<String, Class<? extends Backend>>> backends() {
-        return Collections.singletonList(Pair.<String, Class<? extends Backend>>of("maude", KompileBackend.class));
+        return Collections.singletonList(Pair.<String, Class<? extends Backend>>of("maude", MaudeBackend.class));
     }
 
     @Override

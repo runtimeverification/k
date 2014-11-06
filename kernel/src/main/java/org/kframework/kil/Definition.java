@@ -8,6 +8,9 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.Poset;
+
+import com.google.inject.Inject;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,6 +37,9 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     public Definition() {
         super();
     }
+
+    @Inject
+    public Definition(Void v) {}
 
     public Definition(Definition d) {
         super(d);

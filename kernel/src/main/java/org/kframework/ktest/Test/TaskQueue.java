@@ -164,12 +164,6 @@ public class TaskQueue {
             // done. But since we just skipped kompile step, we need to add krun steps here
             addKRunSteps(tc);
         }
-        if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
-                && !pdfDefs.containsKey(tc.getDefinition())) {
-            Proc<TestCase> proc = tc.getPDFProc();
-            tpe.execute(wrapPDFStep(proc));
-            pdfDefs.put(tc.getDefinition(), false);
-        }
     }
 
     /**
@@ -319,6 +313,12 @@ public class TaskQueue {
             for (Proc<KRunProgram> proc : tc.getKRunProcs()) {
                 tpe.execute(wrapKRunStep(proc));
             }
+        }
+        if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
+                && !pdfDefs.containsKey(tc.getDefinition())) {
+            Proc<TestCase> proc = tc.getPDFProc();
+            tpe.execute(wrapPDFStep(proc));
+            pdfDefs.put(tc.getDefinition(), false);
         }
     }
 

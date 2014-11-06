@@ -41,4 +41,9 @@ public class JavaBackendKModule implements KModule {
                 new JavaSymbolicKRunModule.CommonModule());
     }
 
+    @Override
+    public List<Module> getKDocModules() {
+        return ImmutableList.of();
+    }
+
 }

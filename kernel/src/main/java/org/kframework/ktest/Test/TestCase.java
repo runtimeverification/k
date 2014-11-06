@@ -360,7 +360,7 @@ public class TestCase {
     private String[] getPdfCmd() {
         assert files.resolveWorkingDirectory(getDefinition()).isFile();
         String[] argsArr =
-                new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
+                new String[] { ExecNames.getKDoc(), "--format", "pdf" };
         if (OS.current() == OS.WIN) {
             for (int i = 0; i < argsArr.length; i++) {
                 argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());

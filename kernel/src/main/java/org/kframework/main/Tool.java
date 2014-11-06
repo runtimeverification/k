@@ -2,5 +2,5 @@
 package org.kframework.main;
 
 public enum Tool {
-    KOMPILE, KAST, KRUN, KTEST, OTHER;
+    KOMPILE, KAST, KRUN, KTEST, KDOC, OTHER;
 }

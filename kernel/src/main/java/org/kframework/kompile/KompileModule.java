@@ -8,12 +8,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.Backends;
 import org.kframework.backend.coq.CoqBackend;
-import org.kframework.backend.html.HtmlBackend;
-import org.kframework.backend.latex.DocumentationBackend;
-import org.kframework.backend.latex.LatexBackend;
-import org.kframework.backend.latex.PdfBackend;
-import org.kframework.backend.unparser.UnflattenBackend;
-import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -59,12 +53,6 @@ public class KompileModule extends AbstractModule {
 
         MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), String.class, Backend.class);
-        mapBinder.addBinding(Backends.PDF).to(PdfBackend.class);
-        mapBinder.addBinding(Backends.LATEX).to(LatexBackend.class);
-        mapBinder.addBinding(Backends.DOC).to(DocumentationBackend.class);
-        mapBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
-        mapBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
-        mapBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
         mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);
     }
 

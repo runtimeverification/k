@@ -68,13 +68,13 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Properties;
 
-public class KompileBackend extends BasicBackend {
+public class MaudeBackend extends BasicBackend {
 
     private final FileUtil files;
     private final KExceptionManager kem;
 
     @Inject
-    KompileBackend(Stopwatch sw, Context context, FileUtil files, KExceptionManager kem) {
+    MaudeBackend(Stopwatch sw, Context context, FileUtil files, KExceptionManager kem) {
         super(sw, context);
         this.files = files;
         this.kem = kem;
