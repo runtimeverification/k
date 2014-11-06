@@ -4,25 +4,26 @@ package org.kframework.kore
 
 import scala.collection.immutable.Nil
 
-trait KORETransformer[T] {
-  def transform(k: K): T = (k: @annotation.switch) match {
+trait KORETransformer[T] extends Function1[K, T] with java.util.function.Function[K, T] {
+
+  def apply(k: K): T = (k: @annotation.switch) match {
     case k: KORE => k match {
-      case k: KApply => transform(k)
-      case k: KRewrite => transform(k)
-      case k: KToken => transform(k)
-      case k: KVariable => transform(k)
+      case k: KApply => apply(k)
+      case k: KRewrite => apply(k)
+      case k: KToken => apply(k)
+      case k: KVariable => apply(k)
     }
   }
 
-  def transform(k: KApply): T
-  def transform(k: KRewrite): T
-  def transform(k: KToken): T
-  def transform(k: KVariable): T
+  def apply(k: KApply): T
+  def apply(k: KRewrite): T
+  def apply(k: KToken): T
+  def apply(k: KVariable): T
 }
 
 trait KOREVisitor extends KORETransformer[Nothing] {
   def visit(k: K) {
-    transform(k)
+    apply(k)
   }
 }
 
