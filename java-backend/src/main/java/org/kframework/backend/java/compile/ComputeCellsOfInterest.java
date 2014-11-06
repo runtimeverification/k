@@ -173,11 +173,10 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
                 cell = (Cell) node.getLeft();
             } else if (node.getRight() instanceof Cell) {
                 cell = (Cell) node.getRight();
-            } else if (node.getLeft() instanceof Bag) {
-                Bag bag = (Bag) node.getLeft();
-                if (!bag.isEmpty()) {
-                    cell = (Cell) bag.getContents().get(0);
-                }
+            } else if (node.getLeft() instanceof Bag && !((Bag) node.getLeft()).isEmpty()) {
+                // TODO(YilongL): is it possible that the cells in the bag
+                // are in different nested levels?
+                cell = (Cell) ((Bag) node.getLeft()).getContents().get(0);
             } else {
                 Bag bag = (Bag) node.getRight();
                 if (!bag.isEmpty()) {
