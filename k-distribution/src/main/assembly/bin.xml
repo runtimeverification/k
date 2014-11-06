@@ -10,9 +10,16 @@
         <outputDirectory>/lib/native</outputDirectory>
         <includes>
           <include>*:exe:*</include>
-          <include>*:uexe:*</include>
         </includes>
         <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
+        <fileMode>775</fileMode>
+      </dependencySet>
+      <dependencySet>
+        <outputDirectory>/lib/native</outputDirectory>
+        <includes>
+          <include>*:uexe:*</include>
+        </includes>
+        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}</outputFileNameMapping>
         <fileMode>775</fileMode>
       </dependencySet>
       <dependencySet>

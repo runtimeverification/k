@@ -94,8 +94,6 @@ public class KRunModule extends AbstractModule {
         bind(GlobalOptions.class).toInstance(options.global);
         bind(ColorOptions.class).toInstance(options.color);
 
-        bind(FileSystem.class).to(PortableFileSystem.class);
-
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().toInstance(options);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
@@ -203,6 +201,8 @@ public class KRunModule extends AbstractModule {
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
 
             bind(FileUtil.class);
+
+            bind(FileSystem.class).to(PortableFileSystem.class);
 
         }
 

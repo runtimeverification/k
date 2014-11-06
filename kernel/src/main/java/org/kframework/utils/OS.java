@@ -35,8 +35,6 @@ public enum OS {
         }
         if (this == WIN) {
             executable = executable + ".exe";
-        } else {
-            executable = executable + ".uexe";
         }
         return executable;
     }

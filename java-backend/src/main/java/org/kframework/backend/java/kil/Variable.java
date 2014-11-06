@@ -50,7 +50,7 @@ public class Variable extends Term implements Immutable {
      *            the given sort
      * @return the fresh variable
      */
-    public static Variable getAnonVariable(Sort sort) {
+    public static synchronized Variable getAnonVariable(Sort sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }
 

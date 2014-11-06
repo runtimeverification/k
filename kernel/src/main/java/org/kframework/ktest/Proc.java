@@ -357,8 +357,8 @@ public class Proc<T> implements Runnable {
             // program ended with error ..
             if (expectedErr == null) {
                 // we're not comparing error outputs
-                System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
-                        red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
+                System.out.format("%sERROR: [%s] failed with error code %d (time: %d ms)%s%n",
+                        red, logStr, normalOutput.returnCode, timeDelta, ColorUtil.ANSI_NORMAL);
                 if (debugOutput != null) {
                     System.out.format("error was: %s%n", debugOutput.stderr);
                 } else {

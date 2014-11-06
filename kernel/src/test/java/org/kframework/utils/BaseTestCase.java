@@ -13,6 +13,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.file.WorkingDir;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -74,6 +75,7 @@ public abstract class BaseTestCase {
         @Override
         protected void configure() {
             bind(RunProcess.class).toInstance(rp);
+            bind(TTYInfo.class).toInstance(new TTYInfo(true, true, true));
             bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));
             bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Environment.class).toInstance(System.getenv());
         }

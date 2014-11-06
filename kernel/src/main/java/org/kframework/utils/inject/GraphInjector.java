@@ -4,17 +4,20 @@ package org.kframework.utils.inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.grapher.graphviz.GraphvizGrapher;
 import com.google.inject.grapher.graphviz.GraphvizModule;
+
 import org.kframework.main.Main;
 
 public class GraphInjector {
 
     public static void main(String[] args) throws IOException {
-        Injector injector = Main.getInjector(args);
+        String[] args2 = Arrays.copyOfRange(args, 1, args.length);
+        Injector injector = Main.getInjector(args[0], args2);
         graph("injector.dot", injector);
     }
 
