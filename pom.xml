@@ -42,9 +42,15 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <scala.version>2.11.4</scala.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
