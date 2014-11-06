@@ -51,8 +51,8 @@ case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], attributes: 
 
 sealed trait ProductionItem // marker
 
-case class NonTerminal(sort: Sort) extends ProductionItem 
-case class RegexTerminal(regex: String) extends ProductionItem 
+case class NonTerminal(sort: Sort) extends ProductionItem
+case class RegexTerminal(regex: String) extends ProductionItem
 case class Terminal(value: String) extends ProductionItem // hooked
   with TerminalToString
 
