@@ -50,7 +50,6 @@ public class DefinitionLoader {
     private final BinaryLoader loader;
     private final KExceptionManager kem;
     private final OuterParser outer;
-    private final boolean documentation;
     private final boolean autoinclude;
     private final FileUtil files;
     private final Sdf2Table sdf2Table;
@@ -61,7 +60,6 @@ public class DefinitionLoader {
             BinaryLoader loader,
             KExceptionManager kem,
             OuterParser outer,
-            @Backend.Documentation boolean documentation,
             @Backend.Autoinclude boolean autoinclude,
             FileUtil files,
             Sdf2Table sdf2Table) {
@@ -69,7 +67,6 @@ public class DefinitionLoader {
         this.loader = loader;
         this.kem = kem;
         this.outer = outer;
-        this.documentation = documentation;
         this.autoinclude = autoinclude;
         this.files = files;
         this.sdf2Table = sdf2Table;
@@ -120,19 +117,17 @@ public class DefinitionLoader {
         def.setModulesMap(outer.getModulesMap());
         def.setItems(outer.getModuleItems());
 
-        if (!documentation) {
-            if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
-                String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
-                kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
-                def.setMainSyntaxModule(mainModule);
-            } else {
-                def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
-            }
+        if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
+            String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
+            kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
+            def.setMainSyntaxModule(mainModule);
+        } else {
+            def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
+        }
 
-            if (!def.getModulesMap().containsKey(mainModule)) {
-                String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
-                throw KExceptionManager.compilerError(msg);
-            }
+        if (!def.getModulesMap().containsKey(mainModule)) {
+            String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
+            throw KExceptionManager.compilerError(msg);
         }
         sw.printIntermediate("Outer Parsing");
 
@@ -160,28 +155,26 @@ public class DefinitionLoader {
         ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
         // ------------------------------------- generate parser TBL
         // cache the TBL if the sdf file is the same
-        if (!documentation) {
-            String oldSdfPgm = "";
-            if (files.resolveKompiled("Program.sdf").exists())
-                oldSdfPgm = files.loadFromKompiled("Program.sdf");
+        String oldSdfPgm = "";
+        if (files.resolveKompiled("Program.sdf").exists())
+            oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
-            // save the new parser info
-            Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
-            loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
+        // save the new parser info
+        Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
+        loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
 
-            StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
+        StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
 
-            String newSdfPgm = newSdfPgmBuilder.toString();
-            files.saveToTemp("pgm/Program.sdf", newSdfPgm);
+        String newSdfPgm = newSdfPgmBuilder.toString();
+        files.saveToTemp("pgm/Program.sdf", newSdfPgm);
 
-            sw.printIntermediate("File Gen Pgm");
+        sw.printIntermediate("File Gen Pgm");
 
-            if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
-                sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
-                files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
-                files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
-                sw.printIntermediate("Generate TBLPgm");
-            }
+        if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
+            sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
+            files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
+            files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
+            sw.printIntermediate("Generate TBLPgm");
         }
 
         if(autoinclude)
@@ -210,11 +203,9 @@ public class DefinitionLoader {
                 }
                 // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                 Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
-                if (!documentation) {
-                    Thread t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
-                    t2.join();
-                    files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
-                }
+                Thread t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
+                t2.join();
+                files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
                 t1.join();
                 files.copyTempFileToKompiledDirectory("def/Integration.sdf");
                 files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");

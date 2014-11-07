@@ -81,11 +81,6 @@ public class KompileModule extends AbstractModule {
         return backend.autoincludedFile();
     }
 
-    @Provides @Backend.Documentation
-    boolean documentation(Backend backend) {
-        return backend.documentation();
-    }
-
     @Provides
     Backend getBackend(KompileOptions options, Map<String, Backend> map, KExceptionManager kem) {
         Backend backend = map.get(options.backend);
