@@ -359,8 +359,15 @@ public class TestCase {
      */
     private String[] getPdfCmd() {
         assert files.resolveWorkingDirectory(getDefinition()).isFile();
+        String definitionFilePath =
+                FilenameUtils.getFullPathNoEndSeparator(definition.getObj());
+        String kompileDir = kompileDirArg;
+        if (kompileDir == null) {
+            // Use default value: path of .k file
+            kompileDir = definitionFilePath;
+        }
         String[] argsArr =
-                new String[] { ExecNames.getKDoc(), "--format", "pdf" };
+                new String[] { ExecNames.getKDoc(), "--format", "pdf", "--directory", kompileDir };
         if (OS.current() == OS.WIN) {
             for (int i = 0; i < argsArr.length; i++) {
                 argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
