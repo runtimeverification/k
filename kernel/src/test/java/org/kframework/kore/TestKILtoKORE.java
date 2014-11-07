@@ -47,8 +47,6 @@ public class TestKILtoKORE {
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.convert(def);
-
-        System.out.println(converted);
     }
 
     String requireBla = "require \"bla\"";
