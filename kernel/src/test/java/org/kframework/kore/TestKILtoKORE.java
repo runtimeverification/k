@@ -1,17 +1,22 @@
 package org.kframework.kore;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Import;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
+import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Require;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Sources;
+import org.kframework.kil.Syntax;
 import org.kframework.kore.outer.Sentence;
+import org.kframework.kore.outer.SyntaxSort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.utils.KoreIT;
 
@@ -29,21 +34,50 @@ public class TestKILtoKORE {
                     .stream().filter(i -> i instanceof Module)
                     .map(i -> convert((Module) i)).collect(Collectors.toSet());
 
-            return Definition(immutable(requires), immutable(modules));
+            return new org.kframework.kore.outer.Definition(
+                    immutable(requires), immutable(modules));
         }
 
         private org.kframework.kore.outer.Require convert(Require i) {
-            return Require(new java.io.File(i.getValue()));
+            return new org.kframework.kore.outer.Require(new java.io.File(
+                    i.getValue()));
         }
 
         private org.kframework.kore.outer.Module convert(Module i) {
             Set<Sentence> items = i.getItems().stream().map(j -> convert(j))
                     .collect(Collectors.toSet());
-            return Module(i.getName(), immutable(items),
-                    convert(i.getAttributes()));
+            return new org.kframework.kore.outer.Module(i.getName(),
+                    immutable(items), convert(i.getAttributes()));
         }
 
         private org.kframework.kore.outer.Sentence convert(ModuleItem i) {
+            if (i instanceof Import) {
+                convert((Import) i);
+            } else if (i instanceof Syntax) {
+                convert((Syntax) i);
+            }
+            return null;
+        }
+
+        private org.kframework.kore.outer.Sentence convert(Import s) {
+            return null;
+        }
+
+        private Set<org.kframework.kore.outer.Sentence> convert(Syntax s) {
+            HashSet<Sentence> res = new HashSet<org.kframework.kore.outer.Sentence>();
+
+            if (s.getPriorityBlocks().size() == 0)
+                res.add(new SyntaxSort(convert(s.getAllSorts().get(0)), null));
+
+            for (PriorityBlock b : s.getPriorityBlocks()) {
+
+            }
+
+            return null;
+        }
+
+        private org.kframework.kore.Sort convert(Sort sort) {
+            // TODO Auto-generated method stub
             return null;
         }
 
@@ -62,6 +96,8 @@ public class TestKILtoKORE {
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.convert(def);
+
+        System.out.println(converted);
     }
 
     String requireBla = "require \"bla\"";
