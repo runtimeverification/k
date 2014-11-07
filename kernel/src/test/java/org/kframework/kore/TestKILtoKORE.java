@@ -1,13 +1,17 @@
 package org.kframework.kore;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.Sources;
+import org.kframework.kore.outer.Sentence;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.utils.KoreIT;
 
@@ -33,6 +37,17 @@ public class TestKILtoKORE {
         }
 
         private org.kframework.kore.outer.Module convert(Module i) {
+            Set<Sentence> items = i.getItems().stream().map(j -> convert(j))
+                    .collect(Collectors.toSet());
+            return Module(i.getName(), immutable(items),
+                    convert(i.getAttributes()));
+        }
+
+        private org.kframework.kore.outer.Sentence convert(ModuleItem i) {
+            return null;
+        }
+
+        private org.kframework.kore.Attributes convert(Attributes attributes) {
             return null;
         }
     }
@@ -41,7 +56,7 @@ public class TestKILtoKORE {
     public void basicTest() {
         Definition def = new Definition();
         String testedDefintion = requireBla + "\n" + makeModule(fooSyntax);
-        
+
         def.setItems(Outer.parse(Sources.generatedBy(KoreIT.class),
                 testedDefintion, null));
 

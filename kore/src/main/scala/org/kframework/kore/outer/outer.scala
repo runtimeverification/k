@@ -12,11 +12,6 @@ case class Definition(requires: Set[Require], modules: Set[Module])
 
 case class Require(file: java.io.File)
 
-object Module {
-  def apply(name: String, att: Attributes, sentences: Set[Sentence]): Module =
-    Module(name, sentences, att)
-}
-
 case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attributes())
   extends ModuleToString with ParserPiece with KLabelMappings
 // hooked but different from core, Import is a sentence here
