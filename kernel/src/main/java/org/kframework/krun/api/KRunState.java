@@ -2,6 +2,9 @@
 package org.kframework.krun.api;
 
 import org.kframework.kil.Term;
+
+import com.google.inject.Singleton;
+
 import java.io.Serializable;
 
 public class KRunState implements Serializable, Comparable<KRunState> {
@@ -25,11 +28,14 @@ public class KRunState implements Serializable, Comparable<KRunState> {
      */
     private int stateId;
 
-    private static int nextState = 0;
+    @Singleton
+    public static class Counter {
+        private int nextState;
+    }
 
-    public KRunState(Term rawResult) {
+    public KRunState(Term rawResult, Counter counter) {
         this.rawResult = rawResult;
-        this.stateId = nextState++;
+        this.stateId = counter.nextState++;
     }
 
     public Term getRawResult() {

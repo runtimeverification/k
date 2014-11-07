@@ -1,0 +1,4 @@
+baz(foo15(1, 2), foo15(3, 4), foo15(5, 6), 7) ;
+print ;
+bar(foo15(3, 4), foo15(1, 2), 5) ;
+print

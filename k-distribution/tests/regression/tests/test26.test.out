@@ -1,0 +1,37 @@
+<T>
+    <thread>
+        <k>
+            <generatedTop>
+                <T>
+                    <thread>
+                        <k>
+                            #noparse ~> GeneratedAnonVar2:K
+                        </k>
+                        GeneratedAnonVar1:Bag
+                    </thread>
+                    GeneratedAnonVar0:Bag
+                </T>
+            </generatedTop>
+        </k>
+        <holds>
+            .Map
+        </holds>
+    </thread>
+    <out>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( #buffer ( "" ) )
+    </out>
+    <in>
+        ListItem ( #buffer ( "" ) )
+        ListItem ( #istream ( 0 ) )
+    </in>
+    <data>
+        .List
+    </data>
+    <env>
+        5 |-> "5"
+    </env>
+    <sum>
+        0
+    </sum>
+</T>

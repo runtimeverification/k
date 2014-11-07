@@ -32,6 +32,7 @@ public class MaudeModelChecker implements LtlModelChecker {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final Context context;
+    private final KRunState.Counter counter;
 
     @Inject
     MaudeModelChecker(
@@ -39,12 +40,14 @@ public class MaudeModelChecker implements LtlModelChecker {
             KompileOptions kompileOptions,
             MaudeExecutor executor,
             KExceptionManager kem,
-            FileUtil files) {
+            FileUtil files,
+            KRunState.Counter counter) {
         this.context = context;
         this.kompileOptions = kompileOptions;
         this.executor = executor;
         this.kem = kem;
         this.files = files;
+        this.counter = counter;
     }
 
     @Override
@@ -172,7 +175,7 @@ public class MaudeModelChecker implements LtlModelChecker {
             } else {
                 trans = Transition.label(label);
             }
-            list.add(new MaudeTransition(new KRunState(t), trans));
+            list.add(new MaudeTransition(new KRunState(t, counter), trans));
         } else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
             executor.assertXML(child.size() == 0);
         } else {

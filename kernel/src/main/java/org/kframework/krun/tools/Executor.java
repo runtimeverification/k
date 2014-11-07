@@ -174,7 +174,7 @@ public interface Executor {
                 //we should return null to indicate no pattern is needed
                 return null;
             }
-            if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc() != null)) {
+            if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
                 throw KExceptionManager.criticalError("Pattern matching is not supported by model checking or proving");
             }
             String patternToParse = pattern;

@@ -101,6 +101,7 @@ public class MaudeExecutor implements Executor {
     private final KRunner runner;
     private final File processedXmlOutFile;
     private final Definition def;
+    private final KRunState.Counter stateCounter;
 
     private int counter = 0;
 
@@ -113,7 +114,8 @@ public class MaudeExecutor implements Executor {
             MaudeKRunOptions maudeOptions,
             FileUtil files,
             KRunner runner,
-            Definition def) {
+            Definition def,
+            KRunState.Counter stateCounter) {
         this.options = options;
         this.sw = sw;
         this.context = context;
@@ -123,6 +125,7 @@ public class MaudeExecutor implements Executor {
         this.runner = runner;
         this.processedXmlOutFile = files.resolveTemp("maudeoutput_simplified.xml");
         this.def = def;
+        this.stateCounter = stateCounter;
     }
 
     void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
@@ -241,7 +244,7 @@ public class MaudeExecutor implements Executor {
     private KRunState parseElement(Element el, org.kframework.kil.loader.Context context) {
         Term rawResult = parseXML(el, context);
 
-        return new KRunState(rawResult);
+        return new KRunState(rawResult, stateCounter);
     }
 
     private void parseCounter(Node counterNode) {
@@ -647,7 +650,7 @@ public class MaudeExecutor implements Executor {
 
             Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
                     .visitNode(pattern.getBody());
-            KRunState state = new KRunState(rawResult);
+            KRunState state = new KRunState(rawResult, stateCounter);
             SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo);
             results.add(result);
         }

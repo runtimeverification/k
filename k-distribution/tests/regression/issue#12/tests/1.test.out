@@ -1,7 +1,0 @@
-<k>
-    .K
-</k>
-<out>
-    ListItem(#ostream ( 1 ))
-    ListItem(#buffer ( "7" ))
-</out>

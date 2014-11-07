@@ -11,7 +11,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
@@ -126,7 +125,7 @@ public final class KRunOptions {
         if (io != null && io == true && search()) {
             throw KExceptionManager.criticalError("You cannot specify both --io on and --search");
         }
-        if (io != null && io == true && experimental.ltlmc() != null) {
+        if (io != null && io == true && experimental.ltlmc()) {
             throw KExceptionManager.criticalError("You cannot specify both --io on and --ltlmc");
         }
         if (io != null && io == true && experimental.debugger()) {
@@ -134,7 +133,7 @@ public final class KRunOptions {
         }
         if (search()
                 || experimental.prove != null
-                || experimental.ltlmc() != null
+                || experimental.ltlmc()
                 || experimental.debugger()) {
             return false;
         }
@@ -252,29 +251,13 @@ public final class KRunOptions {
         }
 
         @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
-        private String ltlmc;
+        public String ltlmc;
 
         @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
-        private String ltlmcFile;
+        public String ltlmcFile;
 
-        public String ltlmc() {
-            if (ltlmc != null && ltlmcFile != null) {
-                throw new ParameterException("You may specify only one of --ltlmc and --ltlmc-file.");
-            }
-            if (ltlmc != null) {
-                return ltlmc;
-            }
-            if (ltlmcFile == null) {
-                return null;
-            }
-            return files.loadFromWorkingDirectory(ltlmcFile);
-        }
-
-        private FileUtil files;
-
-        @Inject
-        public void setFiles(FileUtil files) {
-            this.files = files;
+        public boolean ltlmc() {
+            return ltlmc != null || ltlmcFile != null;
         }
 
         @Parameter(names="--prove", description="Prove a set of reachability rules.")
