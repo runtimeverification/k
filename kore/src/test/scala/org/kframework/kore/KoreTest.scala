@@ -53,7 +53,7 @@ class KoreTest {
 
   @Test def testKRewrite {
     val x = KRewrite(TestK, TestK) copy Attributes(TestK)
-    //    val t: KRewrite = x map { t => t }
-    //    assertEquals(x, t)
+    val t: KRewrite = x map { t => t }
+    assertEquals(x, t)
   }
 }
