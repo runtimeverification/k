@@ -39,6 +39,7 @@ public class JavaSymbolicExecutor implements Executor {
     private final Provider<SymbolicRewriter> symbolicRewriter;
     private final KILtoBackendJavaKILTransformer transformer;
     private final Context context;
+    private final KRunState.Counter counter;
 
     @Inject
     JavaSymbolicExecutor(
@@ -48,7 +49,8 @@ public class JavaSymbolicExecutor implements Executor {
             GlobalContext globalContext,
             Provider<SymbolicRewriter> symbolicRewriter,
             KILtoBackendJavaKILTransformer transformer,
-            Definition definition) {
+            Definition definition,
+            KRunState.Counter counter) {
         this.context = context;
         this.javaOptions = javaOptions;
         this.kilTransformer = kilTransformer;
@@ -57,6 +59,7 @@ public class JavaSymbolicExecutor implements Executor {
         this.transformer = transformer;
         this.definition = definition;
         globalContext.setDefinition(definition);
+        this.counter = counter;
     }
 
     @Override
@@ -68,7 +71,7 @@ public class JavaSymbolicExecutor implements Executor {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
-        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm));
+        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, counter));
         UnparserFilter unparser = new UnparserFilter(true, ColorSetting.OFF, OutputModes.PRETTY, context);
         unparser.visitNode(kilTerm);
         returnResult.setRawOutput(unparser.getResult());
@@ -147,7 +150,7 @@ public class JavaSymbolicExecutor implements Executor {
                         .visitNode(pattern.getBody());
 
             searchResults.add(new SearchResult(
-                    new KRunState(rawResult),
+                    new KRunState(rawResult, counter),
                     substitutionMap,
                     compilationInfo));
         }

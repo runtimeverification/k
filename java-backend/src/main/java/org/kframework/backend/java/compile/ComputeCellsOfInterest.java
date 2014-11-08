@@ -23,6 +23,7 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import com.google.common.collect.Lists;
 
@@ -178,9 +179,13 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
                 // are in different nested levels?
                 cell = (Cell) ((Bag) node.getLeft()).getContents().get(0);
             } else {
-                Bag bag = (Bag) node.getRight();
-                if (!bag.isEmpty()) {
-                    cell = (Cell) bag.getContents().get(0);
+                if (node.getRight() instanceof Bag) {
+                    Bag bag = (Bag) node.getRight();
+                    if (!bag.isEmpty()) {
+                        cell = (Cell) bag.getContents().get(0);
+                    }
+                } else {
+                    throw KExceptionManager.criticalError("Rewrite not between two cells??", node);
                 }
             }
 

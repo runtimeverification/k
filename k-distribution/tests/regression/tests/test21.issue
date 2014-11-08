@@ -1,0 +1,1 @@
+test(true == true, pass ; pass, pass ; pass)

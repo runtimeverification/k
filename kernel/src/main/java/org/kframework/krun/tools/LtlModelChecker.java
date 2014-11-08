@@ -14,8 +14,10 @@ import org.kframework.krun.api.KRunResult;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
+import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -41,8 +43,8 @@ public interface LtlModelChecker {
         private final Context context;
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
-        private final KExceptionManager kem;
         private final RunProcess rp;
+        private final FileUtil files;
 
         @Inject
         protected Tool(
@@ -51,15 +53,15 @@ public interface LtlModelChecker {
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
-                KExceptionManager kem,
-                RunProcess rp) {
+                RunProcess rp,
+                @Main FileUtil files) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
             this.sw = sw;
             this.modelChecker = modelChecker;
-            this.kem = kem;
             this.rp = rp;
+            this.files = files;
         }
 
         @Override
@@ -67,7 +69,7 @@ public interface LtlModelChecker {
             a.add(Context.class, context);
             try {
                 Term formula = rp.runParser("kast -e",
-                        options.experimental.ltlmc(), false, Sort.of("LtlFormula"), context);
+                        ltlmc(), false, Sort.of("LtlFormula"), context);
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 formula,
                                 initialConfiguration.get());
@@ -76,6 +78,19 @@ public interface LtlModelChecker {
             } catch (KRunExecutionException e) {
                 throw KExceptionManager.criticalError(e.getMessage(), e);
             }
+        }
+
+        public String ltlmc() {
+            if (options.experimental.ltlmc != null && options.experimental.ltlmcFile != null) {
+                throw new ParameterException("You may specify only one of --ltlmc and --ltlmc-file.");
+            }
+            if (options.experimental.ltlmc != null) {
+                return options.experimental.ltlmc;
+            }
+            if (options.experimental.ltlmcFile == null) {
+                return null;
+            }
+            return files.loadFromWorkingDirectory(options.experimental.ltlmcFile);
         }
 
         @Override

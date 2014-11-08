@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <test
+      definition="regression-maude.k"
+      programs="."
+      results="."
+      extension="issue test"
+      />
+</tests>

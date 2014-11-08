@@ -43,17 +43,20 @@ public class ExecutorDebugger implements Debugger {
     private final Executor executor;
     private final TermLoader loader;
     private final KExceptionManager kem;
+    private final KRunState.Counter counter;
 
     @Inject
     public ExecutorDebugger(
             Executor executor,
             Context context,
             TermLoader loader,
-            KExceptionManager kem) throws KRunExecutionException {
+            KExceptionManager kem,
+            KRunState.Counter counter) throws KRunExecutionException {
         this.context = context;
         this.executor = executor;
         this.loader = loader;
         this.kem = kem;
+        this.counter = counter;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class ExecutorDebugger implements Debugger {
             e.printStackTrace();
         }
 
-        KRunState initialState = new KRunState(initialConfiguration);
+        KRunState initialState = new KRunState(initialConfiguration, counter);
         graph = new KRunGraph();
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
@@ -247,7 +250,7 @@ public class ExecutorDebugger implements Debugger {
             throw new IllegalStateException("Cannot perform command: Configuration does not " +
                 "have an stdin buffer");
         }
-        KRunState newState = new KRunState(result);
+        KRunState newState = new KRunState(result, counter);
         Entry<Integer, KRunState> prevValue = containsValue(newState);
         if (prevValue!=null) {
             KRunState canonicalNewState = canonicalizeState(newState);

@@ -1,0 +1,8 @@
+\QVertices:\E
+\QNode 0:\E
+\Qfoo10\E
+\QNode 1:\E
+\Qfoo11\E
+\QEdges:\E
+\QUnlabelled rule [Node 0, Node 1]\E
+\QDeadlock [Node 1, Node 1]\E
