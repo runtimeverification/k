@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.Backend;
+import org.kframework.backend.PosterBackend;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.krun.tools.Prover;
@@ -21,6 +22,10 @@ import com.google.inject.multibindings.Multibinder;
 public abstract class AbstractKModule implements KModule {
 
     public List<Pair<String, Class<? extends Backend>>> backends() {
+        return Collections.emptyList();
+    }
+
+    public List<Pair<String, Class<? extends PosterBackend>>> posterTypes() {
         return Collections.emptyList();
     }
 
@@ -42,6 +47,21 @@ public abstract class AbstractKModule implements KModule {
 
     public List<Pair<String, Class<? extends Prover>>> provers() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<Module> getKDocModules() {
+        return Collections.<Module>singletonList(new AbstractModule() {
+
+            @Override
+            protected void configure() {
+                MapBinder<String, PosterBackend> mapBinder = MapBinder.newMapBinder(
+                        binder(), String.class, PosterBackend.class);
+                for (Pair<String, Class<? extends PosterBackend>> backend : posterTypes()) {
+                    mapBinder.addBinding(backend.getKey()).to(backend.getValue());
+                }
+            }
+        });
     }
 
     @Override

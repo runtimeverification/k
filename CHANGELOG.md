@@ -1,4 +1,11 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+# K Framework 3.5 #
+
+## Kompile ##
+- `kompile --backend [pdf|latex|html|unparse|unflatten|doc]` has been
+  moved to a new tool, `kdoc --format [pdf|latex|html|unparse|unflatten|doc]`
+
 # K Framework 3.4 (released 2014-08-05) #
 
 This version is a major release.

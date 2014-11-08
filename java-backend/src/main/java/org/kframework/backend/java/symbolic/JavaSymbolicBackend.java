@@ -171,11 +171,6 @@ public class JavaSymbolicBackend extends BasicBackend {
     }
 
     @Override
-    public boolean documentation() {
-        return false;
-    }
-
-    @Override
     public boolean generatesDefinition() {
         return true;
     }

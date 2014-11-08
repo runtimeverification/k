@@ -3,7 +3,7 @@ package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.kframework.backend.BasicBackend;
+import org.kframework.backend.PosterBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
@@ -15,7 +15,7 @@ import com.google.inject.Provider;
 
 import java.io.*;
 
-public class PdfBackend extends BasicBackend {
+public class PdfBackend extends PosterBackend {
 
     private final LatexBackend latexBackend;
     private final FileUtil files;
@@ -81,20 +81,5 @@ public class PdfBackend extends BasicBackend {
         String latexFile = latexBackend.getLatexFile();
         String pdfFile = generatePdf(files.resolveTemp(latexFile));
         files.copyTempFileToDefinitionDirectory(pdfFile);
-    }
-
-    @Override
-    public String getDefaultStep() {
-        return "FirstStep";
-    }
-
-    @Override
-    public boolean documentation() {
-        return true;
-    }
-
-    @Override
-    public boolean generatesDefinition() {
-        return false;
     }
 }

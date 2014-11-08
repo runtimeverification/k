@@ -108,6 +108,8 @@ public class KompileFrontEnd extends FrontEnd {
         javaDef = defLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 context);
 
+        loader.saveOrDie(files.resolveKompiled("definition-concrete.bin"), javaDef);
+
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {

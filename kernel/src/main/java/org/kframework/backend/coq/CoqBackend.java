@@ -110,12 +110,6 @@ public class CoqBackend extends BasicBackend {
     public String autoincludedFile() {
         return Backends.AUTOINCLUDE_JAVA;
     }
-
-    @Override
-    public boolean documentation() {
-        return false;
-    }
-
     @Override
     public boolean generatesDefinition() {
         return false;

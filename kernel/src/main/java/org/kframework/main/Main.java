@@ -13,6 +13,7 @@ import java.util.ServiceLoader;
 import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.kast.KastFrontEnd;
+import org.kframework.kdoc.KDocFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.ktest.KTestFrontEnd;
@@ -120,6 +121,15 @@ public class Main {
                     modules.addAll(KTestFrontEnd.getModules(args2));
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKTestModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
+                    break;
+                case "-kdoc":
+                    modules.addAll(KDocFrontEnd.getModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKDocModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }

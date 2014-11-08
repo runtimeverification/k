@@ -212,6 +212,7 @@ public class UnparserFilter extends NonCachingVisitor {
 
     @Override
     public Void visit(Configuration configuration, Void _) {
+        prepare(configuration);
         indenter.write("configuration");
         indenter.endLine();
         indenter.indent(TAB);

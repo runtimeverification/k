@@ -39,7 +39,6 @@ public interface Backend {
 
     public boolean autoinclude();
     public String autoincludedFile();
-    public boolean documentation();
     public boolean generatesDefinition();
 
     /**
@@ -52,8 +51,6 @@ public interface Backend {
     // TODO(YilongL): why mixing the uses of "compilation step" and
     // "compiler step"? what about a uniform name?
 
-    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-    public static @interface Documentation {}
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
     public static @interface Autoinclude {}
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)

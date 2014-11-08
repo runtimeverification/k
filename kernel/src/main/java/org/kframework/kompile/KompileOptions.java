@@ -52,7 +52,7 @@ public final class KompileOptions implements Serializable {
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.")
     public String directory = ".";
 
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [maude|coq|java]. Each creates the kompiled K definition.")
     public String backend = Backends.MAUDE;
 
     @Parameter(names="--doc-style", description="Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).")

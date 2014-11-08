@@ -32,4 +32,8 @@ public class ExecNames {
         }
         return JarInfo.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
     }
+
+    public static String getKDoc() {
+        return getExecutable("kdoc");
+    }
 }
