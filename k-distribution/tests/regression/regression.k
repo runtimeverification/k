@@ -1,16 +1,16 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "builtins/model-checker.k" 
+require "builtins/model-checker.k"
 
 module REGRESSION
   imports LTL-HOOKS
-  imports MODEL-CHECKER-HOOKS 
+  imports MODEL-CHECKER-HOOKS
 
   // COMMON
   configuration <T> <thread multiplicity="*"> <k> $PGM:K </k> <holds> .Map </holds> </thread> <out stream="stdout"> .List </out> <in stream="stdin"> .List </in> <data> .List </data> <env> 5 |-> "5" .Map </env> <sum> 0 </sum> </T>
   syntax KItem ::= print(K) [strict]
   rule <k> print(I:Int) => .K ...</k> <out>... .List => ListItem(I) </out>
   syntax Common ::= Stmt | Foo
-  
+
   // issue#1
   syntax Foo ::= foo1(Int, Int)
   rule foo1(I, I) => .
@@ -261,7 +261,7 @@ module REGRESSION
 
   //string2int
   syntax KItem ::= "test3"
-  rule test3 => #if true #then 0 #else String2Int("") #fi 
+  rule test3 => #if true #then 0 #else String2Int("") #fi
 
 
   //termattributes
