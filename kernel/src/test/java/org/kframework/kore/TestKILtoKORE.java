@@ -1,10 +1,19 @@
 package org.kframework.kore;
 
+import static org.junit.Assert.assertEquals;
+import static org.kframework.kore.Interface.*;
+import static org.kframework.kore.Interface1.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
@@ -19,8 +28,6 @@ import org.kframework.kore.outer.Sentence;
 import org.kframework.kore.outer.SyntaxSort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.utils.KoreIT;
-
-import static org.kframework.kore.Interface1.*;
 
 public class TestKILtoKORE {
 
@@ -44,19 +51,23 @@ public class TestKILtoKORE {
         }
 
         private org.kframework.kore.outer.Module convert(Module i) {
-            Set<Sentence> items = i.getItems().stream().map(j -> convert(j))
+            Set<Sentence> items = i.getItems().stream()
+                    .flatMap(j -> convert(j).stream())
                     .collect(Collectors.toSet());
             return new org.kframework.kore.outer.Module(i.getName(),
                     immutable(items), convert(i.getAttributes()));
         }
 
-        private org.kframework.kore.outer.Sentence convert(ModuleItem i) {
+        private Set<org.kframework.kore.outer.Sentence> convert(ModuleItem i) {
             if (i instanceof Import) {
-                convert((Import) i);
+                Set<Sentence> res = new HashSet<org.kframework.kore.outer.Sentence>();
+                res.add(new org.kframework.kore.outer.Import(((Import) i)
+                        .getName(), Attributes()));
+                return res;
             } else if (i instanceof Syntax) {
-                convert((Syntax) i);
-            }
-            return null;
+                return convert((Syntax) i);
+            } else
+                return null;
         }
 
         private org.kframework.kore.outer.Sentence convert(Import s) {
@@ -64,49 +75,79 @@ public class TestKILtoKORE {
         }
 
         private Set<org.kframework.kore.outer.Sentence> convert(Syntax s) {
-            HashSet<Sentence> res = new HashSet<org.kframework.kore.outer.Sentence>();
+            Set<Sentence> res = new HashSet<org.kframework.kore.outer.Sentence>();
 
             if (s.getPriorityBlocks().size() == 0)
-                res.add(new SyntaxSort(convert(s.getAllSorts().get(0)), null));
+                res.add(new SyntaxSort(convert(s.getDeclaredSort().getSort()),
+                        convert(s.getAttributes())));
 
             for (PriorityBlock b : s.getPriorityBlocks()) {
-
             }
 
-            return null;
+            return res;
         }
 
         private org.kframework.kore.Sort convert(Sort sort) {
-            // TODO Auto-generated method stub
-            return null;
+            return Sort(sort.getName());
         }
 
         private org.kframework.kore.Attributes convert(Attributes attributes) {
-            return null;
+            Set<K> attributesSet = attributes
+                    .keySet()
+                    .stream()
+                    .map(key -> {
+                        String keyString = key.toString();
+                        String valueString = attributes.get(key).getValue()
+                                .toString();
+
+                        return (K) KApply(
+                                KLabel(keyString),
+                                KList(KToken(Sort("AttributeValue"),
+                                        KString(valueString))));
+                    }).collect(Collectors.toSet());
+
+            return Attributes(KList(attributesSet));
         }
     }
 
-    @Test
-    public void basicTest() {
-        Definition def = new Definition();
-        String testedDefintion = requireBla + "\n" + makeModule(fooSyntax);
+    private static final String ROOT = "src/test/resources/convertor-tests/";
 
+    @Rule
+    public TestName name = new TestName();
+
+    @Test
+    public void emptyModule() throws IOException {
+        standardTest();
+    }
+
+    @Test
+    public void simpleSyntax() throws IOException {
+        standardTest();
+    }
+    
+    @Test
+    public void syntaxWithAttributes() throws IOException {
+        standardTest();
+    }
+
+    private void standardTest() throws IOException {
+        File file = new File(ROOT + name.getMethodName() + ".k");
+        String definitionText = Files.lines(file.toPath())
+                .reduce((x, y) -> x + "\n" + y).get();
+
+        org.kframework.kore.outer.Definition koreDefintion = toKORE(definitionText);
+        assertEquals(definitionText.trim(), koreDefintion.toString().trim());
+    }
+
+    private org.kframework.kore.outer.Definition toKORE(String testedDefintion) {
+        Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(KoreIT.class),
                 testedDefintion, null));
+        
+        System.out.println(def);
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.convert(def);
-
-        System.out.println(converted);
-    }
-
-    String requireBla = "require \"bla\"";
-    String fooSyntax = "syntax Foo ::= \"foo\"";
-
-    private String makeModule(String... contents) {
-        String concatenated = "";
-        for (String s : contents)
-            concatenated += s;
-        return "module EMPTY\n" + concatenated + "\nendmodule";
+        return converted;
     }
 }

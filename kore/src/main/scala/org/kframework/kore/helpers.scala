@@ -27,6 +27,16 @@ trait KCollection[+This <: KCollection[This]]
   override def foreach[B](f: K => B) {
     klist.foreach(f)
   }
+}
+
+trait AttributesToString {
+  self: Attributes =>
+  override def toString() = "[" +
+    (klist map {
+      case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
+    } mkString " ") + "]"
+
+  def postfixString = if (isEmpty) "" else (" " + toString())
 
   def map(f: java.util.function.Function[K, K]): This = {
     val builder = newBuilder
@@ -35,4 +45,9 @@ trait KCollection[+This <: KCollection[This]]
     }
     builder.result()
   }
+}
+
+trait SortToString {
+  self: Sort =>
+  override def toString = name
 }

@@ -30,7 +30,7 @@ trait KLabel // needs to be a KLabel to be able to have KVariables in its place
 
 /* Data Structures */
 
-final class Attributes(val klist: KList) extends KListBacked[Attributes] {
+final class Attributes(val klist: KList) extends KListBacked[Attributes] with AttributesToString {
   import KList.seqOfKtoKList
   // we will eventually decide on something much more specific for attributes
   def copy(klist: LinearSeq[K]) = new Attributes(klist)
@@ -107,6 +107,7 @@ object EmptyK {
 
 object KLabel {
   def apply(name: String) = ConcreteKLabel(name)
+  def unapply(klabel: ConcreteKLabel): Option[String] = Some(klabel.name)
 }
 
 /* Constructors for matching KORE */
@@ -117,7 +118,7 @@ object KLabelWithQuotes {
   }
 }
 
-case class Sort(name: String)
+case class Sort(name: String) extends SortToString
 
 object KORE {
   implicit def StringToKString(s: String) = KString(s)

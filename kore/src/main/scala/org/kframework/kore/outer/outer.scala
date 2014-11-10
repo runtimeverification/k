@@ -17,7 +17,7 @@ case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attr
 // hooked but different from core, Import is a sentence here
 
 trait Sentence { // marker
-  val attributes: Attributes
+  val att: Attributes
 }
 
 case class Rule(
@@ -25,23 +25,24 @@ case class Rule(
   body: kore.K,
   requires: kore.K,
   ensures: kore.K,
-  attributes: Attributes) extends Sentence
+  att: Attributes) extends Sentence
   with RuleToString
 
-case class ModuleComment(comment: String, attributes: Attributes = Attributes()) extends Sentence
+case class ModuleComment(comment: String, att: Attributes = Attributes()) extends Sentence
 
-case class Import(what: String, attributes: Attributes = Attributes()) extends Sentence // hooked
+case class Import(what: String, att: Attributes = Attributes()) extends Sentence // hooked
 
-case class SyntaxPriority(higher: String, lower: String, attributes: Attributes = Attributes()) extends Sentence with ParserPiece
+case class SyntaxPriority(higher: String, lower: String, att: Attributes = Attributes()) extends Sentence with ParserPiece
 
 // will be needed once we figure out how to encode associtivity
 //object Associativity extends Enumeration {
 //  val Left, Right, NonAssoc, Unspecified = Value
 //}
 
-case class SyntaxSort(sort: Sort, attributes: Attributes = Attributes()) extends Sentence with ParserPiece
+case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
+  with ParserPiece with SyntaxSortToString
 
-case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], attributes: Attributes = Attributes()) extends Sentence with ParserPiece // hooked but problematic, see kast-core.k 
+case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes()) extends Sentence with ParserPiece // hooked but problematic, see kast-core.k 
   with SyntaxProductionToString
 
 sealed trait ProductionItem // marker

@@ -2,7 +2,8 @@ package org.kframework.kore.outer
 
 trait ModuleToString {
   self: Module =>
-  override def toString = "module " + name + " " + att + "\n" + sentences.toList.sortBy(_.toString).reverse.mkString("\n\n") + "\n\nendmodule"
+  override def toString = "module " + name + att.postfixString +
+    "\n" + sentences.toList.sortBy(_.toString).reverse.map("  " + _).mkString("\n\n") + "\nendmodule"
 }
 
 trait DefinitionToString {
@@ -15,12 +16,17 @@ trait DefinitionToString {
 
 trait RuleToString {
   self: Rule =>
-  override def toString = "  " + Seq("rule", body, "requires", requires, "ensures", ensures, attributes).mkString(" ")
+  override def toString = "  " + Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
 trait SyntaxProductionToString {
   self: SyntaxProduction =>
-  override def toString = "" + items.mkString(" ") + attributes
+  override def toString = "" + items.mkString(" ") + att
+}
+
+trait SyntaxSortToString {
+  self: SyntaxSort =>
+  override def toString() = "syntax " + sort + att.postfixString
 }
 
 // commented out until we figure out how to encode associativity
