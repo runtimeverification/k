@@ -158,6 +158,7 @@ public class MaudeFilter extends BackendFilter {
                         if (!isEmptyAttributes(p.getAttributes())) {
                             result.append(" [metadata \"");
                             this.visitNode(p.getAttributes());
+                            appendLocationInfo(p);
                             result.append("\"]");
                         }
                         result.append(" .\n");
@@ -170,6 +171,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(StringUtil.escapeMaude(p.getLabel()));
                         result.append(" : K K -> K [prec 120 metadata \"");
                         this.visitNode(p.getAttributes());
+                        appendLocationInfo(p);
                         result.append(" hybrid=()");
                         result.append("\"] .\n");
                         result.append("op ");
@@ -195,6 +197,7 @@ public class MaudeFilter extends BackendFilter {
                         // if (!isEmptyAttributes(p.getCellAttributes())) {
                         result.append(" [metadata \"");
                         this.visitNode(p.getAttributes());
+                        appendLocationInfo(p);
                         result.append("\"]");
                         // }
                         result.append(" .\n");
@@ -203,6 +206,14 @@ public class MaudeFilter extends BackendFilter {
             }
         }
         return null;
+    }
+
+    private void appendLocationInfo(ASTNode p) {
+        result.append(" source=(");
+        result.append(p.getSource());
+        result.append(")");
+        result.append(" location=");
+        result.append(p.getLocation());
     }
 
     @Override
@@ -554,6 +565,7 @@ public class MaudeFilter extends BackendFilter {
             }
             result.append(" \"");
             this.visitNode(rule.getAttributes());
+            appendLocationInfo(rule);
             result.append("\"] .\n");
         }
         return null;
@@ -631,6 +643,7 @@ public class MaudeFilter extends BackendFilter {
         }
         result.append(" \"");
         this.visitNode(sentence.getAttributes());
+        appendLocationInfo(sentence);
         result.append("\"] .");
         return null;
     }
