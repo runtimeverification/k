@@ -6,6 +6,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.main.IOServer;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.maude.MaudeRun;
 
 import com.google.inject.Inject;
@@ -67,8 +68,8 @@ public class KRunner {
             String commandTemplate = "load {0}\nmod KRUNNER is including {1} .\neq #TCPPORT = {2,number,#} .\nendm\nload {3}\n";
 
             String command = MessageFormat.format(commandTemplate,
-                    files.resolveKompiled("main.maude").getAbsolutePath(),
-                    kompileOptions.mainModule(), server.getPort(), files.resolveTemp("maude_in").getAbsolutePath());
+                    JarInfo.windowfyPath(files.resolveKompiled("main.maude").getAbsolutePath()),
+                    kompileOptions.mainModule(), server.getPort(), JarInfo.windowfyPath(files.resolveTemp("maude_in").getAbsolutePath()));
             Process _maudeProcess = runMaude();
             BufferedWriter maudeInput = new BufferedWriter(new OutputStreamWriter(_maudeProcess.getOutputStream()));
             maudeInput.write(command + "\n");
