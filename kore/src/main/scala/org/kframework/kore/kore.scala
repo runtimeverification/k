@@ -5,6 +5,9 @@ package org.kframework.kore
 import collection.JavaConverters._
 import collection.LinearSeq
 import KORE._
+import scala.collection.AbstractIterator
+import scala.collection.IterableLike
+import scala.collection.generic.CanBuildFrom
 
 /* Interfaces */
 
@@ -15,45 +18,36 @@ trait HasAttributes {
 }
 
 trait K extends HasAttributes {
-  protected type Self <: K
+  protected type ThisK <: K
 
-  def copy(att: Attributes): Self
-  def copy(): Self = copy(att)
+  def copy(att: Attributes): ThisK
+  def copy(): ThisK = copy(att)
 }
 
 trait KItem extends K
 
 trait KLabel // needs to be a KLabel to be able to have KVariables in its place
 
-trait KCollection[+This <: KCollection[This]] extends K with GenericCollection[K, This] with HasAttributes {
-  self: This =>
-  def copy(att: Attributes) = copy(KList(), att)
-  def copy(klist: KList, att: Attributes): This
-  def copy(klist: KList): This = copy(klist, att)
-  def copy(klist: LinearSeq[K]): This = copy(new KList(klist), att)
-  def klist: KList
-  protected val items = klist
-}
-
 /* Data Structures */
 
-final class Attributes(val items: LinearSeq[K]) extends GenericCollection[K, Attributes] {
+final class Attributes(val klist: KList) extends KListBacked[Attributes] {
+  import KList.seqOfKtoKList
   // we will eventually decide on something much more specific for attributes
   def copy(klist: LinearSeq[K]) = new Attributes(klist)
-}
-
-final class KList(val items: LinearSeq[K]) extends GenericCollection[K, KList] with KORE {
-  def copy(klist: LinearSeq[K]) = new KList(items)
 }
 
 case class KString(s: String) // just a wrapper to mark it
 
 case class KApply(klabel: KLabel, klist: KList, att: Attributes = Attributes()) extends KCollection[KApply] with KORE {
-  def copy(klist: KList, att: Attributes) = KApply(klabel, klist, att)
+  type ThisK = KApply
+  def copy(klist: KList, att: Attributes) = new KApply(klabel, klist, att)
+
+  // Java interop until Scala-2.12
+  def map(f: java.util.function.Function[K, K]): KApply = map(e => f(e))
 }
 
 case class KToken(sort: Sort, s: KString, att: Attributes = Attributes()) extends KItem with KORE {
-  type Self = KToken
+  type ThisK = KToken
   def copy(att: Attributes): KToken = new KToken(sort, s, att)
 }
 
@@ -62,17 +56,29 @@ case class ConcreteKLabel(name: String) extends KLabel {
 }
 
 final class KSequence(val klist: KList, val att: Attributes = Attributes()) extends KCollection[KSequence] {
-  def copy(klist: KList, att: Attributes): KSequence = KSequence(klist, att)
+  self: KSequence =>
+  type ThisK = KSequence
+  def copy(klist: KList, att: Attributes): KSequence = new KSequence(klist, att)
+
+  // Java interop until Scala-2.12
+  def map(f: java.util.function.Function[K, K]): KSequence = map(e => f(e))
 }
 
 case class KVariable(name: String, att: Attributes = Attributes()) extends KItem with KORE {
-  type Self = KVariable
+  type ThisK = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes()) extends KCollection[KRewrite] with KORE {
-  def copy(klist: KList, att: Attributes): KRewrite = KRewrite(klist, att)
+  self: KRewrite =>
+  type ThisK = KRewrite
+  def copy(l: KList, att: Attributes): KRewrite = l match {
+    case KList(left, right) => new KRewrite(left, right, att)
+  }
   val klist = KList(left, right)
+
+  // Java interop until Scala-2.12
+  def map(f: java.util.function.Function[K, K]): KRewrite = map(e => f(e))
 }
 
 /*  Constructors */
@@ -81,32 +87,31 @@ object KVariable {
   val it = this
 }
 
-object Attributes {
+object Attributes extends CanBuildKListLike[Attributes] {
   def apply(klist: KList): Attributes = new Attributes(klist)
-  def apply(): Attributes = new Attributes(KList())
+  def apply(list: K*): Attributes = new Attributes(list)
 }
 
-object KList extends CanBuildGeneric[K, KList] {
-  def apply(l: K*) = new KList(l.toList)
-  implicit def inject(k: K): KList = KList(k)
-
-  def fromJava(l: Array[K]) = new KList(l.toList)
-}
-
-object KSequence extends CanBuild[KSequence] {
+object KSequence extends CanBuildKListLike[KSequence] {
   def apply(klist: KList, att: Attributes) = new KSequence(klist, att)
+  def apply(list: K*) = apply(list, Attributes())
 
-  def fromJava(l: Array[K]) = new KSequence(new KList(l.toList), Attributes())
+  def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
+}
+
+object KRewrite extends CanBuildKListLike[KRewrite] {
+  def apply(klist: KList, att: Attributes) = klist match {
+    case KList(left, right) => new KRewrite(left, right, att)
+  }
+  def apply(list: K*) = apply(list, Attributes())
+}
+
+object KApply extends CanBuildKListLike[KApply] {
+  def apply(list: K*) = throw new UnsupportedOperationException("Cannot create a KApply from just a list of Ks. It also needs a KLabel")
 }
 
 object EmptyK {
-  def apply() = KSequence()
-}
-
-object KRewrite extends CanBuild[KRewrite] {
-  def apply(klist: KList, att: Attributes) = klist match {
-    case Seq(left, right) => new KRewrite(left, right, att)
-  }
+  def apply() = KSequence(KList(), Attributes())
 }
 
 object KLabel {
@@ -121,25 +126,7 @@ object KLabelWithQuotes {
   }
 }
 
-object EmptyKList {
-  def apply() = List[K]()
-}
-
 case class Sort(name: String)
-
-/* Implicits for nicer Scala interfaces */
-
-object KCollection {
-  type T = KCollection[T] forSome { type T <: KCollection[T] }
-
-  import collection._
-
-  implicit def canBuildFrom: generic.CanBuildFrom[T, K, T] =
-    new generic.CanBuildFrom[T, K, T] {
-      def apply(): mutable.Builder[K, T] = ??? // we have no truly generic K collection -- hm... we might consider KList to the that
-      def apply(from: T): mutable.Builder[K, T] = GenericCollection.newBuilder(l => from.copy(new KList(l)))
-    }
-}
 
 object KORE {
   implicit def StringToKString(s: String) = KString(s)

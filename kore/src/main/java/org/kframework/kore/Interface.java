@@ -12,7 +12,7 @@ package org.kframework.kore;
  */
 
 public class Interface {
-    private static Attributes emptyAttributes = Attributes$.MODULE$.apply();
+    private static Attributes emptyAttributes = Attributes$.MODULE$.apply(KList());
 
     public static KString KString(String s) {
         return new KString(s);
