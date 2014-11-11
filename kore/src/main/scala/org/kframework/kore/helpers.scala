@@ -27,4 +27,12 @@ trait KCollection[+This <: KCollection[This]]
   override def foreach[B](f: K => B) {
     klist.foreach(f)
   }
+
+  def map(f: java.util.function.Function[K, K]): This = {
+    val builder = newBuilder
+    foreach {
+      builder += f(_)
+    }
+    builder.result()
+  }
 }

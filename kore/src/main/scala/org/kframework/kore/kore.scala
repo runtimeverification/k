@@ -41,9 +41,6 @@ case class KString(s: String) // just a wrapper to mark it
 case class KApply(klabel: KLabel, klist: KList, att: Attributes = Attributes()) extends KCollection[KApply] with KORE {
   type ThisK = KApply
   def copy(klist: KList, att: Attributes) = new KApply(klabel, klist, att)
-
-  // Java interop until Scala-2.12
-  def map(f: java.util.function.Function[K, K]): KApply = map(e => f(e))
 }
 
 case class KToken(sort: Sort, s: KString, att: Attributes = Attributes()) extends KItem with KORE {
@@ -59,9 +56,6 @@ final class KSequence(val klist: KList, val att: Attributes = Attributes()) exte
   self: KSequence =>
   type ThisK = KSequence
   def copy(klist: KList, att: Attributes): KSequence = new KSequence(klist, att)
-
-  // Java interop until Scala-2.12
-  def map(f: java.util.function.Function[K, K]): KSequence = map(e => f(e))
 }
 
 case class KVariable(name: String, att: Attributes = Attributes()) extends KItem with KORE {
@@ -76,9 +70,6 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes()) extends K
     case KList(left, right) => new KRewrite(left, right, att)
   }
   val klist = KList(left, right)
-
-  // Java interop until Scala-2.12
-  def map(f: java.util.function.Function[K, K]): KRewrite = map(e => f(e))
 }
 
 /*  Constructors */
