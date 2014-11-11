@@ -20,6 +20,8 @@ import org.kframework.kil.Production;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -278,6 +280,8 @@ public final class KItem extends Term {
             this.kem = kem;
         }
 
+        private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
+
         /**
          * Evaluates this {@code KItem} if it is a predicate or function; otherwise,
          * applies [anywhere] rules associated with this {@code KItem}
@@ -292,9 +296,16 @@ public final class KItem extends Term {
          * @return the reduced result on success, or this {@code KItem} otherwise
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
-            return kItem.isEvaluable(context) ?
-                    evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
-                    kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+            try {
+                return kItem.isEvaluable(context) ?
+                        evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
+                            kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+            } catch (StackOverflowError e) {
+                throw KExceptionManager.criticalError(TRACE_MSG, e);
+            } catch (KEMException e) {
+                e.exception.addTraceFrame("while evaluating function " + kItem.kLabel().toString());
+                throw e;
+            }
         }
 
         /**
@@ -396,7 +407,9 @@ public final class KItem extends Term {
                          * wrong ``owise'' rule during execution.
                          */
                         if (kItem.isGround()) {
-                            assert owiseResult == null : "There shall be at most one [owise] rule for each function";
+                            if (owiseResult != null) {
+                                throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                            }
                             owiseResult = rightHandSide;
                         }
                     } else {

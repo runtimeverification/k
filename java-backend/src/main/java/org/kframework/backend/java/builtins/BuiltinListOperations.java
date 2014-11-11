@@ -31,4 +31,14 @@ public class BuiltinListOperations {
         return builder.build();
     }
 
+    public static BoolToken in(Term element, BuiltinList list, TermContext context) {
+        if (list.contains(element)) {
+            return BoolToken.TRUE;
+        } else if (element.isGround() && list.isGround()) {
+            return BoolToken.FALSE;
+        } else {
+            return null;
+        }
+    }
+
 }
