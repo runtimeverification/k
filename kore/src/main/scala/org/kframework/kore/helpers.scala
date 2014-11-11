@@ -27,10 +27,19 @@ trait KCollection[+This <: KCollection[This]]
   override def foreach[B](f: K => B) {
     klist.foreach(f)
   }
+
+  def map(f: java.util.function.Function[K, K]): This = {
+    val builder = newBuilder
+    foreach {
+      builder += f(_)
+    }
+    builder.result()
+  }
 }
 
 trait AttributesToString {
   self: Attributes =>
+
   override def toString() = "[" +
     (klist map {
       case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
