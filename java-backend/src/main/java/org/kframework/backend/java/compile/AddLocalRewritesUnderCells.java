@@ -139,12 +139,6 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-//        // TODO(YilongL): rewrite this!!!!
-//        if (!crntRule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest().contains(cell.getLabel())
-//                && outerWriteCell == null) {
-//            return super.visit(cell, _);
-//        }
-
         if (status == Status.LHS) {
             if (crntRule.getAttribute(JavaBackendRuleData.class).getReadCells().contains(cell.getLabel())) {
                 if (hasAssocCommMatching(cell)) {
