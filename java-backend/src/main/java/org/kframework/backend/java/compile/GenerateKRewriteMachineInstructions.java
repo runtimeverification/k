@@ -18,6 +18,7 @@ import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rewrite;
@@ -117,6 +118,12 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
 //        System.out.println(rule.getRewritingSchedule());
 
         return rule;
+    }
+
+    @Override
+    public ASTNode visit(KApp kApp, Void _) {
+        /* YilongL: this prevents collecting cells injected inside KItems */
+        return kApp;
     }
 
     @Override

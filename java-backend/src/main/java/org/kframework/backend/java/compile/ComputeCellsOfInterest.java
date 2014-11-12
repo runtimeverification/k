@@ -17,6 +17,7 @@ import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
@@ -156,6 +157,13 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         }
 
         return cell;
+    }
+
+    @Override
+    public ASTNode visit(KApp kApp, Void _) {
+        /* YilongL: this prevents collecting cells injected inside KItems, e.g.:
+         *   rule <k> loadObj(<threads> G:Bag </threads>) => . ...</k>  */
+        return kApp;
     }
 
     @Override
