@@ -226,7 +226,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             return UnmodifiableMap.unmodifiableMap(entries);
         }
 
-        private void concatenate(Term term) {
+        private void concatenate(Term term, boolean update) {
             if (!term.sort().equals(Sort.MAP)) {
                 throw KExceptionManager.criticalError("unexpected sort "
                         + term.sort() + " of concatenated term " + term
@@ -236,7 +236,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             if (term instanceof BuiltinMap) {
                 BuiltinMap map = (BuiltinMap) term;
 
-                if (entries.keySet().stream().anyMatch(key -> map.entries.containsKey(key))) {
+                if (!update && entries.keySet().stream().anyMatch(key -> map.entries.containsKey(key))) {
                     throw KExceptionManager.criticalError("failed to concatenate maps with common keys: "
                             + entries.keySet().stream().filter(map.entries::containsKey).collect(Collectors.toList()));
                 }
@@ -263,7 +263,16 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
          */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
-                concatenate(term);
+                concatenate(term, false);
+            }
+        }
+
+        /**
+         * Updates this builder with the specified terms of sort Map.
+         */
+        public void update(Term... terms) {
+            for (Term term : terms) {
+                concatenate(term, true);
             }
         }
 

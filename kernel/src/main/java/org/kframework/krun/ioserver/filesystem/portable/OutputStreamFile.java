@@ -55,6 +55,8 @@ public class OutputStreamFile extends File {
             os.write(b);
         } catch (IOException e) {
             PortableFileSystem.processIOException(e);
+        } finally {
+            os.flush();
         }
     }
 
@@ -81,6 +83,8 @@ public class OutputStreamFile extends File {
             os.write(b);
         } catch (IOException e) {
             PortableFileSystem.processIOException(e);
+        } finally {
+            os.flush();
         }
     }
 

@@ -38,13 +38,16 @@ public class Main {
      * @throws IOException when loadDefinition fails
      */
     public static void main(String[] args) {
+        AnsiConsole.systemInstall();
         if (args.length >= 1) {
 
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
             Injector injector = getInjector(args[0], args2);
             int result = runApplication(injector);
+            AnsiConsole.systemUninstall();
             System.exit(result);
         }
+        AnsiConsole.systemUninstall();
         invalidJarArguments();
     }
 

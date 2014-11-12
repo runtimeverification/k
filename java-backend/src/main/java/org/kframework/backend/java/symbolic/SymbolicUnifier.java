@@ -23,6 +23,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,7 +119,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     private void unify(Term term, Term otherTerm) {
         if (term.kind().isComputational()) {
-            assert otherTerm.kind().isComputational();
+            assert otherTerm.kind().isComputational() : otherTerm;
 
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());
@@ -525,21 +526,26 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     @Override
     public void unify(Cell cell, Term term) {
-        if (!(term instanceof Cell)) {
-            this.fail(cell, term);
-        }
+        try {
+            if (!(term instanceof Cell)) {
+                this.fail(cell, term);
+            }
 
-        Cell<?> otherCell = (Cell<?>) term;
-        if (!cell.getLabel().equals(otherCell.getLabel())) {
-            /*
-             * AndreiS: commented out the check below as matching might fail due
-             * to KItem < K < KList subsorting:
-             * !cell.contentKind().equals(otherCell.contentKind())
-             */
-            fail(cell, otherCell);
-        }
+            Cell<?> otherCell = (Cell<?>) term;
+            if (!cell.getLabel().equals(otherCell.getLabel())) {
+                /*
+                 * AndreiS: commented out the check below as matching might fail due
+                 * to KItem < K < KList subsorting:
+                 * !cell.contentKind().equals(otherCell.contentKind())
+                 */
+                fail(cell, otherCell);
+            }
 
-        unify(cell.getContent(), otherCell.getContent());
+            unify(cell.getContent(), otherCell.getContent());
+        } catch (KEMException e) {
+            e.exception.addTraceFrame("While unifying cell with label " + cell.getLabel().name());
+            throw e;
+        }
     }
 
     @Override

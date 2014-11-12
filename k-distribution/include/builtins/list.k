@@ -46,7 +46,7 @@ module LIST
   syntax List ::= ListItem(K)   [function, hook(List:ListItem), smtlib(smt_seq_elem)]
 
   /*@ Check element membership in the given list */
-  syntax Bool ::= K "in" List   [function, hook(List:.List), klabel('_inList_)]
+  syntax Bool ::= K "in" List   [function, hook(List:in), klabel('_inList_)]
 
   /*@ Get the list length */
   syntax Int ::= size(List)     [function, hook(Collection:size), klabel ('sizeList), smtlib(smt_seq_len)]

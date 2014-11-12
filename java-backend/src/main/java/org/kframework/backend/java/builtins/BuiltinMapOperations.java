@@ -84,7 +84,7 @@ public class BuiltinMapOperations {
 
     public static Term updateAll(BuiltinMap map1, BuiltinMap map2, TermContext context) {
         BuiltinMap.Builder builder = new BuiltinMap.Builder();
-        builder.concatenate(map1, map2);
+        builder.update(map1, map2);
         return builder.build();
     }
 

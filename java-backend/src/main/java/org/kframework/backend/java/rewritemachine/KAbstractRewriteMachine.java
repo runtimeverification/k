@@ -234,7 +234,7 @@ public class KAbstractRewriteMachine {
                     Collections.singletonList((Cell) content) :
                     Collections.<Cell>emptyList();
         } else {
-            assert false : "Wrong instruction!";
+            assert false : "expected contents of cell with label " + label + " to be a cell but found " + content.getClass().getSimpleName();
             return null;
         }
     }

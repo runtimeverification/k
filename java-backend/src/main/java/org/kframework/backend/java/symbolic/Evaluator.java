@@ -14,8 +14,6 @@ import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 
 /**
@@ -32,18 +30,9 @@ public class Evaluator extends CopyOnWriteTransformer {
         return (Term) term.accept(evaluator);
     }
 
-    private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
-
     @Override
     public ASTNode transform(KItem kItem) {
-        try {
-            return ((KItem) super.transform(kItem)).resolveFunctionAndAnywhere(false, context);
-        } catch (StackOverflowError e) {
-            throw KExceptionManager.criticalError(TRACE_MSG, e);
-        } catch (KEMException e) {
-            e.exception.addTraceFrame(kItem.kLabel().toString());
-            throw e;
-        }
+        return ((KItem) super.transform(kItem)).resolveFunctionAndAnywhere(false, context);
     }
 
     @Override
