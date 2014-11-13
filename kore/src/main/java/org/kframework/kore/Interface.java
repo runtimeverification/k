@@ -26,7 +26,7 @@ public class Interface {
         org.kframework.kore.KList kList = KList(ks);
         return new Attributes(kList);
     }
-    
+
     public static Attributes Attributes(KList klist) {
         return new Attributes(klist);
     }
