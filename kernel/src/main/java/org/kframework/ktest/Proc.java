@@ -96,12 +96,10 @@ public class Proc<T> implements Runnable {
     /**
      * Output of the process.
      */
-    private ProcOutput procOutput = new ProcOutput(null, null, -1);
+    private ProcOutput procOutput = new ProcOutput(null, null, -1, false);
 
     private final KExceptionManager kem;
     private final Map<String, String> env;
-
-    public static final int SIGTERM = 143;
 
     /**
      *
@@ -212,16 +210,17 @@ public class Proc<T> implements Runnable {
                 final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
                 final Future<String> errorGobbler = service.submit(new StreamGobbler(errorStream));
 
-                int returnCode = wait(proc);
+                ProcStatus procStatus = wait(proc);
                 timeDelta += System.currentTimeMillis() - startTime;
 
                 try {
-                    return new ProcOutput(outputGobbler.get(), errorGobbler.get(), returnCode);
+                    return new ProcOutput(outputGobbler.get(), errorGobbler.get(),
+                            procStatus.returnCode, procStatus.timeout);
                 } catch (ExecutionException e) {
                     // program was killed before producing output,
                     // set pgmOut and pgmErr null manually, in case one of the outputs is produced
                     // but other is not (not sure if that's possible, just to make sure..)
-                    return new ProcOutput(null, null, returnCode);
+                    return new ProcOutput(null, null, procStatus.returnCode, procStatus.timeout);
                 }
             } catch (IOException | InterruptedException e) {
                 kem.registerInternalWarning(e.getMessage(), e);
@@ -276,17 +275,19 @@ public class Proc<T> implements Runnable {
         return StringUtil.escapeShell(args, OS.current());
     }
 
-    private int wait(final Process proc) throws InterruptedException {
+    private ProcStatus wait(final Process proc) throws InterruptedException {
+        final boolean[] timeout = {false};
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 proc.destroy();
+                timeout[0] = true;
             }
         }, options.getTimeout());
         int ret = proc.waitFor();
         timer.cancel();
-        return ret;
+        return new ProcStatus(ret, timeout[0]);
     }
 
     /**
@@ -344,10 +345,8 @@ public class Proc<T> implements Runnable {
                 }
             }
 
-        } else if (normalOutput.returnCode == SIGTERM) {
+        } else if (normalOutput.timeout) {
 
-            // TODO: is it possible for program to be killed because of something other than
-            //       timeout? (full memory etc.)
             System.out.format("%sERROR: [%s] killed due to timeout.%s%n",
                     red, logStr, ColorUtil.ANSI_NORMAL);
             reportTimeout();
@@ -432,11 +431,23 @@ class ProcOutput {
     public final String stdout;
     public final String stderr;
     public final int returnCode;
+    public final boolean timeout;
 
-    public ProcOutput(String stdout, String stderr, int returnCode) {
+    public ProcOutput(String stdout, String stderr, int returnCode, boolean timeout) {
         this.stdout = stdout;
         this.stderr = stderr;
         this.returnCode = returnCode;
+        this.timeout = timeout;
+    }
+}
+
+class ProcStatus {
+    public final int returnCode;
+    public final boolean timeout;
+
+    public ProcStatus(int returnCode, boolean timeout) {
+        this.returnCode = returnCode;
+        this.timeout = timeout;
     }
 }
 
