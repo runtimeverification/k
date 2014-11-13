@@ -32,7 +32,9 @@ case class ModuleComment(comment: String, att: Attributes = Attributes()) extend
 
 case class Import(what: String, att: Attributes = Attributes()) extends Sentence // hooked
 
-case class SyntaxPriority(higher: String, lower: String, att: Attributes = Attributes()) extends Sentence with ParserPiece
+case class SyntaxPriority(priorities: List[Set[Tag]], att: Attributes = Attributes()) extends Sentence with ParserPiece
+
+case class Tag(name: String)
 
 // will be needed once we figure out how to encode associativity
 //object Associativity extends Enumeration {
