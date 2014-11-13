@@ -30,6 +30,7 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Sources;
 import org.kframework.kil.StringSentence;
@@ -85,7 +86,7 @@ public class TestKILtoKORE {
                 res.add(new org.kframework.kore.outer.ModuleComment(
                         ((LiterateModuleComment) i).getValue(), convert(i.getAttributes())));
                 return res;
-            } else if (i instanceof org.kframework.kil.Sentence) {
+            } else if (i instanceof Sentence) {
                 // I think this should have left as a bubble...
                 throw new RuntimeException("Found a sentence while translating KIL");
             } else if (i instanceof PriorityExtended) {
