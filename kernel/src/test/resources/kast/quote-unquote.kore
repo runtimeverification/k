@@ -1,0 +1,41 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+
+require "/modules/k-visitor.k"
+
+module QUOTE-UNQUOTE-SYNTAX
+  syntax Exp ::= "quote" Exp    [#KAttributes(quote(.::KList), klabel(quote(.::KList)))]
+  syntax Exp ::= "unquote" Exp  [#KAttributes(unquote(.::KList), klabel(unquote(.::KList)))]
+  syntax Exp ::= "lift" Exp     [#KAttributes(lift(.::KList), strict(.::KList), klabel(lift(.::KList)))]
+  syntax Exp ::= "eval" Exp     [#KAttributes(eval(.::KList), strict(.::KList), klabel(eval(.::KList)))]
+endmodule
+
+module QUOTE-UNQUOTE
+  imports QUOTE-UNQUOTE-SYNTAX
+  imports K-VISITOR
+
+  syntax KItem ::= "qVisitor" "(" Int ")" [#KAttributes(klabel(qVisitor(.::KList)))]
+
+  rule qVisitor(N) => #visitor(#klabel(quoteit),#klist(N),
+                                   #klabel(isQuoted),#klist(.::KList)) requires #token("true", "Bool") 
+                                   ensures #token("true", "Bool") [#KAttributes(macro(.::KList))]
+
+  syntax Exp ::= "mQuote" "(" K "," Int ")" [klabel(mQuote(.::KList))]
+  rule mQuote(E, N) => #visit(E, qVisitor(N)) requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(macro(.::KList))]
+
+  syntax KItem ::= "quoteit" "(" Int "," K ")" [#KAttributes(klabel(quoteit(.::KList)))]
+  rule quote(E) => mQuote(E, #token("0", "Int")) requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+  rule quoteit(N, quote(E))   => #visitingkapp(#klabel(quote),mQuote(E, `_+Int_`(N, #token("1", "Int")))) 
+    requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+  rule quoteit(#token("0", "Int"), unquote(E)) => E requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+  rule quoteit(N, unquote(E)) => #visitingkapp(#klabel(unquote),mQuote(E, `_-Int_`(N, #token("1", "Int"))))
+    requires `_>Int_`(N, #token("0", "Int")) ensures #token("true", "Bool") [#KAttributes(.::KList)]
+
+  rule lift(V) => #visited(V) requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+  rule eval(#visited(E)) => E requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+
+  rule isVal(#visited(E)) => #token("true", "Bool") requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+
+  syntax Bool ::= "isQuoted" "(" Exp ")"     [#KAttributes(klabel(isQuoted(.::KList)), function(.::KList))]
+  rule isQuoted(quote(E)) => #token("true", "Bool") requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+  rule isQuoted(unquote(K)) => #token("true", "Bool") requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
+endmodule

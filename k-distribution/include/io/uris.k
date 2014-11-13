@@ -25,6 +25,11 @@ module URIS
                  | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
 
   syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
+  syntax KItem ::= #parseInModule(String, // input
+                                  String, // start symbol
+                                  String) // module name
+                                  [function, hook(#K-PARSER:#parseInModule)]
+
   rule #open(S:String) => #open(S:String, "rw")
   rule #open(S:String, Mode:String) => #string2Int(#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01")<:TCPAnswer) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
 

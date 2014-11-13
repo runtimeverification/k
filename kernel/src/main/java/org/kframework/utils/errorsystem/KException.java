@@ -140,4 +140,12 @@ public class KException {
             }
         }
     }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
 }

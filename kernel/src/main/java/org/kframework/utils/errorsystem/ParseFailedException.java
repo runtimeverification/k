@@ -11,4 +11,8 @@ public class ParseFailedException extends KEMException {
         super(kException);
         exception = kException;
     }
+
+    public KException getKException() {
+        return exception;
+    }
 }

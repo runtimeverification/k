@@ -37,10 +37,8 @@ public class CheckListDecl extends BasicVisitor {
                 String msg = "Inline list declarations are not allowed.";
                 throw KExceptionManager.compilerError(msg, this, pi);
             }
-            if (pi instanceof Lexical && node.getItems().size() > 1) {
-                String msg = "Inline lexical/token declarations are not allowed.";
-                throw KExceptionManager.compilerError(msg, this, pi);
-            }
+            // (radum) with the new parser lexical declarations are allowed in more places now.
+            // so I removed the restriction for singleton lexical item per production.
         }
         return null;
 

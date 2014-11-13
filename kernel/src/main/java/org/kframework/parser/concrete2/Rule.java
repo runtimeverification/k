@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.kframework.kil.Constant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Location;
 import org.kframework.kil.Production;
@@ -36,10 +37,12 @@ public abstract class Rule implements Serializable {
         }
         public final Location start;
         public final Location end;
-        public MetaData(Location start, Location end) {
+        public final CharSequence input;
+        public MetaData(Location start, Location end, CharSequence input) {
             assert start != null && end != null;
             this.start = start;
             this.end = end;
+            this.input = input;
         }
     }
 
@@ -78,8 +81,15 @@ public abstract class Rule implements Serializable {
         }
         protected KList apply(KList klist, MetaData metaData) {
             //Term term = new KApp(label, klist);
-            Term term = new TermCons(label.getSort(), klist.getContents(), label);
-            term.setSort(label.getSort());
+            Term term;
+            if (label.containsAttribute("token")) {
+                // TODO: radum, figure out how to reject constants from here.
+                String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
+                term = new Constant(label.getSort(), value, label);
+            } else {
+                term = new TermCons(label.getSort(), klist.getContents(), label);
+                term.setSort(label.getSort());
+            }
             return new KList(Arrays.asList(term));
         }
     }
@@ -92,7 +102,7 @@ public abstract class Rule implements Serializable {
         protected abstract boolean rejectSmallKLists();
         /** Returns the number of elements at the end of a KList to consider */
         protected abstract int getSuffixLength();
-        /** Transforms the last {@link getSuffixLength()} elements of a KList.
+        /** Transforms the last getSuffixLength() elements of a KList.
          * Returns 'null' if the parse should be rejected.
          * Returns 'suffix' if the original parse should be used.
          */
