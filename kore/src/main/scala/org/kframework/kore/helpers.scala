@@ -46,14 +46,6 @@ trait AttributesToString {
     } mkString " ") + "]"
 
   def postfixString = if (isEmpty) "" else (" " + toString())
-
-  def map(f: java.util.function.Function[K, K]): This = {
-    val builder = newBuilder
-    foreach {
-      builder += f(_)
-    }
-    builder.result()
-  }
 }
 
 trait SortToString {

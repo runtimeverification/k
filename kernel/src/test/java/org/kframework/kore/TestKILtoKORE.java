@@ -40,7 +40,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kore.outer.ProductionItem;
 import org.kframework.parser.outer.Outer;
-import org.kframework.parser.utils.KoreIT;
 
 public class TestKILtoKORE {
 
@@ -226,10 +225,10 @@ public class TestKILtoKORE {
         standardTest();
     }
 
-    @Test
-    public void syntaxWithRhs() throws IOException {
-        standardTest();
-    }
+//    @Test
+//    public void syntaxWithRhs() throws IOException {
+//        standardTest();
+//    }
 
     @Test
     public void userList() throws IOException {
@@ -253,9 +252,9 @@ public class TestKILtoKORE {
 
     private org.kframework.kore.outer.Definition toKORE(String testedDefintion) {
         Definition def = new Definition();
-        def.setItems(Outer.parse(Sources.generatedBy(KoreIT.class),
+        def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKORE.class),
                 testedDefintion, null));
-        
+
         System.out.println(def);
 
         KILtoKORE convertor = new KILtoKORE();
