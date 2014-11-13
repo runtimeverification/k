@@ -34,7 +34,7 @@ case class Import(what: String, att: Attributes = Attributes()) extends Sentence
 
 case class SyntaxPriority(higher: String, lower: String, att: Attributes = Attributes()) extends Sentence with ParserPiece
 
-// will be needed once we figure out how to encode associtivity
+// will be needed once we figure out how to encode associativity
 //object Associativity extends Enumeration {
 //  val Left, Right, NonAssoc, Unspecified = Value
 //}
