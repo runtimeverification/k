@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
@@ -38,7 +39,7 @@ public class TokenSortCollector extends BasicVisitor {
      *
      * @see TokenSortCollector
      */
-    public static Set<Sort> collectTokenSorts(Definition definition, Context context) {
+    public static Set<Sort> collectTokenSorts(ASTNode definition, Context context) {
         TokenSortCollector collector = new TokenSortCollector(context);
         collector.visitNode(definition);
         return collector.tokenSorts;
@@ -87,21 +88,8 @@ public class TokenSortCollector extends BasicVisitor {
             tokenSorts.add(sort);
         }
 
-        /*
-         * The second and third check above is used to filter out cases such as the following:
-         *   syntax Id ::= "Main"
-         *   syntax Id ::= "String2Id" "(" String ")"  [function, klabel(String2Id)]
-         */
-        if (!production.isLexical() && !production.isTerminal()
-                && !production.containsAttribute(Constants.FUNCTION))  {
-            if (tokenSorts.contains(sort)) {
-                String msg = "Cannot subsort a non-lexical production to a token sort:\nsyntax "
-                        + sort + " ::= " + production;
-                throw KExceptionManager.compilerError(msg, this, production);
-            }
-
-            nonTokenSorts.add(sort);
-        }
+        // (radum) removed since it doesn't comply with the filosophy of the new parser.
+        // once the new parser is fully functional, this entire class should be removed at the same time with SDF.
     }
 
     @Override

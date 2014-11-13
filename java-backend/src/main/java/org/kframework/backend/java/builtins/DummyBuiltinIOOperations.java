@@ -52,6 +52,12 @@ public class DummyBuiltinIOOperations implements BuiltinIOOperations {
     }
 
     @Override
+    public Term parseInModule(StringToken term1, StringToken term2, StringToken term3,
+                      TermContext termContext) {
+        return null;
+    }
+
+    @Override
     public Term system(StringToken term, TermContext termContext) {
         return null;
     }
