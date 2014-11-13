@@ -3,7 +3,6 @@
 .kast*
 .ktest*
 *-kompiled
-*.kore
 *.pdf
 *.swp
 .metadata

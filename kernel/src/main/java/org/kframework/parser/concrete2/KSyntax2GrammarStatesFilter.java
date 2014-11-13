@@ -250,6 +250,19 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                             prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
                     previous.next.add(nts);
                     previous = nts;
+                } else if (prdItem instanceof Lexical) {
+                    Lexical lx = prd.getLexical();
+                    Pattern p;
+                    try {
+                        p = Pattern.compile(lx.getLexicalRule());
+                    } catch (PatternSyntaxException ex) {
+                        p = Pattern.compile("NoMatch");
+                        String msg = "Lexical pattern not compatible with the new parser.";
+                        kem.registerCompilerWarning(msg, ex, lx);
+                    }
+                    PrimitiveState pstate = new RegExState(prd.getSort().getName() + "-T", nt, p, prd);
+                    previous.next.add(pstate);
+                    previous = pstate;
                 } else {
                     assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
                 }

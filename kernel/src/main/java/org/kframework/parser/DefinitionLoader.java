@@ -19,6 +19,7 @@ import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.RemoveUnusedModules;
+import org.kframework.parser.generator.ParsersPerModule;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete.DefinitionLocalKParser;
@@ -169,6 +170,10 @@ public class DefinitionLoader {
         files.saveToTemp("pgm/Program.sdf", newSdfPgm);
 
         sw.printIntermediate("File Gen Pgm");
+        Map<String, Grammar> parsers = ParsersPerModule.generateParsersForModules(def, context, kem);
+        // save the new parser info for all modules. This should make the previous call obsolete (soon)
+        loader.saveOrDie(context.files.resolveKompiled("newModuleParsers.bin"), parsers);
+        sw.printIntermediate("Gen module parsers");
 
         if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
             sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
@@ -188,7 +193,7 @@ public class DefinitionLoader {
         if (files.resolveKompiled("Integration.sdf").exists())
             oldSdf = files.loadFromKompiled("Integration.sdf");
         String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
-        files.saveToTemp("def/Integration.sdf", newSdf);;
+        files.saveToTemp("def/Integration.sdf", newSdf);
         files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
 
         sw.printIntermediate("File Gen Def");

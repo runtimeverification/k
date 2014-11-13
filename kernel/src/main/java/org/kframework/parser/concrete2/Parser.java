@@ -781,7 +781,8 @@ public class Parser {
                 ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,
                 new Rule.MetaData(
                     new Rule.MetaData.Location(startPosition, s.lines[startPosition], s.columns[startPosition]),
-                    new Rule.MetaData.Location(endPosition, s.lines[endPosition], s.columns[endPosition])));
+                    new Rule.MetaData.Location(endPosition, s.lines[endPosition], s.columns[endPosition]),
+                    s.input));
         } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             return stateReturn.function.addNTCall(
                 stateReturn.key.stateCall.function,
