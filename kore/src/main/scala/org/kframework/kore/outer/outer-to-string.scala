@@ -48,3 +48,8 @@ trait TerminalToString {
   self: Terminal =>
   override def toString = "\"" + value + "\""
 }
+
+trait NonTerminalToString {
+  self: NonTerminal =>
+  override def toString = sort.toString()
+}
