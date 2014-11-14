@@ -21,7 +21,7 @@ trait RuleToString {
 
 trait SyntaxProductionToString {
   self: SyntaxProduction =>
-  override def toString = "" + items.mkString(" ") + att
+  override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.postfixString
 }
 
 trait SyntaxSortToString {

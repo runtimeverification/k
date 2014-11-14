@@ -2,6 +2,11 @@
 
 package org.kframework.kore;
 
+import static org.kframework.kore.Interface1.immutable;
+
+import scala.collection.Seq;
+import scala.collection.Seq$;
+
 /**
  *
  * Helper constructors for KORE classes. The class is meant to be imported
@@ -70,5 +75,10 @@ public class Interface {
 
     public static KRewrite KRewrite(K left, K right) {
         return new KRewrite(left, right, emptyAttributes);
+    }
+
+    // TODO: fix unchecked return type
+    public static <A> Seq Seq(A... es) {
+        return immutable(es);
     }
 }

@@ -9,6 +9,8 @@ object Interface1 {
   import org.kframework.kore
 
   def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
+  def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
+  def immutable[T](s: Array[T]): Seq[T] = s
 
   def KList(s: java.util.Set[K]): KList = kore.KList(s.asScala.toSeq: _*)
   def Definition(requires: Set[Require], modules: Set[Module]) =

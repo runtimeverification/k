@@ -106,12 +106,60 @@ public class TestKILtoKORE {
 
         private Set<org.kframework.kore.outer.Sentence> convert(Syntax s) {
             Set<org.kframework.kore.outer.Sentence> res = new HashSet<>();
-            res.add(new org.kframework.kore.outer.SyntaxSort(convert(s.getDeclaredSort().getSort()),
-                    convert(s.getAttributes())));
+            if (s.getPriorityBlocks().size() == 0) {
+                res.add(new org.kframework.kore.outer.SyntaxSort(convert(s.getDeclaredSort().getSort()),
+                        convert(s.getAttributes())));
+                return res;
+            }
+
+            org.kframework.kore.Sort sort =
+                    convert(s.getDeclaredSort().getSort());
 
             for (PriorityBlock b : s.getPriorityBlocks()) {
-                // ignoring priorities for now
                 for (Production p : b.getProductions()) {
+                    // Handle a special case first: List productions have only one item.
+                    if (p.getItems().size() == 1
+                            && p.getItems().get(0) instanceof UserList) {
+                        UserList userList = (UserList) p.getItems().get(0);
+                        org.kframework.kore.Sort elementSort = convert(userList.getSort());
+                        org.kframework.kore.outer.Terminal sepTerminal =
+                                new org.kframework.kore.outer.Terminal(userList.getSeparator());
+                        org.kframework.kore.outer.NonTerminal elem =
+                                new org.kframework.kore.outer.NonTerminal(elementSort);
+
+                        // TODO: attributes are probably wrong
+
+                        // lst ::= lst sep lst
+                        List<org.kframework.kore.outer.ProductionItem> prod1Items =
+                                new ArrayList<>();
+                        prod1Items.add(new org.kframework.kore.outer.NonTerminal(sort));
+                        prod1Items.add(sepTerminal);
+                        prod1Items.add(new org.kframework.kore.outer.NonTerminal(sort));
+                        org.kframework.kore.outer.SyntaxProduction prod1 =
+                                new org.kframework.kore.outer.SyntaxProduction(
+                                        sort, Seq(prod1Items), convert(p.getAttributes()));
+
+                        // lst ::= elem
+                        List<org.kframework.kore.outer.ProductionItem> prod2Items =
+                                new ArrayList<>();
+                        prod2Items.add(elem);
+                        org.kframework.kore.outer.SyntaxProduction prod2 =
+                                new org.kframework.kore.outer.SyntaxProduction(
+                                        sort, Seq(prod2Items), convert(p.getAttributes()));
+
+                        // TODO
+                        // lst ::= .UserList
+                        List<org.kframework.kore.outer.ProductionItem> prod3Items = null;
+                        org.kframework.kore.outer.SyntaxProduction prod3 = null;
+
+                        res.add(prod1);
+                        res.add(prod2);
+                        //res.add(prod3);
+
+                        return res;
+                    }
+
+
                     List<ProductionItem> items = new ArrayList<>();
                     // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
@@ -130,12 +178,13 @@ public class TestKILtoKORE {
 
                     org.kframework.kore.outer.SyntaxProduction prod =
                             new org.kframework.kore.outer.SyntaxProduction(
-                                    convert(s.getDeclaredSort().getSort()),
-                                    null, // TODO: convert `items` to seq
+                                    sort,
+                                    immutable(items),
                                     convert(p.getAttributes()));
+
+                    res.add(prod);
                 }
             }
-
             return res;
         }
 
@@ -182,13 +231,29 @@ public class TestKILtoKORE {
         standardTest();
     }
 
+    @Test
+    public void syntaxWithRhs() throws IOException {
+        standardTest();
+    }
+
+    @Test
+    public void userList() throws IOException {
+        standardTest();
+    }
+
     private void standardTest() throws IOException {
         File file = new File(ROOT + name.getMethodName() + ".k");
         String definitionText = Files.lines(file.toPath())
                 .reduce((x, y) -> x + "\n" + y).get();
-
         org.kframework.kore.outer.Definition koreDefintion = toKORE(definitionText);
-        assertEquals(definitionText.trim(), koreDefintion.toString().trim());
+        File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
+        if (outputFile.isFile()) {
+            String expectedOutput = Files.lines(outputFile.toPath())
+                    .reduce((x, y) -> x + "\n" + y).get();
+            assertEquals(expectedOutput.trim(), koreDefintion.toString().trim());
+        } else {
+            assertEquals(definitionText.trim(), koreDefintion.toString().trim());
+        }
     }
 
     private org.kframework.kore.outer.Definition toKORE(String testedDefintion) {
