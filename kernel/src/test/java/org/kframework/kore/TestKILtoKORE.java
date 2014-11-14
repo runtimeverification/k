@@ -3,15 +3,9 @@
 package org.kframework.kore;
 
 import static org.junit.Assert.assertEquals;
-import static org.kframework.kore.Constructors.*;
-import static org.kframework.kore.outer.Constructors.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
@@ -20,7 +14,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
-import org.kframework.kore.outer.ProductionItem;
 import org.kframework.parser.outer.Outer;
 
 public class TestKILtoKORE {
@@ -46,7 +39,6 @@ public class TestKILtoKORE {
     }
 
     @Test
-    @Ignore
     public void syntaxWithRhs() throws IOException {
         standardTest();
     }
@@ -70,7 +62,6 @@ public class TestKILtoKORE {
     }
 
     @Test
-    @Ignore
     public void imports() throws IOException {
         standardTest();
     }
@@ -100,7 +91,6 @@ public class TestKILtoKORE {
     }
 
     @Test
-    @Ignore
     public void syntaxWithOR() throws IOException {
         standardTest();
     }

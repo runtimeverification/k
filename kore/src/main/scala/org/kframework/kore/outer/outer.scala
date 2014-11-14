@@ -20,6 +20,8 @@ trait Sentence { // marker
   val att: Attributes
 }
 
+case class Bubble(contents: String, att: Attributes = Attributes()) extends Sentence
+
 case class Rule(
   label: String,
   body: kore.K,
@@ -30,7 +32,7 @@ case class Rule(
 
 case class ModuleComment(comment: String, att: Attributes = Attributes()) extends Sentence
 
-case class Import(what: String, att: Attributes = Attributes()) extends Sentence // hooked
+case class Import(what: String, att: Attributes = Attributes()) extends Sentence with ImportToString // hooked
 
 case class SyntaxPriority(priorities: List[Set[Tag]], att: Attributes = Attributes()) extends Sentence with ParserPiece
 

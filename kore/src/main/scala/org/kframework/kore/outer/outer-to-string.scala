@@ -29,6 +29,11 @@ trait SyntaxSortToString {
   override def toString() = "syntax " + sort + att.postfixString
 }
 
+trait ImportToString {
+  self: Import =>
+  override def toString() = "imports " + what + att.postfixString
+}
+
 // commented out until we figure out how to encode associativity
 //trait BlockToString {
 //  self: SyntaxProduction =>
