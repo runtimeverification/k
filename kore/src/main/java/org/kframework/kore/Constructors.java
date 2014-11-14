@@ -2,12 +2,9 @@
 
 package org.kframework.kore;
 
-import static org.kframework.kore.Interface1.immutable;
+import static org.kframework.kore.outer.Constructors.*;
 
 import scala.collection.Seq;
-import scala.collection.Seq$;
-
-import java.util.List;
 
 /**
  *
@@ -18,9 +15,8 @@ import java.util.List;
  *
  */
 
-public class Interface {
-    private static Attributes emptyAttributes = Attributes$.MODULE$
-            .apply(KList());
+public class Constructors {
+    private static Attributes emptyAttributes = Attributes();
 
     public static Attributes Attributes(K... ks) {
         org.kframework.kore.KList kList = KList(ks);
@@ -80,10 +76,6 @@ public class Interface {
     }
 
     public static <A> Seq<A> Seq(A... es) {
-        return immutable(es);
-    }
-
-    public static <A> Seq<A> Seq(List<A> es) {
         return immutable(es);
     }
 }

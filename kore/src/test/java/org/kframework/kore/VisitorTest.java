@@ -3,7 +3,7 @@
 package org.kframework.kore;
 
 import static org.junit.Assert.*;
-import static org.kframework.kore.Interface.*;
+import static org.kframework.kore.Constructors.*;
 
 import org.junit.Test;
 

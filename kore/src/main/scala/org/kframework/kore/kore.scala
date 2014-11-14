@@ -56,6 +56,14 @@ final class KSequence(val klist: KList, val att: Attributes = Attributes()) exte
   self: KSequence =>
   type ThisK = KSequence
   def copy(klist: KList, att: Attributes): KSequence = new KSequence(klist, att)
+
+  override def map(f: java.util.function.Function[K, K]): KSequence = {
+    val builder = newBuilder
+    foreach {
+      builder += f(_)
+    }
+    builder.result()
+  }
 }
 
 case class KVariable(name: String, att: Attributes = Attributes()) extends KItem with KORE {

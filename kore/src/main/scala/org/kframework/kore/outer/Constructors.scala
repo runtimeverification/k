@@ -1,10 +1,18 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore
+package org.kframework.kore.outer
 
 import collection.JavaConverters._
+import org.kframework.kore._;
 
-object Interface1 {
+/**
+ *
+ * Helper constructors for KORE outer classes. The class is meant to be imported
+ * statically.
+ *
+ */
+
+object Constructors {
   import outer._
   import org.kframework.kore
 
@@ -19,4 +27,13 @@ object Interface1 {
   def Require(file: java.io.File) = kore.outer.Require(file)
   def Module(name: String, sentences: Set[Sentence], att: Attributes) =
     kore.outer.Module(name, sentences, att)
+
+  def SyntaxSort(sort: Sort) = outer.SyntaxSort(sort)
+  def SyntaxSort(sort: Sort, att: Attributes) = outer.SyntaxSort(sort, att)
+
+  def SyntaxProduction(sort: Sort, items: Seq[ProductionItem]) = outer.SyntaxProduction(sort, items)
+  def SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes) = outer.SyntaxProduction(sort, items, att)
+
+  def Terminal(s: String) = outer.Terminal(s)
+  def NonTerminal(sort: Sort) = outer.NonTerminal(sort)
 }

@@ -44,7 +44,7 @@ case class Tag(name: String)
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
   with ParserPiece with SyntaxSortToString
 
-case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes()) extends Sentence with ParserPiece // hooked but problematic, see kast-core.k 
+case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes()) extends Sentence with ParserPiece // hooked but problematic, see kast-core.k
   with SyntaxProductionToString
 
 sealed trait ProductionItem // marker
