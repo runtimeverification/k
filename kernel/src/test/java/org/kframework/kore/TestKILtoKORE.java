@@ -148,9 +148,7 @@ public class TestKILtoKORE {
                         // lst ::= .UserList
                         List<org.kframework.kore.outer.ProductionItem> prod3Items =
                                 new ArrayList<>();
-                        org.kframework.kore.Sort nilSort =
-                                new org.kframework.kore.Sort("." + sort.toString());
-                        prod3Items.add(new org.kframework.kore.outer.NonTerminal(nilSort));
+                        prod3Items.add(new org.kframework.kore.outer.Terminal("." + sort.toString()));
                         org.kframework.kore.outer.SyntaxProduction prod3 =
                                 new org.kframework.kore.outer.SyntaxProduction(
                                         sort, Seq(prod3Items), convert(p.getAttributes()));
@@ -162,7 +160,6 @@ public class TestKILtoKORE {
                         return res;
                     }
 
-
                     List<ProductionItem> items = new ArrayList<>();
                     // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
@@ -170,7 +167,7 @@ public class TestKILtoKORE {
                             items.add(new org.kframework.kore.outer.NonTerminal(
                                     convert(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            // TODO: not sure what to do
+                            throw new RuntimeException("Lists should have converted before.");
                         } else if (it instanceof Lexical) {
                             // TODO: not sure what to do
                         } else if (it instanceof Terminal) {
