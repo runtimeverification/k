@@ -4,6 +4,7 @@ package org.kframework.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
+
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 
@@ -604,5 +605,30 @@ public class StringUtil {
             args1[i] = StringUtil.escapeShell(args[i], os);
         }
         return StringUtils.join(args1, ' ');
+    }
+
+    public static String unescapeKoreKLabel(String str) {
+        char delimiter = '`';
+        StringBuilder sb = new StringBuilder();
+        if (str.charAt(0) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the beginning of string: " + str);
+        }
+        if (str.charAt(str.length() - 1) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the end of string: " + str);
+        }
+        for (int i = 1; i < str.length() - 1; i++) {
+            if (str.charAt(i) > 0xFF)
+                throw new IllegalArgumentException("Unicode characters not supported here:" + str);
+            if (str.charAt(i) == '\\') {
+                if (str.charAt(i + 1) == '\\')
+                    sb.append('\\');
+                else if (str.charAt(i + 1) == delimiter)
+                    sb.append(delimiter);
+                i++;
+            } else
+                sb.append(str.charAt(i));
+        }
+
+        return sb.toString();
     }
 }
