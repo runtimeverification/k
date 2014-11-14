@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -242,14 +243,14 @@ public class TestKILtoKORE {
     }
 
     private void standardTest() throws IOException {
-        File file = new File(ROOT + name.getMethodName() + ".k");
-        String definitionText = Files.lines(file.toPath())
-                .reduce((x, y) -> x + "\n" + y).get();
-        org.kframework.kore.outer.Definition koreDefintion = toKORE(definitionText);
+        File inputFile = new File(ROOT + name.getMethodName() + ".k");
         File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
+
+        String definitionText = FileUtils.readFileToString(inputFile);
+        org.kframework.kore.outer.Definition koreDefintion = toKORE(definitionText);
+
         if (outputFile.isFile()) {
-            String expectedOutput = Files.lines(outputFile.toPath())
-                    .reduce((x, y) -> x + "\n" + y).get();
+            String expectedOutput = FileUtils.readFileToString(outputFile);
             assertEquals(expectedOutput.trim(), koreDefintion.toString().trim());
         } else {
             assertEquals(definitionText.trim(), koreDefintion.toString().trim());
