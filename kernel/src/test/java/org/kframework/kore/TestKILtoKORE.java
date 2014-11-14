@@ -6,13 +6,13 @@ import static org.kframework.kore.Interface1.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,13 +54,11 @@ public class TestKILtoKORE {
                     .stream().filter(i -> i instanceof Module)
                     .map(i -> convert((Module) i)).collect(Collectors.toSet());
 
-            return new org.kframework.kore.outer.Definition(
-                    immutable(requires), immutable(modules));
+            return new org.kframework.kore.outer.Definition(immutable(requires), immutable(modules));
         }
 
         private org.kframework.kore.outer.Require convert(Require i) {
-            return new org.kframework.kore.outer.Require(new java.io.File(
-                    i.getValue()));
+            return new org.kframework.kore.outer.Require(new File(i.getValue()));
         }
 
         private org.kframework.kore.outer.Module convert(Module i) {
@@ -73,20 +71,15 @@ public class TestKILtoKORE {
 
         private Set<org.kframework.kore.outer.Sentence> convert(ModuleItem i) {
             if (i instanceof Import) {
-                Set<org.kframework.kore.outer.Sentence> res = new HashSet<>();
-                res.add(new org.kframework.kore.outer.Import(((Import) i)
-                        .getName(), Attributes()));
-                return res;
+                return Sets.newHashSet(convert((Import) i));
             } else if (i instanceof Syntax) {
                 return convert((Syntax) i);
             } else if (i instanceof StringSentence) {
                 // need a bubble here
                 throw new RuntimeException("Not implemented");
             } else if (i instanceof LiterateModuleComment) {
-                Set<org.kframework.kore.outer.Sentence> res = new HashSet<>();
-                res.add(new org.kframework.kore.outer.ModuleComment(
+                return Sets.newHashSet(new org.kframework.kore.outer.ModuleComment(
                         ((LiterateModuleComment) i).getValue(), convert(i.getAttributes())));
-                return res;
             } else if (i instanceof Sentence) {
                 // I think this should have left as a bubble...
                 throw new RuntimeException("Found a sentence while translating KIL");
@@ -97,7 +90,7 @@ public class TestKILtoKORE {
             } else if (i instanceof Restrictions) {
                 throw new RuntimeException("Not implemented");
             } else {
-                throw new RuntimeException("Not implemented");
+                throw new RuntimeException("Unhandled case");
             }
         }
 
@@ -173,6 +166,8 @@ public class TestKILtoKORE {
                         } else if (it instanceof Terminal) {
                             items.add(new org.kframework.kore.outer.Terminal(
                                     ((Terminal) it).getTerminal()));
+                        } else {
+                            throw new RuntimeException("Unhandled case");
                         }
                     }
 
