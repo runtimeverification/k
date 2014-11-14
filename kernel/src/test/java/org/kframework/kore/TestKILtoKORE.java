@@ -141,21 +141,23 @@ public class TestKILtoKORE {
                                         sort, Seq(prod1Items), convert(p.getAttributes()));
 
                         // lst ::= elem
-                        List<org.kframework.kore.outer.ProductionItem> prod2Items =
-                                new ArrayList<>();
-                        prod2Items.add(elem);
                         org.kframework.kore.outer.SyntaxProduction prod2 =
                                 new org.kframework.kore.outer.SyntaxProduction(
-                                        sort, Seq(prod2Items), convert(p.getAttributes()));
+                                        sort, Seq(elem), convert(p.getAttributes()));
 
-                        // TODO
                         // lst ::= .UserList
-                        List<org.kframework.kore.outer.ProductionItem> prod3Items = null;
-                        org.kframework.kore.outer.SyntaxProduction prod3 = null;
+                        List<org.kframework.kore.outer.ProductionItem> prod3Items =
+                                new ArrayList<>();
+                        org.kframework.kore.Sort nilSort =
+                                new org.kframework.kore.Sort("." + sort.toString());
+                        prod3Items.add(new org.kframework.kore.outer.NonTerminal(nilSort));
+                        org.kframework.kore.outer.SyntaxProduction prod3 =
+                                new org.kframework.kore.outer.SyntaxProduction(
+                                        sort, Seq(prod3Items), convert(p.getAttributes()));
 
                         res.add(prod1);
                         res.add(prod2);
-                        //res.add(prod3);
+                        res.add(prod3);
 
                         return res;
                     }
