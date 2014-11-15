@@ -43,6 +43,11 @@ public class TestKILtoKORE {
         standardTest();
     }
 
+    // we'll have to eventually convert the configuration
+    // to macro rules, as Grigore wrote on the wiki
+    // for now, we'll do this conversion:
+    // <k foo="bla"> .K </k>  becomes:
+    // KApply(KLabel("k"), KList(EmptyK), Attributes(KApply(KLabel("foo", KToken(String, "bla"))))
     @Test
     @Ignore
     public void configuration() throws IOException {
@@ -55,6 +60,8 @@ public class TestKILtoKORE {
         standardTest();
     }
 
+    // straightforward
+    // again, the contents remains as a bubble
     @Test
     @Ignore
     public void context() throws IOException {
@@ -66,6 +73,8 @@ public class TestKILtoKORE {
         standardTest();
     }
 
+    // straightforward, look at the kil Rule class
+    // for now, the rule contents stays as a bubble
     @Test
     @Ignore
     public void ruleWithRequiresEnsures() throws IOException {
