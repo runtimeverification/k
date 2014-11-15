@@ -58,3 +58,25 @@ trait NonTerminalToString {
   self: NonTerminal =>
   override def toString = sort.toString()
 }
+
+trait SyntaxAssociativityToString {
+  self: SyntaxAssociativity =>
+  override def toString = {
+    val assocString = assoc match {
+      case Associativity.Left => "left"
+      case Associativity.Right => "right"
+      case Associativity.NonAssoc => "non-assoc"
+    }
+    "syntax associativity " + assocString + " " + tags.mkString(" ") + att.postfixString
+  }
+}
+
+trait SyntaxPriorityToString {
+  self: SyntaxPriority =>
+  override def toString = "syntax priority " + priorities.map { _.mkString(" ") }.mkString(" > ")
+}
+
+trait TagToString {
+  self: Tag =>
+  override def toString = name
+}

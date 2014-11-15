@@ -79,13 +79,11 @@ public class TestKILtoKORE {
     }
 
     @Test
-    @Ignore
     public void syntaxPriorities() throws IOException {
         standardTest();
     }
 
     @Test
-    @Ignore
     public void syntaxWithPriorities() throws IOException {
         standardTest();
     }

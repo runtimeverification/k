@@ -6,6 +6,7 @@ module NOTSOSIMPLESYNTAX
                | "z"
                > left: 
                  "t"    [andanohter]
+               | "m"
                > right:
                  "u"    [off]
 endmodule

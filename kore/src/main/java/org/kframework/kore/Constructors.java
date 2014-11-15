@@ -3,7 +3,6 @@
 package org.kframework.kore;
 
 import static org.kframework.kore.outer.Constructors.*;
-
 import scala.collection.Seq;
 
 /**
@@ -75,6 +74,7 @@ public class Constructors {
         return new KRewrite(left, right, emptyAttributes);
     }
 
+    @SafeVarargs
     public static <A> Seq<A> Seq(A... es) {
         return immutable(es);
     }

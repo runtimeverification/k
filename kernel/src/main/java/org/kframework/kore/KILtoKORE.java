@@ -1,17 +1,17 @@
 package org.kframework.kore;
 
-import static org.kframework.kore.Constructors.Seq;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
@@ -28,7 +28,10 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.kore.outer.ProductionItem;
+import org.kframework.kore.outer.*;
+
+import scala.Enumeration.Value;
+import scala.collection.Seq;
 
 import com.google.common.collect.Sets;
 
@@ -75,14 +78,56 @@ class KILtoKORE {
             // I think this should have left as a bubble...
             throw new RuntimeException("Found a sentence while translating KIL");
         } else if (i instanceof PriorityExtended) {
-            throw new RuntimeException("Not implemented");
+            return convert((PriorityExtended) i);
         } else if (i instanceof PriorityExtendedAssoc) {
-            throw new RuntimeException("Not implemented");
+            return convert((PriorityExtendedAssoc) i);
         } else if (i instanceof Restrictions) {
             throw new RuntimeException("Not implemented");
         } else {
             throw new RuntimeException("Unhandled case");
         }
+    }
+
+    private Set<org.kframework.kore.outer.Sentence> convert(
+            PriorityExtendedAssoc ii) {
+        scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags());
+        String assocOrig = ii.getAssoc();
+        Value assoc = convertAssoc(assocOrig);
+        return Sets.newHashSet(SyntaxAssociativity(assoc, tags));
+    }
+
+    private Value convertAssoc(String assocOrig) {
+        Value assoc = null;
+        // "left", "right", "non-assoc"
+        switch (assocOrig) {
+        case "left":
+            assoc = Associativity.Left();
+            break;
+        case "right":
+            assoc = Associativity.Right();
+            break;
+        case "non-assoc":
+            assoc = Associativity.NonAssoc();
+            break;
+        default:
+            throw new RuntimeException("Incorrect assoc string");
+        }
+        return assoc;
+    }
+
+    private Set<org.kframework.kore.outer.Sentence> convert(PriorityExtended pe) {
+        Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe
+                .getPriorityBlocks().stream().map((block) -> {
+                    return toTags(block.getProductions());
+                }).collect(Collectors.toList()));
+
+        return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
+    }
+
+    private scala.collection.immutable.Set<Tag> toTags(
+            List<KLabelConstant> labels) {
+        return immutable(labels.stream().map(l -> Tag(l.getLabel()))
+                .collect(Collectors.toSet()));
     }
 
     private org.kframework.kore.outer.Sentence convert(Import s) {
@@ -101,8 +146,22 @@ class KILtoKORE {
             return res;
         }
 
+        Function<PriorityBlock, scala.collection.immutable.Set<Tag>> convertToTags = (
+                PriorityBlock b) -> immutable(b.getProductions().stream()
+                .map(p -> Tag(p.getKLabel())).collect(Collectors.toSet()));
+
+        if (s.getPriorityBlocks().size() > 1) {
+            res.add(SyntaxPriority(immutable(s.getPriorityBlocks().stream()
+                    .map(convertToTags).collect(Collectors.toList()))));
+        }
+
         // there are some productions
         for (PriorityBlock b : s.getPriorityBlocks()) {
+            if (b.getAssoc() != "") {
+                Value assoc = convertAssoc(b.getAssoc());
+                res.add(SyntaxAssociativity(assoc, convertToTags.apply(b)));
+            }
+
             for (Production p : b.getProductions()) {
                 // Handle a special case first: List productions have only
                 // one item.

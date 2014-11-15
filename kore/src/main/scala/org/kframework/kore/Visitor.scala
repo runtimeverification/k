@@ -4,7 +4,7 @@ package org.kframework.kore
 
 import scala.collection.immutable.Nil
 
-trait KORETransformer[T] extends Function1[K, T] with java.util.function.Function[K, T] {
+trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
   def apply(k: K): T = (k: @annotation.switch) match {
     case k: KORE => k match {

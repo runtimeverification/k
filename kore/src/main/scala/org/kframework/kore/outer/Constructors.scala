@@ -36,4 +36,14 @@ object Constructors {
 
   def Terminal(s: String) = outer.Terminal(s)
   def NonTerminal(sort: Sort) = outer.NonTerminal(sort)
+
+  def Tag(s: String) = outer.Tag(s)
+
+  def SyntaxPriority(priorities: Seq[Set[Tag]]) = outer.SyntaxPriority(priorities)
+  def SyntaxPriority(priorities: Seq[Set[Tag]], att: Attributes) = outer.SyntaxPriority(priorities, att)
+
+  def SyntaxAssociativity(assoc: outer.Associativity.Value, tags: Set[Tag]) = outer.SyntaxAssociativity(assoc, tags)
+  def SyntaxAssociativity(assoc: outer.Associativity.Value, tags: Set[Tag], att: Attributes) = outer.SyntaxAssociativity(assoc, tags, att)
+
+  def Associativity = outer.Associativity;
 }
