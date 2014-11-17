@@ -5,26 +5,16 @@ package org.kframework.backend.java.symbolic;
 import static org.kframework.backend.java.util.RewriteEngineUtils.isSubsorted;
 import static org.kframework.backend.java.util.RewriteEngineUtils.isSubsortedEq;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -34,6 +24,21 @@ import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -335,6 +340,30 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return;
         }
 
+        /* simplify orBool in multiple equalities */
+        if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'_orBool_") && rightHandSide.equals(BoolToken.FALSE)) {
+            add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.FALSE);
+            add(((KList) ((KItem) leftHandSide).kList()).get(1), BoolToken.FALSE);
+            return;
+        }
+
+        /* simplify orBool in multiple equalities */
+        if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'_orBool_") && leftHandSide.equals(BoolToken.FALSE)) {
+            add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.FALSE);
+            add(((KList) ((KItem) rightHandSide).kList()).get(1), BoolToken.FALSE);
+            return;
+        }
+
+        /* simplify notBool */
+        if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'notBool_") && rightHandSide instanceof BoolToken) {
+            add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.of(!((BoolToken) rightHandSide).booleanValue()));
+            return;
+        }
+        if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'notBool_") && leftHandSide instanceof BoolToken) {
+            add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.of(!((BoolToken) leftHandSide).booleanValue()));
+            return;
+        }
+
         Equality equality = new Equality(leftHandSide, rightHandSide, context);
         if (writeProtected) {
             if (equalityBuffer.add(equality)) {
@@ -526,7 +555,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Entry<Variable, ValueDifference<Term>> entry : mapDifference.entriesDiffering().entrySet()) {
             simplifiedConstraint.add(entry.getKey(), entry.getValue().leftValue());
         }
-        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
+        Predicate<Equality> inConstraint = equality -> !equalities().contains(equality)
+                && !equalities().contains(new Equality(equality.rightHandSide(), equality.leftHandSide(), context));
+        Set<Equality> equalities = constraint.equalities().stream()
+                .filter(inConstraint)
+                .collect(Collectors.toSet());
         equalities.removeAll(equalities());
         simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();

@@ -149,7 +149,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         Predicate<Variable> notInVariables = new Predicate<Variable>() {
             @Override
             public boolean apply(Variable var) {
-                return variables.contains(var);
+                return !variables.contains(var);
             }
         };
 
@@ -217,6 +217,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
                 // TODO(AndreiS): find a better place for pattern expansion
                 candidate.expandPatternsAndSimplify(true);
+
+                if (candidate.isFalse()) {
+                    continue;
+                }
+
+                if (candidate.checkUnsat()) {
+                    continue;
+                }
             }
 
             assert candidate.getMultiConstraints().size() == 1;
