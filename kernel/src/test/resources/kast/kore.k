@@ -128,7 +128,7 @@ module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   syntax KSentence ::= "syntax" KSort "::=" KProduction  KAttributesDeclaration   [ klabel(#KSentenceSyntaxProduction), hook(Syntax) ]
   syntax KSentence ::= "syntax priority" KPrioritySeq    KAttributesDeclaration   [ klabel(#KSentenceSyntaxPriority), hook(SyntaxPriority) ]
   syntax KSentence ::= "syntax" KAssoc KNeTagSet         KAttributesDeclaration   [ klabel(#KSentenceSyntaxAssociativity), hook(SyntaxAssociativity) ]  
-  
+
   syntax KAssoc    ::= "left"
   syntax KAssoc    ::= "right"
   syntax KAssoc    ::= "non-assoc"
@@ -137,7 +137,7 @@ module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   syntax KNeTagSet    ::= Tag KNeTagSet                [ klabel(#KTagSet), assoc, comm ]
   syntax KNeTagSet    ::= Tag                          [ klabel(#KTagSet) ]
   syntax Tag ::= KLabel
-  
+
   syntax KSentence ::= "configuration" K "requires" K             KAttributesDeclaration   [ klabel(#KSentenceConfiguration), hook(Configuration) ]
   syntax KSentence ::= "rule"          K "requires" K "ensures" K KAttributesDeclaration   [ klabel(#KSentenceRule), hook(Rule) ]
   syntax KSentence ::= "context"       K "requires" K             KAttributesDeclaration   [ klabel(#KSentenceContext), hook(Context) ]
