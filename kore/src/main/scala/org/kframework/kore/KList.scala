@@ -3,6 +3,8 @@
 package org.kframework.kore
 
 import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mutable }
+import collection.JavaConverters._
+import java.util.stream.StreamSupport
 
 abstract class KList extends KListLike[KList] {
   def copy(l: LinearSeq[K]) = KList(l: _*)
@@ -42,6 +44,8 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
     new mutable.ListBuffer mapResult copy
 
   def copy(l: LinearSeq[K]): This
+
+  def stream(): java.util.stream.Stream[K] = StreamSupport.stream(this.asJava.spliterator(), false)
 }
 
 /**
