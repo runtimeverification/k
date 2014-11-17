@@ -422,14 +422,24 @@ public class SymbolicRewriter {
                 // TODO(YilongL): the `get(0)` seems hacky
                 Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
                 Variable leftFrame = KSequence.getFrame(leftKContent);
+                if (leftFrame != null) {
+                    KSequence.Builder builder = KSequence.builder();
+                    KSequence.getElements(leftKContent).stream().forEach(builder::concatenate);
+                    leftKContent = builder.build();
+                }
                 Term rightKContent = targetTerm.term().getCellContentsByName(CellLabel.K).get(0);
                 Variable rightFrame = KSequence.getFrame(rightKContent);
+                if (rightFrame != null) {
+                    KSequence.Builder builder = KSequence.builder();
+                    KSequence.getElements(rightKContent).stream().forEach(builder::concatenate);
+                    rightKContent = builder.build();
+                }
                 if (leftFrame != null && rightFrame != null && leftFrame.equals(rightFrame)) {
-                    BoolToken unifiable = MetaK.unifiable(
+                    BoolToken matchable = MetaK.matchable(
                             leftKContent,
                             rightKContent,
                             term.termContext());
-                    if (unifiable != null && unifiable.booleanValue()) {
+                    if (matchable != null && matchable.booleanValue()) {
                         proofResults.add(term);
                         continue;
                     }
