@@ -127,7 +127,7 @@ module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   syntax KSentence ::= "syntax" KSort                    KAttributesDeclaration   [ klabel(#KSentenceSyntaxSort), hook(Syntax) ]
   syntax KSentence ::= "syntax" KSort "::=" KProduction  KAttributesDeclaration   [ klabel(#KSentenceSyntaxProduction), hook(Syntax) ]
   syntax KSentence ::= "syntax priority" KPrioritySeq    KAttributesDeclaration   [ klabel(#KSentenceSyntaxPriority), hook(SyntaxPriority) ]
-  syntax KSentence ::= "syntax" KAssoc KNeTagSet 		 KAttributesDeclaration   [ klabel(#KSentenceSyntaxAssociativity), hook(SyntaxAssociativity) ]  
+  syntax KSentence ::= "syntax" KAssoc KNeTagSet 		 KAttributesDeclaration       [ klabel(#KSentenceSyntaxAssociativity), hook(SyntaxAssociativity) ]  
   
   syntax KAssoc    ::= "left"
   syntax KAssoc    ::= "right"
