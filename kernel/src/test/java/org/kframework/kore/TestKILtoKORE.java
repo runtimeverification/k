@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -66,6 +67,11 @@ public class TestKILtoKORE {
 
     @Test
     public void imports() throws IOException {
+        standardTest();
+    }
+
+    @Test @Ignore
+    public void simpleRule() throws IOException {
         standardTest();
     }
 
