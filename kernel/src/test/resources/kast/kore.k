@@ -134,7 +134,7 @@ module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   syntax KAssoc    ::= "non-assoc"
   syntax KPrioritySeq ::= KNeTagSet ">" KPrioritySeq   [ klabel(#KPrioritySeq), assoc ]
   syntax KPrioritySeq ::= KNeTagSet                    [ klabel(#KPrioritySeq) ]
-  syntax KNeTagSet    ::= Tag " " KNeTagSet            [ klabel(#KTagSet), assoc, comm ]
+  syntax KNeTagSet    ::= Tag KNeTagSet                [ klabel(#KTagSet), assoc, comm ]
   syntax KNeTagSet    ::= Tag                          [ klabel(#KTagSet) ]
   syntax Tag ::= KLabel
   
