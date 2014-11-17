@@ -72,6 +72,15 @@ public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
 
         JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
         if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
+            rule = (Rule) super.visit(rule, _);
+            if ((rule.getBody().getSort().equals(Sort.BAG) || rule.getBody().getSort().equals(Sort.BAG_ITEM))
+                    && rule.containsAttribute(Attribute.PATTERN_FOLDING_KEY)) {
+                Rewrite body = ((Rewrite) rule.getBody()).shallowCopy();
+                body.setLeft(((Cell) body.getLeft()).getContents(), context);
+                body.setRight(((Cell) body.getRight()).getContents(), context);
+                rule = rule.shallowCopy();
+                rule.setBody(body);
+            }
             return rule;
         }
 
