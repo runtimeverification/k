@@ -5,13 +5,15 @@ import org.kframework.kore.Sort
 import scala.util.matching.Regex
 import org.kframework.kore.Attributes
 
-case class Definition(requires: Set[Require], modules: Set[Module])
-  extends DefinitionToString
+sealed trait OuterKORE
 
-case class Require(file: java.io.File)
+case class Definition(requires: Set[Require], modules: Set[Module])
+  extends DefinitionToString with OuterKORE
+
+case class Require(file: java.io.File) extends OuterKORE
 
 case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attributes())
-  extends ModuleToString with KLabelMappings
+  extends ModuleToString with KLabelMappings with OuterKORE
 // hooked but different from core, Import is a sentence here
 
 trait Sentence { // marker
@@ -21,23 +23,25 @@ trait Sentence { // marker
 case class Context(
   body: kore.K,
   requires: kore.K,
-  att: Attributes = Attributes()) extends Sentence
+  att: Attributes = Attributes()) extends Sentence with OuterKORE
 
 case class Rule(
   body: kore.K,
   requires: kore.K,
   ensures: kore.K,
   att: Attributes) extends Sentence
-  with RuleToString
+  with RuleToString with OuterKORE
 
-case class ModuleComment(comment: String, att: Attributes = Attributes()) extends Sentence
+case class ModuleComment(comment: String, att: Attributes = Attributes())
+  extends Sentence with OuterKORE
 
-case class Import(what: String, att: Attributes = Attributes()) extends Sentence with ImportToString // hooked
+case class Import(what: String, att: Attributes = Attributes())
+  extends Sentence with ImportToString with OuterKORE // hooked
 
 // syntax declarations
 
 case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Attributes = Attributes())
-  extends Sentence with SyntaxPriorityToString
+  extends Sentence with SyntaxPriorityToString with OuterKORE
 
 object Associativity extends Enumeration {
   type Value1 = Value
@@ -45,17 +49,17 @@ object Associativity extends Enumeration {
 }
 
 case class SyntaxAssociativity(assoc: Associativity.Value, tags: collection.immutable.Set[Tag], att: Attributes = Attributes())
-  extends Sentence with SyntaxAssociativityToString
+  extends Sentence with SyntaxAssociativityToString with OuterKORE
 
-case class Tag(name: String) extends TagToString
+case class Tag(name: String) extends TagToString with OuterKORE
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString
+  with SyntaxSortToString with OuterKORE
 
 case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
   extends Sentence with SyntaxProductionToString // hooked but problematic, see kast-core.k
 
-sealed trait ProductionItem // marker
+sealed trait ProductionItem extends OuterKORE // marker
 
 case class NonTerminal(sort: Sort) extends ProductionItem
   with NonTerminalToString
