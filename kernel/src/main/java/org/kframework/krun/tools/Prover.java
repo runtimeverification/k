@@ -26,15 +26,19 @@ import com.google.inject.Provider;
 public interface Prover {
 
     /**
+     * @param cfg The configuration used to initialize the prover
+     */
+    public abstract Module preprocess(Module module, Term cfg) throws KRunExecutionException;
+
+    /**
      * Prove a set of reachability rules using Matching Logic.
      * @param module A {@link org.kframework.kil.Module} containing a set of reachability rules to be proven.
-     * @param cfg The configuration used to initialize the prover
      * @exception UnsupportedOperationException The backend implementing this interface does not
      * support proofs
      * @return An object containing metadata about whether the proof succeeded, and a counterexample
      * if it failed.
     */
-    public abstract KRunProofResult<Set<Term>> prove(Module module, Term cfg) throws KRunExecutionException;
+    public abstract KRunProofResult<Set<Term>> prove(Module module) throws KRunExecutionException;
 
     public static class Tool implements Transformation<Void, KRunResult<?>> {
 
@@ -73,7 +77,9 @@ public interface Prover {
                 Definition parsed = termLoader.parseString(content,
                         Sources.fromFile(files.resolveWorkingDirectory(proofFile)), context);
                 Module mod = parsed.getSingletonModule();
-                KRunProofResult<Set<Term>> result = prover.prove(mod, initialConfiguration.get());
+                mod = prover.preprocess(mod, initialConfiguration.get());
+                sw.printIntermediate("Preprocess specification rules");
+                KRunProofResult<Set<Term>> result = prover.prove(mod);
                 sw.printIntermediate("Proof total");
                 return result;
             } catch (KRunExecutionException e) {
