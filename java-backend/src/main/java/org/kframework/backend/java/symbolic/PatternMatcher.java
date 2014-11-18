@@ -256,10 +256,18 @@ public class PatternMatcher extends AbstractMatcher {
             fail(variable, term);
         }
 
+        // TODO(AndreiS): the check below is not sufficient, as the substitution may not be normalized
+        /* occurs check */
+        if (term.variableSet().contains(variable)) {
+            fail(variable, term);
+        }
+
         Term subst = fSubstitution.get(variable);
         if (subst == null) {
             fSubstitution.put(variable, term);
         } else if (!subst.equals(term)) {
+            // TODO(AndreiS): the check below is to strong, as the substitution may not be normalized
+            // variable = A, term = C, fSubstitution = { A |-> B, B |-> C}
             fail(subst, term);
         }
     }
