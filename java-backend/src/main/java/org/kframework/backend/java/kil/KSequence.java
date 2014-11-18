@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.kframework.backend.java.symbolic.Matcher;
@@ -62,6 +63,23 @@ public class KSequence extends KCollection {
             return null;
         } else if (term instanceof KSequence) {
             return ((KSequence) term).frame;
+        } else {
+            assert false : "unexpected argument: " + term;
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the list of elements of a given term representing a potentially
+     * canonicalized {@code KSequence}.
+     */
+    public static List<Term> getElements(Term term) {
+        if (term instanceof Variable && term.sort().equals(Sort.KSEQUENCE)) {
+            return Collections.emptyList();
+        } else if (term.kind() == Kind.KITEM) {
+            return Collections.singletonList(term);
+        } else if (term instanceof KSequence) {
+            return ((KSequence) term).contents;
         } else {
             assert false : "unexpected argument: " + term;
             return null;

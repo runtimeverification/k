@@ -43,6 +43,7 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");
     public static final Attribute<String> PREDICATE = Attribute.of(PREDICATE_KEY, "");
     public static final Attribute<String> PATTERN = Attribute.of(PATTERN_KEY, "");
+    public static final Attribute<String> PATTERN_FOLDING = Attribute.of(PATTERN_FOLDING_KEY, "");
     public static final Attribute<String> TRUSTED = Attribute.of(TRUSTED_KEY, "");
     public static final Attribute<String> MACRO = Attribute.of(MACRO_KEY, "");
     public static final Attribute<String> ANYWHERE = Attribute.of("anywhere", "");

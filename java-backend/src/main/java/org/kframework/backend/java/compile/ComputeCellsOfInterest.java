@@ -84,7 +84,8 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
                 || rule.containsAttribute(Attribute.MACRO_KEY)
                 || rule.containsAttribute(Attribute.ANYWHERE_KEY)
-                || rule.containsAttribute(Attribute.PATTERN_KEY)) {
+                || rule.containsAttribute(Attribute.PATTERN_KEY)
+                || rule.containsAttribute(Attribute.PATTERN_FOLDING_KEY)) {
             rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
             return rule;
         }
