@@ -48,6 +48,8 @@ class KILtoKORE {
                 .filter(i -> i instanceof Module).map(i -> convert((Module) i))
                 .collect(Collectors.toSet());
 
+        // TODO: handle LiterateDefinitionComments
+
         return Definition(immutable(requires), immutable(modules));
     }
 
@@ -97,22 +99,17 @@ class KILtoKORE {
     }
 
     private Value convertAssoc(String assocOrig) {
-        Value assoc = null;
         // "left", "right", "non-assoc"
         switch (assocOrig) {
         case "left":
-            assoc = Associativity.Left();
-            break;
+            return Associativity.Left();
         case "right":
-            assoc = Associativity.Right();
-            break;
+            return Associativity.Right();
         case "non-assoc":
-            assoc = Associativity.NonAssoc();
-            break;
+            return Associativity.NonAssoc();
         default:
-            throw new RuntimeException("Incorrect assoc string");
+            throw new RuntimeException("Incorrect assoc string: " + assocOrig);
         }
-        return assoc;
     }
 
     private Set<org.kframework.kore.outer.Sentence> convert(PriorityExtended pe) {
@@ -167,8 +164,7 @@ class KILtoKORE {
                 // one item.
                 if (p.getItems().size() == 1
                         && p.getItems().get(0) instanceof UserList) {
-                    convertUserList(res, sort, p, (UserList) p.getItems()
-                            .get(0));
+                    convertUserList(res, sort, p, (UserList) p.getItems().get(0));
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     // TODO: when to use RegexTerminal?
@@ -177,8 +173,7 @@ class KILtoKORE {
                             items.add(new org.kframework.kore.outer.NonTerminal(
                                     convert(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new RuntimeException(
-                                    "Lists should have converted before.");
+                            throw new RuntimeException("Lists should have converted before.");
                         } else if (it instanceof Lexical) {
                             // TODO: not sure what to do
                         } else if (it instanceof Terminal) {
@@ -202,7 +197,15 @@ class KILtoKORE {
             org.kframework.kore.Sort sort, Production p, UserList userList) {
         org.kframework.kore.Sort elementSort = convert(userList.getSort());
 
-        // TODO: attributes are probably wrong
+        // TODO: we're splitting one syntax declaration into three, where to put attributes
+        // of original declaration?
+
+        // Using attributes to mark these three rules
+        // (to be used when translating those back to single KIL declaration)
+        org.kframework.kore.KList userlistMarker =
+                KList(KToken(Sort("userList"), KString(userList.getListType())));
+
+        org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 
@@ -210,15 +213,13 @@ class KILtoKORE {
         prod1 = SyntaxProduction(
                 sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()),
-                        NonTerminal(sort)), convert(p.getAttributes()));
+                        NonTerminal(sort)), attrs);
 
         // lst ::= elem
-        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)),
-                convert(p.getAttributes()));
+        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrs);
 
         // lst ::= .UserList
-        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())),
-                convert(p.getAttributes()));
+        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())), attrs);
 
         res.add(prod1);
         res.add(prod2);
@@ -235,8 +236,7 @@ class KILtoKORE {
                 .stream()
                 .map(key -> {
                     String keyString = key.toString();
-                    String valueString = attributes.get(key).getValue()
-                            .toString();
+                    String valueString = attributes.get(key).getValue().toString();
 
                     return (K) KApply(
                             KLabel(keyString),

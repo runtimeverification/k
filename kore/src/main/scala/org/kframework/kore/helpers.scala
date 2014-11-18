@@ -43,7 +43,10 @@ trait AttributesToString {
   override def toString() = "[" +
     (klist map {
       case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
-    } mkString " ") + "]"
+      // FIXME: This is to prevent printing metadata saved as attributes. Currently this metadata
+      // is used to guide translating KORE back to KIL.
+      case a => ""
+    } mkString " ") + "]" // TODO: remove brackets if nothing is printed inside
 
   def postfixString = if (isEmpty) "" else (" " + toString())
 }

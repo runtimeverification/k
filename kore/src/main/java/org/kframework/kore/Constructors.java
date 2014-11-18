@@ -42,6 +42,10 @@ public class Constructors {
         return KList.fromJava(ks);
     }
 
+    public static KList KList(K k) {
+        return KList.fromJava(new K[] {k});
+    }
+
     public static KApply KApply(KLabel klabel, KList klist, Attributes att) {
         return new KApply(klabel, klist, att);
     }
