@@ -75,4 +75,4 @@ case class Configuration(
   ensures: kore.K,
   att: Attributes = Attributes()) extends Sentence
 
-case class Bubble(contents: String, att: Attributes = Attributes()) extends Sentence
+case class Bubble(ty: String, contents: String, att: Attributes = Attributes()) extends Sentence

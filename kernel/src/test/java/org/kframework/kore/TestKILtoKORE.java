@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -49,13 +48,11 @@ public class TestKILtoKORE {
     // <k foo="bla"> .K </k>  becomes:
     // KApply(KLabel("k"), KList(EmptyK), Attributes(KApply(KLabel("foo", KToken(String, "bla"))))
     @Test
-    @Ignore
     public void configuration() throws IOException {
         standardTest();
     }
 
     @Test
-    @Ignore
     public void configurationWithNested() throws IOException {
         standardTest();
     }
@@ -63,7 +60,6 @@ public class TestKILtoKORE {
     // straightforward
     // again, the contents remains as a bubble
     @Test
-    @Ignore
     public void context() throws IOException {
         standardTest();
     }
@@ -76,13 +72,11 @@ public class TestKILtoKORE {
     // straightforward, look at the kil Rule class
     // for now, the rule contents stays as a bubble
     @Test
-    @Ignore
     public void ruleWithRequiresEnsures() throws IOException {
         standardTest();
     }
 
     @Test
-    @Ignore
     public void ruleWithSort() throws IOException {
         standardTest();
     }

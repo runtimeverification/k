@@ -69,7 +69,7 @@ class KILtoKORE {
         } else if (i instanceof StringSentence) {
             StringSentence sentence = (StringSentence) i;
             return Sets.newHashSet(new org.kframework.kore.outer.Bubble(
-                    sentence.getContent(), convert(sentence.getAttributes())));
+                    sentence.getType(), sentence.getContent(), convert(sentence.getAttributes())));
         } else if (i instanceof LiterateModuleComment) {
             return Sets.newHashSet(new org.kframework.kore.outer.ModuleComment(
                     ((LiterateModuleComment) i).getValue(), convert(i
