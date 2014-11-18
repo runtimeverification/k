@@ -155,9 +155,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         SymbolicConstraint rightHandSide = SymbolicConstraint
                 .simplifiedConstraintFrom(constrainedTerm.termContext(),
+                        leftHandSide.substitution(),
                         Maps.filterKeys(unificationConstraint.substitution(), notInVariables),
-                        unificationConstraint.equalities(),
-                        leftHandSide.substitution());
+                        unificationConstraint.equalities());
 
         if (!leftHandSide.implies(rightHandSide, variables)) {
             return null;

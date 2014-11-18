@@ -560,7 +560,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> equalities = constraint.equalities().stream()
                 .filter(inConstraint)
                 .collect(Collectors.toSet());
-        equalities.removeAll(equalities());
         simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();
 
