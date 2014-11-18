@@ -38,6 +38,7 @@ import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.krun.tools.Prover;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.PrivateKModule;
 import org.kframework.main.Tool;
 import org.kframework.transformation.ActivatedTransformationProvider;
 import org.kframework.transformation.BasicTransformationProvider;
@@ -59,10 +60,8 @@ import org.kframework.utils.options.SMTOptions;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
-import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -70,9 +69,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.spi.DefaultElementVisitor;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
@@ -250,7 +246,7 @@ public class KRunModule extends AbstractModule {
         }
     }
 
-    public static class MainExecutionContextModule extends PrivateModule {
+    public static class MainExecutionContextModule extends PrivateKModule {
 
         private final KRunOptions options;
         private final List<Module> definitionSpecificModules;
@@ -262,23 +258,7 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            for (Element element : Elements.getElements(definitionSpecificModules)) {
-                element.acceptVisitor(new DefaultElementVisitor<Void>() {
-                    @Override
-                    public <T> Void visit(Binding<T> binding) {
-                        Key<T> key = binding.getKey();
-                        if (key.getAnnotation() == null && key.getAnnotationType() == null) {
-                            bind(key.getTypeLiteral()).annotatedWith(Main.class).to(key.getTypeLiteral());
-                            expose(key.getTypeLiteral()).annotatedWith(Main.class);
-                        }
-                        return null;
-                    }
-                });
-            }
-            for (Module m : definitionSpecificModules) {
-                install(m);
-            }
-
+            exposeBindings(definitionSpecificModules, Main.class);
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
         }
     }
