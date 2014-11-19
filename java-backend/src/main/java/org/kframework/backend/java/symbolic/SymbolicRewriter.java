@@ -160,15 +160,10 @@ public class SymbolicRewriter {
      *            the term context
      * @return the pattern term
      */
-    private ConstrainedTerm buildPattern(Rule rule, TermContext termContext) {
-        SymbolicConstraint precondition = new SymbolicConstraint(termContext);
-        precondition.addAll(rule.requires());
-
-        ConstrainedTerm pattern = new ConstrainedTerm(
-                rule.leftHandSide(),
-                rule.lookups().getSymbolicConstraint(termContext),
-                precondition);
-        return pattern;
+    private static ConstrainedTerm buildPattern(Rule rule, TermContext termContext) {
+        SymbolicConstraint constraint = rule.lookups().getSymbolicConstraint(termContext);
+        constraint.addAll(rule.requires());
+        return new ConstrainedTerm(rule.leftHandSide(), constraint);
     }
 
     /**
@@ -233,15 +228,7 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
-                    constrainedTerm.termContext());
-            leftHandSideConstraint.addAll(rule.requires());
-
-            ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
-                    rule.leftHandSide(),
-                    rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
-                    leftHandSideConstraint);
-
+            ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
             SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
             if (constraint == null) {
                 continue;
