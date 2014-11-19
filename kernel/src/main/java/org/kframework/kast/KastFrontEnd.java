@@ -8,6 +8,7 @@ import java.util.Map;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
+import org.kframework.backend.unparser.KoreFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
@@ -87,10 +88,16 @@ public class KastFrontEnd extends FrontEnd {
             KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
             kastFilter.visitNode(out);
             kast = kastFilter.getResult();
-        } else {
+        } else if (context.kompileOptions.experimental.legacyKast) {
             MaudeFilter maudeFilter = new MaudeFilter(context, kem);
             maudeFilter.visitNode(out);
             kast = maudeFilter.getResult();
+            kast.append("\n");
+        } else {
+            KoreFilter koreFilter = new KoreFilter(context);
+            StringBuilder sb = new StringBuilder();
+            koreFilter.visitNode(out, sb);
+            kast = sb;
             kast.append("\n");
         }
 

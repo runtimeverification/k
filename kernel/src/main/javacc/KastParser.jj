@@ -161,7 +161,7 @@ Term klist() :
 	{
 		items.add(current);
 	}
-	(<COMMA><COMMA> current = k()
+	(<COMMA> current = k()
 	{
 		items.add(current);
 	}
