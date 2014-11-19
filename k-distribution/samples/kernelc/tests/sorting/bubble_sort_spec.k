@@ -33,12 +33,12 @@ rule [bubble-sort-loop-inv1]:
   ...</env>
   <heap>...
     object(LX) |-> tv (struct listNode *, X:Pointer)
-    object(LC) |-> tv (int, 1 => ?_:Int)
+    object(LC) |-> tv (int, C:Int => ?_:Int)
     (lseg(X, null)(A1:List)
      =>
      lseg(X, null)(?A2:List))
  ...</heap>
-requires X =/=K null
+requires X =/=K null andBool (sorted(A1) orBool C =/=K 0)
 ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 
 rule [bubble-sort-loop-inv2]:

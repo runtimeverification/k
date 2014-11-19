@@ -72,7 +72,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     public boolean isUnifiableByCurrentAlgorithm() {
-        return collectionFunctions.isEmpty() && collectionVariables.size() <= 1;
+        return collectionFunctions.isEmpty();
     }
 
     public boolean hasOnlyGroundKeys() {

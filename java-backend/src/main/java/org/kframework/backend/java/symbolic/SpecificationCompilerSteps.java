@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddInjections;
@@ -28,11 +29,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
  */
 public class SpecificationCompilerSteps extends CompilerSteps<Module> {
 
-    private final KExceptionManager kem;
-
     public SpecificationCompilerSteps(Context context, KExceptionManager kem) {
         super(context);
-        this.kem = kem;
 
         //add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
         add(new RemoveBrackets(context));
@@ -52,7 +50,7 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new ResolveRewrite(context));
         add(new Cell2DataStructure(context));
         add(new CompileDataStructures(context, kem));
-        //add(new DataStructureToLookupUpdate(context));
+        add(new DataStructureToLookupUpdate(context));
     }
 
 }

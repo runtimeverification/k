@@ -98,6 +98,7 @@ public class MetaK {
             Attribute.FUNCTION,
             Attribute.PREDICATE,
             Attribute.PATTERN,
+            Attribute.PATTERN_FOLDING,
             Attribute.MACRO,
             Attribute.ANYWHERE);
 

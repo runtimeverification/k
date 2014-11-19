@@ -14,6 +14,7 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.Prover;
+import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.transformation.ToolActivation;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
@@ -25,18 +26,12 @@ import org.kframework.utils.inject.Spec;
 
 import com.beust.jcommander.JCommander;
 import com.google.inject.AbstractModule;
-import com.google.inject.Binding;
-import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.spi.DefaultElementVisitor;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
 
@@ -92,7 +87,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         }
     }
 
-    public static class SimulationModule extends PrivateModule {
+    public static class SimulationModule extends AnnotatedByDefinitionModule {
 
         private final List<Module> definitionSpecificModules;
 
@@ -102,23 +97,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            for (Element element : Elements.getElements(definitionSpecificModules)) {
-                element.acceptVisitor(new DefaultElementVisitor<Void>() {
-                    @Override
-                    public <T> Void visit(Binding<T> binding) {
-                        Key<T> key = binding.getKey();
-                        if (key.getAnnotation() == null && key.getAnnotationType() == null) {
-                            bind(key.getTypeLiteral()).annotatedWith(Spec.class).to(key.getTypeLiteral());
-                            expose(key.getTypeLiteral()).annotatedWith(Spec.class);
-                        }
-                        return null;
-                    }
-                });
-            }
-            for (Module m : definitionSpecificModules) {
-                install(m);
-            }
-
+            exposeBindings(definitionSpecificModules, Spec.class);
             bind(Simulator.class).annotatedWith(Main.class).to(Simulator.class);
             expose(Simulator.class).annotatedWith(Main.class);
         }
