@@ -9,9 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -34,8 +32,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
     @Rule
     public TestName name = new TestName();
 
-    private static final String ROOT = "src/test/resources/sdf-compiler/";
-
+    @SuppressWarnings("deprecation")
     public Definition parse(String definitionText, String mainModule)
             throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());

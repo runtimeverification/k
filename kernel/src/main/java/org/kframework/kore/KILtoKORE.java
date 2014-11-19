@@ -38,7 +38,7 @@ import com.google.common.collect.Sets;
 import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Constructors.*;
 
-class KILtoKORE {
+public class KILtoKORE {
     public org.kframework.kore.outer.Definition convert(Definition d) {
         Set<org.kframework.kore.outer.Require> requires = d.getItems().stream()
                 .filter(i -> i instanceof Require)
