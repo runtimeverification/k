@@ -33,20 +33,6 @@ trait Matcher {
   def matchOne(pattern: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(pattern, condition).headOption
 
   def matchAll(pattern: K, condition: K = true): Set[Map[KVariable, K]]
-
-  /**
-   * rewrite using the rewrite rule in K
-   */
-  def r(rewrite: K): K = {
-    ???
-  }
-
-  /**
-   * search using the rewrite rule in K
-   */
-  def s(rewrite: K): Set[K] = {
-    ???
-  }
 }
 
 trait KListMatcher extends Matcher with BindingOps {
@@ -110,8 +96,8 @@ trait KTokenMatcher extends Matcher with BindingOps {
   def matchAll(pattern: K, condition: K = true): Set[Map[KVariable, K]] = (pattern, this: KToken) match {
     case (v: KVariable, _) =>
       Set(Map(v -> this))
-    //    case (KApply(label, klist, att), KApply(label2, klist2, att2)) if label == label2 =>
-    //      ???
+    case (KToken(`sort`, `s`, _), _) => Set(Map())
+    case _ => Set()
   }
 }
 
@@ -120,7 +106,11 @@ trait KSequenceMatcher extends Matcher with BindingOps {
   def matchAll(pattern: K, condition: K = true): Set[Map[KVariable, K]] = (pattern, this: KSequence) match {
     case (v: KVariable, _) =>
       Set(Map(v -> this))
-    //    case (KApply(label, klist, att), KApply(label2, klist2, att2)) if label == label2 =>
-    //      ???
+    case (s: KSequence, _) =>
+      klist.matchAll('KList(s.klist: _*), condition) map {
+        case m: Map[KVariable, KApply] => m mapValues {
+          case KApply(KLabel("KList"), kl, _) => KSequence(kl.toSeq: _*)
+        }
+      }
   }
 }

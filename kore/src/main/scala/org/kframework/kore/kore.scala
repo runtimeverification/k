@@ -11,7 +11,10 @@ import scala.collection.generic.CanBuildFrom
 
 /* Interfaces */
 
-trait KCollection extends Iterable[K] with Matcher
+trait KCollection extends Iterable[K] with Matcher {
+  type ThisK
+  def copy(klist: Iterable[K]): ThisK
+}
 
 sealed trait KORE // marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
@@ -19,7 +22,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Matcher {
+trait K extends HasAttributes with Matcher with Rewriting {
   protected type ThisK <: K
 
   def copy(att: Attributes): ThisK
@@ -43,7 +46,7 @@ case class KString(s: String) // just a wrapper to mark it
 case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attributes())
   extends KAbstractCollection[KApply] with KORE with KApplyMatcher {
   type ThisK = KApply
-  def copy(klist: KCollection, att: Attributes) = new KApply(klabel, klist, att)
+  def copy(klist: KCollection, att: Attributes): KApply = new KApply(klabel, klist, att)
 
   override def toString() = klabel.toString + "(" + klist.mkString(",") + ")"
   override def equals(that: Any) = that match {
@@ -53,8 +56,8 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
 }
 
 trait KToken extends KItem with KORE with KTokenMatcher {
-  def sort: Sort
-  def s: KString
+  val sort: Sort
+  val s: KString
 
   override def toString = s.s
 }

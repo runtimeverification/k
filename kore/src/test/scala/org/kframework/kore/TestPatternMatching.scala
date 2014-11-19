@@ -110,11 +110,39 @@ class TestPatternMatching {
   }
 
   @Test
+  def testKListMultipleVar() {
+    val foo = KApply(KLabel("foo"), KList(5, 5))
+    val X = KVariable("X")
+    val pattern = KApply(KLabel("foo"), KList(X, X))
+    assertEquals(Set(Map(X -> KList(5))),
+      foo.matchAll(pattern))
+  }
+
+  @Test
+  def testKListAssocMultipleVar() {
+    val foo = KApply(KLabel("foo"), KList(5, 5, 5))
+    val X = KVariable("X")
+    val pattern = KApply(KLabel("foo"), KList(X, X))
+    assertEquals(Set(),
+      foo.matchAll(pattern))
+  }
+
+  @Test
   def testKApplyWithEmptySeq() {
     val foo = KApply(KLabel("foo"), KList())
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(v))
     assertEquals(Some(Map(v -> KSequence())), foo.m(pattern))
+  }
+
+  @Test
+  def testKSeqAssoc() {
+    val foo = KSequence(5, 5, 5)
+    val X = KVariable("X")
+    val Y = KVariable("Y")
+    val pattern = KSequence(X, 5, Y)
+    assertEquals(Set(Map(X -> KSequence(), Y -> KSequence(5, 5)), Map(X -> KSequence(5), Y -> KSequence(5)), Map(X -> KSequence(5, 5), Y -> KSequence())),
+      foo.matchAll(pattern))
   }
 
   def assertEquals(expected: Any, actual: Any) {
