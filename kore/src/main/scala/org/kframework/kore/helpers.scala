@@ -11,7 +11,6 @@ trait KAbstractCollection[+This <: KAbstractCollection[This]]
   self: This =>
   type ThisK <: This
 
-  override def toString() = super.toString() + " copy " + att
   override def equals(that: Any) = that match {
     case that: This => that.klist.equals(this.klist) && that.att.equals(this.att)
     case _ => false
