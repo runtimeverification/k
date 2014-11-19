@@ -55,14 +55,11 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private Definition parseUsingSDF(String definitionText) {
-        Definition def = null;
         try {
-            def = parse(definitionText, "TEST");
+            return parse(definitionText, "TEST");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return def;
     }
 
     private Definition parseUsingOuter(String definitionText) {

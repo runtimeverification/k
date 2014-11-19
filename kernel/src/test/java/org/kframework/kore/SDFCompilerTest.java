@@ -80,7 +80,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
         kompileOptions.experimental = new Experimental();
         kompileOptions.experimental.legacyKast = false;
 
-        BinaryLoader binaryLoader = mock(BinaryLoader.class);
+        BinaryLoader binaryLoader = new BinaryLoader(kem, null);
 
         Definition parsedKIL = new DefinitionLoader(
                 new Stopwatch(globalOptions), binaryLoader, kem,
