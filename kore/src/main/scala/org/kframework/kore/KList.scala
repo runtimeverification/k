@@ -6,8 +6,12 @@ import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mu
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class KList extends KListLike[KList] {
+abstract class KList extends KListLike[KList] with KCollection with KListMatcher {
+  type ThisK = KList
   def copy(l: LinearSeq[K]) = KList(l: _*)
+  def copy(l: Iterable[K]) = copy(l.toList)
+  
+  override def toString = this.mkString(", ")
 }
 
 final case object EmptyKList extends KList with Serializable {
@@ -25,7 +29,7 @@ final case class ConsKList(override val head: K, override val tail: KList) exten
 }
 
 object KList extends CanBuildKListLike[KList] {
-  def apply(l: K*): KList = l.foldLeft(EmptyKList: KList) { (l: KList, h: K) => new ConsKList(h, l) }
+  def apply(l: K*): KList = l.foldRight(EmptyKList: KList) { (h: K, l: KList) => new ConsKList(h, l) }
 
   implicit def inject(k: K): KList = KList(k)
   implicit def seqOfKtoKList(s: Seq[K]) = KList(s: _*)
@@ -43,7 +47,7 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
   override def newBuilder: mutable.Builder[K, This] =
     new mutable.ListBuffer mapResult copy
 
-  def copy(l: LinearSeq[K]): This
+  def copy(l: Iterable[K]): This
 
   def stream(): java.util.stream.Stream[K] = StreamSupport.stream(this.asJava.spliterator(), false)
 }
@@ -61,7 +65,7 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
  */
 trait KListBacked[+This <: KListLike[This]] extends KListLike[This] {
   self: This =>
-  val klist: KList
+  val klist: KCollection
 
   override def head = klist.head
   override def tail = copy(klist.tail)

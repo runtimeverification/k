@@ -6,7 +6,7 @@ import scala.collection.immutable.Nil
 
 trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
-  def apply(k: K): T = (k: @annotation.switch) match {
+  def apply(k: K): T = k match {
     case k: KORE => k match {
       case k: KApply => apply(k)
       case k: KRewrite => apply(k)

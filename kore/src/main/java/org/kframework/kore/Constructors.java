@@ -39,7 +39,7 @@ public class Constructors {
     }
 
     public static KList KList(K... ks) {
-        return KList.fromJava(ks);
+        return KList$.MODULE$.fromJava(ks);
     }
 
     public static KList KList(K k) {
@@ -55,7 +55,7 @@ public class Constructors {
     }
 
     public static KToken KToken(Sort sort, KString string, Attributes att) {
-        return new KToken(sort, string, att);
+        return new KUninterpretedToken(sort, string, att);
     }
 
     public static KToken KToken(Sort sort, KString string) {
