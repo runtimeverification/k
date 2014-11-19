@@ -13,11 +13,11 @@ public class KOREtoKIL {
     public static org.kframework.kil.Definition convert(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
 
-        for (Require r : iterable(definition.requires().toIterable())) {
+        for (Require r : iterable(definition.requires())) {
             items.add(convert(r));
         }
 
-        for (Module m : iterable(definition.modules().toIterable())) {
+        for (Module m : iterable(definition.modules())) {
             items.add(convert(m));
         }
 
@@ -31,17 +31,19 @@ public class KOREtoKIL {
     }
 
     public static org.kframework.kil.Module convert(Module module) {
-        org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
+        org.kframework.kil.Module mod = new org.kframework.kil.Module(
+                module.name());
 
-        List<Sentence> sentences =
-                scala.collection.JavaConversions.seqAsJavaList(module.sentences().toSeq());
+        List<Sentence> sentences = scala.collection.JavaConversions
+                .seqAsJavaList(module.sentences().toList());
         mod = mod.setModuleItems(convert(sentences));
 
         mod.setAttributes(convert(module.att()));
         return mod;
     }
 
-    public static List<org.kframework.kil.ModuleItem> convert(List<Sentence> sentences) {
+    public static List<org.kframework.kil.ModuleItem> convert(
+            List<Sentence> sentences) {
         List<org.kframework.kil.ModuleItem> ret = new ArrayList<>();
         Iterator<Sentence> iter = sentences.iterator();
 
@@ -55,7 +57,8 @@ public class KOREtoKIL {
                 throw new RuntimeException("Unhandled case");
             } else if (sentence instanceof Import) {
                 Import i = (Import) sentence;
-                org.kframework.kil.ModuleItem item = new org.kframework.kil.Import(i.what());
+                org.kframework.kil.ModuleItem item = new org.kframework.kil.Import(
+                        i.what());
                 item.setAttributes(convert(i.att()));
                 ret.add(item);
             } else if (sentence instanceof SyntaxPriority) {
@@ -67,10 +70,12 @@ public class KOREtoKIL {
                 KList attrs = prod.att().klist();
                 if (attrs.size() != 0
                         && ((ConsKList) attrs).head() instanceof KToken
-                        && ((KToken) ((ConsKList) attrs).head())
-                                .sort().name().equals("userList")) {
-                    // Found a userlist translation. Next 3 rules should be describing the UserList
-                    String listType = ((KToken) ((ConsKList) attrs).head()).s().s();
+                        && ((KToken) ((ConsKList) attrs).head()).sort().name()
+                                .equals("userList")) {
+                    // Found a userlist translation. Next 3 rules should be
+                    // describing the UserList
+                    String listType = ((KToken) ((ConsKList) attrs).head()).s()
+                            .s();
                     Sentence sentence2 = iter.next();
                     Sentence sentence3 = iter.next(); // consume last sentence
                     // FIXME: rules are getting reordered
@@ -94,19 +99,19 @@ public class KOREtoKIL {
         return ret;
     }
 
-    public static org.kframework.kil.Syntax makeUserList(
-            String listType, Sentence s1, Sentence s2) {
+    public static org.kframework.kil.Syntax makeUserList(String listType,
+            Sentence s1, Sentence s2) {
         SyntaxProduction prod1 = (SyntaxProduction) s1;
-        List<ProductionItem> prod1Items =
-                scala.collection.JavaConversions.seqAsJavaList(prod1.items());
+        List<ProductionItem> prod1Items = scala.collection.JavaConversions
+                .seqAsJavaList(prod1.items());
 
         SyntaxProduction prod2 = (SyntaxProduction) s2;
-        List<ProductionItem> prod2Items =
-                scala.collection.JavaConversions.seqAsJavaList(prod2.items());
+        List<ProductionItem> prod2Items = scala.collection.JavaConversions
+                .seqAsJavaList(prod2.items());
 
         org.kframework.kil.Sort listSort = convert(prod1.sort());
-        org.kframework.kil.Sort elementSort = org.kframework.kil.Sort.of(
-                ((NonTerminal) prod2Items.get(0)).sort().name());
+        org.kframework.kil.Sort elementSort = org.kframework.kil.Sort
+                .of(((NonTerminal) prod2Items.get(0)).sort().name());
         String sep = ((Terminal) prod1Items.get(1)).value();
 
         List<org.kframework.kil.PriorityBlock> pbs = new ArrayList<>();
@@ -121,15 +126,13 @@ public class KOREtoKIL {
         List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>();
 
         org.kframework.kil.Production prod = new org.kframework.kil.Production(
-                new org.kframework.kil.NonTerminal(listSort),
-                prodItems);
+                new org.kframework.kil.NonTerminal(listSort), prodItems);
         prods.add(prod);
 
         prodItems.add(userList);
 
         return new org.kframework.kil.Syntax(
-                new org.kframework.kil.NonTerminal(listSort),
-                pbs);
+                new org.kframework.kil.NonTerminal(listSort), pbs);
     }
 
     public static org.kframework.kil.Sort convert(Sort sort) {
@@ -143,7 +146,8 @@ public class KOREtoKIL {
             ConsKList cons = (ConsKList) attrsKList;
             KApply attr = (KApply) cons.head();
             KLabel key = attr.klabel();
-            String value = ((KString) ((ConsKList) ((ConsKList) attr.klist()).tail()).head()).s();
+            String value = ((KString) ((ConsKList) ((ConsKList) attr.klist())
+                    .tail()).head()).s();
             // TODO: I think it's not possible to translate attributes back,
             // we lose a lot of information while translating.
             attrsKList = cons.tail();
