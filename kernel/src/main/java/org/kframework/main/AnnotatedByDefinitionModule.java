@@ -11,7 +11,7 @@ import com.google.inject.spi.Elements;
 
 import java.util.List;
 
-public abstract class PrivateKModule extends PrivateModule {
+public abstract class AnnotatedByDefinitionModule extends PrivateModule {
 
     public void exposeBindings(List<Module> modules, Class cls) {
         for (Element element : Elements.getElements(modules)) {
@@ -27,6 +27,6 @@ public abstract class PrivateKModule extends PrivateModule {
                 }
             });
         }
-        modules.forEach(PrivateKModule.this::install);
+        modules.forEach(AnnotatedByDefinitionModule.this::install);
     }
 }

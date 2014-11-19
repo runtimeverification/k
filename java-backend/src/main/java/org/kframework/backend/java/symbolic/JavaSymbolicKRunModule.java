@@ -14,7 +14,7 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.Prover;
-import org.kframework.main.PrivateKModule;
+import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.transformation.ToolActivation;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
@@ -87,7 +87,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         }
     }
 
-    public static class SimulationModule extends PrivateKModule {
+    public static class SimulationModule extends AnnotatedByDefinitionModule {
 
         private final List<Module> definitionSpecificModules;
 

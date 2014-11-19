@@ -38,7 +38,7 @@ import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.krun.tools.Prover;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.PrivateKModule;
+import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.Tool;
 import org.kframework.transformation.ActivatedTransformationProvider;
 import org.kframework.transformation.BasicTransformationProvider;
@@ -246,7 +246,7 @@ public class KRunModule extends AbstractModule {
         }
     }
 
-    public static class MainExecutionContextModule extends PrivateKModule {
+    public static class MainExecutionContextModule extends AnnotatedByDefinitionModule {
 
         private final KRunOptions options;
         private final List<Module> definitionSpecificModules;
