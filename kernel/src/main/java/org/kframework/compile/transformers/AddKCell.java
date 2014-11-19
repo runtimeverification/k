@@ -41,7 +41,7 @@ public class AddKCell extends CopyOnWriteTransformer {
             returnModule = newModule;
         } else {
             returnModule = newModule.shallowCopy();
-            returnModule = returnModule.addModuleItems(newRules);
+            returnModule = returnModule.setModuleItems(newRules);
         }
         return returnModule;
     }
