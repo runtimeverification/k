@@ -6,8 +6,10 @@ import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mu
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class KList extends KListLike[KList] {
+abstract class KList extends KListLike[KList] with KCollection {
+  type ThisK = KList
   def copy(l: LinearSeq[K]) = KList(l: _*)
+  def copy(l: Iterable[K]) = copy(l.toList)
 }
 
 final case object EmptyKList extends KList with Serializable {
@@ -43,7 +45,7 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
   override def newBuilder: mutable.Builder[K, This] =
     new mutable.ListBuffer mapResult copy
 
-  def copy(l: LinearSeq[K]): This
+  def copy(l: Iterable[K]): This
 
   def stream(): java.util.stream.Stream[K] = StreamSupport.stream(this.asJava.spliterator(), false)
 }
@@ -61,7 +63,7 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
  */
 trait KListBacked[+This <: KListLike[This]] extends KListLike[This] {
   self: This =>
-  val klist: KList
+  val klist: KCollection
 
   override def head = klist.head
   override def tail = copy(klist.tail)

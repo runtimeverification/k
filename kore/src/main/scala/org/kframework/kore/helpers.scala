@@ -6,8 +6,8 @@ import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mu
 
 trait Context
 
-trait KCollection[+This <: KCollection[This]]
-  extends KListBacked[This] with K {
+trait KAbstractCollection[+This <: KAbstractCollection[This]]
+  extends KListBacked[This] with KCollection with K {
   self: This =>
   type ThisK <: This
 
@@ -21,8 +21,8 @@ trait KCollection[+This <: KCollection[This]]
     copy(klist, att ++ a)
   }
 
-  def copy(klist: KList, att: Attributes): ThisK
-  def copy(klist: LinearSeq[K]): ThisK = copy(klist, att)
+  def copy(klist: KCollection, att: Attributes): ThisK
+  def copy(klist: Iterable[K]): ThisK = copy(KList(klist.toSeq: _*), att)
 
   override def foreach[B](f: K => B) {
     klist.foreach(f)

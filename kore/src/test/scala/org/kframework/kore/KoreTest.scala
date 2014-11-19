@@ -3,10 +3,7 @@ package org.kframework.kore
 class KoreTest {
   import org.junit._
 
-  case object TestK extends K {
-    def att: org.kframework.kore.Attributes = ???
-    def copy(att: org.kframework.kore.Attributes): TestK.ThisK = ???
-  }
+  object TestK extends KApply(KLabel("Test"), KList())
 
   import Assert._
 
@@ -40,7 +37,7 @@ class KoreTest {
   }
 
   @Test def testKApply {
-    val x = KApply(KLabel("foo"), TestK) copy Attributes(TestK)
+    val x = KApply(KLabel("foo"), KList(TestK)) copy Attributes(TestK)
     val t: KApply = x map { t: K => t }
     assertEquals(Attributes(TestK), t.att)
     assertEquals(x, t)
