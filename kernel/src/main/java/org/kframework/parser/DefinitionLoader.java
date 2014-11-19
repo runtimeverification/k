@@ -199,6 +199,7 @@ public class DefinitionLoader {
         sw.printIntermediate("File Gen Def");
 
         File cache = files.resolveKompiled("defx-cache.bin");
+        Thread t2 = null;
         if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
                 || !files.resolveKompiled("Ground.tbl").exists()) {
             try {
@@ -208,9 +209,7 @@ public class DefinitionLoader {
                 }
                 // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                 Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
-                Thread t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
-                t2.join();
-                files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
+                t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
                 t1.join();
                 files.copyTempFileToKompiledDirectory("def/Integration.sdf");
                 files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
@@ -266,6 +265,17 @@ public class DefinitionLoader {
         def = (Definition) new NormalizeASTTransformer(context, kem).visitNode(def);
 
         sw.printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
+
+        try {
+            if (t2 != null) {
+                t2.join();
+                files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw KExceptionManager.criticalError(
+                    "Thread was interrupted trying to run SDF2Table");
+        }
 
         return def;
     }
