@@ -30,7 +30,7 @@ public class FileUtil {
     private final KExceptionManager kem;
 
     @Inject
-    FileUtil(
+    public FileUtil(
             @TempDir File tempDir,
             @DefinitionDir @Nullable Provider<File> definitionDir,
             @WorkingDir File workingDir,
@@ -165,7 +165,7 @@ public class FileUtil {
         }
     }
 
-    private void save(File file, String content) {
+    public void save(File file, String content) {
         try {
             File dir = file.getAbsoluteFile().getParentFile();
             if (!dir.exists() && !dir.mkdirs()) {

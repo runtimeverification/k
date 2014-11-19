@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-module NOTSOSIMPLESYNTAX
+module TEST
   syntax priority 'x > 'y 'z > 'm 't > 'u
   syntax associativity right 'u
   syntax associativity left 'm 't

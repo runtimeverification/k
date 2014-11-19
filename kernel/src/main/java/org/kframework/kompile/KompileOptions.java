@@ -17,7 +17,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 
-public final class KompileOptions implements Serializable {
+public class KompileOptions implements Serializable {
 
     public KompileOptions() {}
 

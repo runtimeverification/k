@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-module USERLIST
+module TEST
     syntax Stx ::= "1"
     syntax UserList ::= List{Stx, ","}
 endmodule
