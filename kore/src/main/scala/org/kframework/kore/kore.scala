@@ -11,7 +11,7 @@ import scala.collection.generic.CanBuildFrom
 
 /* Interfaces */
 
-trait KCollection extends Iterable[K]
+trait KCollection extends Iterable[K] with Matcher
 
 sealed trait KORE // marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
@@ -51,6 +51,8 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
 trait KToken extends KItem with KORE with KTokenMatcher {
   def sort: Sort
   def s: KString
+  
+  override def toString = s.s
 }
 
 case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
@@ -86,6 +88,7 @@ case class KVariable(name: String, att: Attributes = Attributes())
   extends KItem with KORE with KLabel with KVariableMatcher {
   type ThisK = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
+  override def toString = name
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())

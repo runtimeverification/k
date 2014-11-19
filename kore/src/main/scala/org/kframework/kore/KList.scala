@@ -6,10 +6,12 @@ import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mu
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class KList extends KListLike[KList] with KCollection {
+abstract class KList extends KListLike[KList] with KCollection with KListMatcher {
   type ThisK = KList
   def copy(l: LinearSeq[K]) = KList(l: _*)
   def copy(l: Iterable[K]) = copy(l.toList)
+  
+  override def toString = this.mkString(", ")
 }
 
 final case object EmptyKList extends KList with Serializable {
@@ -27,7 +29,7 @@ final case class ConsKList(override val head: K, override val tail: KList) exten
 }
 
 object KList extends CanBuildKListLike[KList] {
-  def apply(l: K*): KList = l.foldLeft(EmptyKList: KList) { (l: KList, h: K) => new ConsKList(h, l) }
+  def apply(l: K*): KList = l.foldRight(EmptyKList: KList) { (h: K, l: KList) => new ConsKList(h, l) }
 
   implicit def inject(k: K): KList = KList(k)
   implicit def seqOfKtoKList(s: Seq[K]) = KList(s: _*)

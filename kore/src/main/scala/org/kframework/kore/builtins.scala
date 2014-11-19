@@ -27,7 +27,7 @@ object KInt {
   case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
     type ThisK = KInt
     val sort = KInt
-    val s: KString = "true"
+    val s: KString = n.toString
     def copy(att: Attributes) = KInt(n, att)
   }
 

@@ -52,19 +52,27 @@ trait Matcher {
 trait KListMatcher extends Matcher with BindingOps {
   self: KList =>
 
-  implicit def wrapKList(l: KList) = 'klist(this: _*)
+  implicit def wrapKList(l: KList) = 'KList(l: _*)
 
-  def matchAll(pattern: K, condition: K): Set[Map[KVariable, K]] = pattern match {
-    case v: KVariable => Set(Map(v -> this))
-    case l if l == 'klist(this: _*) => Set(Map())
-    case klist: KList => klist match {
-      case KList() => Set()
-      case a +: l if a == head => matchAll(l)
-      case (v: KVariable) +: l =>
-        Range(1, size)
-          .map { index => (take(index), drop(index)) }
-          .map { case (prefix, suffix) => and(Set(Map(v -> (prefix: K))), suffix.matchAll(l)) }
-          .reduce(or)
+  def matchAll(pattern: K, condition: K): Set[Map[KVariable, K]] = {
+    (this: KList, pattern) match {
+      case (_, v: KVariable) => Set(Map(v -> this))
+      case (_, lP) if lP == 'KList(this: _*) => Set(Map())
+      case (_, KApply(KLabel("KList"), klistP: KList, _)) =>
+        (this, klistP) match {
+          case (KList(), KList()) => Set(Map())
+          case (head +: tail, headP +: tailP) if headP == head => tail.matchAll(tailP)
+          case (_, (v: KVariable) +: tailP) =>
+            0.to(size)
+              .map { index => (take(index), drop(index)) }
+              .map {
+                case (prefix, suffix) =>
+                  println(prefix + " ... " + suffix + " matching " + tailP)
+                  and(Set(Map(v -> (prefix: K))), suffix.matchAll(tailP))
+              }
+              .fold(Set())(or)
+          case _ => Set()
+        }
     }
   }
 }
@@ -76,13 +84,13 @@ trait KApplyMatcher extends Matcher with BindingOps {
     case (v: KVariable, _) =>
       Set(Map(v -> this))
     case (KApply(label, klist, att), KApply(label2, klist2, att2)) if label == label2 =>
-      val klistMatches = klist2.zip(klist) map { case (this2, pattern) => this2.matchAll(pattern) }
+      klist2.matchAll('KList(klist.toSeq: _*), condition)
 
-      klistMatches.fold(Set(Map[KVariable, K]()))({
-        case (s: Set[_], _) if s.isEmpty => Set()
-        case (_, s: Set[_]) if s.isEmpty => Set()
-        case (s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]) => and(s1, s2) // TODO: smarter
-      })
+    //      klistMatches.fold(Set(Map[KVariable, K]()))({
+    //        case (s: Set[_], _) if s.isEmpty => Set()
+    //        case (_, s: Set[_]) if s.isEmpty => Set()
+    //        case (s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]) => and(s1, s2) // TODO: smarter
+    //      })
 
     case (_: KApply, _: KApply) => Set()
   }
