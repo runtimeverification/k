@@ -26,7 +26,7 @@ class TestPatternMatching {
     val foo = KApply(KLabel("foo"), KList(five))
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(v))
-    assertEquals(Some(Map(v -> 'klist(five))), foo.m(pattern))
+    assertEquals(Some(Map(v -> 'KList(five))), foo.m(pattern))
   }
 
   @Test
@@ -43,7 +43,7 @@ class TestPatternMatching {
     val foo = KApply(KLabel("foo"), KList(5, 6))
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(v))
-    assertEquals(Set(Map(v -> 'klist(5, 6))), foo.matchAll(pattern))
+    assertEquals(Set(Map(v -> 'KList(5, 6))), foo.matchAll(pattern))
   }
 
   @Test
@@ -51,7 +51,7 @@ class TestPatternMatching {
     val foo = KApply(KLabel("foo"), KList(5, 6, 7))
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(v, 7))
-    assertEquals(Set(Map(v -> 'klist(5, 6))), foo.matchAll(pattern))
+    assertEquals(Set(Map(v -> 'KList(5, 6))), foo.matchAll(pattern))
   }
 
   @Test
@@ -59,7 +59,7 @@ class TestPatternMatching {
     val foo = KApply(KLabel("foo"), KList(5, 6, 7))
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(5, v))
-    assertEquals(Set(Map(v -> 'klist(6, 7))), foo.matchAll(pattern))
+    assertEquals(Set(Map(v -> 'KList(6, 7))), foo.matchAll(pattern))
   }
 
   @Test
@@ -67,7 +67,7 @@ class TestPatternMatching {
     val foo = KApply(KLabel("foo"), KList(5, 6, 7, 8))
     val v = KVariable("X")
     val pattern = KApply(KLabel("foo"), KList(5, v, 8))
-    assertEquals(Set(Map(v -> 'klist(6, 7))), foo.matchAll(pattern))
+    assertEquals(Set(Map(v -> 'KList(6, 7))), foo.matchAll(pattern))
   }
 
   @Test
@@ -76,7 +76,7 @@ class TestPatternMatching {
     val X = KVariable("X")
     val Y = KVariable("Y")
     val pattern = KApply(KLabel("foo"), KList(X, Y))
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5)), Map(X -> KList(5), Y -> KList())), foo.matchAll(pattern))
+    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5)), Map(X -> 'KList(5), Y -> 'KList())), foo.matchAll(pattern))
   }
 
   @Test
@@ -85,7 +85,7 @@ class TestPatternMatching {
     val X = KVariable("X")
     val Y = KVariable("Y")
     val pattern = KApply(KLabel("foo"), KList(X, Y))
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 6)), Map(X -> KList(5), Y -> KList(6)), Map(X -> KList(5, 6), Y -> KList())),
+    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5, 6)), Map(X -> 'KList(5), Y -> 'KList(6)), Map(X -> 'KList(5, 6), Y -> 'KList())),
       foo.matchAll(pattern))
   }
 
@@ -95,7 +95,7 @@ class TestPatternMatching {
     val X = KVariable("X")
     val Y = KVariable("Y")
     val pattern = KApply(KLabel("foo"), KList(X, 7, Y))
-    assertEquals(Set(Map(X -> KList(5), Y -> KList(6))),
+    assertEquals(Set(Map(X -> 'KList(5), Y -> 'KList(6))),
       foo.matchAll(pattern))
   }
 
@@ -105,7 +105,7 @@ class TestPatternMatching {
     val X = KVariable("X")
     val Y = KVariable("Y")
     val pattern = KApply(KLabel("foo"), KList(X, 5, Y))
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 5)), Map(X -> KList(5), Y -> KList(5)), Map(X -> KList(5, 5), Y -> KList())),
+    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5, 5)), Map(X -> 'KList(5), Y -> 'KList(5)), Map(X -> 'KList(5, 5), Y -> 'KList())),
       foo.matchAll(pattern))
   }
 

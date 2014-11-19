@@ -53,4 +53,8 @@ class KoreTest {
     val t: KRewrite = x map { t => t }
     assertEquals(x, t)
   }
+
+  @Test def testKApplyEquals {
+    assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KApply(KLabel("bar"), KList(), Attributes()))
+  }
 }

@@ -46,12 +46,16 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
   def copy(klist: KCollection, att: Attributes) = new KApply(klabel, klist, att)
 
   override def toString() = klabel.toString + "(" + klist.mkString(",") + ")"
+  override def equals(that: Any) = that match {
+    case KApply(`klabel`, _, _) => super.equals(that)
+    case _ => false
+  }
 }
 
 trait KToken extends KItem with KORE with KTokenMatcher {
   def sort: Sort
   def s: KString
-  
+
   override def toString = s.s
 }
 

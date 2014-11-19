@@ -8,7 +8,7 @@ case class MatchException(m: String) extends RuntimeException(m)
 trait BindingOps {
 
   def or(s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]): Set[Map[KVariable, K]] =
-    s1 ++ s2
+    s1 | s2
 
   def and(s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]): Set[Map[KVariable, K]] = {
     (for (m1 <- s1; m2 <- s2) yield {
@@ -63,11 +63,10 @@ trait KListMatcher extends Matcher with BindingOps {
           case (KList(), KList()) => Set(Map())
           case (head +: tail, headP +: tailP) if headP == head => tail.matchAll(tailP)
           case (_, (v: KVariable) +: tailP) =>
-            0.to(size)
+            (0 to size)
               .map { index => (take(index), drop(index)) }
               .map {
                 case (prefix, suffix) =>
-                  println(prefix + " ... " + suffix + " matching " + tailP)
                   and(Set(Map(v -> (prefix: K))), suffix.matchAll(tailP))
               }
               .fold(Set())(or)
@@ -85,12 +84,6 @@ trait KApplyMatcher extends Matcher with BindingOps {
       Set(Map(v -> this))
     case (KApply(label, klist, att), KApply(label2, klist2, att2)) if label == label2 =>
       klist2.matchAll('KList(klist.toSeq: _*), condition)
-
-    //      klistMatches.fold(Set(Map[KVariable, K]()))({
-    //        case (s: Set[_], _) if s.isEmpty => Set()
-    //        case (_, s: Set[_]) if s.isEmpty => Set()
-    //        case (s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]) => and(s1, s2) // TODO: smarter
-    //      })
 
     case (_: KApply, _: KApply) => Set()
   }
