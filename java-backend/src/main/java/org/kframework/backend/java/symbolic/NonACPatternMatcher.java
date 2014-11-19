@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -21,6 +22,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 
@@ -204,8 +207,10 @@ public class NonACPatternMatcher {
                     } else {
                         return false;
                     }
+                } else if (subject instanceof AssociativeCommutativeCollection || subject instanceof BuiltinList) {
+                    return false;
                 } else {
-                    assert false : "unreachable";
+                    throw KExceptionManager.internalError("unexpected subject type: found " + subject.getClass().getSimpleName());
                 }
             }
         }
