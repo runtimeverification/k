@@ -166,7 +166,7 @@ public class DefinitionLoader {
         files.saveToTemp("pgm/Program.sdf", newSdfPgm);
 
         sw.printIntermediate("File Gen Pgm");
-        if (context.kompileOptions.experimental.parseInModule) {
+        if (context.kompileOptions.experimental.javaParser) {
             // save the new parser info
             Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
             loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);

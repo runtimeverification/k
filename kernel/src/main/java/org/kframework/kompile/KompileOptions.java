@@ -131,7 +131,7 @@ public final class KompileOptions implements Serializable {
 
         // TODO: (RaduM) this might be temporary, since I want to generate the parsers by need if the definition is loaded
         @Parameter(names="--java-parser", description="Generate tables for the new java parser.")
-        public boolean parseInModule = false;
+        public boolean javaParser = false;
 
         @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
         public List<String> documentation = Collections.singletonList("documentation");
