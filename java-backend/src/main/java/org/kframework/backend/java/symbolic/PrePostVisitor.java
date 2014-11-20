@@ -389,7 +389,6 @@ public class PrePostVisitor implements Visitor {
         node.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
         node.term().accept(this);
-        node.lookups().accept(this);
         node.constraint().accept(this);
         node.accept(postVisitor);
     }

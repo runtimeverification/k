@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddInjections;
@@ -50,7 +49,6 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new ResolveRewrite(context));
         add(new Cell2DataStructure(context));
         add(new CompileDataStructures(context, kem));
-        add(new DataStructureToLookupUpdate(context));
     }
 
 }

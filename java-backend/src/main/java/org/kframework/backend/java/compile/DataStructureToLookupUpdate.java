@@ -123,8 +123,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
-        if (context.krunOptions != null && context.krunOptions.experimental.prove != null
-                || node.containsAttribute(Attribute.PATTERN_KEY)
+        if (node.containsAttribute(Attribute.PATTERN_KEY)
                 || node.containsAttribute(Attribute.PATTERN_FOLDING_KEY)
                 || node.containsAttribute(Attribute.LEMMA_KEY)) {
             return node;

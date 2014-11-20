@@ -65,7 +65,6 @@ public class JavaSymbolicProver implements Prover {
             rules.add(freshRule);
         }
 
-        DataStructureToLookupUpdate mapTransformer = new DataStructureToLookupUpdate(context);
         SymbolicRewriter symbolicRewriter = executor.getSymbolicRewriter();
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
@@ -73,35 +72,13 @@ public class JavaSymbolicProver implements Prover {
                 continue;
             }
 
-            org.kframework.kil.Rule kilRule = (org.kframework.kil.Rule) moduleItem;
-            org.kframework.kil.Term kilLeftHandSide
-                    = ((org.kframework.kil.Rewrite) kilRule.getBody()).getLeft();
-            org.kframework.kil.Term kilRightHandSide =
-                    ((org.kframework.kil.Rewrite) kilRule.getBody()).getRight();
-            org.kframework.kil.Term kilRequires = kilRule.getRequires();
-            org.kframework.kil.Term kilEnsures = kilRule.getEnsures();
-
-            org.kframework.kil.Rule kilDummyRule = new org.kframework.kil.Rule(
-                    kilRightHandSide,
-                    MetaK.kWrap(org.kframework.kil.KSequence.EMPTY, "k"),
-                    kilRequires,
-                    kilEnsures,
-                    context);
-            Rule dummyRule = transformer.transformAndEval(
-                    (org.kframework.kil.Rule) mapTransformer.visitNode(kilDummyRule));
-
+            Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
             SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
-            initialConstraint.addAll(dummyRule.requires());
-            ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    transformer.transformAndEval(kilLeftHandSide),
-                    initialConstraint);
-
+            initialConstraint.addAll(rule.requires());
+            ConstrainedTerm initialTerm = new ConstrainedTerm(rule.leftHandSide(), initialConstraint);
             SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
-            targetConstraint.addAll(dummyRule.ensures());
-            ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    dummyRule.leftHandSide().evaluate(termContext),
-                    dummyRule.lookups().getSymbolicConstraint(termContext),
-                    targetConstraint);
+            targetConstraint.addAll(rule.ensures());
+            ConstrainedTerm targetTerm = new ConstrainedTerm(rule.rightHandSide(), targetConstraint);
 
             proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
         }
