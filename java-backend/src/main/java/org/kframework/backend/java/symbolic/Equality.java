@@ -254,14 +254,16 @@ public class Equality {
                         rightHandSide.sort());
             } else {
                 boolean unifiable = false;
-                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem) {
+                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
+                        && !((KItem)rightHandSide).isEvaluable(equality.context)) {
                     for (Sort sort : ((KItem) rightHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(leftHandSide.sort(), sort);
                     }
                     if (!unifiable) {
                         return true;
                     }
-                } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem) {
+                } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
+                        && !((KItem)leftHandSide).isEvaluable(equality.context)) {
                     for (Sort sort : ((KItem) leftHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(rightHandSide.sort(), sort);
                     }
