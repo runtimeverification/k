@@ -17,7 +17,7 @@ public class VisitorTest {
 
         @Override
         public K apply(KRewrite k) {
-            return k.map(this);
+            return KRewrite(apply(k.left()), apply(k.right()), k.att());
         }
 
         @Override

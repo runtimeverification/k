@@ -48,10 +48,18 @@ class KoreTest {
     KApply(TestK)
   }
 
+  @Test def testKList {
+    val x = KList(TestK, TestK)
+    x match {
+      case KList(a, b) => 
+      case _ => throw new RuntimeException("match fail")
+    }
+  }
+
   @Test def testKRewrite {
     val x = KRewrite(TestK, TestK) copy Attributes(TestK)
-    val t: KRewrite = x map { t => t }
-    assertEquals(x, t)
+    val y = KRewrite(TestK, TestK) copy Attributes(TestK)
+    assertEquals(x, y)
   }
 
   @Test def testKApplyEquals {

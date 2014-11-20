@@ -78,6 +78,10 @@ public class Constructors {
         return new KRewrite(left, right, emptyAttributes);
     }
 
+    public static KRewrite KRewrite(K left, K right, Attributes att) {
+        return new KRewrite(left, right, att);
+    }
+
     @SafeVarargs
     public static <A> Seq<A> Seq(A... es) {
         return immutable(es);

@@ -31,7 +31,9 @@ trait K extends HasAttributes with Matcher with Rewriting {
 
 trait KItem extends K
 
-trait KLabel // needs to be a KLabel to be able to have KVariables in its place
+trait KLabel extends KLabelToString {
+  val name: String
+} // needs to be a KLabel to be able to have KVariables in its place
 
 /* Data Structures */
 
@@ -44,11 +46,10 @@ final class Attributes(val klist: KList) extends KListBacked[Attributes] with At
 case class KString(s: String) // just a wrapper to mark it
 
 case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attributes())
-  extends KAbstractCollection[KApply] with KORE with KApplyMatcher {
+  extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString {
   type ThisK = KApply
   def copy(klist: KCollection, att: Attributes): KApply = new KApply(klabel, klist, att)
 
-  override def toString() = klabel.toString + "(" + klist.mkString(",") + ")"
   override def equals(that: Any) = that match {
     case KApply(`klabel`, _, _) => super.equals(that)
     case _ => false
@@ -58,22 +59,16 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
 trait KToken extends KItem with KORE with KTokenMatcher {
   val sort: Sort
   val s: KString
-
-  override def toString = s.s
 }
 
 case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
-  extends KToken {
+  extends KToken with KTokenToString {
   type ThisK = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
-
-  override def toString = s.s
 }
 
 case class ConcreteKLabel(name: String) extends KLabel {
   def apply(ks: K*) = KApply(this, KList(ks: _*))
-
-  override def toString = name
 }
 
 final class KSequence(val klist: KList, val att: Attributes = Attributes())
@@ -95,16 +90,13 @@ case class KVariable(name: String, att: Attributes = Attributes())
   extends KItem with KORE with KLabel with KVariableMatcher {
   type ThisK = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
-  override def toString = name
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends KAbstractCollection[KRewrite] with KORE with KRewriteMatcher {
+  extends K with KORE with KRewriteMatcher with KRewriteToString {
   self: KRewrite =>
   type ThisK = KRewrite
-  def copy(l: KCollection, att: Attributes): KRewrite = l match {
-    case KList(left, right) => new KRewrite(left, right, att)
-  }
+  def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)
 }
 
@@ -133,11 +125,11 @@ object KSequence extends CanBuildKListLike[KSequence] {
   def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
 }
 
-object KRewrite extends CanBuildKListLike[KRewrite] {
-  def apply(klist: KList, att: Attributes) = klist match {
+object KRewrite {
+  def apply(klist: KList, att: Attributes): KRewrite = klist match {
     case KList(left, right) => new KRewrite(left, right, att)
   }
-  def apply(list: K*) = apply(list, Attributes())
+  def apply(list: K*): KRewrite = apply(list, Attributes())
 }
 
 object KApply extends CanBuildKListLike[KApply] {
