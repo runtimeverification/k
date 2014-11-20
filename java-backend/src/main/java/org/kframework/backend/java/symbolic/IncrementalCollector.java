@@ -11,7 +11,8 @@ import org.kframework.backend.java.kil.JavaSymbolicObject;
 
 
 /**
- * A visitor which computes the set of variables in a term.
+ * A visitor which computes the a set of results in a term based
+ * on a specified criteria.
  *
  * @author AndreiS
  */
@@ -26,14 +27,14 @@ public class IncrementalCollector<T> extends PrePostVisitor {
             BiConsumer<Set<T>, JavaSymbolicObject> setValue,
             Function<JavaSymbolicObject, Set<T>> getValue,
             LocalVisitor computeLocal) {
-        getPreVisitor().addVisitor(new PreVariableVisitor());
+        getPreVisitor().addVisitor(new PreIncrementalVisitor());
         getPostVisitor().addVisitor(computeLocal);
-        getPostVisitor().addVisitor(new PostVariableVisitor());
+        getPostVisitor().addVisitor(new PostIncrementalVisitor());
         this.setValue = setValue;
         this.getValue = getValue;
     }
 
-    private class PreVariableVisitor extends LocalVisitor {
+    private class PreIncrementalVisitor extends LocalVisitor {
         @Override
         public void visit(JavaSymbolicObject term) {
             Set<T> termSet = getValue.apply(term);
@@ -48,7 +49,7 @@ public class IncrementalCollector<T> extends PrePostVisitor {
         }
     }
 
-    private class PostVariableVisitor extends LocalVisitor {
+    private class PostIncrementalVisitor extends LocalVisitor {
         @Override
         public void visit(JavaSymbolicObject term) {
             set = setStack.pop();
