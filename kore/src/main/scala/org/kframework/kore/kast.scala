@@ -37,12 +37,6 @@ trait KLabel extends KLabelToString {
 
 /* Data Structures */
 
-final class Attributes(val klist: KList) extends KListBacked[Attributes] with AttributesToString {
-  import KList.seqOfKtoKList
-  // we will eventually decide on something much more specific for attributes
-  def copy(klist: Iterable[K]) = new Attributes(KList(klist.toSeq: _*))
-}
-
 case class KString(s: String) // just a wrapper to mark it
 
 case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attributes())
@@ -111,11 +105,6 @@ object KToken {
 
 object KVariable {
   val it = this
-}
-
-object Attributes extends CanBuildKListLike[Attributes] {
-  def apply(klist: KList): Attributes = new Attributes(klist)
-  def apply(list: K*): Attributes = new Attributes(list)
 }
 
 object KSequence extends CanBuildKListLike[KSequence] {
