@@ -130,7 +130,7 @@ public final class KompileOptions implements Serializable {
         public boolean noPrelude = false;
 
         // TODO: (RaduM) this might be temporary, since I want to generate the parsers by need if the definition is loaded
-        @Parameter(names="--parseInModule", description="Generates all program parsers for each module.")
+        @Parameter(names="--java-parser", description="Generate tables for the new java parser.")
         public boolean parseInModule = false;
 
         @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")

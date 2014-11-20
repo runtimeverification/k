@@ -160,10 +160,6 @@ public class DefinitionLoader {
         if (files.resolveKompiled("Program.sdf").exists())
             oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
-        // save the new parser info
-        Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
-        loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
-
         StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
 
         String newSdfPgm = newSdfPgmBuilder.toString();
@@ -171,6 +167,10 @@ public class DefinitionLoader {
 
         sw.printIntermediate("File Gen Pgm");
         if (context.kompileOptions.experimental.parseInModule) {
+            // save the new parser info
+            Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
+            loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
+
             Map<String, Grammar> parsers = ParsersPerModule.generateParsersForModules(def, context, kem);
             // save the new parser info for all modules. This should make the previous call obsolete (soon)
             loader.saveOrDie(context.files.resolveKompiled("newModuleParsers.bin"), parsers);
