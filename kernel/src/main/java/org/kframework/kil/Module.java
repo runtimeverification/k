@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import java.util.Set;
 public class Module extends DefinitionItem implements Interfaces.MutableList<ModuleItem, Enum<?>> {
     private String name;
     private List<ModuleItem> items = new ArrayList<>();
+
+    // keeps easy to access information about the current module
+    public ModuleContext moduleContext = new ModuleContext();
 
     // lazily computed set of sorts.
     private Set<Sort> sorts;
