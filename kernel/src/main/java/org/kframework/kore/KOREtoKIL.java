@@ -5,22 +5,115 @@ package org.kframework.kore;
 import org.kframework.kore.outer.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.kframework.kore.outer.Constructors.iterable;
+import static org.kframework.kore.outer.Constructors.*;
 
 public class KOREtoKIL {
 
-    public static org.kframework.kil.Definition convert(Definition definition) {
+    class ListProductionCollector {
+        private Map<KString, List<SyntaxProduction>> listProds;
+        private List<org.kframework.kil.Syntax> userLists;
+
+        public List<org.kframework.kil.Syntax> getResults() {
+            return userLists;
+        }
+
+        public List<Sentence> collectAndRemoveListProds(List<Sentence> sentences) {
+            listProds = new HashMap<>();
+            List<Sentence> ret = new ArrayList<>(sentences);
+            Iterator<Sentence> iter = ret.iterator();
+            while (iter.hasNext()) {
+                Sentence sentence = iter.next();
+                if (sentence instanceof SyntaxProduction) {
+                    SyntaxProduction prod = (SyntaxProduction) sentence;
+                    List<K> attrs = prod.att().stream().collect(Collectors.toList());
+                    if (attrs.size() == 2
+                            && attrs.get(0) instanceof KToken
+                            && ((KToken) attrs.get(0)).sort().name().equals("userList")) {
+                        // TODO: Handle ZERO_OR_MORE/ONE_OR_MORE attributes
+                        KString listType = ((KToken) attrs.get(1)).s();
+                        List<SyntaxProduction> prods = listProds.get(listType);
+                        if (prods == null) {
+                            prods = new ArrayList<>(3);
+                            listProds.put(listType, prods);
+                        }
+                        prods.add(prod);
+                        iter.remove();
+                    }
+                }
+            }
+            generateUserLists();
+            return ret;
+        }
+
+        private void generateUserLists() {
+            userLists = new ArrayList<>();
+            for (Map.Entry<KString, List<SyntaxProduction>> entry : listProds.entrySet()) {
+                KString listType = entry.getKey();
+                List<SyntaxProduction> prods = entry.getValue();
+                if (prods.size() != 3) {
+                    throw new RuntimeException("Found list with " + prods.size() + " elements.");
+                }
+                List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(Collectors.toList());
+                List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(Collectors.toList());
+                List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(Collectors.toList());
+
+                Terminal sep;
+                NonTerminal elem;
+
+                if (prod1Items.size() == 3) {
+                    sep = (Terminal) prod1Items.get(1);
+                } else if (prod2Items.size() == 3) {
+                    sep = (Terminal) prod2Items.get(1);
+                } else {
+                    sep = (Terminal) prod3Items.get(1);
+                }
+
+                if (prod1Items.size() == 1 && prod1Items.get(0) instanceof NonTerminal) {
+                    elem = (NonTerminal) prod1Items.get(0);
+                } else if (prod2Items.get(0) instanceof NonTerminal) {
+                    elem = (NonTerminal) prod2Items.get(0);
+                } else {
+                    elem = (NonTerminal) prod3Items.get(0);
+                }
+
+                userLists.add(makeUserList(listType.s(), elem, sep));
+            }
+        }
+
+        private org.kframework.kil.Syntax makeUserList(String listType, NonTerminal elem, Terminal sep) {
+            org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
+
+            org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
+                    org.kframework.kil.Sort.of(elem.sort().name()),
+                    sep.value(),
+                    elem.sort().name());
+
+            List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>(1);
+            prodItems.add(userList);
+
+            org.kframework.kil.Production prod = new org.kframework.kil.Production(
+                    new org.kframework.kil.NonTerminal(listSort), prodItems);
+
+            org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
+            return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
+        }
+    }
+
+    public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
 
         for (Require r : iterable(definition.requires())) {
-            items.add(convert(r));
+            items.add(convertRequire(r));
         }
 
         for (Module m : iterable(definition.modules())) {
-            items.add(convert(m));
+            items.add(convertModule(m));
         }
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
@@ -28,120 +121,34 @@ public class KOREtoKIL {
         return def;
     }
 
-    public static org.kframework.kil.Require convert(Require require) {
+    public org.kframework.kil.Require convertRequire(Require require) {
         return new org.kframework.kil.Require(require.file().getPath());
     }
 
-    public static org.kframework.kil.Module convert(Module module) {
-        org.kframework.kil.Module mod = new org.kframework.kil.Module(
-                module.name());
+    public org.kframework.kil.Module convertModule(Module module) {
+        org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
 
         List<Sentence> sentences = scala.collection.JavaConversions
                 .seqAsJavaList(module.sentences().toList());
-        mod = mod.setModuleItems(convert(sentences));
+        mod = mod.setModuleItems(convertSentences(sentences));
 
-        mod.setAttributes(convert(module.att()));
+        mod.setAttributes(convertAttributes(module.att()));
         return mod;
     }
 
-    public static List<org.kframework.kil.ModuleItem> convert(
-            List<Sentence> sentences) {
+    public List<org.kframework.kil.ModuleItem> convertSentences(List<Sentence> sentences) {
         List<org.kframework.kil.ModuleItem> ret = new ArrayList<>();
-        Iterator<Sentence> iter = sentences.iterator();
-
-        while (iter.hasNext()) {
-            Sentence sentence = iter.next();
-            if (sentence instanceof Context) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof Rule) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof ModuleComment) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof Import) {
-                Import i = (Import) sentence;
-                org.kframework.kil.ModuleItem item = new org.kframework.kil.Import(
-                        i.what());
-                item.setAttributes(convert(i.att()));
-                ret.add(item);
-            } else if (sentence instanceof SyntaxPriority) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof SyntaxSort) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof SyntaxProduction) {
-                SyntaxProduction prod = (SyntaxProduction) sentence;
-                KList attrs = prod.att().klist();
-                if (attrs.size() != 0
-                        && ((ConsKList) attrs).head() instanceof KToken
-                        && ((KToken) ((ConsKList) attrs).head()).sort().name()
-                                .equals("userList")) {
-                    // Found a userlist translation. Next 3 rules should be
-                    // describing the UserList
-                    String listType = ((KToken) ((ConsKList) attrs).head()).s()
-                            .s();
-                    Sentence sentence2 = iter.next();
-                    Sentence sentence3 = iter.next(); // consume last sentence
-                    // FIXME: rules are getting reordered
-                    ret.add(makeUserList(listType, sentence3, sentence));
-                } else {
-                    throw new RuntimeException("Unhandled case");
-                }
-            } else if (sentence instanceof Configuration) {
-                throw new RuntimeException("Unhandled case");
-            } else if (sentence instanceof Bubble) {
-                Bubble bubble = (Bubble) sentence;
-                org.kframework.kil.ModuleItem item = new org.kframework.kil.StringSentence(
-                        bubble.contents(), null, bubble.ty(), null);
-                item.setAttributes(convert(sentence.att()));
-                ret.add(item);
-            } else {
-                throw new RuntimeException("Unhandled case");
-            }
-        }
-
+        ListProductionCollector listCollector = new ListProductionCollector();
+        sentences = listCollector.collectAndRemoveListProds(sentences);
+        ret.addAll(listCollector.getResults());
         return ret;
     }
 
-    public static org.kframework.kil.Syntax makeUserList(String listType,
-            Sentence s1, Sentence s2) {
-        SyntaxProduction prod1 = (SyntaxProduction) s1;
-        List<ProductionItem> prod1Items = scala.collection.JavaConversions
-                .seqAsJavaList(prod1.items());
-
-        SyntaxProduction prod2 = (SyntaxProduction) s2;
-        List<ProductionItem> prod2Items = scala.collection.JavaConversions
-                .seqAsJavaList(prod2.items());
-
-        org.kframework.kil.Sort listSort = convert(prod1.sort());
-        org.kframework.kil.Sort elementSort = org.kframework.kil.Sort
-                .of(((NonTerminal) prod2Items.get(0)).sort().name());
-        String sep = ((Terminal) prod1Items.get(1)).value();
-
-        List<org.kframework.kil.PriorityBlock> pbs = new ArrayList<>();
-        org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock();
-        pbs.add(pb);
-        List<org.kframework.kil.Production> prods = new ArrayList<>();
-        pb.setProductions(prods);
-
-        org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
-                elementSort, sep, listType);
-
-        List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>();
-
-        org.kframework.kil.Production prod = new org.kframework.kil.Production(
-                new org.kframework.kil.NonTerminal(listSort), prodItems);
-        prods.add(prod);
-
-        prodItems.add(userList);
-
-        return new org.kframework.kil.Syntax(
-                new org.kframework.kil.NonTerminal(listSort), pbs);
-    }
-
-    public static org.kframework.kil.Sort convert(Sort sort) {
+    public org.kframework.kil.Sort convertSort(Sort sort) {
         return org.kframework.kil.Sort.of(sort.name());
     }
 
-    public static org.kframework.kil.Attributes convert(Attributes attrs) {
+    public org.kframework.kil.Attributes convertAttributes(Attributes attrs) {
         org.kframework.kil.Attributes ret = new org.kframework.kil.Attributes();
         KList attrsKList = attrs.klist();
         while (attrsKList.size() != 0) {

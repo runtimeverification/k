@@ -156,7 +156,7 @@ public class KILtoKORE {
 
         // there are some productions
         for (PriorityBlock b : s.getPriorityBlocks()) {
-            if (b.getAssoc() != "") {
+            if (!b.getAssoc().equals("")) {
                 Value assoc = convertAssoc(b.getAssoc());
                 res.add(SyntaxAssociativity(assoc, convertToTags.apply(b)));
             }
@@ -205,7 +205,8 @@ public class KILtoKORE {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
         org.kframework.kore.KList userlistMarker =
-                KList(KToken(Sort("userList"), KString(userList.getListType())));
+                KList(KToken(Sort("userList"), KString(userList.getListType())),
+                        KToken(Sort("listType"), KString(userList.getSort().getName())));
 
         org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
 
