@@ -4,6 +4,7 @@ package org.kframework.kore.outer
 
 import collection.JavaConverters._
 import org.kframework.kore._;
+import java.util.stream.StreamSupport
 
 /**
  *
@@ -19,10 +20,11 @@ object Constructors {
   def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
   def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
   def immutable[T](s: Array[T]): Seq[T] = s
-  
-  def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
 
-  def KList(s: java.util.Set[K]): KList = kore.KList(s.asScala.toSeq: _*)
+  def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
+  def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
+
+  def KList(s: java.lang.Iterable[K]): KList = kore.KList(s.asScala.toSeq: _*)
   def Definition(requires: Set[Require], modules: Set[Module]) =
     kore.outer.Definition(requires, modules)
 
