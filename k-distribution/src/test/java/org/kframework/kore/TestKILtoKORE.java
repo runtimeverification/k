@@ -37,7 +37,7 @@ public class TestKILtoKORE extends BaseTest {
     // KToken(String, "bla"))))
     @Test
     public void configuration() throws IOException {
-        outerTest();
+        sdfTest();
     }
 
     @Test

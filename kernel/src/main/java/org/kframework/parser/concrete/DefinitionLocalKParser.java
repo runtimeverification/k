@@ -52,7 +52,7 @@ public class DefinitionLocalKParser {
             if (cached != null) return cached;
             cl = new URLClassLoader(new URL[] {
                     new File(JarInfo.getKBase(false), "lib/java/dynamic/strategoxt.jar").toURI().toURL(),
-                    new File(JarInfo.getKBase(false), "lib/java/dynamic/sdf-parser.jar").toURI().toURL()
+                    new File(JarInfo.getKBase(false), "lib/java/dynamic/sdf-parser.jar").toURI().toURL(),
             });
             Class<?> kparser = Class.forName("org.kframework.parser.concrete.KParser", true, cl);
             if (resourceDomain == null) resourceDomain = kparser;
