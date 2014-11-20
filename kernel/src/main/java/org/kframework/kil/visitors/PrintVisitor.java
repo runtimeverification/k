@@ -1,12 +1,21 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.visitors;
 
+import org.kframework.backend.unparser.KoreFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
 
 /**
- * A basic visitor pattern which takes no extra parameters, returns nothing, and throws no checked exceptions.
+ * A visitor pattern which takes a StringBuilder which is used to construct a textual
+ * representation of the term. Used with:
+ * <pre>{@code
+ * StringBuilder sb = new StringBuilder();
+ * visitor.visitNode(node, sb);
+ * String result = sb.toString();
+ * }</pre>
+ *
+ * For an example implementation, see {@link KoreFilter}.
  * @author dwightguth
  *
  */

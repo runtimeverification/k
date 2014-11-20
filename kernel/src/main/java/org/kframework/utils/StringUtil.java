@@ -607,6 +607,16 @@ public class StringUtil {
         return StringUtils.join(args1, ' ');
     }
 
+    /**
+     * Takes a textual representation of a KLabel using backticks to delimit
+     * and returns the string representation of the KLabel that it corresponds to
+     *
+     * Used by the KAST parser.
+     *
+     * @param str An image of a parser token corresponding to a KLabel in KORE which
+     * begins and ends with backtick
+     * @return The string value of the KLabel
+     */
     public static String unescapeKoreKLabel(String str) {
         char delimiter = '`';
         StringBuilder sb = new StringBuilder();
@@ -632,6 +642,15 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Takes the value of a KLabel and returns a string representation, delimited with
+     * backticks, of the syntax of that KLabel in KORE.
+     *
+     * Used by the KAST pretty printer.
+     *
+     * @param str A string value corresponding to a KLabel.
+     * @return A string which can be parsed back by a KORE parser to reach the original KLabel.
+     */
     public static String escapeKoreKLabel(String value) {
         char delimiter = '`';
         final int length = value.length();

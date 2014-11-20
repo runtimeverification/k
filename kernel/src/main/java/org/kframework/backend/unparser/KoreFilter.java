@@ -13,6 +13,13 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.PrintVisitor;
 import org.kframework.utils.StringUtil;
 
+/**
+ * Converts from the old KIL hierarchy to the textual KAST.
+ * Currently supports the K-SEQ module of KORE only.
+ *
+ * @author dwightguth
+ *
+ */
 public class KoreFilter extends PrintVisitor {
 
     public KoreFilter(Context context) {
