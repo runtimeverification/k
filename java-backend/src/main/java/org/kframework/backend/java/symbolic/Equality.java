@@ -254,14 +254,22 @@ public class Equality {
                         rightHandSide.sort());
             } else {
                 boolean unifiable = false;
-                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem) {
+                // TODO(YilongL): find a better way to deal with the case in partial compilation
+                // where this code path is invoked on an unevaluated ground function such that
+                // that function could return a smaller sort than the main return sort of the function,
+                // for which the two can be unified. e.g.:
+                // syntax ThreadId ::= Int | "foo" | "getThreadId" [function]
+                // ThreadId:Int ?= getThreadId
+                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
+                        && !((KItem)rightHandSide).isEvaluable(equality.context)) {
                     for (Sort sort : ((KItem) rightHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(leftHandSide.sort(), sort);
                     }
                     if (!unifiable) {
                         return true;
                     }
-                } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem) {
+                } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
+                        && !((KItem)leftHandSide).isEvaluable(equality.context)) {
                     for (Sort sort : ((KItem) leftHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(rightHandSide.sort(), sort);
                     }
