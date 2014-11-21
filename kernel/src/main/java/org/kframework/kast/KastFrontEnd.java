@@ -8,6 +8,7 @@ import java.util.Map;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
+import org.kframework.backend.unparser.KoreFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
@@ -17,6 +18,7 @@ import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
@@ -57,8 +59,9 @@ public class KastFrontEnd extends FrontEnd {
             KExceptionManager kem,
             JarInfo jarInfo,
             @Environment Map<String, String> env,
-            ProgramLoader loader) {
-        super(kem, options.global, usage, experimentalUsage, jarInfo);
+            ProgramLoader loader,
+            FileUtil files) {
+        super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.contextProvider = contextProvider;
         this.sw = sw;
@@ -87,10 +90,16 @@ public class KastFrontEnd extends FrontEnd {
             KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
             kastFilter.visitNode(out);
             kast = kastFilter.getResult();
-        } else {
+        } else if (context.kompileOptions.experimental.legacyKast) {
             MaudeFilter maudeFilter = new MaudeFilter(context, kem);
             maudeFilter.visitNode(out);
             kast = maudeFilter.getResult();
+            kast.append("\n");
+        } else {
+            KoreFilter koreFilter = new KoreFilter(context);
+            StringBuilder sb = new StringBuilder();
+            koreFilter.visitNode(out, sb);
+            kast = sb;
             kast.append("\n");
         }
 

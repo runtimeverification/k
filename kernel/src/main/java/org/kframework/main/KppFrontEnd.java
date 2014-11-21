@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.FirstArg;
 
@@ -27,8 +28,9 @@ public class KppFrontEnd extends FrontEnd {
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @FirstArg String fileName,
-            JarInfo jarInfo) {
-        super(kem, globalOptions, USAGE, "", jarInfo);
+            JarInfo jarInfo,
+            FileUtil files) {
+        super(kem, globalOptions, USAGE, "", jarInfo, files);
         this.fileName = fileName;
     }
 

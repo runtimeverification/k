@@ -19,10 +19,6 @@ public final class Sort implements MaximalSharing, Serializable {
 
     private static final PatriciaTrie<Sort> cache = new PatriciaTrie<>();
 
-    /*
-     * The following sorts will always have fixed ordinals as they are
-     * created and cached during class initialization.
-     */
     public static final Sort KITEM          =   Sort.of("KItem");
     public static final Sort KSEQUENCE      =   Sort.of("K");
     public static final Sort KLIST          =   Sort.of("KList");
@@ -53,21 +49,8 @@ public final class Sort implements MaximalSharing, Serializable {
     private final String name;
 
     /**
-     * Each sort is tagged with an unique ordinal, which is determined by the
-     * order in which the sort is cached.
-     * <p>
-     * Once the ordinal of a sort is determined, later serialization and
-     * de-serialization should have no effect on it.
-     */
-    private final int ordinal;
-
-    /**
      * Gets the corresponding {@code Sort} from its {@code String}
      * representation.
-     * <p>
-     * This method shall <b>NOT</b> be used to initialize static {@code Sort}
-     * data outside of this class because it will assign a wrong ordinal to that
-     * {@code Sort}.
      *
      * @param name
      *            the name of the sort
@@ -76,7 +59,7 @@ public final class Sort implements MaximalSharing, Serializable {
     public static Sort of(String name) {
         Sort sort = cache.get(name);
         if (sort == null) {
-            sort = new Sort(name, cache.size());
+            sort = new Sort(name);
             cache.put(name, sort);
         }
         return sort;
@@ -94,17 +77,12 @@ public final class Sort implements MaximalSharing, Serializable {
         return builder.build();
     }
 
-    private Sort(String name, int ordinal) {
+    private Sort(String name) {
         this.name = name;
-        this.ordinal = ordinal;
     }
 
     public String name() {
         return name;
-    }
-
-    public int ordinal() {
-        return ordinal;
     }
 
     public Sort getUserListSort(String separator) {
@@ -118,7 +96,7 @@ public final class Sort implements MaximalSharing, Serializable {
 
     @Override
     public int hashCode() {
-        return ordinal;
+        return name.hashCode();
     }
 
     @Override
@@ -138,13 +116,8 @@ public final class Sort implements MaximalSharing, Serializable {
     Object readResolve() throws ObjectStreamException {
         Sort sort = cache.get(name);
         if (sort == null) {
-            /* do not use Sort#of to cache this sort; we need to
-             * preserve the original ordinal */
             sort = this;
             cache.put(name, sort);
-        } else {
-            assert this.ordinal == sort.ordinal : "ordinal of sort " + name
-                    + " changes after deserialization.";
         }
         return sort;
     }

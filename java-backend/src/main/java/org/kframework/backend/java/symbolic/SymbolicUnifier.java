@@ -118,6 +118,14 @@ public class SymbolicUnifier extends AbstractUnifier {
      * doing.
      */
     private void unify(Term term, Term otherTerm) {
+        if (term.isGround() && otherTerm.isGround()
+                && term.isNormal() && otherTerm.isNormal()) {
+            if (!term.equals(otherTerm)) {
+                fail(term, otherTerm);
+            }
+            return;
+        }
+
         if (term.kind().isComputational()) {
             assert otherTerm.kind().isComputational() : otherTerm;
 

@@ -15,8 +15,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.Environment;
-import org.kframework.utils.file.WorkingDir;
+import org.kframework.utils.kastparser.KastParser;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -176,7 +175,11 @@ public class RunProcess {
 
                 //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
                 //TODO(dwightguth): parse the output of the external parser into real kil classes
-                term = new BackendTerm(Sort.of(""), kast);
+                if (context.kompileOptions.experimental.legacyKast) {
+                    term = new BackendTerm(Sort.of(""), kast);
+                } else {
+                    return KastParser.parse(kast, source);
+                }
         }
 
         return term;

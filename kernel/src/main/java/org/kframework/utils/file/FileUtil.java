@@ -27,7 +27,7 @@ public class FileUtil {
     private final Provider<File> kompiledDir;
     private final File workingDir;
     private final Provider<File> definitionDir;
-    private final KExceptionManager kem;
+    private final GlobalOptions options;
 
     @Inject
     public FileUtil(
@@ -35,25 +35,22 @@ public class FileUtil {
             @DefinitionDir @Nullable Provider<File> definitionDir,
             @WorkingDir File workingDir,
             @KompiledDir @Nullable Provider<File> kompiledDir,
-            GlobalOptions options,
-            KExceptionManager kem) {
+            GlobalOptions options) {
         this.tempDir = tempDir;
         this.definitionDir = definitionDir;
         this.workingDir = workingDir;
         this.kompiledDir = kompiledDir;
-        this.kem = kem;
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    if (!options.debug) {
-                        try {
-                            FileUtils.deleteDirectory(tempDir);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
+        this.options = options;
+    }
+
+    public void deleteTempDir() {
+        if (!options.debug) {
+            try {
+                FileUtils.deleteDirectory(tempDir);
+            } catch (IOException e) {
+                throw KExceptionManager.criticalError("Failed to delete temporary directory", e);
+            }
+        }
     }
 
     /**

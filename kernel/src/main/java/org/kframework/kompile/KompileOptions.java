@@ -129,8 +129,9 @@ public class KompileOptions implements Serializable {
         @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;
 
-        @Parameter(names="--loud", description="Prints 'Done' at the end if all is ok.")
-        public boolean loud = false;
+        // TODO: (RaduM) this might be temporary, since I want to generate the parsers by need if the definition is loaded
+        @Parameter(names="--java-parser", description="Generate tables for the new java parser.")
+        public boolean javaParser = false;
 
         @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
         public List<String> documentation = Collections.singletonList("documentation");

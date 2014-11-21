@@ -57,6 +57,7 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -689,54 +690,59 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      *          the partially evaluated rule
      */
     private static Rule evaluateRule(Rule rule, GlobalContext globalContext) {
-        TermContext termContext = TermContext.of(globalContext);
-        // TODO(AndreiS): some evaluation is required in the LHS as well
-        // TODO(YilongL): cannot simply uncomment the following code because it
-        // may evaluate the LHS using the rule itself
-        //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+        try {
+            TermContext termContext = TermContext.of(globalContext);
+            // TODO(AndreiS): some evaluation is required in the LHS as well
+            // TODO(YilongL): cannot simply uncomment the following code because it
+            // may evaluate the LHS using the rule itself
+            //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
 
-        Rule origRule = rule;
-        Term rightHandSide = rule.rightHandSide().evaluate(termContext);
-        List<Term> requires = new ArrayList<>();
-        for (Term term : rule.requires()) {
-            requires.add(term.evaluate(termContext));
-        }
-        List<Term> ensures = new ArrayList<>();
-        for (Term term : rule.ensures()) {
-            ensures.add(term.evaluate(termContext));
-        }
-        UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
-        for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-            lookupsBuilder.add(
-                    equality.leftHandSide().evaluate(termContext),
-                    equality.rightHandSide().evaluate(termContext));
-        }
-
-        Map<CellLabel, Term> rhsOfWriteCell = null;
-        if (rule.isCompiledForFastRewriting()) {
-            rhsOfWriteCell = new HashMap<>();
-            for (Map.Entry<CellLabel, Term> entry : rule.rhsOfWriteCell().entrySet()) {
-                rhsOfWriteCell.put(entry.getKey(), entry.getValue().evaluate(termContext));
+            Rule origRule = rule;
+            Term rightHandSide = rule.rightHandSide().evaluate(termContext);
+            List<Term> requires = new ArrayList<>();
+            for (Term term : rule.requires()) {
+                requires.add(term.evaluate(termContext));
             }
-        }
+            List<Term> ensures = new ArrayList<>();
+            for (Term term : rule.ensures()) {
+                ensures.add(term.evaluate(termContext));
+            }
+            UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+                lookupsBuilder.add(
+                        equality.leftHandSide().evaluate(termContext),
+                        equality.rightHandSide().evaluate(termContext));
+            }
 
-        Rule newRule = new Rule(
-                rule.label(),
-                rule.leftHandSide(),
-                rightHandSide,
-                requires,
-                ensures,
-                rule.freshConstants(),
-                rule.freshVariables(),
-                lookupsBuilder.build(),
-                rule.isCompiledForFastRewriting(),
-                rule.lhsOfReadCell(),
-                rhsOfWriteCell,
-                rule.cellsToCopy(),
-                rule.instructions(),
-                rule,
-                globalContext.getDefinition());
-        return newRule.equals(rule) ? origRule : newRule;
+            Map<CellLabel, Term> rhsOfWriteCell = null;
+            if (rule.isCompiledForFastRewriting()) {
+                rhsOfWriteCell = new HashMap<>();
+                for (Map.Entry<CellLabel, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+                    rhsOfWriteCell.put(entry.getKey(), entry.getValue().evaluate(termContext));
+                }
+            }
+
+            Rule newRule = new Rule(
+                    rule.label(),
+                    rule.leftHandSide(),
+                    rightHandSide,
+                    requires,
+                    ensures,
+                    rule.freshConstants(),
+                    rule.freshVariables(),
+                    lookupsBuilder.build(),
+                    rule.isCompiledForFastRewriting(),
+                    rule.lhsOfReadCell(),
+                    rhsOfWriteCell,
+                    rule.cellsToCopy(),
+                    rule.instructions(),
+                    rule,
+                    globalContext.getDefinition());
+            return newRule.equals(rule) ? origRule : newRule;
+        } catch (KEMException e) {
+            e.exception.addTraceFrame("while compiling rule at location " + rule.getSource() + rule.getLocation());
+            throw e;
+        }
     }
 
     private static void flattenKSequence(

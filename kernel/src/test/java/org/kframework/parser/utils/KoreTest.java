@@ -35,8 +35,8 @@ public class KoreTest extends BaseTestCase {
 
     @Test
     public void testKore() throws Exception {
-        String quq = FileUtils.readFileToString(new File("src/test/resources/kast/quote-unquote.kore"));
-        String kore = FileUtils.readFileToString(new File("src/test/resources/kast/kore.k"));
+        String quq = FileUtils.readFileToString(new File(getClass().getResource("/kast/quote-unquote.kore").toURI()));
+        String kore = FileUtils.readFileToString(new File(getClass().getResource("/kast/kore.k").toURI()));
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(KoreTest.class), kore, null));
         ProductionReference pr = null;

@@ -23,6 +23,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -162,6 +163,18 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(KApp kApp, Void _) {
+        new BasicVisitor(context) {
+            @Override
+            public Void visit(Rewrite node, Void p) throws RuntimeException {
+                /* dwightguth: handle the case where hasRewrite needs to be set
+                 * in order to set writeCell2RHS, e.g.:
+                 *   rule <k> foo(a => b) ...</k>
+                 */
+                hasRewrite = true;
+                return null;
+            }
+        }.visitNode(kApp);
+
         /* YilongL: this prevents collecting cells injected inside KItems, e.g.:
          *   rule <k> loadObj(<threads> G:Bag </threads>) => . ...</k>  */
         return kApp;

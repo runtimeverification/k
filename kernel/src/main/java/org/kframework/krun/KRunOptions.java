@@ -268,5 +268,8 @@ public final class KRunOptions {
 
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public String outputFile;
+
+        @Parameter(names="--trace", description="Print a trace of every rule applied.")
+        public boolean trace = false;
     }
 }

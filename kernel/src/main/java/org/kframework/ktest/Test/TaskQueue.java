@@ -8,6 +8,7 @@ import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,10 +78,10 @@ public class TaskQueue {
      *
      * Note that these don't hold all the Proc objects, hold only the ones that we really run.
      */
-    private final List<Proc<TestCase>> scriptProcs = new ArrayList<>();
-    private final List<Proc<TestCase>> kompileProcs = new ArrayList<>();
-    private final List<Proc<TestCase>> pdfProcs = new ArrayList<>();
-    private final List<Proc<KRunProgram>> krunProcs = new ArrayList<>();
+    private final List<Proc<TestCase>> scriptProcs = Collections.synchronizedList(new ArrayList<>());
+    private final List<Proc<TestCase>> kompileProcs = Collections.synchronizedList(new ArrayList<>());
+    private final List<Proc<TestCase>> pdfProcs = Collections.synchronizedList(new ArrayList<>());
+    private final List<Proc<KRunProgram>> krunProcs = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Time when lastly finished task finishes.
