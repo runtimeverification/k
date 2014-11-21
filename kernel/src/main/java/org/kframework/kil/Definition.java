@@ -107,7 +107,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return mainSyntaxModule;
     }
 
-    public void preprocess(org.kframework.kil.loader.Context context) {
+    public void preprocess(org.kframework.kil.loader.Context context, boolean autoinclude) {
         // Collect information
         // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
         new UpdateReferencesVisitor(context).visitNode(this);
@@ -120,6 +120,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         new CollectStartSymbolPgmVisitor(context).visitNode(this);
         new CollectConfigCellsVisitor(context).visitNode(this);
         new CollectLocationsVisitor().visitNode(this);
+        new FillInModuleContext(autoinclude).visitNode(this);
         new CollectVariableTokens(context).visitNode(this);
 
         /* collect lexical token sorts */

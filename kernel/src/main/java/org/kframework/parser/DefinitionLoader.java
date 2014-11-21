@@ -83,7 +83,7 @@ public class DefinitionLoader {
 
             sw.printIntermediate("Load definition from binary");
 
-            javaDef.preprocess(context);
+            javaDef.preprocess(context, autoinclude);
 
             sw.printIntermediate("Preprocess");
 
@@ -138,7 +138,7 @@ public class DefinitionLoader {
 
         // HERE: add labels to sorts
 
-        def.preprocess(context);
+        def.preprocess(context, autoinclude);
 
         sw.printIntermediate("Preprocess");
 

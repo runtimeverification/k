@@ -18,7 +18,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     private List<ModuleItem> items = new ArrayList<>();
 
     // keeps easy to access information about the current module
-    public ModuleContext moduleContext = new ModuleContext();
+    private transient ModuleContext moduleContext = new ModuleContext();
 
     // lazily computed set of sorts.
     private Set<Sort> sorts;
@@ -204,4 +204,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         this.sorts = null;
     }
 
+    public ModuleContext getModuleContext() {
+        return moduleContext;
+    }
 }

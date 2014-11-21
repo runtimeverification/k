@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ModuleContext implements Serializable {
-    private Set<Module> importedModules;
-    private Set<Sort> declaredSorts;
+    private Set<Module> importedModules = new HashSet<>();
+    private Set<Sort> declaredSorts = new HashSet<>();
     private Poset<Sort> syntacticSubsorts = Poset.create();
     public SetMultimap<String, Production> klabels = HashMultimap.create();
     public SetMultimap<String, Production> tags = HashMultimap.create();
@@ -35,6 +35,19 @@ public class ModuleContext implements Serializable {
     public Set<Production> productions = new HashSet<>();
     public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
+
+    public void add(ModuleContext moduleContext) {
+        this.importedModules.addAll(moduleContext.importedModules);
+        this.declaredSorts.addAll(moduleContext.declaredSorts);
+        this.syntacticSubsorts.add(moduleContext.syntacticSubsorts);
+        this.klabels.putAll(moduleContext.klabels);
+        this.tags.putAll(moduleContext.tags);
+        this.cells.putAll(moduleContext.cells);
+        this.cellSorts.putAll(moduleContext.cellSorts);
+        this.priorities.add(moduleContext.priorities);
+        this.assocLeft.add(moduleContext.assocLeft);
+        this.assocRight.add(moduleContext.assocRight);
+    }
 
     public void addProduction(Production p) {
         productions.add(p);
@@ -69,5 +82,25 @@ public class ModuleContext implements Serializable {
         for (Attribute<?> a : p.getAttributes().values()) {
             tags.remove(a.getKey().toString(), p);
         }
+    }
+
+    public void addImportedModule(Module mod) {
+        importedModules.add(mod);
+    }
+
+    public Set<Module> getImportedModules() {
+        return java.util.Collections.unmodifiableSet(importedModules);
+    }
+
+    public void addDeclaredSort(Sort sort) {
+        declaredSorts.add(sort);
+    }
+
+    public Set<Sort> getDeclaredSorts() {
+        return java.util.Collections.unmodifiableSet(declaredSorts);
+    }
+
+    public void addSyntacticSubsort(Sort bigSort, Sort smallSort) {
+        syntacticSubsorts.addRelation(bigSort, smallSort);
     }
 }

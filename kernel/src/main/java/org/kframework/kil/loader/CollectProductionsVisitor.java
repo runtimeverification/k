@@ -12,7 +12,7 @@ public class CollectProductionsVisitor extends BasicVisitor {
     @Override
     public Void visit(Production node, Void _) {
         context.addProduction(node);
-        this.getCurrentModule().moduleContext.addProduction(node);
+        this.getCurrentModule().getModuleContext().addProduction(node);
         return null;
     }
 }

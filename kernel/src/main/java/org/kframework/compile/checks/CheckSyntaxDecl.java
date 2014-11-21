@@ -90,7 +90,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 sorts++;
                 NonTerminal s = (NonTerminal) pi;
                 if (!s.getSort().isCellSort()) {
-                    if (!context.getAllSorts().contains(s.getSort())) {
+                    if (!this.getCurrentModule().getModuleContext().getDeclaredSorts().contains(s.getSort())) {
                         String msg = "Undefined sort " + s;
                         throw KExceptionManager.compilerError(msg, this, s);
                     }

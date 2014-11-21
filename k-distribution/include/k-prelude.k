@@ -10,6 +10,9 @@ module K-TECHNIQUE
     // so we have to declare things like isSet in less obvious places
 
     syntax KItem
+    syntax K
+    syntax KList
+	syntax KLabel
 endmodule
 
 module K-LISTK-EXTRAS
