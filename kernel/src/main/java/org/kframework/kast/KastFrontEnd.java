@@ -18,6 +18,7 @@ import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
@@ -58,8 +59,9 @@ public class KastFrontEnd extends FrontEnd {
             KExceptionManager kem,
             JarInfo jarInfo,
             @Environment Map<String, String> env,
-            ProgramLoader loader) {
-        super(kem, options.global, usage, experimentalUsage, jarInfo);
+            ProgramLoader loader,
+            FileUtil files) {
+        super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.contextProvider = contextProvider;
         this.sw = sw;

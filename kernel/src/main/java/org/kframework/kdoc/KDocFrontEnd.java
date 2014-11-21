@@ -8,6 +8,7 @@ import org.kframework.kil.Definition;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
@@ -42,8 +43,9 @@ public class KDocFrontEnd extends FrontEnd {
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             PosterBackend backend,
-            Provider<Definition> def) {
-        super(kem, globalOptions, usage, experimentalUsage, jarInfo);
+            Provider<Definition> def,
+            FileUtil files) {
+        super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.backend = backend;
         this.def = def;
     }

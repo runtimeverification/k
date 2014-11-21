@@ -30,9 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
 
@@ -53,8 +51,6 @@ import com.google.inject.Inject;
  */
 @SuppressWarnings("serial")
 public final class KItem extends Term {
-
-    private static final Table<Definition, CacheTableColKey, CacheTableValue> SORT_CACHE_TABLE = HashBasedTable.create();
 
     private final Term kLabel;
     private final Term kList;
@@ -111,7 +107,7 @@ public final class KItem extends Term {
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                cacheTabVal = SORT_CACHE_TABLE.get(definition, cacheTabColKey);
+                cacheTabVal = definition.SORT_CACHE_TABLE.get(cacheTabColKey);
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
@@ -123,7 +119,7 @@ public final class KItem extends Term {
             /* cache miss, compute sort information and cache it */
             cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext, tool);
             if (enableCache) {
-                SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
+                definition.SORT_CACHE_TABLE.put(cacheTabColKey, cacheTabVal);
             }
 
             sort = cacheTabVal.sort;
@@ -669,7 +665,7 @@ public final class KItem extends Term {
      * {@link KItem#isExactSort}, depends only on the {@code KLabelConstant} and
      * the sorts of its children.
      */
-    private static final class CacheTableColKey {
+    static final class CacheTableColKey {
 
         final KLabelConstant kLabelConstant;
         final Sort[] sorts;
@@ -720,7 +716,7 @@ public final class KItem extends Term {
         }
     }
 
-    private static final class CacheTableValue {
+    static final class CacheTableValue {
 
         final Sort sort;
         final boolean isExactSort;
