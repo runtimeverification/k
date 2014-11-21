@@ -107,7 +107,7 @@ public final class KItem extends Term {
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                cacheTabVal = definition.SORT_CACHE_TABLE.get(cacheTabColKey);
+                cacheTabVal = definition.getSortCacheTable().get(cacheTabColKey);
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
@@ -119,7 +119,7 @@ public final class KItem extends Term {
             /* cache miss, compute sort information and cache it */
             cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext, tool);
             if (enableCache) {
-                definition.SORT_CACHE_TABLE.put(cacheTabColKey, cacheTabVal);
+                definition.getSortCacheTable().put(cacheTabColKey, cacheTabVal);
             }
 
             sort = cacheTabVal.sort;

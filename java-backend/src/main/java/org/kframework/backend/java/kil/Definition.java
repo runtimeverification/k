@@ -61,7 +61,7 @@ public class Definition extends JavaSymbolicObject {
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
 
-    final Map<KItem.CacheTableColKey, KItem.CacheTableValue> SORT_CACHE_TABLE = new HashMap<>();
+    private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     @Inject
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
@@ -231,5 +231,9 @@ public class Definition extends JavaSymbolicObject {
 
     public RuleIndex getIndex() {
         return index;
+    }
+
+    public Map<KItem.CacheTableColKey, KItem.CacheTableValue> getSortCacheTable() {
+        return sortCacheTable;
     }
 }
