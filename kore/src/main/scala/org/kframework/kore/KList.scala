@@ -6,10 +6,12 @@ import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mu
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class KList extends KListLike[KList] with KCollection with KListMatcher {
+abstract class KList extends KListLike[KList] with KCollection with KListMatcher with interfaces.KList {
   type ThisK = KList
   def copy(l: LinearSeq[K]) = KList(l: _*)
   def copy(l: Iterable[K]) = copy(l.toList)
+  
+  def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]
 
   override def toString = this.mkString(", ")
 }

@@ -71,6 +71,7 @@ trait KListBacked[+This <: KListLike[This]] extends KListLike[This] {
   override def head = klist.head
   override def tail = copy(klist.tail)
   override def isEmpty = klist.isEmpty
+  def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]  
 }
 
 /**

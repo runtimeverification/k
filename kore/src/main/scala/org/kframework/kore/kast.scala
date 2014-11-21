@@ -22,22 +22,22 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Matcher with Rewriting {
+trait K extends HasAttributes with Matcher with Rewriting with interfaces.K {
   protected type ThisK <: K
 
   def copy(att: Attributes): ThisK
   def copy(): ThisK = copy(att)
 }
 
-trait KItem extends K
+trait KItem extends K with interfaces.KItem
 
-trait KLabel extends KLabelToString {
+trait KLabel extends KLabelToString with interfaces.KLabel {
   val name: String
 } // needs to be a KLabel to be able to have KVariables in its place
 
 /* Data Structures */
 
-case class KString(s: String) // just a wrapper to mark it
+case class KString(s: String) extends interfaces.KString // just a wrapper to mark it
 
 case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attributes())
   extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString {
@@ -50,7 +50,7 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
   }
 }
 
-trait KToken extends KItem with KORE with KTokenMatcher {
+trait KToken extends KItem with KORE with KTokenMatcher with interfaces.KToken {
   val sort: Sort
   val s: KString
 }
@@ -66,7 +66,7 @@ case class ConcreteKLabel(name: String) extends KLabel {
 }
 
 final class KSequence(val klist: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection[KSequence] with KSequenceMatcher {
+  extends KAbstractCollection[KSequence] with KSequenceMatcher with interfaces.KSequence {
   self: KSequence =>
   type ThisK = KSequence
   def copy(klist: KCollection, att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
@@ -81,13 +81,13 @@ final class KSequence(val klist: KList, val att: Attributes = Attributes())
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
-  extends KItem with KORE with KLabel with KVariableMatcher {
+  extends KItem with KORE with KLabel with KVariableMatcher with interfaces.KVariable {
   type ThisK = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends K with KORE with KRewriteMatcher with KRewriteToString {
+  extends K with KORE with KRewriteMatcher with KRewriteToString with interfaces.KRewrite {
   self: KRewrite =>
   type ThisK = KRewrite
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
@@ -142,7 +142,7 @@ object KLabelWithQuotes {
   }
 }
 
-case class Sort(name: String) extends SortToString
+case class Sort(name: String) extends SortToString with interfaces.Sort
 
 object KORE {
   implicit def StringToKString(s: String) = KString(s)
