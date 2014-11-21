@@ -2,7 +2,7 @@
 
 package org.kframework.kore
 
-import collection.{ AbstractSeq, LinearSeq, LinearSeqOptimized, Seq, generic, mutable }
+import collection.{ LinearSeq, LinearSeqOptimized, Seq, generic, mutable }
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
@@ -10,7 +10,7 @@ abstract class KList extends KListLike[KList] with KCollection with KListMatcher
   type ThisK = KList
   def copy(l: LinearSeq[K]) = KList(l: _*)
   def copy(l: Iterable[K]) = copy(l.toList)
-  
+
   def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]
 
   override def toString = this.mkString(", ")
@@ -37,10 +37,7 @@ object KList extends CanBuildKListLike[KList] {
       case (h: K, l: KList) => new ConsKList(h, l)
     }
 
-  implicit def inject(k: K): KList = KList(k)
-  implicit def seqOfKtoKList(s: Seq[K]) = KList(s: _*)
   def fromJava(l: Array[K]) = apply(l: _*)
-  val fromList = seqOfKtoKList _
 
   def unapplySeq(l: KCollection): Option[Seq[K]] = Some(l.toSeq)
 }

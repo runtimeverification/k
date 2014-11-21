@@ -13,12 +13,6 @@ class KoreTest {
     assertEquals(KList(TestK, TestK), t)
   }
 
-  @Test def testAttributesMapId {
-    val x = Attributes(KList(TestK, TestK))
-    val t: Attributes = x map { t => t }
-    assertEquals(Attributes(KList(TestK, TestK)), t)
-  }
-
   @Test def testKSequenceMapId {
     val x = KSequence(TestK, TestK)
     val t: KSequence = x map { t: K => t }

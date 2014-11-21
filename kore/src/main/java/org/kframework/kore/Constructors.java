@@ -19,11 +19,11 @@ public class Constructors {
 
     public static Attributes Attributes(K... ks) {
         org.kframework.kore.KList kList = KList(ks);
-        return new Attributes(kList);
+        return new Attributes(kList.toSet());
     }
 
     public static Attributes Attributes(KList klist) {
-        return new Attributes(klist);
+        return new Attributes(klist.toSet());
     }
 
     public static KString KString(String s) {

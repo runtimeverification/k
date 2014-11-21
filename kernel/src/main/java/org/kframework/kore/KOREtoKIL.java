@@ -4,6 +4,8 @@ package org.kframework.kore;
 
 import org.kframework.kore.outer.*;
 
+import scala.collection.immutable.Set;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,9 +33,8 @@ public class KOREtoKIL {
                 Sentence sentence = iter.next();
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
-                    List<K> attrs = prod.att().stream().collect(Collectors.toList());
-                    if (attrs.size() == 2
-                            && attrs.get(0) instanceof KToken
+                    List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
+                    if (attrs.size() == 2 && attrs.get(0) instanceof KToken
                             && ((KToken) attrs.get(0)).sort().name().equals("userList")) {
                         // TODO: Handle ZERO_OR_MORE/ONE_OR_MORE attributes
                         KString listType = ((KToken) attrs.get(1)).s();
@@ -59,9 +60,12 @@ public class KOREtoKIL {
                 if (prods.size() != 3) {
                     throw new RuntimeException("Found list with " + prods.size() + " elements.");
                 }
-                List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(Collectors.toList());
-                List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(Collectors.toList());
-                List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(Collectors.toList());
+                List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(
+                        Collectors.toList());
+                List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(
+                        Collectors.toList());
+                List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(
+                        Collectors.toList());
 
                 Terminal sep;
                 NonTerminal elem;
@@ -86,13 +90,13 @@ public class KOREtoKIL {
             }
         }
 
-        private org.kframework.kil.Syntax makeUserList(String listType, NonTerminal elem, Terminal sep) {
+        private org.kframework.kil.Syntax makeUserList(String listType, NonTerminal elem,
+                Terminal sep) {
             org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
-                    org.kframework.kil.Sort.of(elem.sort().name()),
-                    sep.value(),
-                    elem.sort().name());
+                    org.kframework.kil.Sort.of(elem.sort().name()), sep.value(), elem.sort()
+                            .name());
 
             List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>(1);
             prodItems.add(userList);
@@ -128,8 +132,8 @@ public class KOREtoKIL {
     public org.kframework.kil.Module convertModule(Module module) {
         org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
 
-        List<Sentence> sentences = scala.collection.JavaConversions
-                .seqAsJavaList(module.sentences().toList());
+        List<Sentence> sentences = scala.collection.JavaConversions.seqAsJavaList(module
+                .sentences().toList());
         mod = mod.setModuleItems(convertSentences(sentences));
 
         mod.setAttributes(convertAttributes(module.att()));
@@ -150,17 +154,14 @@ public class KOREtoKIL {
 
     public org.kframework.kil.Attributes convertAttributes(Attributes attrs) {
         org.kframework.kil.Attributes ret = new org.kframework.kil.Attributes();
-        KList attrsKList = attrs.klist();
-        while (attrsKList.size() != 0) {
-            ConsKList cons = (ConsKList) attrsKList;
-            KApply attr = (KApply) cons.head();
+        stream(attrs.att()).map(a -> {
+            KApply attr = (KApply) a;
             KLabel key = attr.klabel();
-            String value = ((KString) ((ConsKList) ((ConsKList) attr.klist())
-                    .tail()).head()).s();
+            String value = ((KString) ((ConsKList) ((ConsKList) attr.klist()).tail()).head()).s();
+            return null;
             // TODO: I think it's not possible to translate attributes back,
             // we lose a lot of information while translating.
-            attrsKList = cons.tail();
-        }
+            });
         return ret;
     }
 }

@@ -11,14 +11,14 @@ trait AttributesToString {
   self: Attributes =>
 
   override def toString() = "[" +
-    (klist map {
+    (att map {
       case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
       // FIXME: This is to prevent printing metadata saved as attributes. Currently this metadata
       // is used to guide translating KORE back to KIL.
       case a => ""
     } mkString " ") + "]" // TODO: remove brackets if nothing is printed inside
 
-  def postfixString = if (isEmpty) "" else (" " + toString())
+  def postfixString = if (att.isEmpty) "" else (" " + toString())
 }
 
 trait SortToString {
