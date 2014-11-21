@@ -7,138 +7,132 @@ class TestPatternMatching {
   import org.junit._
   import Assert._
 
+  val X = KVariable("X")
+
   @Test
   def testSimple() {
-    val foo = KApply(KLabel("foo"), KList())
-    val v = KVariable("X")
-    assertEquals(Some(Map(v -> foo)), foo.m(v))
+    val foo = 'foo()
+    assertEquals(Some(Map(X -> foo)), foo.m(X))
   }
 
   @Test
   def testEmptyMatch() {
-    val foo = KApply(KLabel("foo"), KList())
+    val foo = 'foo()
     assertEquals(Some(Map()), foo.m(foo))
   }
 
   @Test
   def testKApply() {
     val five = KToken(Sort("Int"), KString("5"))
-    val foo = KApply(KLabel("foo"), KList(five))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(v))
-    assertEquals(Some(Map(v -> 'KList(five))), foo.m(pattern))
+    val foo = 'foo(five)
+    val pattern = 'foo(X)
+    assertEquals(Some(Map(X -> KList(five))), foo.m(pattern))
   }
 
   @Test
   def testKApply1() {
     val five = KToken(Sort("Int"), KString("5"))
-    val foo = KApply(KLabel("foo"), KList(five))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("bar"), KList(v))
+    val foo = 'foo(five)
+    val pattern = KApply(KLabel("bar"), KList(X))
     assertEquals(None, foo.m(pattern))
   }
 
   @Test
   def testKListEntire() {
-    val foo = KApply(KLabel("foo"), KList(5, 6))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(v))
-    assertEquals(Set(Map(v -> 'KList(5, 6))), foo.matchAll(pattern))
+    val foo = 'foo(5, 6)
+    val pattern = 'foo(X)
+    assertEquals(Set(Map(X -> KList(5, 6))), foo.matchAll(pattern))
   }
 
   @Test
   def testKListPrefix() {
-    val foo = KApply(KLabel("foo"), KList(5, 6, 7))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(v, 7))
-    assertEquals(Set(Map(v -> 'KList(5, 6))), foo.matchAll(pattern))
+    val foo = 'foo(5, 6, 7)
+    val pattern = 'foo(X, 7)
+    assertEquals(Set(Map(X -> KList(5, 6))), foo.matchAll(pattern))
   }
 
   @Test
   def testKListPostfix() {
-    val foo = KApply(KLabel("foo"), KList(5, 6, 7))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(5, v))
-    assertEquals(Set(Map(v -> 'KList(6, 7))), foo.matchAll(pattern))
+    val foo = 'foo(5, 6, 7)
+    val pattern = 'foo(5, X)
+    assertEquals(Set(Map(X -> KList(6, 7))), foo.matchAll(pattern))
   }
 
   @Test
   def testKListMiddle() {
-    val foo = KApply(KLabel("foo"), KList(5, 6, 7, 8))
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(5, v, 8))
-    assertEquals(Set(Map(v -> 'KList(6, 7))), foo.matchAll(pattern))
+    val foo = 'foo(5, 6, 7, 8)
+    val pattern = 'foo(5, X, 8)
+    assertEquals(Set(Map(X -> KList(6, 7))), foo.matchAll(pattern))
   }
 
   @Test
   def testKListAssoc() {
-    val foo = KApply(KLabel("foo"), KList(5))
-    val X = KVariable("X")
+    val foo = 'foo(5)
     val Y = KVariable("Y")
-    val pattern = KApply(KLabel("foo"), KList(X, Y))
-    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5)), Map(X -> 'KList(5), Y -> 'KList())), foo.matchAll(pattern))
+    val pattern = 'foo(X, Y)
+    assertEquals(Set(Map(X -> KList(), Y -> KList(5)), Map(X -> KList(5), Y -> KList())), foo.matchAll(pattern))
   }
 
   @Test
   def testKListAssoc1() {
-    val foo = KApply(KLabel("foo"), KList(5, 6))
-    val X = KVariable("X")
+    val foo = 'foo(5, 6)
     val Y = KVariable("Y")
-    val pattern = KApply(KLabel("foo"), KList(X, Y))
-    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5, 6)), Map(X -> 'KList(5), Y -> 'KList(6)), Map(X -> 'KList(5, 6), Y -> 'KList())),
+    val pattern = 'foo(X, Y)
+    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 6)), Map(X -> KList(5), Y -> KList(6)), Map(X -> KList(5, 6), Y -> KList())),
       foo.matchAll(pattern))
   }
 
   @Test
   def testKListAssoc2() {
-    val foo = KApply(KLabel("foo"), KList(5, 7, 6))
-    val X = KVariable("X")
+    val foo = 'foo(5, 7, 6)
     val Y = KVariable("Y")
-    val pattern = KApply(KLabel("foo"), KList(X, 7, Y))
-    assertEquals(Set(Map(X -> 'KList(5), Y -> 'KList(6))),
+    val pattern = 'foo(X, 7, Y)
+    assertEquals(Set(Map(X -> KList(5), Y -> KList(6))),
       foo.matchAll(pattern))
   }
 
   @Test
   def testKListAssoc3() {
-    val foo = KApply(KLabel("foo"), KList(5, 5, 5))
-    val X = KVariable("X")
+    val foo = 'foo(5, 5, 5)
     val Y = KVariable("Y")
-    val pattern = KApply(KLabel("foo"), KList(X, 5, Y))
-    assertEquals(Set(Map(X -> 'KList(), Y -> 'KList(5, 5)), Map(X -> 'KList(5), Y -> 'KList(5)), Map(X -> 'KList(5, 5), Y -> 'KList())),
+    val pattern = 'foo(X, 5, Y)
+    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 5)), Map(X -> KList(5), Y -> KList(5)), Map(X -> KList(5, 5), Y -> KList())),
       foo.matchAll(pattern))
   }
 
   @Test
   def testKListMultipleVar() {
-    val foo = KApply(KLabel("foo"), KList(5, 5))
-    val X = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(X, X))
+    val foo = 'foo(5, 5)
+    val pattern = 'foo(X, X)
     assertEquals(Set(Map(X -> KList(5))),
       foo.matchAll(pattern))
   }
 
   @Test
   def testKListAssocMultipleVar() {
-    val foo = KApply(KLabel("foo"), KList(5, 5, 5))
-    val X = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(X, X))
+    val foo = 'foo(5, 5, 5)
+    val pattern = 'foo(X, X)
     assertEquals(Set(),
       foo.matchAll(pattern))
   }
 
   @Test
   def testKApplyWithEmptySeq() {
-    val foo = KApply(KLabel("foo"), KList())
-    val v = KVariable("X")
-    val pattern = KApply(KLabel("foo"), KList(v))
-    assertEquals(Some(Map(v -> KSequence())), foo.m(pattern))
+    val foo = 'foo()
+    val pattern = 'foo(X)
+    assertEquals(Some(Map(X -> KList())), foo.m(pattern))
+  }
+
+  @Test
+  def testKVariableMatchingKLabel() {
+    val foo = 'foo()
+    val pattern = KApply(X, KList(), Attributes())
+    assertEquals(Some(Map(X -> MetaKLabel('foo))), foo.m(pattern))
   }
 
   @Test
   def testKSeqAssoc() {
     val foo = KSequence(5, 5, 5)
-    val X = KVariable("X")
     val Y = KVariable("Y")
     val pattern = KSequence(X, 5, Y)
     assertEquals(Set(Map(X -> KSequence(), Y -> KSequence(5, 5)), Map(X -> KSequence(5), Y -> KSequence(5)), Map(X -> KSequence(5, 5), Y -> KSequence())),

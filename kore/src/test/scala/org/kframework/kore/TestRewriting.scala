@@ -58,10 +58,15 @@ class TestRewriting {
   def testDeduplicate() {
     assertEquals(Set('foo(4, 4)), 'foo(4, 4, 4, 4).search(KRewrite('foo(X, X), 'foo(X))))
   }
-  
+
   @Test
   def testDeduplicateNot() {
     assertEquals(Set(), 'foo(4, 4, 4, 4, 4).search(KRewrite('foo(X, X), 'foo(X))))
+  }
+
+  @Test
+  def testKLabelMatch() {
+    assertEquals(Set('foo(4)), 'foo(4, 4).search(KRewrite(KApply(X, KList(4, 4)), KApply(X, KList(4)), Attributes())))
   }
 
   def assertEquals(expected: Any, actual: Any) {

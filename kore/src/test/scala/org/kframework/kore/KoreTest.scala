@@ -1,5 +1,7 @@
 package org.kframework.kore
 
+import KInt._
+
 class KoreTest {
   import org.junit._
 
@@ -45,7 +47,7 @@ class KoreTest {
   @Test def testKList {
     val x = KList(TestK, TestK)
     x match {
-      case KList(a, b) => 
+      case KList(a, b) =>
       case _ => throw new RuntimeException("match fail")
     }
   }
@@ -58,5 +60,10 @@ class KoreTest {
 
   @Test def testKApplyEquals {
     assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KApply(KLabel("bar"), KList(), Attributes()))
+    assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KList())
+    assertNotEquals(KList(), KApply(KLabel("foo"), KList(), Attributes()))
+    assertNotEquals(KList(5), KApply(KLabel("foo"), KList(5), Attributes()))
+    assertNotEquals(KApply(KLabel("foo"), KList(5), Attributes()), KList(5))
   }
+
 }

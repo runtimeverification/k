@@ -11,8 +11,8 @@ import scala.collection.generic.CanBuildFrom
 
 /* Interfaces */
 
-trait KCollection extends Iterable[K] with Matcher {
-  type ThisK
+trait KCollection extends Iterable[K] with Matcher with K {
+  type ThisK <: K
   def copy(klist: Iterable[K]): ThisK
 }
 
@@ -29,7 +29,9 @@ trait K extends HasAttributes with Matcher with Rewriting with interfaces.K {
   def copy(): ThisK = copy(att)
 }
 
-trait KItem extends K with interfaces.KItem
+trait KItem extends K with interfaces.KItem {
+  //  def ~>(seq: KSequence): KSequence = this +: seq 
+}
 
 trait KLabel extends KLabelToString with interfaces.KLabel {
   val name: String
@@ -109,7 +111,7 @@ object KVariable {
 
 object KSequence extends CanBuildKListLike[KSequence] {
   def apply(klist: KList, att: Attributes) = new KSequence(klist, att)
-  def apply(list: K*) = apply(list, Attributes())
+  def apply(list: K*) = apply(KList(list: _*), Attributes())
 
   def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
 }
@@ -118,18 +120,21 @@ object KRewrite {
   def apply(klist: KList, att: Attributes): KRewrite = klist match {
     case KList(left, right) => new KRewrite(left, right, att)
   }
-  def apply(list: K*): KRewrite = apply(list, Attributes())
+  def apply(list: K*): KRewrite = apply(KList(list: _*), Attributes())
 }
 
 object KApply extends CanBuildKListLike[KApply] {
-  def apply(list: K*) = throw new UnsupportedOperationException("Cannot create a KApply from just a list of Ks. It also needs a KLabel")
+  def apply(list: K*) = list.headOption match {
+    case Some(v: KVariable) => new KApply(v, KList(list.tail: _*))
+    case _ => ???
+  }
 }
 
 object EmptyK {
   def apply() = KSequence(KList(), Attributes())
 }
 
-object KLabel {
+object KLabel extends ConcreteKLabel("KLabel") {
   def apply(name: String) = ConcreteKLabel(name)
   def unapply(klabel: ConcreteKLabel): Option[String] = Some(klabel.name)
 }
@@ -150,4 +155,6 @@ object KORE {
   implicit def seqOfKsToKList(ks: Seq[K]) = KList(ks: _*)
 
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)
+
+  implicit def KItemToKSeq(k: K) = KSequence(k)
 }
