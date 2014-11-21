@@ -10,11 +10,14 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -57,6 +60,8 @@ public class Definition extends JavaSymbolicObject {
     private final Set<Sort> builtinSorts;
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
+
+    private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     @Inject
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
@@ -226,5 +231,9 @@ public class Definition extends JavaSymbolicObject {
 
     public RuleIndex getIndex() {
         return index;
+    }
+
+    public Map<KItem.CacheTableColKey, KItem.CacheTableValue> getSortCacheTable() {
+        return sortCacheTable;
     }
 }

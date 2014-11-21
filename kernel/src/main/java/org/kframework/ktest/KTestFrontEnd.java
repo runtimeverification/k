@@ -59,7 +59,7 @@ public class KTestFrontEnd extends FrontEnd {
             JarInfo jarInfo,
             @Environment Map<String, String> env,
             FileUtil files) {
-        super(kem, globalOptions, usage, experimentalUsage, jarInfo);
+        super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.options.setDebug(globalOptions.debug);
         this.kem = kem;

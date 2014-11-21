@@ -64,7 +64,7 @@ public class KompileFrontEnd extends FrontEnd {
             DefinitionLoader defLoader,
             JarInfo jarInfo,
             FileUtil files) {
-        super(kem, options.global, usage, experimentalUsage, jarInfo);
+        super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.context = context;
         this.options = options;
         this.backend = backend;

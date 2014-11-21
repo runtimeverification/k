@@ -12,12 +12,14 @@ import org.kframework.transformation.TransformationNotSatisfiedException;
 import org.kframework.transformation.TransformationProvider;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.Main;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -54,8 +56,9 @@ public class KRunFrontEnd extends FrontEnd {
             TransformationProvider<Transformation<Void, Void>> toolProvider,
             KExceptionManager kem,
             BinaryLoader loader,
-            JarInfo jarInfo) {
-        super(kem, options, usage, experimentalUsage, jarInfo);
+            JarInfo jarInfo,
+            @Main FileUtil files) {
+        super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.toolProvider = toolProvider;
         this.kem = kem;
     }
