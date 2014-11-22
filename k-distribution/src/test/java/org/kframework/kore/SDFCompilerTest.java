@@ -53,7 +53,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
 
         FileUtil fileUtil = new FileUtil(tempDir.toFile(),
                 Providers.of(definitionDir), definitionDir,
-                Providers.of(kompiledDir), globalOptions, kem);
+                Providers.of(kompiledDir), globalOptions);
 
         context.files = fileUtil;
 
