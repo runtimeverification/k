@@ -34,21 +34,6 @@ trait ImportToString {
   override def toString() = "imports " + what + att.postfixString
 }
 
-// commented out until we figure out how to encode associativity
-//trait BlockToString {
-//  self: SyntaxProduction =>
-//  override def toString = {
-//    import Associativity._
-//    val assocString = assoc match {
-//      case Unspecified => ""
-//      case Left => "left:\n"
-//      case Right => "right:\n"
-//      case NonAssoc => "non-assoc:\n"
-//    }
-//    assocString + productions.mkString("\n              |")
-//  }
-//}
-
 trait TerminalToString {
   self: Terminal =>
   override def toString = "\"" + value + "\""
@@ -69,6 +54,11 @@ trait SyntaxAssociativityToString {
     }
     "syntax associativity " + assocString + " " + tags.mkString(" ") + att.postfixString
   }
+}
+
+trait ContextToString {
+  self: Context =>
+  override def toString = "context " + body + " requires " + requires
 }
 
 trait SyntaxPriorityToString {

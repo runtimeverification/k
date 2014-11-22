@@ -14,6 +14,6 @@ endmodule
 module TEST
   syntax Exp ::= Exp "+" Exp
   imports INCLUDE
-  Context('_+_(_,Hole()),KBoolean(true,[]),[])
-  Context('_+_(Hole(),_),KBoolean(true,[]),[])
+  context '_+_(_,Hole()) requires true
+  context '_+_(Hole(),_) requires true
 endmodule

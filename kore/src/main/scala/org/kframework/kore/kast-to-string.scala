@@ -4,7 +4,7 @@ package org.kframework.kore
 
 trait KApplyToString {
   self: KApply =>
-  override def toString() = klabel.toString + "(" + klist.mkString(",") + ")"
+  override def toString() = klabel.toString + "(" + contents.mkString(",") + ")"
 }
 
 trait AttributesToString {

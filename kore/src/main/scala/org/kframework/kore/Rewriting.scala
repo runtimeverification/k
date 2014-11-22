@@ -36,11 +36,10 @@ trait Rewriting {
   def transform(substituion: Map[KVariable, K]): K = this match {
     case v: KVariable => substituion.getOrElse(v, v)
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
-      val newChildren: KApply = kapp map { _.transform(substituion) }
-      KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren.klist)
-    case c: KCollection with K =>
-      val newChildren = c map { _.transform(substituion) }
-      c.copy(newChildren)
+      val newChildren: KApply = kapp map { x: K => x.transform(substituion) }
+      KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
+    case c: KCollection[_] =>
+      c map { x: K => x.transform(substituion) }
     case e => e
   }
 }

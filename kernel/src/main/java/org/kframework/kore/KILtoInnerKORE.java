@@ -55,9 +55,9 @@ import static org.kframework.kore.Constructors.*;
 
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
-    public KApply apply(Bag body) {
+    public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
-        return KApply(KBag(), KList(contents));
+        return KBag(contents);
     }
 
     public KApply apply(Cell body) {

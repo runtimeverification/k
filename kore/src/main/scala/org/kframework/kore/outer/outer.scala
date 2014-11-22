@@ -25,7 +25,7 @@ trait Sentence { // marker
 case class Context(
   body: kore.K,
   requires: kore.K,
-  att: Attributes = Attributes()) extends Sentence with OuterKORE
+  att: Attributes = Attributes()) extends Sentence with OuterKORE with ContextToString
 
 case class Rule(
   body: kore.K,

@@ -6,10 +6,9 @@ import collection.{ LinearSeq, LinearSeqOptimized, Seq, generic, mutable }
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class KList extends KListLike[KList] with KCollection with KListMatcher with interfaces.KList with K {
+abstract class KList extends KListLike[KList] with Iterable[K] with KListMatcher with interfaces.KList with K with Associative {
   type ThisK = KList
-  def copy(l: LinearSeq[K]) = KList(l: _*)
-  def copy(l: Iterable[K]) = copy(l.toList)
+  def copy(l: Iterable[K]) = KList(l.toSeq: _*)
 
   def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]
 
@@ -42,11 +41,11 @@ final case class ConsKList(override val head: K, override val tail: KList) exten
 object KList extends CanBuildKListLike[KList] {
   def apply(l: K*): KList =
     l.foldRight(EmptyKList: KList) {
-      case (h: KList, l: KList) => KList((h ++ l).toSeq: _*)
+      case (h: Associative, l: KList) => KList((h ++ l).toSeq: _*)
       case (h: K, l: KList) => new ConsKList(h, l)
     }
 
   def fromJava(l: Array[K]) = apply(l: _*)
 
-  def unapplySeq(l: KCollection): Option[Seq[K]] = Some(l.toSeq)
+  def unapplySeq(l: Iterable[K]): Option[Seq[K]] = Some(l.toSeq)
 }

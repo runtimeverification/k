@@ -5,7 +5,6 @@ package org.kframework.kore.outer
 import collection.JavaConverters._
 import org.kframework.kore._
 import java.util.stream.StreamSupport
-import org.kframework.kore.outer.Configuration
 
 /**
  *
@@ -14,15 +13,8 @@ import org.kframework.kore.outer.Configuration
  *
  */
 
-object Constructors {
+object Constructors extends CollectionConverters {
   import org.kframework.kore
-
-  def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
-  def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
-  def immutable[T](s: Array[T]): Seq[T] = s
-
-  def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
-  def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
 
   def KList(s: java.lang.Iterable[K]): KList = kore.KList(s.asScala.toSeq: _*)
   def Definition(requires: Set[Require], modules: Set[Module]) =
@@ -51,7 +43,7 @@ object Constructors {
 
   def Context(content: K, requires: K) = outer.Context(content, requires)
   def Context(content: K, requires: K, att: Attributes) = outer.Context(content, requires, att)
-  
+
   def Associativity = outer.Associativity;
 
   // EXTRA

@@ -8,27 +8,12 @@ import collection._
 import JavaConverters._
 
 trait KAbstractCollection[+This <: KAbstractCollection[This]]
-  extends KListBacked[This] with KCollection with K {
+  extends KListBacked[This] with KCollection[This] with K {
   self: This =>
   type ThisK <: This
 
-  def copy(a: Attributes): ThisK = {
-    copy(klist, Attributes(att.att ++ a.att))
-  }
-
-  def copy(klist: KCollection, att: Attributes): ThisK
-  def copy(klist: Iterable[K]): ThisK = copy(KList(klist.toSeq: _*), att)
-
   override def foreach[B](f: K => B) {
-    klist.foreach(f)
-  }
-
-  def map(f: java.util.function.Function[K, K]): This = {
-    val builder = newBuilder
-    foreach {
-      builder += f(_)
-    }
-    builder.result()
+    contents.foreach(f)
   }
 
   override def equals(that: Any) = that match {
@@ -64,11 +49,11 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
 
 trait KListBacked[+This <: KListLike[This]] extends KListLike[This] {
   self: This =>
-  val klist: KCollection
+  val contents: Iterable[K]
 
-  override def head = klist.head
-  override def tail = copy(klist.tail)
-  override def isEmpty = klist.isEmpty
+  override def head = contents.head
+  override def tail = copy(contents.tail)
+  override def isEmpty = contents.isEmpty
   def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]
 }
 
@@ -85,4 +70,23 @@ trait CanBuildKListLike[This <: KListLike[This]] {
       def apply(): mutable.Builder[K, This] = new mutable.ListBuffer mapResult fromList
       def apply(from: This): mutable.Builder[K, This] = from.newBuilder
     }
+}
+
+trait Associative extends Iterable[K]
+
+trait KCollection[+This <: KCollection[This]] extends K with IterableLike[K, This] {
+  self: KCollection[This] =>
+  type ThisK <: KCollection[This]
+
+  def copy(ks: Iterable[K], att: Attributes): ThisK
+  def copy(ks: Iterable[K]): ThisK = copy(ks, Attributes())
+  def copy(att: Attributes): ThisK = copy(Seq(), att)
+
+  def map(f: K => K): This = {
+    val builder = newBuilder
+    foreach {
+      builder += f(_)
+    }
+    builder.result()
+  }
 }

@@ -78,16 +78,17 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
 trait KApplyMatcher extends Matcher with BindingOps {
   self: KApply =>
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = (pattern, this: KApply) match {
-    case (v: KVariable, _) =>
-      Set(Map(v -> this))
-    case (KApply(labelVariable: KVariable, klist, att), KApply(label2, klist2, att2)) =>
-      and(Set(Map(labelVariable -> MetaKLabel(label2))), klist2.matchAll(klist, condition))
-    case (KApply(label, klist, att), KApply(label2, klist2, att2)) if label == label2 =>
-      klist2.matchAll(klist, condition)
+  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    (pattern, this: KApply) match {
+      case (v: KVariable, _) =>
+        Set(Map(v -> this))
+      case (KApply(labelVariable: KVariable, contentsP: K, att), KApply(label2, contents: Matcher, att2)) =>
+        and(Set(Map(labelVariable -> MetaKLabel(label2))), contents.matchAll(contentsP, condition))
+      case (KApply(label, contentsP: K, att), KApply(label2, contents: Matcher, att2)) if label == label2 =>
+        contents.matchAll(contentsP, condition)
 
-    case (_: KApply, _: KApply) => Set()
-  }
+      case (_: KApply, _: KApply) => Set()
+    }
 }
 
 trait KVariableMatcher extends Matcher with BindingOps {
@@ -118,12 +119,13 @@ trait KTokenMatcher extends Matcher with BindingOps {
 
 trait KSequenceMatcher extends Matcher with BindingOps {
   self: KSequence =>
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = (pattern, this: KSequence) match {
-    case (v: KVariable, _) =>
-      Set(Map(v -> this))
-    case (s: KSequence, _) =>
-      klist.matchAll(s.klist, condition) map {
-        case m: Map[KVariable, KList] => m mapValues { l => KSequence(l.toSeq: _*) }
-      }
-  }
+  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    (pattern, this: KSequence) match {
+      case (v: KVariable, _) =>
+        Set(Map(v -> this))
+      case (s: KSequence, _) =>
+        klist.matchAll(s.klist, condition) map {
+          case m: Map[KVariable, KList] => m mapValues { l => KSequence(l.toSeq: _*) }
+        }
+    }
 }

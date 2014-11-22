@@ -37,8 +37,16 @@ public class Constructors {
         return Hole$.MODULE$;
     }
 
-    public static KLabel KBag() {
+    public static KLabel KBagLabel() {
         return KBag$.MODULE$;
+    }
+
+    public static KBag KBag(K... ks) {
+        return new KBag(KList.fromJava(ks));
+    }
+
+    public static KBag KBag(List<K> ks) {
+        return new KBag(org.kframework.kore.outer.Constructors.KList(ks));
     }
 
     public static Sort Sort(String name) {
@@ -62,11 +70,11 @@ public class Constructors {
     // return KList.fromJava(new K[] { k });
     // }
 
-    public static KApply KApply(KLabel klabel, KList klist, Attributes att) {
+    public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist, Attributes att) {
         return new KApply(klabel, klist, att);
     }
 
-    public static KApply KApply(KLabel klabel, KList klist) {
+    public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist) {
         return KApply(klabel, klist, emptyAttributes);
     }
 

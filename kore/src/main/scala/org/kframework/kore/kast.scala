@@ -11,11 +11,6 @@ import scala.collection.generic.CanBuildFrom
 
 /* Interfaces */
 
-trait KCollection extends Iterable[K] with Matcher with K {
-  type ThisK <: K
-  def copy(klist: Iterable[K]): ThisK
-}
-
 sealed trait KORE // marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
 trait HasAttributes {
@@ -41,10 +36,10 @@ trait KLabel extends KLabelToString with interfaces.KLabel {
 
 case class KString(s: String) extends interfaces.KString // just a wrapper to mark it
 
-case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attributes())
+case class KApply(klabel: KLabel, contents: Iterable[K], att: Attributes = Attributes())
   extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString {
   type ThisK = KApply
-  def copy(klist: KCollection, att: Attributes): KApply = new KApply(klabel, klist, att)
+  def copy(klist: Iterable[K], att: Attributes): KApply = new KApply(klabel, klist, att)
 
   override def equals(that: Any) = that match {
     case KApply(`klabel`, _, _) => super.equals(that)
@@ -52,7 +47,7 @@ case class KApply(klabel: KLabel, klist: KCollection, att: Attributes = Attribut
   }
 }
 
-trait KToken extends KItem with KORE with KTokenMatcher with interfaces.KToken {
+trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString with interfaces.KToken {
   val sort: Sort
   val s: KString
 }
@@ -67,19 +62,12 @@ case class ConcreteKLabel(name: String) extends KLabel {
   def apply(ks: K*) = KApply(this, KList(ks: _*))
 }
 
-final class KSequence(val klist: KList, val att: Attributes = Attributes())
+final class KSequence(val contents: Iterable[K], val att: Attributes = Attributes())
   extends KAbstractCollection[KSequence] with KSequenceMatcher with interfaces.KSequence {
   self: KSequence =>
   type ThisK = KSequence
-  def copy(klist: KCollection, att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
-
-  override def map(f: java.util.function.Function[K, K]): KSequence = {
-    val builder = newBuilder
-    foreach {
-      builder += f(_)
-    }
-    builder.result()
-  }
+  def copy(klist: Iterable[K], att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
+  def klist = KList(contents.toSeq: _*)
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
@@ -155,6 +143,4 @@ object KORE {
   implicit def seqOfKsToKList(ks: Seq[K]) = KList(ks: _*)
 
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)
-
-  implicit def KItemToKSeq(k: K) = KSequence(k)
 }
