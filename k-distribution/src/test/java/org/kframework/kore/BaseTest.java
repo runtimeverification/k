@@ -45,7 +45,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         Definition def = parse.apply(definitionText);
 
         KILtoKORE convertor = new KILtoKORE();
-        org.kframework.kore.outer.Definition converted = convertor.convert(def);
+        org.kframework.kore.outer.Definition converted = convertor.apply(def);
         org.kframework.kore.outer.Definition koreDefintion = converted;
 
         if (outputFile.isFile()) {

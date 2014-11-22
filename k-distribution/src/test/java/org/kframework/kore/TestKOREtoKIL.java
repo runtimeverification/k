@@ -22,7 +22,7 @@ public class TestKOREtoKIL {
         kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKIL.class), pgm, null));
 
         KILtoKORE toKore = new KILtoKORE();
-        Definition koreDef = toKore.convert(kilDef);
+        Definition koreDef = toKore.apply(kilDef);
         KOREtoKIL toKil = new KOREtoKIL();
         org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
 

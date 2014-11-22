@@ -3,6 +3,9 @@
 package org.kframework.kore;
 
 import static org.kframework.kore.outer.Constructors.*;
+
+import java.util.List;
+
 import scala.collection.Seq;
 
 /**
@@ -42,9 +45,14 @@ public class Constructors {
         return KList$.MODULE$.fromJava(ks);
     }
 
-    public static KList KList(K k) {
-        return KList.fromJava(new K[] {k});
-    }
+    //
+    // public static KList KList(Iterable<K> ks) {
+    // return KList$.MODULE$.apply(immutable(ks));
+    // }
+    //
+    // public static KList KList(K k) {
+    // return KList.fromJava(new K[] { k });
+    // }
 
     public static KApply KApply(KLabel klabel, KList klist, Attributes att) {
         return new KApply(klabel, klist, att);
@@ -72,6 +80,10 @@ public class Constructors {
 
     public static KSequence KSequence(K... ks) {
         return KSequence.fromJava(ks);
+    }
+
+    public static KSequence KSequence(List<K> ks) {
+        return KSequence(org.kframework.kore.outer.Constructors.KList(ks));
     }
 
     public static KRewrite KRewrite(K left, K right) {

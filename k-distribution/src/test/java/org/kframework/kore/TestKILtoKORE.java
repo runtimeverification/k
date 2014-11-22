@@ -35,7 +35,7 @@ public class TestKILtoKORE extends BaseTest {
     // <k foo="bla"> .K </k> becomes:
     // KApply(KLabel("k"), KList(EmptyK), Attributes(KApply(KLabel("foo",
     // KToken(String, "bla"))))
-    @Test @Ignore
+    @Test
     public void configuration() throws IOException {
         sdfTest();
     }

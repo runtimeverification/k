@@ -4,17 +4,15 @@ package org.kframework.kore
 
 import KORE._
 
-object KBoolean {
-  object KBoolean extends Sort("Boolean")
+case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
+  type ThisK = KBoolean
+  val sort = KBoolean
+  val s: KString = v.toString
 
-  case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
-    type ThisK = KBoolean
-    val sort = KBoolean
-    val s: KString = v.toString
+  def copy(att: Attributes) = KBoolean(v, att)
+}
 
-    def copy(att: Attributes) = KBoolean(v, att)
-  }
-
+object KBoolean extends Sort("Boolean") {
   implicit def toKBoolean(b: Boolean): KBoolean = b match {
     case true => KBoolean(true)
     case false => KBoolean(false)

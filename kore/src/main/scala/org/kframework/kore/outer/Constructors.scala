@@ -3,8 +3,9 @@
 package org.kframework.kore.outer
 
 import collection.JavaConverters._
-import org.kframework.kore._;
+import org.kframework.kore._
 import java.util.stream.StreamSupport
+import org.kframework.kore.outer.Configuration
 
 /**
  *
@@ -14,7 +15,6 @@ import java.util.stream.StreamSupport
  */
 
 object Constructors {
-  import outer._
   import org.kframework.kore
 
   def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
@@ -50,4 +50,8 @@ object Constructors {
   def SyntaxAssociativity(assoc: outer.Associativity.Value, tags: Set[Tag], att: Attributes) = outer.SyntaxAssociativity(assoc, tags, att)
 
   def Associativity = outer.Associativity;
+
+  // EXTRA
+
+  def Configuration(body: K, ensures: K, att: Attributes) = outer.Configuration(body, ensures, att)
 }
