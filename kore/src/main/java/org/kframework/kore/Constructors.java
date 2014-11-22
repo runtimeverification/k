@@ -33,6 +33,10 @@ public class Constructors {
         return new KString(s);
     }
 
+    public static KLabel KBag() {
+        return KBag$.MODULE$;
+    }
+
     public static Sort Sort(String name) {
         return new Sort(name);
     }

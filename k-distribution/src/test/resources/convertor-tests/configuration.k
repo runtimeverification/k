@@ -1,5 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
+require "include.k"
 
 module TEST
-	configuration <k> .K </k>
+  imports INCLUDE
+  configuration <t> <k multiplicity="*" color="green"> .K </k> <env> .Map </env> <stack> .Bag </stack> </t>
 endmodule

@@ -35,8 +35,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public Definition parse(String definitionText, String mainModule)
-            throws IOException {
+    public Definition parse(String definitionText, String mainModule) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -48,20 +47,19 @@ abstract class SDFCompilerTest extends BaseTestCase {
         Path tempDir = Files.createTempDirectory("temp");
         File definitionDir = new File(testDir.toAbsolutePath().toString());
         File kompiledDir = new File(definitionDir, "test-kompiled");
+        System.out.println(definitionDir);
 
         context.globalOptions = globalOptions;
 
-        FileUtil fileUtil = new FileUtil(tempDir.toFile(),
-                Providers.of(definitionDir), definitionDir,
-                Providers.of(kompiledDir), globalOptions);
+        FileUtil fileUtil = new FileUtil(tempDir.toFile(), Providers.of(definitionDir),
+                definitionDir, Providers.of(kompiledDir), globalOptions);
 
         context.files = fileUtil;
 
-        String path = new File("../k-distribution/target/release/k/lib/native/")
-                .getAbsolutePath() + "/" + OS.current() + "/";
+        String path = new File("../k-distribution/target/release/k/lib/native/").getAbsolutePath()
+                + "/" + OS.current() + "/";
 
-        String nativeSDF2TableExecutable = path
-                + OS.current().getNativeExecutable("sdf2table");
+        String nativeSDF2TableExecutable = path + OS.current().getNativeExecutable("sdf2table");
 
         Sdf2Table sdf2Table = new Sdf2Table(Providers.of(new ProcessBuilder()),
                 nativeSDF2TableExecutable);
@@ -84,11 +82,9 @@ abstract class SDFCompilerTest extends BaseTestCase {
 
         BinaryLoader binaryLoader = new BinaryLoader(kem, null);
 
-        Definition parsedKIL = new DefinitionLoader(
-                new Stopwatch(globalOptions), binaryLoader, kem,
-                new OuterParser(globalOptions, false, null, fileUtil, kem),
-                false, fileUtil, sdf2Table).parseDefinition(file, mainModule,
-                context);
+        Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
+                kem, new OuterParser(globalOptions, false, "autoinclude-java.k", fileUtil, kem),
+                false, fileUtil, sdf2Table).parseDefinition(file, mainModule, context);
 
         return parsedKIL;
     }

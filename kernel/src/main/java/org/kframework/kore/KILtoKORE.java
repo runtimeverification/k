@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
@@ -49,7 +50,9 @@ import com.google.common.collect.Sets;
 import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Constructors.*;
 
-public class KILtoKORE implements Function<Term, Object> {
+public class KILtoKORE extends KILTransformation<Object> {
+
+    public KILtoInnerKORE inner = new KILtoInnerKORE();
 
     public org.kframework.kore.outer.Definition apply(Definition d) {
         Set<org.kframework.kore.outer.Require> requires = d.getItems().stream()
@@ -65,17 +68,17 @@ public class KILtoKORE implements Function<Term, Object> {
         return Definition(immutable(requires), immutable(modules));
     }
 
-    private org.kframework.kore.outer.Require apply(Require i) {
+    public org.kframework.kore.outer.Require apply(Require i) {
         return Require(new File(i.getValue()));
     }
 
-    private org.kframework.kore.outer.Module apply(Module i) {
+    public org.kframework.kore.outer.Module apply(Module i) {
         Set<org.kframework.kore.outer.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
         return Module(i.getName(), immutable(items), apply(i.getAttributes()));
     }
 
-    private Set<org.kframework.kore.outer.Sentence> apply(ModuleItem i) {
+    public Set<org.kframework.kore.outer.Sentence> apply(ModuleItem i) {
         if (i instanceof Import) {
             return Sets.newHashSet(apply((Import) i));
         } else if (i instanceof Syntax) {
@@ -93,10 +96,10 @@ public class KILtoKORE implements Function<Term, Object> {
             Term kilEnsures = kilConfiguration.getEnsures();
             K ensures;
             if (kilEnsures != null)
-                ensures = (K) apply(kilEnsures);
+                ensures = inner.apply(kilEnsures);
             else
                 ensures = new KBoolean(true, Attributes());
-            return Sets.newHashSet(Configuration(apply(body), ensures,
+            return Sets.newHashSet(Configuration(inner.apply(body), ensures,
                     apply(kilConfiguration.getAttributes())));
         } else if (i instanceof PriorityExtended) {
             return apply((PriorityExtended) i);
@@ -109,43 +112,14 @@ public class KILtoKORE implements Function<Term, Object> {
         }
     }
 
-    private KApply apply(Cell body) {
-        K x = (K) apply(body.getContents());
-        return KApply(KLabel(body.getLabel()), KList(x));
-    }
-
-    static class VisitingException extends RuntimeException {
-        VisitingException(Throwable e) {
-            super(e);
-        }
-    }
-
-    public Object apply(Term t) {
-        Method visitorMethod;
-        try {
-            visitorMethod = this.getClass().getDeclaredMethod("apply",
-                    new Class[] { t.getClass() });
-            return visitorMethod.invoke(this, t);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException e) {
-            throw new VisitingException(e);
-        }
-    }
-
-    private Set<org.kframework.kore.outer.Sentence> apply(PriorityExtendedAssoc ii) {
+    public Set<org.kframework.kore.outer.Sentence> apply(PriorityExtendedAssoc ii) {
         scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags());
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
         return Sets.newHashSet(SyntaxAssociativity(assoc, tags));
     }
 
-    private org.kframework.kore.KSequence apply(KSequence seq) {
-        List<K> elements = seq.getContents().stream().map(this).map(x -> (K) x)
-                .collect(Collectors.toList());
-        return KSequence(elements);
-    }
-
-    private Value applyAssoc(String assocOrig) {
+    public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
         case "left":
@@ -159,7 +133,7 @@ public class KILtoKORE implements Function<Term, Object> {
         }
     }
 
-    private Set<org.kframework.kore.outer.Sentence> apply(PriorityExtended pe) {
+    public Set<org.kframework.kore.outer.Sentence> apply(PriorityExtended pe) {
         Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
                 .stream().map((block) -> {
                     return toTags(block.getProductions());
@@ -168,15 +142,15 @@ public class KILtoKORE implements Function<Term, Object> {
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    private scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
+    public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
         return immutable(labels.stream().map(l -> Tag(l.getLabel())).collect(Collectors.toSet()));
     }
 
-    private org.kframework.kore.outer.Sentence apply(Import s) {
+    public org.kframework.kore.outer.Sentence apply(Import s) {
         return new org.kframework.kore.outer.Import(s.getName(), apply(s.getAttributes()));
     }
 
-    private Set<org.kframework.kore.outer.Sentence> apply(Syntax s) {
+    public Set<org.kframework.kore.outer.Sentence> apply(Syntax s) {
         Set<org.kframework.kore.outer.Sentence> res = new HashSet<>();
 
         org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getSort());
@@ -236,7 +210,7 @@ public class KILtoKORE implements Function<Term, Object> {
         return res;
     }
 
-    private void applyUserList(Set<org.kframework.kore.outer.Sentence> res,
+    public void applyUserList(Set<org.kframework.kore.outer.Sentence> res,
             org.kframework.kore.Sort sort, Production p, UserList userList) {
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
@@ -270,11 +244,11 @@ public class KILtoKORE implements Function<Term, Object> {
         res.add(prod3);
     }
 
-    private org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
+    public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
         return Sort(sort.getName());
     }
 
-    private org.kframework.kore.Attributes apply(Attributes attributes) {
+    public org.kframework.kore.Attributes apply(Attributes attributes) {
         Set<K> attributesSet = attributes
                 .keySet()
                 .stream()

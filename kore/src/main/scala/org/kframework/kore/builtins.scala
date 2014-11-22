@@ -46,3 +46,5 @@ class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] wit
   def copy(att: Attributes) = this
   def att = Attributes()
 }
+
+object KBag extends ConcreteKLabel("Bag")
