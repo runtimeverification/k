@@ -57,6 +57,8 @@ class KBag(val contents: KList) extends KAbstractCollection[KBag] with Associati
 
   override def newBuilder: collection.mutable.Builder[K, KBag] =
     contents.newBuilder mapResult copy
+    
+  override def toString = if(isEmpty) ".Bag" else super.toString()
 }
 
 object KBag extends ConcreteKLabel("Bag")

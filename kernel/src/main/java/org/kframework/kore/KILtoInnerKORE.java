@@ -60,12 +60,15 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return KBag(contents);
     }
 
+    KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
+
     public KApply apply(Cell body) {
         K x = (K) apply(body.getContents());
-        if(x instanceof KBag) {
-            return KApply(KLabel(body.getLabel()), KList(((KBag) x).contents()));
+        if (x instanceof KBag && !((KBag) x).isEmpty()) {
+            return KApply(KLabel(body.getLabel()), KList(((KBag) x).contents()),
+                    Attributes(cellMarker));
         } else
-            return KApply(KLabel(body.getLabel()), KList(x));
+            return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {

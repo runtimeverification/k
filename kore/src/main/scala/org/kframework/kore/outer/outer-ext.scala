@@ -12,8 +12,18 @@ case class Configuration(
   override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
   def xmlify(x: K): String = x match {
-    case KApply(label, klist: KList, att) => "<" + label.name + att.att.map(xmlifyAttributes).mkString(" ") + ">" +
-      klist.map(xmlify _).mkString(" ") + "<" + label.name + ">"
+    case KApply(label, klist: KList, att) if att.contains("cell") => {
+      val atts = att.att.filterNot(_ == Configuration.cellMarker)
+
+      val attsString = if (atts.size > 0)
+        " " + atts.map(xmlifyAttributes).mkString(" ")
+      else
+        ""
+
+      "<" + label.name + attsString + ">" +
+        klist.map(xmlify _).mkString(" ") +
+        "<" + label.name + ">"
+    }
     case e => e.toString
   }
 
@@ -24,6 +34,10 @@ case class Configuration(
       else
         "")
   }
+}
+
+object Configuration {
+  val cellMarker = KApply(KLabel("cell"), KList());
 }
 
 case class Bubble(ty: String, contents: String, att: Attributes = Attributes()) extends Sentence
