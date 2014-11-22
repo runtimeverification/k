@@ -15,6 +15,18 @@ trait Rewriting {
   /**
    * search using the rewrite rule in K
    */
+  def search(rules: Set[KRewrite]): Set[K] = priority(rules) flatMap search
+
+  def priority(rules: Set[KRewrite]): Set[KRewrite] = this match {
+    case KApply(KLabel(v), _, _) => rules collect {
+      case r @ KRewrite(KApply(v1, _, _), _, _) if v == v1 => r
+    }
+    case _ => rules
+  }
+
+  /**
+   * search using the rewrite rule in K
+   */
   def search(rewrite: KRewrite): Set[K] = {
     val solutions = matchAll(rewrite.left, true)
 
