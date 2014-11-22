@@ -35,7 +35,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public Definition parse(String definitionText, String mainModule) throws IOException {
+    public Definition parse(File definitionFile, String mainModule) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -47,7 +47,6 @@ abstract class SDFCompilerTest extends BaseTestCase {
         Path tempDir = Files.createTempDirectory("temp");
         File definitionDir = new File(testDir.toAbsolutePath().toString());
         File kompiledDir = new File(definitionDir, "test-kompiled");
-        System.out.println(definitionDir);
 
         context.globalOptions = globalOptions;
 
@@ -63,9 +62,6 @@ abstract class SDFCompilerTest extends BaseTestCase {
 
         Sdf2Table sdf2Table = new Sdf2Table(Providers.of(new ProcessBuilder()),
                 nativeSDF2TableExecutable);
-
-        File file = File.createTempFile("test", ".k");
-        fileUtil.save(file, definitionText);
 
         KompileOptions kompileOptions = mock(KompileOptions.class);
         when(kompileOptions.mainModule()).thenReturn(mainModule);
@@ -84,7 +80,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
 
         Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
                 kem, new OuterParser(globalOptions, false, "autoinclude-java.k", fileUtil, kem),
-                false, fileUtil, sdf2Table).parseDefinition(file, mainModule, context);
+                false, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
         return parsedKIL;
     }

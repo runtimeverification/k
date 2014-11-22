@@ -38,6 +38,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kore.outer.*;
@@ -63,8 +64,14 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {
-        List<K> elements = seq.getContents().stream().map(this).map(x -> (K) x)
-                .collect(Collectors.toList());
-        return KSequence(elements);
+        return KSequence(apply(seq.getContents()));
+    }
+
+    private List<K> apply(List<Term> contents) {
+        return contents.stream().map(this).map(x -> (K) x).collect(Collectors.toList());
+    }
+
+    public KApply apply(TermCons cons) {
+        return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())));
     }
 }

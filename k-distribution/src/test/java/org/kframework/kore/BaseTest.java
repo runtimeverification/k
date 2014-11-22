@@ -31,11 +31,31 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     protected void sdfTest() throws IOException {
-        standardTest(this::parseUsingSDF);
+        standardTestUsingFile(this::parseUsingSDF);
     }
 
-    private void standardTest(Function<String, Definition> parse)
-            throws IOException {
+    private void standardTestUsingFile(Function<File, Definition> parse) throws IOException {
+        File definitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
+        File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
+
+        // Definition def = parseUsingOuter(definitionText);
+        Definition def = parse.apply(definitionFile);
+
+        KILtoKORE convertor = new KILtoKORE();
+        org.kframework.kore.outer.Definition converted = convertor.apply(def);
+        org.kframework.kore.outer.Definition koreDefintion = converted;
+
+        String definitionText = FileUtils.readFileToString(definitionFile);
+
+        if (outputFile.isFile()) {
+            String expectedOutput = FileUtils.readFileToString(outputFile);
+            assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));
+        } else {
+            assertEquals(clean(definitionText), clean(koreDefintion.toString()));
+        }
+    }
+
+    private void standardTest(Function<String, Definition> parse) throws IOException {
         File definitionFile = new File(ROOT + name.getMethodName() + ".k");
         File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
 
@@ -56,9 +76,9 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private Definition parseUsingSDF(String definitionText) {
+    private Definition parseUsingSDF(File definitionFile) {
         try {
-            return parse(definitionText, "TEST");
+            return parse(definitionFile, "TEST");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -66,14 +86,12 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     private Definition parseUsingOuter(String definitionText) {
         Definition def = new Definition();
-        def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKORE.class),
-                definitionText, null));
+        def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKORE.class), definitionText, null));
         return def;
     }
 
     private String clean(String definitionText) {
-        return definitionText.replace(
-                "// Copyright (c) 2014 K Team. All Rights Reserved.", "")
+        return definitionText.replace("// Copyright (c) 2014 K Team. All Rights Reserved.", "")
                 .trim();
     }
 
