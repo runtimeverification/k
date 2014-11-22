@@ -33,6 +33,10 @@ public class Constructors {
         return new KString(s);
     }
 
+    public static KLabel Hole() {
+        return Hole$.MODULE$;
+    }
+
     public static KLabel KBag() {
         return KBag$.MODULE$;
     }

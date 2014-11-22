@@ -107,8 +107,16 @@ public class KILtoKORE extends KILTransformation<Object> {
             return apply((PriorityExtendedAssoc) i);
         } else if (i instanceof Restrictions) {
             throw new RuntimeException("Not implemented");
+        } else if (i instanceof org.kframework.kil.Context) {
+            org.kframework.kil.Context c = (org.kframework.kil.Context) i;
+            K requires;
+            if (c.getRequires() != null)
+                requires = inner.apply(c.getRequires());
+            else
+                requires = new KBoolean(true, Attributes());
+            return Sets.newHashSet(Context(inner.apply(c.getBody()), requires));
         } else {
-            throw new RuntimeException("Unhandled case");
+            throw new RuntimeException("Unhandled case:" + i.getClass());
         }
     }
 

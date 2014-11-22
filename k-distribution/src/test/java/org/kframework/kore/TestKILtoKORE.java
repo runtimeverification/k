@@ -40,16 +40,11 @@ public class TestKILtoKORE extends BaseTest {
         sdfTest();
     }
 
-    @Test
-    public void configurationWithNested() throws IOException {
-        outerTest();
-    }
-
     // straightforward
     // again, the contents remains as a bubble
     @Test
     public void context() throws IOException {
-        outerTest();
+        sdfTest();
     }
 
     @Test

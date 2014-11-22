@@ -5,5 +5,8 @@ module INCLUDE
                     [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]")]
   syntax String ::= #String
   
-  syntax Map ::= ".Map"                         [function, hook(Map:.Map)]  
+  syntax Map ::= ".Map"                         [function, hook(Map:.Map)]
+  
+  syntax #Bool ::= "true"
+  syntax #Bool ::= "false"
 endmodule

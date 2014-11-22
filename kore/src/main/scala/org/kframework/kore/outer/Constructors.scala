@@ -49,6 +49,9 @@ object Constructors {
   def SyntaxAssociativity(assoc: outer.Associativity.Value, tags: Set[Tag]) = outer.SyntaxAssociativity(assoc, tags)
   def SyntaxAssociativity(assoc: outer.Associativity.Value, tags: Set[Tag], att: Attributes) = outer.SyntaxAssociativity(assoc, tags, att)
 
+  def Context(content: K, requires: K) = outer.Context(content, requires)
+  def Context(content: K, requires: K, att: Attributes) = outer.Context(content, requires, att)
+  
   def Associativity = outer.Associativity;
 
   // EXTRA

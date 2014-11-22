@@ -7,8 +7,6 @@ import java.util.stream.StreamSupport
 import collection._
 import JavaConverters._
 
-trait Context
-
 trait KAbstractCollection[+This <: KAbstractCollection[This]]
   extends KListBacked[This] with KCollection with K {
   self: This =>

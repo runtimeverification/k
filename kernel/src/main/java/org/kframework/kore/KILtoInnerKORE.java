@@ -20,6 +20,7 @@ import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSequence;
@@ -41,6 +42,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
 import org.kframework.kore.outer.*;
 
 import scala.Enumeration.Value;
@@ -73,5 +75,13 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     public KApply apply(TermCons cons) {
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())));
+    }
+
+    public KApply apply(Hole hole) {
+        return KApply(Hole(), KList());
+    }
+
+    public KVariable apply(Variable v) {
+        return KVariable(v.getName());
     }
 }

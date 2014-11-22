@@ -31,38 +31,16 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     protected void sdfTest() throws IOException {
-        standardTestUsingFile(this::parseUsingSDF);
+        standardTest(this::parseUsingSDF);
     }
 
-    private void standardTestUsingFile(Function<File, Definition> parse) throws IOException {
+    private void standardTest(Function<File, Definition> parse) throws IOException {
         File definitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
 
-        // Definition def = parseUsingOuter(definitionText);
         Definition def = parse.apply(definitionFile);
 
-        KILtoKORE convertor = new KILtoKORE();
-        org.kframework.kore.outer.Definition converted = convertor.apply(def);
-        org.kframework.kore.outer.Definition koreDefintion = converted;
-
-        String definitionText = FileUtils.readFileToString(definitionFile);
-
-        if (outputFile.isFile()) {
-            String expectedOutput = FileUtils.readFileToString(outputFile);
-            assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));
-        } else {
-            assertEquals(clean(definitionText), clean(koreDefintion.toString()));
-        }
-    }
-
-    private void standardTest(Function<String, Definition> parse) throws IOException {
-        File definitionFile = new File(ROOT + name.getMethodName() + ".k");
-        File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
-
-        String definitionText = FileUtils.readFileToString(definitionFile);
-
-        // Definition def = parseUsingOuter(definitionText);
-        Definition def = parse.apply(definitionText);
+        System.out.println(def);
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.apply(def);
@@ -72,6 +50,7 @@ public abstract class BaseTest extends SDFCompilerTest {
             String expectedOutput = FileUtils.readFileToString(outputFile);
             assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));
         } else {
+            String definitionText = FileUtils.readFileToString(definitionFile);
             assertEquals(clean(definitionText), clean(koreDefintion.toString()));
         }
     }
@@ -84,8 +63,14 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private Definition parseUsingOuter(String definitionText) {
+    private Definition parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
+        String definitionText;
+        try {
+            definitionText = FileUtils.readFileToString(definitionFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKORE.class), definitionText, null));
         return def;
     }

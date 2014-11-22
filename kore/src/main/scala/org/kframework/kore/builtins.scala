@@ -48,3 +48,5 @@ class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] wit
 }
 
 object KBag extends ConcreteKLabel("Bag")
+
+object Hole extends ConcreteKLabel("Hole")
