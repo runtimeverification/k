@@ -157,7 +157,7 @@ public class KOREtoKIL {
         stream(attrs.att()).map(a -> {
             KApply attr = (KApply) a;
             KLabel key = attr.klabel();
-            String value = ((KString) ((ConsKList) ((ConsKList) attr.contents()).tail()).head()).s();
+//            String value = ((KString) ((ConsKList) ((ConsKList) attr.contents()).tail()).head()).s();
             return null;
             // TODO: I think it's not possible to translate attributes back,
             // we lose a lot of information while translating.

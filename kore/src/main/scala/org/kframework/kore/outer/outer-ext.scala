@@ -12,15 +12,15 @@ case class Configuration(
   override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
   def xmlify(x: K): String = x match {
-    case KApply(label, klist, att) => "<" + label.name + att.att.map(xmlifyAttributes).mkString(" ") + ">" +
-      klist.map(xmlify).mkString(" ") + "<" + label.name + ">"
-    case e => e.toString 
+    case KApply(label, klist: KList, att) => "<" + label.name + att.att.map(xmlifyAttributes).mkString(" ") + ">" +
+      klist.map(xmlify _).mkString(" ") + "<" + label.name + ">"
+    case e => e.toString
   }
 
   def xmlifyAttributes(x: K): String = x match {
-    case KApply(label, klist, att) => label.name +
+    case KApply(label, klist: KList, att) => label.name +
       (if (!klist.isEmpty)
-        "=" + klist.map("\"" + _ + "\"").mkString(" ")
+        "=" + klist.map({ e: K => "\"" + e + "\"" }).mkString(" ")
       else
         "")
   }

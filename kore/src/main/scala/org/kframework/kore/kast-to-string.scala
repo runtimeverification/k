@@ -15,8 +15,9 @@ trait AttributesToString {
       case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
       // FIXME: This is to prevent printing metadata saved as attributes. Currently this metadata
       // is used to guide translating KORE back to KIL.
-      case a => ""
-    } mkString " ") + "]" // TODO: remove brackets if nothing is printed inside
+      case a => a.toString
+    }).toList.sorted.mkString(" ") +
+    "]" // TODO: remove brackets if nothing is printed inside
 
   def postfixString = if (att.isEmpty) "" else (" " + toString())
 }
@@ -43,7 +44,8 @@ trait KRewriteToString {
 
 trait KSequenceToString {
   self: KSequence =>
-  override def toString = mkString("~>")
+  override def toString =
+    if(isEmpty) ".K" else mkString("~>")
 }
 
 trait KStringToString {

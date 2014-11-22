@@ -8,6 +8,7 @@ import KORE._
 import scala.collection.AbstractIterator
 import scala.collection.IterableLike
 import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable.Builder
 
 /* Interfaces */
 
@@ -21,7 +22,6 @@ trait K extends HasAttributes with Matcher with Rewriting with interfaces.K {
   protected type ThisK <: K
 
   def copy(att: Attributes): ThisK
-  def copy(): ThisK = copy(att)
 }
 
 trait KItem extends K with interfaces.KItem {
@@ -36,15 +36,16 @@ trait KLabel extends KLabelToString with interfaces.KLabel {
 
 case class KString(s: String) extends interfaces.KString // just a wrapper to mark it
 
-case class KApply(klabel: KLabel, contents: Iterable[K], att: Attributes = Attributes())
-  extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString {
+class KApply(val klabel: KLabel, val contents: KList, val att: Attributes = Attributes())
+  extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString with Equals {
   type ThisK = KApply
-  def copy(klist: Iterable[K], att: Attributes): KApply = new KApply(klabel, klist, att)
 
-  override def equals(that: Any) = that match {
-    case KApply(`klabel`, _, _) => super.equals(that)
+  override def canEqual(that: Any) = that match {
+    case t: KApply => t.klabel == klabel
     case _ => false
   }
+
+  def copy(ks: Iterable[K], att: Attributes): KApply = KApply(klabel, ks, att)
 }
 
 trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString with interfaces.KToken {
@@ -59,15 +60,17 @@ case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attribu
 }
 
 case class ConcreteKLabel(name: String) extends KLabel {
-  def apply(ks: K*) = KApply(this, KList(ks: _*))
+  def apply(ks: K*) = KApply(this, ks)
 }
 
-final class KSequence(val contents: Iterable[K], val att: Attributes = Attributes())
-  extends KAbstractCollection[KSequence] with KSequenceMatcher with interfaces.KSequence {
+final class KSequence(val contents: KList, val att: Attributes = Attributes())
+  extends KAbstractCollection[KSequence] with KSequenceMatcher with KSequenceToString {
   self: KSequence =>
   type ThisK = KSequence
   def copy(klist: Iterable[K], att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
   def klist = KList(contents.toSeq: _*)
+
+  override def canEqual(that: Any) = that.isInstanceOf[KSequence]
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
@@ -86,6 +89,14 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
 
 /*  Constructors */
 
+object KApply {
+  def apply(klabel: KLabel, contents: Iterable[K], att: Attributes = Attributes()) = {
+    new KApply(klabel, KList(contents), att)
+  }
+
+  def unapply(a: KApply): Option[(KLabel, KList, Attributes)] = Some((a.klabel, a.contents, a.att))
+}
+
 object KToken {
   def apply(sort: Sort, s: KString, att: Attributes = Attributes()) =
     KUninterpretedToken(sort, s, att)
@@ -97,7 +108,7 @@ object KVariable {
   val it = this
 }
 
-object KSequence extends CanBuildKListLike[KSequence] {
+object KSequence extends CanBuildKCollection[KSequence] {
   def apply(klist: KList, att: Attributes) = new KSequence(klist, att)
   def apply(list: K*) = apply(KList(list: _*), Attributes())
 
@@ -109,13 +120,6 @@ object KRewrite {
     case KList(left, right) => new KRewrite(left, right, att)
   }
   def apply(list: K*): KRewrite = apply(KList(list: _*), Attributes())
-}
-
-object KApply extends CanBuildKListLike[KApply] {
-  def apply(list: K*) = list.headOption match {
-    case Some(v: KVariable) => new KApply(v, KList(list.tail: _*))
-    case _ => ???
-  }
 }
 
 object EmptyK {

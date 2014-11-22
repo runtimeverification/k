@@ -3,22 +3,34 @@
 package org.kframework.kore
 
 import java.util.stream.StreamSupport
-
 import collection._
 import JavaConverters._
+import scala.collection.mutable.Builder
+import scala.reflect.ClassTag
 
-trait KAbstractCollection[+This <: KAbstractCollection[This]]
-  extends KListBacked[This] with KCollection[This] with K {
+trait KAbstractCollection[+This <: KAbstractCollection[This]] extends KCollection[This] with K {
   self: This =>
   type ThisK <: This
 
-  override def foreach[B](f: K => B) {
-    contents.foreach(f)
+  def contents: KCollection[T forSome { type T <: KCollection[T] }]
+
+  override def newBuilder: mutable.Builder[K, This] =
+    contents.newBuilder mapResult copy
+
+  def copy(ks: KCollection[_]): This = copy(ks, att)
+
+  def iterator: Iterator[K] = contents.iterator
+
+  override def equals(other: Any) = {
+    other match {
+      case that: KAbstractCollection[_] => that.canEqual(KAbstractCollection.this) && contents == that.contents
+      case _ => false
+    }
   }
 
-  override def equals(that: Any) = that match {
-    case that: This => super.equals(that)
-    case _ => false
+  override def hashCode() = {
+    val prime = 41
+    prime + contents.hashCode
   }
 }
 
@@ -31,39 +43,16 @@ trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOpt
     new mutable.ListBuffer mapResult copy
 
   def copy(l: Iterable[K]): This
-
-  def stream(): java.util.stream.Stream[K] = StreamSupport.stream(this.asJava.spliterator(), false)
-}
-
-/**
- * A KList-backed implementation of KList
- *
- * Implementing classes only need to provide an implementation of:
- * def copy(LinearSeq[K]): This
- *
- * @see org.kframework.kore.Attributes for an example
- *
- * KList is not based on this class because it cannot be backed by itself
- *
- */
-
-trait KListBacked[+This <: KListLike[This]] extends KListLike[This] {
-  self: This =>
-  val contents: Iterable[K]
-
-  override def head = contents.head
-  override def tail = copy(contents.tail)
-  override def isEmpty = contents.isEmpty
-  def ks(): java.lang.Iterable[interfaces.K] = this.asJava.asInstanceOf[java.lang.Iterable[interfaces.K]]
 }
 
 /**
  * Should be extended by companion objects of classes extending KListLike
  */
-trait CanBuildKListLike[This <: KListLike[This]] {
+
+trait CanBuildKCollection[This <: KCollection[This]] {
   def apply(l: K*): This
 
-  private val fromList = apply _
+  protected val fromList = apply _
 
   implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
     new generic.CanBuildFrom[This, K, This] {
@@ -72,21 +61,41 @@ trait CanBuildKListLike[This <: KListLike[This]] {
     }
 }
 
-trait Associative extends Iterable[K]
+trait Associative[With] extends Iterable[K]
 
-trait KCollection[+This <: KCollection[This]] extends K with IterableLike[K, This] {
+trait KCollection[+This <: KCollection[This]] extends Iterable[K] with K with IterableLike[K, This] {
   self: KCollection[This] =>
   type ThisK <: KCollection[This]
 
   def copy(ks: Iterable[K], att: Attributes): ThisK
-  def copy(ks: Iterable[K]): ThisK = copy(ks, Attributes())
+  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
   def copy(att: Attributes): ThisK = copy(Seq(), att)
+
+  override def newBuilder: Builder[K, This] = ???
 
   def map(f: K => K): This = {
     val builder = newBuilder
+
     foreach {
       builder += f(_)
     }
     builder.result()
   }
+}
+
+class AssocBuilder[A, AssocIn <: Iterable[A]: ClassTag] extends Builder[A, List[A]] {
+  val buffer = new mutable.ListBuffer[A]
+
+  def +=(elem: A): this.type = {
+    if (elem.getClass().isAssignableFrom(implicitly[ClassTag[AssocIn]].runtimeClass))
+      buffer ++= elem.asInstanceOf[AssocIn]
+    else
+      buffer += elem
+
+    this
+  }
+
+  def clear(): Unit = buffer.clear()
+
+  def result(): List[A] = buffer.result();
 }

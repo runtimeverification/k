@@ -62,7 +62,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     public KApply apply(Cell body) {
         K x = (K) apply(body.getContents());
-        return KApply(KLabel(body.getLabel()), KList(x));
+        if(x instanceof KBag) {
+            return KApply(KLabel(body.getLabel()), KList(((KBag) x).contents()));
+        } else
+            return KApply(KLabel(body.getLabel()), KList(x));
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {

@@ -11,7 +11,7 @@ class KoreTest {
 
   @Test def testKListMapId {
     val x = KList(TestK, TestK)
-    val t: KList = x map { t => t }
+    val t: KList = x map { t: K => t }
     assertEquals(KList(TestK, TestK), t)
   }
 
@@ -39,17 +39,16 @@ class KoreTest {
     assertEquals(x, t)
   }
 
-  @Test(expected = classOf[UnsupportedOperationException])
-  def testCannotCreateKApplyFromJustKs {
-    KApply(TestK)
-  }
-
   @Test def testKList {
     val x = KList(TestK, TestK)
     x match {
       case KList(a, b) =>
       case _ => throw new RuntimeException("match fail")
     }
+  }
+  
+  @Test def testKListAssoc {
+    assertEquals(KList(TestK), KList(KList(TestK)))
   }
 
   @Test def testKRewrite {

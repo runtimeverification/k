@@ -71,7 +71,7 @@ public class Constructors {
     // }
 
     public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist, Attributes att) {
-        return new KApply(klabel, klist, att);
+        return KApply$.MODULE$.apply(klabel, klist, att);
     }
 
     public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist) {

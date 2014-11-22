@@ -3,7 +3,7 @@ package org.kframework.kore.outer
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString +
-    "\n" + sentences.toList.sortBy(_.toString).reverse.map("  " + _).mkString("\n") + "\nendmodule"
+    "\n" + sentences.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") + "\nendmodule"
 }
 
 trait DefinitionToString {
@@ -11,7 +11,7 @@ trait DefinitionToString {
   override def toString =
     requires.mkString("\n") +
       "\n\n" +
-      modules.mkString("\n\n\n")
+      modules.toList.map(_.toString).sorted.mkString("\n\n\n")
 }
 
 trait RuleToString {

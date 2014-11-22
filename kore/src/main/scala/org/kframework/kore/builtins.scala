@@ -33,7 +33,7 @@ object KInt {
   implicit def toKInt(n: Int): KInt = KInt(n)
 }
 
-class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] with Associative {
+class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] with Associative[KSet] {
   type ThisK = KSet
 
   def contains(key: K): Boolean = backingSet.contains(key)
@@ -48,12 +48,15 @@ class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] wit
   def att = Attributes()
 }
 
-class KBag(val contents: Iterable[K]) extends KAbstractCollection[KBag] with Associative {
+class KBag(val contents: KList) extends KAbstractCollection[KBag] with Associative[KBag] {
   type ThisK = KBag
 
   def att = Attributes()
-  def copy(klist: Iterable[K], att: Attributes): KBag = new KBag(klist)
+  def copy(klist: Iterable[K], att: Attributes): KBag = new KBag(KList(klist.toSeq: _*))
   def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+
+  override def newBuilder: collection.mutable.Builder[K, KBag] =
+    contents.newBuilder mapResult copy
 }
 
 object KBag extends ConcreteKLabel("Bag")
