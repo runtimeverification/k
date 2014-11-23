@@ -145,6 +145,34 @@ public class KOREtoKIL {
         ListProductionCollector listCollector = new ListProductionCollector();
         sentences = listCollector.collectAndRemoveListProds(sentences);
         ret.addAll(listCollector.getResults());
+
+        for (Sentence sentence : sentences) {
+            if (sentence instanceof Import) {
+                Import anImport = (Import) sentence;
+                org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.what());
+                kilImport.setAttributes(convertAttributes(anImport.att()));
+                ret.add(kilImport);
+            } else if (sentence instanceof Bubble) {
+                Bubble bubble = (Bubble) sentence;
+                org.kframework.kil.StringSentence kilBubble =
+                        new org.kframework.kil.StringSentence(bubble.contents(), null, bubble.ty(), null);
+                kilBubble.setAttributes(convertAttributes(bubble.att()));
+                ret.add(kilBubble);
+            } else if (sentence instanceof ModuleComment) {
+                ModuleComment moduleComment = (ModuleComment) sentence;
+                org.kframework.kil.LiterateModuleComment kilComment =
+                        // TODO: we lost type information
+                        new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
+                kilComment.setAttributes(convertAttributes(moduleComment.att()));
+                ret.add(kilComment);
+            } else if (sentence instanceof Configuration) {
+                throw new RuntimeException("Not implemented.");
+            } else if (sentence instanceof Rule) {
+                Rule rule = (Rule) sentence;
+                //new org.kframework.kil.Rule kilRule = new org.kframework.kil.Rule()
+            }
+        }
+
         return ret;
     }
 

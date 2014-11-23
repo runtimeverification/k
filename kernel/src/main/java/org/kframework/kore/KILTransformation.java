@@ -17,10 +17,8 @@ public class KILTransformation<R> implements Function<Term, R> {
 
     @SuppressWarnings("unchecked")
     public R apply(Term t) {
-        Method visitorMethod;
         try {
-            visitorMethod = this.getClass().getDeclaredMethod("apply",
-                    new Class[] { t.getClass() });
+            Method visitorMethod = this.getClass().getDeclaredMethod("apply", t.getClass());
             return (R) visitorMethod.invoke(this, t);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {

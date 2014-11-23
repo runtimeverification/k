@@ -93,7 +93,6 @@ public class KILtoKORE extends KILTransformation<Object> {
         } else if (i instanceof org.kframework.kil.Configuration) {
             Configuration kilConfiguration = (org.kframework.kil.Configuration) i;
             Cell body = (Cell) kilConfiguration.getBody();
-            Term kilEnsures = kilConfiguration.getEnsures();
 
             return Sets.newHashSet(Configuration(inner.apply(body),
                     inner.applyOrTrue(kilConfiguration.getEnsures()),
