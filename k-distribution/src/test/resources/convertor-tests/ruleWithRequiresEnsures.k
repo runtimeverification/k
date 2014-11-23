@@ -1,7 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
 module TEST
-	rule A:Bool => A requires A ==K A
-	rule A:Bool => A ensures A ==K A
-	rule A:Bool => A requires A==K A ensures A ==K A
+	syntax Exp
+
+	rule A:Exp => A requires A
+	rule A:Exp => A ensures A
+	rule A:Exp => A requires A ensures A
 endmodule

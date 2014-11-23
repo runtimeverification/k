@@ -61,12 +61,7 @@ public class TestKILtoKORE extends BaseTest {
     // for now, the rule contents stays as a bubble
     @Test
     public void ruleWithRequiresEnsures() throws IOException {
-        outerTest();
-    }
-
-    @Test
-    public void ruleWithSort() throws IOException {
-        outerTest();
+        sdfTest();
     }
 
     @Test
