@@ -9,23 +9,39 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kore.outer.Definition;
 import org.kframework.parser.outer.Outer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestKOREtoKIL {
 
     @Test
+    public void testBubble() {
+        String pgm = "module PGM " +
+                "configuration <k> .K </k> " +
+                "endmodule";
+        org.kframework.kil.Definition kilDef = parseAndTranslateBack(pgm);
+
+        List<String> sentences = new ArrayList<>();
+        BasicVisitor variableCollector = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.StringSentence string, Void _void) {
+                sentences.add(string.getContent());
+                return _void;
+            }
+        };
+        variableCollector.visitNode(kilDef);
+        assertEquals(sentences.size(), 1);
+        assertEquals(sentences.get(0), "<k> .K </k>");
+    }
+
+    @Test
     public void testListConversion() {
-        org.kframework.kil.Definition kilDef = new org.kframework.kil.Definition();
         String pgm = "module PGM " +
                 "syntax UserLst ::= List{Elem, \",\"} " +
                 "syntax NotYourUsualList ::= UserLst " +
                 "syntax AnotherList ::= List{Elem2, \"!\"} " +
                 "endmodule";
-        kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKIL.class), pgm, null));
-
-        KILtoKORE toKore = new KILtoKORE();
-        Definition koreDef = toKore.apply(kilDef);
-        KOREtoKIL toKil = new KOREtoKIL();
-        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
-
+        org.kframework.kil.Definition kilDef = parseAndTranslateBack(pgm);
 
         final int[] lists = {0};
         BasicVisitor variableCollector = new BasicVisitor(null) {
@@ -35,7 +51,19 @@ public class TestKOREtoKIL {
                 return _void;
             }
         };
-        variableCollector.visitNode(kilDef1);
+        variableCollector.visitNode(kilDef);
         assertEquals(lists[0], 2);
+    }
+
+    public org.kframework.kil.Definition parseAndTranslateBack(String pgm) {
+        org.kframework.kil.Definition kilDef = new org.kframework.kil.Definition();
+        kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKIL.class), pgm, null));
+
+        KILtoKORE toKore = new KILtoKORE();
+        Definition koreDef = toKore.apply(kilDef);
+        KOREtoKIL toKil = new KOREtoKIL();
+        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+
+        return kilDef1;
     }
 }
