@@ -9,10 +9,26 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kore.outer.Definition;
 import org.kframework.parser.outer.Outer;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestKOREtoKIL {
+public class TestKOREtoKIL extends BaseTest {
+
+    static final String ROOT = "src/test/resources/reverse-convertor-tests/";
+
+    @Test
+    public void testConfiguration() throws IOException {
+        org.kframework.kil.Definition kilDef = parse(
+                new File(ROOT + "configuration.k").getAbsoluteFile(), "TEST");
+
+        KILtoKORE toKore = new KILtoKORE();
+        org.kframework.kore.outer.Definition koreDef = toKore.apply(kilDef);
+
+        KOREtoKIL toKil = new KOREtoKIL();
+        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+    }
 
     @Test
     public void testBubble() {

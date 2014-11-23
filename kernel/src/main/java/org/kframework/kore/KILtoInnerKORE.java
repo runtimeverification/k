@@ -65,12 +65,13 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
 
     public KApply apply(Cell body) {
-        K x = (K) apply(body.getContents());
+        K x = apply(body.getContents());
         if (x instanceof KBag && !((KBag) x).isEmpty()) {
             return KApply(KLabel(body.getLabel()), KList(((KBag) x).contents()),
                     Attributes(cellMarker));
-        } else
+        } else {
             return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));
+        }
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {
@@ -78,7 +79,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     private List<K> apply(List<Term> contents) {
-        return contents.stream().map(this).map(x -> (K) x).collect(Collectors.toList());
+        return contents.stream().map(this).collect(Collectors.toList());
     }
 
     public KApply apply(TermCons cons) {

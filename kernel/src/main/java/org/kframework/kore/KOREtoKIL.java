@@ -4,8 +4,6 @@ package org.kframework.kore;
 
 import org.kframework.kore.outer.*;
 
-import scala.collection.immutable.Set;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -166,10 +164,14 @@ public class KOREtoKIL {
                 kilComment.setAttributes(convertAttributes(moduleComment.att()));
                 ret.add(kilComment);
             } else if (sentence instanceof Configuration) {
-                throw new RuntimeException("Not implemented.");
+                Configuration conf = (Configuration) sentence;
+                org.kframework.kil.Configuration kilConf = new org.kframework.kil.Configuration();
+                kilConf.setBody(convertConfBody(conf.body()));
+                kilConf.setEnsures(convertK(conf.ensures()));
+                kilConf.setAttributes(convertAttributes(conf.att()));
+                ret.add(kilConf);
             } else if (sentence instanceof Rule) {
-                Rule rule = (Rule) sentence;
-                //new org.kframework.kil.Rule kilRule = new org.kframework.kil.Rule()
+                throw new RuntimeException("Not implemented: KORE Rule to KIL");
             }
         }
 
@@ -189,7 +191,46 @@ public class KOREtoKIL {
             return null;
             // TODO: I think it's not possible to translate attributes back,
             // we lose a lot of information while translating.
-            });
+        });
         return ret;
+    }
+
+    public org.kframework.kil.Term convertConfBody(K k) {
+        if (k instanceof KApply) {
+            KApply kApply = (KApply) k;
+            KLabel confLabel = kApply.klabel();
+            org.kframework.kil.Cell kilCell = new org.kframework.kil.Cell();
+            kilCell.setLabel(confLabel.name());
+            List<K> args = stream(kApply.contents()).collect(Collectors.toList());
+            if (args.size() == 1) {
+                kilCell.setContents(convertK(args.get(0)));
+            } else {
+                kilCell.setContents(new org.kframework.kil.Bag(
+                        args.stream().map(kk -> convertK(k)).collect(Collectors.toList())));
+            }
+            return kilCell;
+        }
+        throw new RuntimeException("Unexpected conf body found.");
+    }
+
+    public org.kframework.kil.Term convertK(K k) {
+        if (k instanceof KSequence) {
+            KSequence kSequence = (KSequence) k;
+            return new org.kframework.kil.KSequence(stream(kSequence).map(
+                    this::convertK).collect(Collectors.toList()));
+        } else if (k instanceof KApply) {
+            KApply kApply = (KApply) k;
+            // FIXME: a lot of things that are not a KApply are translated to
+            // KORE KApply, we need to figure out every one of them and handle here
+            return org.kframework.kil.KApp.of(convertKApply(kApply.klabel()),
+                    stream(kApply.contents()).map(this::convertK).collect(Collectors.toList()));
+
+        }
+        throw new RuntimeException(
+                "Not implemented: KORE.K(" + k.getClass().getName() + ") -> KIL.Term");
+    }
+
+    public org.kframework.kil.Term convertKLabel(KLabel label) {
+        return null;
     }
 }
