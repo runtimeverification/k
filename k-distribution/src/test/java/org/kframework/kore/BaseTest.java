@@ -46,6 +46,8 @@ public abstract class BaseTest extends SDFCompilerTest {
         org.kframework.kore.outer.Definition converted = convertor.apply(def);
         org.kframework.kore.outer.Definition koreDefintion = converted;
 
+        System.out.println(Meta$.MODULE$.apply(koreDefintion));
+
         if (outputFile.isFile()) {
             String expectedOutput = FileUtils.readFileToString(outputFile);
             assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));

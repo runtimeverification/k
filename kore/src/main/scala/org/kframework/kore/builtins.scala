@@ -20,16 +20,14 @@ object KBoolean extends Sort("Boolean") {
   }
 }
 
-object KInt {
-  object KInt extends Sort("Boolean")
-
-  case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
+case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
     type ThisK = KInt
     val sort = KInt
     val s: KString = n.toString
     def copy(att: Attributes) = KInt(n, att)
   }
 
+object KInt extends Sort("Boolean") {
   implicit def toKInt(n: Int): KInt = KInt(n)
 }
 

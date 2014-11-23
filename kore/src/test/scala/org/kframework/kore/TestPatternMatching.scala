@@ -139,6 +139,12 @@ class TestPatternMatching {
       foo.matchAll(pattern))
   }
 
+  @Test
+  def testAttributes() {
+    val foo = 'foo()
+    assertEquals(Some(Map(X -> foo)), foo.m(X))
+  }
+
   def assertEquals(expected: Any, actual: Any) {
     if (expected != actual) {
       Assert.assertEquals(expected.toString(), actual.toString())
