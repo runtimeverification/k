@@ -53,9 +53,8 @@ public class TestKILtoKORE extends BaseTest {
     }
 
     @Test
-    @Ignore
     public void simpleRule() throws IOException {
-        outerTest();
+        sdfTest();
     }
 
     // straightforward, look at the kil Rule class

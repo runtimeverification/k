@@ -75,7 +75,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.kore.outer.Module apply(Module i) {
         Set<org.kframework.kore.outer.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
-        return Module(i.getName(), immutable(items), apply(i.getAttributes()));
+        return Module(i.getName(), immutable(items), inner.apply(i.getAttributes()));
     }
 
     public Set<org.kframework.kore.outer.Sentence> apply(ModuleItem i) {
@@ -86,21 +86,18 @@ public class KILtoKORE extends KILTransformation<Object> {
         } else if (i instanceof StringSentence) {
             StringSentence sentence = (StringSentence) i;
             return Sets.newHashSet(new org.kframework.kore.outer.Bubble(sentence.getType(),
-                    sentence.getContent(), apply(sentence.getAttributes())));
+                    sentence.getContent(), inner.apply(sentence.getAttributes())));
         } else if (i instanceof LiterateModuleComment) {
             return Sets.newHashSet(new org.kframework.kore.outer.ModuleComment(
-                    ((LiterateModuleComment) i).getValue(), apply(i.getAttributes())));
+                    ((LiterateModuleComment) i).getValue(), inner.apply(i.getAttributes())));
         } else if (i instanceof org.kframework.kil.Configuration) {
             Configuration kilConfiguration = (org.kframework.kil.Configuration) i;
             Cell body = (Cell) kilConfiguration.getBody();
             Term kilEnsures = kilConfiguration.getEnsures();
-            K ensures;
-            if (kilEnsures != null)
-                ensures = inner.apply(kilEnsures);
-            else
-                ensures = new KBoolean(true, Attributes());
-            return Sets.newHashSet(Configuration(inner.apply(body), ensures,
-                    apply(kilConfiguration.getAttributes())));
+
+            return Sets.newHashSet(Configuration(inner.apply(body),
+                    inner.applyOrTrue(kilConfiguration.getEnsures()),
+                    inner.apply(kilConfiguration.getAttributes())));
         } else if (i instanceof PriorityExtended) {
             return apply((PriorityExtended) i);
         } else if (i instanceof PriorityExtendedAssoc) {
@@ -109,15 +106,19 @@ public class KILtoKORE extends KILTransformation<Object> {
             throw new RuntimeException("Not implemented");
         } else if (i instanceof org.kframework.kil.Context) {
             org.kframework.kil.Context c = (org.kframework.kil.Context) i;
-            K requires;
-            if (c.getRequires() != null)
-                requires = inner.apply(c.getRequires());
-            else
-                requires = new KBoolean(true, Attributes());
-            return Sets.newHashSet(Context(inner.apply(c.getBody()), requires));
+
+            return Sets.newHashSet(Context(inner.apply(c.getBody()),
+                    inner.applyOrTrue(c.getRequires())));
+        } else if (i instanceof org.kframework.kil.Rule) {
+            return Sets.newHashSet(apply((org.kframework.kil.Rule) i));
         } else {
             throw new RuntimeException("Unhandled case:" + i.getClass());
         }
+    }
+
+    public Rule apply(org.kframework.kil.Rule r) {
+        return Rule(inner.apply(r.getBody()), inner.applyOrTrue(r.getRequires()),
+                inner.applyOrTrue(r.getEnsures()), inner.apply(r.getAttributes()));
     }
 
     public Set<org.kframework.kore.outer.Sentence> apply(PriorityExtendedAssoc ii) {
@@ -155,7 +156,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.kore.outer.Sentence apply(Import s) {
-        return new org.kframework.kore.outer.Import(s.getName(), apply(s.getAttributes()));
+        return new org.kframework.kore.outer.Import(s.getName(), inner.apply(s.getAttributes()));
     }
 
     public Set<org.kframework.kore.outer.Sentence> apply(Syntax s) {
@@ -165,7 +166,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
-            res.add(SyntaxSort(sort, apply(s.getAttributes())));
+            res.add(SyntaxSort(sort, inner.apply(s.getAttributes())));
             return res;
         }
 
@@ -209,7 +210,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                     }
 
                     org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(sort,
-                            immutable(items), apply(p.getAttributes()));
+                            immutable(items), inner.apply(p.getAttributes()));
 
                     res.add(prod);
                 }
@@ -254,20 +255,5 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
         return Sort(sort.getName());
-    }
-
-    public org.kframework.kore.Attributes apply(Attributes attributes) {
-        Set<K> attributesSet = attributes
-                .keySet()
-                .stream()
-                .map(key -> {
-                    String keyString = key.toString();
-                    String valueString = attributes.get(key).getValue().toString();
-
-                    return (K) KApply(KLabel(keyString),
-                            KList(KToken(Sort("AttributeValue"), KString(valueString))));
-                }).collect(Collectors.toSet());
-
-        return Attributes(KList(attributesSet));
     }
 }

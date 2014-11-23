@@ -35,6 +35,7 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
+import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
@@ -55,6 +56,7 @@ import static org.kframework.kore.Constructors.*;
 
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
+
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
         return KBag(contents);
@@ -80,14 +82,48 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(TermCons cons) {
-        return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())));
+        return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
+                sortAttributes(cons));
+    }
+
+    private org.kframework.kore.Attributes sortAttributes(Term cons) {
+
+        return apply(cons.getAttributes()).add(
+                Attributes(KApply(KLabel("sort"),
+                        KList(KToken(StringSort$.MODULE$, KString(cons.getSort().toString()))))));
     }
 
     public KApply apply(Hole hole) {
-        return KApply(Hole(), KList());
+        return KApply(Hole(), KList(), sortAttributes(hole));
     }
 
     public KVariable apply(Variable v) {
-        return KVariable(v.getName());
+        return KVariable(v.getName(), sortAttributes(v));
+    }
+
+    public KRewrite apply(Rewrite r) {
+        return KRewrite(apply(r.getLeft()), apply(r.getRight()), sortAttributes(r));
+    }
+
+    public K applyOrTrue(Term t) {
+        if (t != null)
+            return apply(t);
+        else
+            return new KBoolean(true, Attributes());
+    }
+
+    public org.kframework.kore.Attributes apply(Attributes attributes) {
+        Set<K> attributesSet = attributes
+                .keySet()
+                .stream()
+                .map(key -> {
+                    String keyString = key.toString();
+                    String valueString = attributes.get(key).getValue().toString();
+
+                    return (K) KApply(KLabel(keyString),
+                            KList(KToken(Sort("AttributeValue"), KString(valueString))));
+                }).collect(Collectors.toSet());
+
+        return Attributes(KList(attributesSet));
     }
 }

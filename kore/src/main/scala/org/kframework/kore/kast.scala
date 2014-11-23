@@ -74,7 +74,7 @@ final class KSequence(val contents: KList, val att: Attributes = Attributes())
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
-  extends KItem with KORE with KLabel with KVariableMatcher with interfaces.KVariable {
+  extends KItem with KORE with KLabel with KVariableMatcher with KVariableToString {
   type ThisK = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }

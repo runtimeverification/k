@@ -44,6 +44,9 @@ object Constructors extends CollectionConverters {
   def Context(content: K, requires: K) = outer.Context(content, requires)
   def Context(content: K, requires: K, att: Attributes) = outer.Context(content, requires, att)
 
+  def Rule(body: K, requires: K, ensures: K, att: Attributes) = outer.Rule(body, requires, ensures, att)
+  def Rule(body: K, requires: K, ensures: K) = outer.Rule(body, requires, ensures, Attributes())
+  
   def Associativity = outer.Associativity;
 
   // EXTRA

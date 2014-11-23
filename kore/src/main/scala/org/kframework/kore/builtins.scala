@@ -57,10 +57,22 @@ class KBag(val contents: KList) extends KAbstractCollection[KBag] with Associati
 
   override def newBuilder: collection.mutable.Builder[K, KBag] =
     contents.newBuilder mapResult copy
-    
-  override def toString = if(isEmpty) ".Bag" else super.toString()
+
+  override def toString = if (isEmpty) ".Bag" else super.toString()
 }
 
 object KBag extends ConcreteKLabel("Bag")
 
 object Hole extends ConcreteKLabel("Hole")
+
+object StringSort extends Sort("String")
+
+//case class KWithCondition(t: K, condition: K) extends K {
+//  type ThisK = KWithCondition
+//  def att() = Attributes()
+//  def copy(att: Attributes) = this
+//
+//  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+//
+//  override def toString = "#WithCondition(" + t + "," + condition + ")";
+//}

@@ -87,7 +87,7 @@ public class Constructors {
     }
 
     public static KVariable KVariable(String name, Attributes att) {
-        return new KVariable(name, emptyAttributes);
+        return new KVariable(name, att);
     }
 
     public static KVariable KVariable(String name) {
