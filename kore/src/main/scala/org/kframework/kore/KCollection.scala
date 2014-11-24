@@ -2,12 +2,15 @@
 
 package org.kframework.kore
 
-import java.util.stream.StreamSupport
 import collection._
 import JavaConverters._
-import scala.collection.mutable.Builder
-import scala.reflect.ClassTag
-import scala.collection.mutable.ListBuffer
+import collection.mutable.Builder
+
+trait KCollection extends Collection[K] with K {
+  type This <: KCollection
+
+  def copy(att: Attributes): This
+}
 
 trait KAbstractCollection extends KCollection {
   type This <: KAbstractCollection
@@ -54,51 +57,3 @@ trait CanBuildKCollection {
     }
 }
 
-trait Associative[With]
-
-trait Collection[T] {
-  type This <: Collection[T]
-
-  def newBuilder: Builder[T, This]
-
-  def canEqual(that: Any): Boolean
-
-  def foreach(f: T => Unit)
-
-  def mkString(separator: String): String
-
-  def iterator: Iterator[T]
-
-  def isEmpty: Boolean = size == 0
-
-  def size: Int
-
-  def map(f: T => T): This = {
-    val builder = newBuilder
-    foreach { builder += f(_) }
-    builder.result()
-  }
-
-  def map[R](f: T => R): List[R] = {
-    val builder = ListBuffer[R]()
-    foreach { builder += f(_) }
-    builder.result()
-  }
-}
-
-class AssocBuilder[A, AssocIn <: Collection[A]: ClassTag] extends Builder[A, List[A]] {
-  val buffer = new mutable.ListBuffer[A]
-
-  def +=(elem: A): this.type = {
-    if (elem.getClass().isAssignableFrom(implicitly[ClassTag[AssocIn]].runtimeClass))
-      elem.asInstanceOf[AssocIn].foreach { e => buffer += e }
-    else
-      buffer += elem
-
-    this
-  }
-
-  def clear(): Unit = buffer.clear()
-
-  def result(): List[A] = buffer.result();
-}

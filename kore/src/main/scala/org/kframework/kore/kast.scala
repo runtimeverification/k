@@ -36,12 +36,6 @@ trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
   val s: KString
 }
 
-trait KCollection extends Collection[K] with K {
-  type This <: KCollection
-
-  def copy(att: Attributes): This
-}
-
 trait Sort extends SortToString {
   def name: String
 }
