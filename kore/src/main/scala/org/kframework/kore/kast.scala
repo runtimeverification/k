@@ -54,7 +54,7 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
   extends KAbstractCollection with KORE with KApplyMatcher with KApplyToString with Equals {
   type This = KApply
 
-  val delegate: Iterable[K] = klist.delegate
+  protected[kore] def delegate: Iterable[K] = klist.delegate
 
   def newBuilder: Builder[K, KApply] = klist.newBuilder mapResult { new KApply(klabel, _, att) }
 
@@ -99,7 +99,7 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)
 
-  def delegate: Iterable[K] = Seq(left, right)
+  protected[kore] def delegate: Iterable[K] = Seq(left, right)
 
   def newBuilder: Builder[K, KRewrite] = ListBuffer[K]() mapResult {
     case List(left, right) => KRewrite(left, right)

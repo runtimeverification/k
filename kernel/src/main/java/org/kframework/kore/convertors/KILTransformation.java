@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore;
+package org.kframework.kore.convertors;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore;
+package org.kframework.kore.convertors;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +44,9 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
+import org.kframework.kore.*;
+import org.kframework.kore.KBoolean;
+import org.kframework.kore.Sorts;
 import org.kframework.kore.outer.*;
 
 import scala.Enumeration.Value;

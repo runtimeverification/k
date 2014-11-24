@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 trait KAbstractCollection extends KCollection {
   type This <: KAbstractCollection
 
-  def delegate: Iterable[K]
+  protected[kore] def delegate: Iterable[K]
 
   override def equals(that: Any) = {
     canEqual(that) && (that match {

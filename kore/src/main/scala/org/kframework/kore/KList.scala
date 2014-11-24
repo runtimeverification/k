@@ -7,7 +7,7 @@ import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.Builder
 
-class KList(val delegate: List[K]) extends KAbstractCollection with KListMatcher with K with Associative[KList] {
+class KList(protected[kore] val delegate: List[K]) extends KAbstractCollection with KListMatcher with K with Associative[KList] {
   type This = KList
   def copy(l: Iterable[K], att: Attributes) = KList(l.toSeq: _*)
 

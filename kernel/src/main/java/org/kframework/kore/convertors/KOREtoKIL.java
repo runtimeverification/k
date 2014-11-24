@@ -1,9 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore;
+package org.kframework.kore.convertors;
 
+import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.outer.Constructors.*;
-import static org.kframework.kore.Constructors.*;
 
 public class KOREtoKIL {
 

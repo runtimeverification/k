@@ -1,9 +1,11 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore;
+package org.kframework.kore.convertors;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import org.kframework.kil.Sources;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kore.outer.Definition;
