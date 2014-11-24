@@ -265,7 +265,7 @@ public class KOREtoKIL {
             if (k instanceof KApply) {
                 KApply kApply = (KApply) k;
                 if (kApply.klabel().equals(new ConcreteKLabel("sort"))) {
-                    List<K> args = stream(kApply.contents()).collect(Collectors.toList());
+                    List<K> args = stream(kApply.delegate()).collect(Collectors.toList());
                     if (args.size() == 1 && args.get(0) instanceof KToken) {
                         KToken tok = (KToken) args.get(0);
                         sort = org.kframework.kil.Sort.of(tok.s().s());
