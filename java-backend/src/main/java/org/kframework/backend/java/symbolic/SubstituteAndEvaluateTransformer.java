@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -41,7 +40,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     protected boolean proceed(JavaSymbolicObject object) {
-        return ((!substitution.isEmpty() && !object.isGround()) || !object.isNormal());
+        return object.canSubstituteAndEvaluate(substitution);
     }
 
     @Override
