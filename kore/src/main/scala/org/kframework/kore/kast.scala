@@ -48,10 +48,10 @@ trait Sort extends SortToString {
 
 /* Data Structures */
 
-case class KString(s: String) // just a wrapper to mark it
+case class KString(s: String) extends KORE // just a wrapper to mark it
 
 class KList(protected[kore] val delegate: List[K])
-  extends KAbstractCollection with KListMatcher with K with Associative[KList] with KListToString {
+  extends KAbstractCollection with KListMatcher with K with Associative[KList] with KListToString with KORE {
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]
@@ -82,17 +82,17 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
 }
 
 case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
-  extends KToken with KTokenToString {
+  extends KToken with KTokenToString with KORE {
   type This = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
 }
 
-case class ConcreteKLabel(name: String) extends KLabel {
+case class ConcreteKLabel(name: String) extends KLabel with KORE {
   def apply(ks: K*) = new KApply(this, KList(ks))
 }
 
 case class KSequence(val klist: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection with KSequenceMatcher with KSequenceToString {
+  extends KAbstractCollection with KSequenceMatcher with KSequenceToString with KORE {
   type This = KSequence
   def delegate = klist.delegate
 
