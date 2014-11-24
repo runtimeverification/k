@@ -50,6 +50,21 @@ trait Sort extends SortToString {
 
 case class KString(s: String) // just a wrapper to mark it
 
+class KList(protected[kore] val delegate: List[K])
+  extends KAbstractCollection with KListMatcher with K with Associative[KList] with KListToString {
+  type This = KList
+
+  override def canEqual(that: Any) = that.isInstanceOf[KList]
+  override def newBuilder: Builder[K, KList] = KList.newBuilder
+
+  def att = Attributes()
+
+  //FIXME: when Scala 2.12 is out
+  def map(f: java.util.function.Function[K, K]): KList = map(f(_))
+
+  def copy(att: Attributes): KList = this
+}
+
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
   extends KAbstractCollection with KORE with KApplyMatcher with KApplyToString with Equals {
   type This = KApply
@@ -107,6 +122,18 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
 }
 
 /*  Constructors */
+
+object KList extends CanBuildKCollection {
+  type This = KList
+
+  def apply(l: Iterable[K]): KList = (newBuilder ++= l).result()
+
+  def newBuilder: Builder[K, KList] =
+    new AssocBuilder[K, KList] mapResult { new KList(_) }
+
+  def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
+}
+
 
 object KToken {
   def apply(sort: Sort, s: KString, att: Attributes = Attributes()) =
