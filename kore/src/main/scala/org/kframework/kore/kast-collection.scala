@@ -7,49 +7,41 @@ import collection._
 import JavaConverters._
 import scala.collection.mutable.Builder
 import scala.reflect.ClassTag
+import scala.collection.mutable.ListBuffer
 
-trait KAbstractCollection[+This <: KAbstractCollection[This]] extends KCollection[This] with K {
-  self: This =>
-  type ThisK <: This
+trait KAbstractCollection extends KCollection with K {
+  type This <: KAbstractCollection
 
-  def contents: KCollection[T forSome { type T <: KCollection[T] }]
+  def delegate: Iterable[K]
 
-  override def newBuilder: mutable.Builder[K, This] =
-    contents.newBuilder mapResult copy
-
-  def copy(ks: KCollection[_]): This = copy(ks, att)
-
-  def iterator: Iterator[K] = contents.iterator
-
-  override def equals(other: Any) = {
-    other match {
-      case that: KAbstractCollection[_] => that.canEqual(KAbstractCollection.this) && contents == that.contents
+  override def equals(that: Any) = {
+    canEqual(that) && (that match {
+      case that: KAbstractCollection => that.canEqual(KAbstractCollection.this) && delegate == that.delegate
       case _ => false
-    }
+    })
   }
+
+  def foreach(f: K => Unit) = delegate.foreach(f)
+
+  def iterator = delegate.iterator
+
+  def size = delegate.size
+
+  def mkString(separator: String): String = delegate.mkString(separator)
 
   override def hashCode() = {
     val prime = 41
-    prime + contents.hashCode
+    prime + delegate.hashCode
   }
-}
-
-/**
- * Describes objects which contain K's and can be iterated like a KList
- */
-trait KListLike[+This <: KListLike[This]] extends LinearSeq[K] with LinearSeqOptimized[K, This] {
-  self: This =>
-  override def newBuilder: mutable.Builder[K, This] =
-    new mutable.ListBuffer mapResult copy
-
-  def copy(l: Iterable[K]): This
 }
 
 /**
  * Should be extended by companion objects of classes extending KListLike
  */
 
-trait CanBuildKCollection[This <: KCollection[This]] {
+trait CanBuildKCollection {
+  type This <: KCollection
+
   def apply(l: K*): This
 
   protected val fromList = apply _
@@ -57,38 +49,56 @@ trait CanBuildKCollection[This <: KCollection[This]] {
   implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
     new generic.CanBuildFrom[This, K, This] {
       def apply(): mutable.Builder[K, This] = new mutable.ListBuffer mapResult fromList
-      def apply(from: This): mutable.Builder[K, This] = from.newBuilder
+      def apply(from: This): mutable.Builder[K, This] = from.newBuilder.asInstanceOf[Builder[K, This]]
     }
 }
 
-trait Associative[With] extends Iterable[K]
+trait Associative[With]
 
-trait KCollection[+This <: KCollection[This]] extends Iterable[K] with K with IterableLike[K, This] {
-  self: KCollection[This] =>
-  type ThisK <: KCollection[This]
+trait Collection[T] {
+  type This <: Collection[T]
 
-  def copy(ks: Iterable[K], att: Attributes): ThisK
-  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
-  def copy(att: Attributes): ThisK = copy(Seq(), att)
+  def newBuilder: Builder[T, This]
 
-  override def newBuilder: Builder[K, This] = ???
+  def canEqual(that: Any): Boolean
 
-  def map(f: K => K): This = {
+  def foreach(f: T => Unit)
+
+  def mkString(separator: String): String
+
+  def iterator: Iterator[T]
+
+  def isEmpty: Boolean = size == 0
+
+  def size: Int
+
+  def map(f: T => T): This = {
     val builder = newBuilder
+    foreach { builder += f(_) }
+    builder.result()
+  }
 
-    foreach {
-      builder += f(_)
-    }
+  def map[R](f: T => R): List[R] = {
+    val builder = ListBuffer[R]()
+    foreach { builder += f(_) }
     builder.result()
   }
 }
 
-class AssocBuilder[A, AssocIn <: Iterable[A]: ClassTag] extends Builder[A, List[A]] {
+trait KCollection extends Collection[K] with K {
+  type This <: KCollection
+
+  def copy(ks: Iterable[K], att: Attributes): This
+  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
+  def copy(att: Attributes): This = copy(Seq(), att)
+}
+
+class AssocBuilder[A, AssocIn <: Collection[A]: ClassTag] extends Builder[A, List[A]] {
   val buffer = new mutable.ListBuffer[A]
 
   def +=(elem: A): this.type = {
     if (elem.getClass().isAssignableFrom(implicitly[ClassTag[AssocIn]].runtimeClass))
-      buffer ++= elem.asInstanceOf[AssocIn]
+      elem.asInstanceOf[AssocIn].foreach { e => buffer += e }
     else
       buffer += elem
 

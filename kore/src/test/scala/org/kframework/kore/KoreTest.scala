@@ -33,7 +33,7 @@ class KoreTest {
   }
 
   @Test def testKApply {
-    val x = KApply(KLabel("foo"), KList(TestK)) copy Attributes(TestK)
+    val x = KApply(KLabel("foo"), Seq(TestK)) copy Attributes(TestK)
     val t: KApply = x map { t: K => t }
     assertEquals(Attributes(TestK), t.att)
     assertEquals(x, t)

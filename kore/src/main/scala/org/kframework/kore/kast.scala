@@ -18,84 +18,80 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Matcher with Rewriting with interfaces.K {
-  protected type ThisK <: K
+trait K extends HasAttributes with Matcher with Rewriting {
+  protected type This <: K
 
-  def copy(att: Attributes): ThisK
+  def copy(att: Attributes): This
 }
 
-trait KItem extends K with interfaces.KItem {
+trait KItem extends K {
   //  def ~>(seq: KSequence): KSequence = this +: seq 
 }
 
-trait KLabel extends KLabelToString with interfaces.KLabel {
+trait KLabel extends KLabelToString {
   val name: String
 } // needs to be a KLabel to be able to have KVariables in its place
 
 /* Data Structures */
 
-case class KString(s: String) extends interfaces.KString // just a wrapper to mark it
+case class KString(s: String) // just a wrapper to mark it
 
-class KApply(val klabel: KLabel, val contents: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection[KApply] with KORE with KApplyMatcher with KApplyToString with Equals {
-  type ThisK = KApply
+case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
+  extends KAbstractCollection with KORE with KApplyMatcher with KApplyToString with Equals {
+  type This = KApply
+
+  val delegate: Iterable[K] = klist.delegate
+
+  def newBuilder: Builder[K, KApply] = klist.newBuilder mapResult { new KApply(klabel, _, att) }
 
   override def canEqual(that: Any) = that match {
     case t: KApply => t.klabel == klabel
     case _ => false
   }
 
-  def copy(ks: Iterable[K], att: Attributes): KApply = KApply(klabel, ks, att)
+  def copy(ks: Iterable[K], att: Attributes): KApply = KApply(klabel, KList(ks), att)
 }
 
-trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString with interfaces.KToken {
+trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
   val sort: Sort
   val s: KString
 }
 
 case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
   extends KToken with KTokenToString {
-  type ThisK = KToken
+  type This = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
 }
 
 case class ConcreteKLabel(name: String) extends KLabel {
-  def apply(ks: K*) = KApply(this, ks)
+  def apply(ks: K*) = new KApply(this, KList(ks))
 }
 
-final class KSequence(val contents: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection[KSequence] with KSequenceMatcher with KSequenceToString {
-  self: KSequence =>
-  type ThisK = KSequence
+case class KSequence(val klist: KList, val att: Attributes = Attributes())
+  extends KAbstractCollection with KSequenceMatcher with KSequenceToString {
+  type This = KSequence
   def copy(klist: Iterable[K], att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
-  def klist = KList(contents.toSeq: _*)
+  def delegate = klist.delegate
+
+  def newBuilder: Builder[K, KSequence] = klist.newBuilder mapResult { new KSequence(_, att) }
 
   override def canEqual(that: Any) = that.isInstanceOf[KSequence]
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
   extends KItem with KORE with KLabel with KVariableMatcher with KVariableToString {
-  type ThisK = KVariable
+  type This = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends K with KORE with KRewriteMatcher with KRewriteToString with interfaces.KRewrite {
-  self: KRewrite =>
-  type ThisK = KRewrite
+  extends K with KORE with KRewriteMatcher with KRewriteToString {
+  type This = KRewrite
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)
 }
 
 /*  Constructors */
-
-object KApply {
-  def apply(klabel: KLabel, contents: Iterable[K], att: Attributes = Attributes()) = {
-    new KApply(klabel, KList(contents), att)
-  }
-
-  def unapply(a: KApply): Option[(KLabel, KList, Attributes)] = Some((a.klabel, a.contents, a.att))
-}
 
 object KToken {
   def apply(sort: Sort, s: KString, att: Attributes = Attributes()) =
@@ -108,9 +104,10 @@ object KVariable {
   val it = this
 }
 
-object KSequence extends CanBuildKCollection[KSequence] {
-  def apply(klist: KList, att: Attributes) = new KSequence(klist, att)
-  def apply(list: K*) = apply(KList(list: _*), Attributes())
+object KSequence extends CanBuildKCollection {
+  type This = KSequence
+
+  def apply(list: K*): KSequence = apply(KList(list: _*), Attributes())
 
   def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
 }
@@ -139,7 +136,7 @@ object KLabelWithQuotes {
   }
 }
 
-case class Sort(name: String) extends SortToString with interfaces.Sort
+case class Sort(name: String) extends SortToString
 
 object KORE {
   implicit def StringToKString(s: String) = KString(s)

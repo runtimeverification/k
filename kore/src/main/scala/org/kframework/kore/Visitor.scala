@@ -8,7 +8,7 @@ trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, 
 
   def apply(k: K): T = k match {
     case k: KORE => k match {
-      case k: KApply => apply(k)
+      case k: KApply => apply(k: KApply)
       case k: KRewrite => apply(k)
       case k: KToken => apply(k)
       case k: KVariable => apply(k)

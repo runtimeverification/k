@@ -7,8 +7,8 @@ case class Attributes(att: Set[K] = Set()) extends AttributesToString {
   }) != None
 
   def get(label: String): K = KList(att collect {
-    case KApply(KLabel(label), value, _) => value
-  } toList: _*) match {
+    case KApply(KLabel(label), value, _) => KList(value)
+  } toList) match {
     case KList(e) => e
     case e => e
   }

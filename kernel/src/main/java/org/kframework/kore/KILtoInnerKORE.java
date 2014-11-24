@@ -59,7 +59,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
-        return KBag(contents);
+        return KBag(KList(contents));
     }
 
     KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
@@ -67,7 +67,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     public KApply apply(Cell body) {
         K x = apply(body.getContents());
         if (x instanceof KBag && !((KBag) x).isEmpty()) {
-            return KApply(KLabel(body.getLabel()), KList(((KBag) x).contents()),
+            return KApply(KLabel(body.getLabel()), KList(((KBag) x)),
                     Attributes(cellMarker));
         } else {
             return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));

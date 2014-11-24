@@ -51,12 +51,12 @@ trait KListMatcher extends Matcher with BindingOps {
       case v: KVariable => Set(Map(v -> this))
       case lP if equiv(lP, this) => Set(Map())
       case klistP: KList =>
-        (this, klistP) match {
-          case (KList(), KList()) => Set(Map())
+        (this.delegate, klistP.delegate) match {
+          case (List(), List()) => Set(Map())
           case (head +: tail, headP +: tailP) if equiv(headP, head) => tail.matchAll(tailP)
           case (_, (v: KVariable) +: tailP) =>
             (0 to size)
-              .map { index => (take(index), drop(index)) }
+              .map { index => (delegate.take(index), delegate.drop(index)) }
               .map {
                 case (prefix, suffix) =>
                   and(Set(Map(v -> (prefix: K))), suffix.matchAll(tailP))
@@ -69,7 +69,7 @@ trait KListMatcher extends Matcher with BindingOps {
 }
 
 case class MetaKLabel(klabel: KLabel) extends KItem {
-  type ThisK = MetaKLabel
+  type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
   def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
@@ -86,7 +86,6 @@ trait KApplyMatcher extends Matcher with BindingOps {
         and(Set(Map(labelVariable -> MetaKLabel(label2))), contents.matchAll(contentsP, condition))
       case (KApply(label, contentsP: K, att), KApply(label2, contents: Matcher, att2)) if label == label2 =>
         contents.matchAll(contentsP, condition)
-
       case (_: KApply, _: KApply) => Set()
     }
 }
@@ -125,7 +124,7 @@ trait KSequenceMatcher extends Matcher with BindingOps {
         Set(Map(v -> this))
       case (s: KSequence, _) =>
         klist.matchAll(s.klist, condition) map {
-          case m: Map[KVariable, KList] => m mapValues { l => KSequence(l.toSeq: _*) }
+          case m: Map[KVariable, KList] => m mapValues { l => KSequence(l, Attributes()) }
         }
     }
 }

@@ -12,7 +12,7 @@ public class VisitorTest {
 
         @Override
         public K apply(KApply k) {
-            return k.map(this);
+            return (K) k.map(this);
         }
 
         @Override
@@ -69,8 +69,8 @@ public class VisitorTest {
     @Test
     public void testNested() {
         FooTransformer fooTransformer = new FooTransformer();
-        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(
-                KToken(Sort("foo"), KString("bla")), KVariable("U")));
+        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken(Sort("foo"), KString("bla")),
+                KVariable("U")));
 
         assertEquals(KRewrite(KVariable("T"), KVariable("U")), t);
     }

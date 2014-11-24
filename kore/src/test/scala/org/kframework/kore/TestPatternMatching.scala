@@ -33,7 +33,7 @@ class TestPatternMatching {
   def testKApply1() {
     val five = KToken(Sort("Int"), KString("5"))
     val foo = 'foo(five)
-    val pattern = KApply(KLabel("bar"), KList(X))
+    val pattern = KApply(KLabel("bar"), Seq(X))
     assertEquals(None, foo.m(pattern))
   }
 
@@ -126,7 +126,7 @@ class TestPatternMatching {
   @Test
   def testKVariableMatchingKLabel() {
     val foo = 'foo()
-    val pattern = KApply(X, KList(), Attributes())
+    val pattern = KApply(X, Seq(), Attributes())
     assertEquals(Some(Map(X -> MetaKLabel('foo))), foo.m(pattern))
   }
 

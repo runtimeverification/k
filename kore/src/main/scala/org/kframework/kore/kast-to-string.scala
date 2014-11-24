@@ -4,7 +4,7 @@ package org.kframework.kore
 
 trait KApplyToString {
   self: KApply =>
-  override def toString() = klabel.toString + "(" + contents.mkString(",") + ")" + att.postfixString
+  override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
 }
 
 trait SortToString {

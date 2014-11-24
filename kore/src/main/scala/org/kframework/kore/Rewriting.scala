@@ -1,7 +1,6 @@
 package org.kframework.kore
 
 import KBoolean._
-import KORE._
 
 trait Rewriting {
   self: K =>
@@ -38,7 +37,7 @@ trait Rewriting {
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
       val newChildren = klist map { x: K => x.transform(substituion) }
       KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
-    case c: KCollection[_] =>
+    case c: KCollection =>
       c map { x: K => x.transform(substituion) }
     case e => e
   }

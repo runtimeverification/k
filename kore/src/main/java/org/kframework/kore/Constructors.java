@@ -22,11 +22,11 @@ public class Constructors {
 
     public static Attributes Attributes(K... ks) {
         org.kframework.kore.KList kList = KList(ks);
-        return new Attributes(kList.toSet());
+        return new Attributes(kList.delegate().toSet());
     }
 
     public static Attributes Attributes(KList klist) {
-        return new Attributes(klist.toSet());
+        return new Attributes(klist.delegate().toSet());
     }
 
     public static KString KString(String s) {
@@ -42,11 +42,11 @@ public class Constructors {
     }
 
     public static KBag KBag(K... ks) {
-        return new KBag(KList.fromJava(ks));
+        return KBag$.MODULE$.apply(KList.fromJava(ks));
     }
 
-    public static KBag KBag(List<K> ks) {
-        return new KBag(org.kframework.kore.outer.Constructors.KList(ks));
+    public static KBag KBag(KList ks) {
+        return KBag$.MODULE$.apply(ks);
     }
 
     public static Sort Sort(String name) {
@@ -70,11 +70,11 @@ public class Constructors {
     // return KList.fromJava(new K[] { k });
     // }
 
-    public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist, Attributes att) {
+    public static KApply KApply(KLabel klabel, KList klist, Attributes att) {
         return KApply$.MODULE$.apply(klabel, klist, att);
     }
 
-    public static KApply KApply(KLabel klabel, scala.collection.Iterable<K> klist) {
+    public static KApply KApply(KLabel klabel, KList klist) {
         return KApply(klabel, klist, emptyAttributes);
     }
 

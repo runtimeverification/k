@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.outer.Constructors.*;
+import static org.kframework.kore.Constructors.*;
 
 public class KOREtoKIL {
 
@@ -230,7 +231,7 @@ public class KOREtoKIL {
             KLabel confLabel = kApply.klabel();
             org.kframework.kil.Cell kilCell = new org.kframework.kil.Cell();
             kilCell.setLabel(confLabel.name());
-            List<K> args = stream(kApply.contents()).collect(Collectors.toList());
+            List<K> args = stream(kApply.delegate()).collect(Collectors.toList());
             if (args.size() == 1) {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
@@ -245,7 +246,7 @@ public class KOREtoKIL {
     public org.kframework.kil.Term convertK(K k) {
         if (k instanceof KSequence) {
             KSequence kSequence = (KSequence) k;
-            return new org.kframework.kil.KSequence(stream(kSequence).map(
+            return new org.kframework.kil.KSequence(stream(kSequence.delegate()).map(
                     this::convertK).collect(Collectors.toList()));
         } else if (k instanceof KApply) {
             KApply kApply = (KApply) k;
@@ -288,7 +289,7 @@ public class KOREtoKIL {
 
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
-        List<K> contents = stream(kApply.contents()).collect(Collectors.toList());
+        List<K> contents = stream(kApply.delegate()).collect(Collectors.toList());
         if (label == Hole$.MODULE$) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));

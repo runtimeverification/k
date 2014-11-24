@@ -4,9 +4,10 @@ package org.kframework.kore
 
 import KORE._
 import KBoolean._
+import scala.collection.mutable.Builder
 
 case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
-  type ThisK = KBoolean
+  type This = KBoolean
   val sort = KBoolean
   val s: KString = v.toString
 
@@ -21,11 +22,11 @@ object KBoolean extends Sort("Boolean") {
 }
 
 case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
-    type ThisK = KInt
-    val sort = KInt
-    val s: KString = n.toString
-    def copy(att: Attributes) = KInt(n, att)
-  }
+  type This = KInt
+  val sort = KInt
+  val s: KString = n.toString
+  def copy(att: Attributes) = KInt(n, att)
+}
 
 object KInt extends Sort("Boolean") {
   implicit def toKInt(n: Int): KInt = KInt(n)
@@ -46,20 +47,23 @@ class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] wit
   def att = Attributes()
 }
 
-class KBag(val contents: KList) extends KAbstractCollection[KBag] with Associative[KBag] {
-  type ThisK = KBag
+case class KBag(val klist: KList) extends KAbstractCollection with Associative[KBag] {
+  type This = KBag
 
+  def canEqual(that: Any) = that.isInstanceOf[KBag]
   def att = Attributes()
-  def copy(klist: Iterable[K], att: Attributes): KBag = new KBag(KList(klist.toSeq: _*))
+  def copy(klist: Iterable[K], att: Attributes): KBag = (newBuilder ++= klist).result
   def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 
-  override def newBuilder: collection.mutable.Builder[K, KBag] =
-    contents.newBuilder mapResult copy
+  val delegate = klist.delegate
+  def newBuilder: Builder[K, KBag] = KBag.newBuilder
 
-  override def toString = if (isEmpty) ".Bag" else super.toString()
+  override def toString = if (isEmpty) ".Bag" else "Bag(" + mkString(",") + ")"
 }
 
-object KBag extends ConcreteKLabel("Bag")
+object KBag extends ConcreteKLabel("Bag") {
+  def newBuilder = KList.newBuilder mapResult { new KBag(_) }
+}
 
 object Hole extends ConcreteKLabel("Hole")
 
