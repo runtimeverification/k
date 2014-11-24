@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class TestKILtoKORE extends BaseTest {
+public class TestKILtoKOREIT extends BaseTest {
 
     @Test
     public void emptyModule() throws IOException {

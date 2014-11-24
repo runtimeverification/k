@@ -50,7 +50,7 @@ public class Constructors {
     }
 
     public static Sort Sort(String name) {
-        return new Sort(name);
+        return Sort$.MODULE$.apply(name);
     }
 
     public static KLabel KLabel(String name) {

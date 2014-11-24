@@ -14,11 +14,9 @@ case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
   def copy(att: Attributes) = KBoolean(v, att)
 }
 
-object KBoolean extends Sort("Boolean") {
-  implicit def toKBoolean(b: Boolean): KBoolean = b match {
-    case true => KBoolean(true)
-    case false => KBoolean(false)
-  }
+object KBoolean extends Sort with KLabel {
+  implicit def toKBoolean(b: Boolean): KBoolean = KBoolean(b)
+  val name: String = "Boolean"
 }
 
 case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
@@ -28,8 +26,10 @@ case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
   def copy(att: Attributes) = KInt(n, att)
 }
 
-object KInt extends Sort("Boolean") {
+object KInt extends Sort with KLabel {
   implicit def toKInt(n: Int): KInt = KInt(n)
+
+  val name: String = "Int"
 }
 
 case class KBag(val klist: KList) extends KAbstractCollection with Associative[KBag] {
@@ -46,20 +46,12 @@ case class KBag(val klist: KList) extends KAbstractCollection with Associative[K
   override def toString = if (isEmpty) ".Bag" else "Bag(" + mkString(",") + ")"
 }
 
-object KBag extends ConcreteKLabel("Bag") {
+object KBag extends Sort with KLabel {
   def newBuilder = KList.newBuilder mapResult { new KBag(_) }
+
+  val name: String = "Bag"
 }
 
-object Hole extends ConcreteKLabel("Hole")
-
-object StringSort extends Sort("String")
-
-//case class KWithCondition(t: K, condition: K) extends K {
-//  type ThisK = KWithCondition
-//  def att() = Attributes()
-//  def copy(att: Attributes) = this
-//
-//  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
-//
-//  override def toString = "#WithCondition(" + t + "," + condition + ")";
-//}
+case object Hole extends KLabel with Sort {
+  val name = "HOLE"
+}

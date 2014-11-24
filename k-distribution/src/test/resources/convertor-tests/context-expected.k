@@ -14,6 +14,6 @@ endmodule
 module TEST
   syntax Exp ::= Exp "+" Exp
   imports INCLUDE
-  context '_+_(_ [sort(K)],Hole() [sort(KItem)]) [sort(Exp)] requires true
-  context '_+_(Hole() [sort(KItem)],_ [sort(K)]) [sort(Exp)] requires true
+  context '_+_(_ [sort(K)],HOLE() [sort(KItem)]) [sort(Exp)] requires true
+  context '_+_(HOLE() [sort(KItem)],_ [sort(K)]) [sort(Exp)] requires true
 endmodule

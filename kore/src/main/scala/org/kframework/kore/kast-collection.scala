@@ -9,7 +9,7 @@ import scala.collection.mutable.Builder
 import scala.reflect.ClassTag
 import scala.collection.mutable.ListBuffer
 
-trait KAbstractCollection extends KCollection with K {
+trait KAbstractCollection extends KCollection {
   type This <: KAbstractCollection
 
   def delegate: Iterable[K]
@@ -84,14 +84,6 @@ trait Collection[T] {
     foreach { builder += f(_) }
     builder.result()
   }
-}
-
-trait KCollection extends Collection[K] with K {
-  type This <: KCollection
-
-//  def copy(ks: Iterable[K], att: Attributes): This
-//  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
-  def copy(att: Attributes): This
 }
 
 class AssocBuilder[A, AssocIn <: Collection[A]: ClassTag] extends Builder[A, List[A]] {

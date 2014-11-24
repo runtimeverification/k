@@ -9,6 +9,7 @@ import scala.collection.AbstractIterator
 import scala.collection.IterableLike
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Builder
+import scala.collection.mutable.ListBuffer
 
 /* Interfaces */
 
@@ -24,13 +25,26 @@ trait K extends HasAttributes with Matcher with Rewriting {
   def copy(att: Attributes): This
 }
 
-trait KItem extends K {
-  //  def ~>(seq: KSequence): KSequence = this +: seq 
-}
+trait KItem extends K
 
 trait KLabel extends KLabelToString {
   val name: String
-} // needs to be a KLabel to be able to have KVariables in its place
+}
+
+trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
+  val sort: Sort
+  val s: KString
+}
+
+trait KCollection extends Collection[K] with K {
+  type This <: KCollection
+
+  def copy(att: Attributes): This
+}
+
+trait Sort extends SortToString {
+  def name: String
+}
 
 /* Data Structures */
 
@@ -52,11 +66,6 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
   def copy(att: Attributes): KApply = KApply(klabel, klist, att)
 }
 
-trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
-  val sort: Sort
-  val s: KString
-}
-
 case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
   extends KToken with KTokenToString {
   type This = KToken
@@ -75,7 +84,7 @@ case class KSequence(val klist: KList, val att: Attributes = Attributes())
   def newBuilder: Builder[K, KSequence] = klist.newBuilder mapResult { new KSequence(_, att) }
   def copy(att: Attributes): KSequence = new KSequence(klist, att)
 
-  override def canEqual(that: Any) = that.isInstanceOf[KSequence]
+  def canEqual(that: Any) = that.isInstanceOf[KSequence]
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
@@ -85,10 +94,16 @@ case class KVariable(name: String, att: Attributes = Attributes())
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends K with KORE with KRewriteMatcher with KRewriteToString {
+  extends KAbstractCollection with KORE with KRewriteMatcher with KRewriteToString {
   type This = KRewrite
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)
+
+  def delegate: Iterable[K] = Seq(left, right)
+
+  def newBuilder: Builder[K, KRewrite] = ListBuffer[K]() mapResult {
+    case List(left, right) => KRewrite(left, right)
+  }
 }
 
 /*  Constructors */
@@ -102,6 +117,10 @@ object KToken {
 
 object KVariable {
   val it = this
+}
+
+object KString extends Sort {
+  val name = "KString"
 }
 
 object KSequence extends CanBuildKCollection {
@@ -136,7 +155,12 @@ object KLabelWithQuotes {
   }
 }
 
-case class Sort(name: String) extends SortToString
+case class UninterpretedSort(name: String) extends Sort
+
+object Sort {
+  def apply(s: String) = UninterpretedSort(s)
+  def unapply(s: Sort): Option[String] = Some(s.name)
+}
 
 object KORE {
   implicit def StringToKString(s: String) = KString(s)

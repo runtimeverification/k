@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestKOREtoKIL extends BaseTest {
+public class TestKOREtoKILIT extends BaseTest {
 
     static final String ROOT = "src/test/resources/reverse-convertor-tests/";
 
@@ -85,7 +85,7 @@ public class TestKOREtoKIL extends BaseTest {
 
     public org.kframework.kil.Definition parseAndTranslateBack(String pgm) {
         org.kframework.kil.Definition kilDef = new org.kframework.kil.Definition();
-        kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKIL.class), pgm, null));
+        kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKILIT.class), pgm, null));
 
         KILtoKORE toKore = new KILtoKORE();
         Definition koreDef = toKore.apply(kilDef);
