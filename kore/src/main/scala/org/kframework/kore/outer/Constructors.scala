@@ -13,7 +13,7 @@ import java.util.stream.StreamSupport
  *
  */
 
-object Constructors extends CollectionConverters {
+object Constructors {
   import org.kframework.kore
 
   def KList(s: java.lang.Iterable[K]): KList = kore.KList(s.asScala.toSeq: _*)

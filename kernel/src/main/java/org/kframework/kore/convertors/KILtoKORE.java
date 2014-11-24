@@ -42,6 +42,7 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kore.KList;
 import org.kframework.kore.outer.*;
+import static org.kframework.kore.Collections.*;
 
 import scala.Enumeration.Value;
 import scala.collection.Seq;

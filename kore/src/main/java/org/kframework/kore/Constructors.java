@@ -3,6 +3,7 @@
 package org.kframework.kore;
 
 import static org.kframework.kore.outer.Constructors.*;
+import static org.kframework.kore.Collections.*;
 
 import java.util.List;
 

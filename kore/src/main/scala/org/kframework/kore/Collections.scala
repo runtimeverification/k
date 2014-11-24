@@ -5,7 +5,7 @@ package org.kframework.kore
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 
-abstract class CollectionConverters {
+object Collections {
   def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
   def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
   def immutable[T](s: Array[T]): Seq[T] = s
