@@ -5,6 +5,7 @@ package org.kframework.kore
 import KORE._
 import KBoolean._
 import scala.collection.mutable.Builder
+import scala.collection.mutable.SetBuilder
 
 case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
   type This = KBoolean
@@ -32,7 +33,7 @@ object KInt extends Sort with KLabel {
   val name: String = "Int"
 }
 
-case class KBag(val klist: KList) extends KAbstractCollection with Associative[KBag] {
+case class KBag private[kore] (val klist: KList) extends KAbstractCollection with Associative[KBag] {
   type This = KBag
 
   def canEqual(that: Any) = that.isInstanceOf[KBag]
@@ -44,6 +45,24 @@ case class KBag(val klist: KList) extends KAbstractCollection with Associative[K
   def newBuilder: Builder[K, KBag] = KBag.newBuilder
 
   override def toString = if (isEmpty) ".Bag" else "Bag(" + mkString(",") + ")"
+}
+
+case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection with Associative[KBag] {
+  type This = KSet
+
+  def canEqual(that: Any) = that.isInstanceOf[KSet]
+  def att = Attributes()
+  def copy(att: Attributes): KSet = this
+  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+
+  val delegate = content
+  def newBuilder: Builder[K, KSet] = KSet.newBuilder
+
+  override def toString = if (isEmpty) ".Set" else "Set(" + mkString(",") + ")"
+}
+
+object KSet {
+  def newBuilder: Builder[K, KSet] = new SetBuilder[K, Set[K]](Set[K]()) mapResult { new KSet(_) }
 }
 
 object KBag extends Sort with KLabel {

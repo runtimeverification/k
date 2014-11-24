@@ -12,16 +12,23 @@ object Meta extends App {
   def apply(o: Any): K = {
     o match {
       case o: List[_] => KList(o map apply)
-      case o: Set[_] => 'KSet(o.toList map apply)
-      case o: Iterable[_] => 'KSet(o.toList map apply)
-      case o if o.getClass().getMethods.exists(_.toString().contains("productIterator")) =>
-        val elements = o.asInstanceOf[HasProductIterator].productIterator.toList
-        KApply(KLabel(processName(o.getClass().getName)), elements map apply)
+      case o: Set[_] => new KSet(o map apply)
+      case o: Iterable[_] => new KSet(o.toSet map apply)
+
+      // Primitives 
       case o: Int => KInt(o)
       case o: String => KToken(Sort("String"), o)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
       case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)
       case o: java.io.File => KToken(Sort("File"), o.toString)
+
+      // Already K
+      case o: K => o
+
+      // Fallback to reflection
+      case o if o.getClass().getMethods.exists(_.toString().contains("productIterator")) =>
+        val elements = o.asInstanceOf[HasProductIterator].productIterator.toList
+        KApply(KLabel(processName(o.getClass().getName)), elements map apply)
     }
   }
 
