@@ -62,10 +62,9 @@ public class Constructors {
         return (org.kframework.kore.KList) KList$.MODULE$.apply(immutable(ks));
     }
 
-    //
-    // public static KList KList(Iterable<K> ks) {
-    // return KList$.MODULE$.apply(immutable(ks));
-    // }
+    public static KList KList(Iterable<K> ks) {
+        return KList$.MODULE$.apply(immutable(ks));
+    }
     //
     // public static KList KList(K k) {
     // return KList.fromJava(new K[] { k });
@@ -100,7 +99,7 @@ public class Constructors {
     }
 
     public static KSequence KSequence(List<K> ks) {
-        return KSequence(org.kframework.kore.outer.Constructors.KList(ks));
+        return KSequence(KList(ks));
     }
 
     public static KRewrite KRewrite(K left, K right) {

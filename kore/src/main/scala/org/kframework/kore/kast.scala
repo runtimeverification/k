@@ -128,10 +128,12 @@ object KList extends CanBuildKCollection {
   def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
 }
 
-
 object KToken {
   def apply(sort: Sort, s: KString, att: Attributes = Attributes()) =
     KUninterpretedToken(sort, s, att)
+
+  def apply(sort: Sort, s: String) =
+    KUninterpretedToken(sort, KString(s), Attributes())
 
   def unapply(t: KToken) = Some((t.sort, t.s, t.att))
 }

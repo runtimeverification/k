@@ -16,7 +16,6 @@ import java.util.stream.StreamSupport
 object Constructors {
   import org.kframework.kore
 
-  def KList(s: java.lang.Iterable[K]): KList = kore.KList(s.asScala.toSeq: _*)
   def Definition(requires: Set[Require], modules: Set[Module]) =
     kore.outer.Definition(requires, modules)
 
