@@ -32,21 +32,6 @@ object KInt extends Sort("Boolean") {
   implicit def toKInt(n: Int): KInt = KInt(n)
 }
 
-class KSet(private val backingSet: Set[K]) extends collection.AbstractSet[K] with Associative[KSet] {
-  type ThisK = KSet
-
-  def contains(key: K): Boolean = backingSet.contains(key)
-  def iterator: Iterator[K] = backingSet.iterator
-  def +(elem: K): KSet = new KSet(backingSet + elem)
-  def -(elem: K): KSet = new KSet(backingSet - elem)
-
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
-
-  def copy(l: Iterable[K]): KSet = new KSet(l.toSet)
-  def copy(att: Attributes) = this
-  def att = Attributes()
-}
-
 case class KBag(val klist: KList) extends KAbstractCollection with Associative[KBag] {
   type This = KBag
 
