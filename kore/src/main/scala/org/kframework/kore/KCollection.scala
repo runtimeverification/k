@@ -28,9 +28,6 @@ trait KAbstractCollection extends KCollection {
 
   def iterator = delegate.iterator
 
-  def size = delegate.size
-
-  def mkString(separator: String): String = delegate.mkString(separator)
 
   override def hashCode() = {
     val prime = 41

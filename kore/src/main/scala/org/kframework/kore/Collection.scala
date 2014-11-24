@@ -14,13 +14,13 @@ trait Collection[T] {
 
   def foreach(f: T => Unit)
 
-  def mkString(separator: String): String
+  def mkString(separator: String): String = iterator.mkString(separator)
 
   def iterator: Iterator[T]
 
   def isEmpty: Boolean = size == 0
 
-  def size: Int
+  def size: Int = { var s = 0; foreach { x => s += 1 }; s }
 
   def map(f: T => T): This = {
     val builder = newBuilder
@@ -28,7 +28,7 @@ trait Collection[T] {
     builder.result()
   }
 
-  def map[R](f: T => R): List[R] = {
+  def map[R](f: T => R): scala.List[R] = {
     val builder = ListBuffer[R]()
     foreach { builder += f(_) }
     builder.result()
