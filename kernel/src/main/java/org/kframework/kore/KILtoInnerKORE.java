@@ -95,7 +95,8 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(Hole hole) {
-        return KApply(Hole(), KList(), sortAttributes(hole));
+        return KApply(Hole(), KList(KToken(Sort(hole.getSort().getName()), KString(""))),
+                sortAttributes(hole));
     }
 
     public KVariable apply(Variable v) {

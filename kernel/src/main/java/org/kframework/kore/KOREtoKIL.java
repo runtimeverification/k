@@ -167,7 +167,7 @@ public class KOREtoKIL {
                 Configuration conf = (Configuration) sentence;
                 org.kframework.kil.Configuration kilConf = new org.kframework.kil.Configuration();
                 kilConf.setBody(convertConfBody(conf.body()));
-                kilConf.setEnsures(convertK(conf.ensures()));
+                kilConf.setEnsures(convertKBool(conf.ensures()));
                 kilConf.setAttributes(convertAttributes(conf.att()));
                 ret.add(kilConf);
             } else if (sentence instanceof Rule) {
@@ -222,15 +222,27 @@ public class KOREtoKIL {
             KApply kApply = (KApply) k;
             // FIXME: a lot of things that are not a KApply are translated to
             // KORE KApply, we need to figure out every one of them and handle here
-            return org.kframework.kil.KApp.of(convertKApply(kApply.klabel()),
-                    stream(kApply.contents()).map(this::convertK).collect(Collectors.toList()));
-
+            return convertKApply(kApply);
         }
         throw new RuntimeException(
                 "Not implemented: KORE.K(" + k.getClass().getName() + ") -> KIL.Term");
     }
 
-    public org.kframework.kil.Term convertKLabel(KLabel label) {
-        return null;
+    public org.kframework.kil.Term convertKBool(K k) {
+        if (k instanceof KBoolean) {
+            return null;
+        }
+        return convertK(k);
+    }
+
+    public org.kframework.kil.Term convertKApply(KApply kApply) {
+        KLabel label = kApply.klabel();
+        List<K> contents = stream(kApply.contents()).collect(Collectors.toList());
+        if (label == Hole$.MODULE$) {
+            Sort sort = ((KToken) contents.get(0)).sort();
+            return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
+        } else {
+            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()), null, null);
+        }
     }
 }
