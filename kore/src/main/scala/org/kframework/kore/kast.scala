@@ -49,7 +49,7 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
     case _ => false
   }
 
-  def copy(ks: Iterable[K], att: Attributes): KApply = KApply(klabel, KList(ks), att)
+  def copy(att: Attributes): KApply = KApply(klabel, klist, att)
 }
 
 trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
@@ -70,10 +70,10 @@ case class ConcreteKLabel(name: String) extends KLabel {
 case class KSequence(val klist: KList, val att: Attributes = Attributes())
   extends KAbstractCollection with KSequenceMatcher with KSequenceToString {
   type This = KSequence
-  def copy(klist: Iterable[K], att: Attributes): KSequence = new KSequence(KList(klist.toSeq: _*), att)
   def delegate = klist.delegate
 
   def newBuilder: Builder[K, KSequence] = klist.newBuilder mapResult { new KSequence(_, att) }
+  def copy(att: Attributes): KSequence = new KSequence(klist, att)
 
   override def canEqual(that: Any) = that.isInstanceOf[KSequence]
 }
@@ -107,7 +107,7 @@ object KVariable {
 object KSequence extends CanBuildKCollection {
   type This = KSequence
 
-  def apply(list: K*): KSequence = apply(KList(list: _*), Attributes())
+  def newBuilder = KList.newBuilder mapResult { new KSequence(_, Attributes()) }
 
   def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
 }

@@ -42,13 +42,14 @@ trait KAbstractCollection extends KCollection with K {
 trait CanBuildKCollection {
   type This <: KCollection
 
-  def apply(l: K*): This
+  def apply(l: K*): This = (canBuildFrom.apply() ++= l).result
+  def newBuilder: Builder[K, This]
 
   protected val fromList = apply _
 
   implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
     new generic.CanBuildFrom[This, K, This] {
-      def apply(): mutable.Builder[K, This] = new mutable.ListBuffer mapResult fromList
+      def apply(): mutable.Builder[K, This] = newBuilder
       def apply(from: This): mutable.Builder[K, This] = from.newBuilder.asInstanceOf[Builder[K, This]]
     }
 }
@@ -88,9 +89,9 @@ trait Collection[T] {
 trait KCollection extends Collection[K] with K {
   type This <: KCollection
 
-  def copy(ks: Iterable[K], att: Attributes): This
-  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
-  def copy(att: Attributes): This = copy(Seq(), att)
+//  def copy(ks: Iterable[K], att: Attributes): This
+//  def copy(ks: Iterable[K]): This = copy(ks, Attributes()).asInstanceOf[This]
+  def copy(att: Attributes): This
 }
 
 class AssocBuilder[A, AssocIn <: Collection[A]: ClassTag] extends Builder[A, List[A]] {

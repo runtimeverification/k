@@ -42,7 +42,7 @@ public class Constructors {
     }
 
     public static KBag KBag(K... ks) {
-        return KBag$.MODULE$.apply(KList.fromJava(ks));
+        return KBag$.MODULE$.apply(KList(ks));
     }
 
     public static KBag KBag(KList ks) {
@@ -58,7 +58,7 @@ public class Constructors {
     }
 
     public static KList KList(K... ks) {
-        return KList$.MODULE$.fromJava(ks);
+        return (org.kframework.kore.KList) KList$.MODULE$.apply(immutable(ks));
     }
 
     //

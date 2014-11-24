@@ -37,7 +37,7 @@ case class KBag(val klist: KList) extends KAbstractCollection with Associative[K
 
   def canEqual(that: Any) = that.isInstanceOf[KBag]
   def att = Attributes()
-  def copy(klist: Iterable[K], att: Attributes): KBag = (newBuilder ++= klist).result
+  def copy(att: Attributes): KBag = this
   def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 
   val delegate = klist.delegate

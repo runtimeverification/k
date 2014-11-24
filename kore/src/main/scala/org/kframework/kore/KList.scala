@@ -16,19 +16,20 @@ class KList(val delegate: List[K]) extends KAbstractCollection with KListMatcher
   override def newBuilder: Builder[K, KList] = KList.newBuilder
 
   def att = Attributes()
+
+  //FIXME: when Scala 2.12 is out
+  def map(f: java.util.function.Function[K, K]): KList = map(f(_))
+
+  def copy(att: Attributes): KList = this
 }
 
 object KList extends CanBuildKCollection {
   type This = KList
 
-  def apply(l: K*): KList = (newBuilder ++= l).result()
-
   def apply(l: Iterable[K]): KList = (newBuilder ++= l).result()
 
   def newBuilder: Builder[K, KList] =
     new AssocBuilder[K, KList] mapResult { new KList(_) }
-
-  def fromJava(l: Array[K]) = apply(l: _*)
 
   def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
 }
