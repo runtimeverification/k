@@ -41,7 +41,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     protected boolean proceed(JavaSymbolicObject object) {
-        return ((substitution.isEmpty() || object.isGround()) && object.isNormal());
+        return ((!substitution.isEmpty() && !object.isGround()) || !object.isNormal());
     }
 
     @Override

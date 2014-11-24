@@ -131,12 +131,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * {@code evaluate} method instead.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        if ((substitution.isEmpty() || isGround()) && isNormal()) {
+        if ((!substitution.isEmpty() && !isGround()) || !isNormal()) {
+            return (Term) this.accept(new SubstituteAndEvaluateTransformer(substitution, context));
+        } else {
             return this;
         }
-
-        SubstituteAndEvaluateTransformer transformer = new SubstituteAndEvaluateTransformer(substitution, context);
-        return (Term) this.accept(transformer);
     }
 
     /**
