@@ -52,6 +52,9 @@ import static org.kframework.kore.Constructors.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
+    // we mark productions in same priority blocks with ids unique to that priority block
+    private int priorityBlockId = 0;
+
     public KILtoInnerKORE inner = new KILtoInnerKORE();
 
     public org.kframework.kore.outer.Definition apply(Definition d) {
@@ -208,8 +211,13 @@ public class KILtoKORE extends KILTransformation<Object> {
                         }
                     }
 
+                    org.kframework.kore.Attributes attrs = inner.apply(p.getAttributes());
+                    // org.kframework.kore.KToken pbIndicator = KToken(Sort("priority-block"),
+                    //         KString(Integer.toString(priorityBlockId++)));
+                    // attrs = attrs.add(Attributes(pbIndicator));
+
                     org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(sort,
-                            immutable(items), inner.apply(p.getAttributes()));
+                            immutable(items), attrs);
 
                     res.add(prod);
                 }

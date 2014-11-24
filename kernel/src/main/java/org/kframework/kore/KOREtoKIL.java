@@ -3,6 +3,7 @@
 package org.kframework.kore;
 
 import org.kframework.kore.outer.*;
+import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,12 +171,40 @@ public class KOREtoKIL {
                 kilConf.setEnsures(convertKBool(conf.ensures()));
                 kilConf.setAttributes(convertAttributes(conf.att()));
                 ret.add(kilConf);
+            } else if (sentence instanceof SyntaxProduction) {
+                SyntaxProduction syntaxProduction = (SyntaxProduction) sentence;
+                List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
+                for (ProductionItem it :
+                        scala.collection.JavaConversions.seqAsJavaList(syntaxProduction.items())) {
+                    kilProdItems.add(convertProdItem(it));
+                }
+                org.kframework.kil.NonTerminal lhs =
+                        new org.kframework.kil.NonTerminal(convertSort(syntaxProduction.sort()));
+                org.kframework.kil.Production kilProd =
+                        new org.kframework.kil.Production(lhs, kilProdItems);
+                org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
+                ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
             } else if (sentence instanceof Rule) {
                 throw new RuntimeException("Not implemented: KORE Rule to KIL");
             }
         }
 
         return ret;
+    }
+
+    public org.kframework.kil.ProductionItem convertProdItem(ProductionItem prodItem) {
+        if (prodItem instanceof NonTerminal) {
+            NonTerminal item = (NonTerminal) prodItem;
+            return new org.kframework.kil.NonTerminal(convertSort(item.sort()));
+        } else if (prodItem instanceof Terminal) {
+            Terminal item = (Terminal) prodItem;
+            return new org.kframework.kil.Terminal(item.value());
+        } else if (prodItem instanceof RegexTerminal) {
+            RegexTerminal item = (RegexTerminal) prodItem;
+            throw new RuntimeException("Not implemented");
+        } else {
+            throw new RuntimeException("Unhandled case");
+        }
     }
 
     public org.kframework.kil.Sort convertSort(Sort sort) {
@@ -226,6 +255,28 @@ public class KOREtoKIL {
         }
         throw new RuntimeException(
                 "Not implemented: KORE.K(" + k.getClass().getName() + ") -> KIL.Term");
+    }
+
+    public org.kframework.kil.Variable convertKVariable(KVariable var) {
+        List<K> attrs = stream(var.att().att()).collect(Collectors.toList());
+        org.kframework.kil.Sort sort = null;
+        for (K k : attrs) {
+            if (k instanceof KApply) {
+                KApply kApply = (KApply) k;
+                if (kApply.klabel().equals(new ConcreteKLabel("sort"))) {
+                    List<K> args = stream(kApply.contents()).collect(Collectors.toList());
+                    if (args.size() == 1 && args.get(0) instanceof KToken) {
+                        KToken tok = (KToken) args.get(0);
+                        sort = org.kframework.kil.Sort.of(tok.s().s());
+                        break;
+                    }
+                }
+            }
+        }
+        if (sort == null) {
+            throw new RuntimeException("Can't figure sort of KVariable");
+        }
+        return new org.kframework.kil.Variable(var.name(), sort);
     }
 
     public org.kframework.kil.Term convertKBool(K k) {

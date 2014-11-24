@@ -31,6 +31,18 @@ public class TestKOREtoKIL extends BaseTest {
     }
 
     @Test
+    public void testRules() throws IOException {
+        org.kframework.kil.Definition kilDef = parse(
+                new File(ROOT + "syntaxWithOR.k").getAbsoluteFile(), "TEST");
+
+        KILtoKORE toKore = new KILtoKORE();
+        org.kframework.kore.outer.Definition koreDef = toKore.apply(kilDef);
+
+        KOREtoKIL toKil = new KOREtoKIL();
+        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+    }
+
+    @Test
     public void testBubble() {
         String pgm = "module PGM " +
                 "configuration <k> .K </k> " +
