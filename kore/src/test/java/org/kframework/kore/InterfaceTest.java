@@ -18,5 +18,6 @@ public class InterfaceTest {
 
         // Navigating it
         KLabel theLabel = ((KApply) k.left()).klabel();
+        theLabel.name();
     }
 }

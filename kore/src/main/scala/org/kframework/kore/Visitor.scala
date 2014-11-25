@@ -12,6 +12,8 @@ trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, 
       case k: KRewrite => apply(k)
       case k: KToken => apply(k)
       case k: KVariable => apply(k)
+      case k: KList => apply(k)
+      case k: KSequence => apply(k)
     }
   }
 
@@ -19,6 +21,8 @@ trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, 
   def apply(k: KRewrite): T
   def apply(k: KToken): T
   def apply(k: KVariable): T
+  def apply(k: KList): T
+  def apply(k: KSequence): T
 }
 
 trait KOREVisitor extends KORETransformer[Nothing] {

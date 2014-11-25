@@ -56,9 +56,6 @@ class KList(protected[kore] val delegate: List[K])
   def get(i: Int) = delegate.lift(i)
   def att = Attributes()
 
-  //FIXME: when Scala 2.12 is out
-  def map(f: java.util.function.Function[K, K]): KList = map(f(_))
-
   def copy(att: Attributes): KList = this
 }
 
