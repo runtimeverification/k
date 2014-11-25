@@ -45,7 +45,10 @@ object Constructors {
 
   def Rule(body: K, requires: K, ensures: K, att: Attributes) = outer.Rule(body, requires, ensures, att)
   def Rule(body: K, requires: K, ensures: K) = outer.Rule(body, requires, ensures, Attributes())
-  
+
+  def Bubble(sentenceType: String, content: String, att: Attributes) =
+    outer.Bubble(sentenceType, content, att)
+
   def Associativity = outer.Associativity;
 
   // EXTRA

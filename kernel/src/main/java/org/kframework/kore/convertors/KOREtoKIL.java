@@ -156,7 +156,7 @@ public class KOREtoKIL {
             } else if (sentence instanceof Bubble) {
                 Bubble bubble = (Bubble) sentence;
                 org.kframework.kil.StringSentence kilBubble =
-                        new org.kframework.kil.StringSentence(bubble.contents(), null, bubble.ty(), null);
+                        new org.kframework.kil.StringSentence(bubble.contents(), null, bubble.sentenceType(), null);
                 kilBubble.setAttributes(convertAttributes(bubble.att()));
                 ret.add(kilBubble);
             } else if (sentence instanceof ModuleComment) {

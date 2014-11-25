@@ -42,8 +42,8 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kore.KList;
 import org.kframework.kore.outer.*;
-import static org.kframework.kore.Collections.*;
 
+import static org.kframework.kore.Collections.*;
 import scala.Enumeration.Value;
 import scala.collection.Seq;
 
@@ -56,7 +56,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     // we mark productions in same priority blocks with ids unique to that
     // priority block
-    private int priorityBlockId = 0;
+    public int priorityBlockId = 0;
 
     public KILtoInnerKORE inner = new KILtoInnerKORE();
 
@@ -84,41 +84,33 @@ public class KILtoKORE extends KILTransformation<Object> {
         return Module(i.getName(), immutable(items), inner.apply(i.getAttributes()));
     }
 
+    @SuppressWarnings("unchecked")
     public Set<org.kframework.kore.outer.Sentence> apply(ModuleItem i) {
-        if (i instanceof Import) {
-            return Sets.newHashSet(apply((Import) i));
-        } else if (i instanceof Syntax) {
-            return apply((Syntax) i);
-        } else if (i instanceof StringSentence) {
-            StringSentence sentence = (StringSentence) i;
-            return Sets.newHashSet(new org.kframework.kore.outer.Bubble(sentence.getType(),
-                    sentence.getContent(), inner.apply(sentence.getAttributes())));
-        } else if (i instanceof LiterateModuleComment) {
-            return Sets.newHashSet(new org.kframework.kore.outer.ModuleComment(
-                    ((LiterateModuleComment) i).getValue(), inner.apply(i.getAttributes())));
-        } else if (i instanceof org.kframework.kil.Configuration) {
-            Configuration kilConfiguration = (org.kframework.kil.Configuration) i;
-            Cell body = (Cell) kilConfiguration.getBody();
-
-            return Sets.newHashSet(Configuration(inner.apply(body),
-                    inner.applyOrTrue(kilConfiguration.getEnsures()),
-                    inner.apply(kilConfiguration.getAttributes())));
-        } else if (i instanceof PriorityExtended) {
-            return apply((PriorityExtended) i);
-        } else if (i instanceof PriorityExtendedAssoc) {
-            return apply((PriorityExtendedAssoc) i);
-        } else if (i instanceof Restrictions) {
-            throw new RuntimeException("Not implemented");
-        } else if (i instanceof org.kframework.kil.Context) {
-            org.kframework.kil.Context c = (org.kframework.kil.Context) i;
-
-            return Sets.newHashSet(Context(inner.apply(c.getBody()),
-                    inner.applyOrTrue(c.getRequires())));
-        } else if (i instanceof org.kframework.kil.Rule) {
-            return Sets.newHashSet(apply((org.kframework.kil.Rule) i));
+        if (i instanceof Syntax || i instanceof PriorityExtended) {
+            return (Set<org.kframework.kore.outer.Sentence>) apply((ASTNode) i);
         } else {
-            throw new RuntimeException("Unhandled case:" + i.getClass());
+            return Sets.newHashSet((org.kframework.kore.outer.Sentence) apply((ASTNode) i));
         }
+    }
+
+    public org.kframework.kore.outer.Bubble apply(StringSentence sentence) {
+        return Bubble(sentence.getType(), sentence.getContent(),
+                inner.apply(sentence.getAttributes()));
+    }
+
+    public Context apply(org.kframework.kil.Context c) {
+        return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
+    }
+
+    public ModuleComment apply(LiterateModuleComment m) {
+        return new org.kframework.kore.outer.ModuleComment(m.getValue(), inner.apply(m
+                .getAttributes()));
+    }
+
+    public org.kframework.kore.outer.Configuration apply(Configuration kilConfiguration) {
+        Cell body = (Cell) kilConfiguration.getBody();
+        return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
+                inner.apply(kilConfiguration.getAttributes()));
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
@@ -126,11 +118,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                 inner.applyOrTrue(r.getEnsures()), inner.apply(r.getAttributes()));
     }
 
-    public Set<org.kframework.kore.outer.Sentence> apply(PriorityExtendedAssoc ii) {
+    public org.kframework.kore.outer.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
         scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags());
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
-        return Sets.newHashSet(SyntaxAssociativity(assoc, tags));
+        return SyntaxAssociativity(assoc, tags);
     }
 
     public Value applyAssoc(String assocOrig) {

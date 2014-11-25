@@ -7,7 +7,7 @@ import org.kframework.kore._
 case class Configuration(
   body: K,
   ensures: K,
-  att: Attributes = Attributes()) extends Sentence {
+  att: Attributes = Attributes()) extends Sentence with OuterKORE {
 
   override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
@@ -45,4 +45,4 @@ object Configuration {
   val cellMarker = KApply(KLabel("cell"), KList());
 }
 
-case class Bubble(ty: String, contents: String, att: Attributes = Attributes()) extends Sentence
+case class Bubble(sentenceType: String, contents: String, att: Attributes = Attributes()) extends Sentence

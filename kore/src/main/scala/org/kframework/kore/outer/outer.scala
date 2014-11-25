@@ -7,7 +7,7 @@ import org.kframework.kore.Sort
 import scala.util.matching.Regex
 import org.kframework.kore.Attributes
 
-sealed trait OuterKORE
+trait OuterKORE
 
 case class Definition(requires: Set[Require], modules: Set[Module])
   extends DefinitionToString with OuterKORE

@@ -6,9 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 
-public class KILTransformation<R> implements Function<Term, R> {
+public class KILTransformation<R> implements Function<ASTNode, R> {
 
     @SuppressWarnings("serial")
     static class VisitingException extends RuntimeException {
@@ -18,7 +19,7 @@ public class KILTransformation<R> implements Function<Term, R> {
     }
 
     @SuppressWarnings("unchecked")
-    public R apply(Term t) {
+    public R apply(ASTNode t) {
         try {
             Method visitorMethod = this.getClass().getDeclaredMethod("apply", t.getClass());
             return (R) visitorMethod.invoke(this, t);
