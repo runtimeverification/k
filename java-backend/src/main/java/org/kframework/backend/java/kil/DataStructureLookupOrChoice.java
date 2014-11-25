@@ -20,6 +20,29 @@ public interface DataStructureLookupOrChoice {
             return KItem.of(klabel, KList.concatenate(base, key), context);
         }
 
+        public static boolean isLookup(Term term) {
+            return term instanceof KItem
+                    && ((KItem) term).kLabel() instanceof KLabelConstant
+                    && (((KItem) term).kLabel().toString().equals("List:get")
+                            || ((KItem) term).kLabel().toString().equals("Map:lookup")
+                            || ((KItem) term).kLabel().toString().equals("'_in_"))
+                    && ((KItem) term).kList() instanceof KList
+                    && ((KList) ((KItem) term).kList()).isConcreteCollection()
+                    && ((KList) ((KItem) term).kList()).concreteSize() == 2;
+        }
+
+        public static Term getBase(Term term) {
+            assert isLookup(term);
+            return ((KList) (((KItem) term).kList())).get(0);
+
+        }
+
+        public static Term getKey(Term term) {
+            assert isLookup(term);
+            return ((KList) (((KItem) term).kList())).get(1);
+
+        }
+
         public static DataStructureChoice of(DataStructureChoice.Type type, Term base) {
             switch (type) {
             case MAP_KEY_CHOICE:
