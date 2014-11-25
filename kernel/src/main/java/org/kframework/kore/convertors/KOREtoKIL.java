@@ -250,7 +250,7 @@ public class KOREtoKIL {
             KLabel confLabel = kApply.klabel();
             org.kframework.kil.Cell kilCell = new org.kframework.kil.Cell();
             kilCell.setLabel(confLabel.name());
-            List<K> args = stream(kApply.delegate()).collect(Collectors.toList());
+            List<K> args = kApply.stream().collect(Collectors.toList());
             if (args.size() == 1) {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
@@ -265,7 +265,7 @@ public class KOREtoKIL {
     public org.kframework.kil.Term convertK(K k) {
         if (k instanceof KSequence) {
             KSequence kSequence = (KSequence) k;
-            return new org.kframework.kil.KSequence(stream(kSequence.delegate()).map(
+            return new org.kframework.kil.KSequence(kSequence.stream().map(
                     this::convertK).collect(Collectors.toList()));
         } else if (k instanceof KApply) {
             KApply kApply = (KApply) k;
@@ -274,14 +274,14 @@ public class KOREtoKIL {
             return convertKApply(kApply);
         } else if (k instanceof KBag) {
             KBag kBag = (KBag) k;
-            List<K> bagItems = stream(kBag.delegate()).collect(Collectors.toList());
+            List<K> bagItems = kBag.stream().collect(Collectors.toList());
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
             // as far as I understand from the translation code, this list should have one element
             K bagItem = bagItems.get(0);
             if (bagItem instanceof KBag) {
                 KBag item = (KBag) bagItem;
-                List<K> kbagItems = stream(item.delegate()).collect(Collectors.toList());
+                List<K> kbagItems = item.stream().collect(Collectors.toList());
                 kilBagItems.addAll(kbagItems.stream().map(this::convertK).collect(Collectors.toList()));
             } else {
                 kilBagItems.add(convertK(bagItem));
@@ -303,7 +303,7 @@ public class KOREtoKIL {
             if (k instanceof KApply) {
                 KApply kApply = (KApply) k;
                 if (kApply.klabel().equals(new ConcreteKLabel("sort"))) {
-                    List<K> args = stream(kApply.delegate()).collect(Collectors.toList());
+                    List<K> args = kApply.stream().collect(Collectors.toList());
                     if (args.size() == 1 && args.get(0) instanceof KToken) {
                         KToken tok = (KToken) args.get(0);
                         sort = org.kframework.kil.Sort.of(tok.s().s());
@@ -327,7 +327,7 @@ public class KOREtoKIL {
 
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
-        List<K> contents = stream(kApply.delegate()).collect(Collectors.toList());
+        List<K> contents = kApply.stream().collect(Collectors.toList());
         if (label == Hole$.MODULE$) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
