@@ -44,6 +44,20 @@ public class TestKOREtoKILIT extends BaseTest {
     }
 
     @Test
+    public void testSimpleRule() throws IOException {
+        org.kframework.kil.Definition kilDef = parse(
+                new File(ROOT + "simpleRule.k").getAbsoluteFile(), "TEST");
+
+        KILtoKORE toKore = new KILtoKORE();
+        org.kframework.kore.outer.Definition koreDef = toKore.apply(kilDef);
+
+        KOREtoKIL toKil = new KOREtoKIL();
+        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+
+        assertEquals(countRules(kilDef1), 1);
+    }
+
+    @Test
     public void testRules() throws IOException {
         org.kframework.kil.Definition kilDef = parse(
                 new File(ROOT + "syntaxWithOR.k").getAbsoluteFile(), "TEST");
@@ -106,5 +120,18 @@ public class TestKOREtoKILIT extends BaseTest {
         org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
 
         return kilDef1;
+    }
+
+    public int countRules(org.kframework.kil.Definition kilDef) {
+        final int[] rules = {0};
+        BasicVisitor ruleCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Rule conf, Void _void) {
+                rules[0]++;
+                return _void;
+            }
+        };
+        ruleCounter.visitNode(kilDef);
+        return rules[0];
     }
 }

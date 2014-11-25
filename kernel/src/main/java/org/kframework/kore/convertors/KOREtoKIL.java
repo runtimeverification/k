@@ -187,7 +187,15 @@ public class KOREtoKIL {
                 org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
                 ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
             } else if (sentence instanceof Rule) {
-                throw new RuntimeException("Not implemented: KORE Rule to KIL");
+                Rule rule = (Rule) sentence;
+                if (rule.body() instanceof KRewrite) {
+                    KRewrite body = (KRewrite) rule.body();
+                    ret.add(new org.kframework.kil.Rule(
+                            convertK(body.left()),
+                            convertK(body.right()),
+                            convertKBool(rule.requires()),
+                            convertKBool(rule.ensures()), null)); // context is null
+                }
             }
         }
 
@@ -270,6 +278,8 @@ public class KOREtoKIL {
             }
             kilBag.setContents(kilBagItems);
             return kilBag;
+        } else if (k instanceof KVariable) {
+            return convertKVariable((KVariable) k);
         }
         System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
         throw new RuntimeException(
@@ -300,7 +310,7 @@ public class KOREtoKIL {
 
     public org.kframework.kil.Term convertKBool(K k) {
         if (k instanceof KBoolean) {
-            return null;
+            return null; // FIXME
         }
         return convertK(k);
     }
