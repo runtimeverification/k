@@ -129,4 +129,15 @@ public class BuiltinMapOperations {
 
         return BoolToken.of(map2.getEntries().entrySet().containsAll(map1.getEntries().entrySet()));
     }
+
+    public static Term choice(BuiltinMap map, TermContext context) {
+        if (!map.getEntries().isEmpty()) {
+            return map.getEntries().keySet().iterator().next();
+        } else if (map.isEmpty()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -22,11 +22,9 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.ListUpdate;
-import org.kframework.backend.java.kil.MapKeyChoice;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetElementChoice;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -149,11 +147,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return proceed(mapKeyChoice) ? super.transform(mapKeyChoice) : mapKeyChoice;
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return proceed(mapUpdate) ? super.transform(mapUpdate) : mapUpdate;
     }
@@ -166,11 +159,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Rule rule) {
         return proceed(rule) ? super.transform(rule) : rule;
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return proceed(setElementChoice) ? super.transform(setElementChoice) : setElementChoice;
     }
 
     @Override

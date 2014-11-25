@@ -143,11 +143,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(MapKeyChoice mapKeyChoice) {
-        visit((Term) mapKeyChoice);
-    }
-
-    @Override
     public void visit(MapUpdate mapUpdate) {
         visit((Term) mapUpdate);
     }
@@ -160,11 +155,6 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(Rule rule) {
         visit((JavaSymbolicObject) rule);
-    }
-
-    @Override
-    public void visit(SetElementChoice setElementChoice) {
-        visit((Term) setElementChoice);
     }
 
     @Override

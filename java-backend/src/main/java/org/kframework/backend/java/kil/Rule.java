@@ -239,10 +239,10 @@ public class Rule extends JavaSymbolicObject {
             /* add variables that occur in the key and value positions of data
              * structure lookup operations under read-write cells */
             for (Equality eq : lookups.equalities()) {
-                if (DataStructureLookupOrChoice.Util.isLookup(eq.leftHandSide())) {
-                    if (!lhsOfReadOnlyCell.contains(DataStructureLookupOrChoice.Util.getBase(eq.leftHandSide()))) {
+                if (DataStructures.isLookup(eq.leftHandSide())) {
+                    if (!lhsOfReadOnlyCell.contains(DataStructures.getBase(eq.leftHandSide()))) {
                         // do not double count base variable again
-                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructureLookupOrChoice.Util.getKey(eq.leftHandSide())));
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getKey(eq.leftHandSide())));
                         lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(eq.rightHandSide()));
                     }
                 }
@@ -250,8 +250,8 @@ public class Rule extends JavaSymbolicObject {
         } else {
             lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(leftHandSide));
             for (Equality eq : lookups.equalities()) {
-                if (DataStructureLookupOrChoice.Util.isLookup(eq.leftHandSide())) {
-                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructureLookupOrChoice.Util.getKey(eq.leftHandSide())));
+                if (DataStructures.isLookup(eq.leftHandSide())) {
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getKey(eq.leftHandSide())));
                     lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(eq.rightHandSide()));
                 }
             }

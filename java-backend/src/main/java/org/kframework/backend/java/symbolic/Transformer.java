@@ -37,11 +37,9 @@ public interface Transformer {
     public ASTNode transform(KList kList);
     public ASTNode transform(KSequence kSequence);
     public ASTNode transform(ListUpdate listUpdate);
-    public ASTNode transform(MapKeyChoice mapKeyChoice);
     public ASTNode transform(MapUpdate mapUpdate);
     public ASTNode transform(MetaVariable metaVariable);
     public ASTNode transform(Rule rule);
-    public ASTNode transform(SetElementChoice setElementChoice);
     public ASTNode transform(SetUpdate setUpdate);
     public ASTNode transform(SymbolicConstraint symbolicConstraint);
     public ASTNode transform(StringToken stringToken);

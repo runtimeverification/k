@@ -53,5 +53,8 @@ module MAP
 
   /*@ Check map inclusion */
   syntax Bool ::= Map "<=Map" Map               [function, hook(Map:inclusion)]
+
+  /*@ Get an arbitrarily chosen key of the Map  */
+  syntax K ::= choice(Map)                      [function, hook(Map:choice), klabel(Map:choice)]
 endmodule
 

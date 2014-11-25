@@ -153,11 +153,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return proceed(mapKeyChoice) ? ((MapKeyChoice) super.transform(mapKeyChoice)).evaluateChoice() : mapKeyChoice;
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return proceed(mapUpdate) ? ((MapUpdate) super.transform(mapUpdate)).evaluateUpdate() : mapUpdate;
     }
@@ -170,11 +165,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Rule rule) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return proceed(setElementChoice) ? ((SetElementChoice) super.transform(setElementChoice)).evaluateChoice() : setElementChoice;
     }
 
     @Override

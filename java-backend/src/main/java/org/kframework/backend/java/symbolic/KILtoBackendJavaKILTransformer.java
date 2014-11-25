@@ -17,7 +17,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Hole;
@@ -31,10 +31,8 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListUpdate;
-import org.kframework.backend.java.kil.MapKeyChoice;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetElementChoice;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -487,19 +485,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term key = (Term) this.visitNode(lookup.key());
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookupsBuilder.add(new SetElementChoice(base), key);
+                    lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                 } else {
-                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookupsBuilder.add(new MapKeyChoice(base), key);
+                        lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                     }
-                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 } else { // ListLookup
-                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 }
             }
 

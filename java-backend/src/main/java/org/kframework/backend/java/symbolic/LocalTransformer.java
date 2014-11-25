@@ -141,11 +141,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transform((Term) mapKeyChoice);
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return transform((Term) mapUpdate);
     }
@@ -162,11 +157,6 @@ public class LocalTransformer implements Transformer {
 
     protected ASTNode transform(JavaSymbolicObject object) {
         return object;
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return transform((Term) setElementChoice);
     }
 
     @Override

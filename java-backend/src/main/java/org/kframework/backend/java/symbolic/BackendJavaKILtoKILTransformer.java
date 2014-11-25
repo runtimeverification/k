@@ -300,11 +300,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transformJavaBackendSpecificTerm(mapKeyChoice);
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return transformJavaBackendSpecificTerm(mapUpdate);
     }
@@ -319,12 +314,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         throw new UnsupportedOperationException("Not implemented, yet");
     }
 
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return transformJavaBackendSpecificTerm(setElementChoice);
-    }
-
-    @Override
+   @Override
     public ASTNode transform(SetUpdate setUpdate) {
         return transformJavaBackendSpecificTerm(setUpdate);
     }

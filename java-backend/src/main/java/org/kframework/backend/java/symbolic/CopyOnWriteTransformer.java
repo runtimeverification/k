@@ -341,15 +341,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        Term map = (Term) mapKeyChoice.map().accept(this);
-        if (map != mapKeyChoice.map()) {
-            mapKeyChoice = new MapKeyChoice(map);
-        }
-        return mapKeyChoice;
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
 //        System.out.println("Map: "+(Term)mapUpdate.map().accept(this));
         Term map = (Term) mapUpdate.map().accept(this);
@@ -437,15 +428,6 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         return setUpdate;
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        Term set = (Term) setElementChoice.set().accept(this);
-        if (set != setElementChoice.set()) {
-            setElementChoice = new SetElementChoice(set);
-        }
-        return setElementChoice;
     }
 
     @Override

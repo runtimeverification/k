@@ -1,7 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -71,6 +74,16 @@ public class BuiltinSetOperations {
         }
 
         return BoolToken.of(set2.elements().containsAll(set1.elements()));
+    }
+
+    public static Term choice(BuiltinSet set, TermContext context) {
+        if (!set.elements().isEmpty()) {
+            return set.elements().iterator().next();
+        } else if (set.isEmpty()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
     }
 
 }

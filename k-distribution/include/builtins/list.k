@@ -45,6 +45,9 @@ module LIST
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)   [function, hook(List:ListItem), smtlib(smt_seq_elem)]
 
+  /*@ Get an element form the List by index. Positive indices mean from the
+   beginning (0 is the first element), and negative indices mean from the end
+   (-1 is the last element). */
   syntax K ::= List "[" Int "]"   [function, hook(List:get), klabel(List:get)]
 
   /*@ Check element membership in the given list */
