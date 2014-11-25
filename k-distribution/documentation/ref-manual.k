@@ -855,7 +855,7 @@ Type of data parsed & Default parser & Parser flag & KRUN\_SORT & KRUN\_IS\_NOT\
 \subsubsection{\krun execution backends: \texttt{-{}-backend}}
 By default, once an initial configuration has been computed by \krun{}, the
 actual executing of the rewriting-based semantics is performed by maude.
-However, for certain purposes, maude is less than ideal. For example, maude’s
+However, for certain purposes, maude is less than ideal. For example, maude's
 implementation of Sets, Bags, and Maps is based on associative-commutative
 matching, which, while incredibly powerful and capable of supporting very
 complex operations on these data types, is highly inefficient. Additionally,
