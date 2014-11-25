@@ -3,6 +3,9 @@ require "map.k"
 
 module MAP-IMPL
   imports MAP
+  imports BOOL-HOOKS
+  imports K-EQUAL-HOOKS
+  imports INT-HOOKS
 
   // syntax K ::= Map "[" K "]"
   rule (K1:K |-> K2:K _:Map)[K1] => K2

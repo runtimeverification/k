@@ -5,6 +5,7 @@ require "int.k"
 
 module LIST
   imports INT-SYNTAX-HOOKS
+  imports K-TECHNIQUE
 
   /*@ \section{Description} \K lists are ordered collections that may contain
    duplicate elements. These behave more like lists in functional programming

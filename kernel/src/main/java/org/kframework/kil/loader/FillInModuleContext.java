@@ -39,6 +39,11 @@ public class FillInModuleContext extends BasicVisitor {
     @Override
     public Void visit(Definition def, Void _)  {
         super.visit(def, _);
+        if (def.getMainSyntaxModule().equals(def.getMainModule())) {
+            // if the syntax module is the same with the main module, add everything
+            def.getModulesMap().get(def.getMainModule()).getModuleContext().addImportedModule(this.getCurrentDefinition().getModulesMap().get(Constants.AUTO_INCLUDED_MODULE));
+            moduleInclusion.addRelation(def.getModulesMap().get(def.getMainModule()).getName(), Constants.AUTO_INCLUDED_MODULE);
+        }
         List<String> circuit = moduleInclusion.checkForCycles();
         if (circuit != null) {
             String msg = "Found circularity in module imports: ";

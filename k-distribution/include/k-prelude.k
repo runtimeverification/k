@@ -12,7 +12,8 @@ module K-TECHNIQUE
     syntax KItem
     syntax K
     syntax KList
-	syntax KLabel
+    syntax KLabel
+	syntax Bag
 endmodule
 
 module K-LISTK-EXTRAS
@@ -31,6 +32,7 @@ module K-RESULT
     imports K-TECHNIQUE
     imports BOOL-HOOKS
 
+    syntax KResult
     syntax KItem ::= KResult
     syntax Bool ::= isKResult(KItem) [function,klabel(isKResult)]
 
@@ -57,6 +59,7 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
+  imports K-TECHNIQUE
   syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_)]
   rule getKLabel(L:KLabel(_:KList)) => L
 

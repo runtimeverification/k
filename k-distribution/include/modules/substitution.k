@@ -96,6 +96,7 @@ module BINDER
 endmodule
 
 module FREE-VARS-SYNTAX
+  imports K-TECHNIQUE
   syntax Set ::= freeVariables(KList)  [function, latex({\it FV}({#1}))]  // public
 
 endmodule
