@@ -144,6 +144,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                                 System.out.println(rule);
                             }
                             subject = constructNewSubjectTerm(rule, subst);
+                            termContext.setTopTerm(subject);
                             results.add(subject);
                             succeed = true;
                             break;

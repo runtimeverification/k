@@ -10,9 +10,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.kil.GeneratedSource;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -20,7 +18,10 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 import org.kframework.parser.ProgramLoader;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
     private final FileSystem fs;
     private final Context context;
     private final ConfigurationCreationOptions ccOptions;
-    private final KILtoBackendJavaKILTransformer kilTransformer;
+    private final Provider<KILtoBackendJavaKILTransformer> kilTransformerProvider;
     private final ProgramLoader programLoader;
     private final RunProcess rp;
 
@@ -48,14 +49,14 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             FileSystem fs,
             Context context,
             ConfigurationCreationOptions ccOptions,
-            KILtoBackendJavaKILTransformer kilTransformer,
+            Provider<KILtoBackendJavaKILTransformer> kilTransformerProvider,
             ProgramLoader programLoader,
             RunProcess rp) {
         this.def = def;
         this.fs = fs;
         this.context = context;
         this.ccOptions = ccOptions;
-        this.kilTransformer = kilTransformer;
+        this.kilTransformerProvider = kilTransformerProvider;
         this.programLoader = programLoader;
         this.rp = rp;
     }
@@ -152,7 +153,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             org.kframework.kil.Term kast = rp.runParser(
                     ccOptions.parser(context),
                     term1.stringValue(), true, Sort.of(term2.stringValue()), context);
-            Term term = kilTransformer.transformAndEval(kast);
+            Term term = kilTransformerProvider.get().transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);
@@ -167,7 +168,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
                     Sources.generatedBy(this.getClass()),
                     Sort.of(startSymbol.stringValue()),
                     moduleName.stringValue(), context);
-            Term term = kilTransformer.transformAndEval(kast);
+            Term term = kilTransformerProvider.get().transformAndEval(kast);
             term = term.evaluate(termContext);
             return term;
         } catch (ParseFailedException e) {
