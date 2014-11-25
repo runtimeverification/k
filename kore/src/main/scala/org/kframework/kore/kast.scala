@@ -19,7 +19,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes {
+trait K extends HasAttributes with Matcher with Rewriting {
   protected type This <: K
 
   def copy(att: Attributes): This
@@ -31,7 +31,7 @@ trait KLabel extends KLabelToString {
   val name: String
 }
 
-trait KToken extends KItem with KORE with KTokenToString {
+trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
   val sort: Sort
   val s: KString
 }
@@ -46,6 +46,7 @@ case class KString(s: String) extends KORE // just a wrapper to mark it
 
 class KList(protected[kore] val delegate: List[K])
   extends KAbstractCollection with Indexed[Int, K]
+  with KListMatcher with Associative[KList]
   with KListToString with KORE {
   type This = KList
 
@@ -60,6 +61,7 @@ class KList(protected[kore] val delegate: List[K])
 
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
   extends KAbstractCollection with Indexed[Int, K]
+  with KApplyMatcher with Associative[KList]
   with KApplyToString with KORE with Equals {
   type This = KApply
 
@@ -88,7 +90,7 @@ case class ConcreteKLabel(name: String) extends KLabel with KORE {
 }
 
 case class KSequence(val klist: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection with KSequenceToString with KORE {
+  extends KAbstractCollection with KSequenceMatcher with KSequenceToString with KORE {
   type This = KSequence
   def delegate = klist.delegate
 
@@ -99,13 +101,13 @@ case class KSequence(val klist: KList, val att: Attributes = Attributes())
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
-  extends KItem with KORE with KLabel with KVariableToString {
+  extends KItem with KORE with KLabel with KVariableMatcher with KVariableToString {
   type This = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends KAbstractCollection with KORE with KRewriteToString {
+  extends KAbstractCollection with KORE with KRewriteMatcher with KRewriteToString {
   type This = KRewrite
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)

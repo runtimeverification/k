@@ -39,6 +39,7 @@ case class KBag private[kore] (val klist: KList) extends KAbstractCollection wit
   def canEqual(that: Any) = that.isInstanceOf[KBag]
   def att = Attributes()
   def copy(att: Attributes): KBag = this
+  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 
   val delegate = klist.delegate
   def newBuilder: Builder[K, KBag] = KBag.newBuilder
@@ -52,6 +53,7 @@ case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection 
   def canEqual(that: Any) = that.isInstanceOf[KSet]
   def att = Attributes()
   def copy(att: Attributes): KSet = this
+  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 
   val delegate = content
   def newBuilder: Builder[K, KSet] = KSet.newBuilder
