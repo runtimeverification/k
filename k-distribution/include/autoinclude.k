@@ -26,4 +26,5 @@ module AUTO-INCLUDED-MODULE
   imports MINT-IMPL
   imports K-IO
   imports K-LISTK-EXTRAS
+  imports BINDER
 endmodule
