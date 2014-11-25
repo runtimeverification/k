@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -41,19 +40,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     protected boolean proceed(JavaSymbolicObject object) {
-        Set<Variable> set1 = object.variableSet();
-        Set<Variable> set2 = substitution.keySet();
-        if (set1.size() > set2.size()) {
-            Set<Variable> tmp = set1;
-            set1 = set2;
-            set2 = tmp;
-        }
-        for (Variable variable : set1) {
-            if (set2.contains(variable)) {
-                return true;
-            }
-        }
-        return false;
+        return object.canSubstituteAndEvaluate(substitution);
     }
 
     @Override
