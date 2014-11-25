@@ -1,10 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
 module TEST
-  syntax Foo ::= "x"     
-               > "y"   	[someattribute] 
+  syntax Foo ::= "x"
+               > "y"     [someattribute]
                | "z"
-               > left: 
+               > left:
                  "t"    [andanohter]
                | "m"
                > right:

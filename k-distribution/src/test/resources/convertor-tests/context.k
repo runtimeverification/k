@@ -3,11 +3,11 @@
 require "include.k"
 
 module TEST
-	imports INCLUDE
+  imports INCLUDE
 
-	syntax Exp ::= Exp "+" Exp
+  syntax Exp ::= Exp "+" Exp
 
-	context HOLE + _
-	
-	context _ + HOLE
+  context HOLE + _
+
+  context _ + HOLE
 endmodule

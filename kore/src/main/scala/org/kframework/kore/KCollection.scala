@@ -28,7 +28,6 @@ trait KAbstractCollection extends KCollection {
 
   def iterable = delegate
 
-
   override def hashCode() = {
     val prime = 41
     prime + delegate.hashCode
@@ -36,7 +35,7 @@ trait KAbstractCollection extends KCollection {
 }
 
 /**
- * Should be extended by companion objects of classes extending KListLike
+ *  Should be extended by companion objects of classes extending KCollection
  */
 
 trait CanBuildKCollection {
@@ -53,4 +52,3 @@ trait CanBuildKCollection {
       def apply(from: This): mutable.Builder[K, This] = from.newBuilder.asInstanceOf[Builder[K, This]]
     }
 }
-
