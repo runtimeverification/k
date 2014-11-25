@@ -3,7 +3,7 @@ require "builtins/bool.k"
 require "builtins/k-equal.k"
 require "builtins/symbolic-k.k"
 module UNIFICATION
-  imports SYMBOLIC-K
+  imports VARIABLE
   imports BOOL-HOOKS
   imports K-EQUAL-HOOKS
 
