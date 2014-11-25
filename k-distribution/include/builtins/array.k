@@ -2,6 +2,7 @@
 require "int.k"
 
 module ARRAY-SYNTAX
+  imports K-TECHNIQUE
   syntax Array ::= "store"       "(" Array "," Int "," K ")"  [smtlib(store)]
                   | "const-array" "(" Int "," K ")"
 
