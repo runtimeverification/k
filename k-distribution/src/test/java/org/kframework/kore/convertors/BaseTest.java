@@ -13,7 +13,6 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
-import org.kframework.kore.Meta;
 import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
