@@ -287,7 +287,7 @@ analysis of programs that you execute. The simplest of these tools is the
 ability to search the state space of programs.
 
 In order to make use of the search functionality that \krun provides, it is
-first necessary to tune your semantics for nondetermininism by appropriately
+first necessary to tune your semantics for nondeterminism by appropriately
 specifying values for the \verb^--transition^, \verb^--superheat^, and
 \verb^--supercool^ flags to \kompile. For information on how to do this, please
 refer to section \ref{sec:nondeterminism}.
@@ -369,7 +369,7 @@ Finally, you may wish to visualize the search graph created by your search
 command. For this purpose we provide the \verb^--graph^ flag to \krun. The
 \verb^--graph^ flag tells \krun to output the search graph as a set of nodes
 connected by edges corresponding to transition rules in your semantics. By
-spercifying this flag, you will receive a textual representation of this graph
+specifying this flag, you will receive a textual representation of this graph
 for your examination. You will also be given the option to load this graph into
 the \krun debugger in order to view it in more detail by examining specific
 vertices and edges within the graph.  Future versions of the tool also plan to
@@ -403,7 +403,7 @@ time, type the \verb^abort^ command.
 The remaining commands serve the purpose of allowing you to manually explore
 the state space of your program, and to construct a search graph of these
 states. Essentially, you may select any state in your program and tell \krun to
-execute from that state for some specific amount of time. When the debuggerr
+execute from that state for some specific amount of time. When the debugger
 returns control to you, it will have added the states it passed through while
 performing your command to the search graph, and you will be able to view them.
 
@@ -421,14 +421,14 @@ should begin in that state. This is not necessary if your desire is to begin
 executing in the state you had just created. However, if you have immediately
 previously executed a command which generated more than one leaf state, or if
 you wish to execute from a different state than the leaf state you have just
-created, you need to first use this command to select the state inq question.
+created, you need to first use this command to select the state in question.
 
 Finally, \krun allows you to request additional information concerning states
 or edges in the graph. By using the \verb^show-node^ command, you may tell the
 debugger to display the entire configuration for a particular state number. You
 may also use the \verb^show-edge^ command to tell the debugger to display all
 the information it has on a particular edge. Sometimes this is only the
-contents of the configurations at the two endpoitns of the edge. Other times
+contents of the configurations at the two endpoints of the edge. Other times
 this also includes additional information like the label of the rule, or the
 entire rule itself.
 
@@ -682,7 +682,7 @@ which formed the collapsed component are once again available in the displayed s
 The enabling of this button is conditioned by selecting a composed graph element.
 
 \label{Compare}
-The "Compare" button has the purpose of easing the workload to which the user has to be submited to in order to
+The "Compare" button has the purpose of easing the workload to which the user has to be submitted to in order to
 perceive the differences between configurations.
 
 \tab{ 1. Select 2 basic vertices.}
@@ -793,7 +793,7 @@ use this. This is especially useful if your external parser is a variant of
 The second, KRUN\_SORT, contains a sort name designed to provide the external
 parser information about the context in which the term is being parsed. As an
 example of how this is used, if you specify a model-checking formula using the
-\verb^--ltlmc^ flag, it is parsed using yuour external parser with the sort
+\verb^--ltlmc^ flag, it is parsed using your external parser with the sort
 information of ``LtlFormula''.
 
 The third, KRUN\_IS\_NOT\_FILE, tells the external parser that because of the
@@ -855,7 +855,7 @@ Type of data parsed & Default parser & Parser flag & KRUN\_SORT & KRUN\_IS\_NOT\
 \subsubsection{\krun execution backends: \texttt{-{}-backend}}
 By default, once an initial configuration has been computed by \krun{}, the
 actual executing of the rewriting-based semantics is performed by maude.
-However, for certain purposes, maude is less than ideal. For example, maude's
+However, for certain purposes, maude is less than ideal. For example, Maude’s
 implementation of Sets, Bags, and Maps is based on associative-commutative
 matching, which, while incredibly powerful and capable of supporting very
 complex operations on these data types, is highly inefficient. Additionally,
@@ -948,7 +948,7 @@ since the primary speed bottleneck in maude is associative-commutative
 matching, it is not always the case that decreasing the number of times a rule
 rewrites will have an appreciable effect on performance, even if that rule
 executes millions of times. In the absence of AC matching, maude rewrites
-several million rules per second. AC matching, howver, is over 100 times
+several million rules per second. AC matching, however, is over 100 times
 slower.
 */
 
