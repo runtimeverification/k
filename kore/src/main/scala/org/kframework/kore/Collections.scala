@@ -13,4 +13,6 @@ object Collections {
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
+  def stream[T](c: Collection[T]): java.util.stream.Stream[T] = c.stream
+  def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
 }
