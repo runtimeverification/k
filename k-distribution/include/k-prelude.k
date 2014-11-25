@@ -13,7 +13,7 @@ module K-TECHNIQUE
     syntax K
     syntax KList
     syntax KLabel
-	syntax Bag
+    syntax Bag
 endmodule
 
 module K-LISTK-EXTRAS
