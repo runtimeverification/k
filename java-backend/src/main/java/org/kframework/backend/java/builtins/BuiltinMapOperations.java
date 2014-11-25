@@ -39,8 +39,16 @@ public class BuiltinMapOperations {
     }
 
     public static Term lookup(BuiltinMap map, Term key, TermContext context) {
-        MapLookup mapLookup = new MapLookup(map, key, Kind.KITEM);
-        return mapLookup.evaluateLookup();
+        Term value = map.get(key);
+        if (value != null) {
+            return value;
+        } else if (key.isGround() && map.isConcreteCollection() && map.hasOnlyGroundKeys()) {
+            return Bottom.of(Kind.K);
+        } else if (map.isEmpty()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
     }
 
     public static Term update(BuiltinMap map, Term key, Term value, TermContext context) {

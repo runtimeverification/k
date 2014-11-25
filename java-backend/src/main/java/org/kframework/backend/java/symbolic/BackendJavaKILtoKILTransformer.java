@@ -295,11 +295,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return transformJavaBackendSpecificTerm(listLookup);
-    }
-
-    @Override
     public ASTNode transform(ListUpdate listUpdate) {
         return transformJavaBackendSpecificTerm(listUpdate);
     }
@@ -307,11 +302,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
         return transformJavaBackendSpecificTerm(mapKeyChoice);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return transformJavaBackendSpecificTerm(mapLookup);
     }
 
     @Override
@@ -332,11 +322,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(SetElementChoice setElementChoice) {
         return transformJavaBackendSpecificTerm(setElementChoice);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return transformJavaBackendSpecificTerm(setLookup);
     }
 
     @Override

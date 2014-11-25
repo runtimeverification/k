@@ -153,12 +153,6 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup listLookup) {
-        listLookup.list().accept(this);
-        listLookup.key().accept(this);
-    }
-
-    @Override
     public void visit(ListUpdate listUpdate) {
         listUpdate.list().accept(this);
     }
@@ -167,13 +161,6 @@ public class BottomUpVisitor implements Visitor {
     public void visit(MapKeyChoice mapKeyChoice) {
         mapKeyChoice.map().accept(this);
         visit((Term) mapKeyChoice);
-    }
-
-    @Override
-    public void visit(MapLookup mapLookup) {
-        mapLookup.map().accept(this);
-        mapLookup.key().accept(this);
-        visit((Term) mapLookup);
     }
 
     @Override
@@ -213,13 +200,6 @@ public class BottomUpVisitor implements Visitor {
     public void visit(SetElementChoice setElementChoice) {
         setElementChoice.set().accept(this);
         visit((Term) setElementChoice);
-    }
-
-    @Override
-    public void visit(SetLookup setLookup) {
-        setLookup.base().accept(this);
-        setLookup.key().accept(this);
-        visit((Term) setLookup);
     }
 
     @Override

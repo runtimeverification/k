@@ -252,16 +252,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup node) {
-        preVisitor.resetProceed();
-        node.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        node.list().accept(this);
-        node.key().accept(this);
-        node.accept(postVisitor);
-    }
-
-    @Override
     public void visit(ListUpdate node) {
         preVisitor.resetProceed();
         node.accept(preVisitor);
@@ -277,16 +267,6 @@ public class PrePostVisitor implements Visitor {
         if (!preVisitor.isProceed()) return;
         mapKeyChoice.map().accept(this);
         mapKeyChoice.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(MapLookup mapLookup) {
-        preVisitor.resetProceed();
-        mapLookup.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        mapLookup.map().accept(this);
-        mapLookup.key().accept(this);
-        mapLookup.accept(postVisitor);
     }
 
     @Override
@@ -312,16 +292,6 @@ public class PrePostVisitor implements Visitor {
         if (!preVisitor.isProceed()) return;
         setElementChoice.set().accept(this);
         setElementChoice.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(SetLookup setLookup) {
-        preVisitor.resetProceed();
-        setLookup.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        setLookup.base().accept(this);
-        setLookup.key().accept(this);
-        setLookup.accept(postVisitor);
     }
 
     @Override

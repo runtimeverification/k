@@ -21,15 +21,12 @@ import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.ListLookup;
 import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapKeyChoice;
-import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetElementChoice;
-import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -147,11 +144,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return proceed(listLookup) ? super.transform(listLookup) : listLookup;
-    }
-
-    @Override
     public ASTNode transform(ListUpdate listUpdate) {
         return proceed(listUpdate) ? super.transform(listUpdate) : listUpdate;
     }
@@ -159,11 +151,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
         return proceed(mapKeyChoice) ? super.transform(mapKeyChoice) : mapKeyChoice;
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return proceed(mapLookup) ? super.transform(mapLookup) : mapLookup;
     }
 
     @Override
@@ -184,11 +171,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(SetElementChoice setElementChoice) {
         return proceed(setElementChoice) ? super.transform(setElementChoice) : setElementChoice;
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return proceed(setLookup) ? super.transform(setLookup) : setLookup;
     }
 
     @Override

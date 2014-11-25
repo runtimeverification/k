@@ -149,17 +149,7 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup node) {
-        return transformAll(node);
-    }
-
-    @Override
     public ASTNode transform(MapKeyChoice node) {
-        return transformAll(node);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup node) {
         return transformAll(node);
     }
 
@@ -180,11 +170,6 @@ public class CombinedLocalTransformer extends LocalTransformer {
 
     @Override
     public ASTNode transform(SetElementChoice node) {
-        return transformAll(node);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup node) {
         return transformAll(node);
     }
 

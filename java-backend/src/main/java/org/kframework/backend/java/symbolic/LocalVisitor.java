@@ -138,11 +138,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup listLookup) {
-        visit((Term) listLookup);
-    }
-
-    @Override
     public void visit(ListUpdate listUpdate) {
         visit((Term) listUpdate);
     }
@@ -150,11 +145,6 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(MapKeyChoice mapKeyChoice) {
         visit((Term) mapKeyChoice);
-    }
-
-    @Override
-    public void visit(MapLookup mapLookup) {
-        visit((Term) mapLookup);
     }
 
     @Override
@@ -175,11 +165,6 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(SetElementChoice setElementChoice) {
         visit((Term) setElementChoice);
-    }
-
-    @Override
-    public void visit(SetLookup mapLookup) {
-        visit((Term) mapLookup);
     }
 
     @Override

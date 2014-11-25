@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Hole;
@@ -29,14 +30,11 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
 import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapKeyChoice;
-import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetElementChoice;
-import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -487,29 +485,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
-            Kind kind;
-            if (lookup.kind().equals(org.kframework.kil.Sort.KITEM)) {
-                kind = Kind.KITEM;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.K)) {
-                kind = Kind.K;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLIST)) {
-                kind = Kind.KLIST;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLABEL)) {
-                kind = Kind.KLABEL;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG_ITEM)) {
-                kind = Kind.CELL;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG)) {
-                kind = Kind.CELL_COLLECTION;
-            } else {
-                assert false: "unexpected lookup kind";
-                kind = null;
-            }
-
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
                     lookupsBuilder.add(new SetElementChoice(base), key);
                 } else {
-                    lookupsBuilder.add(new SetLookup(base, key), BoolToken.TRUE);
+                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
@@ -517,9 +497,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     if (lookup.choice()) {
                         lookupsBuilder.add(new MapKeyChoice(base), key);
                     }
-                    lookupsBuilder.add(new MapLookup(base, key, kind), value);
+                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), value);
                 } else { // ListLookup
-                    lookupsBuilder.add(new ListLookup(base, key, kind), value);
+                    lookupsBuilder.add(DataStructureLookupOrChoice.Util.of(base, key, TermContext.of(globalContext)), value);
                 }
             }
 

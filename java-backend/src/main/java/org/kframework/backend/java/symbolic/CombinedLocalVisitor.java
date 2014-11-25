@@ -150,17 +150,7 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
-    public void visit(ListLookup node) {
-        visitAll(node);
-    }
-
-    @Override
     public void visit(MapKeyChoice node) {
-        visitAll(node);
-    }
-
-    @Override
-    public void visit(MapLookup node) {
         visitAll(node);
     }
 
@@ -181,11 +171,6 @@ public class CombinedLocalVisitor extends LocalVisitor {
 
     @Override
     public void visit(SetElementChoice node) {
-        visitAll(node);
-    }
-
-    @Override
-    public void visit(SetLookup node) {
         visitAll(node);
     }
 

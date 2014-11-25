@@ -1,7 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -29,6 +31,17 @@ public class BuiltinListOperations {
         BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItem(element);
         return builder.build();
+    }
+
+    public static Term get(BuiltinList list, IntToken index, TermContext context) {
+        Term value = list.get(index.intValue());
+        if (value != null) {
+            return value;
+        } else if (list.isConcreteCollection()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
     }
 
     public static BoolToken in(Term element, BuiltinList list, TermContext context) {

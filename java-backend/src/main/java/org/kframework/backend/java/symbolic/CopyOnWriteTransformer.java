@@ -249,16 +249,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        Term list = (Term) listLookup.list().accept(this);
-        Term key = (Term) listLookup.key().accept(this);
-        if (list != listLookup.list() || key != listLookup.key()) {
-            listLookup = new ListLookup(list, key, listLookup.kind());
-        }
-        return listLookup;
-    }
-
-    @Override
     public ASTNode transform(ListUpdate listUpdate) {
         Term list = (Term) listUpdate.list().accept(this);
         if (list != listUpdate.list()) {
@@ -360,17 +350,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        Term map = (Term) mapLookup.map().accept(this);
-        Term key = (Term) mapLookup.key().accept(this);
-        if (map != mapLookup.map() || key != mapLookup.key()) {
-            mapLookup = new MapLookup(map, key, mapLookup.kind());
-        }
-        return mapLookup;
-
-    }
-
-    @Override
     public ASTNode transform(MapUpdate mapUpdate) {
 //        System.out.println("Map: "+(Term)mapUpdate.map().accept(this));
         Term map = (Term) mapUpdate.map().accept(this);
@@ -467,16 +446,6 @@ public class CopyOnWriteTransformer implements Transformer {
             setElementChoice = new SetElementChoice(set);
         }
         return setElementChoice;
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        Term base = (Term) setLookup.base().accept(this);
-        Term key = (Term) setLookup.key().accept(this);
-        if (base != setLookup.base() || key != setLookup.key()) {
-            setLookup = new SetLookup(base, key);
-        }
-        return setLookup;
     }
 
     @Override

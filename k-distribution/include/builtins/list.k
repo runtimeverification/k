@@ -45,6 +45,8 @@ module LIST
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)   [function, hook(List:ListItem), smtlib(smt_seq_elem)]
 
+  syntax Bool ::= List "[" Int "]"   [function, hook(List:get), klabel(List:get)]
+
   /*@ Check element membership in the given list */
   syntax Bool ::= K "in" List   [function, hook(List:in), klabel('_inList_)]
 

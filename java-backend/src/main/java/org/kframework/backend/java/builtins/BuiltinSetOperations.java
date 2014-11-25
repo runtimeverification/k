@@ -58,6 +58,8 @@ public class BuiltinSetOperations {
             return BoolToken.TRUE;
         } else if (element.isGround() && set.isGround()) {
             return BoolToken.FALSE;
+        } else if (set.isEmpty()) {
+            return BoolToken.FALSE;
         } else {
             return null;
         }

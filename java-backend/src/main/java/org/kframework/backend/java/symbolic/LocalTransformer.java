@@ -136,11 +136,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return transform((Term) listLookup);
-    }
-
-    @Override
     public ASTNode transform(ListUpdate listUpdate) {
         return transform((Term) listUpdate);
     }
@@ -148,11 +143,6 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
         return transform((Term) mapKeyChoice);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return transform((Term) mapLookup);
     }
 
     @Override
@@ -177,11 +167,6 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(SetElementChoice setElementChoice) {
         return transform((Term) setElementChoice);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return transform((Term) setLookup);
     }
 
     @Override
