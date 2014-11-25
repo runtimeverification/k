@@ -70,6 +70,32 @@ public class TestKOREtoKILIT extends BaseTest {
     }
 
     @Test
+    public void testSimpleSyntax() throws IOException {
+        org.kframework.kil.Definition kilDef = parse(
+                new File(ROOT + "simpleSyntax.k").getAbsoluteFile(), "TEST");
+
+        KILtoKORE toKore = new KILtoKORE();
+        org.kframework.kore.outer.Definition koreDef = toKore.apply(kilDef);
+
+        KOREtoKIL toKil = new KOREtoKIL();
+        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+
+        final int[] syntaxct = {0};
+        BasicVisitor syntaxCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Syntax syntax, Void _void) {
+                syntaxct[0]++;
+                return _void;
+            }
+        };
+        syntaxCounter.visitNode(kilDef1);
+
+        assertEquals(1, syntaxct[0]);
+    }
+
+
+
+    @Test
     public void testBubble() {
         String pgm = "module PGM " +
                 "configuration <k> .K </k> " +

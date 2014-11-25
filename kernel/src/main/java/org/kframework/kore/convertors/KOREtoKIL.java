@@ -110,6 +110,10 @@ public class KOREtoKIL {
         }
     }
 
+    private org.kframework.kil.loader.Context dummyContext =
+            new org.kframework.kil.loader.Context();
+
+
     public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
 
@@ -186,6 +190,12 @@ public class KOREtoKIL {
                         new org.kframework.kil.Production(lhs, kilProdItems);
                 org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
                 ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
+            } else if (sentence instanceof SyntaxSort) {
+                SyntaxSort syntaxSort = (SyntaxSort) sentence;
+                ret.add(new org.kframework.kil.Syntax(
+                        new org.kframework.kil.NonTerminal(
+                                org.kframework.kil.Sort.of(syntaxSort.sort().name())),
+                        new ArrayList<>(0)));
             } else if (sentence instanceof Rule) {
                 Rule rule = (Rule) sentence;
                 if (rule.body() instanceof KRewrite) {
@@ -194,7 +204,7 @@ public class KOREtoKIL {
                             convertK(body.left()),
                             convertK(body.right()),
                             convertKBool(rule.requires()),
-                            convertKBool(rule.ensures()), null)); // context is null
+                            convertKBool(rule.ensures()), dummyContext));
                 }
             }
         }
