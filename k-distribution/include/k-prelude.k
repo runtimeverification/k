@@ -14,7 +14,7 @@ module K-TECHNIQUE
     syntax KList
     syntax KLabel
     syntax Bag
-	syntax BagItem
+    syntax BagItem
 endmodule
 
 module K-LISTK-EXTRAS
