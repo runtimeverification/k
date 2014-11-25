@@ -20,6 +20,7 @@ trait Collection[T] {
 
   def iterable: Iterable[T]
 
+  def list: java.util.List[T] = iterable.toList.asJava
   def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
 
   def isEmpty: Boolean = size == 0

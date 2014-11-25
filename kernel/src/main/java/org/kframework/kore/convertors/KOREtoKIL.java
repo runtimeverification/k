@@ -110,9 +110,7 @@ public class KOREtoKIL {
         }
     }
 
-    private org.kframework.kil.loader.Context dummyContext =
-            new org.kframework.kil.loader.Context();
-
+    private org.kframework.kil.loader.Context dummyContext = new org.kframework.kil.loader.Context();
 
     public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
@@ -154,20 +152,21 @@ public class KOREtoKIL {
         for (Sentence sentence : sentences) {
             if (sentence instanceof Import) {
                 Import anImport = (Import) sentence;
-                org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.what());
+                org.kframework.kil.Import kilImport = new org.kframework.kil.Import(
+                        anImport.what());
                 kilImport.setAttributes(convertAttributes(anImport.att()));
                 ret.add(kilImport);
             } else if (sentence instanceof Bubble) {
                 Bubble bubble = (Bubble) sentence;
-                org.kframework.kil.StringSentence kilBubble =
-                        new org.kframework.kil.StringSentence(bubble.contents(), null, bubble.sentenceType(), null);
+                org.kframework.kil.StringSentence kilBubble = new org.kframework.kil.StringSentence(
+                        bubble.contents(), null, bubble.sentenceType(), null);
                 kilBubble.setAttributes(convertAttributes(bubble.att()));
                 ret.add(kilBubble);
             } else if (sentence instanceof ModuleComment) {
                 ModuleComment moduleComment = (ModuleComment) sentence;
                 org.kframework.kil.LiterateModuleComment kilComment =
-                        // TODO: we lost type information
-                        new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
+                // TODO: we lost type information
+                new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
                 kilComment.setAttributes(convertAttributes(moduleComment.att()));
                 ret.add(kilComment);
             } else if (sentence instanceof Configuration) {
@@ -180,30 +179,27 @@ public class KOREtoKIL {
             } else if (sentence instanceof SyntaxProduction) {
                 SyntaxProduction syntaxProduction = (SyntaxProduction) sentence;
                 List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
-                for (ProductionItem it :
-                        scala.collection.JavaConversions.seqAsJavaList(syntaxProduction.items())) {
+                for (ProductionItem it : scala.collection.JavaConversions
+                        .seqAsJavaList(syntaxProduction.items())) {
                     kilProdItems.add(convertProdItem(it));
                 }
-                org.kframework.kil.NonTerminal lhs =
-                        new org.kframework.kil.NonTerminal(convertSort(syntaxProduction.sort()));
-                org.kframework.kil.Production kilProd =
-                        new org.kframework.kil.Production(lhs, kilProdItems);
-                org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
+                org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
+                        convertSort(syntaxProduction.sort()));
+                org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
+                        kilProdItems);
+                org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("",
+                        kilProd);
                 ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
             } else if (sentence instanceof SyntaxSort) {
                 SyntaxSort syntaxSort = (SyntaxSort) sentence;
-                ret.add(new org.kframework.kil.Syntax(
-                        new org.kframework.kil.NonTerminal(
-                                org.kframework.kil.Sort.of(syntaxSort.sort().name())),
-                        new ArrayList<>(0)));
+                ret.add(new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(
+                        org.kframework.kil.Sort.of(syntaxSort.sort().name())), new ArrayList<>(0)));
             } else if (sentence instanceof Rule) {
                 Rule rule = (Rule) sentence;
                 if (rule.body() instanceof KRewrite) {
                     KRewrite body = (KRewrite) rule.body();
-                    ret.add(new org.kframework.kil.Rule(
-                            convertK(body.left()),
-                            convertK(body.right()),
-                            convertKBool(rule.requires()),
+                    ret.add(new org.kframework.kil.Rule(convertK(body.left()), convertK(body
+                            .right()), convertKBool(rule.requires()),
                             convertKBool(rule.ensures()), dummyContext));
                 }
             }
@@ -236,11 +232,12 @@ public class KOREtoKIL {
         stream(attrs.att()).map(a -> {
             KApply attr = (KApply) a;
             KLabel key = attr.klabel();
-//            String value = ((KString) ((ConsKList) ((ConsKList) attr.contents()).tail()).head()).s();
-            return null;
-            // TODO: I think it's not possible to translate attributes back,
-            // we lose a lot of information while translating.
-        });
+            // String value = ((KString) ((ConsKList) ((ConsKList)
+            // attr.contents()).tail()).head()).s();
+                return null;
+                // TODO: I think it's not possible to translate attributes back,
+                // we lose a lot of information while translating.
+            });
         return ret;
     }
 
@@ -250,12 +247,12 @@ public class KOREtoKIL {
             KLabel confLabel = kApply.klabel();
             org.kframework.kil.Cell kilCell = new org.kframework.kil.Cell();
             kilCell.setLabel(confLabel.name());
-            List<K> args = kApply.stream().collect(Collectors.toList());
+            List<K> args = kApply.list();
             if (args.size() == 1) {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
-                kilCell.setContents(new org.kframework.kil.Bag(
-                        args.stream().map(kk -> convertK(kk)).collect(Collectors.toList())));
+                kilCell.setContents(new org.kframework.kil.Bag(args.stream()
+                        .map(kk -> convertK(kk)).collect(Collectors.toList())));
             }
             return kilCell;
         }
@@ -265,24 +262,27 @@ public class KOREtoKIL {
     public org.kframework.kil.Term convertK(K k) {
         if (k instanceof KSequence) {
             KSequence kSequence = (KSequence) k;
-            return new org.kframework.kil.KSequence(kSequence.stream().map(
-                    this::convertK).collect(Collectors.toList()));
+            return new org.kframework.kil.KSequence(kSequence.stream().map(this::convertK)
+                    .collect(Collectors.toList()));
         } else if (k instanceof KApply) {
             KApply kApply = (KApply) k;
             // FIXME: a lot of things that are not a KApply are translated to
-            // KORE KApply, we need to figure out every one of them and handle here
+            // KORE KApply, we need to figure out every one of them and handle
+            // here
             return convertKApply(kApply);
         } else if (k instanceof KBag) {
             KBag kBag = (KBag) k;
-            List<K> bagItems = kBag.stream().collect(Collectors.toList());
+            List<K> bagItems = kBag.list();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
-            // as far as I understand from the translation code, this list should have one element
+            // as far as I understand from the translation code, this list
+            // should have one element
             K bagItem = bagItems.get(0);
             if (bagItem instanceof KBag) {
                 KBag item = (KBag) bagItem;
-                List<K> kbagItems = item.stream().collect(Collectors.toList());
-                kilBagItems.addAll(kbagItems.stream().map(this::convertK).collect(Collectors.toList()));
+                List<K> kbagItems = item.list();
+                kilBagItems.addAll(kbagItems.stream().map(this::convertK)
+                        .collect(Collectors.toList()));
             } else {
                 kilBagItems.add(convertK(bagItem));
             }
@@ -292,8 +292,8 @@ public class KOREtoKIL {
             return convertKVariable((KVariable) k);
         }
         System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-        throw new RuntimeException(
-                "Not implemented: KORE.K(" + k.getClass().getName() + ") -> KIL.Term");
+        throw new RuntimeException("Not implemented: KORE.K(" + k.getClass().getName()
+                + ") -> KIL.Term");
     }
 
     public org.kframework.kil.Variable convertKVariable(KVariable var) {
@@ -303,7 +303,7 @@ public class KOREtoKIL {
             if (k instanceof KApply) {
                 KApply kApply = (KApply) k;
                 if (kApply.klabel().equals(new ConcreteKLabel("sort"))) {
-                    List<K> args = kApply.stream().collect(Collectors.toList());
+                    List<K> args = kApply.list();
                     if (args.size() == 1 && args.get(0) instanceof KToken) {
                         KToken tok = (KToken) args.get(0);
                         sort = org.kframework.kil.Sort.of(tok.s().s());
@@ -327,12 +327,13 @@ public class KOREtoKIL {
 
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
-        List<K> contents = kApply.stream().collect(Collectors.toList());
+        List<K> contents = kApply.list();
         if (label == Hole$.MODULE$) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
-            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()), null, null);
+            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()), null,
+                    null);
         }
     }
 }
