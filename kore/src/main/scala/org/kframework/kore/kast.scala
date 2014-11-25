@@ -45,12 +45,15 @@ trait Sort extends SortToString {
 case class KString(s: String) extends KORE // just a wrapper to mark it
 
 class KList(protected[kore] val delegate: List[K])
-  extends KAbstractCollection with KListMatcher with K with Associative[KList] with KListToString with KORE {
+  extends KAbstractCollection with Indexed[Int, K]
+  with KListMatcher with Associative[KList]
+  with KListToString with KORE {
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]
   override def newBuilder: Builder[K, KList] = KList.newBuilder
 
+  def get(i: Int) = delegate.lift(i)
   def att = Attributes()
 
   //FIXME: when Scala 2.12 is out
@@ -60,10 +63,14 @@ class KList(protected[kore] val delegate: List[K])
 }
 
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection with KORE with KApplyMatcher with KApplyToString with Equals {
+  extends KAbstractCollection with Indexed[Int, K]
+  with KApplyMatcher with Associative[KList]
+  with KApplyToString with KORE with Equals {
   type This = KApply
 
   protected[kore] def delegate: Iterable[K] = klist.delegate
+
+  def get(i: Int) = klist.get(i)
 
   def newBuilder: Builder[K, KApply] = klist.newBuilder mapResult { new KApply(klabel, _, att) }
 

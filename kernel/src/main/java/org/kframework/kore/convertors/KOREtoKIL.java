@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Collections.*;
 
 public class KOREtoKIL {
