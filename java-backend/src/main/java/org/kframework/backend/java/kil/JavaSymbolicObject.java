@@ -73,6 +73,12 @@ public abstract class JavaSymbolicObject extends ASTNode
         return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
     }
 
+    /**
+     * Returns true if a call to {@link org.kframework.backend.java.kil.Term#substituteAndEvaluate(java.util.Map, TermContext)} may simplify this term.
+     */
+    public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+        return (!substitution.isEmpty() && !isGround()) || !isNormal();
+    }
 
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
