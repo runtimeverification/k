@@ -30,6 +30,17 @@ public class TestKOREtoKILIT extends BaseTest {
 
         KOREtoKIL toKil = new KOREtoKIL();
         org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+
+        final int[] configurations = {0};
+        BasicVisitor configurationCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Configuration conf, Void _void) {
+                configurations[0]++;
+                return _void;
+            }
+        };
+        configurationCounter.visitNode(kilDef1);
+        assertEquals(configurations[0], 1);
     }
 
     @Test
@@ -52,14 +63,14 @@ public class TestKOREtoKILIT extends BaseTest {
         org.kframework.kil.Definition kilDef = parseAndTranslateBack(pgm);
 
         List<String> sentences = new ArrayList<>();
-        BasicVisitor variableCollector = new BasicVisitor(null) {
+        BasicVisitor variableCounter = new BasicVisitor(null) {
             @Override
             public Void visit(org.kframework.kil.StringSentence string, Void _void) {
                 sentences.add(string.getContent());
                 return _void;
             }
         };
-        variableCollector.visitNode(kilDef);
+        variableCounter.visitNode(kilDef);
         assertEquals(sentences.size(), 1);
         assertEquals(sentences.get(0), "<k> .K </k>");
     }
@@ -74,14 +85,14 @@ public class TestKOREtoKILIT extends BaseTest {
         org.kframework.kil.Definition kilDef = parseAndTranslateBack(pgm);
 
         final int[] lists = {0};
-        BasicVisitor variableCollector = new BasicVisitor(null) {
+        BasicVisitor variableCounter = new BasicVisitor(null) {
             @Override
             public Void visit(org.kframework.kil.UserList lst, Void _void) {
                 lists[0]++;
                 return _void;
             }
         };
-        variableCollector.visitNode(kilDef);
+        variableCounter.visitNode(kilDef);
         assertEquals(lists[0], 2);
     }
 

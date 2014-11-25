@@ -70,8 +70,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     public KApply apply(Cell body) {
         K x = apply(body.getContents());
         if (x instanceof KBag && !((KBag) x).isEmpty()) {
-            return KApply(KLabel(body.getLabel()), KList(((KBag) x)),
-                    Attributes(cellMarker));
+            return KApply(KLabel(body.getLabel()), KList(((KBag) x)), Attributes(cellMarker));
         } else {
             return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));
         }

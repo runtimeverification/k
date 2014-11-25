@@ -6,6 +6,7 @@ import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -236,7 +237,7 @@ public class KOREtoKIL {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
                 kilCell.setContents(new org.kframework.kil.Bag(
-                        args.stream().map(kk -> convertK(k)).collect(Collectors.toList())));
+                        args.stream().map(kk -> convertK(kk)).collect(Collectors.toList())));
             }
             return kilCell;
         }
@@ -253,7 +254,24 @@ public class KOREtoKIL {
             // FIXME: a lot of things that are not a KApply are translated to
             // KORE KApply, we need to figure out every one of them and handle here
             return convertKApply(kApply);
+        } else if (k instanceof KBag) {
+            KBag kBag = (KBag) k;
+            List<K> bagItems = stream(kBag.delegate()).collect(Collectors.toList());
+            org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
+            List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
+            // as far as I understand from the translation code, this list should have one element
+            K bagItem = bagItems.get(0);
+            if (bagItem instanceof KBag) {
+                KBag item = (KBag) bagItem;
+                List<K> kbagItems = stream(item.delegate()).collect(Collectors.toList());
+                kilBagItems.addAll(kbagItems.stream().map(this::convertK).collect(Collectors.toList()));
+            } else {
+                kilBagItems.add(convertK(bagItem));
+            }
+            kilBag.setContents(kilBagItems);
+            return kilBag;
         }
+        System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
         throw new RuntimeException(
                 "Not implemented: KORE.K(" + k.getClass().getName() + ") -> KIL.Term");
     }
