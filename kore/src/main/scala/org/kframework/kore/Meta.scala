@@ -6,7 +6,7 @@ import KORE._
 import scala.Enumeration
 import org.kframework.kore.outer.Associativity
 
-object Meta extends App {
+object Meta extends (Any => K) {
   type HasProductIterator = { def productIterator: Iterator[Any] }
 
   def apply(o: Any): K = {
@@ -15,7 +15,7 @@ object Meta extends App {
       case o: Set[_] => new KSet(o map apply)
       case o: Iterable[_] => new KSet(o.toSet map apply)
 
-      // Primitives 
+      // Primitives
       case o: Int => KInt(o)
       case o: String => KToken(Sort("String"), o)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
@@ -34,5 +34,28 @@ object Meta extends App {
 
   def processName(arg: String) = {
     arg.replace("org.kframework.kore.outer.", "").replace("org.kframework.kore.", "")
+  }
+}
+
+case class Concrete(includes: Set[String]) extends (K => Any) {
+  import scala.reflect.runtime.{ universe => ru }
+  val m = ru.runtimeMirror(getClass.getClassLoader)
+
+  def apply(o: K) = o match {
+    case KApply(KLabel(l), ks, att) =>
+      val children = ks map { apply _ }
+
+      val moduleS = m.staticModule("org.kframework.kore." + l)
+      val moduleR = m.reflectModule(moduleS)
+      val module = moduleR.instance
+
+      val paramTypes = children map { _.getClass() }
+
+      val constructor = module.getClass.getMethod("apply", paramTypes: _*)
+
+      println(module)
+      println(constructor)
+
+    case KInt(x, _) => x
   }
 }

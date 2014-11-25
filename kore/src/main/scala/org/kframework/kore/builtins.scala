@@ -63,6 +63,7 @@ case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection 
 
 object KSet {
   def newBuilder: Builder[K, KSet] = new SetBuilder[K, Set[K]](Set[K]()) mapResult { new KSet(_) }
+  def apply(ks: K*): KSet = (newBuilder ++= ks).result
 }
 
 object KBag extends Sort with KLabel {

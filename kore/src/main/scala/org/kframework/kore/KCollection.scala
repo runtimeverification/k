@@ -26,7 +26,7 @@ trait KAbstractCollection extends KCollection {
 
   def foreach(f: K => Unit) = delegate.foreach(f)
 
-  def iterator = delegate.iterator
+  def iterable = delegate
 
 
   override def hashCode() = {

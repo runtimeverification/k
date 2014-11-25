@@ -2,8 +2,10 @@
 
 package org.kframework.kore
 
-import scala.collection.mutable.Builder
-import scala.collection.mutable.ListBuffer
+import collection.mutable.Builder
+import collection.mutable.ListBuffer
+import collection.JavaConverters._
+import java.util.stream.StreamSupport
 
 trait Collection[T] {
   type This <: Collection[T]
@@ -14,9 +16,11 @@ trait Collection[T] {
 
   def foreach(f: T => Unit)
 
-  def mkString(separator: String): String = iterator.mkString(separator)
+  def mkString(separator: String): String = iterable.mkString(separator)
 
-  def iterator: Iterator[T]
+  def iterable: Iterable[T]
+
+  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
 
   def isEmpty: Boolean = size == 0
 
