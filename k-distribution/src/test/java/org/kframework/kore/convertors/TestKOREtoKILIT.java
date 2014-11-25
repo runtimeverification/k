@@ -40,7 +40,19 @@ public class TestKOREtoKILIT extends BaseTest {
             }
         };
         configurationCounter.visitNode(kilDef1);
+
+        final int[] imports = {0};
+        BasicVisitor importCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Import _import, Void _void) {
+                imports[0]++;
+                return _void;
+            }
+        };
+        importCounter.visitNode(kilDef1);
+
         assertEquals(configurations[0], 1);
+        assertEquals(imports[0], 1);
     }
 
     @Test
@@ -67,6 +79,17 @@ public class TestKOREtoKILIT extends BaseTest {
 
         KOREtoKIL toKil = new KOREtoKIL();
         org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
+
+        final int[] syntaxct = {0};
+        BasicVisitor syntaxCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Syntax syntax, Void _void) {
+                syntaxct[0]++;
+                return _void;
+            }
+        };
+        syntaxCounter.visitNode(kilDef1);
+        assertEquals(2, syntaxct[0]);
     }
 
     @Test
@@ -92,8 +115,6 @@ public class TestKOREtoKILIT extends BaseTest {
 
         assertEquals(1, syntaxct[0]);
     }
-
-
 
     @Test
     public void testBubble() {

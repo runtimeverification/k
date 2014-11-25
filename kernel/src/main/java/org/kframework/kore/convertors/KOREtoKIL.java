@@ -331,7 +331,14 @@ public class KOREtoKIL {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
-            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()), null,
+            List<K> args = stream(kApply.klist().iterable()).collect(Collectors.toList());
+            List<org.kframework.kil.Term> kilTerms = new ArrayList<>();
+            for (K arg : args) {
+                kilTerms.add(convertK(arg));
+            }
+            return new org.kframework.kil.TermCons(
+                    org.kframework.kil.Sort.of(label.name()),
+                    kilTerms,
                     null);
         }
     }
