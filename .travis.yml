@@ -1,3 +1,4 @@
 language: java
 install: mvn clean verify -DskipTests -DskipKTest
 script: mvn clean verify 
+
