@@ -4,9 +4,11 @@ package org.kframework.kore.convertors;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestKILtoKOREIT extends BaseTest {
 
     @Test
@@ -40,8 +42,6 @@ public class TestKILtoKOREIT extends BaseTest {
         sdfTest();
     }
 
-    // straightforward
-    // again, the contents remains as a bubble
     @Test
     public void context() throws IOException {
         sdfTest();
@@ -57,8 +57,6 @@ public class TestKILtoKOREIT extends BaseTest {
         sdfTest();
     }
 
-    // straightforward, look at the kil Rule class
-    // for now, the rule contents stays as a bubble
     @Test
     public void ruleWithRequiresEnsures() throws IOException {
         sdfTest();
