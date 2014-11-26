@@ -291,16 +291,15 @@ public class KOREtoKIL {
             List<K> bagItems = kBag.list();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
-            // as far as I understand from the translation code, this list
-            // should have one element
-            K bagItem = bagItems.get(0);
-            if (bagItem instanceof KBag) {
-                KBag item = (KBag) bagItem;
-                List<K> kbagItems = item.list();
-                kilBagItems.addAll(kbagItems.stream().map(this::convertK)
-                        .collect(Collectors.toList()));
-            } else {
-                kilBagItems.add(convertK(bagItem));
+            for (K bagItem : bagItems) {
+                if (bagItem instanceof KBag) {
+                    KBag item = (KBag) bagItem;
+                    List<K> kbagItems = item.list();
+                    kilBagItems.addAll(kbagItems.stream().map(this::convertK)
+                            .collect(Collectors.toList()));
+                } else {
+                    kilBagItems.add(convertK(bagItem));
+                }
             }
             kilBag.setContents(kilBagItems);
             return kilBag;
