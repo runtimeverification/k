@@ -208,6 +208,16 @@ public class KOREtoKIL {
                             .right()), convertKBool(rule.requires()),
                             convertKBool(rule.ensures()), dummyContext));
                 }
+            } else if (sentence instanceof Context) {
+                Context context = (Context) sentence;
+                org.kframework.kil.Context kilContext =
+                        new org.kframework.kil.Context();
+                kilContext.setBody(convertK(context.body()));
+                kilContext.setRequires(convertKBool(context.requires()));
+                ret.add(kilContext);
+            } else {
+                throw NOT_IMPLEMENTED("Not implemented: KORE.Sentence(" + sentence.getClass().getName()
+                        + ") -> KIL.Sentence");
             }
         }
 

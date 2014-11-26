@@ -19,6 +19,7 @@ import java.util.List;
 public class TestKOREtoKILIT extends BaseTest {
 
     static final String ROOT = "src/test/resources/reverse-convertor-tests/";
+    static final String TO_KORE_ROOT = "src/test/resources/convertor-tests/";
 
     @Test
     public void testConfiguration() throws IOException {
@@ -157,6 +158,29 @@ public class TestKOREtoKILIT extends BaseTest {
         assertEquals(lists[0], 2);
     }
 
+    @Test
+    public void contextTest() throws IOException {
+        org.kframework.kil.Definition kilDef = kilToKoreTest("context.k");
+
+        final int[] contexts = {0};
+        BasicVisitor contextCounter = new BasicVisitor(null) {
+            @Override
+            public Void visit(org.kframework.kil.Context ctx, Void _void) {
+                contexts[0]++;
+                return _void;
+            }
+        };
+        contextCounter.visitNode(kilDef);
+        assertEquals(contexts[0], 2);
+    }
+
+    public org.kframework.kil.Definition kilToKoreTest(String fileName) throws IOException {
+        Definition kilDef = new KILtoKORE().apply(
+                parse(new File(TO_KORE_ROOT + fileName).getAbsoluteFile(), "TEST"));
+        KOREtoKIL toKil = new KOREtoKIL();
+        return toKil.convertDefinition(kilDef);
+    }
+
     public org.kframework.kil.Definition parseAndTranslateBack(String pgm) {
         org.kframework.kil.Definition kilDef = new org.kframework.kil.Definition();
         kilDef.setItems(Outer.parse(Sources.generatedBy(TestKOREtoKILIT.class), pgm, null));
@@ -164,9 +188,7 @@ public class TestKOREtoKILIT extends BaseTest {
         KILtoKORE toKore = new KILtoKORE();
         Definition koreDef = toKore.apply(kilDef);
         KOREtoKIL toKil = new KOREtoKIL();
-        org.kframework.kil.Definition kilDef1 = toKil.convertDefinition(koreDef);
-
-        return kilDef1;
+        return toKil.convertDefinition(koreDef);
     }
 
     public int countRules(org.kframework.kil.Definition kilDef) {
