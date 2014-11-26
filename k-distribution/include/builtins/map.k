@@ -40,7 +40,10 @@ module MAP
   /*@ Update the first map by adding all key/value pairs in the second map. If a
    key in the first map exists also in the second map, its associated value will
    be overwritten by the value from the second map. */
-  syntax Map ::= updateMap(Map, Map)            [function, hook(Map:updateAll)]
+  syntax Map ::= updateAll(Map, Map)            [function, hook(Map:updateAll)]
+
+  /*@ Update the Map by removing all key/value pairs with the key in the Set. */
+  syntax Map ::= removeAll(Map, Set)            [function, hook(Map:removeAll)]
 
   /*@ Get a Set consisting of all keys in the Map:*/
   syntax Set ::= keys(Map)                      [function, hook(Map:keys)]

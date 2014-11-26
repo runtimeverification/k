@@ -149,22 +149,12 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(MapUpdate node) {
-        return transformAll(node);
-    }
-
-    @Override
     public ASTNode transform(MetaVariable node) {
         return transformAll(node);
     }
 
     @Override
     public ASTNode transform(Rule node) {
-        return transformAll(node);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate node) {
         return transformAll(node);
     }
 

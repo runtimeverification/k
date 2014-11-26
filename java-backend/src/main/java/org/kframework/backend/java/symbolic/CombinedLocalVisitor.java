@@ -150,22 +150,12 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
-    public void visit(MapUpdate node) {
-        visitAll(node);
-    }
-
-    @Override
     public void visit(MetaVariable node) {
         visitAll(node);
     }
 
     @Override
     public void visit(Rule node) {
-        visitAll(node);
-    }
-
-    @Override
-    public void visit(SetUpdate node) {
         visitAll(node);
     }
 

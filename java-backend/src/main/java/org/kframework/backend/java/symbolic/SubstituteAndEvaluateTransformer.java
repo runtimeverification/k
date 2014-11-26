@@ -148,16 +148,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return proceed(listUpdate) ? ((ListUpdate) super.transform(listUpdate)).evaluateUpdate() : listUpdate;
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return proceed(mapUpdate) ? ((MapUpdate) super.transform(mapUpdate)).evaluateUpdate() : mapUpdate;
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return metaVariable;
     }
@@ -165,11 +155,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Rule rule) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return proceed(setUpdate) ? ((SetUpdate) super.transform(setUpdate)).evaluateUpdate() : setUpdate;
     }
 
     @Override

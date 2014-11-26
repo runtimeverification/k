@@ -30,10 +30,7 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListUpdate;
-import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -288,16 +285,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<KList>(CellLabel.of(node.getLabel()), (KList) content);
             } else if (content instanceof BuiltinList) {
                 return new Cell<BuiltinList>(CellLabel.of(node.getLabel()), (BuiltinList) content);
-            } else if (content instanceof ListUpdate) {
-                return new Cell<ListUpdate>(CellLabel.of(node.getLabel()), (ListUpdate) content);
             } else if (content instanceof BuiltinSet) {
                 return new Cell<BuiltinSet>(CellLabel.of(node.getLabel()), (BuiltinSet) content);
-            } else if (content instanceof SetUpdate) {
-                return new Cell<SetUpdate>(CellLabel.of(node.getLabel()), (SetUpdate) content);
             } else if (content instanceof BuiltinMap) {
                 return new Cell<BuiltinMap>(CellLabel.of(node.getLabel()), (BuiltinMap) content);
-            } else if (content instanceof MapUpdate) {
-                return new Cell<MapUpdate>(CellLabel.of(node.getLabel()), (MapUpdate) content);
             } else if (content instanceof Variable) {
                 return new Cell<Term>(CellLabel.of(node.getLabel()), content);
             } else if (content instanceof KItemProjection) {
@@ -379,7 +370,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.ListUpdate node, Void _)  {
         Variable base = (Variable) this.visitNode(node.base());
 
-        return new ListUpdate(base, node.removeLeft().size(), node.removeRight().size());
+        return DataStructures.listRange(
+                base,
+                node.removeLeft().size(),
+                node.removeRight().size(),
+                TermContext.of(globalContext));
     }
 
     @Override
@@ -391,7 +386,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             removeSet.add((Term) this.visitNode(term));
         }
 
-        return new SetUpdate(set, removeSet);
+        return DataStructures.setDifference(set, removeSet, TermContext.of(globalContext));
     }
 
      @Override
@@ -411,7 +406,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             updateMap.put(key, value);
         }
 
-        return new MapUpdate(map, removeSet, updateMap);
+        return DataStructures.mapUpdateAll(
+                DataStructures.mapRemoveAll(map, removeSet, TermContext.of(globalContext)),
+                updateMap,
+                TermContext.of(globalContext));
     }
 
     @Override

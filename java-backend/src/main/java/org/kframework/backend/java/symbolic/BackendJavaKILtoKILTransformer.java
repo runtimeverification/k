@@ -295,16 +295,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return transformJavaBackendSpecificTerm(listUpdate);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transformJavaBackendSpecificTerm(mapUpdate);
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
     }
@@ -312,11 +302,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(Rule rule) {
         throw new UnsupportedOperationException("Not implemented, yet");
-    }
-
-   @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transformJavaBackendSpecificTerm(setUpdate);
     }
 
     @Override

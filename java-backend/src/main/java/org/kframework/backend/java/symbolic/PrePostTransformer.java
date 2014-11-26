@@ -245,18 +245,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        ASTNode astNode = listUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
-        listUpdate = (ListUpdate) astNode;
-        listUpdate = (ListUpdate) super.transform(listUpdate);
-        return listUpdate.accept(postTransformer);
-    }
-
-    @Override
     public ASTNode transform(BuiltinList builtinList) {
         ASTNode astNode = builtinList.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
@@ -287,30 +275,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         assert astNode instanceof BuiltinSet : "preTransformer should not modify type";
         builtinSet = (BuiltinSet) astNode;
         return ((JavaSymbolicObject) super.transform(builtinSet)).accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        ASTNode astNode = mapUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof MapUpdate : "preTransformer should not modify type";
-        mapUpdate = (MapUpdate) astNode;
-        mapUpdate = (MapUpdate) super.transform(mapUpdate);
-        return mapUpdate.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        ASTNode astNode = setUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof SetUpdate : "preTransformer should not modify type";
-        setUpdate = (SetUpdate) astNode;
-        setUpdate = (SetUpdate) super.transform(setUpdate);
-        return setUpdate.accept(postTransformer);
     }
 
     @Override

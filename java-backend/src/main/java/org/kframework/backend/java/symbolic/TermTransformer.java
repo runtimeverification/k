@@ -110,16 +110,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transformTerm((Term) super.transform(mapUpdate));
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transformTerm((Term) super.transform(setUpdate));
-    }
-
-    @Override
     public ASTNode transform(StringToken stringToken) {
         return transformTerm((Term) super.transform(stringToken));
     }

@@ -1,6 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.builtins.IntToken;
+
+import java.util.Map;
+import java.util.Set;
+
 public interface DataStructures {
 
     static KItem lookup(Term base, Term key, TermContext context) {
@@ -60,6 +65,56 @@ public interface DataStructures {
             return null;
         }
         return KItem.of(klabel, KList.singleton(base), context);
+    }
+
+    static Term listRange(Term base, int removeLeft, int removeRight, TermContext context) {
+        if (removeLeft == 0 && removeRight == 0) {
+            return base;
+        }
+
+        return KItem.of(
+                KLabelConstant.of("List:range", context.definition().context()),
+                KList.concatenate(base, IntToken.of(removeLeft), IntToken.of(removeRight)),
+                context);
+    }
+
+    static Term mapRemoveAll(Term base, Set<Term> removeSet, TermContext context) {
+        if (removeSet.isEmpty()) {
+            return base;
+        }
+
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.addAll(removeSet);
+        return KItem.of(
+                KLabelConstant.of("'removeAll", context.definition().context()),
+                KList.concatenate(base, builder.build()),
+                context);
+    }
+
+    static Term mapUpdateAll(Term base, Map<Term, Term> updateMap, TermContext context) {
+        if (updateMap.isEmpty()) {
+            return base;
+        }
+
+        BuiltinMap.Builder builder = new BuiltinMap.Builder();
+        builder.putAll(updateMap);
+        return KItem.of(
+                KLabelConstant.of("'updateAll", context.definition().context()),
+                KList.concatenate(base, builder.build()),
+                context);
+    }
+
+    static Term setDifference(Term base, Set<Term> removeSet, TermContext context) {
+        if (removeSet.isEmpty()) {
+            return base;
+        }
+
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.addAll(removeSet);
+        return KItem.of(
+                KLabelConstant.of("'_-Set_", context.definition().context()),
+                KList.concatenate(base, builder.build()),
+                context);
     }
 
 }

@@ -136,16 +136,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return transform((Term) listUpdate);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transform((Term) mapUpdate);
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
     }
@@ -157,11 +147,6 @@ public class LocalTransformer implements Transformer {
 
     protected ASTNode transform(JavaSymbolicObject object) {
         return object;
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transform((Term) setUpdate);
     }
 
     @Override

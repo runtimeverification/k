@@ -4,12 +4,16 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
 import com.google.common.collect.Sets;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -46,14 +50,32 @@ public class BuiltinSetOperations {
         return builder.build();
     }
 
-    public static Term difference(BuiltinSet set1, BuiltinSet set2, TermContext context) {
-        if (!set1.isGround() || !set2.isGround()) {
+    public static Term difference(Term set, BuiltinSet removeBuiltinSet, TermContext context) {
+        if (!removeBuiltinSet.isConcreteCollection()) {
             return null;
         }
 
+        if (removeBuiltinSet.isEmpty()) {
+            return set;
+        }
+
+        if (!(set instanceof BuiltinSet)) {
+            return null;
+        }
+        BuiltinSet builtinSet = (BuiltinSet) set;
+
         BuiltinSet.Builder builder = BuiltinSet.builder();
-        builder.addAll(Sets.difference(set1.elements(), set2.elements()));
-        return builder.build();
+        builder.concatenate(builtinSet);
+
+        Set<Term> pendingRemoveSet = removeBuiltinSet.elements().stream()
+                .filter(element -> !builder.remove(element))
+                .collect(Collectors.toSet());
+
+        if (!builtinSet.isConcreteCollection() && !pendingRemoveSet.isEmpty()) {
+            return DataStructures.setDifference(builder.build(), pendingRemoveSet, context);
+        } else {
+            return builder.build();
+        }
     }
 
     public static BoolToken in(Term element, BuiltinSet set, TermContext context) {

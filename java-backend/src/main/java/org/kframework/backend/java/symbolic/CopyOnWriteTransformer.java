@@ -249,15 +249,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        Term list = (Term) listUpdate.list().accept(this);
-        if (list != listUpdate.list()) {
-            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
-        }
-        return listUpdate;
-    }
-
-    @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
         BuiltinList.Builder builder = BuiltinList.builder();
@@ -338,96 +329,6 @@ public class CopyOnWriteTransformer implements Transformer {
             builder.concatenate(transformedTerm);
         }
         return changed ? builder.build() : builtinSet;
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-//        System.out.println("Map: "+(Term)mapUpdate.map().accept(this));
-        Term map = (Term) mapUpdate.map().accept(this);
-        java.util.Set<Term> removeSet = null;
-        for(Term key : mapUpdate.removeSet()) {
-            Term transformedKey = (Term) key.accept(this);
-
-            if (removeSet == null && transformedKey != key) {
-                removeSet = new HashSet<Term>(mapUpdate.removeSet().size());
-                for(Term copyKey : mapUpdate.removeSet()) {
-                    if (copyKey == key) {
-                        break;
-                    }
-                    removeSet.add(copyKey);
-                }
-            }
-
-            if (removeSet != null) {
-                removeSet.add(transformedKey);
-            }
-        }
-        if (removeSet == null) {
-            removeSet = mapUpdate.removeSet();
-        }
-
-        Map<Term, Term> updateMap = null;
-        for(java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
-            Term key = (Term) entry.getKey().accept(this);
-            Term value = (Term) entry.getValue().accept(this);
-
-            if (updateMap == null && (key != entry.getKey() || value != entry.getValue())) {
-                updateMap = new HashMap<Term, Term>(mapUpdate.updateMap().size());
-                for(Map.Entry<Term, Term> copyEntry : mapUpdate.updateMap().entrySet()) {
-                    if (copyEntry.equals(entry)) {
-                        break;
-                    }
-                    updateMap.put(copyEntry.getKey(), copyEntry.getValue());
-                }
-            }
-
-            if (updateMap != null) {
-                updateMap.put(key, value);
-            }
-        }
-        if (updateMap == null) {
-            updateMap = mapUpdate.updateMap();
-        }
-
-        if (map != mapUpdate.map() || removeSet != mapUpdate.removeSet()
-                || mapUpdate.updateMap() != updateMap) {
-            mapUpdate = new MapUpdate(map, removeSet, updateMap);
-        }
-
-        return mapUpdate;
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        Term set = (Term) setUpdate.base().accept(this);
-
-        java.util.Set<Term> removeSet = null;
-        for(Term key : setUpdate.removeSet()) {
-            Term transformedKey = (Term) key.accept(this);
-
-            if (removeSet == null && transformedKey != key) {
-                removeSet = new HashSet<Term>(setUpdate.removeSet().size());
-                for(Term copyKey : setUpdate.removeSet()) {
-                    if (copyKey == key) {
-                        break;
-                    }
-                    removeSet.add(copyKey);
-                }
-            }
-
-            if (removeSet != null) {
-                removeSet.add(transformedKey);
-            }
-        }
-        if (removeSet == null) {
-            removeSet = setUpdate.removeSet();
-        }
-
-        if (set != setUpdate.base() || removeSet != setUpdate.removeSet()) {
-            setUpdate = new SetUpdate(set, removeSet);
-        }
-
-        return setUpdate;
     }
 
     @Override

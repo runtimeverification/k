@@ -252,43 +252,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListUpdate node) {
-        preVisitor.resetProceed();
-        node.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        node.list().accept(this);
-        node.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(MapUpdate mapUpdate) {
-        preVisitor.resetProceed();
-        mapUpdate.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        mapUpdate.map().accept(this);
-        for (Term key : mapUpdate.removeSet()) {
-            key.accept(this);
-        }
-        for (Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
-            entry.getKey().accept(this);
-            entry.getValue().accept(this);
-        }
-        mapUpdate.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(SetUpdate setUpdate) {
-        preVisitor.resetProceed();
-        setUpdate.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        setUpdate.base().accept(this);
-        for (Term key : setUpdate.removeSet()) {
-            key.accept(this);
-        }
-        setUpdate.accept(postVisitor);
-    }
-
-    @Override
     public void visit(MetaVariable metaVariable) {
         visit((Token) metaVariable);
     }
