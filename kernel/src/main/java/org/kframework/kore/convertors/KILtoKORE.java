@@ -30,6 +30,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kore.Attributes;
 import org.kframework.kore.outer.*;
 
 import static org.kframework.kore.Collections.*;
@@ -200,8 +201,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     // KString(Integer.toString(priorityBlockId++)));
                     // attrs = attrs.add(Attributes(pbIndicator));
 
-                    org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(sort,
-                            immutable(items), attrs);
+                    org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(
+                            sort,
+                            immutable(items),
+                            attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                    "" + System.identityHashCode(p)));
 
                     res.add(prod);
                 }
@@ -228,16 +232,21 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 
+        String kilProductionId = "" + System.identityHashCode(p);
+
         // lst ::= lst sep lst
+        Attributes attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                kilProductionId);
         prod1 = SyntaxProduction(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrs);
+                attrsWithKilProductionId);
 
         // lst ::= elem
-        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrs);
+        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
 
         // lst ::= .UserList
-        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())), attrs);
+        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId);
 
         res.add(prod1);
         res.add(prod2);

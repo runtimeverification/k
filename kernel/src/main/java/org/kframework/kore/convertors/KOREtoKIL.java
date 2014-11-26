@@ -95,12 +95,13 @@ public class KOREtoKIL {
                     elem = (NonTerminal) prod3Items.get(0);
                 }
 
-                userLists.add(makeUserList(listType.s(), elem, sep));
+                userLists.add(makeUserList(listType.s(), elem, sep,
+                        prods.get(0).att().getString(KILtoInnerKORE.PRODUCTION_ID).get()));
             }
         }
 
         private org.kframework.kil.Syntax makeUserList(String listType, NonTerminal elem,
-                Terminal sep) {
+                Terminal sep, String kilProductionId) {
             org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
@@ -113,12 +114,16 @@ public class KOREtoKIL {
             org.kframework.kil.Production prod = new org.kframework.kil.Production(
                     new org.kframework.kil.NonTerminal(listSort), prodItems);
 
+            kilProductionIdToProductionInstance.put(kilProductionId, prod);
+
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
         }
     }
 
     private org.kframework.kil.loader.Context dummyContext = new org.kframework.kil.loader.Context();
+
+    Map<String, org.kframework.kil.Production> kilProductionIdToProductionInstance = new HashMap<>();
 
     public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
@@ -195,6 +200,10 @@ public class KOREtoKIL {
                         convertSort(syntaxProduction.sort()));
                 org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
                         kilProdItems);
+
+                kilProductionIdToProductionInstance.put(
+                        sentence.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
+
                 org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("",
                         kilProd);
                 ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
@@ -212,14 +221,13 @@ public class KOREtoKIL {
                 }
             } else if (sentence instanceof Context) {
                 Context context = (Context) sentence;
-                org.kframework.kil.Context kilContext =
-                        new org.kframework.kil.Context();
+                org.kframework.kil.Context kilContext = new org.kframework.kil.Context();
                 kilContext.setBody(convertK(context.body()));
                 kilContext.setRequires(convertKBool(context.requires()));
                 ret.add(kilContext);
             } else {
-                throw NOT_IMPLEMENTED("Not implemented: KORE.Sentence(" + sentence.getClass().getName()
-                        + ") -> KIL.Sentence");
+                throw NOT_IMPLEMENTED("Not implemented: KORE.Sentence("
+                        + sentence.getClass().getName() + ") -> KIL.Sentence");
             }
         }
 

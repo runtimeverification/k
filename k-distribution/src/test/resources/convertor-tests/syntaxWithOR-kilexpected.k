@@ -2,8 +2,9 @@
 
 DEF: null -> null
 module TEST
-  syntax Exp ::=
+  syntax Foo ::= "y"
 
-  rule A:Exp => A:Exp
+  syntax Foo ::= "x"
+
 
 endmodule
