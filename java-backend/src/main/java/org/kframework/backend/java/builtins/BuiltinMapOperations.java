@@ -9,7 +9,6 @@ import com.google.common.collect.Multisets;
 import org.kframework.backend.java.kil.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -40,13 +39,31 @@ public class BuiltinMapOperations {
         return builder.build();
     }
 
-    public static Term lookup(BuiltinMap map, Term key, TermContext context) {
-        Term value = map.get(key);
+    public static Term lookup(Term map, Term key, TermContext context) {
+        while (DataStructures.isMapUpdate(map)) {
+            Term value = builtinMapLookup(DataStructures.getMapUpdateMap(map), key);
+            if (!(value instanceof Bottom)) {
+                return value;
+            }
+            map = DataStructures.getMapUpdateBase(map);
+        }
+
+        return builtinMapLookup(map, key);
+    }
+
+    public static Term builtinMapLookup(Term map, Term key) {
+        if (!(map instanceof BuiltinMap)) {
+            return null;
+        }
+        BuiltinMap builtinMap = (BuiltinMap) map;
+
+
+        Term value = builtinMap.get(key);
         if (value != null) {
             return value;
-        } else if (key.isGround() && map.isConcreteCollection() && map.hasOnlyGroundKeys()) {
+        } else if (key.isGround() && builtinMap.isConcreteCollection() && builtinMap.hasOnlyGroundKeys()) {
             return Bottom.of(Kind.K);
-        } else if (map.isEmpty()) {
+        } else if (builtinMap.isEmpty()) {
             return Bottom.of(Kind.K);
         } else {
             return null;

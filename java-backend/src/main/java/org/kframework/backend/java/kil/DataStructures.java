@@ -38,7 +38,7 @@ public interface DataStructures {
                 && ((KList) ((KItem) term).kList()).concreteSize() == 2;
     }
 
-    static Term getBase(Term term) {
+    static Term getLookupBase(Term term) {
         assert isLookup(term);
         return !term.sort().equals(Sort.SET) ?
                ((KList) (((KItem) term).kList())).get(0) :
@@ -46,7 +46,7 @@ public interface DataStructures {
 
     }
 
-    static Term getKey(Term term) {
+    static Term getLookupKey(Term term) {
         assert isLookup(term);
         return !term.sort().equals(Sort.SET) ?
                ((KList) (((KItem) term).kList())).get(1) :
@@ -115,6 +115,26 @@ public interface DataStructures {
                 KLabelConstant.of("'_-Set_", context.definition().context()),
                 KList.concatenate(base, builder.build()),
                 context);
+    }
+
+    static boolean isMapUpdate(Term term) {
+        return term instanceof KItem
+                && ((KItem) term).kLabel() instanceof KLabelConstant
+                && ((KItem) term).kLabel().toString().equals("'updateMap")
+                && ((KItem) term).kList() instanceof KList
+                && ((KList) ((KItem) term).kList()).isConcreteCollection()
+                && ((KList) ((KItem) term).kList()).concreteSize() == 2;
+    }
+
+    static Term getMapUpdateBase(Term term) {
+        assert isMapUpdate(term);
+        return ((KList) (((KItem) term).kList())).get(0);
+
+    }
+
+    static Term getMapUpdateMap(Term term) {
+        assert isMapUpdate(term);
+        return ((KList) (((KItem) term).kList())).get(1);
     }
 
 }

@@ -240,9 +240,9 @@ public class Rule extends JavaSymbolicObject {
              * structure lookup operations under read-write cells */
             for (Equality eq : lookups.equalities()) {
                 if (DataStructures.isLookup(eq.leftHandSide())) {
-                    if (!lhsOfReadOnlyCell.contains(DataStructures.getBase(eq.leftHandSide()))) {
+                    if (!lhsOfReadOnlyCell.contains(DataStructures.getLookupBase(eq.leftHandSide()))) {
                         // do not double count base variable again
-                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getKey(eq.leftHandSide())));
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getLookupKey(eq.leftHandSide())));
                         lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(eq.rightHandSide()));
                     }
                 }
@@ -251,7 +251,7 @@ public class Rule extends JavaSymbolicObject {
             lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(leftHandSide));
             for (Equality eq : lookups.equalities()) {
                 if (DataStructures.isLookup(eq.leftHandSide())) {
-                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getKey(eq.leftHandSide())));
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getLookupKey(eq.leftHandSide())));
                     lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(eq.rightHandSide()));
                 }
             }
