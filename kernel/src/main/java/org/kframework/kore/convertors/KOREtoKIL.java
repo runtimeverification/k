@@ -306,6 +306,8 @@ public class KOREtoKIL {
         org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
                 kilProdItems);
 
+        kilProd.setAttributes(convertAttributes(syntaxProduction.att()));
+
         kilProductionIdToProductionInstance.put(
                 syntaxProduction.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
 

@@ -7,7 +7,7 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
   type This = Attributes
 
   def contains(label: String): Boolean = (att find {
-    case KApply(KLabel(label), _, _) => true
+    case KApply(KLabel(`label`), _, _) => true
     case _ => false
   }) != None
 
@@ -46,11 +46,15 @@ trait AttributesToString {
 
   override def toString() =
     "[" +
-    (this map[String] {
-      case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
-      case x => x.toString
-    }).sorted.mkString(" ") +
-    "]"
+      (this.filteredAtt map {
+        case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
+        case x => x.toString
+      }).toList.sorted.mkString(" ") +
+      "]"
 
-  def postfixString = if (att.isEmpty) "" else (" " + toString())
+  def postfixString = {
+    if (filteredAtt.isEmpty) "" else (" " + toString())
+  }
+
+  lazy val filteredAtt: Set[K] = att filter { case KApply(KLabel("productionID"), _, _) => false; case _ => true } // TODO: remove along with KIL to KORE to KIL convertors
 }

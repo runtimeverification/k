@@ -13,5 +13,5 @@ endmodule
 
 module TEST
   imports INCLUDE
-  configuration <t><k>.K<k> <env><'.Map sort="Map"><'.Map><env> <stack>.Bag<stack><t> ensures true
+  configuration <t><k>.K</k> <env>'.Map() [sort(Map)]</env> <stack>.Bag</stack></t> ensures true
 endmodule
