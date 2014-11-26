@@ -42,14 +42,14 @@ public abstract class BaseTest extends SDFCompilerTest {
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.apply(def);
-        org.kframework.kore.outer.Definition koreDefintion = converted;
+        org.kframework.kore.outer.Definition koreDefinition = converted;
 
         if (outputFile.isFile()) {
             String expectedOutput = FileUtils.readFileToString(outputFile);
-            assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));
+            assertEquals(clean(expectedOutput), clean(koreDefinition.toString()));
         } else {
             String definitionText = FileUtils.readFileToString(definitionFile);
-            assertEquals(clean(definitionText), clean(koreDefintion.toString()));
+            assertEquals(clean(definitionText), clean(koreDefinition.toString()));
         }
     }
 
