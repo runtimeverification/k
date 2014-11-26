@@ -1,5 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
+DEF: null -> null
 module TEST
-  configuration <k> .K </k>
+  syntax Bar ::= "2"
+
+  syntax Foo ::= "1"
+
+
 endmodule

@@ -2,9 +2,9 @@
 
 DEF: null -> null
 module TEST
-  syntax Foo ::= "y"
-
   syntax Foo ::= "x"
+
+  syntax Foo ::= "y"
 
 
 endmodule

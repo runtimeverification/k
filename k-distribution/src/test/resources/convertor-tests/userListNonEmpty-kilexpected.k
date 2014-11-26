@@ -2,8 +2,9 @@
 
 DEF: null -> null
 module TEST
-  rule A:Exp => A:Exp
-  syntax Exp ::=
+  syntax Stx ::= "1"
+
+  syntax Stx ::= NeList{Stx,","}
 
 
 endmodule

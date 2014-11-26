@@ -514,12 +514,10 @@ public class KOREtoKIL {
             for (K arg : args) {
                 kilTerms.add(convertK(arg));
             }
-            System.out.println(kApply);
             String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
 
             Production production = kilProductionIdToProductionInstance.get(kilProductionId);
             if (production == null) {
-                System.out.println(kilProductionIdToProductionInstance);
                 throw new RuntimeException("Could not find production for: " + kApply);
             }
 
