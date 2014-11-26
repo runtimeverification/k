@@ -31,6 +31,7 @@ object Constructors {
 
   def Terminal(s: String) = outer.Terminal(s)
   def NonTerminal(sort: Sort) = outer.NonTerminal(sort)
+  def RegexTerminal(regexString: String) = outer.RegexTerminal(regexString)
 
   def Tag(s: String) = outer.Tag(s)
 

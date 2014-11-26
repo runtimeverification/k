@@ -247,12 +247,15 @@ public class DefinitionLoader {
         CacheLookupFilter clf = new CacheLookupFilter(context, cachedDef);
         int cachedSentences = 0;
         ParseRulesFilter prf = null;
-        def = (Definition) clf.visitNode(def);
-        cachedSentences = clf.getKept().size();
-        prf = new ParseRulesFilter(context, clf.getKept());
-        def = (Definition) prf.visitNode(def);
-        // save definition
-        loader.saveOrDie(cache, clf.getKept());
+        try {
+            def = (Definition) clf.visitNode(def);
+            cachedSentences = clf.getKept().size();
+            prf = new ParseRulesFilter(context, clf.getKept());
+            def = (Definition) prf.visitNode(def);
+        } finally {
+            // save definition
+            loader.saveOrDie(cache, clf.getKept());
+        }
 
         // really important to do disambiguation after we save the cache to disk because
         // the objects in the sentences are mutable, and we risk altering them and miss

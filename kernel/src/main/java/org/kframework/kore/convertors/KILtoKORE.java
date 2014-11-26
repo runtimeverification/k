@@ -182,12 +182,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
-                            items.add(new org.kframework.kore.outer.NonTerminal(
-                                    apply(((NonTerminal) it).getSort())));
+                            items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
                             throw new RuntimeException("Lists should have applyed before.");
                         } else if (it instanceof Lexical) {
-                            // TODO: not sure what to do
+                            items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
