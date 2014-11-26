@@ -143,7 +143,7 @@ public class KOREtoKIL {
 
         List<Sentence> sentences = scala.collection.JavaConversions.seqAsJavaList(module
                 .sentences().toList());
-        mod = mod.setModuleItems(convertSentences(sentences));
+        mod = mod.addModuleItems(convertSentences(sentences));
 
         mod.setAttributes(convertAttributes(module.att()));
         return mod;

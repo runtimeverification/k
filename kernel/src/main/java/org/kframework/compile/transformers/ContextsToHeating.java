@@ -25,7 +25,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Module node, Void _)  {
-        return ((Module)super.visit(node, _)).setModuleItems(rules);
+        return ((Module)super.visit(node, _)).addModuleItems(rules);
     }
 
     /* assumes term has exactly one rewrite and returns the list

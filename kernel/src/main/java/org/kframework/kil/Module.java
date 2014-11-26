@@ -111,7 +111,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return visitor.complete(this, visitor.visit(this, p));
     }
 
-    public Module setModuleItems(List<ModuleItem> rules) {
+    public Module addModuleItems(List<ModuleItem> rules) {
         Module result = new Module(this);
         List<ModuleItem> items = new ArrayList<>(this.items);
         items.addAll(rules);
