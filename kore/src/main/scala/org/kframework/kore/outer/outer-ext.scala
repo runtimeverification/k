@@ -22,7 +22,7 @@ case class Configuration(
 
       "<" + label.name + attsString + ">" +
         klist.map(xmlify _).mkString(" ") +
-        "<" + label.name + ">"
+        "</" + label.name + ">"
     }
     case KBag(klist) =>
       if (klist.isEmpty)

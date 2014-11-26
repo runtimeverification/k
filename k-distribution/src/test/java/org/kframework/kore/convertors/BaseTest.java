@@ -27,15 +27,15 @@ public abstract class BaseTest extends SDFCompilerTest {
         super();
     }
 
-    protected void outerTest() throws IOException {
-        standardTest(this::parseUsingOuter);
+    protected void outerKILtoKORETest() throws IOException {
+        testKILtoKORE(this::parseUsingOuter);
     }
 
-    protected void sdfTest() throws IOException {
-        standardTest(this::parseUsingSDF);
+    protected void sdfKILtoKORETest() throws IOException {
+        testKILtoKORE(this::parseUsingSDF);
     }
 
-    private void standardTest(Function<File, Definition> parse) throws IOException {
+    private void testKILtoKORE(Function<File, Definition> parse) throws IOException {
         File definitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
 
@@ -43,14 +43,41 @@ public abstract class BaseTest extends SDFCompilerTest {
 
         KILtoKORE convertor = new KILtoKORE();
         org.kframework.kore.outer.Definition converted = convertor.apply(def);
-        org.kframework.kore.outer.Definition koreDefintion = converted;
+        org.kframework.kore.outer.Definition koreDefinition = converted;
 
         if (outputFile.isFile()) {
             String expectedOutput = FileUtils.readFileToString(outputFile);
-            assertEquals(clean(expectedOutput), clean(koreDefintion.toString()));
+            assertEquals(clean(expectedOutput), clean(koreDefinition.toString()));
         } else {
             String definitionText = FileUtils.readFileToString(definitionFile);
-            assertEquals(clean(definitionText), clean(koreDefintion.toString()));
+            assertEquals(clean(definitionText), clean(koreDefinition.toString()));
+        }
+    }
+
+    protected void outerKILtoKOREtoKILTest() throws IOException {
+        testKILtoKOREtoKIL(this::parseUsingOuter);
+    }
+
+    protected void sdfKILtoKOREtoKILTest() throws IOException {
+        testKILtoKOREtoKIL(this::parseUsingSDF);
+    }
+
+    private void testKILtoKOREtoKIL(Function<File, Definition> parse) throws IOException {
+        File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
+        File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName() + "-kilexpected.k");
+
+        Definition kilDefinition = parse.apply(kilDefinitionFile);
+
+        KILtoKORE kilToKore = new KILtoKORE();
+        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(kilDefinition);
+        Definition kilDefinitionTranslatedBack = new KOREtoKIL().convertDefinition(koreDef);
+
+        if (kilExpectedDefinitionFile.isFile()) {
+            String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile);
+            assertEquals(clean(expectedOutput), clean(kilDefinitionTranslatedBack.toString()));
+        } else {
+            String definitionText = FileUtils.readFileToString(kilDefinitionFile);
+            assertEquals(clean(definitionText), clean(kilDefinitionTranslatedBack.toString()));
         }
     }
 
@@ -70,13 +97,13 @@ public abstract class BaseTest extends SDFCompilerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKOREIT.class), definitionText, null));
+        def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
         return def;
     }
 
     private String clean(String definitionText) {
         return definitionText.replace("// Copyright (c) 2014 K Team. All Rights Reserved.", "")
-                .trim();
+                .replaceAll(" *\n", "\n").trim();
     }
 
 }

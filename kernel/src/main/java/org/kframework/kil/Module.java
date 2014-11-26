@@ -6,6 +6,7 @@ import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,7 +61,16 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     @Override
     public String toString() {
         String content = "";
-        for (ModuleItem i : items)
+        List<ModuleItem> sortedItems = new ArrayList<ModuleItem>(items);
+
+        sortedItems.sort(new Comparator<ModuleItem>() {
+            @Override
+            public int compare(ModuleItem o1, ModuleItem o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+
+        for (ModuleItem i : sortedItems)
             content += i + " \n";
 
         return "module " + name + "\n" + content + "\nendmodule";
@@ -111,7 +121,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return visitor.complete(this, visitor.visit(this, p));
     }
 
-    public Module setModuleItems(List<ModuleItem> rules) {
+    public Module addModuleItems(List<ModuleItem> rules) {
         Module result = new Module(this);
         List<ModuleItem> items = new ArrayList<>(this.items);
         items.addAll(rules);

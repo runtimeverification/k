@@ -50,7 +50,7 @@ public class KRunProgram {
             stringArgs.addAll(arg.toStringList());
         }
         String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
-        if (OS.current() == OS.WIN) {
+        if (OS.current() == OS.WINDOWS) {
             for (int i = 0; i < argsArr.length; i++) {
                 argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
             }

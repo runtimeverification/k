@@ -1,5 +1,7 @@
 package org.kframework.kore.outer
 
+import org.apache.commons.lang3.StringEscapeUtils
+
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString +
@@ -42,6 +44,13 @@ trait TerminalToString {
 trait NonTerminalToString {
   self: NonTerminal =>
   override def toString = sort.toString()
+}
+
+trait RegexTerminalToString {
+  self: RegexTerminal =>
+  override def toString = {
+    "r\"" + StringEscapeUtils.escapeJava(regex) + "\""
+  }
 }
 
 trait SyntaxAssociativityToString {

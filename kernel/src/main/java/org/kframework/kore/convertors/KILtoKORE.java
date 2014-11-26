@@ -3,26 +3,19 @@
 package org.kframework.kore.convertors;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.AbstractVisitor;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
@@ -33,14 +26,11 @@ import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.kore.KList;
+import org.kframework.kore.Attributes;
 import org.kframework.kore.outer.*;
 
 import static org.kframework.kore.Collections.*;
@@ -141,9 +131,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Set<org.kframework.kore.outer.Sentence> apply(PriorityExtended pe) {
         Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
-                .stream().map((block) -> {
-                    return toTags(block.getProductions());
-                }).collect(Collectors.toList()));
+                .stream().map(block -> toTags(block.getProductions()))
+                .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
@@ -193,12 +182,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
-                            items.add(new org.kframework.kore.outer.NonTerminal(
-                                    apply(((NonTerminal) it).getSort())));
+                            items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
                             throw new RuntimeException("Lists should have applyed before.");
                         } else if (it instanceof Lexical) {
-                            // TODO: not sure what to do
+                            items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
@@ -212,8 +200,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     // KString(Integer.toString(priorityBlockId++)));
                     // attrs = attrs.add(Attributes(pbIndicator));
 
-                    org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(sort,
-                            immutable(items), attrs);
+                    org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(
+                            sort,
+                            immutable(items),
+                            attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                    "" + System.identityHashCode(p)));
 
                     res.add(prod);
                 }
@@ -224,6 +215,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public void applyUserList(Set<org.kframework.kore.outer.Sentence> res,
             org.kframework.kore.Sort sort, Production p, UserList userList) {
+        boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
+
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
         // TODO: we're splitting one syntax declaration into three, where to put
@@ -233,27 +226,33 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
         org.kframework.kore.KList userlistMarker = KList(
-                KToken(Sort("userList"), KString(userList.getListType())),
-                KToken(Sort("listType"), KString(userList.getSort().getName())));
+                KToken(Sort("userList"), KString(userList.getSort().getName())));
 
         org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 
+        String kilProductionId = "" + System.identityHashCode(p);
+
         // lst ::= lst sep lst
+        Attributes attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                kilProductionId);
         prod1 = SyntaxProduction(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrs);
+                attrsWithKilProductionId);
 
         // lst ::= elem
-        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrs);
+        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
 
         // lst ::= .UserList
-        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())), attrs);
+        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId);
 
         res.add(prod1);
         res.add(prod2);
-        res.add(prod3);
+        if (!nonEmpty) {
+            res.add(prod3);
+        }
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {

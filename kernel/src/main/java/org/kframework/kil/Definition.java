@@ -12,15 +12,17 @@ import org.kframework.utils.Poset;
 import com.google.inject.Inject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 /**
- * Represents a language definition.
- * Includes contents from all {@code required}-d files.
+ * Represents a language definition. Includes contents from all {@code required}
+ * -d files.
+ *
  * @see DefinitionLoader
  */
 public class Definition extends ASTNode implements Interfaces.MutableList<DefinitionItem, Enum<?>> {
@@ -39,7 +41,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     }
 
     @Inject
-    public Definition(Void v) {}
+    public Definition(Void v) {
+    }
 
     public Definition(Definition d) {
         super(d);
@@ -53,7 +56,14 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     @Override
     public String toString() {
         String content = "";
-        for (DefinitionItem di : items)
+        List<DefinitionItem> sortedItems = new ArrayList<>(items);
+        sortedItems.sort(new Comparator<DefinitionItem>() {
+            @Override
+            public int compare(DefinitionItem o1, DefinitionItem o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+        for (DefinitionItem di : sortedItems)
             content += di + " \n";
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
@@ -109,7 +119,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
 
     public void preprocess(org.kframework.kil.loader.Context context) {
         // Collect information
-        // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
+        // this.accept(new AddSymbolicVariablesDeclaration(context,
+        // this.getMainSyntaxModule()));
         new UpdateReferencesVisitor(context).visitNode(this);
         new CollectProductionsVisitor(context).visitNode(this);
         new UpdateAssocVisitor(context).visitNode(this);
@@ -126,8 +137,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         context.setTokenSorts(TokenSortCollector.collectTokenSorts(this, context));
 
         /* collect the data structure sorts */
-        DataStructureSortCollector dataStructureSortCollector
-                = new DataStructureSortCollector(context);
+        DataStructureSortCollector dataStructureSortCollector = new DataStructureSortCollector(
+                context);
         dataStructureSortCollector.visitNode(this);
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
 

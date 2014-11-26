@@ -1,5 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
+DEF: null -> null
 module TEST
-  syntax Foo
+  rule A:Exp => A:Exp
+  syntax Exp ::=
+
+
 endmodule

@@ -45,8 +45,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kore.*;
-import org.kframework.kore.KBoolean;
-import org.kframework.kore.Sorts;
 import org.kframework.kore.outer.*;
 
 import scala.Enumeration.Value;
@@ -60,6 +58,8 @@ import static org.kframework.kore.Constructors.*;
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
 
+    public static final String PRODUCTION_ID = "productionID";
+
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
         return KBag(KList(contents));
@@ -67,6 +67,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
 
+    @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {
         K x = apply(body.getContents());
         if (x instanceof KBag && !((KBag) x).isEmpty()) {
@@ -85,8 +86,15 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(TermCons cons) {
+        org.kframework.kore.Attributes att = attributesFor(cons);
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
-                sortAttributes(cons));
+                att);
+    }
+
+    private org.kframework.kore.Attributes attributesFor(TermCons cons) {
+        String uniqueishID = "" + System.identityHashCode(cons.getProduction());
+        org.kframework.kore.Attributes att = sortAttributes(cons).add(PRODUCTION_ID, uniqueishID);
+        return att;
     }
 
     private org.kframework.kore.Attributes sortAttributes(Term cons) {
