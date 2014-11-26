@@ -2,19 +2,9 @@
 
 package org.kframework.kore.convertors;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.kframework.kil.Sources;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kore.outer.Definition;
-import org.kframework.parser.outer.Outer;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.junit.Test;
 
 public class TestKOREtoKILIT extends BaseTest {
 

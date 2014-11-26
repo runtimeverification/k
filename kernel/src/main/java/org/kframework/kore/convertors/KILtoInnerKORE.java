@@ -85,10 +85,15 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(TermCons cons) {
-        String uniqueishID = "" + System.identityHashCode(cons.getProduction());
-        org.kframework.kore.Attributes att = sortAttributes(cons).add(PRODUCTION_ID, uniqueishID);
+        org.kframework.kore.Attributes att = attributesFor(cons);
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
                 att);
+    }
+
+    private org.kframework.kore.Attributes attributesFor(TermCons cons) {
+        String uniqueishID = "" + System.identityHashCode(cons.getProduction());
+        org.kframework.kore.Attributes att = sortAttributes(cons).add(PRODUCTION_ID, uniqueishID);
+        return att;
     }
 
     private org.kframework.kore.Attributes sortAttributes(Term cons) {

@@ -3,8 +3,11 @@
 package org.kframework.kore.convertors;
 
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Production;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
+
+import scala.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.Collections.*;
@@ -162,7 +166,35 @@ public class KOREtoKIL {
         sentences = listCollector.collectAndRemoveListProds(sentences);
         ret.addAll(listCollector.getResults());
 
-        for (Sentence sentence : sentences) {
+        sentences
+                .stream()
+                .filter(s -> s instanceof SyntaxProduction)
+                .forEach(
+                        sentence -> {
+                            SyntaxProduction syntaxProduction = (SyntaxProduction) sentence;
+                            List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
+                            for (ProductionItem it : scala.collection.JavaConversions
+                                    .seqAsJavaList(syntaxProduction.items())) {
+                                kilProdItems.add(convertProdItem(it));
+                            }
+                            org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
+                                    convertSort(syntaxProduction.sort()));
+                            org.kframework.kil.Production kilProd = new org.kframework.kil.Production(
+                                    lhs, kilProdItems);
+
+                            kilProductionIdToProductionInstance.put(
+                                    sentence.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(),
+                                    kilProd);
+
+                            org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock(
+                                    "", kilProd);
+                            ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
+                        });
+
+        Set<Sentence> allTheRest = sentences.stream()
+                .filter(s -> !(s instanceof SyntaxProduction)).collect(Collectors.toSet());
+
+        for (Sentence sentence : allTheRest) {
             if (sentence instanceof Import) {
                 Import anImport = (Import) sentence;
                 org.kframework.kil.Import kilImport = new org.kframework.kil.Import(
@@ -323,7 +355,7 @@ public class KOREtoKIL {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
                 kilCell.setContents(new org.kframework.kil.Bag(args.stream()
-                        .map(kk -> convertK(kk)).collect(Collectors.toList())));
+                        .map(kk -> convertConfBody(kk)).collect(Collectors.toList())));
             }
             return kilCell;
         }
@@ -407,8 +439,15 @@ public class KOREtoKIL {
             for (K arg : args) {
                 kilTerms.add(convertK(arg));
             }
+            System.out.println(kApply);
+            String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
+
+            Production production = kilProductionIdToProductionInstance.get(kilProductionId);
+            if (production == null)
+                throw new RuntimeException("Could not find production for: " + kApply);
+
             return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
-                    kilTerms, null);
+                    kilTerms, production);
         }
     }
 }
