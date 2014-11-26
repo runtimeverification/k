@@ -18,7 +18,9 @@ import static org.kframework.kore.Collections.*;
 
 public class KOREtoKIL {
 
-    private static RuntimeException NOT_IMPLEMENTED = NOT_IMPLEMENTED("Not implemented");
+    private static RuntimeException NOT_IMPLEMENTED() {
+        return NOT_IMPLEMENTED("Not implemented");
+    }
 
     private static RuntimeException NOT_IMPLEMENTED(String s) {
         return new RuntimeException(s);
@@ -233,9 +235,9 @@ public class KOREtoKIL {
             return new org.kframework.kil.Terminal(item.value());
         } else if (prodItem instanceof RegexTerminal) {
             RegexTerminal item = (RegexTerminal) prodItem;
-            throw NOT_IMPLEMENTED;
+            return new org.kframework.kil.Lexical(item.regex(), null);
         } else {
-            throw NOT_IMPLEMENTED;
+            throw NOT_IMPLEMENTED();
         }
     }
 
@@ -254,14 +256,14 @@ public class KOREtoKIL {
                     String value = ((KToken) klist.get(0)).s().s();
                     kilAttributes.add(Attribute.of(key.name(), value));
                 } else {
-                    throw NOT_IMPLEMENTED;
+                    throw NOT_IMPLEMENTED();
                 }
             } else if (a instanceof KToken) {
                 KToken attr = (KToken) a;
                 String stringValue = attr.s().s();
                 kilAttributes.add(Attribute.of(stringValue, stringValue));
             } else {
-                throw NOT_IMPLEMENTED;
+                throw NOT_IMPLEMENTED();
             }
         });
         return kilAttributes;
