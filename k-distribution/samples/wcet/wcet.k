@@ -127,10 +127,6 @@ module WCET
   syntax KResult ::= Int
   syntax Exp ::= Int
 
-  syntax Map ::= Map "<-" Map [function]
-  rule M1 <- (K1:K |-> K2:K M2:Map) => M1[K1 <- K2] <- M2
-  rule M1 <- .Map => M1
-
   //@ The values of the language are integers once an immediate or register index is evaluated.
 
   syntax KItem ::= load(K)
@@ -271,7 +267,7 @@ module WCET
   rule <k> updateStatus(Start:Int) ...</k>
        <input> ListItem((I2:Int, M:Map)) => .List ...</input>
        <wcet> I:Int </wcet>
-       <status> Status:Map => Status <- M </status> when I >=Int I2 andBool I2 >=Int Start
+       <status> Status:Map => updateMap(Status, M) </status> when I >=Int I2 andBool I2 >=Int Start
   rule <k> updateStatus(Start:Int) => . ...</k>
        <input> ListItem((I2:Int, _:Map)) ...</input>
        <wcet> I:Int </wcet> when notBool(I >=Int I2 andBool I >=Int Start)
