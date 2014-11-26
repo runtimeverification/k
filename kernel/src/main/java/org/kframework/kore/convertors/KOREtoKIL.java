@@ -225,6 +225,20 @@ public class KOREtoKIL {
                 kilContext.setBody(convertK(context.body()));
                 kilContext.setRequires(convertKBool(context.requires()));
                 ret.add(kilContext);
+            } else if (sentence instanceof SyntaxAssociativity) {
+                SyntaxAssociativity syntaxAssociativity = (SyntaxAssociativity) sentence;
+                String assoc = convertAssoc(syntaxAssociativity.assoc());
+                List<org.kframework.kil.KLabelConstant> tags =
+                        stream(syntaxAssociativity.tags()).map(this::convertTag).collect(Collectors.toList());
+                ret.add(new org.kframework.kil.PriorityExtendedAssoc(assoc, tags));
+            } else if (sentence instanceof SyntaxPriority) {
+                SyntaxPriority syntaxPriority = (SyntaxPriority) sentence;
+                List<org.kframework.kil.PriorityBlockExtended> priorities =
+                        stream(syntaxPriority.priorities()).map(set -> {
+                            List<Tag> tags = stream(set).collect(Collectors.toList());
+                            return tagsToPriBlockExt(tags);
+                        }).collect(Collectors.toList());
+                ret.add(new org.kframework.kil.PriorityExtended(priorities));
             } else {
                 throw NOT_IMPLEMENTED("Not implemented: KORE.Sentence("
                         + sentence.getClass().getName() + ") -> KIL.Sentence");
@@ -232,6 +246,27 @@ public class KOREtoKIL {
         }
 
         return ret;
+    }
+
+    public org.kframework.kil.PriorityBlockExtended tagsToPriBlockExt(List<Tag> tags) {
+        return new org.kframework.kil.PriorityBlockExtended(
+                tags.stream().map(this::convertTag).collect(Collectors.toList()));
+    }
+
+    public String convertAssoc(scala.Enumeration.Value assoc) {
+        if (assoc.equals(Associativity.Left())) {
+            return "left";
+        } else if (assoc.equals(Associativity.Right())) {
+            return "right";
+        } else if (assoc.equals(Associativity.NonAssoc())) {
+            return "non-assoc";
+        } else {
+            throw new RuntimeException("Unhandled enum value for Associativity.");
+        }
+    }
+
+    public org.kframework.kil.KLabelConstant convertTag(Tag tag) {
+        return new org.kframework.kil.KLabelConstant(tag.name());
     }
 
     public org.kframework.kil.ProductionItem convertProdItem(ProductionItem prodItem) {
