@@ -475,8 +475,10 @@ public class KOREtoKIL {
             String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
 
             Production production = kilProductionIdToProductionInstance.get(kilProductionId);
-            if (production == null)
+            if (production == null) {
+                System.out.println(kilProductionIdToProductionInstance);
                 throw new RuntimeException("Could not find production for: " + kApply);
+            }
 
             return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
                     kilTerms, production);
