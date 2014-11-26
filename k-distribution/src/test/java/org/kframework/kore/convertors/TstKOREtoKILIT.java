@@ -79,6 +79,11 @@ public class TstKOREtoKILIT extends BaseTest {
         outerKILtoKOREtoKILTest();
     }
 
+    @Test
+    public void userListNonEmpty() throws IOException {
+        outerKILtoKOREtoKILTest();
+    }
+
     static final String ROOT = "src/test/resources/reverse-convertor-tests/";
     static final String TO_KORE_ROOT = "src/test/resources/convertor-tests/";
 //

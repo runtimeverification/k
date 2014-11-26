@@ -81,4 +81,9 @@ public class TstKILtoKOREIT extends BaseTest {
     public void userList() throws IOException {
         outerKILtoKORETest();
     }
+
+    @Test
+    public void userListNonEmpty() throws IOException {
+        sdfKILtoKORETest();
+    }
 }

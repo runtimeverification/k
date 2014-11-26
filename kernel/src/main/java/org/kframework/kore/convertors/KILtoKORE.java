@@ -215,6 +215,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public void applyUserList(Set<org.kframework.kore.outer.Sentence> res,
             org.kframework.kore.Sort sort, Production p, UserList userList) {
+        boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
+
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
         // TODO: we're splitting one syntax declaration into three, where to put
@@ -224,8 +226,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
         org.kframework.kore.KList userlistMarker = KList(
-                KToken(Sort("userList"), KString(userList.getListType())),
-                KToken(Sort("listType"), KString(userList.getSort().getName())));
+                KToken(Sort("userList"), KString(userList.getSort().getName())));
 
         org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
 
@@ -249,7 +250,9 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         res.add(prod1);
         res.add(prod2);
-        res.add(prod3);
+        if (!nonEmpty) {
+            res.add(prod3);
+        }
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
