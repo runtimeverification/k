@@ -99,7 +99,7 @@ public interface DataStructures {
         BuiltinMap.Builder builder = new BuiltinMap.Builder();
         builder.putAll(updateMap);
         return KItem.of(
-                KLabelConstant.of("'updateAll", context.definition().context()),
+                KLabelConstant.of("'updateMap", context.definition().context()),
                 KList.concatenate(base, builder.build()),
                 context);
     }
