@@ -96,7 +96,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        def.setItems(Outer.parse(Sources.generatedBy(TestKILtoKOREIT.class), definitionText, null));
+        def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
         return def;
     }
 

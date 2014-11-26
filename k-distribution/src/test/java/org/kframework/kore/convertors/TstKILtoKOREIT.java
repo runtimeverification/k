@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TestKILtoKOREIT extends BaseTest {
+public class TstKILtoKOREIT extends BaseTest {
 
     @Test
     public void emptyModule() throws IOException {
