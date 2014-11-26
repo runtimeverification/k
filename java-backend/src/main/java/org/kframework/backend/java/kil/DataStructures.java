@@ -5,17 +5,21 @@ public interface DataStructures {
 
     static KItem lookup(Term base, Term key, TermContext context) {
         KLabelConstant klabel;
+        KList kList;
         if (base.sort().equals(Sort.LIST)) {
             klabel = KLabelConstant.of("List:get", context.definition().context());
+            kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.MAP)) {
             klabel = KLabelConstant.of("Map:lookup", context.definition().context());
+            kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.SET)) {
             klabel = KLabelConstant.of("'_in_", context.definition().context());
+            kList = (KList) KList.concatenate(key, base);
         } else {
             assert false : "unimplemented missing case";
             return null;
         }
-        return KItem.of(klabel, KList.concatenate(base, key), context);
+        return KItem.of(klabel, kList, context);
     }
 
     static boolean isLookup(Term term) {
@@ -31,13 +35,17 @@ public interface DataStructures {
 
     static Term getBase(Term term) {
         assert isLookup(term);
-        return ((KList) (((KItem) term).kList())).get(0);
+        return !term.sort().equals(Sort.SET) ?
+               ((KList) (((KItem) term).kList())).get(0) :
+               ((KList) (((KItem) term).kList())).get(1);
 
     }
 
     static Term getKey(Term term) {
         assert isLookup(term);
-        return ((KList) (((KItem) term).kList())).get(1);
+        return !term.sort().equals(Sort.SET) ?
+               ((KList) (((KItem) term).kList())).get(1) :
+               ((KList) (((KItem) term).kList())).get(0);
 
     }
 
