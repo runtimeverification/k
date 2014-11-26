@@ -196,81 +196,25 @@ public class KOREtoKIL {
 
         for (Sentence sentence : allTheRest) {
             if (sentence instanceof Import) {
-                Import anImport = (Import) sentence;
-                org.kframework.kil.Import kilImport = new org.kframework.kil.Import(
-                        anImport.what());
-                kilImport.setAttributes(convertAttributes(anImport.att()));
-                ret.add(kilImport);
+                ret.add(convertModuleItem((Import) sentence));
             } else if (sentence instanceof Bubble) {
-                Bubble bubble = (Bubble) sentence;
-                org.kframework.kil.StringSentence kilBubble = new org.kframework.kil.StringSentence(
-                        bubble.contents(), null, bubble.sentenceType(), null);
-                kilBubble.setAttributes(convertAttributes(bubble.att()));
-                ret.add(kilBubble);
+                ret.add(convertModuleItem((Bubble) sentence));
             } else if (sentence instanceof ModuleComment) {
-                ModuleComment moduleComment = (ModuleComment) sentence;
-                org.kframework.kil.LiterateModuleComment kilComment =
-                // TODO: we lost type information
-                new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
-                kilComment.setAttributes(convertAttributes(moduleComment.att()));
-                ret.add(kilComment);
+                ret.add(convertModuleItem((ModuleComment) sentence));
             } else if (sentence instanceof Configuration) {
-                Configuration conf = (Configuration) sentence;
-                org.kframework.kil.Configuration kilConf = new org.kframework.kil.Configuration();
-                kilConf.setBody(convertConfBody(conf.body()));
-                kilConf.setEnsures(convertKBool(conf.ensures()));
-                kilConf.setAttributes(convertAttributes(conf.att()));
-                ret.add(kilConf);
+                ret.add(convertModuleItem((Configuration) sentence));
             } else if (sentence instanceof SyntaxProduction) {
-                SyntaxProduction syntaxProduction = (SyntaxProduction) sentence;
-                List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
-                for (ProductionItem it : scala.collection.JavaConversions
-                        .seqAsJavaList(syntaxProduction.items())) {
-                    kilProdItems.add(convertProdItem(it));
-                }
-                org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
-                        convertSort(syntaxProduction.sort()));
-                org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
-                        kilProdItems);
-
-                kilProductionIdToProductionInstance.put(
-                        sentence.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
-
-                org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("",
-                        kilProd);
-                ret.add(new org.kframework.kil.Syntax(lhs, kilPB));
+                ret.add(convertModuleItem((SyntaxProduction) sentence));
             } else if (sentence instanceof SyntaxSort) {
-                SyntaxSort syntaxSort = (SyntaxSort) sentence;
-                ret.add(new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(
-                        org.kframework.kil.Sort.of(syntaxSort.sort().name())), new ArrayList<>(0)));
+                ret.add(convertModuleItem((SyntaxSort) sentence));
             } else if (sentence instanceof Rule) {
-                Rule rule = (Rule) sentence;
-                if (rule.body() instanceof KRewrite) {
-                    KRewrite body = (KRewrite) rule.body();
-                    ret.add(new org.kframework.kil.Rule(convertK(body.left()), convertK(body
-                            .right()), convertKBool(rule.requires()),
-                            convertKBool(rule.ensures()), dummyContext));
-                }
+                ret.add(convertModuleItem((Rule) sentence));
             } else if (sentence instanceof Context) {
-                Context context = (Context) sentence;
-                org.kframework.kil.Context kilContext = new org.kframework.kil.Context();
-                kilContext.setBody(convertK(context.body()));
-                kilContext.setRequires(convertKBool(context.requires()));
-                ret.add(kilContext);
+                ret.add(convertModuleItem((Context) sentence));
             } else if (sentence instanceof SyntaxAssociativity) {
-                SyntaxAssociativity syntaxAssociativity = (SyntaxAssociativity) sentence;
-                String assoc = convertAssoc(syntaxAssociativity.assoc());
-                List<org.kframework.kil.KLabelConstant> tags =
-                        stream(syntaxAssociativity.tags()).map(this::convertTag).collect(Collectors.toList());
-                ret.add(new org.kframework.kil.PriorityExtendedAssoc(assoc, tags));
+                ret.add(convertModuleItem((SyntaxAssociativity) sentence));
             } else if (sentence instanceof SyntaxPriority) {
-                SyntaxPriority syntaxPriority = (SyntaxPriority) sentence;
-                List<org.kframework.kil.PriorityBlockExtended> priorities =
-                        stream(syntaxPriority.priorities()).map(set -> {
-                            List<Tag> tags = stream(set).collect(Collectors.toList());
-                            return tagsToPriBlockExt(tags);
-                        }).collect(Collectors.toList());
-                ret.add(new org.kframework.kil.PriorityExtended(priorities));
+                ret.add(convertModuleItem((SyntaxPriority) sentence));
             } else {
                 throw NOT_IMPLEMENTED("Not implemented: KORE.Sentence("
                         + sentence.getClass().getName() + ") -> KIL.Sentence");
@@ -278,6 +222,94 @@ public class KOREtoKIL {
         }
 
         return ret;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(Import anImport) {
+        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(
+                anImport.what());
+        kilImport.setAttributes(convertAttributes(anImport.att()));
+        return kilImport;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(Bubble bubble) {
+        org.kframework.kil.StringSentence kilBubble = new org.kframework.kil.StringSentence(
+                bubble.contents(), null, bubble.sentenceType(), null);
+        kilBubble.setAttributes(convertAttributes(bubble.att()));
+        return kilBubble;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(ModuleComment moduleComment) {
+        org.kframework.kil.LiterateModuleComment kilComment =
+                // TODO: we lost type information
+                new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
+        kilComment.setAttributes(convertAttributes(moduleComment.att()));
+        return kilComment;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(Configuration conf) {
+        org.kframework.kil.Configuration kilConf = new org.kframework.kil.Configuration();
+        kilConf.setBody(convertConfBody(conf.body()));
+        kilConf.setEnsures(convertKBool(conf.ensures()));
+        kilConf.setAttributes(convertAttributes(conf.att()));
+        return kilConf;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(SyntaxProduction syntaxProduction) {
+        List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
+        for (ProductionItem it : scala.collection.JavaConversions
+                .seqAsJavaList(syntaxProduction.items())) {
+            kilProdItems.add(convertProdItem(it));
+        }
+        org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
+                convertSort(syntaxProduction.sort()));
+        org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
+                kilProdItems);
+
+        kilProductionIdToProductionInstance.put(
+                syntaxProduction.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
+
+        org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("",
+                kilProd);
+
+        return new org.kframework.kil.Syntax(lhs, kilPB);
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(SyntaxSort syntaxSort) {
+        return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(
+                org.kframework.kil.Sort.of(syntaxSort.sort().name())), new ArrayList<>(0));
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(Rule rule) {
+        if (rule.body() instanceof KRewrite) {
+            KRewrite body = (KRewrite) rule.body();
+            return new org.kframework.kil.Rule(convertK(body.left()), convertK(body
+                    .right()), convertKBool(rule.requires()),
+                    convertKBool(rule.ensures()), dummyContext);
+        }
+        throw NOT_IMPLEMENTED("Not implemented: Rule -> KIL.Sentence");
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(Context context) {
+        org.kframework.kil.Context kilContext = new org.kframework.kil.Context();
+        kilContext.setBody(convertK(context.body()));
+        kilContext.setRequires(convertKBool(context.requires()));
+        return kilContext;
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(SyntaxAssociativity syntaxAssociativity) {
+        String assoc = convertAssoc(syntaxAssociativity.assoc());
+        List<org.kframework.kil.KLabelConstant> tags =
+                stream(syntaxAssociativity.tags()).map(this::convertTag).collect(Collectors.toList());
+        return new org.kframework.kil.PriorityExtendedAssoc(assoc, tags);
+    }
+
+    public org.kframework.kil.ModuleItem convertModuleItem(SyntaxPriority syntaxPriority) {
+        List<org.kframework.kil.PriorityBlockExtended> priorities =
+                stream(syntaxPriority.priorities()).map(set -> {
+                    List<Tag> tags = stream(set).collect(Collectors.toList());
+                    return tagsToPriBlockExt(tags);
+                }).collect(Collectors.toList());
+        return new org.kframework.kil.PriorityExtended(priorities);
     }
 
     public org.kframework.kil.PriorityBlockExtended tagsToPriBlockExt(List<Tag> tags) {
