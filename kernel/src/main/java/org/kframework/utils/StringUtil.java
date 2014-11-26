@@ -593,7 +593,7 @@ public class StringUtil {
     public static String escapeShell(String arg, OS os) {
         if (os.isPosix) {
             return "'" + StringUtils.replace(arg, "'", "'\\''") + "'";
-        } else if (os == OS.WIN) {
+        } else if (os == OS.WINDOWS) {
             return '"' + StringUtils.replace(arg, "\"", "\\\"") + '"';
         }
         throw new IllegalArgumentException("unsupported OS");
