@@ -2,6 +2,7 @@
 
 package org.kframework.kore.convertors;
 
+import org.kframework.kil.Attribute;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
@@ -16,6 +17,12 @@ import java.util.stream.Collectors;
 import static org.kframework.kore.Collections.*;
 
 public class KOREtoKIL {
+
+    private static RuntimeException NOT_IMPLEMENTED = NOT_IMPLEMENTED("Not implemented");
+
+    private static RuntimeException NOT_IMPLEMENTED(String s) {
+        return new RuntimeException(s);
+    }
 
     class ListProductionCollector {
         private Map<KString, List<SyntaxProduction>> listProds;
@@ -216,9 +223,9 @@ public class KOREtoKIL {
             return new org.kframework.kil.Terminal(item.value());
         } else if (prodItem instanceof RegexTerminal) {
             RegexTerminal item = (RegexTerminal) prodItem;
-            throw new RuntimeException("Not implemented");
+            throw NOT_IMPLEMENTED;
         } else {
-            throw new RuntimeException("Unhandled case");
+            throw NOT_IMPLEMENTED;
         }
     }
 
@@ -226,18 +233,28 @@ public class KOREtoKIL {
         return org.kframework.kil.Sort.of(sort.name());
     }
 
-    public org.kframework.kil.Attributes convertAttributes(Attributes attrs) {
-        org.kframework.kil.Attributes ret = new org.kframework.kil.Attributes();
-        stream(attrs.att()).map(a -> {
-            KApply attr = (KApply) a;
-            KLabel key = attr.klabel();
-            // String value = ((KString) ((ConsKList) ((ConsKList)
-            // attr.contents()).tail()).head()).s();
-                return null;
-                // TODO: I think it's not possible to translate attributes back,
-                // we lose a lot of information while translating.
-            });
-        return ret;
+    public org.kframework.kil.Attributes convertAttributes(Attributes koreAttributes) {
+        org.kframework.kil.Attributes kilAttributes = new org.kframework.kil.Attributes();
+        koreAttributes.stream().forEach(a -> {
+            if (a instanceof KApply) {
+                KApply attr = (KApply) a;
+                KLabel key = attr.klabel();
+                KList klist = attr.klist();
+                if (klist.size() == 1 && klist.get(0) instanceof KToken) {
+                    String value = ((KToken) klist.get(0)).s().s();
+                    kilAttributes.add(Attribute.of(key.name(), value));
+                } else {
+                    throw NOT_IMPLEMENTED;
+                }
+            } else if (a instanceof KToken) {
+                KToken attr = (KToken) a;
+                String stringValue = attr.s().s();
+                kilAttributes.add(Attribute.of(stringValue, stringValue));
+            } else {
+                throw NOT_IMPLEMENTED;
+            }
+        });
+        return kilAttributes;
     }
 
     public org.kframework.kil.Term convertConfBody(K k) {
@@ -291,7 +308,7 @@ public class KOREtoKIL {
             return convertKVariable((KVariable) k);
         }
         System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-        throw new RuntimeException("Not implemented: KORE.K(" + k.getClass().getName()
+        throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
                 + ") -> KIL.Term");
     }
 
@@ -336,10 +353,8 @@ public class KOREtoKIL {
             for (K arg : args) {
                 kilTerms.add(convertK(arg));
             }
-            return new org.kframework.kil.TermCons(
-                    org.kframework.kil.Sort.of(label.name()),
-                    kilTerms,
-                    null);
+            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
+                    kilTerms, null);
         }
     }
 }

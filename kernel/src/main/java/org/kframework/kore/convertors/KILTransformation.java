@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Term;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
 
