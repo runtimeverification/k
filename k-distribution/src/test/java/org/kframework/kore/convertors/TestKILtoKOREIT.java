@@ -13,22 +13,22 @@ public class TestKILtoKOREIT extends BaseTest {
 
     @Test
     public void emptyModule() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void simpleSyntax() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void syntaxWithAttributes() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void syntaxWithRhs() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     // we'll have to eventually convert the configuration
@@ -39,46 +39,46 @@ public class TestKILtoKOREIT extends BaseTest {
     // KToken(String, "bla"))))
     @Test
     public void configuration() throws IOException {
-        sdfTest();
+        sdfKILtoKORETest();
     }
 
     @Test
     public void context() throws IOException {
-        sdfTest();
+        sdfKILtoKORETest();
     }
 
     @Test
     public void imports() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void simpleRule() throws IOException {
-        sdfTest();
+        sdfKILtoKORETest();
     }
 
     @Test
     public void ruleWithRequiresEnsures() throws IOException {
-        sdfTest();
+        sdfKILtoKORETest();
     }
 
     @Test
     public void syntaxPriorities() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void syntaxWithPriorities() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void syntaxWithOR() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 
     @Test
     public void userList() throws IOException {
-        outerTest();
+        outerKILtoKORETest();
     }
 }

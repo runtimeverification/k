@@ -56,7 +56,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
         context.files = fileUtil;
 
         String path = new File("../k-distribution/target/release/k/lib/native/").getAbsolutePath()
-                + "/" + OS.current().toString().toLowerCase() + "/";
+                + "/" + OS.current() + "/";
 
         String nativeSDF2TableExecutable = path + OS.current().getNativeExecutable("sdf2table");
 
