@@ -35,9 +35,9 @@ public class StringUtilTest {
     public void StringUtilEscapeShell() throws Exception {
         String[] cmd1 = new String[] {"foo", "bar \" baz"};
         String[] cmd2 = new String[] {"'"};
-        Assert.assertEquals("\"foo\" \"bar \\\" baz\"", StringUtil.escapeShell(cmd1, OS.WIN));
-        Assert.assertEquals("'foo' 'bar \" baz'", StringUtil.escapeShell(cmd1, OS.UNIX));
-        Assert.assertEquals("''\\'''", StringUtil.escapeShell(cmd2, OS.UNIX));
+        Assert.assertEquals("\"foo\" \"bar \\\" baz\"", StringUtil.escapeShell(cmd1, OS.WINDOWS));
+        Assert.assertEquals("'foo' 'bar \" baz'", StringUtil.escapeShell(cmd1, OS.LINUX));
+        Assert.assertEquals("''\\'''", StringUtil.escapeShell(cmd2, OS.LINUX));
     }
 
     @Test

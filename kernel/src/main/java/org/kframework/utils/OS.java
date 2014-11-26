@@ -7,7 +7,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 public enum OS {
-    OSX(true), UNIX(true), UNKNOWN(false), WIN(false);
+    OSX(true), LINUX(true), UNKNOWN(false), WINDOWS(false);
 
     private OS(boolean isPosix) {
         this.isPosix = isPosix;
@@ -18,9 +18,9 @@ public enum OS {
     public static OS current() {
         String osString = System.getProperty("os.name").toLowerCase();
         if (osString.contains("nix") || osString.contains("nux"))
-            return OS.UNIX;
+            return OS.LINUX;
         else if (osString.contains("win"))
-            return OS.WIN;
+            return OS.WINDOWS;
         else if (osString.contains("mac"))
             return OS.OSX;
         else
@@ -33,7 +33,7 @@ public enum OS {
                     "Unknown OS type. " + System.getProperty("os.name") + " not recognized. " +
                     "Please contact K developers with details of your OS.");
         }
-        if (this == WIN) {
+        if (this == WINDOWS) {
             executable = executable + ".exe";
         }
         return executable;
