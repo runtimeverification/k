@@ -14,7 +14,8 @@ import com.google.inject.Provider;
 
 public class Sdf2Table {
 
-    private final ProcessBuilder pb;
+    private final Provider<ProcessBuilder> pb;
+    private String theCommand;
 
     @Inject
     public Sdf2Table(Provider<ProcessBuilder> pb) {
@@ -22,8 +23,8 @@ public class Sdf2Table {
     }
 
     public Sdf2Table(Provider<ProcessBuilder> pb, String theCommand) {
-        this.pb = pb.get();
-        this.pb.command(theCommand);
+        this.pb = pb;
+        this.theCommand = theCommand;
     }
 
     public void run_sdf2table(File startDir, String mainFile) {
@@ -32,9 +33,8 @@ public class Sdf2Table {
         try {
 
             // create process
-            this.pb.command().addAll(
-                    Lists.newArrayList("-c", "-m", mainFile, "-o", mainFile
-                            + ".tbl"));
+            ProcessBuilder pb = this.pb.get().command(theCommand, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
+
             pb.directory(startDir);
 
             // start sdf2table process
