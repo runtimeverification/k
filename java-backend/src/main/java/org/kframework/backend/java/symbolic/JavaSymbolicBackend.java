@@ -111,7 +111,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));
         steps.add(new ContextsToHeating(context));
-        //steps.add(new AddSupercoolDefinition(context));
+        steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
         //steps.add(new AddSuperheatRules(context));
         steps.add(new DesugarStreams(context));
@@ -153,7 +153,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new JavaBackendCell2DataStructure(context));
         steps.add(new DataStructureToLookupUpdate(context));
 
-        //steps.add(new ResolveSupercool(context));
+        steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));
         steps.add(new AddOptionalTags(context));

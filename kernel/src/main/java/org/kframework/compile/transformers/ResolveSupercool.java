@@ -4,9 +4,6 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-import java.util.*;
-import java.util.List;
-
 /**
  * Initially created by: Traian Florin Serbanuta
  * <p/>
@@ -45,16 +42,8 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
             return super.visit(node, _);
         }
         node = node.shallowCopy();
-        if (node.getContents() instanceof KSequence) {
-            KSequence kseq = (KSequence) node.getContents().shallowCopy();
-            node.setContents(kseq);
-            List<Term> kitems = new ArrayList<Term>(kseq.getContents());
-            kseq.setContents(kitems);
-            kitems.set(0, KApp.of(KLabelConstant.COOL_KLABEL, kitems.get(0)));
-        } else {
-            KApp kApp = new KApp(KLabelConstant.COOL_KLABEL, node.getContents());
-            node.setContents(kApp);
-        }
+        KApp kApp = new KApp(KLabelConstant.COOL_KLABEL, node.getContents());
+        node.setContents(new KItemProjection(Sort.K, kApp));
         return node;
     }
 

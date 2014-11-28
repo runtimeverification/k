@@ -74,16 +74,8 @@ endmodule
 module K-FREZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
-  syntax KLabel ::= "heat" | "heated" | "redex" | "cool"
 
-  rule heat(heated(K:K)) => K
-  rule heat(heated(_,,K:K,,_)) => K
-     [heat-choice]
-
-  rule heat((redex(_:K,, K:K,, KL:KList) => K,,KL),,_)
-    [owise]
-  rule heat((redex(K:K) => .KList),,_,,heated(_,,(.KList => K)))
-    [owise]
+  syntax K ::= cool(K) [function, klabel(cool)]
 
   rule cool(K:K) => K [owise]
 endmodule
