@@ -2,6 +2,8 @@
 
 package org.kframework.kore
 
+import org.kframework._
+
 import collection._
 import JavaConverters._
 import collection.mutable.Builder

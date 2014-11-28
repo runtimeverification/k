@@ -2,6 +2,8 @@
 
 package org.kframework.kore
 
+import org.kframework._
+
 import collection.JavaConverters._
 import collection.LinearSeq
 import KORE._

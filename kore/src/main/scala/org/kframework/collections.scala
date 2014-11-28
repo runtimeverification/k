@@ -1,11 +1,9 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+package org.kframework
 
-package org.kframework.kore
-
-import collection.mutable.Builder
-import collection.mutable.ListBuffer
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
+import scala.collection.mutable.Builder
+import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.SetBuilder
 
 trait Indexed[I, T] {
@@ -45,6 +43,7 @@ trait Collection[T] extends java.lang.Iterable[T] {
   }
 }
 
+
 case class ImmutableList[T](l: List[T]) extends Collection[T] with Indexed[Int, T] {
   type This = ImmutableList[T]
   def get(i: Int): Option[T] = l.lift(i)
@@ -57,10 +56,10 @@ case class ImmutableList[T](l: List[T]) extends Collection[T] with Indexed[Int, 
   def iterable: Iterable[T] = l
 }
 
-case class ImmutableSet[T](s: Set[T]) extends Collection[T] {
+case class ImmutableSet[T](s: collection.Set[T]) extends Collection[T] {
   type This = ImmutableSet[T]
 
-  def newBuilder: Builder[T, This] = new SetBuilder[T, Set[T]](Set[T]()) mapResult { new ImmutableSet(_) }
+  def newBuilder: Builder[T, This] = new SetBuilder[T, collection.Set[T]](Set[T]()) mapResult { new ImmutableSet(_) }
 
   def foreach(f: T => Unit) = s foreach f
   def iterable: Iterable[T] = s

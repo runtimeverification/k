@@ -50,7 +50,10 @@ object Associativity extends Enumeration {
   val Left, Right, NonAssoc, Unspecified = Value
 }
 
-case class SyntaxAssociativity(assoc: Associativity.Value, tags: collection.immutable.Set[Tag], att: Attributes = Attributes())
+case class SyntaxAssociativity(
+    assoc: Associativity.Value, 
+    tags: collection.immutable.Set[Tag], 
+    att: Attributes = Attributes())
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
 case class Tag(name: String) extends TagToString with OuterKORE
