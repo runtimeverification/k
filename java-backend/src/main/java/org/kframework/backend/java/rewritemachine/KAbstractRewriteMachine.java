@@ -107,7 +107,6 @@ public class KAbstractRewriteMachine {
 
                     cell.unsafeSetContent((Term) rightHandSide.accept(substAndEvalTransformer));
                 }
-                context.setTopTerm(subject);
                 Profiler.stopTimer(Profiler.LOCAL_REWRITE_BUILD_RHS_TIMER);
             } else {
                 success = false;

@@ -144,7 +144,6 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                                 System.out.println(rule);
                             }
                             subject = constructNewSubjectTerm(rule, subst);
-                            termContext.setTopTerm(subject);
                             results.add(subject);
                             succeed = true;
                             break;
@@ -166,12 +165,15 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         }
     }
 
+    @Override
     protected final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
         Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
                 DeepCloner.clone(rule.rightHandSide()) :
                 rule.rightHandSide();
-        return rhs.copyOnShareSubstAndEval(substitution,
+        Term result = rhs.copyOnShareSubstAndEval(substitution,
                 rule.reusableVariables().elementSet(), termContext);
+        termContext.setTopTerm(result);
+        return result;
     }
 
     @Override
