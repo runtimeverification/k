@@ -16,7 +16,7 @@ import org.kframework.main.KModule;
 import org.kframework.utils.inject.Builtins;
 import org.kframework.utils.inject.Options;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Module;

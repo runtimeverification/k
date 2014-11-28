@@ -16,12 +16,13 @@ import org.kframework.utils.inject.Builtins;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
 
 public class JavaSymbolicCommonModule extends AbstractModule {
 
-    private final String hookPropertiesFileName = "hooks.properties";
+    private static final String HOOK_PROPERTIES_FILE_NAME = "hooks.properties";
 
     @Override
     protected void configure() {
@@ -29,9 +30,9 @@ public class JavaSymbolicCommonModule extends AbstractModule {
         Properties properties = new Properties();
 
         try {
-            FileUtil.loadProperties(properties, getClass(), hookPropertiesFileName);
+            FileUtil.loadProperties(properties, getClass(), HOOK_PROPERTIES_FILE_NAME);
         } catch (IOException e) {
-            throw KExceptionManager.internalError("Could not read from resource " + hookPropertiesFileName, e);
+            throw KExceptionManager.internalError("Could not read from resource " + HOOK_PROPERTIES_FILE_NAME, e);
         }
 
         MapBinder<String, String> builtinMethods = MapBinder.newMapBinder(binder(),
@@ -47,8 +48,8 @@ public class JavaSymbolicCommonModule extends AbstractModule {
      * ensuring that all dependencies declared in hooks.properties are satisfied.
      */
     @Provides @Builtins
-    Map<String, MethodHandle> getBuiltinTable(@Builtins Map<String, String> hookDeclarations, Injector injector, KExceptionManager kem) {
-        Map<String, MethodHandle> result = new HashMap<>();
+    Map<String, Provider<MethodHandle>> getBuiltinTable(@Builtins Map<String, String> hookDeclarations, Injector injector, KExceptionManager kem) {
+        Map<String, Provider<MethodHandle>> result = new HashMap<>();
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         for (String key : hookDeclarations.keySet()) {
             String hook = hookDeclarations.get(key);
@@ -59,10 +60,13 @@ public class JavaSymbolicCommonModule extends AbstractModule {
                 for (Method method : c.getDeclaredMethods()) {
                     if (method.getName().equals(methodName)) {
                         MethodHandle handle = lookup.unreflect(method);
-                        if (!Modifier.isStatic(method.getModifiers())) {
-                            handle = MethodHandles.insertArguments(handle, 0, injector.getInstance(c));
-                        }
-                        result.put(key, handle);
+                        result.put(key, () -> {
+                            MethodHandle resultHandle = handle;
+                            if (!Modifier.isStatic(method.getModifiers())) {
+                                resultHandle = MethodHandles.insertArguments(handle, 0, injector.getInstance(c));
+                            }
+                            return resultHandle;
+                        });
                         break;
                     }
                 }
