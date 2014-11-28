@@ -171,6 +171,10 @@ public class KExceptionManager {
         register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
+    public void registerInternalHiddenWarning(String message, Throwable e) {
+        register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
+    }
+
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
             AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));

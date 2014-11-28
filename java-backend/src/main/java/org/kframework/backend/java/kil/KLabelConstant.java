@@ -15,6 +15,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -89,20 +90,24 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                  * KLabel is a function determines if the KItem constructed by
                  * this KLabel can be split during unification
                  */
-                assert isFunction == (production
+                if (isFunction != (production
                         .containsAttribute(Attribute.FUNCTION.getKey()) || production
-                        .containsAttribute(Attribute.PREDICATE.getKey())) : "Cannot determine if the KLabel "
+                        .containsAttribute(Attribute.PREDICATE.getKey()))) {
+                    throw KExceptionManager.criticalError("Cannot determine if the KLabel "
                         + label
                         + " is a function symbol because there are multiple productions associated with this KLabel: "
-                        + productions;
-                assert isPattern == production.containsAttribute(Attribute.PATTERN_KEY) :
-                        "Cannot determine if the KLabel " + label
+                        + productions);
+                }
+                if (isPattern != production.containsAttribute(Attribute.PATTERN_KEY)) {
+                    throw KExceptionManager.criticalError("Cannot determine if the KLabel " + label
                         + " is a pattern symbol because there are multiple productions associated with this KLabel: "
-                        + productions;
-                assert smtlib == null && production.getAttribute(Attribute.SMTLIB_KEY) == null || smtlib.equals(production.getAttribute(Attribute.SMTLIB_KEY)) :
-                        "Cannot determine the smtlib attribute of the KLabel " + label
+                        + productions);
+                }
+                if (!(smtlib == null && production.getAttribute(Attribute.SMTLIB_KEY) == null || smtlib.equals(production.getAttribute(Attribute.SMTLIB_KEY)))) {
+                    throw KExceptionManager.criticalError("Cannot determine the smtlib attribute of the KLabel " + label
                         + " because there are multiple productions associated with this KLabel: "
-                        + productions;
+                        + productions);
+                }
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */

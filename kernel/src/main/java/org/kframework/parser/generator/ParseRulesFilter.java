@@ -69,10 +69,12 @@ public class ParseRulesFilter extends ParseForestTransformer {
             } else {
                 try {
                     parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
-                } catch (RuntimeException  e) {
+                // DISABLE EXCEPTION CHECKSTYLE
+                } catch (RuntimeException e) {
                     String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
                     throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
                 }
+                // ENABLE EXCEPTION CHECKSTYLE
             }
             Document doc = XmlLoader.getXMLDoc(parsed);
 

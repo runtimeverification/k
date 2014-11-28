@@ -198,8 +198,8 @@ languages).  */
 module LOGIK
   imports UNIFICATION
 
-  syntax KItem ::= variables(K) [function, hook(MetaK:variables)] // TODO(YilongL): can't we change the return type to be Set?
-  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap)] // TODO(YilongL): can't we change the return type to be Map?
+  syntax KItem ::= variables(K) [function, hook(MetaK:variables), impure] // TODO(YilongL): can't we change the return type to be Set?
+  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap), impure] // TODO(YilongL): can't we change the return type to be Map?
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we

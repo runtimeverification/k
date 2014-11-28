@@ -195,10 +195,10 @@ one cannot do it in general (same like for all Turing-complete
 languages).  */
 
 module LOGIK
-  syntax KItem ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
-  syntax KItem ::= variables(K) [function, hook(MetaK:variables)]
-  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap)]
-  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable)]
+  syntax KItem ::= renameVariables(K) [function, hook(MetaK:renameVariables), impure]
+  syntax KItem ::= variables(K) [function, hook(MetaK:variables), impure]
+  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap), impure]
+  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable), impure]
 
 
 /*@ Unification is at the core of logic programming.  Here we are

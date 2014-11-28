@@ -17,7 +17,7 @@ public class TermContext extends JavaSymbolicObject {
 
     private final GlobalContext global;
 
-    private ConstrainedTerm.Data topConstrainedTermData;
+    private Term topTerm;
 
     private TermContext(GlobalContext global) {
         this.global = global;
@@ -27,9 +27,10 @@ public class TermContext extends JavaSymbolicObject {
         return new TermContext(global);
     }
 
-    public static TermContext of(GlobalContext global, ConstrainedTerm.Data topConstrainedTermData) {
+    public static TermContext of(GlobalContext global, Term topTerm, BigInteger counter) {
         TermContext termContext = new TermContext(global);
-        termContext.setConstrainedTermData(topConstrainedTermData);
+        termContext.topTerm = topTerm;
+        termContext.counter = counter;
         return termContext;
     }
 
@@ -58,12 +59,12 @@ public class TermContext extends JavaSymbolicObject {
         return global;
     }
 
-    public ConstrainedTerm.Data getConstrainedTermData() {
-        return topConstrainedTermData;
+    public Term getTopTerm() {
+        return topTerm;
     }
 
-    public void setConstrainedTermData(ConstrainedTerm.Data constrainedTermData) {
-        this.topConstrainedTermData = constrainedTermData;
+    public void setTopTerm(Term topTerm) {
+        this.topTerm = topTerm;
     }
 
     @Override

@@ -54,7 +54,7 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
-  syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_)]
+  syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_), impure]
   rule getKLabel(L:KLabel(_:KList)) => L
 
 endmodule
