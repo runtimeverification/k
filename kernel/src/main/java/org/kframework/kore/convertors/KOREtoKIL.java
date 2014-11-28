@@ -21,12 +21,12 @@ import static org.kframework.kore.Collections.*;
 
 public class KOREtoKIL {
 
-    private static RuntimeException NOT_IMPLEMENTED() {
+    private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
     }
 
-    private static RuntimeException NOT_IMPLEMENTED(String s) {
-        return new RuntimeException(s);
+    private static AssertionError NOT_IMPLEMENTED(String s) {
+        return new AssertionError(s);
     }
 
     class ListProductionCollector {
@@ -80,7 +80,7 @@ public class KOREtoKIL {
                 KString listType = entry.getKey();
                 List<SyntaxProduction> prods = entry.getValue();
                 if (prods.size() != 3 && prods.size() != 2) {
-                    throw new RuntimeException("Found list with " + prods.size() + " elements.");
+                    throw new AssertionError("Found list with " + prods.size() + " elements.");
                 }
 
                 if (prods.size() == 2) {
@@ -368,7 +368,7 @@ public class KOREtoKIL {
         } else if (assoc.equals(Associativity.NonAssoc())) {
             return "non-assoc";
         } else {
-            throw new RuntimeException("Unhandled enum value for Associativity.");
+            throw new AssertionError("Unhandled enum value for Associativity.");
         }
     }
 
@@ -434,7 +434,7 @@ public class KOREtoKIL {
             }
             return kilCell;
         }
-        throw new RuntimeException("Unexpected conf body found.");
+        throw new AssertionError("Unexpected conf body found.");
     }
 
     public org.kframework.kil.Term convertK(K k) {
@@ -490,7 +490,7 @@ public class KOREtoKIL {
             }
         }
         if (sort == null) {
-            throw new RuntimeException("Can't figure sort of KVariable");
+            throw new AssertionError("Can't figure sort of KVariable");
         }
         return new org.kframework.kil.Variable(var.name(), sort);
     }
@@ -518,7 +518,7 @@ public class KOREtoKIL {
 
             Production production = kilProductionIdToProductionInstance.get(kilProductionId);
             if (production == null) {
-                throw new RuntimeException("Could not find production for: " + kApply);
+                throw new AssertionError("Could not find production for: " + kApply);
             }
 
             return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),

@@ -44,11 +44,7 @@ import static org.kframework.kore.Constructors.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
-    // we mark productions in same priority blocks with ids unique to that
-    // priority block
-    public int priorityBlockId = 0;
-
-    public KILtoInnerKORE inner = new KILtoInnerKORE();
+    private KILtoInnerKORE inner = new KILtoInnerKORE();
 
     public org.kframework.kore.outer.Definition apply(Definition d) {
         Set<org.kframework.kore.outer.Require> requires = d.getItems().stream()
@@ -125,7 +121,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         case "non-assoc":
             return Associativity.NonAssoc();
         default:
-            throw new RuntimeException("Incorrect assoc string: " + assocOrig);
+            throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
@@ -184,21 +180,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new RuntimeException("Lists should have applyed before.");
+                            throw new AssertionError("Lists should have applyed before.");
                         } else if (it instanceof Lexical) {
                             items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
-                            throw new RuntimeException("Unhandled case");
+                            throw new AssertionError("Unhandled case");
                         }
                     }
 
                     org.kframework.kore.Attributes attrs = inner.apply(p.getAttributes());
-                    // org.kframework.kore.KToken pbIndicator =
-                    // KToken(Sort("priority-block"),
-                    // KString(Integer.toString(priorityBlockId++)));
-                    // attrs = attrs.add(Attributes(pbIndicator));
 
                     org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(
                             sort,
