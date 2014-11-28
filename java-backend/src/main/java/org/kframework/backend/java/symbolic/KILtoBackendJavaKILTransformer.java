@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Hole;
@@ -29,15 +30,7 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.ListUpdate;
-import org.kframework.backend.java.kil.MapKeyChoice;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetElementChoice;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -292,16 +285,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<KList>(CellLabel.of(node.getLabel()), (KList) content);
             } else if (content instanceof BuiltinList) {
                 return new Cell<BuiltinList>(CellLabel.of(node.getLabel()), (BuiltinList) content);
-            } else if (content instanceof ListUpdate) {
-                return new Cell<ListUpdate>(CellLabel.of(node.getLabel()), (ListUpdate) content);
             } else if (content instanceof BuiltinSet) {
                 return new Cell<BuiltinSet>(CellLabel.of(node.getLabel()), (BuiltinSet) content);
-            } else if (content instanceof SetUpdate) {
-                return new Cell<SetUpdate>(CellLabel.of(node.getLabel()), (SetUpdate) content);
             } else if (content instanceof BuiltinMap) {
                 return new Cell<BuiltinMap>(CellLabel.of(node.getLabel()), (BuiltinMap) content);
-            } else if (content instanceof MapUpdate) {
-                return new Cell<MapUpdate>(CellLabel.of(node.getLabel()), (MapUpdate) content);
             } else if (content instanceof Variable) {
                 return new Cell<Term>(CellLabel.of(node.getLabel()), content);
             } else if (content instanceof KItemProjection) {
@@ -383,7 +370,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.ListUpdate node, Void _)  {
         Variable base = (Variable) this.visitNode(node.base());
 
-        return new ListUpdate(base, node.removeLeft().size(), node.removeRight().size());
+        return DataStructures.listRange(
+                base,
+                node.removeLeft().size(),
+                node.removeRight().size(),
+                TermContext.of(globalContext));
     }
 
     @Override
@@ -395,7 +386,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             removeSet.add((Term) this.visitNode(term));
         }
 
-        return new SetUpdate(set, removeSet);
+        return DataStructures.setDifference(set, removeSet, TermContext.of(globalContext));
     }
 
      @Override
@@ -415,7 +406,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             updateMap.put(key, value);
         }
 
-        return new MapUpdate(map, removeSet, updateMap);
+        return DataStructures.mapUpdateAll(
+                DataStructures.mapRemoveAll(map, removeSet, TermContext.of(globalContext)),
+                updateMap,
+                TermContext.of(globalContext));
     }
 
     @Override
@@ -487,39 +481,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
-            Kind kind;
-            if (lookup.kind().equals(org.kframework.kil.Sort.KITEM)) {
-                kind = Kind.KITEM;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.K)) {
-                kind = Kind.K;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLIST)) {
-                kind = Kind.KLIST;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLABEL)) {
-                kind = Kind.KLABEL;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG_ITEM)) {
-                kind = Kind.CELL;
-            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG)) {
-                kind = Kind.CELL_COLLECTION;
-            } else {
-                assert false: "unexpected lookup kind";
-                kind = null;
-            }
-
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookupsBuilder.add(new SetElementChoice(base), key);
+                    lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                 } else {
-                    lookupsBuilder.add(new SetLookup(base, key), BoolToken.TRUE);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookupsBuilder.add(new MapKeyChoice(base), key);
+                        lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                     }
-                    lookupsBuilder.add(new MapLookup(base, key, kind), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 } else { // ListLookup
-                    lookupsBuilder.add(new ListLookup(base, key, kind), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 }
             }
 

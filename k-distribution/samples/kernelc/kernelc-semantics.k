@@ -73,6 +73,7 @@ module KERNELC-SEMANTICS
     <k> T:Type X:Id; => .K ...</k>
     <env> Env:Map => Env[X <- tv(T *, object(!I:Int))] </env>
     <heap>... .Map => object(!I) |-> tv(T, undef) ...</heap>
+    <locals>... .List => ListItem(tv(T *, object(!I:Int))) </locals>
     [structural]
 
 
@@ -95,14 +96,18 @@ module KERNELC-SEMANTICS
    * Block statement
    */
   rule
-    <k> { VDs:VariableDeclarations Ss:Statements } => VDs ~> Ss ~> Env ...</k>
+    <k>
+      { VDs:VariableDeclarations Ss:Statements } => VDs ~> Ss ~> Env ~> Locals
+    ...</k>
     <env> Env:Map </env>
+    <locals> Locals:List => .List </locals>
     requires VDs =/=K .VariableDeclarations
     [structural]
   rule { .VariableDeclarations Ss:Statements } => Ss    [structural]
   rule
-    <k> Env:Map => deleteLocals(values(BlockEnv -Map Env)) ...</k>
-    <env> BlockEnv:Map => Env </env>
+    <k> Env:Map ~> Locals:List => deleteLocals(BlockLocals) ...</k>
+    <env> _:Map => Env </env>
+    <locals> BlockLocals:List => Locals </locals>
     [structural]
 
   syntax KItem ::= deleteLocals(List)
@@ -149,19 +154,22 @@ module KERNELC-SEMANTICS
   /*
    * Function call/return
    */
-  syntax KItem ::= callStackFrame(K, Map, Id)
+  syntax KItem ::= callStackFrame(K, Map, List, Id)
   rule
     <fun>...
       Callee |-> functionBody(PDs:ParameterDeclarations, _:Type, B:Block)
     ...</fun>
     <k>
-        Callee:Id(EEs:EvaluatedExpressions) ~> K
-      =>
-        { declareParameters(PDs) bindParameters(PDs, EEs, B) }
+      Callee:Id(EEs:EvaluatedExpressions) ~> K
+    =>
+      { declareParameters(PDs) bindParameters(PDs, EEs, B) }
     </k>
-    <stack> .List => ListItem(callStackFrame(K, Env, Caller)) ...</stack>
+    <stack>
+      .List => ListItem(callStackFrame(K, Env, Locals, Caller))
+    ...</stack>
     <fun-id> Caller:Id => Callee </fun-id>
     <env> Env:Map => .Map </env>
+    <locals> Locals:List => .List </locals>
     // TODO: handle special function more generically
     requires Callee =/=K malloc andBool Callee =/=K free
      andBool Callee =/=K scanf andBool Callee =/=K printf
@@ -175,10 +183,13 @@ module KERNELC-SEMANTICS
       deleteLocals(values(CalleeEnv)) ~> tv(T, V) ~> K
     </k>
     <stack>
-      ListItem(callStackFrame(K, CallerEnv:Map, Caller:Id)) => .List
+      ListItem(callStackFrame(K, CallerEnv:Map, CallerLocals:List, Caller:Id))
+    =>
+      .List
     ...</stack>
     <fun-id> Callee:Id => Caller </fun-id>
     <env> CalleeEnv:Map => CallerEnv </env>
+    <locals> _:List => CallerLocals </locals>
 
 
   /*

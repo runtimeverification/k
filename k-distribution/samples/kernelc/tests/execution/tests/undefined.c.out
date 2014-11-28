@@ -13,17 +13,20 @@
     <k>
         * tv ( int * , member ( 2 , value ) ) ~> '_`,_(HOLE,, 
           '.List`{"'_`,_"`}(.KList)) ~> "%d\n", HOLE ~> printf ( HOLE ) ~> 
-          HOLE ; ~> return 0 ; .Statements ~> .Map ~> return tv ( void , undef
-           ) ; .Statements
+          HOLE ; ~> return 0 ; .Statements ~> .Map ~> .List ~> return tv ( 
+          void , undef ) ; .Statements
     </k>
     <env>
         x |-> tv ( struct listNode * * , object ( 1 ) )
     </env>
+    <locals>
+        ListItem ( tv ( struct listNode * * , object ( 1 ) ) )
+    </locals>
     <fun-id>
         main
     </fun-id>
     <stack>
-        ListItem ( callStackFrame ( .K , .Map ,  ) )
+        ListItem ( callStackFrame ( .K , .Map , .List ,  ) )
     </stack>
     <heap>
         object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) )

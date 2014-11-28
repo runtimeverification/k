@@ -110,41 +110,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return transformTerm((Term) super.transform(listLookup));
-    }
-
-    @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transformTerm((Term) super.transform(mapKeyChoice));
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return transformTerm((Term) super.transform(mapLookup));
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transformTerm((Term) super.transform(mapUpdate));
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return transformTerm((Term) super.transform(setElementChoice));
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return transformTerm((Term) super.transform(setLookup));
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transformTerm((Term) super.transform(setUpdate));
-    }
-
-    @Override
     public ASTNode transform(StringToken stringToken) {
         return transformTerm((Term) super.transform(stringToken));
     }

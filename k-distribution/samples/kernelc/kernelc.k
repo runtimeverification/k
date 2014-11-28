@@ -26,6 +26,7 @@ module KERNELC
 
       <k> $PGM:File ~> main(.Expressions) </k>
       <env> .Map </env>
+      <locals> .List </locals>
       <fun-id> String2Id("") </fun-id>
       <stack> .List </stack>
 
