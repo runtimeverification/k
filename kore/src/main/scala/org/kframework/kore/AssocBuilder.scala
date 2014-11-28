@@ -6,6 +6,8 @@ import scala.reflect.ClassTag
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
 
+import org.kframework._
+
 trait Associative[With]
 
 class AssocBuilder[A, AssocIn <: Collection[A]: ClassTag] extends Builder[A, List[A]] {

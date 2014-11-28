@@ -18,7 +18,7 @@ class MetaTest {
     assertEquals('Definition(KSet('Require(KToken(Sort("File"), "foo.k"))), KSet()),
       Meta(Definition(Set(Require(new File("foo.k"))), Set())))
 
-    //    val c = Concrete(Set())
-    //    println(c(Meta(Foo(2))))
+    val c = Concrete(Set())
+    println(c(Meta(Foo(2))))
   }
 }

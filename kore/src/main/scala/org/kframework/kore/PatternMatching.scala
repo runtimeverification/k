@@ -1,7 +1,10 @@
 package org.kframework.kore
 
+import org.kframework._
+
 import KBoolean._
 import KORE._
+
 
 case class MatchException(m: String) extends RuntimeException(m)
 

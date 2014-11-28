@@ -37,26 +37,25 @@ object Meta extends (Any => K) {
   }
 }
 
-// comment out until fixing IntelliJ
-//case class Concrete(includes: Set[String]) extends (K => Any) {
-//  import scala.reflect.runtime.{ universe => ru }
-//  val m = ru.runtimeMirror(getClass.getClassLoader)
-//
-//  def apply(o: K) = o match {
-//    case KApply(KLabel(l), ks, att) =>
-//      val children = ks map { apply _ }
-//
-//      val moduleS = m.staticModule("org.kframework.kore." + l)
-//      val moduleR = m.reflectModule(moduleS)
-//      val module = moduleR.instance
-//
-//      val paramTypes = children map { _.getClass() }
-//
-//      val constructor = module.getClass.getMethod("apply", paramTypes: _*)
-//
-//      println(module)
-//      println(constructor)
-//
-//    case KInt(x, _) => x
-//  }
-//}
+case class Concrete(includes: Set[String]) extends (K => Any) {
+  import scala.reflect.runtime.{ universe => ru }
+  val m = ru.runtimeMirror(getClass.getClassLoader)
+
+  def apply(o: K) = o match {
+    case KApply(KLabel(l), ks, att) =>
+      val children = ks map { apply _ }
+
+      val moduleS = m.staticModule("org.kframework.kore." + l)
+      val moduleR = m.reflectModule(moduleS)
+      val module = moduleR.instance
+
+      val paramTypes = children map { _.getClass() }
+
+      val constructor = module.getClass.getMethod("apply", paramTypes: _*)
+
+      println(module)
+      println(constructor)
+
+    case KInt(x, _) => x
+  }
+}
