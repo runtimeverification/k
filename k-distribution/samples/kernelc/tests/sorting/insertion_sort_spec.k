@@ -37,6 +37,8 @@ rule [insertion-sort-loop-inv1]:
   =>
     .K
   ...</k>
+  // TODO: add back ... to the env cell when lookup and update for maps with
+  // frames work better
   <env>
     x |-> tv(struct listNode * *, object(LX:Int))
     y |-> tv(struct listNode * *, object(LY:Int))
@@ -65,6 +67,8 @@ rule [insertion-sort-loop-inv2]:
   =>
     .K
   ...</k>
+  // TODO: add back ... to the env cell when lookup and update for maps with
+  // frames work better
   <env>
     y |-> tv(struct listNode * *, object(LY:Int))
     z |-> tv(struct listNode * *, object(LZ:Int))

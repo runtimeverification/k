@@ -6,6 +6,12 @@ import org.kframework.backend.java.builtins.IntToken;
 import java.util.Map;
 import java.util.Set;
 
+
+/**
+ * Contains helper methods for handling data structures and operations (lookup, update, ...) on data structures.
+ *
+ * @author AndreiS
+ */
 public interface DataStructures {
 
     static KItem lookup(Term base, Term key, TermContext context) {

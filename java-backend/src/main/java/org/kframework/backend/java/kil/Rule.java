@@ -251,6 +251,7 @@ public class Rule extends JavaSymbolicObject {
             lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(leftHandSide));
             for (Equality eq : lookups.equalities()) {
                 if (DataStructures.isLookup(eq.leftHandSide())) {
+                    // do not double count base variable again
                     lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(DataStructures.getLookupKey(eq.leftHandSide())));
                     lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(eq.rightHandSide()));
                 }
