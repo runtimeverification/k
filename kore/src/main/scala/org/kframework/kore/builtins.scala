@@ -2,6 +2,8 @@
 
 package org.kframework.kore
 
+import org.kframework._
+
 import KORE._
 import KBoolean._
 import scala.collection.mutable.Builder

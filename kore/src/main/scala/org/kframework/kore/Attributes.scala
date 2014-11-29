@@ -1,5 +1,7 @@
 package org.kframework.kore
 
+import org.kframework._
+
 import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
 

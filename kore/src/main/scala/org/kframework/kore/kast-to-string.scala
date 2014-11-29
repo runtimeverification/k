@@ -2,6 +2,8 @@
 
 package org.kframework.kore
 
+import org.kframework._
+
 trait KApplyToString {
   self: KApply =>
   override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
