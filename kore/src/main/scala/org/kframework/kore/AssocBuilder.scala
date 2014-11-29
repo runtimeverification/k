@@ -5,6 +5,7 @@ package org.kframework.kore
 import scala.reflect.ClassTag
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
+import org.kframework.Collection
 
 trait Associative[With]
 
