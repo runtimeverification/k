@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.kframework.kore.Collections.*;
+import static org.kframework.Collections.*;
 
 public class KOREtoKIL {
 
