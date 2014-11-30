@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 package org.kframework
 
 import scala.collection.mutable.Builder
