@@ -33,7 +33,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.Attributes;
 import org.kframework.kore.outer.*;
 
-import static org.kframework.Collections.*;
 import scala.Enumeration.Value;
 import scala.collection.Seq;
 
@@ -41,6 +40,7 @@ import com.google.common.collect.Sets;
 
 import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Constructors.*;
+import static org.kframework.Collections.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
@@ -217,10 +217,9 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.kore.KList userlistMarker = KList(
-                KToken(Sort("userList"), KString(userList.getSort().getName())));
 
-        org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
+        org.kframework.kore.Attributes attrs = Attributes(KToken(Sort("userList"),
+                KString(userList.getSort().getName())));
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 

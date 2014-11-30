@@ -117,7 +117,7 @@ public class KOREtoKIL {
             }
 
             org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
-
+            
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
                     org.kframework.kil.Sort.of(elem.sort().name()), sep.value(), UserList.ZERO_OR_MORE);
 

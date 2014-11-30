@@ -54,6 +54,7 @@ import com.google.common.collect.Sets;
 
 import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Constructors.*;
+import static org.kframework.Collections.*;
 
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
@@ -101,7 +102,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
         return apply(cons.getAttributes()).add(
                 Attributes(KApply(KLabel("sort"),
-                        KList(KToken(Sorts.KString, KString(cons.getSort().toString()))))));
+                        KList(KToken(Sorts.KString(), KString(cons.getSort().toString()))))));
     }
 
     public KApply apply(Hole hole) {
@@ -136,6 +137,6 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                             KList(KToken(Sort("AttributeValue"), KString(valueString))));
                 }).collect(Collectors.toSet());
 
-        return Attributes(KList(attributesSet));
+        return Attributes(immutable(attributesSet));
     }
 }

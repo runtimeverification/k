@@ -23,6 +23,7 @@ object Collections {
   def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
 
   @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
+  @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
   @annotation.varargs def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)
 
   def toList[T]: Collector[T, List[T]] =

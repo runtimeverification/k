@@ -64,5 +64,11 @@ class KoreTest {
     assertNotEquals(KList(5), KApply(KLabel("foo"), KList(5), Attributes()))
     assertNotEquals(KApply(KLabel("foo"), KList(5), Attributes()), KList(5))
   }
+  
+  @Test def testAttributes {
+    assertEquals("[]", Attributes().toString())
+    assertEquals("", Attributes().postfixString)
+    assertEquals(" [X]", Attributes(KVariable("X")).postfixString)
+  }
 
 }
