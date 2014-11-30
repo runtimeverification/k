@@ -5,7 +5,6 @@ import org.kframework._
 import KBoolean._
 import KORE._
 
-
 case class MatchException(m: String) extends RuntimeException(m)
 
 trait BindingOps {
@@ -37,95 +36,88 @@ object EqualsEquivalence extends Equivalence {
 }
 
 trait Matcher {
-  def m(pattern: K) = matchOne(pattern)
+  self: K =>
+
+  def matchPattern(pattern: K) = pattern.matchOne(this)
   /**
    * match a pattern
    */
-  def matchOne(pattern: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(pattern, condition).headOption
+  def matchOne(k: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(k, condition).headOption
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]]
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]]
 }
 
-trait KListMatcher extends Matcher with BindingOps {
+trait KListPattern extends Matcher with BindingOps {
   self: KList =>
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = {
-    pattern match {
-      case v: KVariable => Set(Map(v -> this))
-      case lP if equiv(lP, this) => Set(Map())
-      case klistP: KList =>
-        (this.delegate, klistP.delegate) match {
-          case (List(), List()) => Set(Map())
-          case (head +: tail, headP +: tailP) if equiv(headP, head) => tail.matchAll(tailP)
-          case (_, (v: KVariable) +: tailP) =>
-            (0 to size)
-              .map { index => (delegate.take(index), delegate.drop(index)) }
-              .map {
-                case (prefix, suffix) =>
-                  and(Set(Map(v -> (prefix: K))), suffix.matchAll(tailP))
-              }
-              .fold(Set())(or)
-          case _ => Set()
-        }
-    }
-  }
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    if (equiv(this, k))
+      Set(Map())
+    else
+      k match {
+        case k: KList =>
+          (k.delegate, this.delegate) match {
+            case (List(), List()) => Set(Map())
+            case (head +: tail, headP +: tailP) if equiv(headP, head) => tailP.matchAll(tail)
+            case (_, (v: KVariable) +: tailP) =>
+              (0 to k.size)
+                .map { index => (k.delegate.take(index), k.delegate.drop(index)) }
+                .map {
+                  case (prefix, suffix) =>
+                    and(Set(Map(v -> (prefix: K))), tailP.matchAll(suffix))
+                }
+                .fold(Set())(or)
+            case _ => Set()
+          }
+      }
 }
 
 case class MetaKLabel(klabel: KLabel) extends KItem {
   type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 }
 
-trait KApplyMatcher extends Matcher with BindingOps {
+trait KApplyPattern extends Matcher with BindingOps {
   self: KApply =>
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
-    (pattern, this: KApply) match {
-      case (v: KVariable, _) =>
-        Set(Map(v -> this))
-      case (KApply(labelVariable: KVariable, contentsP: K, att), KApply(label2, contents: Matcher, att2)) =>
-        and(Set(Map(labelVariable -> MetaKLabel(label2))), contents.matchAll(contentsP, condition))
-      case (KApply(label, contentsP: K, att), KApply(label2, contents: Matcher, att2)) if label == label2 =>
-        contents.matchAll(contentsP, condition)
-      case (_: KApply, _: KApply) => Set()
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    (this, k) match {
+      case (KApply(labelVariable: KVariable, contentsP: K, att), KApply(label2, contents, att2)) =>
+        and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents, condition))
+      case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
+        contentsP.matchAll(contents, condition)
+      case (_: KApply, _) => Set()
     }
 }
 
-trait KVariableMatcher extends Matcher with BindingOps {
+trait KVariablePattern extends Matcher with BindingOps {
   self: KVariable =>
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
-    throw MatchException("Encountered a KVariable on the object side during regular (non-symbolic) matching")
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    Set(Map(this -> k))
 }
 
-trait KRewriteMatcher extends Matcher with BindingOps {
+trait KRewritePattern extends Matcher with BindingOps {
   self: KRewrite =>
 
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = (pattern, this: KRewrite) match {
-    case (v: KVariable, _) =>
-      Set(Map(v -> this))
-  }
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 }
 
-trait KTokenMatcher extends Matcher with BindingOps {
+trait KTokenPattern extends Matcher with BindingOps {
   self: KToken =>
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = (pattern, this: KToken) match {
-    case (v: KVariable, _) =>
-      Set(Map(v -> this))
-    case (KToken(`sort`, `s`, _), _) => Set(Map())
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = k match {
+    case KToken(`sort`, `s`, _) => Set(Map())
     case _ => Set()
   }
 }
 
-trait KSequenceMatcher extends Matcher with BindingOps {
+trait KSequencePattern extends Matcher with BindingOps {
   self: KSequence =>
-  def matchAll(pattern: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
-    (pattern, this: KSequence) match {
-      case (v: KVariable, _) =>
-        Set(Map(v -> this))
-      case (s: KSequence, _) =>
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+    k match {
+      case s: KSequence =>
         ks.matchAll(s.ks, condition) map {
           case m: Map[_, _] => m.asInstanceOf[Map[KVariable, KList]] mapValues { l => KSequence(l.delegate, Attributes()) }
         }

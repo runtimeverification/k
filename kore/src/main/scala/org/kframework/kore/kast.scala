@@ -33,7 +33,7 @@ trait KLabel extends KLabelToString {
   val name: String
 }
 
-trait KToken extends KItem with KORE with KTokenMatcher with KTokenToString {
+trait KToken extends KItem with KORE with KTokenPattern with KTokenToString {
   val sort: Sort
   val s: KString
 }
@@ -48,7 +48,7 @@ case class KString(s: String) extends KORE // just a wrapper to mark it
 
 class KList(protected[kore] val delegate: List[K])
   extends KAbstractCollection with Indexed[Int, K]
-  with KListMatcher with Associative[KList]
+  with KListPattern with Associative[KList]
   with KListToString with KORE {
   type This = KList
 
@@ -63,7 +63,7 @@ class KList(protected[kore] val delegate: List[K])
 
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
   extends KAbstractCollection with Indexed[Int, K]
-  with KApplyMatcher with Associative[KList]
+  with KApplyPattern with Associative[KList]
   with KApplyToString with KORE with Equals {
   type This = KApply
 
@@ -92,7 +92,7 @@ case class ConcreteKLabel(name: String) extends KLabel with KORE {
 }
 
 case class KSequence(val ks: List[K], val att: Attributes = Attributes())
-  extends KAbstractCollection with KSequenceMatcher with KSequenceToString with KORE {
+  extends KAbstractCollection with KSequencePattern with KSequenceToString with KORE {
   type This = KSequence
   def delegate = ks
 
@@ -103,13 +103,13 @@ case class KSequence(val ks: List[K], val att: Attributes = Attributes())
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
-  extends KItem with KORE with KLabel with KVariableMatcher with KVariableToString {
+  extends KItem with KORE with KLabel with KVariablePattern with KVariableToString {
   type This = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
-  extends KAbstractCollection with KORE with KRewriteMatcher with KRewriteToString {
+  extends KAbstractCollection with KORE with KRewritePattern with KRewriteToString {
   type This = KRewrite
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
   val klist = KList(left, right)

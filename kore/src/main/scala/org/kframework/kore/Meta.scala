@@ -19,6 +19,7 @@ object Meta extends (Any => K) {
       case o: Int => KInt(o)
       case o: String => KToken(Sort("String"), o)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
+
       case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)
       case o: java.io.File => KToken(Sort("File"), o.toString)
 
