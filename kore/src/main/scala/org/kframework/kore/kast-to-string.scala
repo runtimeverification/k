@@ -16,7 +16,7 @@ trait SortToString {
 
 trait KTokenToString {
   self: KToken =>
-  override def toString = s.s
+  override def toString = s
 }
 
 trait KVariableToString {
@@ -38,11 +38,6 @@ trait KSequenceToString {
   self: KSequence =>
   override def toString =
     if (isEmpty) ".K" else mkString("~>")
-}
-
-trait KStringToString {
-  self: KString =>
-  override def toString = s
 }
 
 trait KListToString {

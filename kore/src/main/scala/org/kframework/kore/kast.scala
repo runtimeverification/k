@@ -35,7 +35,7 @@ trait KLabel extends KLabelToString {
 
 trait KToken extends KItem with KORE with KTokenToString {
   val sort: Sort
-  val s: KString
+  val s: String
 }
 
 trait Sort extends SortToString {
@@ -43,8 +43,6 @@ trait Sort extends SortToString {
 }
 
 /* Data Structures */
-
-case class KString(s: String) extends KORE // just a wrapper to mark it
 
 class KList(protected[kore] val delegate: List[K])
   extends KAbstractCollection with Indexed[Int, K]
@@ -79,7 +77,7 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
   def copy(att: Attributes): KApply = KApply(klabel, klist, att)
 }
 
-case class KUninterpretedToken(sort: Sort, s: KString, override val att: Attributes = Attributes())
+case class KUninterpretedToken(sort: Sort, s: String, override val att: Attributes = Attributes())
   extends KToken with KTokenToString with KORE {
   type This = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
@@ -133,11 +131,11 @@ object KList extends CanBuildKCollection {
 }
 
 object KToken {
-  def apply(sort: Sort, s: KString, att: Attributes = Attributes()) =
+  def apply(sort: Sort, s: String, att: Attributes = Attributes()) =
     KUninterpretedToken(sort, s, att)
 
   def apply(sort: Sort, s: String) =
-    KUninterpretedToken(sort, KString(s), Attributes())
+    KUninterpretedToken(sort, s, Attributes())
 
   def unapply(t: KToken) = Some((t.sort, t.s, t.att))
 }
@@ -190,8 +188,6 @@ object Sort {
 }
 
 object KORE {
-  implicit def StringToKString(s: String) = KString(s)
-
   implicit def seqOfKsToKList(ks: Seq[K]) = KList(ks: _*)
 
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)

@@ -22,8 +22,6 @@ object Constructors {
   def Attributes(ks: Set[K]) = kore.Attributes(ks)
   @annotation.varargs def Attributes(ks: K*) = kore.Attributes(ks: _*)
 
-  def KString(s: String) = kore.KString(s);
-
   def Hole = kore.Hole
 
   def KBagLabel = kore.KBag
@@ -44,8 +42,8 @@ object Constructors {
 
   def KApply(klabel: KLabel, klist: KList) = kore.KApply(klabel, klist, Attributes())
 
-  def KToken(sort: Sort, string: KString, att: Attributes) = kore.KToken(sort, string, att)
-  def KToken(sort: Sort, string: KString) = kore.KToken(sort, string, Attributes())
+  def KToken(sort: Sort, string: String, att: Attributes) = kore.KToken(sort, string, att)
+  def KToken(sort: Sort, string: String) = kore.KToken(sort, string, Attributes())
 
   def KVariable(name: String, att: Attributes) = kore.KVariable(name, att)
 

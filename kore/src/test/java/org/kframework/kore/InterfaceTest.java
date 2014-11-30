@@ -13,7 +13,7 @@ public class InterfaceTest {
         // Creating "A + 0 => A" programmatically
 
         KRewrite k = KRewrite(
-                KApply(KLabel("_+_"), KList(KVariable("A"), KToken(Sort("Int"), KString("0")))),
+                KApply(KLabel("_+_"), KList(KVariable("A"), KToken(Sort("Int"), "0"))),
                 KVariable("A"));
 
         // Navigating it

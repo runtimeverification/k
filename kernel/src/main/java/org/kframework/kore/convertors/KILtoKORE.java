@@ -219,7 +219,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // (to be used when translating those back to single KIL declaration)
 
         org.kframework.kore.Attributes attrs = Attributes(KToken(Sort("userList"),
-                KString(userList.getSort().getName())));
+                userList.getSort().getName()));
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 
