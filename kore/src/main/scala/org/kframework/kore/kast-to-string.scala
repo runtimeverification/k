@@ -47,5 +47,9 @@ trait KStringToString {
 
 trait KListToString {
   self: KList =>
-  override def toString = "KList(" + this.mkString(",") + ")"
+  override def toString =
+    if (size == 0)
+      ".K"
+    else
+      "KList(" + this.mkString(",") + ")"
 }
