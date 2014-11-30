@@ -23,7 +23,7 @@ class TestPatternMatching {
 
   @Test
   def testKApply() {
-    val five = KToken(Sort("Int"), KString("5"))
+    val five = KToken(Sort("Int"), "5")
     val foo = 'foo(five)
     val pattern = 'foo(X)
     assertEquals(Some(Map(X -> KList(five))), pattern.matchOne(foo))
@@ -31,7 +31,7 @@ class TestPatternMatching {
 
   @Test
   def testKApply1() {
-    val five = KToken(Sort("Int"), KString("5"))
+    val five = KToken(Sort("Int"), "5")
     val foo = 'foo(five)
     val pattern = KApply(KLabel("bar"), Seq(X))
     assertEquals(None, pattern.matchOne(foo))
