@@ -146,10 +146,6 @@ object KVariable {
   val it = this
 }
 
-object KString extends Sort {
-  val name = "KString"
-}
-
 object KSequence extends CanBuildKCollection {
   type This = KSequence
 
