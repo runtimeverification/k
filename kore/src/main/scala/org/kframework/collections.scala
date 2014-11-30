@@ -30,11 +30,12 @@ object Collections {
     Collector(() => new CombinerFromBuilder(new SetBuilder(Set())))
 
   def toAssociativeList[T]: Collector[T, List[T]] =
-    Collector(() => new CombinerFromBuilder(new AssocBuilder[T, List[T], List[T]](ListBuffer())))
+    Collector(() => new CombinerFromBuilder(
+      new AssocBuilder[T, List[T], List[T]](ListBuffer())))
 
   def toAssociativeSet[T]: Collector[T, Set[T]] =
-    Collector(() => new CombinerFromBuilder(new AssocBuilder[T, Set[T], Set[T]](
-      new SetBuilder(Set()))))
+    Collector(() => new CombinerFromBuilder(
+      new AssocBuilder[T, Set[T], Set[T]](new SetBuilder(Set()))))
 }
 
 class CombinerFromBuilder[T, R <: { def iterator: Iterator[T] }](protected[this] val b: Builder[T, R]) extends Combiner[T, R] {
