@@ -15,7 +15,7 @@ trait Indexed[I, T] {
 trait Collection[T] {
   type This <: Collection[T]
 
-  def newBuilder: Builder[T, This]
+  def newBuilder(): Builder[T, This]
 
   def canEqual(that: Any): Boolean
 
@@ -33,7 +33,7 @@ trait Collection[T] {
   def size: Int = { var s = 0; foreach { x => s += 1 }; s }
 
   def map(f: T => T): This = {
-    val builder = newBuilder
+    val builder = newBuilder()
     foreach { builder += f(_) }
     builder.result()
   }

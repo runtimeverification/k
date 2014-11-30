@@ -46,7 +46,7 @@ class KoreTest {
       case _ => throw new RuntimeException("match fail")
     }
   }
-  
+
   @Test def testKListAssoc {
     assertEquals(KList(TestK), KList(KList(TestK)))
   }
@@ -64,7 +64,12 @@ class KoreTest {
     assertNotEquals(KList(5), KApply(KLabel("foo"), KList(5), Attributes()))
     assertNotEquals(KApply(KLabel("foo"), KList(5), Attributes()), KList(5))
   }
-  
+
+  @Test def testKSequenceEquals {
+    assertEquals(KSequence(TestK), KSequence(TestK))
+    assertEquals(KSequence(TestK, TestK), KSequence(TestK, TestK))
+  }
+
   @Test def testAttributes {
     assertEquals("[]", Attributes().toString())
     assertEquals("", Attributes().postfixString)

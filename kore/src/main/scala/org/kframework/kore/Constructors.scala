@@ -53,18 +53,21 @@ object Constructors {
     kore.KVariable(name, Attributes())
   }
 
-  @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks)
+  @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks: _*)
 
   def KSequence(ks: java.util.List[K]) = kore.KSequence(KList(ks))
 
   def KRewrite(left: K, right: K) = kore.KRewrite(left, right, Attributes())
 
   def KRewrite(left: K, right: K, att: Attributes) = kore.KRewrite(left, right, att)
-  
+
   def KInt(n: Int) = kore.KInt(n)
-  
+
   def stream(c: KCollection) = org.kframework.Collections.stream(c);
-  
+
   def toKList: Collector[K, KList] =
-    Collector(() => new CombinerFromBuilder(kore.KList.newBuilder))
+    Collector(() => new CombinerFromBuilder(kore.KList.newBuilder()))
+
+  def toKSequence: Collector[K, KSequence] =
+    Collector(() => new CombinerFromBuilder(kore.KSequence.newBuilder()))
 }
