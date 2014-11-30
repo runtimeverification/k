@@ -14,7 +14,7 @@ class AssocBuilder[A, R, AssocIn <: { def iterator: Iterator[A] }: ClassTag](val
     val collectionClass = implicitly[ClassTag[AssocIn]].runtimeClass
 
     if (collectionClass.isAssignableFrom(elementClass)) {
-      elem.asInstanceOf[AssocIn].iterator.foreach { e => builder += e }
+      elem.asInstanceOf[AssocIn].iterator.foreach { e => this += e }
     } else
       builder += elem
 
