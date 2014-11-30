@@ -53,7 +53,7 @@ class KList(protected[kore] val delegate: List[K])
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]
-  override def newBuilder: Builder[K, KList] = KList.newBuilder
+  def newBuilder(): Builder[K, KList] = KList.newBuilder(att)
 
   def get(i: Int) = delegate.lift(i)
   def att = Attributes()
@@ -71,7 +71,7 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
 
   def get(i: Int) = klist.get(i)
 
-  def newBuilder: Builder[K, KApply] = klist.newBuilder mapResult { new KApply(klabel, _, att) }
+  def newBuilder: Builder[K, KApply] = klist.newBuilder() mapResult { new KApply(klabel, _, att) }
 
   override def canEqual(that: Any) = that match {
     case t: KApply => t.klabel == klabel
@@ -91,13 +91,13 @@ case class ConcreteKLabel(name: String) extends KLabel with KORE {
   def apply(ks: K*) = new KApply(this, KList(ks))
 }
 
-case class KSequence(val klist: KList, val att: Attributes = Attributes())
+case class KSequence(val ks: List[K], val att: Attributes = Attributes())
   extends KAbstractCollection with KSequenceMatcher with KSequenceToString with KORE {
   type This = KSequence
-  def delegate = klist.delegate
+  def delegate = ks
 
-  def newBuilder: Builder[K, KSequence] = klist.newBuilder mapResult { new KSequence(_, att) }
-  def copy(att: Attributes): KSequence = new KSequence(klist, att)
+  def newBuilder(): Builder[K, KSequence] = KSequence.newBuilder(att)
+  def copy(att: Attributes): KSequence = new KSequence(ks, att)
 
   def canEqual(that: Any) = that.isInstanceOf[KSequence]
 }
@@ -126,10 +126,10 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
 object KList extends CanBuildKCollection {
   type This = KList
 
-  def apply(l: Iterable[K]): KList = (newBuilder ++= l).result()
+  def apply(l: Iterable[K]): KList = (newBuilder() ++= l).result()
 
-  def newBuilder: Builder[K, KList] =
-    new AssocBuilder[K, KList] mapResult { new KList(_) }
+  def newBuilder(att: Attributes = Attributes()): Builder[K, KList] =
+    new AssocBuilder[K, List[K], KList](ListBuffer()) mapResult { new KList(_) }
 
   def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
 }
@@ -155,9 +155,9 @@ object KString extends Sort {
 object KSequence extends CanBuildKCollection {
   type This = KSequence
 
-  def newBuilder = KList.newBuilder mapResult { new KSequence(_, Attributes()) }
-
-  def fromJava(l: Array[K]) = new KSequence(KList(l: _*), Attributes())
+  def newBuilder(att: Attributes = Attributes()) =
+    new AssocBuilder[K, List[K], KSequence](ListBuffer())
+      .mapResult { new KSequence(_, att) }
 }
 
 object KRewrite {
@@ -168,7 +168,7 @@ object KRewrite {
 }
 
 object EmptyK {
-  def apply() = KSequence(KList(), Attributes())
+  def apply() = KSequence(List(), Attributes())
 }
 
 object KLabel extends ConcreteKLabel("KLabel") {

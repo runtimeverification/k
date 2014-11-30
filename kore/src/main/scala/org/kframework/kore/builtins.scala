@@ -69,7 +69,7 @@ object KSet {
 }
 
 object KBag extends Sort with KLabel {
-  def newBuilder = KList.newBuilder mapResult { new KBag(_) }
+  def newBuilder = KList.newBuilder() mapResult { new KBag(_) }
 
   val name: String = "Bag"
 }

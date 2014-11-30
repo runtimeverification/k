@@ -1,66 +1,84 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 package org.kframework
 
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
+import java.util.function.BiConsumer
+import java.util.function.BinaryOperator
+import java.util.function.Supplier
 import scala.collection.mutable.SetBuilder
 
-trait Indexed[I, T] {
-  def apply(i: I): T = get(i).get
-  def get(i: I): Option[T]
+object Collections {
+  def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala
+  def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
+  def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
+  def immutable[T](s: Array[T]): Seq[T] = s
+
+  def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
+  def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
+  def stream[T](c: Collection[T]): java.util.stream.Stream[T] = c.stream
+  def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
+
+  @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
+  @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
+  @annotation.varargs def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)
+
+  def toList[T]: Collector[T, List[T]] =
+    Collector(() => new CombinerFromBuilder(ListBuffer()))
+
+  def toSet[T]: Collector[T, Set[T]] =
+    Collector(() => new CombinerFromBuilder(new SetBuilder(Set())))
+
+  def toAssociativeList[T]: Collector[T, List[T]] =
+    Collector(() => new CombinerFromBuilder(
+      new AssocBuilder[T, List[T], List[T]](ListBuffer())))
+
+  def toAssociativeSet[T]: Collector[T, Set[T]] =
+    Collector(() => new CombinerFromBuilder(
+      new AssocBuilder[T, Set[T], Set[T]](new SetBuilder(Set()))))
 }
 
-trait Collection[T] extends java.lang.Iterable[T] {
-  type This <: Collection[T]
+class CombinerFromBuilder[T, R <: { def iterator: Iterator[T] }](protected[this] val b: Builder[T, R]) extends Combiner[T, R] {
+  type This <: CombinerFromBuilder[T, R]
 
-  def newBuilder: Builder[T, This]
+  def +=(elem: T): this.type = { b += elem; this }
 
-  def canEqual(that: Any): Boolean
+  def combine(other: Iterable[T]) { this ++= other }
 
-  def foreach(f: T => Unit)
+  def clear(): Unit = b.clear()
 
-  def mkString(separator: String): String = iterable.mkString(separator)
+  def result(): R = b.result()
 
-  def iterable: Iterable[T]
+  def iterator() = b.result().iterator
+}
 
-  def iterator = iterable.iterator.asJava
-  def list: java.util.List[T] = iterable.toList.asJava
-  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
+trait Combiner[T, R] extends Builder[T, R] with Iterable[T] {
+  type This <: Combiner[T, R]
 
-  def isEmpty: Boolean = size == 0
-  def size: Int = { var s = 0; foreach { x => s += 1 }; s }
+  def combine(other: Iterable[T])
+}
 
-  def map(f: T => T): This = {
-    val builder = newBuilder
-    foreach { builder += f(_) }
-    builder.result()
+case class Collector[T, R](cf: () => Combiner[T, R]) extends java.util.stream.Collector[T, Combiner[T, R], R] {
+  def accumulator() = new BiConsumer[Combiner[T, R], T] {
+    def accept(buffer: Combiner[T, R], e: T) = buffer += e
   }
-  def map[R](f: T => R): scala.List[R] = {
-    val builder = ListBuffer[R]()
-    foreach { builder += f(_) }
-    builder.result()
+
+  def characteristics() = new java.util.HashSet()
+
+  def combiner() = new BinaryOperator[Combiner[T, R]] {
+    def apply(a: Combiner[T, R], b: Combiner[T, R]) = {
+      a.combine(b); a
+    }
   }
-}
 
+  def finisher(): java.util.function.Function[Combiner[T, R], R] = new java.util.function.Function[Combiner[T, R], R] {
+    def apply(buffer: Combiner[T, R]): R = buffer.result()
+  }
 
-case class ImmutableList[T](l: List[T]) extends Collection[T] with Indexed[Int, T] {
-  type This = ImmutableList[T]
-  def get(i: Int): Option[T] = l.lift(i)
-  override def apply(i: Int): T = l(i)
-
-  def newBuilder: Builder[T, This] = ListBuffer() mapResult { new ImmutableList(_) }
-
-  def foreach(f: T => Unit) = l foreach f
-
-  def iterable: Iterable[T] = l
-}
-
-case class ImmutableSet[T](s: collection.Set[T]) extends Collection[T] {
-  type This = ImmutableSet[T]
-
-  def newBuilder: Builder[T, This] = new SetBuilder[T, collection.Set[T]](Set[T]()) mapResult { new ImmutableSet(_) }
-
-  def foreach(f: T => Unit) = s foreach f
-  def iterable: Iterable[T] = s
+  def supplier(): Supplier[Combiner[T, R]] = new Supplier[Combiner[T, R]] {
+    def get() = cf()
+  }
 }

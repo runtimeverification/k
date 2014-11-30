@@ -33,7 +33,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.Attributes;
 import org.kframework.kore.outer.*;
 
-import static org.kframework.kore.Collections.*;
 import scala.Enumeration.Value;
 import scala.collection.Seq;
 
@@ -41,14 +40,11 @@ import com.google.common.collect.Sets;
 
 import static org.kframework.kore.outer.Constructors.*;
 import static org.kframework.kore.Constructors.*;
+import static org.kframework.Collections.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
-    // we mark productions in same priority blocks with ids unique to that
-    // priority block
-    public int priorityBlockId = 0;
-
-    public KILtoInnerKORE inner = new KILtoInnerKORE();
+    private KILtoInnerKORE inner = new KILtoInnerKORE();
 
     public org.kframework.kore.outer.Definition apply(Definition d) {
         Set<org.kframework.kore.outer.Require> requires = d.getItems().stream()
@@ -125,7 +121,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         case "non-assoc":
             return Associativity.NonAssoc();
         default:
-            throw new RuntimeException("Incorrect assoc string: " + assocOrig);
+            throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
@@ -184,21 +180,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new RuntimeException("Lists should have applyed before.");
+                            throw new AssertionError("Lists should have applyed before.");
                         } else if (it instanceof Lexical) {
                             items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
-                            throw new RuntimeException("Unhandled case");
+                            throw new AssertionError("Unhandled case");
                         }
                     }
 
                     org.kframework.kore.Attributes attrs = inner.apply(p.getAttributes());
-                    // org.kframework.kore.KToken pbIndicator =
-                    // KToken(Sort("priority-block"),
-                    // KString(Integer.toString(priorityBlockId++)));
-                    // attrs = attrs.add(Attributes(pbIndicator));
 
                     org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(
                             sort,
@@ -225,10 +217,9 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.kore.KList userlistMarker = KList(
-                KToken(Sort("userList"), KString(userList.getSort().getName())));
 
-        org.kframework.kore.Attributes attrs = Attributes(userlistMarker);
+        org.kframework.kore.Attributes attrs = Attributes(KToken(Sort("userList"),
+                KString(userList.getSort().getName())));
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 

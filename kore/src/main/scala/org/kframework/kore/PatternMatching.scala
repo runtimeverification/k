@@ -126,8 +126,8 @@ trait KSequenceMatcher extends Matcher with BindingOps {
       case (v: KVariable, _) =>
         Set(Map(v -> this))
       case (s: KSequence, _) =>
-        klist.matchAll(s.klist, condition) map {
-          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, KList]] mapValues { l => KSequence(l, Attributes()) }
+        ks.matchAll(s.ks, condition) map {
+          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, KList]] mapValues { l => KSequence(l.delegate, Attributes()) }
         }
     }
 }

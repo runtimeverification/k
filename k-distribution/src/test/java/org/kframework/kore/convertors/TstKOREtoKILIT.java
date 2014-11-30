@@ -71,7 +71,7 @@ public class TstKOREtoKILIT extends BaseTest {
         outerKILtoKOREtoKILTest();
     }
 
-    @Test
+    @Test @Ignore
     public void userList() throws IOException {
         outerKILtoKOREtoKILTest();
     }
