@@ -7,12 +7,24 @@ import KORE._
 
 case class MatchException(m: String) extends RuntimeException(m)
 
+object Pattern {
+  type Solution = Map[KVariable, K]
+}
+
+import Pattern.Solution
+
+trait Pattern {
+  def matchOne(k: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(k, condition).headOption
+
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
+}
+
 trait BindingOps {
 
-  def or(s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]): Set[Map[KVariable, K]] =
+  def or(s1: Set[Solution], s2: Set[Solution]): Set[Solution] =
     s1 | s2
 
-  def and(s1: Set[Map[KVariable, K]], s2: Set[Map[KVariable, K]]): Set[Map[KVariable, K]] = {
+  def and(s1: Set[Solution], s2: Set[Solution]): Set[Solution] = {
     (for (m1 <- s1; m2 <- s2) yield {
       and(m1, m2)
     }).flatten
@@ -35,22 +47,17 @@ object EqualsEquivalence extends Equivalence {
   def apply(a: K, b: K): Boolean = a == b
 }
 
-trait Matcher {
-  self: K =>
-
-  def matchPattern(pattern: K) = pattern.matchOne(this)
-  /**
-   * match a pattern
-   */
-  def matchOne(k: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(k, condition).headOption
-
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]]
+trait PatternByReflection {
+  self: { def productIterator: Iterable[K] } =>
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
+    ???
+  }
 }
 
-trait KListPattern extends Matcher with BindingOps {
+trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     if (equiv(this, k))
       Set(Map())
     else
@@ -76,13 +83,13 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
   type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
-trait KApplyPattern extends Matcher with BindingOps {
+trait KApplyPattern extends Pattern with BindingOps {
   self: KApply =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     (this, k) match {
       case (KApply(labelVariable: KVariable, contentsP: K, att), KApply(label2, contents, att2)) =>
         and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents, condition))
@@ -92,30 +99,30 @@ trait KApplyPattern extends Matcher with BindingOps {
     }
 }
 
-trait KVariablePattern extends Matcher with BindingOps {
+trait KVariablePattern extends Pattern with BindingOps {
   self: KVariable =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     Set(Map(this -> k))
 }
 
-trait KRewritePattern extends Matcher with BindingOps {
+trait KRewritePattern extends Pattern with BindingOps {
   self: KRewrite =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = ???
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
-trait KTokenPattern extends Matcher with BindingOps {
+trait KTokenPattern extends Pattern with BindingOps {
   self: KToken =>
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] = k match {
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
     case KToken(`sort`, `s`, _) => Set(Map())
     case _ => Set()
   }
 }
 
-trait KSequencePattern extends Matcher with BindingOps {
+trait KSequencePattern extends Pattern with BindingOps {
   self: KSequence =>
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, K]] =
+  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks, condition) map {

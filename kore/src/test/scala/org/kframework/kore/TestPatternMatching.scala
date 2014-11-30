@@ -12,13 +12,13 @@ class TestPatternMatching {
   @Test
   def testSimple() {
     val foo = 'foo()
-    assertEquals(Some(Map(X -> foo)), foo.matchPattern(X))
+    assertEquals(Some(Map(X -> foo)), X.matchOne(foo))
   }
 
   @Test
   def testEmptyMatch() {
     val foo = 'foo()
-    assertEquals(Some(Map()), foo.matchPattern(foo))
+    assertEquals(Some(Map()), foo.matchOne(foo))
   }
 
   @Test
@@ -26,7 +26,7 @@ class TestPatternMatching {
     val five = KToken(Sort("Int"), KString("5"))
     val foo = 'foo(five)
     val pattern = 'foo(X)
-    assertEquals(Some(Map(X -> KList(five))), foo.matchPattern(pattern))
+    assertEquals(Some(Map(X -> KList(five))), pattern.matchOne(foo))
   }
 
   @Test
@@ -34,7 +34,7 @@ class TestPatternMatching {
     val five = KToken(Sort("Int"), KString("5"))
     val foo = 'foo(five)
     val pattern = KApply(KLabel("bar"), Seq(X))
-    assertEquals(None, foo.matchPattern(pattern))
+    assertEquals(None, pattern.matchOne(foo))
   }
 
   @Test
@@ -120,14 +120,14 @@ class TestPatternMatching {
   def testKApplyWithEmptySeq() {
     val foo = 'foo()
     val pattern = 'foo(X)
-    assertEquals(Some(Map(X -> KList())), foo.matchPattern(pattern))
+    assertEquals(Some(Map(X -> KList())), pattern.matchOne(foo))
   }
 
   @Test
   def testKVariableMatchingKLabel() {
     val foo = 'foo()
     val pattern = KApply(X, Seq(), Attributes())
-    assertEquals(Some(Map(X -> MetaKLabel('foo))), foo.matchPattern(pattern))
+    assertEquals(Some(Map(X -> MetaKLabel('foo))), pattern.matchOne(foo))
   }
 
   @Test
@@ -142,7 +142,7 @@ class TestPatternMatching {
   @Test
   def testAttributes() {
     val foo = 'foo()
-    assertEquals(Some(Map(X -> foo)), foo.matchPattern(X))
+    assertEquals(Some(Map(X -> foo)), X.matchOne(foo))
   }
 
   def assertEquals(expected: Any, actual: Any) {

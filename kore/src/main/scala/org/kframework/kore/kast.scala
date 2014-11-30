@@ -21,7 +21,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Matcher with Rewriting {
+trait K extends HasAttributes with Pattern with Rewriting {
   protected type This <: K
 
   def copy(att: Attributes): This
