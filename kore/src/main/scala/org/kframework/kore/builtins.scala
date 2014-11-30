@@ -35,6 +35,18 @@ object KInt extends Sort with KLabel {
   val name: String = "Int"
 }
 
+case class KString(s: String, att: Attributes = Attributes()) extends KToken {
+  type This = KString
+  val sort = KString
+  def copy(att: Attributes) = KString(s, att)
+}
+
+object KString extends Sort with KLabel {
+  implicit def toKString(s: String): KString = KString(s)
+
+  val name: String = "Int"
+}
+
 case class KBag private[kore] (val klist: KList) extends KAbstractCollection with Associative[KBag] {
   type This = KBag
 
