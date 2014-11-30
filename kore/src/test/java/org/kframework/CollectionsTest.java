@@ -51,7 +51,7 @@ public class CollectionsTest {
 
 		Stream<Integer> s = stream(List(1, 2, 3));
 
-		// splitting 1 into a list of 0.5 and 0.5
+		// splitting 3 into a list
 		Stream<Object> l = s.map(x -> {
 			if (x == 3)
 				return List(1, 2);
