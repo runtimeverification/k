@@ -12,7 +12,7 @@ import scala.collection.mutable.SetBuilder
 case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
   type This = KBoolean
   val sort = KBoolean
-  val s: KString = v.toString
+  val s: String = v.toString
 
   def copy(att: Attributes) = KBoolean(v, att)
 }
@@ -25,7 +25,7 @@ object KBoolean extends Sort with KLabel {
 case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
   type This = KInt
   val sort = KInt
-  val s: KString = n.toString
+  val s: String = n.toString
   def copy(att: Attributes) = KInt(n, att)
 }
 

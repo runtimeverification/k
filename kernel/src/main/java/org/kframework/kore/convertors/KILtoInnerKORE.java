@@ -102,11 +102,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
         return apply(cons.getAttributes()).add(
                 Attributes(KApply(KLabel("sort"),
-                        KList(KToken(Sorts.KString(), KString(cons.getSort().toString()))))));
+                        KList(KToken(Sorts.KString(), cons.getSort().toString())))));
     }
 
     public KApply apply(Hole hole) {
-        return KApply(Hole(), KList(KToken(Sort(hole.getSort().getName()), KString(""))),
+        return KApply(Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
                 sortAttributes(hole));
     }
 
@@ -134,7 +134,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                     String valueString = attributes.get(key).getValue().toString();
 
                     return (K) KApply(KLabel(keyString),
-                            KList(KToken(Sort("AttributeValue"), KString(valueString))));
+                            KList(KToken(Sort("AttributeValue"), valueString)));
                 }).collect(Collectors.toSet());
 
         return Attributes(immutable(attributesSet));

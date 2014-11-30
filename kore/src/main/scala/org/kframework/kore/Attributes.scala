@@ -49,7 +49,7 @@ trait AttributesToString {
   override def toString() =
     "[" +
       (this.filteredAtt map {
-        case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
+        case KApply(KLabel(keyName), KList(KToken(_, value, _)), _) => keyName + "(" + value + ")"
         case x => x.toString
       }).toList.sorted.mkString(" ") +
       "]"

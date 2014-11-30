@@ -30,7 +30,7 @@ public class KOREtoKIL {
     }
 
     class ListProductionCollector {
-        private Map<KString, List<SyntaxProduction>> listProds;
+        private Map<String, List<SyntaxProduction>> listProds;
         private List<org.kframework.kil.Syntax> userLists;
 
         public List<org.kframework.kil.Syntax> getResults() {
@@ -46,7 +46,7 @@ public class KOREtoKIL {
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
                     List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    KString listType = searchListType(attrs);
+                    String listType = searchListType(attrs);
                     if (listType != null) {
                         List<SyntaxProduction> prods = listProds.get(listType);
                         if (prods == null) {
@@ -62,7 +62,7 @@ public class KOREtoKIL {
             return ret;
         }
 
-        private KString searchListType(List<K> attrs) {
+        private String searchListType(List<K> attrs) {
             for (K attr : attrs) {
                 if (attr instanceof KToken) {
                     KToken kToken = (KToken) attr;
@@ -76,17 +76,17 @@ public class KOREtoKIL {
 
         private void generateUserLists() {
             userLists = new ArrayList<>();
-            for (Map.Entry<KString, List<SyntaxProduction>> entry : listProds.entrySet()) {
-                KString listType = entry.getKey();
+            for (Map.Entry<String, List<SyntaxProduction>> entry : listProds.entrySet()) {
+                String listType = entry.getKey();
                 List<SyntaxProduction> prods = entry.getValue();
                 if (prods.size() != 3 && prods.size() != 2) {
                     throw new AssertionError("Found list with " + prods.size() + " elements.");
                 }
 
                 if (prods.size() == 2) {
-                    userLists.add(makeNonEmptyUserList(prods, listType.s()));
+                    userLists.add(makeNonEmptyUserList(prods, listType));
                 } else {
-                    userLists.add(makeUserList(prods, listType.s()));
+                    userLists.add(makeUserList(prods, listType));
                 }
             }
         }
@@ -403,14 +403,14 @@ public class KOREtoKIL {
                 KLabel key = attr.klabel();
                 KList klist = attr.klist();
                 if (klist.size() == 1 && klist.get(0) instanceof KToken) {
-                    String value = ((KToken) klist.get(0)).s().s();
+                    String value = ((KToken) klist.get(0)).s();
                     kilAttributes.add(Attribute.of(key.name(), value));
                 } else {
                     throw NOT_IMPLEMENTED();
                 }
             } else if (a instanceof KToken) {
                 KToken attr = (KToken) a;
-                String stringValue = attr.s().s();
+                String stringValue = attr.s();
                 kilAttributes.add(Attribute.of(stringValue, stringValue));
             } else {
                 throw NOT_IMPLEMENTED();
@@ -483,7 +483,7 @@ public class KOREtoKIL {
                     List<K> args = kApply.list();
                     if (args.size() == 1 && args.get(0) instanceof KToken) {
                         KToken tok = (KToken) args.get(0);
-                        sort = org.kframework.kil.Sort.of(tok.s().s());
+                        sort = org.kframework.kil.Sort.of(tok.s());
                         break;
                     }
                 }
