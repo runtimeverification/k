@@ -127,7 +127,7 @@ object KList extends CanBuildKCollection {
   def apply(l: Iterable[K]): KList = (newBuilder ++= l).result()
 
   def newBuilder: Builder[K, KList] =
-    new AssocBuilder[K, KList] mapResult { new KList(_) }
+    new AssocBuilder[K, List[K], KList](ListBuffer()) mapResult { new KList(_) }
 
   def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
 }
