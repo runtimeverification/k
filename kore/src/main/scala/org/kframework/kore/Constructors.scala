@@ -2,12 +2,12 @@
 
 package org.kframework.kore;
 
-import java.util.List;
-
-import scala.collection.Seq;
+import java.util.List
+import scala.collection.Seq
 import collection.JavaConverters._
-
 import org.kframework.kore
+import org.kframework.Collector
+import org.kframework.CombinerFromBuilder
 
 /**
  *
@@ -60,4 +60,11 @@ object Constructors {
   def KRewrite(left: K, right: K) = kore.KRewrite(left, right, Attributes())
 
   def KRewrite(left: K, right: K, att: Attributes) = kore.KRewrite(left, right, att)
+  
+  def KInt(n: Int) = kore.KInt(n)
+  
+  def stream(c: KCollection) = org.kframework.Collections.stream(c);
+  
+  def toKList: Collector[K, KList] =
+    Collector(() => new CombinerFromBuilder(kore.KList.newBuilder))
 }
