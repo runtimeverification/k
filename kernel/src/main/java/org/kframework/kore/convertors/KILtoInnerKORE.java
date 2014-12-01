@@ -48,12 +48,13 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
-
 import org.kframework.utils.StringBuilderUtil;
+
 import scala.Enumeration.Value;
 import scala.collection.Seq;
 
@@ -99,47 +100,26 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 att);
     }
 
-    public KApply apply(KApp kApp) {
+    public K apply(KApp kApp) {
         Term label = kApp.getLabel();
-        Term child = kApp.getChild();
+        
+        System.out.println(kApp);
 
-        KLabel koreLabel;
-        KList koreChildren;
-
-        org.kframework.kore.Attributes attrs = apply(kApp.getAttributes());
-
-        if (label instanceof IntBuiltin) {
-            IntBuiltin intBuiltin = (IntBuiltin) label;
-            koreLabel = KLabel(intBuiltin.value());
-            attrs = attrs.add("sort", "int").add("payload", intBuiltin.bigIntegerValue().toString());
-        } else if (label instanceof Int32Builtin) {
-            Int32Builtin int32Builtin = (Int32Builtin) label;
-            koreLabel = KLabel(int32Builtin.value());
-            attrs = attrs.add("sort", "int32").add("payload", Integer.toString(int32Builtin.intValue()));
-        } else if (label instanceof StringBuiltin) {
-            StringBuiltin stringBuiltin = (StringBuiltin) label;
-            koreLabel = KLabel(stringBuiltin.value());
-            attrs = attrs.add("sort", "string").add("payload", stringBuiltin.stringValue());
-        } else if (label instanceof FloatBuiltin) {
-            FloatBuiltin floatBuiltin = (FloatBuiltin) label;
-            koreLabel = KLabel(floatBuiltin.value());
-            attrs = attrs.add("sort", "float").add("payload", floatBuiltin.bigFloatValue().toString());
-        } else if (label instanceof BoolBuiltin) {
-            BoolBuiltin boolBuiltin = (BoolBuiltin) label;
-            koreLabel = KLabel(boolBuiltin.value());
-            attrs = attrs.add("sort", "bool").add("payload", boolBuiltin.booleanValue().toString());
+        if (label instanceof Token) {
+            return KToken(Sort(((Token)label).tokenSort().getName()), ((Token) label).value());
         } else {
-            throw new RuntimeException("Unhandled case");
-        }
+            Term child = kApp.getChild();
 
-        if (child instanceof org.kframework.kil.KList) {
-            org.kframework.kil.KList kList = (org.kframework.kil.KList) child;
-            koreChildren = KList(kList.getContents().stream().map(this).collect(Collectors.toList()));
-        } else {
-            throw new RuntimeException("Unhandled case");
+            if (child instanceof org.kframework.kil.KList) {
+                org.kframework.kil.KList kList = (org.kframework.kil.KList) child;
+                KList koreChildren = (KList) kList.getContents().stream().map(this)
+                        .collect(toKList());
+                throw new AssertionError();
+                // return new KApply(null, koreChildren, apply(kApp.getAttributes()));
+            } else {
+                throw new AssertionError();
+            }
         }
-
-        return new KApply(koreLabel, koreChildren, apply(kApp.getAttributes()).add(attrs));
     }
 
     private org.kframework.kore.Attributes attributesFor(TermCons cons) {
