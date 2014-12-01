@@ -84,6 +84,14 @@ module STRING-HOOKS
 
   rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
+  rule isLowerCase(C:String)
+      => (ordChar(C) >=Int ordChar("a"))
+           andBool (ordChar(C) <=Int ordChar("z")) when isChar(C)
+
+  rule isUpperCase(C:String)
+      => (ordChar(C) >=Int ordChar("A"))
+           andBool (ordChar(C) <=Int ordChar("Z")) when isChar(C)
+
   syntax Bool ::= "#isWhiteSpace" "(" String ")"   [function, klabel(#isWhiteSpace)]
   rule #isWhiteSpace(C:String)
       => (ordChar(C) >=Int 9 andBool ordChar(C) <=Int 13)
