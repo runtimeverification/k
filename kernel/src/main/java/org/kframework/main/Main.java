@@ -38,6 +38,7 @@ public class Main {
      * @throws IOException when loadDefinition fails
      */
     public static void main(String[] args) {
+        isNailgun = false;
         AnsiConsole.systemInstall();
         if (args.length >= 1) {
 
@@ -51,7 +52,14 @@ public class Main {
         invalidJarArguments();
     }
 
+    private static boolean isNailgun;
+
+    public static boolean isNailgun() {
+        return isNailgun;
+    }
+
     public static void nailMain(NGContext context) {
+        isNailgun = true;
         ThreadLocalPrintStream system_out = (ThreadLocalPrintStream) System.out;
         ThreadLocalPrintStream system_err = (ThreadLocalPrintStream) System.err;
         if (context.getArgs().length >= 1) {

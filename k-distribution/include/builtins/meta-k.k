@@ -2,6 +2,6 @@
 require "set.k"
 
 module META-K
-  syntax K ::= #variables(K)        [function, hook(#META-K:#variables)]
-             | #rename(K, MySet)    [function, hook(#META-K:#rename)]
+  syntax K ::= #variables(K)        [function, hook(#META-K:#variables), impure]
+             | #rename(K, MySet)    [function, hook(#META-K:#rename), impure]
 endmodule

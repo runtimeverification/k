@@ -1,10 +1,16 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+
+import java.util.List;
 
 
 /**
@@ -31,6 +37,17 @@ public class BuiltinListOperations {
         return builder.build();
     }
 
+    public static Term get(BuiltinList list, IntToken index, TermContext context) {
+        Term value = list.get(index.intValue());
+        if (value != null) {
+            return value;
+        } else if (list.isConcreteCollection()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
+    }
+
     public static BoolToken in(Term element, BuiltinList list, TermContext context) {
         if (list.contains(element)) {
             return BoolToken.TRUE;
@@ -39,6 +56,52 @@ public class BuiltinListOperations {
         } else {
             return null;
         }
+    }
+
+    public static Term range(BuiltinList list, IntToken int1, IntToken int2, TermContext context) {
+        int removeLeft = int1.intValue();
+        int removeRight = int2.intValue();
+        int pendingRemoveLeft;
+        int pendingRemoveRight;
+        List<Term> elementsLeft = list.elementsLeft();
+        List<Term> elementsRight = list.elementsRight();
+        if (list.isConcreteCollection()) {
+            if (removeLeft + removeRight > elementsLeft.size()) {
+                return Bottom.of(Kind.KITEM);
+            }
+
+            pendingRemoveLeft = pendingRemoveRight = 0;
+            elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size() - removeRight);
+            elementsRight = ImmutableList.of();
+        } else {
+            if (removeLeft > elementsLeft.size()) {
+                pendingRemoveLeft = removeLeft - elementsLeft.size();
+                elementsLeft = ImmutableList.of();
+            } else {
+                pendingRemoveLeft = 0;
+                elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size());
+            }
+
+            if (removeRight > elementsRight.size()) {
+                pendingRemoveRight = removeRight - elementsRight.size();
+                elementsRight = ImmutableList.of();
+            } else {
+                pendingRemoveRight = 0;
+                elementsRight = elementsRight.subList(0, elementsRight.size() - removeRight);
+            }
+        }
+
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItems(elementsLeft);
+        builder.concatenate(list.baseTerms());
+        builder.addItems(elementsRight);
+
+        return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
+                DataStructures.listRange(
+                        builder.build(),
+                        pendingRemoveLeft,
+                        pendingRemoveLeft, context) :
+                builder.build();
     }
 
 }
