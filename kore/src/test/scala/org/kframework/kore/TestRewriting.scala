@@ -46,7 +46,8 @@ class TestRewriting {
 
   @Test
   def testVarSubstitution1() {
-    assertEquals(Set('foo(5, 4, 5)), 'foo(4, 5, 6).search(KRewrite('foo(X, 6), 'foo(5, X))))
+    assertEquals(Set('foo(5, 4, 5)),
+      'foo(4, 5, 6).search(KRewrite('foo(X, 6), 'foo(5, X))))
   }
 
   @Test
@@ -67,6 +68,27 @@ class TestRewriting {
   @Test
   def testKLabelMatch() {
     assertEquals(Set('foo(4)), 'foo(4, 4).search(KRewrite(KApply(X, KList(4, 4)), KApply(X, KList(4)), Attributes())))
+  }
+
+  @Test
+  def simple() {
+    assertEquals(Set('foo(1, 3)),
+      'foo(1, 2).search(KRewrite('foo(1, 2), 'foo(1, 3))))
+  }
+
+  @Test def testSimpleToTop {
+    assertEquals(Set('foo(1, 3)),
+      'foo(1, 2).search('foo(1, KRewrite(2, 3))))
+  }
+
+  @Test def testWithVariableInside {
+    assertEquals(Set('foo(1, 3)),
+    'foo(1, 'bar(2, 3)).search(KRewrite('foo(1, 'bar(2, X)), 'foo(1, X))))
+  }
+
+  @Test def testToTopWithVariableInside {
+    assertEquals(Set('foo(1, 3)),
+      'foo(1, 'bar(2, 3)).search('foo(1, KRewrite('bar(2, X), X))))
   }
 
   def assertEquals(expected: Any, actual: Any) {

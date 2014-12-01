@@ -12,8 +12,8 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
 
     @SuppressWarnings("serial")
     static class VisitingException extends RuntimeException {
-        VisitingException(Throwable e) {
-            super(e);
+        VisitingException(String m, Throwable e) {
+            super(m, e);
         }
     }
 
@@ -24,7 +24,8 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
             return (R) visitorMethod.invoke(this, t);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
-            throw new VisitingException(e);
+            throw new VisitingException(this.getClass().getCanonicalName().toString()
+                    + " doesn't have an apply for " + t.getClass(), e);
         }
     }
 }

@@ -65,16 +65,18 @@ trait KListPattern extends Pattern with BindingOps {
         case k: KList =>
           (k.delegate, this.delegate) match {
             case (List(), List()) => Set(Map())
-            case (head +: tail, headP +: tailP) if equiv(headP, head) => tailP.matchAll(tail)
-            case (_, (v: KVariable) +: tailP) =>
+            //            case (head +: tail, headP +: tailP) if equiv(headP, head) => tailP.matchAll(tail)
+            case (_, headP +: tailP) =>
               (0 to k.size)
                 .map { index => (k.delegate.take(index), k.delegate.drop(index)) }
                 .map {
+                  case (List(oneElement), suffix) =>
+                    and(headP.matchAll(oneElement), tailP.matchAll(suffix))
                   case (prefix, suffix) =>
-                    and(Set(Map(v -> (prefix: K))), tailP.matchAll(suffix))
+                    and(headP.matchAll(prefix), tailP.matchAll(suffix))
                 }
                 .fold(Set())(or)
-            case _ => Set()
+            case other => Set()
           }
       }
 }
@@ -126,7 +128,10 @@ trait KSequencePattern extends Pattern with BindingOps {
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks, condition) map {
-          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, KList]] mapValues { l => KSequence(l.delegate, Attributes()) }
+          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, K]] mapValues {
+            case l: KList => KSequence(l.delegate, Attributes())
+            case k => k
+          }
         }
     }
 }

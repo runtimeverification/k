@@ -20,10 +20,9 @@ class TestPatternMatching {
   }
 
   @Test def testKApply() {
-    val five = KToken(Sort("Int"), "5")
-    val foo = 'foo(five)
+    val foo = 'foo(5)
     val pattern = 'foo(X)
-    assertEquals(Some(Map(X -> KList(five))), pattern.matchOne(foo))
+    assertEquals(Some(Map(X -> 5)), pattern.matchOne(foo))
   }
 
   @Test def testKApply1() {
@@ -31,6 +30,10 @@ class TestPatternMatching {
     val foo = 'foo(five)
     val pattern = KApply(KLabel("bar"), Seq(X))
     assertEquals(None, pattern.matchOne(foo))
+  }
+
+  @Test def testNested() {
+    assertEquals(Set(Map(X -> (5: K))), 'foo('bar(X)).matchAll('foo('bar(5))))
   }
 
   @Test def testKListEntire() {
@@ -61,14 +64,14 @@ class TestPatternMatching {
     val foo = 'foo(5)
     val Y = KVariable("Y")
     val pattern = 'foo(X, Y)
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5)), Map(X -> KList(5), Y -> KList())), pattern.matchAll(foo))
+    assertEquals(Set(Map(X -> KList(), Y -> 5), Map(X -> 5, Y -> KList())), pattern.matchAll(foo))
   }
 
   @Test def testKListAssoc1() {
     val foo = 'foo(5, 6)
     val Y = KVariable("Y")
     val pattern = 'foo(X, Y)
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 6)), Map(X -> KList(5), Y -> KList(6)), Map(X -> KList(5, 6), Y -> KList())),
+    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 6)), Map(X -> 5, Y -> 6), Map(X -> KList(5, 6), Y -> KList())),
       pattern.matchAll(foo))
   }
 
@@ -76,7 +79,7 @@ class TestPatternMatching {
     val foo = 'foo(5, 7, 6)
     val Y = KVariable("Y")
     val pattern = 'foo(X, 7, Y)
-    assertEquals(Set(Map(X -> KList(5), Y -> KList(6))),
+    assertEquals(Set(Map(X -> 5, Y -> 6)),
       pattern.matchAll(foo))
   }
 
@@ -84,14 +87,14 @@ class TestPatternMatching {
     val foo = 'foo(5, 5, 5)
     val Y = KVariable("Y")
     val pattern = 'foo(X, 5, Y)
-    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 5)), Map(X -> KList(5), Y -> KList(5)), Map(X -> KList(5, 5), Y -> KList())),
+    assertEquals(Set(Map(X -> KList(), Y -> KList(5, 5)), Map(X -> 5, Y -> 5), Map(X -> KList(5, 5), Y -> KList())),
       pattern.matchAll(foo))
   }
 
   @Test def testKListMultipleVar() {
     val foo = 'foo(5, 5)
     val pattern = 'foo(X, X)
-    assertEquals(Set(Map(X -> KList(5))),
+    assertEquals(Set(Map(X -> (5: K))),
       pattern.matchAll(foo))
   }
 
@@ -129,7 +132,7 @@ class TestPatternMatching {
 
   @Test def testAnywhere() {
     val o = 'foo('bar('foo()))
-    assertEquals(Set(Map(X -> KList('bar('foo()))), Map(X -> KSequence())), Anywhere('foo(X)).matchAll(o))
+    assertEquals(Set(Map(X -> 'bar('foo())), Map(X -> KSequence())), Anywhere('foo(X)).matchAll(o))
   }
 
   def assertEquals(expected: Any, actual: Any) {

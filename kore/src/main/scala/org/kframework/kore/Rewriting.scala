@@ -5,13 +5,6 @@ import KBoolean._
 trait Rewriting {
   self: K =>
   /**
-   * rewrite using the rewrite rule in K
-   */
-  def rewrite(rewrite: KRewrite): Some[K] = {
-    ???
-  }
-
-  /**
    * search using the rewrite rule in K
    */
   def search(rules: Set[KRewrite]): Set[K] = priority(rules) flatMap search
@@ -27,7 +20,7 @@ trait Rewriting {
    * search using the rewrite rule in K
    */
   def search(rewrite: KRewrite): Set[K] = {
-    val solutions = matchAll(rewrite.left, true)
+    val solutions = rewrite.left.matchAll(this, true)
 
     solutions map { substituion => rewrite.right.transform(substituion) }
   }
@@ -40,5 +33,21 @@ trait Rewriting {
     case c: KCollection =>
       c map { x: K => x.transform(substituion) }
     case e => e
+  }
+
+  def search(rewrite: K): Set[K] = {
+    println(KRewrite(toLeft(rewrite), toRight(rewrite)))
+    search(KRewrite(toLeft(rewrite), toRight(rewrite)))
+  }
+
+  def toLeft(rewrite: K): K = rewrite match {
+    case KRewrite(left, right, _) => left
+    case c: KCollection => c map toLeft
+    case other => other
+  }
+  def toRight(rewrite: K): K = rewrite match {
+    case KRewrite(left, right, _) => right
+    case c: KCollection => c map toRight
+    case other => other
   }
 }
