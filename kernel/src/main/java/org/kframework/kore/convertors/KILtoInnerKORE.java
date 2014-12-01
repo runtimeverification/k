@@ -65,7 +65,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return KBag(KList(contents));
     }
 
-    KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
+    private KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
 
     @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {

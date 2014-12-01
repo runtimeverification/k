@@ -162,7 +162,7 @@ public class FileUtil {
         }
     }
 
-    public void save(File file, String content) {
+    public static void save(File file, String content) {
         try {
             File dir = file.getAbsoluteFile().getParentFile();
             if (!dir.exists() && !dir.mkdirs()) {
