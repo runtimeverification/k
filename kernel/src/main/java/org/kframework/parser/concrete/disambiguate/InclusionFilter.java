@@ -32,7 +32,7 @@ public class InclusionFilter extends ParseForestTransformer {
 //            throw new PriorityException(kex);
 //        }
 
-        if (!getCurrentDefinition().isModuleIncludedEq(getCurrentModule().getName(), consModule)) {
+        if (!getCurrentDefinition().getDefinitionContext().isModuleIncludedEq(getCurrentModule().getName(), consModule)) {
             String msg = "Production " + tc.getProduction().toString() + " has not been imported in this module.\n";
             msg += "    Defined in module: " + consModule + " file: " + consFile;
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());

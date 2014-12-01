@@ -115,10 +115,10 @@ public class DefinitionLoader {
             def.setMainFile(mainFile.getAbsoluteFile());
         }
         def.setMainModule(mainModule);
-        def.setModulesMap(outer.getModulesMap());
+        def.getDefinitionContext().addModules(outer.getModulesMap().values());
         def.setItems(outer.getModuleItems());
 
-        if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
+        if (!def.getDefinitionContext().containsModule(context.kompileOptions.syntaxModule())) {
             String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
             kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
             def.setMainSyntaxModule(mainModule);
@@ -126,7 +126,7 @@ public class DefinitionLoader {
             def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
         }
 
-        if (!def.getModulesMap().containsKey(mainModule)) {
+        if (!def.getDefinitionContext().containsModule(mainModule)) {
             String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
             throw KExceptionManager.compilerError(msg);
         }

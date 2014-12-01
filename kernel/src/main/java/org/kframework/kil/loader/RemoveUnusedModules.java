@@ -46,7 +46,6 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
         if (change) {
             def = def.shallowCopy();
             def.setItems(reachableModulesList);
-            def.setModulesMap(reachableModulesMap);
         }
         return def;
     }
@@ -65,7 +64,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
         public Void visit(Definition d, Void _) {
             Queue<Module> mods = new LinkedList<Module>();
             for (String name : initialModules) {
-                Module mainModule = d.getModulesMap().get(name);
+                Module mainModule = d.getDefinitionContext().getModuleByName(name);
                 if (mainModule != null) {
                     mods.add(mainModule);
                     included.put(name, mainModule);
@@ -80,7 +79,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
                     if (!(i instanceof Import)) continue;
                     String name = ((Import)i).getName();
                     if (included.containsKey(name)) continue;
-                    Module mod1 = d.getModulesMap().get(name);
+                    Module mod1 = d.getDefinitionContext().getModuleByName(name);
                     if (mod1!= null) {
                         mods.add(mod1);
                         included.put(name, mod1);

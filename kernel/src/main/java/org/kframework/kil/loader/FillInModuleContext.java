@@ -29,8 +29,7 @@ import java.util.Set;
 
 public class FillInModuleContext extends BasicVisitor {
 
-    private boolean autoinclude;
-    private Poset<String> moduleInclusion = new Poset<>();
+    private final boolean autoinclude;
     public FillInModuleContext(boolean autoinclude) {
         super(FillInModuleContext.class.toString(), null);
         this.autoinclude = autoinclude;
@@ -41,22 +40,13 @@ public class FillInModuleContext extends BasicVisitor {
         super.visit(def, _);
         if (def.getMainSyntaxModule().equals(def.getMainModule())) {
             // if the syntax module is the same with the main module, add everything
-            def.getModulesMap().get(def.getMainModule()).getModuleContext().addImportedModule(this.getCurrentDefinition().getModulesMap().get(Constants.AUTO_INCLUDED_MODULE));
-            moduleInclusion.addRelation(def.getModulesMap().get(def.getMainModule()).getName(), Constants.AUTO_INCLUDED_MODULE);
-        }
-        List<String> circuit = moduleInclusion.checkForCycles();
-        if (circuit != null) {
-            String msg = "Found circularity in module imports: ";
-            for (String moduleName : circuit)
-                msg += moduleName + " < ";
-            msg += circuit.get(0);
-            throw KExceptionManager.compilerError(msg, this, def);
+            def.getDefinitionContext().getModuleByName(def.getMainModule()).getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_MODULE));
         }
         // TODO: transitive closure for imports
         // DFS from the main module
 
         Set<Module> visited = new HashSet<>();
-        DFS(def.getModulesMap().get(def.getMainModule()), visited);
+        DFS(def.getDefinitionContext().getModuleByName(def.getMainModule()), visited);
         return null;
     }
 
@@ -74,15 +64,15 @@ public class FillInModuleContext extends BasicVisitor {
     @Override
     public Void visit(Import node, Void _)  {
         Module module;
+        // TODO (dwight) remove the same time with maude backend
         if (!node.getName().startsWith("#")) { // maude legacy: some modules specified with # are builtin
-            module = this.getCurrentDefinition().getModulesMap().get(node.getName());
+            module = this.getCurrentDefinition().getDefinitionContext().getModuleByName(node.getName());
             if (module == null) {
                 String msg = "Could not find module: " + node.getName() + " imported from: " + this.getCurrentModule().getName();
                 throw KExceptionManager.compilerError(msg, this, node);
             }
             this.getCurrentModule().getModuleContext().addImportedModule(module);
         }
-        moduleInclusion.addRelation(this.getCurrentModule().getName(), node.getName());
         return null;
     }
 
@@ -91,13 +81,11 @@ public class FillInModuleContext extends BasicVisitor {
         if (autoinclude) {
             if (this.getCurrentDefinition().getMainSyntaxModule().equals(node.getName())) {
                 // the syntax module automatically includes Constants.AUTO_INCLUDED_SYNTAX_MODULE
-                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getModulesMap().get(Constants.AUTO_INCLUDED_SYNTAX_MODULE));
-                moduleInclusion.addRelation(node.getName(), Constants.AUTO_INCLUDED_SYNTAX_MODULE);
+                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_SYNTAX_MODULE));
                 // TODO: (RaduM) try to figure out how and when to import the autoincluded modules.
             } else if (!node.isPredefined()) {
                 // every user defined module automatically includes Constants.AUTO_INCLUDED_MODULE
-                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getModulesMap().get(Constants.AUTO_INCLUDED_MODULE));
-                moduleInclusion.addRelation(node.getName(), Constants.AUTO_INCLUDED_MODULE);
+                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_MODULE));
             }
         }
         super.visit(node, _);

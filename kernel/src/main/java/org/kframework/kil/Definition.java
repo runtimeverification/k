@@ -29,10 +29,11 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     private File mainFile;
     private String mainModule;
     /** An index of all modules in {@link #items} by name */
-    private Map<String, Module> modulesMap;
     private String mainSyntaxModule;
-    private Poset<String> modules = Poset.create();
     public Map<String, ASTNode> locations = new HashMap<>();
+
+    // keeps easy to access information about the current definition
+    private transient DefinitionContext definitionContext = new DefinitionContext();
 
     public Definition() {
         super();
@@ -59,24 +60,9 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
 
-    public void addModuleImport(String mainModule, String importedModule) {
-        if (mainModule.equals(importedModule))
-            return;
-        modules.addRelation(mainModule, importedModule);
-    }
-
-    public boolean isModuleIncludedEq(String localModule, String importedModule) {
-        if (localModule.equals(importedModule))
-            return true;
-        return modules.isInRelation(localModule, importedModule);
-    }
-
-    public void finalizeModules() {
-        modules.transitiveClosure();
-    }
-
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
+        definitionContext.setModules(items);
     }
 
     public List<DefinitionItem> getItems() {
@@ -135,14 +121,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
     }
 
-    public Map<String, Module> getModulesMap() {
-        return modulesMap;
-    }
-
-    public void setModulesMap(Map<String, Module> modulesMap) {
-        this.modulesMap = modulesMap;
-    }
-
     public Module getSingletonModule() {
         List<Module> modules = new LinkedList<Module>();
         for (DefinitionItem i : this.getItems()) {
@@ -174,5 +152,13 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     @Override
     public void setChildren(List<DefinitionItem> children, Enum<?> _) {
         this.items = children;
+    }
+
+    public DefinitionContext getDefinitionContext() {
+        return definitionContext;
+    }
+
+    public void setDefinitionContext(DefinitionContext definitionContext) {
+        this.definitionContext = definitionContext;
     }
 }
