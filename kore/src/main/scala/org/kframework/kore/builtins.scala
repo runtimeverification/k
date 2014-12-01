@@ -61,6 +61,12 @@ case class KBag private[kore] (val klist: KList) extends KAbstractCollection wit
   override def toString = if (isEmpty) ".Bag" else "Bag(" + mkString(",") + ")"
 }
 
+object KBag extends Sort with KLabel {
+  def newBuilder = KList.newBuilder() mapResult { new KBag(_) }
+
+  val name: String = "Bag"
+}
+
 case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection with Associative[KBag] {
   type This = KSet
 
@@ -78,12 +84,6 @@ case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection 
 object KSet {
   def newBuilder: Builder[K, KSet] = new SetBuilder[K, Set[K]](Set[K]()) mapResult { new KSet(_) }
   def apply(ks: K*): KSet = (newBuilder ++= ks).result
-}
-
-object KBag extends Sort with KLabel {
-  def newBuilder = KList.newBuilder() mapResult { new KBag(_) }
-
-  val name: String = "Bag"
 }
 
 case object Hole extends KLabel with Sort {

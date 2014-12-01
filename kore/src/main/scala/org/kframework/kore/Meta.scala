@@ -5,19 +5,21 @@ package org.kframework.kore
 import KORE._
 import scala.Enumeration
 import org.kframework.kore.outer.Associativity
+import java.lang.invoke.MethodType
+import java.lang.invoke.MethodHandles
+import collection.JavaConverters._
 
 object Meta extends (Any => K) {
   type HasProductIterator = { def productIterator: Iterator[Any] }
 
   def apply(o: Any): K = {
     o match {
-      case o: List[_] => KList(o map apply)
-      case o: Set[_] => new KSet(o map apply)
-      case o: Iterable[_] => new KSet(o.toSet map apply)
+      case o: List[_] => 'List(o map apply)
+      case o: Set[_] => 'Set(o map apply toList)
 
       // Primitives
       case o: Int => KInt(o)
-      case o: String => KToken(Sort("String"), o)
+      case o: String => KString(o)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
 
       case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)
@@ -25,6 +27,8 @@ object Meta extends (Any => K) {
 
       // Already K
       case o: K => o
+
+      case o: Sort => 'Sort(KString(o.name))
 
       // Fallback to reflection
       case o if o.getClass().getMethods.exists(_.toString().contains("productIterator")) =>
@@ -38,25 +42,49 @@ object Meta extends (Any => K) {
   }
 }
 
-case class Concrete(includes: Set[String]) extends (K => Any) {
+object Concrete extends (K => Any) {
   import scala.reflect.runtime.{ universe => ru }
   val m = ru.runtimeMirror(getClass.getClassLoader)
 
-  def apply(o: K) = o match {
-    case KApply(KLabel(l), ks, att) =>
-      val children = ks map { apply _ }
+  def apply(o: K) = {
+    val res = o match {
+      case KApply(KLabel("List"), ks, att) => ks.delegate map apply
+      case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
+      case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
 
-      val moduleS = m.staticModule("org.kframework.kore." + l)
-      val moduleR = m.reflectModule(moduleS)
-      val module = moduleR.instance
+      case KApply(KLabel(l), ks, att) =>
+        val children = ks map { apply _ }
 
-      val paramTypes = children map { _.getClass() }
+        val moduleS = try {
+          m.staticModule("org.kframework.kore.outer." + l)
+        } catch {
+          case e: ScalaReflectionException => m.staticModule("org.kframework.kore." + l)
+        }
 
-      val constructor = module.getClass.getMethod("apply", paramTypes: _*)
+        val moduleR = m.reflectModule(moduleS)
+        val module = moduleR.instance
 
-      println(module)
-      println(constructor)
+        val methodRef = module.getClass.getMethods()
+          .filter { m => m.getName == "apply" && m.getParameterCount == children.size }
+          .filter {
+            m =>
+              m.getParameterTypes.zip(children map { _.getClass }).exists {
+                case (paramClass, argClass) => paramClass.isAssignableFrom(argClass)
+              }
+          } head
 
-    case KInt(x, _) => x
+        println("invoking: " + methodRef +
+          "\n on " + module +
+          "\n with arguments: " + children +
+          "\n of types: " + children.map(_.getClass))
+
+        methodRef.invoke(module, children.toSeq.asInstanceOf[Seq[Object]]: _*)
+
+      case KInt(x, _) => x
+      case s: KSet => s.delegate map apply
+      case s: KString => s.s
+    }
+    println(o + " concretized to " + res)
+    res
   }
 }
