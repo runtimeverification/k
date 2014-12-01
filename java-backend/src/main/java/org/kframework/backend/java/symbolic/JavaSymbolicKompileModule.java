@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.java.builtins.BuiltinIOOperations;
-import org.kframework.backend.java.builtins.DummyBuiltinIOOperations;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Definition;
@@ -23,7 +22,6 @@ public class JavaSymbolicKompileModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(JavaExecutionOptions.class).toInstance(new JavaExecutionOptions());
-        bind(BuiltinIOOperations.class).to(DummyBuiltinIOOperations.class);
         bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(true);
         bind(FileSystem.class).to(PortableFileSystem.class);
 

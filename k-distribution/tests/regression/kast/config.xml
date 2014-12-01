@@ -8,6 +8,7 @@
     skip="pdf"
     posixInitScript="init.sh"
     extension="test">
+    <kompile-option name="--legacy-kast" />
     <program name="1.test">
       <krun-option name="--parser" value="kast --parser binary" />
       <krun-option name="--term" />

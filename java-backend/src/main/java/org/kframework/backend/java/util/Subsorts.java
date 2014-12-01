@@ -8,8 +8,10 @@ import java.util.Set;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.kil.loader.Context;
 
+import com.google.common.collect.ArrayTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 
 /**
  * Subsort relation.
@@ -27,27 +29,25 @@ public class Subsorts implements Serializable {
      * {@code subsort[sort1][sort2] = true} iff {@code sort1} is bigger than
      * {@code sort2}.
      */
-    private final boolean[][] subsort;
+    private final Table<Sort, Sort, Boolean> subsort;
 
     public Subsorts(Context context) {
         this.context = context;
 
         Set<org.kframework.kil.Sort> genericKILSorts = context.getAllSorts();
         ImmutableSet.Builder<Sort> setBuilder = ImmutableSet.builder();
-        int maxOrd = -1;
         for (org.kframework.kil.Sort genericKILSort : genericKILSorts) {
             /* ensure all sorts in context have Java-backend counterparts */
             Sort sort = Sort.of(genericKILSort.getName());
             setBuilder.add(sort);
-            maxOrd = Math.max(maxOrd, sort.ordinal());
         }
         this.sorts = setBuilder.build();
 
-        this.subsort = new boolean[maxOrd + 1][maxOrd + 1];
+        this.subsort = ArrayTable.create(sorts, sorts);
         for (Sort sort1 : sorts) {
             for (Sort sort2 : sorts) {
-                subsort[sort1.ordinal()][sort2.ordinal()] = context
-                        .isSubsorted(sort1.toFrontEnd(), sort2.toFrontEnd());
+                subsort.put(sort1, sort2, context
+                        .isSubsorted(sort1.toFrontEnd(), sort2.toFrontEnd()));
             }
         }
     }
@@ -57,7 +57,7 @@ public class Subsorts implements Serializable {
     }
 
     public boolean isSubsorted(Sort bigSort, Sort smallSort) {
-        return subsort[bigSort.ordinal()][smallSort.ordinal()];
+        return subsort.get(bigSort, smallSort);
     }
 
     public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {

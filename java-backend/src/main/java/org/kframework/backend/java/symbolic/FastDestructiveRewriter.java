@@ -122,6 +122,9 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
                         Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
                         if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
+                            if (termContext.definition().context().krunOptions.experimental.trace) {
+                                System.out.println(rule);
+                            }
                             results.add(subject);
 
                             /* the result of rewrite machine must be in the reference results */
@@ -137,6 +140,9 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                     } else {
                         Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
                         for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
+                            if (termContext.definition().context().krunOptions.experimental.trace) {
+                                System.out.println(rule);
+                            }
                             subject = constructNewSubjectTerm(rule, subst);
                             results.add(subject);
                             succeed = true;
@@ -159,12 +165,15 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         }
     }
 
+    @Override
     protected final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
         Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
                 DeepCloner.clone(rule.rightHandSide()) :
                 rule.rightHandSide();
-        return rhs.copyOnShareSubstAndEval(substitution,
+        Term result = rhs.copyOnShareSubstAndEval(substitution,
                 rule.reusableVariables().elementSet(), termContext);
+        termContext.setTopTerm(result);
+        return result;
     }
 
     @Override

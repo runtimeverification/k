@@ -154,7 +154,7 @@ public class MaudeExecutor implements Executor {
         maudeFilter.visitNode(cfg);
         StringBuilder cmd = new StringBuilder();
 
-        if(maudeOptions.trace) {
+        if(options.experimental.trace) {
             cmd.append("set trace on .\n");
         }
         if(maudeOptions.profile) {
@@ -483,7 +483,7 @@ public class MaudeExecutor implements Executor {
                                         RuleCompilerSteps compilationInfo)
             throws KRunExecutionException {
         StringBuilder cmd = new StringBuilder();
-        if (maudeOptions.trace) {
+        if (options.experimental.trace) {
           cmd.append("set trace on .\n");
         }
         cmd.append("set show command off .\n").append(setCounter()).append("search ");

@@ -13,6 +13,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.file.WorkingDir;
 import org.mockito.Mock;
@@ -53,6 +54,9 @@ public abstract class BaseTestCase {
 
     @Mock
     File tempDir;
+
+    @Mock
+    protected FileUtil files;
 
     @Before
     public void setUpWiring() {

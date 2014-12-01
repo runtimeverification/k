@@ -3,9 +3,10 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
+import org.kframework.backend.java.symbolic.IncrementalCollector;
+import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.VariableCollector;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
@@ -34,7 +35,8 @@ public abstract class JavaSymbolicObject extends ASTNode
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
      * Variable (the variable has all fields set to null at the moment of hashing).
      */
-    private transient Set<Variable> variableSet = null;
+    transient Set<Variable> variableSet = null;
+    transient Set<Term> functionKLabels = null;
 
     /**
      * Returns {@code true} if this JavaSymbolicObject does not contain any variables.
@@ -71,6 +73,12 @@ public abstract class JavaSymbolicObject extends ASTNode
         return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
     }
 
+    /**
+     * Returns true if a call to {@link org.kframework.backend.java.kil.Term#substituteAndEvaluate(java.util.Map, TermContext)} may simplify this term.
+     */
+    public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+        return (!substitution.isEmpty() && !isGround()) || !isNormal();
+    }
 
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
@@ -98,11 +106,45 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public Set<Variable> variableSet() {
         if (variableSet == null) {
-            VariableCollector visitor = new VariableCollector();
+            IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.setVariableSet(set),
+                    term -> term.getVariableSet(),
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(Variable variable) {
+                            variable.getVariableSet().add(variable);
+                        }
+                    });
             accept(visitor);
-            variableSet = visitor.getVariableSet();
+            variableSet = visitor.getResultSet();
         }
         return Collections.unmodifiableSet(variableSet);
+    }
+
+    /**
+     * Returns true if this {@code JavaSymbolicObject} has no functions or
+     * patterns, false otherwise.
+     * <p>
+     * When the set of variables has not been computed, this method will do the
+     * computation instead of simply returning {@code null}.
+     */
+    public boolean isNormal() {
+        if (functionKLabels == null) {
+            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.functionKLabels = set,
+                    term -> term.functionKLabels,
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(KItem kItem) {
+                            if (kItem.isSymbolic()) {
+                                kItem.functionKLabels.add(kItem.kLabel());
+                            }
+                        }
+                    });
+            accept(visitor);
+            functionKLabels = visitor.getResultSet();
+        }
+        return functionKLabels.size() == 0;
     }
 
     @Override

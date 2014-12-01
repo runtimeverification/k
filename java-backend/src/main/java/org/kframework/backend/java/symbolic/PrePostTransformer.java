@@ -245,30 +245,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        ASTNode astNode = listLookup.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof ListLookup : "preTransformer should not modify type";
-        listLookup = (ListLookup) astNode;
-        listLookup = (ListLookup) super.transform(listLookup);
-        return listLookup.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        ASTNode astNode = listUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
-        listUpdate = (ListUpdate) astNode;
-        listUpdate = (ListUpdate) super.transform(listUpdate);
-        return listUpdate.accept(postTransformer);
-    }
-
-    @Override
     public ASTNode transform(BuiltinList builtinList) {
         ASTNode astNode = builtinList.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
@@ -299,78 +275,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         assert astNode instanceof BuiltinSet : "preTransformer should not modify type";
         builtinSet = (BuiltinSet) astNode;
         return ((JavaSymbolicObject) super.transform(builtinSet)).accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        ASTNode astNode = mapKeyChoice.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof MapKeyChoice : "preTransformer should not modify type";
-        mapKeyChoice = (MapKeyChoice) astNode;
-        mapKeyChoice = (MapKeyChoice) super.transform(mapKeyChoice);
-        return mapKeyChoice.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        ASTNode astNode = mapLookup.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof MapLookup : "preTransformer should not modify type";
-        mapLookup = (MapLookup) astNode;
-        mapLookup = (MapLookup) super.transform(mapLookup);
-        return mapLookup.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        ASTNode astNode = mapUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof MapUpdate : "preTransformer should not modify type";
-        mapUpdate = (MapUpdate) astNode;
-        mapUpdate = (MapUpdate) super.transform(mapUpdate);
-        return mapUpdate.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        ASTNode astNode = setUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof SetUpdate : "preTransformer should not modify type";
-        setUpdate = (SetUpdate) astNode;
-        setUpdate = (SetUpdate) super.transform(setUpdate);
-        return setUpdate.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        ASTNode astNode = setElementChoice.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof SetElementChoice : "preTransformer should not modify type";
-        setElementChoice = (SetElementChoice) astNode;
-        setElementChoice = (SetElementChoice) super.transform(setElementChoice);
-        return setElementChoice.accept(postTransformer);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        ASTNode astNode = setLookup.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof SetLookup : "preTransformer should not modify type";
-        setLookup = (SetLookup) astNode;
-        setLookup = (SetLookup) super.transform(setLookup);
-        return setLookup.accept(postTransformer);
     }
 
     @Override

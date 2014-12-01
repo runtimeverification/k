@@ -3,8 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import java.util.List;
 
-import org.kframework.backend.java.builtins.BuiltinIOOperations;
-import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.ksimulation.Simulator;
@@ -63,7 +61,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         @Override
         protected void configure() {
             install(new JavaSymbolicCommonModule());
-            bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
 
             bind(SymbolicRewriter.class);
             bind(GlobalContext.class);

@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -41,19 +40,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     protected boolean proceed(JavaSymbolicObject object) {
-        Set<Variable> set1 = object.variableSet();
-        Set<Variable> set2 = substitution.keySet();
-        if (set1.size() > set2.size()) {
-            Set<Variable> tmp = set1;
-            set1 = set2;
-            set2 = tmp;
-        }
-        for (Variable variable : set1) {
-            if (set2.contains(variable)) {
-                return true;
-            }
-        }
-        return false;
+        return object.canSubstituteAndEvaluate(substitution);
     }
 
     @Override
@@ -161,31 +148,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return proceed(listLookup) ? ((ListLookup) super.transform(listLookup)).evaluateLookup() : listLookup;
-    }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return proceed(listUpdate) ? ((ListUpdate) super.transform(listUpdate)).evaluateUpdate() : listUpdate;
-    }
-
-    @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return proceed(mapKeyChoice) ? ((MapKeyChoice) super.transform(mapKeyChoice)).evaluateChoice() : mapKeyChoice;
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return proceed(mapLookup) ? ((MapLookup) super.transform(mapLookup)).evaluateLookup() : mapLookup;
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return proceed(mapUpdate) ? ((MapUpdate) super.transform(mapUpdate)).evaluateUpdate() : mapUpdate;
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return metaVariable;
     }
@@ -193,21 +155,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Rule rule) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return proceed(setElementChoice) ? ((SetElementChoice) super.transform(setElementChoice)).evaluateChoice() : setElementChoice;
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return proceed(setLookup) ? ((SetLookup) super.transform(setLookup)).evaluateLookup() : setLookup;
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return proceed(setUpdate) ? ((SetUpdate) super.transform(setUpdate)).evaluateUpdate() : setUpdate;
     }
 
     @Override

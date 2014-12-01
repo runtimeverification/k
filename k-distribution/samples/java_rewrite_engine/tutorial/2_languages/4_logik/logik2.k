@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module META
-  syntax KItem ::= renameVariables(K)   [function, hook(MetaK:renameVariables)]
-  syntax KItem ::= variables(K)         [function, hook(MetaK:variables)]
-  syntax KItem ::= variablesMap(K)      [function, hook(MetaK:variablesMap)]
+  syntax KItem ::= renameVariables(K)   [function, hook(MetaK:renameVariables), impure]
+  syntax KItem ::= variables(K)         [function, hook(MetaK:variables), impure]
+  syntax KItem ::= variablesMap(K)      [function, hook(MetaK:variablesMap), impure]
 
-  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable)]
+  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable), impure]
 endmodule
 
 module LOGIK2

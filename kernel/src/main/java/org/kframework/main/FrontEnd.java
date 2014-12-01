@@ -1,10 +1,16 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.main;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+
 import com.beust.jcommander.ParameterException;
 
 public abstract class FrontEnd {
@@ -15,18 +21,21 @@ public abstract class FrontEnd {
     private final GlobalOptions globalOptions;
     private final String usage, experimentalUsage;
     private final JarInfo jarInfo;
+    private final FileUtil files;
 
     public FrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,
             String usage,
             String experimentalUsage,
-            JarInfo jarInfo) {
+            JarInfo jarInfo,
+            FileUtil files) {
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.usage = usage;
         this.experimentalUsage = experimentalUsage;
         this.jarInfo = jarInfo;
+        this.files = files;
     }
 
     public boolean main() {
@@ -43,6 +52,8 @@ public abstract class FrontEnd {
                     succeeded = run();
                 } catch (ParameterException e) {
                     throw KExceptionManager.criticalError(e.getMessage(), e);
+                } finally {
+                    files.deleteTempDir();
                 }
                 kem.print();
             }

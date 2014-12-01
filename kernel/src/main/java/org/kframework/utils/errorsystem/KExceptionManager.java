@@ -119,6 +119,10 @@ public class KExceptionManager {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, phase, null, node.getLocation(), node.getSource());
     }
 
+    public static KEMException innerParserError(String message, Throwable e, Source source, Location location) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
+    }
+
     public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
     }
@@ -165,6 +169,10 @@ public class KExceptionManager {
 
     public void registerInternalWarning(String message, Throwable e) {
         register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
+    }
+
+    public void registerInternalHiddenWarning(String message, Throwable e) {
+        register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,

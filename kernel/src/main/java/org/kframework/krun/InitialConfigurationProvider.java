@@ -24,6 +24,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
+import org.kframework.main.Main;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.TTYInfo;
@@ -119,7 +120,9 @@ public class InitialConfigurationProvider implements Provider<Term> {
                     new InputStreamReader(System.in));
             // detect if the input comes from console or redirected
             // from a pipeline
-            if (!tty.stdin) {
+
+            if ((Main.isNailgun() && !tty.stdin)
+                    || (!Main.isNailgun() && br.ready())) {
                 buffer = br.readLine();
             }
         } catch (IOException e) {

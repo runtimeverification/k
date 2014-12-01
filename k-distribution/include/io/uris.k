@@ -8,27 +8,27 @@ module URIS
 
 // B, N, and P are really supposed to be Nat
   syntax KItem ::= "#open" "(" String ")" [function]
-                 | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
-                 | "#tell" "(" Int ")" [function, hook(#IO:#tell)]
-                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc)]
-                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
+                 | "#open" "(" String "," String ")" [function, hook(#IO:#open), impure]
+                 | "#tell" "(" Int ")" [function, hook(#IO:#tell), impure]
+                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc), impure]
+                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read), impure]
 
-  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close)]
-             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek)]
-             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
-             | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
+  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close), impure]
+             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek), impure]
+             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc), impure]
+             | "#write" "(" Int "," String ")" [function, hook(#IO:#write), impure]
 
   syntax KItem ::= "#ioError" "(" String ")"
 
-  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat)]
-                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat)]
-                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
+  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat), impure]
+                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat), impure]
+                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir), impure]
 
-  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
+  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse), impure]
   syntax KItem ::= #parseInModule(String, // input
                                   String, // start symbol
                                   String) // module name
-                                  [function, hook(#K-PARSER:#parseInModule)]
+                                  [function, hook(#K-PARSER:#parseInModule), impure]
 
   rule #open(S:String) => #open(S:String, "rw")
   rule #open(S:String, Mode:String) => #string2Int(#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01")<:TCPAnswer) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
@@ -115,7 +115,7 @@ module URIS
 // ------------------------------
 // System
 
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system)]
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   rule #system(Cmd:String) => #systemTypes(#string2klist(#tcpRequest("system\x01" +String Cmd +String "\x01")<:TCPAnswer))

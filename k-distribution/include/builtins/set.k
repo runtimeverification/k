@@ -35,6 +35,9 @@ module SET
   /*@ Get the cardinality of a set ($|A|$) */
   syntax Int ::= size(Set)                [function, hook(Collection:size)]
 
+  /*@ Get an arbitrarily chosen element of the Set */
+  syntax K ::= choice(Set)                [function, hook(Set:choice), klabel(Set:choice)]
+
   /* set difference axioms */
   // TODO(AndreiS): remove this if not used
   //rule S1:Set -Set (SetItem(K:K) S2:Set) => S1 -Set S2
