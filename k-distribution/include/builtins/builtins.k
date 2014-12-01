@@ -5,8 +5,6 @@ require "array.k"
 require "float.k"
 require "string.k"
 require "id.k"
-require "lcid.k"
-require "ucid.k"
 require "io/tcp.k"
 require "k-equal.k"
 require "random.k"
@@ -24,8 +22,6 @@ module BUILTIN-SYNTAX-HOOKS
   imports FLOAT-SYNTAX-HOOKS
   imports STRING-SYNTAX-HOOKS
   imports ID-SYNTAX-HOOKS
-  imports LCID-SYNTAX-HOOKS
-  imports UCID-SYNTAX-HOOKS
   //imports LTL-SYNTAX-HOOKS
   //imports MODEL-CHECKER-SYNTAX-HOOKS
 endmodule
@@ -34,8 +30,6 @@ module BUILTIN-HOOKS
   imports BOOL-HOOKS
   imports INT-HOOKS
   imports ID-HOOKS
-  imports LCID-HOOKS
-  imports UCID-HOOKS
 //  imports ARRAY
   imports FLOAT-HOOKS
   imports STRING-HOOKS
