@@ -80,4 +80,9 @@ public class TstKOREtoKILIT extends BaseTest {
     public void userListNonEmpty() throws IOException {
         outerKILtoKOREtoKILTest();
     }
+
+    @Test
+    public void kapp() throws IOException {
+        sdfKILtoKOREtoKILTest();
+    }
 }

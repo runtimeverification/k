@@ -8,6 +8,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -509,20 +510,40 @@ public class KOREtoKIL {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
+            boolean kilProductionIdP = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).isEmpty();
             List<K> args = stream(kApply.klist().iterable()).collect(Collectors.toList());
-            List<org.kframework.kil.Term> kilTerms = new ArrayList<>();
-            for (K arg : args) {
-                kilTerms.add(convertK(arg));
-            }
-            String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
+            List<org.kframework.kil.Term> kilTerms =
+                    args.stream().map(this::convertK).collect(Collectors.toList());
 
-            Production production = kilProductionIdToProductionInstance.get(kilProductionId);
-            if (production == null) {
-                throw new AssertionError("Could not find production for: " + kApply);
-            }
+            if (kilProductionIdP) {
+                // KApp
+                String labelSort = kApply.att().getString("sort").get();
+                org.kframework.kil.Term kAppLabel;
+                if (labelSort.equals("int")) {
+                    kAppLabel = org.kframework.kil.IntBuiltin.of(new BigInteger(kApply.att().getString("payload").get()));
+                } else if (labelSort.equals("int32")) {
+                    kAppLabel = org.kframework.kil.Int32Builtin.of(new Integer(kApply.att().getString("payload").get()));
+                } else if (labelSort.equals("string")) {
+                    kAppLabel = org.kframework.kil.StringBuiltin.of(kApply.att().getString("payload").get());
+                } else if (labelSort.equals("float")) {
+                    kAppLabel = org.kframework.kil.FloatBuiltin.of(kApply.att().getString("payload").get());
+                } else if (labelSort.equals("bool")) {
+                    kAppLabel = org.kframework.kil.BoolBuiltin.of(kApply.att().getString("payload").get());
+                } else {
+                    kAppLabel = org.kframework.kil.Token.of(org.kframework.kil.Sort.of(labelSort), label.name());
+                }
+                return new org.kframework.kil.KApp(kAppLabel, new org.kframework.kil.KList(kilTerms));
+            } else {
+                // TermCons
+                String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
+                Production production = kilProductionIdToProductionInstance.get(kilProductionId);
+                if (production == null) {
+                    throw new AssertionError("Could not find production for: " + kApply);
+                }
 
-            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
-                    kilTerms, production);
+                return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
+                        kilTerms, production);
+            }
         }
     }
 }

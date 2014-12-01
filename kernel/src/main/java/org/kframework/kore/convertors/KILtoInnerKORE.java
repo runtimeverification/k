@@ -17,11 +17,16 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
+import org.kframework.kil.Int32Builtin;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
@@ -37,6 +42,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -47,6 +53,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
+import org.kframework.utils.StringBuilderUtil;
 import scala.Enumeration.Value;
 import scala.collection.Seq;
 
@@ -90,6 +97,49 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         org.kframework.kore.Attributes att = attributesFor(cons);
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
                 att);
+    }
+
+    public KApply apply(KApp kApp) {
+        Term label = kApp.getLabel();
+        Term child = kApp.getChild();
+
+        KLabel koreLabel;
+        KList koreChildren;
+
+        org.kframework.kore.Attributes attrs = apply(kApp.getAttributes());
+
+        if (label instanceof IntBuiltin) {
+            IntBuiltin intBuiltin = (IntBuiltin) label;
+            koreLabel = KLabel(intBuiltin.value());
+            attrs = attrs.add("sort", "int").add("payload", intBuiltin.bigIntegerValue().toString());
+        } else if (label instanceof Int32Builtin) {
+            Int32Builtin int32Builtin = (Int32Builtin) label;
+            koreLabel = KLabel(int32Builtin.value());
+            attrs = attrs.add("sort", "int32").add("payload", Integer.toString(int32Builtin.intValue()));
+        } else if (label instanceof StringBuiltin) {
+            StringBuiltin stringBuiltin = (StringBuiltin) label;
+            koreLabel = KLabel(stringBuiltin.value());
+            attrs = attrs.add("sort", "string").add("payload", stringBuiltin.stringValue());
+        } else if (label instanceof FloatBuiltin) {
+            FloatBuiltin floatBuiltin = (FloatBuiltin) label;
+            koreLabel = KLabel(floatBuiltin.value());
+            attrs = attrs.add("sort", "float").add("payload", floatBuiltin.bigFloatValue().toString());
+        } else if (label instanceof BoolBuiltin) {
+            BoolBuiltin boolBuiltin = (BoolBuiltin) label;
+            koreLabel = KLabel(boolBuiltin.value());
+            attrs = attrs.add("sort", "bool").add("payload", boolBuiltin.booleanValue().toString());
+        } else {
+            throw new RuntimeException("Unhandled case");
+        }
+
+        if (child instanceof org.kframework.kil.KList) {
+            org.kframework.kil.KList kList = (org.kframework.kil.KList) child;
+            koreChildren = KList(kList.getContents().stream().map(this).collect(Collectors.toList()));
+        } else {
+            throw new RuntimeException("Unhandled case");
+        }
+
+        return new KApply(koreLabel, koreChildren, apply(kApp.getAttributes()).add(attrs));
     }
 
     private org.kframework.kore.Attributes attributesFor(TermCons cons) {
