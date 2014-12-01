@@ -136,31 +136,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return transform((Term) listLookup);
-    }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return transform((Term) listUpdate);
-    }
-
-    @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transform((Term) mapKeyChoice);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return transform((Term) mapLookup);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transform((Term) mapUpdate);
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
     }
@@ -172,21 +147,6 @@ public class LocalTransformer implements Transformer {
 
     protected ASTNode transform(JavaSymbolicObject object) {
         return object;
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return transform((Term) setElementChoice);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return transform((Term) setLookup);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transform((Term) setUpdate);
     }
 
     @Override

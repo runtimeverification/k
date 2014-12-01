@@ -249,8 +249,6 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                 patternsBuilder.add((KItem) term);
             } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
                 functionsBuilder.add(term);
-            } else if (term instanceof MapUpdate) {
-                functionsBuilder.add(term);
             } else if (term instanceof Variable) {
                 variablesBuilder.add((Variable) term);
             } else {

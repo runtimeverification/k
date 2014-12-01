@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 
 module LAMBDA
-  syntax K ::= K "[" K "/" K "]" [function, hook(Substitution:userSubstitution)]
+  syntax K ::= K "[" K "/" K "]" [function, hook(Substitution:userSubstitution), impure]
 
   syntax Val ::= Id
                | Int | Bool

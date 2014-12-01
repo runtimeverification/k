@@ -203,7 +203,7 @@ constraint.
 
 
 // alpha conversion moved here by grigore
- syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables)]
+ syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables), impure]
 //            | applyAlpha(K)
 
 // rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
