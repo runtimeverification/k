@@ -18,10 +18,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class ModuleContext implements Serializable {
+    /** set of imported modules into this module. Should contain the auto included ones */
     private Set<Module> importedModules = new HashSet<>();
+    /** declared sorts visible in this module (transitive) */
     private Set<Sort> declaredSorts = new HashSet<>();
+    /** syntactic subsorts visible in this module (transitive) */
     private Poset<Sort> syntacticSubsorts = Poset.create();
+    /** multimap from a klabel to a production visible in this m/odule (transitive) */
     public SetMultimap<String, Production> klabels = HashMultimap.create();
+    /** multimap from a tag to a production visible in this module (transitive) */
     public SetMultimap<String, Production> tags = HashMultimap.create();
     public Map<String, Cell> cells = new HashMap<>();
     public Map<String, Sort> cellSorts = new HashMap<>();

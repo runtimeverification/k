@@ -136,7 +136,10 @@ public class DefinitionLoader {
         //parse files importing from other files
         def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
 
-        // HERE: add labels to sorts
+        if(autoinclude)
+            new AddAutoIncludedModulesVisitor(context).visitNode(def);
+        // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
+        new CollectModuleImportsVisitor(context).visitNode(def);
 
         def.preprocess(context, autoinclude);
 
@@ -182,11 +185,6 @@ public class DefinitionLoader {
             files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
             sw.printIntermediate("Generate TBLPgm");
         }
-
-        if(autoinclude)
-            new AddAutoIncludedModulesVisitor(context).visitNode(def);
-        // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
-        new CollectModuleImportsVisitor(context).visitNode(def);
 
         // ------------------------------------- generate parser TBL
         // cache the TBL if the sdf file is the same

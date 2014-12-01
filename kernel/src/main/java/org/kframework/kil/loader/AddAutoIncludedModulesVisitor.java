@@ -18,14 +18,17 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
 
     @Override
     public Void visit(Definition def, Void _) {
-        Import importMod = new Import(Constants.AUTO_INCLUDED_MODULE);
-
         for (DefinitionItem di : def.getItems()) {
             if (di instanceof Module) {
                 Module m = (Module) di;
                 if (!m.isPredefined()) {
                     CollectIncludesVisitor getIncludes = new CollectIncludesVisitor(context);
                     getIncludes.visitNode(m);
+                    Import importMod = new Import(Constants.AUTO_INCLUDED_MODULE);
+                    // if there is a separate module syntax, add only the special module for syntactic stuff
+                    if (m.getName().equals(def.getMainSyntaxModule()) && !def.getMainSyntaxModule().equals(def.getMainModule()))
+                        importMod = new Import(Constants.AUTO_INCLUDED_SYNTAX_MODULE);
+
                     if (!getIncludes.getImportList().contains(importMod))
                         m.getItems().add(0, importMod);
                 }

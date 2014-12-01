@@ -29,22 +29,15 @@ import java.util.Set;
 
 public class FillInModuleContext extends BasicVisitor {
 
-    private final boolean autoinclude;
-    public FillInModuleContext(boolean autoinclude) {
+    public FillInModuleContext() {
         super(FillInModuleContext.class.toString(), null);
-        this.autoinclude = autoinclude;
     }
 
     @Override
     public Void visit(Definition def, Void _)  {
         super.visit(def, _);
-        if (def.getMainSyntaxModule().equals(def.getMainModule())) {
-            // if the syntax module is the same with the main module, add everything
-            def.getDefinitionContext().getModuleByName(def.getMainModule()).getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_MODULE));
-        }
-        // TODO: transitive closure for imports
-        // DFS from the main module
 
+        // calculate the transitivity using DFS from the main module
         Set<Module> visited = new HashSet<>();
         DFS(def.getDefinitionContext().getModuleByName(def.getMainModule()), visited);
         return null;
@@ -64,7 +57,7 @@ public class FillInModuleContext extends BasicVisitor {
     @Override
     public Void visit(Import node, Void _)  {
         Module module;
-        // TODO (dwight) remove the same time with maude backend
+        // TODO (dwight) remove only the condition the same time with maude backend
         if (!node.getName().startsWith("#")) { // maude legacy: some modules specified with # are builtin
             module = this.getCurrentDefinition().getDefinitionContext().getModuleByName(node.getName());
             if (module == null) {
@@ -73,22 +66,6 @@ public class FillInModuleContext extends BasicVisitor {
             }
             this.getCurrentModule().getModuleContext().addImportedModule(module);
         }
-        return null;
-    }
-
-    @Override
-    public Void visit(Module node, Void _) {
-        if (autoinclude) {
-            if (this.getCurrentDefinition().getMainSyntaxModule().equals(node.getName())) {
-                // the syntax module automatically includes Constants.AUTO_INCLUDED_SYNTAX_MODULE
-                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_SYNTAX_MODULE));
-                // TODO: (RaduM) try to figure out how and when to import the autoincluded modules.
-            } else if (!node.isPredefined()) {
-                // every user defined module automatically includes Constants.AUTO_INCLUDED_MODULE
-                node.getModuleContext().addImportedModule(this.getCurrentDefinition().getDefinitionContext().getModuleByName(Constants.AUTO_INCLUDED_MODULE));
-            }
-        }
-        super.visit(node, _);
         return null;
     }
 
