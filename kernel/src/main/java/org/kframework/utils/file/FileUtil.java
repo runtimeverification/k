@@ -174,7 +174,7 @@ public class FileUtil {
         }
     }
 
-    private String load(File file) {
+    private static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {
