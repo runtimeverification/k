@@ -91,7 +91,7 @@ trait KApplyPattern extends Pattern with BindingOps {
 
   def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     (this, k) match {
-      case (KApply(labelVariable: KVariable, contentsP: K, att), KApply(label2, contents, att2)) =>
+      case (KApply(labelVariable: KVariable, contentsP: K, _), KApply(label2, contents, _)) =>
         and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents, condition))
       case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
         contentsP.matchAll(contents, condition)
@@ -129,4 +129,15 @@ trait KSequencePattern extends Pattern with BindingOps {
           case m: Map[_, _] => m.asInstanceOf[Map[KVariable, KList]] mapValues { l => KSequence(l.delegate, Attributes()) }
         }
     }
+}
+
+case class Anywhere(pattern: K) extends Pattern with BindingOps {
+  def matchAll(k: K, condition: K)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
+    val topSolutions = pattern.matchAll(k)
+    val childrenSolutions = k match {
+      case k: KCollection => (k map { c: K => this.matchAll(c) }).fold(Set())(or)
+      case _ => Set[Solution]()
+    }
+    or(topSolutions, childrenSolutions)
+  }
 }
