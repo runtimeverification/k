@@ -15,8 +15,8 @@ module ID-HOOKS
   rule Id2String(X:Id) => #tokenToString(X)
   rule String2Id(S:String) => #parseToken("Id", S)
 
-  syntax Id ::= CamelCaseId
-  syntax Id ::= PascalCaseId
+  syntax CamelCaseId
+  syntax PascalCaseId
   rule isPascalCaseId(X:Id) => isUppercase(substrString(#tokenToString(X), 0, 1))
   rule isCamelCaseId(X:Id) => isLowercase(substrString(#tokenToString(X), 0, 1))
 
