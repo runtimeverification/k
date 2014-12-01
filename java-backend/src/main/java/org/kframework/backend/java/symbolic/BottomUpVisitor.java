@@ -153,42 +153,6 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup listLookup) {
-        listLookup.list().accept(this);
-        listLookup.key().accept(this);
-    }
-
-    @Override
-    public void visit(ListUpdate listUpdate) {
-        listUpdate.list().accept(this);
-    }
-
-    @Override
-    public void visit(MapKeyChoice mapKeyChoice) {
-        mapKeyChoice.map().accept(this);
-        visit((Term) mapKeyChoice);
-    }
-
-    @Override
-    public void visit(MapLookup mapLookup) {
-        mapLookup.map().accept(this);
-        mapLookup.key().accept(this);
-        visit((Term) mapLookup);
-    }
-
-    @Override
-    public void visit(MapUpdate mapUpdate) {
-        mapUpdate.map().accept(this);
-        for (Term key : mapUpdate.removeSet()) {
-            key.accept(this);
-        }
-        for (java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
-            entry.getKey().accept(this);
-            entry.getValue().accept(this);
-        }
-    }
-
-    @Override
     public void visit(MetaVariable metaVariable) {
         visit((Token) metaVariable);
     }
@@ -206,27 +170,6 @@ public class BottomUpVisitor implements Visitor {
         }
         for (Variable variable : rule.freshConstants()) {
             variable.accept(this);
-        }
-    }
-
-    @Override
-    public void visit(SetElementChoice setElementChoice) {
-        setElementChoice.set().accept(this);
-        visit((Term) setElementChoice);
-    }
-
-    @Override
-    public void visit(SetLookup setLookup) {
-        setLookup.base().accept(this);
-        setLookup.key().accept(this);
-        visit((Term) setLookup);
-    }
-
-    @Override
-    public void visit(SetUpdate setUpdate) {
-        setUpdate.base().accept(this);
-        for (Term key : setUpdate.removeSet()) {
-            key.accept(this);
         }
     }
 

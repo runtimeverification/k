@@ -295,31 +295,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return transformJavaBackendSpecificTerm(listLookup);
-    }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return transformJavaBackendSpecificTerm(listUpdate);
-    }
-
-    @Override
-    public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transformJavaBackendSpecificTerm(mapKeyChoice);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return transformJavaBackendSpecificTerm(mapLookup);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return transformJavaBackendSpecificTerm(mapUpdate);
-    }
-
-    @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
     }
@@ -327,21 +302,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(Rule rule) {
         throw new UnsupportedOperationException("Not implemented, yet");
-    }
-
-    @Override
-    public ASTNode transform(SetElementChoice setElementChoice) {
-        return transformJavaBackendSpecificTerm(setElementChoice);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return transformJavaBackendSpecificTerm(setLookup);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return transformJavaBackendSpecificTerm(setUpdate);
     }
 
     @Override

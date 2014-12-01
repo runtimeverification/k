@@ -138,31 +138,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup listLookup) {
-        visit((Term) listLookup);
-    }
-
-    @Override
-    public void visit(ListUpdate listUpdate) {
-        visit((Term) listUpdate);
-    }
-
-    @Override
-    public void visit(MapKeyChoice mapKeyChoice) {
-        visit((Term) mapKeyChoice);
-    }
-
-    @Override
-    public void visit(MapLookup mapLookup) {
-        visit((Term) mapLookup);
-    }
-
-    @Override
-    public void visit(MapUpdate mapUpdate) {
-        visit((Term) mapUpdate);
-    }
-
-    @Override
     public void visit(MetaVariable metaVariable) {
         visit((Token) metaVariable);
     }
@@ -170,21 +145,6 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(Rule rule) {
         visit((JavaSymbolicObject) rule);
-    }
-
-    @Override
-    public void visit(SetElementChoice setElementChoice) {
-        visit((Term) setElementChoice);
-    }
-
-    @Override
-    public void visit(SetLookup mapLookup) {
-        visit((Term) mapLookup);
-    }
-
-    @Override
-    public void visit(SetUpdate mapUpdate) {
-        visit((Term) mapUpdate);
     }
 
     @Override
