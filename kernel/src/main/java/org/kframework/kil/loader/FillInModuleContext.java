@@ -57,7 +57,7 @@ public class FillInModuleContext extends BasicVisitor {
     @Override
     public Void visit(Import node, Void _)  {
         Module module;
-        // TODO (dwight) remove only the condition the same time with maude backend
+        // TODO(dwightguth) remove only the condition the same time with maude backend
         if (!node.getName().startsWith("#")) { // maude legacy: some modules specified with # are builtin
             module = this.getCurrentDefinition().getDefinitionContext().getModuleByName(node.getName());
             if (module == null) {

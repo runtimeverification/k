@@ -44,7 +44,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
                         Import imp = ((Import) s);
                         String mname2 = imp.getName();
                         Module mm = def.getDefinitionContext().getModuleByName(mname2);
-                        // TODO (Dwight) if the module starts with # it means it is predefined in maude
+                        // TODO(dwightguth) if the module starts with # it means it is predefined in maude
                         if (!mname2.startsWith("#")) {
                             if (mm != null)
                                 synQue.add(mm.getName());
