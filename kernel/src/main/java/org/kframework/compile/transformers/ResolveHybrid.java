@@ -30,16 +30,16 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Production node, Void _void)  {
-        if (!node.containsAttribute("hybrid")) return node;
+        if (!node.containsAttribute("hybrid") && !node.isListDecl()) return node;
         Rule rule = new Rule();
         rule.setBody(new Rewrite(
                 KApp.of(KLabelConstant.KRESULT_PREDICATE,
-                        new KApp(KLabelConstant.of(((Terminal) node.getItems().get(0)).getTerminal()),
-                                 new Variable("Ks", Sort.KLIST))),
-                BoolBuiltin.TRUE, context));
+                        KApp.of(KLabelConstant.of(((Terminal) node.getItems().get(0)).getTerminal()),
+                                 new Variable("K", Sort.K), new Variable("Ks", Sort.KLIST))),
+                KApp.of(KLabelConstant.KRESULT_PREDICATE, new Variable("Ks", Sort.KLIST)), context));
         rule.setRequires(new KApp(
                 KLabelConstant.KRESULT_PREDICATE,
-                new Variable("Ks", Sort.KLIST)));
+                new Variable("K", Sort.K)));
 
         rule.addAttribute(Attribute.PREDICATE);
         hybrids.add(rule);
