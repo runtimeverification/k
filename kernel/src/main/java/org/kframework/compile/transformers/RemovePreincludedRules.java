@@ -25,33 +25,6 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
         if (!(node.getSource() instanceof FileSource)) {
             return null;
         }
-        String filename = ((FileSource)node.getSource()).getFile().getAbsolutePath();
-        if ((!filename.startsWith(JarInfo.getKBase(false) + File.separator + "include")
-                && !filename.startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "builtins"
-                        + File.separator + "id.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "builtins"
-                        + File.separator + "int.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "builtins"
-                        + File.separator + "mint.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "io"
-                        + File.separator + "io.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                                + File.separator + "include" + File.separator + "builtins"
-                                + File.separator + "float.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "modules"
-                        + File.separator + "k-functional-visitor.k"))
-                || (filename.equals(JarInfo.getKBase(false)
-                        + File.separator + "include" + File.separator + "modules"
-                        + File.separator + "verification_lemmas.k"))) {
-            return node;
-        }
-
-        return null;
+        return node;
     }
 }
