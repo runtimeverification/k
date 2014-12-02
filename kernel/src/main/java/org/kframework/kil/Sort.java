@@ -150,6 +150,10 @@ public class Sort implements Serializable {
         return name.endsWith(CELL_FRAGMENT_NAME);
     }
 
+    public boolean isUserListSort() {
+        return name.startsWith(LIST_OF_BOTTOM_PREFIX);
+    }
+
     public Sort getUserListSort(String separator) {
         return Sort.of(LIST_OF_BOTTOM_PREFIX + name + "{\"" + separator + "\"}");
     }
