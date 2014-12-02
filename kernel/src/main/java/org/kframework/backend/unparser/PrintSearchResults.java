@@ -31,7 +31,6 @@ public class PrintSearchResults implements Transformation<SearchResults, String>
         int i = 1;
         SortedSet<String> solutionStrings = new TreeSet<>();
         for (SearchResult solution : results.getSolutions()) {
-            a.add(Boolean.class, PrintSearchResult.IS_DEFAULT_PATTERN, results.isDefaultPattern());
             solutionStrings.add(searchResultPrinter.run(solution, a));
         }
         for (String solution : solutionStrings) {
