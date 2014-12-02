@@ -7,28 +7,29 @@ import java.io.IOException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TstKILtoKOREIT extends BaseTest {
 
     @Test
     public void emptyModule() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void simpleSyntax() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void syntaxWithAttributes() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void syntaxWithRhs() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     // we'll have to eventually convert the configuration
@@ -39,56 +40,67 @@ public class TstKILtoKOREIT extends BaseTest {
     // KToken(String, "bla"))))
     @Test
     public void configuration() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
     }
 
     @Test
     public void context() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
     }
 
     @Test
     public void imports() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void simpleRule() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
     }
 
     @Test
     public void ruleWithRequiresEnsures() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
     }
 
     @Test
     public void syntaxPriorities() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void syntaxWithPriorities() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void syntaxWithOR() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void userList() throws IOException {
-        outerKILtoKORETest();
+        outerOnlyTest();
     }
 
     @Test
     public void userListNonEmpty() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
     }
 
     @Test
     public void kapp() throws IOException {
-        sdfKILtoKORETest();
+        sdfTest();
+    }
+
+    protected String convert(DefintionWithContext defWithContext) {
+        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
+        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
+        String koreDefString = koreDef.toString();
+        return koreDefString;
+    }
+    
+    protected String expecteFilePostfix() {
+        return "-expected.k";
     }
 }
