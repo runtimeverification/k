@@ -72,7 +72,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public ConstrainedTerm(Term term, SymbolicConstraint constraint) {
         Data data = new Data(term, constraint);
         this.data = data;
-        this.context = data.constraint.termContext();
+        this.context = TermContext.of(data.constraint.termContext().global(),
+                term, data.constraint.termContext().getCounter());
     }
 
     public ConstrainedTerm(Term term, TermContext context) {

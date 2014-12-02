@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
@@ -12,17 +13,16 @@ import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -227,26 +227,7 @@ public final class KItem extends Term {
     }
 
     public boolean isEvaluable(TermContext context) {
-        if (evaluable != null) {
-            return evaluable;
-        }
-
-        evaluable = false;
-        if (!(kLabel instanceof KLabelConstant)) {
-            return false;
-        }
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-
-        if (!(kList instanceof KList)) {
-            return false;
-        }
-
-        if (kLabelConstant.isSortPredicate()
-                || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                || context.global().builtins.isBuiltinKLabel(kLabelConstant)) {
-            evaluable = true;
-        }
-        return evaluable;
+        return context.global().kItemOps.isEvaluable(this, context);
     }
 
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
@@ -261,19 +242,19 @@ public final class KItem extends Term {
 
         private final Tool tool;
         private final JavaExecutionOptions javaOptions;
-        private final GlobalOptions globalOptions;
         private final KExceptionManager kem;
+        private final BuiltinFunction builtins;
 
         @Inject
         public KItemOperations(
                 Tool tool,
                 JavaExecutionOptions javaOptions,
-                GlobalOptions globalOptions,
-                KExceptionManager kem) {
+                KExceptionManager kem,
+                BuiltinFunction builtins) {
             this.tool = tool;
             this.javaOptions = javaOptions;
-            this.globalOptions = globalOptions;
             this.kem = kem;
+            this.builtins = builtins;
         }
 
         private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
@@ -304,6 +285,29 @@ public final class KItem extends Term {
             }
         }
 
+        public boolean isEvaluable(KItem kItem, TermContext context) {
+            if (kItem.evaluable != null) {
+                return kItem.evaluable;
+            }
+
+            kItem.evaluable = false;
+            if (!(kItem.kLabel instanceof KLabelConstant)) {
+                return false;
+            }
+            KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
+
+            if (!(kItem.kList instanceof KList)) {
+                return false;
+            }
+
+            if (kLabelConstant.isSortPredicate()
+                    || !context.definition().functionRules().get(kLabelConstant).isEmpty()
+                    || builtins.isBuiltinKLabel(kLabelConstant)) {
+                kItem.evaluable = true;
+            }
+            return kItem.evaluable;
+        }
+
         /**
          * Evaluates this {@code KItem} if it is a predicate or function
          *
@@ -327,16 +331,20 @@ public final class KItem extends Term {
 
             KList kList = (KList) kItem.kList;
 
-            if (context.global().builtins.isBuiltinKLabel(kLabelConstant)) {
+            if (builtins.isBuiltinKLabel(kLabelConstant)) {
                 try {
                     Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                    Term result = context.global().builtins.invoke(context, kLabelConstant, arguments);
+                    Term result = builtins.invoke(context, kLabelConstant, arguments);
                     if (result != null) {
                         return result;
                     }
-                } catch (IllegalAccessException | IllegalArgumentException e) {
-                } catch (InvocationTargetException e) {
-                    Throwable t = e.getTargetException();
+                } catch (ClassCastException e) {
+                // DISABLE EXCEPTION CHECKSTYLE
+                } catch (ImpureFunctionException e) {
+                    // do not do anything further: immediately assume this function is not ready to be evaluated yet.
+                    return kItem;
+                } catch (Throwable t) {
+                // ENABLE EXCEPTION CHECKSTYLE
                     if (t instanceof Error) {
                         throw (Error)t;
                     }
@@ -344,9 +352,9 @@ public final class KItem extends Term {
                         throw (RuntimeException)t;
                     }
                     if (t instanceof RuntimeException) {
-                        kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, e);
+                        kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
                     } else {
-                        throw new AssertionError("Builtin functions should not throw checked exceptions", e);
+                        throw new AssertionError("Builtin functions should not throw checked exceptions", t);
                     }
                 }
             }

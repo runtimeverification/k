@@ -23,11 +23,17 @@
     <module name="IllegalThrows">
       <property name="illegalClassNames" value="java.lang.Exception, java.lang.Throwable" />
     </module>
+    <module name="FileContentsHolder" />
   </module>
   <module name="FileTabCharacter" />
   <module name="RegexpMultiline">
     <property name="format" value="(?s:((\r)|([ \t\x0B\f]$)).*)" />
     <property name="message" value="File has non-Unix line endings or trailing whitespace" />
+  </module>
+  <module name="SuppressionCommentFilter">
+    <property name="offCommentFormat" value="DISABLE EXCEPTION CHECKSTYLE" />
+    <property name="onCommentFormat" value="ENABLE EXCEPTION CHECKSTYLE" />
+    <property name="checkFormat" value="IllegalCatch|IllegalThrows" />
   </module>
 <!--<module name="NewlineAtEndOfFile" />-->
 </module>

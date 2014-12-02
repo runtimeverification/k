@@ -9,9 +9,10 @@ import com.google.common.collect.Multisets;
 import org.kframework.backend.java.kil.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -38,25 +39,47 @@ public class BuiltinMapOperations {
         return builder.build();
     }
 
-    public static Term lookup(BuiltinMap map, Term key, TermContext context) {
-        MapLookup mapLookup = new MapLookup(map, key, Kind.KITEM);
-        return mapLookup.evaluateLookup();
+    public static Term lookup(Term map, Term key, TermContext context) {
+        while (DataStructures.isMapUpdate(map)) {
+            Term value = builtinMapLookup(DataStructures.getMapUpdateMap(map), key);
+            if (!(value instanceof Bottom)) {
+                return value;
+            }
+            map = DataStructures.getMapUpdateBase(map);
+        }
+
+        return builtinMapLookup(map, key);
     }
 
-    public static Term update(BuiltinMap map, Term key, Term value, TermContext context) {
-        MapUpdate mapUpdate = new MapUpdate(
-                map,
-                Collections.<Term>emptySet(),
-                Collections.singletonMap(key, value));
-        return mapUpdate.evaluateUpdate();
+    public static Term builtinMapLookup(Term map, Term key) {
+        if (!(map instanceof BuiltinMap)) {
+            return null;
+        }
+        BuiltinMap builtinMap = (BuiltinMap) map;
+
+
+        Term value = builtinMap.get(key);
+        if (value != null) {
+            return value;
+        } else if (key.isGround() && builtinMap.isConcreteCollection() && builtinMap.hasOnlyGroundKeys()) {
+            return Bottom.of(Kind.K);
+        } else if (builtinMap.isEmpty()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
     }
 
-    public static Term remove(BuiltinMap map, Term key, TermContext context) {
-        MapUpdate mapUpdate = new MapUpdate(
-                map,
-                Collections.singleton(key),
-                Collections.<Term, Term>emptyMap());
-        return mapUpdate.evaluateUpdate();
+    public static Term update(Term map, Term key, Term value, TermContext context) {
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.put(key, value);
+        return updateAll(map, (BuiltinMap) builder.build(), context);
+    }
+
+    public static Term remove(Term map, Term key, TermContext context) {
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.add(key);
+        return removeAll(map, (BuiltinSet) builder.build(), context);
     }
 
     public static Term difference(BuiltinMap map1, BuiltinMap map2, TermContext context) {
@@ -82,10 +105,57 @@ public class BuiltinMapOperations {
         }
     }
 
-    public static Term updateAll(BuiltinMap map1, BuiltinMap map2, TermContext context) {
+    public static Term updateAll(Term map, BuiltinMap updateBuiltinMap, TermContext context) {
+        if (!updateBuiltinMap.isConcreteCollection()) {
+            return null;
+        }
+
+        if (updateBuiltinMap.isEmpty()) {
+            return map;
+        }
+
+        if (!(map instanceof BuiltinMap)) {
+            return null;
+        }
+        BuiltinMap builtinMap = (BuiltinMap) map;
+
         BuiltinMap.Builder builder = new BuiltinMap.Builder();
-        builder.update(map1, map2);
-        return builder.build();
+        builder.update(builtinMap, updateBuiltinMap);
+        BuiltinMap updatedMap = (BuiltinMap) builder.build();
+        if (builtinMap.isConcreteCollection()
+                || updatedMap.concreteSize() == builtinMap.concreteSize()) {
+            return updatedMap;
+        } else {
+            return null;
+        }
+    }
+
+    public static Term removeAll(Term map, BuiltinSet removeBuiltinSet, TermContext context) {
+        if (!removeBuiltinSet.isConcreteCollection()) {
+            return null;
+        }
+
+        if (removeBuiltinSet.isEmpty()) {
+            return map;
+        }
+
+        if (!(map instanceof BuiltinMap)) {
+            return null;
+        }
+        BuiltinMap builtinMap = (BuiltinMap) map;
+
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.concatenate(builtinMap);
+
+        Set<Term> pendingRemoveSet = removeBuiltinSet.elements().stream()
+                .filter(element -> builder.remove(element) == null)
+                .collect(Collectors.toSet());
+
+        if (!builtinMap.isConcreteCollection() && !pendingRemoveSet.isEmpty()) {
+            return DataStructures.mapRemoveAll(builder.build(), pendingRemoveSet, context);
+        } else {
+            return builder.build();
+        }
     }
 
     public static BuiltinSet keys(BuiltinMap map, TermContext context) {
@@ -121,4 +191,15 @@ public class BuiltinMapOperations {
 
         return BoolToken.of(map2.getEntries().entrySet().containsAll(map1.getEntries().entrySet()));
     }
+
+    public static Term choice(BuiltinMap map, TermContext context) {
+        if (!map.getEntries().isEmpty()) {
+            return map.getEntries().keySet().iterator().next();
+        } else if (map.isEmpty()) {
+            return Bottom.of(Kind.K);
+        } else {
+            return null;
+        }
+    }
+
 }

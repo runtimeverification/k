@@ -12,10 +12,6 @@ import java.util.Map;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.DataStructureChoice;
-import org.kframework.backend.java.kil.DataStructureLookup;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
-import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -64,19 +60,13 @@ public class RewriteEngineUtils {
 
         /* evaluate data structure lookups/choices and add bindings for them */
         for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-            // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
-            Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
-                    equality.leftHandSide() : equality.rightHandSide();
-                    Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ?
-                            equality.rightHandSide() : equality.leftHandSide();
-                    assert lookupOrChoice instanceof DataStructureLookupOrChoice :
-                        "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
+            Term lookupOrChoice = equality.leftHandSide();
+            Term nonLookupOrChoice =  equality.rightHandSide();
 
                     Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                     boolean resolved = false;
-                    if (evalLookupOrChoice instanceof Bottom
-                            || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
+                    if (evalLookupOrChoice == null || evalLookupOrChoice instanceof Bottom) {
                         /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
                         // when the operation is pending, it is not really a valid match
@@ -159,46 +149,9 @@ public class RewriteEngineUtils {
         return results;
     }
 
-    /**
-     * Private helper method to substitute and evaluate a
-     * {@link DataStructureLookupOrChoice} operation efficiently.
-     * <p>
-     * This method is more than 10x faster than simply calling
-     * {@code Term#substituteAndEvaluate(Map, TermContext)} on
-     * {@code lookupOrChoice}.
-     *
-     * @param lookupOrChoice
-     * @param subst
-     *            the substitution map
-     * @return the evaluated data structure lookup or choice operation
-     */
     public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
         Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
-
-        Term evalLookupOrChoice = null;
-        if (lookupOrChoice instanceof DataStructureLookup) {
-            DataStructureLookup lookup = (DataStructureLookup) lookupOrChoice;
-            Term base = null, key = null;
-            if (lookup.base() instanceof Variable) {
-                base = subst.get(lookup.base());
-            }
-            key = subst.get(lookup.key());
-            Kind kind = lookupOrChoice.kind();
-            base = base == null ? lookup.base().copyOnShareSubstAndEval(subst, context) : base;
-            key = key == null ? lookup.key().copyOnShareSubstAndEval(subst, context) : key;
-
-            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(lookup.type(), base, key, kind).evaluateLookup();
-        } else {
-            DataStructureChoice choice = (DataStructureChoice) lookupOrChoice;
-            Term base = null;
-            if (choice.base() instanceof Variable) {
-                base = subst.get(choice.base());
-            }
-            base = base == null ? choice.base() : base;
-
-            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(choice.type(), base).evaluateChoice();
-        }
-
+        Term evalLookupOrChoice = lookupOrChoice.copyOnShareSubstAndEval(subst, context);
         Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         return evalLookupOrChoice;
     }
