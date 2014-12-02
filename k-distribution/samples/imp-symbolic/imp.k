@@ -44,6 +44,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+  imports FREE-VARS
 
   syntax KResult ::= Int | Bool
 

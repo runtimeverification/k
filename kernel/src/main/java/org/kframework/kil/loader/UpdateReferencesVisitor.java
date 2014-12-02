@@ -12,13 +12,6 @@ public class UpdateReferencesVisitor extends BasicVisitor {
     }
 
     private Syntax prodRoot;
-    private String moduleName;
-
-    @Override
-    public Void visit(Module mod, Void _) {
-        moduleName = mod.getName();
-        return super.visit(mod, _);
-    }
 
     /**
      * Add the sort attribute to every production when calling the collector
@@ -33,7 +26,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
     public Void visit(Production node, Void _) {
         node.setSort(prodRoot.getDeclaredSort().getSort());
         node.copyAttributesFrom(prodRoot);
-        node.setOwnerModuleName(moduleName);
+        node.setOwnerModuleName(this.getCurrentModule().getName());
         return null;
     }
 }

@@ -55,10 +55,10 @@ public class ParsersPerModule {
                 CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
                 // visit all modules to collect all Terminals first
                 for (String modName : imported)
-                    ctv.visitNode(def.getModulesMap().get(modName));
+                    ctv.visitNode(def.getDefinitionContext().getModuleByName(modName));
                 KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv, kem);
                 for (String modName : imported)
-                    ks2gsf.visitNode(def.getModulesMap().get(modName));
+                    ks2gsf.visitNode(def.getDefinitionContext().getModuleByName(modName));
                 parsers.put(((Module) di).getName(), ks2gsf.getGrammar());
             }
         }
@@ -80,7 +80,7 @@ public class ParsersPerModule {
     private static void getIncludedModules2(String modName, Definition def, Set<String> visited) {
         if (visited.contains(modName))
             return;
-        Module m = def.getModulesMap().get(modName);
+        Module m = def.getDefinitionContext().getModuleByName(modName);
         // there are some mockup modules that don't really exist, like #BOOL-INTERFACE
         // from the old maude days
         if (m == null)

@@ -13,7 +13,7 @@ module SYMBOLIC-K
   imports #SMT
   imports BUILTIN-HOOKS
   imports ID-HOOKS
-  imports FREE-VARS
+  imports FREE-VARS-SYNTAX
   imports SYMBOLIC-SYNTAX
 //  imports SIMPLIFICATION
 

@@ -1,4 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
+require "../k-prelude.k"
+
 module BOOL-SYNTAX-HOOKS
   imports #BOOL-INTERFACE
 
@@ -8,6 +10,7 @@ module BOOL-SYNTAX-HOOKS
 endmodule
 
 module BOOL-HOOKS
+  imports K-TECHNIQUE
   imports BOOL-SYNTAX-HOOKS
 
   syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
