@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
+import org.kframework.kil.loader.Context;
 import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
@@ -34,14 +35,15 @@ public abstract class BaseTest extends SDFCompilerTest {
         testKILtoKORE(this::parseUsingSDF);
     }
 
-    private void testKILtoKORE(Function<File, Definition> parse) throws IOException {
+    private void testKILtoKORE(Function<File, DefintionWithContext> parse) throws IOException {
         File definitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File outputFile = new File(ROOT + name.getMethodName() + "-expected.k");
 
-        Definition def = parse.apply(definitionFile);
+        DefintionWithContext defWithContext = parse.apply(definitionFile);
 
-        KILtoKORE convertor = new KILtoKORE();
-        org.kframework.kore.outer.Definition converted = convertor.apply(def);
+        KILtoKORE convertor = new KILtoKORE(defWithContext.context);
+        org.kframework.kore.outer.Definition converted = convertor
+                .apply(defWithContext.definition);
         org.kframework.kore.outer.Definition koreDefinition = converted;
 
         if (outputFile.isFile()) {
@@ -61,14 +63,24 @@ public abstract class BaseTest extends SDFCompilerTest {
         testKILtoKOREtoKIL(this::parseUsingSDF);
     }
 
-    private void testKILtoKOREtoKIL(Function<File, Definition> parse) throws IOException {
+    static class DefintionWithContext {
+        private Definition definition;
+        private Context context;
+
+        public DefintionWithContext(Definition d, Context c) {
+            this.definition = d;
+            this.context = c;
+        }
+    }
+
+    private void testKILtoKOREtoKIL(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName() + "-kilexpected.k");
 
-        Definition kilDefinition = parse.apply(kilDefinitionFile);
+        DefintionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
-        KILtoKORE kilToKore = new KILtoKORE();
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(kilDefinition);
+        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
+        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
         Definition kilDefinitionTranslatedBack = new KOREtoKIL().convertDefinition(koreDef);
 
         if (kilExpectedDefinitionFile.isFile()) {
@@ -80,7 +92,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private Definition parseUsingSDF(File definitionFile) {
+    private DefintionWithContext parseUsingSDF(File definitionFile) {
         try {
             return parse(definitionFile, "TEST");
         } catch (IOException e) {
@@ -88,7 +100,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private Definition parseUsingOuter(File definitionFile) {
+    private DefintionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {
@@ -97,7 +109,7 @@ public abstract class BaseTest extends SDFCompilerTest {
             throw new RuntimeException(e);
         }
         def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
-        return def;
+        return new DefintionWithContext(def, null);
     }
 
     private String clean(String definitionText) {

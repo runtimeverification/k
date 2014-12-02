@@ -25,12 +25,17 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
             return (R) visitorMethod.invoke(this, t);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                 | IllegalArgumentException e) {
-            throw new VisitingException(t.getClass().toString(), e);
+            throw new VisitingException(makeErrorMessage(t), e);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof VisitingException)
                 throw (VisitingException) e.getCause();
             else
-                throw new VisitingException(t.getClass().toString(), e);
+                throw new VisitingException(makeErrorMessage(t), e);
         }
+    }
+
+    public String makeErrorMessage(ASTNode t) {
+        return t.toString() + " at location " + t.getLocation() + " of class "
+                + t.getClass().toString();
     }
 }

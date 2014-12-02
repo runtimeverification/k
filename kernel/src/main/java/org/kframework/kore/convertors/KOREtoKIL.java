@@ -3,7 +3,9 @@
 package org.kframework.kore.convertors;
 
 import org.kframework.kil.Attribute;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
+import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
@@ -133,6 +135,9 @@ public class KOREtoKIL {
             org.kframework.kil.Production prod = new org.kframework.kil.Production(
                     new org.kframework.kil.NonTerminal(listSort), prodItems);
 
+            kilProductionIdToProductionInstance.put(
+                    prods.get(0).att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
+
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
         }
@@ -170,6 +175,9 @@ public class KOREtoKIL {
 
         org.kframework.kil.Production prod = new org.kframework.kil.Production(
                 new org.kframework.kil.NonTerminal(listSort), prodItems);
+
+        kilProductionIdToProductionInstance.put(
+                prods.get(0).att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
 
         org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
         return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
@@ -546,15 +554,17 @@ public class KOREtoKIL {
                     .collect(Collectors.toList());
 
             if (kilProductionIdP) {
-                // KApp
-                throw new AssertionError("Unimplemented");
+                KLabelConstant kAppLabel = KLabelConstant.of(label.name());
+                return new org.kframework.kil.KApp(kAppLabel, new org.kframework.kil.KList(
+                        kilTerms));
             } else {
                 // TermCons
                 String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID)
                         .get();
                 Production production = kilProductionIdToProductionInstance.get(kilProductionId);
                 if (production == null) {
-                    throw new AssertionError("Could not find production for: " + kApply);
+                    throw new AssertionError("Could not find production for: " + kApply
+                            + " with id: " + kilProductionId);
                 }
 
                 return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),

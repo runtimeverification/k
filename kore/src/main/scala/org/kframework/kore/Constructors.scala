@@ -50,6 +50,8 @@ object Constructors {
   def KVariable(name: String) = {
     kore.KVariable(name, Attributes())
   }
+  
+  def InjectedKLabel(l: KLabel) = kore.InjectedKLabel(l)
 
   @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks: _*)
 

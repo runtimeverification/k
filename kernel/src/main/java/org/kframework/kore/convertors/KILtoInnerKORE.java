@@ -30,6 +30,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -46,11 +47,13 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Context;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 import org.kframework.utils.StringBuilderUtil;
@@ -67,11 +70,22 @@ import static org.kframework.Collections.*;
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
 
+    private Context context;
+
+    public KILtoInnerKORE(org.kframework.kil.loader.Context context) {
+        this.context = context;
+    }
+
     public static final String PRODUCTION_ID = "productionID";
+    public static final String LIST_TERMINATOR = "listTerminator";
 
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
         return KBag(KList(contents));
+    }
+
+    public K apply(TermComment c) {
+        return KList();
     }
 
     private KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
@@ -84,6 +98,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         } else {
             return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));
         }
+    }
+
+    public K apply(org.kframework.kil.KLabelConstant c) {
+        return InjectedKLabel(KLabel(c.getLabel()));
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {
@@ -100,26 +118,37 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 att);
     }
 
+    public KApply apply(ListTerminator t) {
+        Production production = context.listProductions.get(t.getSort());
+        String terminatorKLabel = production.getTerminatorKLabel();
+
+        // NOTE: we don't covert it back to ListTerminator because Radu thinks it is not necessary
+
+        return KApply(KLabel(terminatorKLabel), KList(), Attributes().add(LIST_TERMINATOR));
+    }
+
     public K apply(KApp kApp) {
         Term label = kApp.getLabel();
-        
-        System.out.println(kApp);
 
         if (label instanceof Token) {
-            return KToken(Sort(((Token)label).tokenSort().getName()), ((Token) label).value());
+            return KToken(Sort(((Token) label).tokenSort().getName()), ((Token) label).value());
         } else {
             Term child = kApp.getChild();
 
             if (child instanceof org.kframework.kil.KList) {
-                org.kframework.kil.KList kList = (org.kframework.kil.KList) child;
-                KList koreChildren = (KList) kList.getContents().stream().map(this)
-                        .collect(toKList());
-                throw new AssertionError();
-                // return new KApply(null, koreChildren, apply(kApp.getAttributes()));
+                return KApply(KLabel(((KLabelConstant) label).getLabel()), (KList) apply(child),
+                        apply(kApp.getAttributes()));
+            } else if (child instanceof org.kframework.kil.Variable) {
+                // System.out.println(label.getClass());
+                return KApply(null, KList(apply(child)), apply(kApp.getAttributes()));
             } else {
-                throw new AssertionError();
+                throw new AssertionError("encountered " + child.getClass() + " in a KApp");
             }
         }
+    }
+
+    public K apply(org.kframework.kil.KList kList) {
+        return (K) kList.getContents().stream().map(this).collect(toKList());
     }
 
     private org.kframework.kore.Attributes attributesFor(TermCons cons) {

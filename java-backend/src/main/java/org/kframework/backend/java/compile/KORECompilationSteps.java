@@ -17,7 +17,7 @@ public class KORECompilationSteps extends BasicCompilerStep<Definition> {
 
     @Override
     public Definition compile(Definition ast, String haltAfterStep) throws CompilerStepDone {
-        KILtoKORE kilToKORE = new KILtoKORE();
+        KILtoKORE kilToKORE = new KILtoKORE(context);
         KOREtoKIL koreToKIL = new KOREtoKIL();
 
         org.kframework.kore.outer.Definition koreDefinition = kilToKORE.apply(ast);

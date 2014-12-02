@@ -9,4 +9,10 @@ module TEST
 
   rule notBool true => false
   rule notBool false => true
+
+  rule 'notBool(true) => false
+
+  syntax Bools ::= List{Bool, ","}
+
+  rule true, true => .Bools
 endmodule

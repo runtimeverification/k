@@ -44,7 +44,13 @@ import static org.kframework.Collections.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
-    private KILtoInnerKORE inner = new KILtoInnerKORE();
+    private org.kframework.kil.loader.Context context;
+    private KILtoInnerKORE inner;
+
+    public KILtoKORE(org.kframework.kil.loader.Context context) {
+        this.context = context;
+        inner = new KILtoInnerKORE(context);
+    }
 
     public org.kframework.kore.outer.Definition apply(Definition d) {
         Set<org.kframework.kore.outer.Require> requires = d.getItems().stream()

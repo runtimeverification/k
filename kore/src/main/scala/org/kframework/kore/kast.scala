@@ -117,6 +117,14 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   }
 }
 
+case class InjectedKLabel(klabel: KLabel) extends KItem {
+  type This = InjectedKLabel
+  def att() = Attributes()
+  def copy(att: Attributes) = this
+
+  override def toString = "#klabel" + "(" + klabel + ")";
+}
+
 /*  Constructors */
 
 object KList extends CanBuildKCollection {
