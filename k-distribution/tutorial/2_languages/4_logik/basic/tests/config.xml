@@ -8,6 +8,7 @@
       extension="logik"
       exclude="append-6"
       results="." >
+      <kompile-option name="--backend" value="java" />
       <all-programs>
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
