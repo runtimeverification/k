@@ -33,6 +33,16 @@ public interface DataStructures {
         return KItem.of(klabel, kList, context);
     }
 
+    static boolean isChoice(Term term) {
+        return term instanceof KItem
+                && ((KItem) term).kLabel() instanceof KLabelConstant
+                && (((KItem) term).kLabel().toString().equals("Map:choice")
+                        || ((KItem) term).kLabel().toString().equals("Set:choice"))
+                && ((KItem) term).kList() instanceof KList
+                && ((KList) ((KItem) term).kList()).isConcreteCollection()
+                && ((KList) ((KItem) term).kList()).concreteSize() == 2;
+    }
+
     static boolean isLookup(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
