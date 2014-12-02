@@ -183,9 +183,6 @@ public class IOServer implements Runnable {
         if (command.equals("system")) {
             return new CommandSystem(args, socket, fs, rp);
         }
-        if (command.equals("time")) {
-            return new CommandTime(args, socket, fs);
-        }
 
         return new CommandUnknown(args, socket, fs); //, (long) 0);
     }
