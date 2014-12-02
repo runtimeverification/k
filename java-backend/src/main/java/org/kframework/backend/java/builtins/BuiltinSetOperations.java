@@ -102,7 +102,7 @@ public class BuiltinSetOperations {
         if (!set.elements().isEmpty()) {
             return set.elements().iterator().next();
         } else if (set.isEmpty()) {
-            return Bottom.of(Kind.K);
+            return Bottom.BOTTOM;
         } else {
             return null;
         }

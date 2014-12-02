@@ -62,9 +62,9 @@ public class BuiltinMapOperations {
         if (value != null) {
             return value;
         } else if (key.isGround() && builtinMap.isConcreteCollection() && builtinMap.hasOnlyGroundKeys()) {
-            return Bottom.of(Kind.K);
+            return Bottom.BOTTOM;
         } else if (builtinMap.isEmpty()) {
-            return Bottom.of(Kind.K);
+            return Bottom.BOTTOM;
         } else {
             return null;
         }
@@ -196,7 +196,7 @@ public class BuiltinMapOperations {
         if (!map.getEntries().isEmpty()) {
             return map.getEntries().keySet().iterator().next();
         } else if (map.isEmpty()) {
-            return Bottom.of(Kind.K);
+            return Bottom.BOTTOM;
         } else {
             return null;
         }
