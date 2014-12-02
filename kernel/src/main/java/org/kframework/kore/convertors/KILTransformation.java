@@ -6,14 +6,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.kframework.kil.ASTNode;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
 
     @SuppressWarnings("serial")
     static class VisitingException extends RuntimeException {
-        VisitingException(Throwable e, Class cls) {
-            super(e.getMessage() + " - " + cls.getName(), e);
+        VisitingException(String message, Exception e) {
+            super(message, e);
         }
     }
 
@@ -24,9 +25,12 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
             return (R) visitorMethod.invoke(this, t);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                 | IllegalArgumentException e) {
-            throw new VisitingException(e, t.getClass());
+            throw new VisitingException(t.getClass().toString(), e);
         } catch (InvocationTargetException e) {
-            throw new VisitingException(e.getTargetException(), t.getClass());
+            if (e.getCause() instanceof VisitingException)
+                throw (VisitingException) e.getCause();
+            else
+                throw new VisitingException(t.getClass().toString(), e);
         }
     }
 }
