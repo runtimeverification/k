@@ -49,6 +49,10 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         return KApp.of(KLabelConstant.of(label), elements);
     }
 
+    public static KApp of(Term label, List<Term> elements) {
+        return KApp.of(label, new KList(elements));
+    }
+
     /**
      * Constructs a {@link KApp} object representing the application of the specified KLabel to the specified KList.
      *

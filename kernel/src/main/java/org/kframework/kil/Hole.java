@@ -22,7 +22,7 @@ public class Hole extends Term {
         super(hole);
     }
 
-    private Hole(Sort sort) {
+    public Hole(Sort sort) {
         super(sort);
 
         assert sort.equals(Sort.KITEM);

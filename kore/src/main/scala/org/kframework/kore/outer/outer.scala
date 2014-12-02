@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 package org.kframework.kore.outer
 
 import org.kframework.kore
@@ -5,54 +7,65 @@ import org.kframework.kore.Sort
 import scala.util.matching.Regex
 import org.kframework.kore.Attributes
 
-trait ParserPiece
+trait OuterKORE
 
 case class Definition(requires: Set[Require], modules: Set[Module])
-  extends DefinitionToString with ParserPiece
+  extends DefinitionToString with OuterKORE
 
-case class Require(file: java.io.File)
-
-object Module {
-  def apply(name: String, att: Attributes, sentences: Set[Sentence]): Module =
-    Module(name, sentences, att)
-}
+case class Require(file: java.io.File) extends OuterKORE
 
 case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attributes())
-  extends ModuleToString with ParserPiece with KLabelMappings
+  extends ModuleToString with KLabelMappings with OuterKORE
 // hooked but different from core, Import is a sentence here
 
 trait Sentence { // marker
-  val attributes: Attributes
+  val att: Attributes
 }
 
+case class Context(
+  body: kore.K,
+  requires: kore.K,
+  att: Attributes = Attributes()) extends Sentence with OuterKORE with ContextToString
+
 case class Rule(
-  label: String,
   body: kore.K,
   requires: kore.K,
   ensures: kore.K,
-  attributes: Attributes) extends Sentence
-  with RuleToString
+  att: Attributes) extends Sentence
+  with RuleToString with OuterKORE
 
-case class ModuleComment(comment: String, attributes: Attributes = Attributes()) extends Sentence
+case class ModuleComment(comment: String, att: Attributes = Attributes())
+  extends Sentence with OuterKORE
 
-case class Import(what: String, attributes: Attributes = Attributes()) extends Sentence // hooked
+case class Import(what: String, att: Attributes = Attributes())
+  extends Sentence with ImportToString with OuterKORE // hooked
 
-case class SyntaxPriority(higher: String, lower: String, attributes: Attributes = Attributes()) extends Sentence with ParserPiece
+// syntax declarations
 
-// will be needed once we figure out how to encode associtivity
-//object Associativity extends Enumeration {
-//  val Left, Right, NonAssoc, Unspecified = Value
-//}
+case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Attributes = Attributes())
+  extends Sentence with SyntaxPriorityToString with OuterKORE
 
-case class SyntaxSort(sort: Sort, attributes: Attributes = Attributes()) extends Sentence with ParserPiece
+object Associativity extends Enumeration {
+  type Value1 = Value
+  val Left, Right, NonAssoc, Unspecified = Value
+}
 
-case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], attributes: Attributes = Attributes()) extends Sentence with ParserPiece // hooked but problematic, see kast-core.k 
-  with SyntaxProductionToString
+case class SyntaxAssociativity(assoc: Associativity.Value, tags: collection.immutable.Set[Tag], att: Attributes = Attributes())
+  extends Sentence with SyntaxAssociativityToString with OuterKORE
 
-sealed trait ProductionItem // marker
+case class Tag(name: String) extends TagToString with OuterKORE
 
-case class NonTerminal(sort: Sort) extends ProductionItem 
-case class RegexTerminal(regex: String) extends ProductionItem 
+case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
+  with SyntaxSortToString with OuterKORE
+
+case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
+  extends Sentence with SyntaxProductionToString // hooked but problematic, see kast-core.k
+
+sealed trait ProductionItem extends OuterKORE // marker
+
+case class NonTerminal(sort: Sort) extends ProductionItem
+  with NonTerminalToString
+case class RegexTerminal(regex: String) extends ProductionItem with RegexTerminalToString
 case class Terminal(value: String) extends ProductionItem // hooked
   with TerminalToString
 

@@ -252,8 +252,6 @@ public class DefinitionLoader {
             cachedSentences = clf.getKept().size();
             prf = new ParseRulesFilter(context, clf.getKept());
             def = (Definition) prf.visitNode(def);
-        } catch (ParseFailedException te) {
-            te.printStackTrace();
         } finally {
             // save definition
             loader.saveOrDie(cache, clf.getKept());

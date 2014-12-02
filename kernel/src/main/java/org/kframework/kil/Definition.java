@@ -12,6 +12,8 @@ import org.kframework.utils.Poset;
 import com.google.inject.Inject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +55,14 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     @Override
     public String toString() {
         String content = "";
-        for (DefinitionItem di : items)
+        List<DefinitionItem> sortedItems = new ArrayList<>(items);
+        sortedItems.sort(new Comparator<DefinitionItem>() {
+            @Override
+            public int compare(DefinitionItem o1, DefinitionItem o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+        for (DefinitionItem di : sortedItems)
             content += di + " \n";
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;

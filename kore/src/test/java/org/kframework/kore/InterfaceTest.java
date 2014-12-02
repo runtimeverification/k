@@ -3,7 +3,7 @@
 package org.kframework.kore;
 
 import org.junit.Test;
-import static org.kframework.kore.Interface.*;
+import static org.kframework.kore.Constructors.*;
 
 public class InterfaceTest {
 
@@ -18,5 +18,6 @@ public class InterfaceTest {
 
         // Navigating it
         KLabel theLabel = ((KApply) k.left()).klabel();
+        theLabel.name();
     }
 }

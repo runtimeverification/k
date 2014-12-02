@@ -3,7 +3,7 @@
 package org.kframework.kore;
 
 import static org.junit.Assert.*;
-import static org.kframework.kore.Interface.*;
+import static org.kframework.kore.Constructors.*;
 
 import org.junit.Test;
 
@@ -12,12 +12,12 @@ public class VisitorTest {
 
         @Override
         public K apply(KApply k) {
-            return k.map(this);
+            return (K) k.map(this);
         }
 
         @Override
         public K apply(KRewrite k) {
-            return k.map(this);
+            return KRewrite(apply(k.left()), apply(k.right()), k.att());
         }
 
         @Override
@@ -28,6 +28,16 @@ public class VisitorTest {
         @Override
         public K apply(KVariable k) {
             return k;
+        }
+
+        @Override
+        public K apply(KList k) {
+            return (K) k.map(this);
+        }
+
+        @Override
+        public K apply(KSequence k) {
+            return (K) k.map(this);
         }
     }
 
@@ -69,8 +79,8 @@ public class VisitorTest {
     @Test
     public void testNested() {
         FooTransformer fooTransformer = new FooTransformer();
-        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(
-                KToken(Sort("foo"), KString("bla")), KVariable("U")));
+        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken(Sort("foo"), KString("bla")),
+                KVariable("U")));
 
         assertEquals(KRewrite(KVariable("T"), KVariable("U")), t);
     }

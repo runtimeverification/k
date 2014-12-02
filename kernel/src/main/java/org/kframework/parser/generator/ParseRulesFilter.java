@@ -72,7 +72,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 // DISABLE EXCEPTION CHECKSTYLE
                 } catch (RuntimeException e) {
                     String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation(), e));
                 }
                 // ENABLE EXCEPTION CHECKSTYLE
             }

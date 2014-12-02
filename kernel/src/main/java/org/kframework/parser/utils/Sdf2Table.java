@@ -8,40 +8,49 @@ import java.io.InputStream;
 import org.kframework.utils.OS;
 import org.kframework.utils.ThreadedStreamCapturer;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class Sdf2Table {
 
     private final Provider<ProcessBuilder> pb;
+    private String theCommand;
 
     @Inject
     public Sdf2Table(Provider<ProcessBuilder> pb) {
+        this(pb, OS.current().getNativeExecutable("sdf2table"));
+    }
+
+    public Sdf2Table(Provider<ProcessBuilder> pb, String theCommand) {
         this.pb = pb;
+        this.theCommand = theCommand;
     }
 
     public void run_sdf2table(File startDir, String mainFile) {
         ThreadedStreamCapturer errorStreamHandler;
 
         try {
-            String f = OS.current().getNativeExecutable("sdf2table");
 
             // create process
-            ProcessBuilder pb = this.pb.get().command(f, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
+            ProcessBuilder pb = this.pb.get().command(theCommand, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
+
             pb.directory(startDir);
 
             // start sdf2table process
             Process process = pb.start();
 
             InputStream errorStream = process.getErrorStream();
-            // these need to run as java thread to get the standard error from the command.
+            // these need to run as java thread to get the standard error from
+            // the command.
             errorStreamHandler = new ThreadedStreamCapturer(errorStream);
             errorStreamHandler.start();
             process.waitFor();
             errorStreamHandler.join();
 
             String s = errorStreamHandler.getContent().toString();
-            // if some errors occurred (if something was written on the stderr stream)
+            // if some errors occurred (if something was written on the stderr
+            // stream)
             if (!s.equals("")) {
                 assert false : "SDF2Table returned errors: " + s;
             }
