@@ -1,2 +1,0 @@
-\QL1:Term |-> cons ( a, cons ( b, nil ) )\E\s+\QL2:Term |-> nil\E
-\QL1:Term |-> nil\E\s+\QL2:Term |-> cons ( b, cons ( a, nil ) )\E
