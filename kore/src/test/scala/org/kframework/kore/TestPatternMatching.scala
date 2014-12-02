@@ -132,7 +132,10 @@ class TestPatternMatching {
 
   @Test def testAnywhere() {
     val o = 'foo('bar('foo()))
-    assertEquals(Set(Map(X -> 'bar('foo())), Map(X -> KSequence())), Anywhere('foo(X)).matchAll(o))
+    import Anywhere._
+    assertEquals(
+      Set(Map(X -> 'bar('foo()), TOP -> HOLE), Map(X -> KSequence(), TOP -> 'foo('bar(HOLE)))),
+      Anywhere('foo(X)).matchAll(o))
   }
 
   def assertEquals(expected: Any, actual: Any) {

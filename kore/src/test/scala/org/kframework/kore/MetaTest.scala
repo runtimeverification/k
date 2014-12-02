@@ -33,8 +33,8 @@ class MetaTest {
 
   val metad = 'Definition('Set(),
     'Set('Module("TEST",
-      'Set('SyntaxProduction('Sort("Foo"),
-        'List('Terminal("Bar")), 'Attributes('Set()))), 'Attributes('Set()))))
+      'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")), 'Attributes('Set()))),
+      'Attributes('Set()))))
 
   @Test def definitionMeta() {
     assertEquals(metad, Meta(d))
@@ -42,5 +42,11 @@ class MetaTest {
 
   @Test def definitionConcrete() {
     assertEquals(d, Concrete(metad))
+  }
+
+  @Test def testTransformation() {
+    val metaT = Meta(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))): K)
+    println(metaT)
+//    println(Concrete(metaT))
   }
 }

@@ -1,17 +1,17 @@
 package org.kframework.kore
 
 import org.kframework._
-
 import KBoolean._
 import KORE._
+
+import Pattern.Solution
+import scala.collection.mutable.ListBuffer
 
 case class MatchException(m: String) extends RuntimeException(m)
 
 object Pattern {
   type Solution = Map[KVariable, K]
 }
-
-import Pattern.Solution
 
 trait Pattern {
   def matchOne(k: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(k, condition).headOption
@@ -136,13 +136,45 @@ trait KSequencePattern extends Pattern with BindingOps {
     }
 }
 
-case class Anywhere(pattern: K) extends Pattern with BindingOps {
+case class Anywhere(pattern: K) extends KAbstractCollection with BindingOps {
+  type This = Anywhere
+
+  def delegate = List(pattern)
+  def att = Attributes()
+  def copy(att: Attributes) = this
+
+  def newBuilder = ListBuffer() mapResult {
+    case List(x) => Anywhere(x)
+    case _ => throw new UnsupportedOperationException()
+  }
+  import Anywhere._
+
   def matchAll(k: K, condition: K)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
-    val topSolutions = pattern.matchAll(k)
+    val localSolution = and(pattern.matchAll(k), Set(Map(TOP -> (HOLE: K))))
     val childrenSolutions = k match {
-      case k: KCollection => (k map { c: K => this.matchAll(c) }).fold(Set())(or)
+      case k: KCollection =>
+        (k map { c: K =>
+          val solutions = this.matchAll(c)
+          val updatedSolutions = solutions map {
+            case s =>
+              val newAnywhere: K = k map { childK: K =>
+                childK match {
+                  case `c` => s(TOP)
+                  case other: K => other
+                }
+              }
+              val anywhereWrapper = Map(TOP -> newAnywhere)
+              s ++ anywhereWrapper
+          }
+          updatedSolutions
+        }).fold(Set())(or)
       case _ => Set[Solution]()
     }
-    or(topSolutions, childrenSolutions)
+    or(localSolution, childrenSolutions)
   }
+}
+
+object Anywhere {
+  val TOP = KVariable("TOP")
+  val HOLE = KVariable("HOLE")
 }

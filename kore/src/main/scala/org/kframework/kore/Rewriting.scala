@@ -4,6 +4,8 @@ import KBoolean._
 
 trait Rewriting {
   self: K =>
+
+  import Anywhere._
   /**
    * search using the rewrite rule in K
    */
@@ -20,13 +22,14 @@ trait Rewriting {
    * search using the rewrite rule in K
    */
   def search(rewrite: KRewrite): Set[K] = {
-    val solutions = rewrite.left.matchAll(this, true)
-
+    val solutions = rewrite.left.matchAll(this)
+    println(solutions)
     solutions map { substituion => rewrite.right.transform(substituion) }
   }
 
   def transform(substituion: Map[KVariable, K]): K = this match {
-    case v: KVariable => substituion.getOrElse(v, v)
+    case Anywhere(p) => substituion(TOP).transform(substituion + (HOLE -> p))
+    case v: KVariable => substituion(v).transform(substituion)
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
       val newChildren = klist map { x: K => x.transform(substituion) }
       KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
@@ -36,7 +39,6 @@ trait Rewriting {
   }
 
   def search(rewrite: K): Set[K] = {
-    println(KRewrite(toLeft(rewrite), toRight(rewrite)))
     search(KRewrite(toLeft(rewrite), toRight(rewrite)))
   }
 
@@ -45,8 +47,10 @@ trait Rewriting {
     case c: KCollection => c map toLeft
     case other => other
   }
+
   def toRight(rewrite: K): K = rewrite match {
     case KRewrite(left, right, _) => right
+    case Anywhere(p) => Anywhere(toRight(p))
     case c: KCollection => c map toRight
     case other => other
   }

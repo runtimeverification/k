@@ -90,6 +90,12 @@ class TestRewriting {
     assertEquals(Set('foo(1, 3)),
       'foo(1, 'bar(2, 3)).search('foo(1, KRewrite('bar(2, X), X))))
   }
+  
+  @Test def testAnywhere {
+    assertEquals(Set(),
+        'foo('bar('foo(0))).search(Anywhere(KRewrite('foo(X), X)))
+        )
+  }
 
   def assertEquals(expected: Any, actual: Any) {
     if (expected != actual) {
