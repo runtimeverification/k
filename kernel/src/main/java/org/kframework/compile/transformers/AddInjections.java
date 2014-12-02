@@ -19,7 +19,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -135,7 +134,9 @@ public class AddInjections extends CopyOnWriteTransformer{
             return transformedNode;
         }
 
-        assert transformedNode.getBody() instanceof Rewrite : "Deep rewrites are currently not allowed in function rules.";
+        if (!(transformedNode.getBody() instanceof Rewrite)) {
+            transformedNode = (Rule) new ResolveRewrite(context).visitNode(transformedNode);
+        }
         Term left = ((Rewrite) transformedNode.getBody()).getLeft();
         Term right = ((Rewrite) transformedNode.getBody()).getRight();
         if (!(left instanceof KItemProjection)) {
