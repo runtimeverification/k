@@ -75,6 +75,15 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                 } catch (NumberFormatException e) { }
             }
 
+            if (variable.getName().matches("_\\d+")) {
+                try {
+                    Integer.parseInt(variable.getName().substring(1));
+                    substitution.put(
+                            variable,
+                            new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));
+                } catch (NumberFormatException e) { }
+            }
+
             return null;
         }
 

@@ -1,1 +1,5 @@
-\Q"V" |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )\E
+Search results:
+
+Solution 1:
+Solution:Map -->
+V:Term |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )

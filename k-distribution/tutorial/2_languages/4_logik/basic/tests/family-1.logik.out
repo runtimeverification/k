@@ -1,10 +1,61 @@
-"A".*jim.*\s+"B".*john.*\s+"X".*david.*
-"A".*nathan.*\s+"B".*david.*\s+"X".*jim.*
-"A".*nathan.*\s+"B".*david.*\s+"X".*steve.*
-"A".*nathan.*\s+"B".*jim.*\s+"X".*steve.*
-"A".*nathan.*\s+"B".*john.*\s+"X".*david.*
-"A".*nathan.*\s+"B".*john.*\s+"X".*jim.*
-"A".*nathan.*\s+"B".*john.*\s+"X".*steve.*
-"A".*steve.*\s+"B".*david.*\s+"X".*jim.*
-"A".*steve.*\s+"B".*john.*\s+"X".*david.*
-"A".*steve.*\s+"B".*john.*\s+"X".*jim.*
+Search results:
+
+Solution 1:
+Solution:Map -->
+A:Term |-> jim (  )
+B:Term |-> john (  )
+X:Term |-> david (  )
+
+Solution 2:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> david (  )
+X:Term |-> jim (  )
+
+Solution 3:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> david (  )
+X:Term |-> steve (  )
+
+Solution 4:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> jim (  )
+X:Term |-> steve (  )
+
+Solution 5:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> john (  )
+X:Term |-> david (  )
+
+Solution 6:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> john (  )
+X:Term |-> jim (  )
+
+Solution 7:
+Solution:Map -->
+A:Term |-> nathan (  )
+B:Term |-> john (  )
+X:Term |-> steve (  )
+
+Solution 8:
+Solution:Map -->
+A:Term |-> steve (  )
+B:Term |-> david (  )
+X:Term |-> jim (  )
+
+Solution 9:
+Solution:Map -->
+A:Term |-> steve (  )
+B:Term |-> john (  )
+X:Term |-> david (  )
+
+Solution 10:
+Solution:Map -->
+A:Term |-> steve (  )
+B:Term |-> john (  )
+X:Term |-> jim (  )
