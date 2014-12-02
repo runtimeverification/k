@@ -144,7 +144,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 possibleTerms = new ArrayList<Term>();
                 if (listProds != null) {
                     for (Production prod : listProds) {
-                            possibleTerms.add(new ListTerminator(prod.getSort(), null));
+                        if (prod.getSort().isUserListSort()) {
+                            continue;
+                        }
+                        possibleTerms.add(new ListTerminator(prod.getSort(), null));
                     }
                     if (possibleTerms.size() == 0) {
                         return super.visit(kapp, null);
