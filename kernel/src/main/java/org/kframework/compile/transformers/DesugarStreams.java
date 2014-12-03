@@ -19,8 +19,8 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _)  {
-        ASTNode result = super.visit(node, _);
+    public ASTNode visit(Cell node, Void _void)  {
+        ASTNode result = super.visit(node, _void);
         if (!(result instanceof Cell)) {
             throw KExceptionManager.internalError(
                     "Expecting Cell, but got " + result.getClass() + " in Streams Desugarer.",
@@ -85,17 +85,17 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) {
+    public ASTNode visit(Rule node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) {
+    public ASTNode visit(Syntax node, Void _void) {
         return node;
     }
 

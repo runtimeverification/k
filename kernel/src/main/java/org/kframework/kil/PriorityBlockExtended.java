@@ -87,12 +87,12 @@ public class PriorityBlockExtended extends ASTNode implements Interfaces.Mutable
     }
 
     @Override
-    public List<KLabelConstant> getChildren(Enum<?> _) {
+    public List<KLabelConstant> getChildren(Enum<?> _void) {
         return productions;
     }
 
     @Override
-    public void setChildren(List<KLabelConstant> children, Enum<?> _) {
+    public void setChildren(List<KLabelConstant> children, Enum<?> _void) {
         this.productions = children;
     }
 

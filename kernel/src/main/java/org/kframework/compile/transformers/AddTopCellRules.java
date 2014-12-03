@@ -15,7 +15,7 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) {
+    public ASTNode visit(Rule node, Void _void) {
         if (MetaK.isAnywhere(node)) return node;
         if (!MetaK.hasCell(node.getBody(), context)) return node;
         node = node.shallowCopy();
@@ -24,17 +24,17 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) {
+    public ASTNode visit(Configuration node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) {
+    public ASTNode visit(Syntax node, Void _void) {
         return node;
     }
 

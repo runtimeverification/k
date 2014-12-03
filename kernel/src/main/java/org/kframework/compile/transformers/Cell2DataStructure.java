@@ -53,18 +53,18 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration configuration, Void _) {
+    public ASTNode visit(Configuration configuration, Void _void) {
         return configuration;
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
+    public ASTNode visit(Cell cell, Void _void)  {
         if (!madeCellDataStructures) {
             makeCellDataStructures(context);
             madeCellDataStructures = true;
         }
 
-        cell = (Cell) super.visit(cell, _);
+        cell = (Cell) super.visit(cell, _void);
 
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {

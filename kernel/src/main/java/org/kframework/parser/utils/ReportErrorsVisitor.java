@@ -20,7 +20,7 @@ public class ReportErrorsVisitor extends ParseForestTransformer {
         this.fromWhere = fromWhere;
     }
 
-    public ASTNode visit(ParseError pe, Void _) throws ParseFailedException {
+    public ASTNode visit(ParseError pe, Void _void) throws ParseFailedException {
         String msg = pe.getMessage();
         if (msg.equals("Parse error: eof unexpected"))
             msg = "Parse error: Unexpected end of " + fromWhere;

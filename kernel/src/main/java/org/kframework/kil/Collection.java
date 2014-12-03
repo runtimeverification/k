@@ -101,12 +101,12 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
     }
 
     @Override
-    public List<Term> getChildren(Enum<?> _) {
+    public List<Term> getChildren(Enum<?> _void) {
         return contents;
     }
 
     @Override
-    public void setChildren(List<Term> children, Enum<?> _) {
+    public void setChildren(List<Term> children, Enum<?> _void) {
         this.contents = children;
     }
 }

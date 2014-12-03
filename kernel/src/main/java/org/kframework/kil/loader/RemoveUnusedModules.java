@@ -18,7 +18,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Definition def, Void _)  {
+    public ASTNode visit(Definition def, Void _void)  {
         boolean change = false;
         Set<String> initialModules = new HashSet<>();
         if (autoinclude) {
@@ -61,7 +61,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
         }
 
         @Override
-        public Void visit(Definition d, Void _) {
+        public Void visit(Definition d, Void _void) {
             Queue<Module> mods = new LinkedList<Module>();
             for (String name : initialModules) {
                 Module mainModule = d.getDefinitionContext().getModuleByName(name);

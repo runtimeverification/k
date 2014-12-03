@@ -118,7 +118,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         assert node.getBody() instanceof Rewrite:
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
@@ -283,8 +283,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(ListBuiltin node, Void _)  {
-        node = (ListBuiltin) super.visit(node, _);
+    public ASTNode visit(ListBuiltin node, Void _void)  {
+        node = (ListBuiltin) super.visit(node, _void);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
@@ -383,8 +383,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(MapBuiltin node, Void _)  {
-        node = (MapBuiltin) super.visit(node, _);
+    public ASTNode visit(MapBuiltin node, Void _void)  {
+        node = (MapBuiltin) super.visit(node, _void);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
@@ -462,8 +462,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(SetBuiltin node, Void _)  {
-        node = (SetBuiltin) super.visit(node, _);
+    public ASTNode visit(SetBuiltin node, Void _void)  {
+        node = (SetBuiltin) super.visit(node, _void);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
@@ -532,7 +532,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable node, Void _)  {
+    public ASTNode visit(Variable node, Void _void)  {
         if (status != Status.LHS && reverseMap.containsKey(node)) {
             return reverseMap.get(node);
         } else {

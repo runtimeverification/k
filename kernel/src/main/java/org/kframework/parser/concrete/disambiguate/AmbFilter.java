@@ -31,7 +31,7 @@ public class AmbFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
         String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 
         for (int i = 0; i < amb.getContents().size(); i++) {

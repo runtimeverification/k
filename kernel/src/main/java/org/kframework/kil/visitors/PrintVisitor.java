@@ -30,12 +30,12 @@ public class PrintVisitor extends AbstractVisitor<StringBuilder, Void, RuntimeEx
     }
 
     @Override
-    public Void defaultReturnValue(ASTNode node, StringBuilder _) {
+    public Void defaultReturnValue(ASTNode node, StringBuilder _void) {
         return null;
     }
 
     @Override
-    public <T extends ASTNode> T processChildTerm(T child, Void _) {
+    public <T extends ASTNode> T processChildTerm(T child, Void _void) {
         return child;
     }
 

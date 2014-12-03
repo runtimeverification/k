@@ -32,75 +32,75 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
     private boolean atTop = true;
 
     @Override
-    public ASTNode visit(TermCons ast, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(Constant ast, Void _) throws ParseFailedException {
+    public ASTNode visit(Constant ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(Collection ast, Void _) throws ParseFailedException {
+    public ASTNode visit(Collection ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(Cell ast, Void _) throws ParseFailedException {
+    public ASTNode visit(Cell ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(CollectionItem ast, Void _) throws ParseFailedException {
+    public ASTNode visit(CollectionItem ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(KApp ast, Void _) throws ParseFailedException {
+    public ASTNode visit(KApp ast, Void _void) throws ParseFailedException {
         if (ast.getLabel() instanceof Token) return ast;
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(Hole ast, Void _) throws ParseFailedException {
+    public ASTNode visit(Hole ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(Freezer ast, Void _) throws ParseFailedException {
+    public ASTNode visit(Freezer ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode visit(KInjectedLabel ast, Void _) throws ParseFailedException {
+    public ASTNode visit(KInjectedLabel ast, Void _void) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         return postpare((Term)result, tmp);
     }
 
@@ -152,7 +152,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         private boolean hasTerm;
         private Location realLocation;
 
-        public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
             realLocation = ast.getLocation();
             for (int i = amb.getContents().size() - 1; i >= 0; i--) {
                 Term t = amb.getContents().get(i);
@@ -171,7 +171,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             return amb;
         }
 
-        public ASTNode visit(Term t, Void _) throws ParseFailedException {
+        public ASTNode visit(Term t, Void _void) throws ParseFailedException {
             if (t.equals(ast) && t.getLocation().equals(realLocation)) {
                 hasTerm = true;
             }

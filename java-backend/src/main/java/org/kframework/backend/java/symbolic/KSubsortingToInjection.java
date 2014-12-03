@@ -20,12 +20,12 @@ public class KSubsortingToInjection extends CopyOnWriteTransformer {
     }
 
     @Override
-    public TermCons visit(TermCons termCons, Void _) {
+    public TermCons visit(TermCons termCons, Void _void) {
         return termCons;
     }
 
     @Override
-    public KList visit(KList kList, Void _) {
+    public KList visit(KList kList, Void _void) {
         return kList;
     }
 

@@ -14,7 +14,7 @@ public class AddDefaultComputational extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) {
+    public ASTNode visit(Rule node, Void _void) {
         if (!(node.containsAttribute("structural")
                 || node.containsAttribute(Attribute.ANYWHERE_KEY)
                 || node.containsAttribute(Attribute.FUNCTION_KEY)

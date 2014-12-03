@@ -20,17 +20,17 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         for (String cool : context.kompileOptions.supercool) {
             if (node.containsAttribute(cool)) {
-                return super.visit(node, _);
+                return super.visit(node, _void);
             }
         }
         return node;
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _)  {
+    public ASTNode visit(Rewrite node, Void _void)  {
         Term right = (Term) this.visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
@@ -40,9 +40,9 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _)  {
+    public ASTNode visit(Cell node, Void _void)  {
         if (!node.getLabel().equals("k") ) {
-            return super.visit(node, _);
+            return super.visit(node, _void);
         }
         node = node.shallowCopy();
         if (node.getContents() instanceof KSequence) {
@@ -59,17 +59,17 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 }

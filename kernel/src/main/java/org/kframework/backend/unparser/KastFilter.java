@@ -27,58 +27,58 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         throw new RuntimeException("don't know how to kast Definition");
     }
 
     @Override
-    public Void visit(Import imp, Void _) {
+    public Void visit(Import imp, Void _void) {
         throw new RuntimeException("don't know how to kast Import");
     }
 
     @Override
-    public Void visit(Module mod, Void _) {
+    public Void visit(Module mod, Void _void) {
         throw new RuntimeException("don't know how to kast Module");
     }
 
     @Override
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         throw new RuntimeException("don't know how to kast Syntax");
     }
 
     @Override
-    public Void visit(PriorityBlock priorityBlock, Void _) {
+    public Void visit(PriorityBlock priorityBlock, Void _void) {
         throw new RuntimeException("don't know how to kast PriorityBlock");
     }
 
     @Override
-    public Void visit(Production prod, Void _) {
+    public Void visit(Production prod, Void _void) {
         throw new RuntimeException("don't know how to kast Production");
     }
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
+    public Void visit(NonTerminal sort, Void _void) {
         throw new RuntimeException("don't know how to kast Sort");
     }
 
     @Override
-    public Void visit(Terminal terminal, Void _) {
+    public Void visit(Terminal terminal, Void _void) {
         throw new RuntimeException("don't know how to kast Terminal");
     }
 
     @Override
-    public Void visit(StringSentence stringSentence, Void _) {
+    public Void visit(StringSentence stringSentence, Void _void) {
         result.write("StringSentence should not be StringSentence");
         return null;
     }
 
     @Override
-    public Void visit(UserList userList, Void _) {
+    public Void visit(UserList userList, Void _void) {
         throw new RuntimeException("don't know how to kast UserList");
     }
 
     @Override
-    public Void visit(KList listOfK, Void _) {
+    public Void visit(KList listOfK, Void _void) {
         if (listOfK.getContents().size() == 0) {
             this.visitNode(new ListTerminator(listOfK.getSort(), null));
         } else if (listOfK.getContents().size() == 1) {
@@ -104,32 +104,32 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Attributes attributes, Void _) {
+    public Void visit(Attributes attributes, Void _void) {
         throw new RuntimeException("don't know how to kast Attributes");
     }
 
     @Override
-    public Void visit(Attribute attribute, Void _) {
+    public Void visit(Attribute attribute, Void _void) {
         throw new RuntimeException("don't know how to kast Attribute");
     }
 
     @Override
-    public Void visit(Configuration configuration, Void _) {
+    public Void visit(Configuration configuration, Void _void) {
         throw new RuntimeException("don't know how to kast Configuration");
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
+    public Void visit(Cell cell, Void _void) {
         throw new RuntimeException("don't know how to kast Cell");
     }
 
     @Override
-    public Void visit(Variable variable, Void _) {
+    public Void visit(Variable variable, Void _void) {
         throw new RuntimeException("don't know how to kast Variable");
     }
 
     @Override
-    public Void visit(ListTerminator empty, Void _) {
+    public Void visit(ListTerminator empty, Void _void) {
         Sort sort = empty.getSort();
         if (MaudeHelper.isBasicSort(sort)) {
             result.write(".");
@@ -145,12 +145,12 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {
+    public Void visit(Rule rule, Void _void) {
         throw new RuntimeException("don't know how to kast Rule");
     }
 
     @Override
-    public Void visit(KApp kapp, Void _) {
+    public Void visit(KApp kapp, Void _void) {
         if (kapp.getLabel() instanceof Token) {
             Token token = (Token)kapp.getLabel();
             if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
@@ -192,59 +192,59 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(KSequence ksequence, Void _) {
+    public Void visit(KSequence ksequence, Void _void) {
         throw new RuntimeException("don't know how to kast KSequence");
     }
 
     @Override
-    public Void visit(TermCons termCons, Void _) {
+    public Void visit(TermCons termCons, Void _void) {
         throw new RuntimeException("don't know how to kast TermCons");
     }
 
     @Override
-    public Void visit(Sentence sentence, Void _) {
+    public Void visit(Sentence sentence, Void _void) {
         throw new RuntimeException("don't know how to kast Sentence");
     }
 
     @Override
-    public Void visit(Rewrite rewrite, Void _) {
+    public Void visit(Rewrite rewrite, Void _void) {
         throw new RuntimeException("don't know how to kast Rewrite");
     }
 
     @Override
-    public Void visit(KLabelConstant kLabelConstant, Void _) {
+    public Void visit(KLabelConstant kLabelConstant, Void _void) {
         result.write(kLabelConstant.getLabel());
         return null;
     }
 
     @Override
-    public Void visit(Token token, Void _) {
+    public Void visit(Token token, Void _void) {
         result.write(token.toString());
         return null;
     }
 
     @Override
-    public Void visit(Collection collection, Void _) {
+    public Void visit(Collection collection, Void _void) {
         throw new RuntimeException("don't know how to kast Collection");
     }
 
     @Override
-    public Void visit(CollectionItem collectionItem, Void _) {
+    public Void visit(CollectionItem collectionItem, Void _void) {
         throw new RuntimeException("don't know how to kast CollectionItem");
     }
 
     @Override
-    public Void visit(BagItem bagItem, Void _) {
+    public Void visit(BagItem bagItem, Void _void) {
         throw new RuntimeException("don't know how to kast BagItem");
     }
 
     @Override
-    public Void visit(Hole hole, Void _) {
+    public Void visit(Hole hole, Void _void) {
         throw new RuntimeException("don't know how to kast Hole");
     }
 
     @Override
-    public Void visit(KInjectedLabel kInjectedLabel, Void _) {
+    public Void visit(KInjectedLabel kInjectedLabel, Void _void) {
         Term term = kInjectedLabel.getTerm();
         if (term.getSort().isKSort()) {
             result.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
@@ -258,42 +258,42 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(KLabel kLabel, Void _) {
+    public Void visit(KLabel kLabel, Void _void) {
         throw new RuntimeException("don't know how to kast KLabel");
     }
 
     @Override
-    public Void visit(TermComment termComment, Void _) {
+    public Void visit(TermComment termComment, Void _void) {
         throw new RuntimeException("don't know how to kast TermComment");
     }
 
     @Override
-    public Void visit(Bag bag, Void _) {
+    public Void visit(Bag bag, Void _void) {
         throw new RuntimeException("don't know how to kast Bag");
     }
 
     @Override
-    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _) {
+    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _void) {
         throw new RuntimeException("don't know how to kast Ambiguity");
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context context, Void _) {
+    public Void visit(org.kframework.kil.Context context, Void _void) {
         throw new RuntimeException("don't know how to kast Context");
     }
 
     @Override
-    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _) {
+    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _void) {
         throw new RuntimeException("don't know how to kast LiterateDefinitionComment");
     }
 
     @Override
-    public Void visit(LiterateModuleComment literateModuleComment, Void _) {
+    public Void visit(LiterateModuleComment literateModuleComment, Void _void) {
         throw new RuntimeException("don't know how to kast LiterateModuleComment");
     }
 
     @Override
-    public Void visit(org.kframework.kil.Require require, Void _) {
+    public Void visit(org.kframework.kil.Require require, Void _void) {
         throw new RuntimeException("don't know how to kast Require");
     }
 }

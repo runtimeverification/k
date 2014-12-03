@@ -17,7 +17,7 @@ public class AddOptionalTags extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(ASTNode node, Void _) {
+    public ASTNode visit(ASTNode node, Void _void) {
 
         for (String tag : options.transition)
             if (node.containsAttribute(tag))

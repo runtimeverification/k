@@ -33,17 +33,17 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration cfg, Void _) throws ParseFailedException {
+    public ASTNode visit(Configuration cfg, Void _void) throws ParseFailedException {
         return cfg;
     }
 
     @Override
-    public ASTNode visit(Syntax syn, Void _) throws ParseFailedException {
+    public ASTNode visit(Syntax syn, Void _void) throws ParseFailedException {
         return syn;
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
         List<Term> children = new ArrayList<Term>();
         boolean klist = false;
         Term krw = null;
@@ -60,37 +60,37 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
             children.remove(krw);
 
         if (children.size() == 0 || children.size() == amb.getContents().size())
-            return super.visit(amb, _);
+            return super.visit(amb, _void);
         if (children.size() == 1)
             return this.visitNode(children.get(0));
         amb.setContents(children);
-        return super.visit(amb, _);
+        return super.visit(amb, _void);
     }
 
     @Override
-    public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
+    public ASTNode visit(KSequence ks, Void _void) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
             ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
             ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
-        return super.visit(ks, _);
+        return super.visit(ks, _void);
     }
 
     @Override
-    public ASTNode visit(KList ks, Void _) throws ParseFailedException {
+    public ASTNode visit(KList ks, Void _void) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
             ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
             ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
-        return super.visit(ks, _);
+        return super.visit(ks, _void);
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
@@ -107,7 +107,7 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     /**
@@ -124,14 +124,14 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
+        public ASTNode visit(Rewrite ks, Void _void) throws ParseFailedException {
             String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
             ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {

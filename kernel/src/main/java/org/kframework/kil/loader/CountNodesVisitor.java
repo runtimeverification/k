@@ -24,41 +24,41 @@ public class CountNodesVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Module module, Void _) {
+    public Void visit(Module module, Void _void) {
         if (!module.isPredefined()) {
             numModules++;
-            super.visit(module, _);
+            super.visit(module, _void);
         }
         return null;
     }
 
     @Override
-    public Void visit(Sentence rule, Void _) {
+    public Void visit(Sentence rule, Void _void) {
         numSentences++;
-        return super.visit(rule, _);
+        return super.visit(rule, _void);
     }
 
     @Override
-    public Void visit(Production production, Void _) {
+    public Void visit(Production production, Void _void) {
         numProductions++;
-        return super.visit(production, _);
+        return super.visit(production, _void);
     }
 
     boolean inConfig = false;
     @Override
-    public Void visit(Configuration config, Void _) {
+    public Void visit(Configuration config, Void _void) {
         inConfig = true;
-        super.visit(config, _);
+        super.visit(config, _void);
         inConfig = false;
         numSentences++;
         return null;
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
+    public Void visit(Cell cell, Void _void) {
         if (inConfig) {
             numCells++;
-            super.visit(cell, _);
+            super.visit(cell, _void);
         }
         return null;
     }

@@ -20,7 +20,7 @@ public class SetVariablesInferredSort extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Variable visit(Variable variable, Void _) {
+    public Variable visit(Variable variable, Void _void) {
         Variable result = new Variable(variable);
         result.setSort(variable.getExpectedSort());
         return result;

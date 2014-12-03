@@ -32,20 +32,20 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         ASTNode vis;
         if (tc.getProduction().getKLabel() == null)
-            vis = this.visitNode(tc.getContents().get(0), _);
+            vis = this.visitNode(tc.getContents().get(0), _void);
         else {
             // invalidate the hashCode cache
             tc.invalidateHashCode();
-            vis = super.visit(tc, _);
+            vis = super.visit(tc, _void);
         }
         return vis;
     }
 
     @Override
-    public ASTNode visit(KList node, Void _) throws ParseFailedException {
+    public ASTNode visit(KList node, Void _void) throws ParseFailedException {
         java.util.List<Term> contents = new ArrayList<>();
         for (Term t : node.getContents()) {
             ASTNode transformed = this.visitNode(t);
@@ -62,7 +62,7 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
         ParseFailedException exception = new ParseFailedException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
                 "Parse forest contains no trees!", node.getSource(), node.getLocation()));

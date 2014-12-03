@@ -39,7 +39,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence r, Void _) throws ParseFailedException {
+    public ASTNode visit(Sentence r, Void _void) throws ParseFailedException {
         r = (Sentence) new RemoveDuplicateVariables(context).visitNode(r);
 
         CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
@@ -269,7 +269,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
             Set<Term> maxterms = new HashSet<Term>();
             for (Term t : amb.getContents()) {
                 if (t instanceof Variable) {
@@ -292,7 +292,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
             } else if (maxterms.size() > 1)
                 amb.setContents(new ArrayList<Term>(maxterms));
 
-            return super.visit(amb, _);
+            return super.visit(amb, _void);
         }
     }
 
@@ -305,7 +305,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
         public Set<String> typedVars = new HashSet<>();
 
         @Override
-        public Void visit(Variable var, Void _) {
+        public Void visit(Variable var, Void _void) {
             if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
                 if (!var.isUserTyped()) {
                     if (vars.containsKey(var.getName()))

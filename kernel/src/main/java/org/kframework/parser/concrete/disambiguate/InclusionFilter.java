@@ -20,7 +20,7 @@ public class InclusionFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         Source consFile = tc.getProduction().getSource();
         String consModule = tc.getProduction().getOwnerModuleName();
 //        Trying to fix issue 651, by removing file inclusion check
@@ -39,6 +39,6 @@ public class InclusionFilter extends ParseForestTransformer {
             throw new PriorityException(kex);
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 }

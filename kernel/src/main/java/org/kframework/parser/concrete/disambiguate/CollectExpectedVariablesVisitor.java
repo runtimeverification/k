@@ -24,7 +24,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
     public Set<Multimap<String, String>> vars = new HashSet<>();
 
     @Override
-    public Void visit(Ambiguity node, Void _) {
+    public Void visit(Ambiguity node, Void _void) {
         Set<Multimap<String, String>> newVars = new HashSet<>();
         for (Term t : node.getContents()) {
             CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(context);
@@ -43,11 +43,11 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
         }
         if (!newVars.isEmpty())
             vars = newVars;
-        return visit((Term) node, _);
+        return visit((Term) node, _void);
     }
 
     @Override
-    public Void visit(Variable var, Void _) {
+    public Void visit(Variable var, Void _void) {
         if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             if (vars.isEmpty())
                 vars.add(HashMultimap.<String, String>create());

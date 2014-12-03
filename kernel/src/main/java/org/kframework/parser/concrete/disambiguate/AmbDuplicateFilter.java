@@ -16,7 +16,7 @@ public class AmbDuplicateFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
 
         // remove duplicate ambiguities
         // should be applied after updating something like variable declarations
@@ -32,8 +32,8 @@ public class AmbDuplicateFilter extends ParseForestTransformer {
 
         if (children.size() > 1) {
             amb.setContents(children);
-            return super.visit(amb, _);
+            return super.visit(amb, _void);
         } else
-            return super.visit(children.get(0), _);
+            return super.visit(children.get(0), _void);
     }
 }

@@ -34,8 +34,8 @@ public class FillInModuleContext extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Definition def, Void _)  {
-        super.visit(def, _);
+    public Void visit(Definition def, Void _void)  {
+        super.visit(def, _void);
 
         // calculate the transitivity using DFS from the main module
         Set<Module> visited = new HashSet<>();
@@ -55,7 +55,7 @@ public class FillInModuleContext extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Import node, Void _)  {
+    public Void visit(Import node, Void _void)  {
         Module module;
         // TODO(dwightguth) remove only the condition the same time with maude backend
         if (!node.getName().startsWith("#")) { // maude legacy: some modules specified with # are builtin
@@ -70,18 +70,18 @@ public class FillInModuleContext extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Syntax syn, Void _)  {
+    public Void visit(Syntax syn, Void _void)  {
         this.getCurrentModule().getModuleContext().addDeclaredSort(syn.getDeclaredSort().getSort());
-        super.visit(syn, _);
+        super.visit(syn, _void);
         return null;
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         if (node.isSyntacticSubsort())
             this.getCurrentModule().getModuleContext().addSyntacticSubsort(node.getSort(), node.getSubsort());
         this.getCurrentModule().getModuleContext().addProduction(node);
-        super.visit(node, _);
+        super.visit(node, _void);
         return null;
     }
 }

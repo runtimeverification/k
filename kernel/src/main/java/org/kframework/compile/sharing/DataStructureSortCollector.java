@@ -69,7 +69,7 @@ public class DataStructureSortCollector extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         Sort sort = node.getSort();
 
         String hookAttribute = node.getAttribute(Attribute.HOOK_KEY);

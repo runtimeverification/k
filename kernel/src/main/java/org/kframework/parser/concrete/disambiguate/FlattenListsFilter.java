@@ -18,7 +18,7 @@ public class FlattenListsFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Collection c, Void _) throws ParseFailedException {
+    public ASTNode visit(Collection c, Void _void) throws ParseFailedException {
         boolean found;
         do {
             found = false;
@@ -34,6 +34,6 @@ public class FlattenListsFilter extends ParseForestTransformer {
             c.setContents(contents);
         } while (found);
 
-        return super.visit(c, _);
+        return super.visit(c, _void);
     }
 }

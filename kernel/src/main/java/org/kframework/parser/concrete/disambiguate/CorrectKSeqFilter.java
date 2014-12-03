@@ -28,7 +28,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
         List<Term> children = new ArrayList<Term>();
         for (Term t : amb.getContents()) {
             if (t instanceof KSequence) {
@@ -37,15 +37,15 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
         }
 
         if (children.size() == 0 || children.size() == amb.getContents().size())
-            return super.visit(amb, _);
+            return super.visit(amb, _void);
         if (children.size() == 1)
             return this.visitNode(children.get(0));
         amb.setContents(children);
-        return super.visit(amb, _);
+        return super.visit(amb, _void);
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
@@ -62,7 +62,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     /**
@@ -79,10 +79,10 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
+        public ASTNode visit(KSequence ks, Void _void) throws ParseFailedException {
             /* TODO: andreis changed here; radu please review */
             if (ks.isEmpty()) {
-                return super.visit(ks, _);
+                return super.visit(ks, _void);
             }
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
@@ -90,7 +90,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
             ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
