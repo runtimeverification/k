@@ -1,1 +1,0 @@
-\QL:Term |-> cons ( c, cons ( b, cons ( a, nil ) ) )\E

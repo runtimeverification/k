@@ -1,5 +1,0 @@
-L:Term |-> cons \( (.*?), cons \( \1, nil \(  \) \) \)
-L:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( \1, nil \(  \) \) \) \)
-L:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( \2, cons \( \1, nil \(  \) \) \) \) \)
-L:Term |-> cons \( (.*?), nil \(  \) \)
-L:Term |-> nil \(  \)

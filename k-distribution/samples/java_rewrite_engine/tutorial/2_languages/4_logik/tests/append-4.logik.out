@@ -1,5 +1,0 @@
-L1:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( ((?!\1|\2).*?), cons \( ((?!\1|\2|\3).*?), nil \(  \) \) \) \) \)\nL2:Term \|-> L2\nL3:Term \|-> cons \( \1, cons \( \2, cons \( \3, cons \( \4, cons \( a \(  \), L2 \) \) \) \) \)
-L1:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( ((?!\1|\2).*?), nil \(  \) \) \) \)\nL2:Term \|-> L2\nL3:Term \|-> cons \( \1, cons \( \2, cons \( \3, cons \( a \(  \), L2 \) \) \) \)
-L1:Term |-> cons \( (.*?), cons \( ((?!\1).*?), nil \(  \) \) \)\nL2:Term \|-> L2\nL3:Term \|-> cons \( \1, cons \( \2, cons \( a \(  \), L2 \) \) \)
-L1:Term |-> cons \( (.*?), nil \(  \) \)\nL2:Term \|-> L2\nL3:Term \|-> cons \( \1, cons \( a \(  \), L2 \) \)
-L1:Term |-> nil \(  \)\nL2:Term \|-> L2\nL3:Term \|-> cons \( a \(  \), L2 \)

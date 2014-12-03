@@ -326,7 +326,7 @@
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
-    <all-programs regex="true">
+    <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
