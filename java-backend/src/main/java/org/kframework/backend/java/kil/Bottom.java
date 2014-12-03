@@ -1,15 +1,12 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.EnumMap;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
-import com.google.common.collect.Maps;
 
 /**
  * Refers to a computation which never completes successfully.
@@ -22,19 +19,10 @@ import com.google.common.collect.Maps;
  */
 public class Bottom extends Term implements MaximalSharing {
 
-    private static final EnumMap<Kind, Bottom> cache = Maps.newEnumMap(Kind.class);
+    public static final Bottom BOTTOM = new Bottom();
 
-    public static Bottom of(Kind kind) {
-        Bottom bottom = cache.get(kind);
-        if (bottom == null) {
-            bottom = new Bottom(kind);
-            cache.put(kind, bottom);
-        }
-        return bottom;
-    }
-
-    private Bottom(Kind kind) {
-        super(kind);
+    private Bottom() {
+        super(Kind.BOTTOM);
     }
 
     @Override
