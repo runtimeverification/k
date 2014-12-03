@@ -1,13 +1,16 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.*;
 
@@ -25,10 +28,14 @@ import java.util.Set;
 public class UserSubstitutionTransformer extends PrePostTransformer {
 
     private final Map<Term, Term> substitution;
-    private final Set<Term> unboundedTerms;
+    private final Set<Term> unboundedVars;
 
     public static Term userSubstitution(Map<Term, Term> substitution, Term term, TermContext context) {
         if (substitution.isEmpty()) return term;
+        for (Term var : substitution.keySet()) {
+            assert context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, var.sort()) :
+                    "All keys in substitution should be variables.";
+        }
         UserSubstitutionTransformer transformer = new UserSubstitutionTransformer(substitution, context);
         return (Term) term.accept(transformer);
     }
@@ -37,11 +44,11 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     public UserSubstitutionTransformer(Map<Term, Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
-        unboundedTerms = new HashSet<>();
+        unboundedVars = new HashSet<>();
         for (Map.Entry<Term, Term> substPair : substitution.entrySet()) {
-            Set<Term> unboundedTerms1 = UnboundedTermsCollector.getUnboundedTerms(substPair.getValue());
-            unboundedTerms1.remove(substPair.getKey());
-            unboundedTerms.addAll(unboundedTerms1);
+            Set<Term> unboundedVars1 = UnboundedVariablesCollector.getUnboundedVars(substPair.getValue(), context);
+            unboundedVars1.remove(substPair.getKey());
+            unboundedVars.addAll(unboundedVars1);
         }
 
         preTransformer.addTransformer(new BinderSubstitution(context));
@@ -81,14 +88,22 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
                 if (kLabelConstant.isBinder()) {  // if label is a binder rename all bound variables
-                    Map<Integer, Term> freshSubstitution = new HashMap<>();
+                    Table<Integer, Term, Term> freshSubstitution = HashBasedTable.create();
                     Multimap<Integer, Integer> backBinding = HashMultimap.create();
                     Multimap<Integer, Integer> binderMap =  kLabelConstant.getBinderMap();
                     for (Integer keyIndex : binderMap.keySet()) {
-                        Term boundVar = kList.get(keyIndex);
-                        if (!unboundedTerms.contains(boundVar) && !substitution.containsKey(boundVar)) continue;
-                        Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
-                        freshSubstitution.put(keyIndex, freshBoundVar);
+                        Set<Term> boundVars = kList.get(keyIndex).userVariableSet(context);
+                        Set<Term> capturingVars = new HashSet<>();
+                        for (Term boundVar : boundVars) {
+                            if (unboundedVars.contains(boundVar) || substitution.containsKey(boundVar)) {
+                                capturingVars.add(boundVar);
+                            }
+                        }
+                        if (capturingVars.isEmpty()) continue;
+                        for (Term boundVar : capturingVars) {
+                            Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
+                            freshSubstitution.put(keyIndex, boundVar, freshBoundVar);
+                        }
                         backBinding.put(keyIndex, keyIndex);
                         for (Integer valueIndex : binderMap.get(keyIndex)) {
                             backBinding.put(valueIndex, keyIndex);
@@ -100,11 +115,12 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         Map<Term, Term> newSubstitution = new HashMap<>(substitution);
                         if (backBinding.containsKey(idx)) {
                             for (Integer boundPosition : backBinding.get(idx)) {
-                                Term variable = kList.get(boundPosition);
-                                if (unboundedTerms.contains(variable)) {
-                                    newSubstitution.put(variable, freshSubstitution.get(boundPosition));
-                                } else if (substitution.containsKey(variable)) {
-                                    newSubstitution.remove(variable);
+                                for (Term variable :  kList.get(boundPosition).userVariableSet(context)) {
+                                    if (unboundedVars.contains(variable)) {
+                                        newSubstitution.put(variable, freshSubstitution.get(boundPosition, variable));
+                                    } else if (substitution.containsKey(variable)) {
+                                        newSubstitution.remove(variable);
+                                    }
                                 }
                             }
                         }

@@ -10,31 +10,31 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Collects all terms which are not bound by a binder.
- * In some sense it is similar to computing the free variables
- * However since we don't know for sure what can be bound and what not
- * we simply remove the bound terms from all the others.
+ * Computes the free variables of a term.
  *
  * @author TraianSF
  */
-public class UnboundedTermsCollector extends PrePostVisitor {
-    Multiset<Term> boundVariables;
-    Set<Term> unboundedTerms;
+public class UnboundedVariablesCollector extends PrePostVisitor {
+    private final TermContext context;
+    private final Multiset<Term> boundVariables;
+    private final Set<Term> unboundedVariables;
 
     /**
-     * Computes unbounded terms of a given term
-     * @param term --- the term to compute the set of unbounded terms for
-     * @return the set of unbounded terms in {@code term}
+     * Computes the set of unbounded variables of a given term
+     * @param term --- the term to compute the set of unbounded vars for
+     * @param context
+     * @return the set of unbounded vars in {@code term}
      */
-    public static Set<Term> getUnboundedTerms(Term term) {
-        UnboundedTermsCollector collector = new UnboundedTermsCollector();
+    public static Set<Term> getUnboundedVars(Term term, TermContext context) {
+        UnboundedVariablesCollector collector = new UnboundedVariablesCollector(context);
         term.accept(collector);
-        return collector.unboundedTerms;
+        return collector.unboundedVariables;
     }
 
-    private UnboundedTermsCollector() {
+    private UnboundedVariablesCollector(TermContext context) {
+        this.context = context;
         boundVariables = HashMultiset.create();
-        unboundedTerms = new HashSet<>();
+        unboundedVariables = new HashSet<>();
         preVisitor.addVisitor(new LocalVisitor() {
             @Override
             public void visit(KItem kItem) {
@@ -50,10 +50,13 @@ public class UnboundedTermsCollector extends PrePostVisitor {
         preVisitor.addVisitor(new LocalVisitor(){
             @Override
             public void visit(Term node) {
-                if (! boundVariables.contains(node)) {
-                    unboundedTerms.add(node);
+                if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, node.sort())) {
+                    if (!boundVariables.contains(node)) {
+                        unboundedVariables.add(node);
+                    }
+                } else {
+                    super.visit(node);
                 }
-                super.visit(node);
             }
         });
      }
@@ -72,9 +75,9 @@ public class UnboundedTermsCollector extends PrePostVisitor {
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
                 for (Integer keyIndex : binderMap.keySet()) {
                     if (add) {
-                        boundVariables.add(kList.get(keyIndex));
+                        boundVariables.addAll(kList.get(keyIndex).userVariableSet(context));
                     } else {
-                        boundVariables.remove(kList.get(keyIndex));
+                        boundVariables.removeAll(kList.get(keyIndex).userVariableSet(context));
                     }
                 }
             }
