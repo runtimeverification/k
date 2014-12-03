@@ -347,9 +347,5 @@
     </all-programs>
   </test>
 
-  <test definition="issue1219/test.k">
-    <kompile-option name="--backend" value="java" />
-  </test>
-
 <!-- end Java Rewrite Engine tests -->
 </tests>
