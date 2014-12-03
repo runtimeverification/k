@@ -154,12 +154,12 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     }
 
     @Override
-    public List<DefinitionItem> getChildren(Enum<?> _) {
+    public List<DefinitionItem> getChildren(Enum<?> _void) {
         return items;
     }
 
     @Override
-    public void setChildren(List<DefinitionItem> children, Enum<?> _) {
+    public void setChildren(List<DefinitionItem> children, Enum<?> _void) {
         this.items = children;
     }
 

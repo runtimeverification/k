@@ -20,22 +20,22 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Variable node, Void _) {
+    public Void visit(Variable node, Void _void) {
         assert node.getName().startsWith("$") : "Configuration variables must start with $ symbol.";
         context.configVarSorts.put(node.getName().substring(1), node.getSort());
         return null;

@@ -49,7 +49,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         Set<Production> prods = SyntaxByTag.get(node, "binder", context);
         prods.addAll(SyntaxByTag.get(node, "metabinder", context));
         if (prods.isEmpty())

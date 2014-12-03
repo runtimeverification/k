@@ -28,7 +28,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Rule visit(Rule rule, Void _) {
+    public Rule visit(Rule rule, Void _void) {
         counter = 0;
         substitution.clear();
         visitor.visitNode(rule);
@@ -37,11 +37,11 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
             return rule;
         }
 
-        return (Rule) super.visit(rule, _);
+        return (Rule) super.visit(rule, _void);
     }
 
     @Override
-    public Variable visit(Variable variable, Void _) {
+    public Variable visit(Variable variable, Void _void) {
          Variable substituteVariable = substitution.get(variable);
         if (substituteVariable != null) {
             return substituteVariable;
@@ -61,7 +61,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
         }
 
         @Override
-        public Void visit(Variable variable, Void _) {
+        public Void visit(Variable variable, Void _void) {
             if (substitution.containsKey(variable)) {
                 return null;
             }

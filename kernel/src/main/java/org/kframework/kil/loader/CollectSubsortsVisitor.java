@@ -16,22 +16,22 @@ public class CollectSubsortsVisitor extends BasicVisitor {
         super(context);
     }
 
-    public Void visit(Definition def, Void _) {
-        super.visit(def, _);
+    public Void visit(Definition def, Void _void) {
+        super.visit(def, _void);
         context.computeSubsortTransitiveClosure();
         return null;
     }
 
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         Sort sort = syn.getDeclaredSort().getSort();
         if (!sort.isBaseSort()) {
             context.addSubsort(Sort.KITEM, sort);
             context.addSyntacticSubsort(Sort.KITEM, sort);
         }
-        return super.visit(syn, _);
+        return super.visit(syn, _void);
     }
 
-    public Void visit(Production prd, Void _) {
+    public Void visit(Production prd, Void _void) {
         if (prd.isSubsort()) {
             context.addSubsort(prd.getSort(), prd.getSubsort());
         }

@@ -29,7 +29,7 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
         // find the groups of terms alike
 
         Set<Term> processed = new HashSet<Term>();
@@ -83,7 +83,7 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
         } else if (maxterms.size() > 1)
             amb.setContents(new ArrayList<Term>(maxterms));
 
-        return super.visit(amb, _);
+        return super.visit(amb, _void);
     }
 
     private boolean isSubsorted(Production big, Production small) {

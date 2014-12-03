@@ -18,9 +18,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons ast, Void _)  {
+    public ASTNode visit(TermCons ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -28,9 +28,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Collection ast, Void _)  {
+    public ASTNode visit(Collection ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -38,9 +38,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell ast, Void _)  {
+    public ASTNode visit(Cell ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -48,9 +48,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(CollectionItem ast, Void _)  {
+    public ASTNode visit(CollectionItem ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -58,9 +58,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp ast, Void _)  {
+    public ASTNode visit(KApp ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -68,9 +68,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Hole ast, Void _)  {
+    public ASTNode visit(Hole ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -78,9 +78,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Freezer ast, Void _)  {
+    public ASTNode visit(Freezer ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -88,9 +88,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KInjectedLabel ast, Void _)  {
+    public ASTNode visit(KInjectedLabel ast, Void _void)  {
         prepare(ast);
-        ASTNode result = super.visit(ast, _);
+        ASTNode result = super.visit(ast, _void);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -258,9 +258,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             this.inner = inner;
         }
         @Override
-        public Void visit(Term t, Void _) {
+        public Void visit(Term t, Void _void) {
             if (t == inner) found = true;
-            return super.visit(t, _);
+            return super.visit(t, _void);
         }
         public boolean getFound() {
             return found;

@@ -23,32 +23,32 @@ public class SentenceVariablesFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration cfg, Void _) throws ParseFailedException {
+    public ASTNode visit(Configuration cfg, Void _void) throws ParseFailedException {
         config = true;
-        return super.visit(cfg, _);
+        return super.visit(cfg, _void);
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws ParseFailedException {
+    public ASTNode visit(org.kframework.kil.Context cfg, Void _void) throws ParseFailedException {
         config = false;
-        return super.visit(cfg, _);
+        return super.visit(cfg, _void);
     }
 
     @Override
-    public ASTNode visit(Rule cfg, Void _) throws ParseFailedException {
+    public ASTNode visit(Rule cfg, Void _void) throws ParseFailedException {
         config = false;
-        return super.visit(cfg, _);
+        return super.visit(cfg, _void);
     }
 
     @Override
-    public ASTNode visit(Syntax cfg, Void _) throws ParseFailedException {
+    public ASTNode visit(Syntax cfg, Void _void) throws ParseFailedException {
         config = false;
         return cfg;
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        super.visit(tc, _);
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
+        super.visit(tc, _void);
         if (tc.getProduction().isSyntacticSubsort()) {
             if (tc.getContents().get(0) instanceof Variable) {
                 return tc.getContents().get(0);
@@ -58,7 +58,7 @@ public class SentenceVariablesFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable var, Void _) throws ParseFailedException {
+    public ASTNode visit(Variable var, Void _void) throws ParseFailedException {
         if (config) {
             if (!(var.getName().startsWith("$") || var.isFreshConstant() || var.isFreshVariable())) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";

@@ -32,7 +32,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Cast cst, Void _) throws ParseFailedException {
+    public ASTNode visit(Cast cst, Void _void) throws ParseFailedException {
         // removed variables and allowing only Cast
         // if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable
         // this should be done only if the casting is syntactic, because on semantic cast there should be another branch
@@ -53,7 +53,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
             }
         }
         secondFilter.visitNode(cst.getContent());
-        return super.visit(cst, _);
+        return super.visit(cst, _void);
     }
 
     /**
@@ -70,7 +70,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
+        public ASTNode visit(KSequence ks, Void _void) throws ParseFailedException {
             assert ks.getContents().size() <= 2;
 
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
@@ -79,14 +79,14 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
+        public ASTNode visit(Rewrite ks, Void _void) throws ParseFailedException {
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+        public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
             assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
 
             int lastElement = tc.getProduction().getItems().size() - 1;
@@ -95,11 +95,11 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
                 KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
                 throw new PriorityException(kex);
             }
-            return super.visit(tc, _);
+            return super.visit(tc, _void);
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
             ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {

@@ -34,22 +34,22 @@ public class MaudeBuiltinsFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         if (!node.containsAttribute(Attribute.HOOK_KEY)) {
             return null;
         }
@@ -71,7 +71,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         if (node.getArity() > 0) {
             right += "(";
             first = true;
-            super.visit(node, _);
+            super.visit(node, _void);
             right += ")";
         } else {
             left += ".KList";
@@ -92,7 +92,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 
 
     @Override
-    public Void visit(NonTerminal node, Void _) {
+    public Void visit(NonTerminal node, Void _void) {
         if (!first) {
             left += ",, ";
             right += ", ";

@@ -12,18 +12,18 @@ public class CollectConfigCellsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Configuration config, Void _) {
-        return super.visit((Sentence) config, _);
+    public Void visit(Configuration config, Void _void) {
+        return super.visit((Sentence) config, _void);
     }
 
     @Override
-    public Void visit(Sentence s, Void _) {
+    public Void visit(Sentence s, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
+    public Void visit(Cell cell, Void _void) {
         context.addCellDecl(cell);
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 }

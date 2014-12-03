@@ -11,7 +11,7 @@ public class CollectBracketsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         if (node.isBracket()) {
             context.canonicalBracketForSort.put(node.getSort(), node);
         }

@@ -49,12 +49,12 @@ public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration configuration, Void _) {
+    public ASTNode visit(Configuration configuration, Void _void) {
         return configuration;
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _) {
+    public ASTNode visit(Rule rule, Void _void) {
         if (!madeCellDataStructures) {
             makeCellDataStructures(context);
             madeCellDataStructures = true;
@@ -68,11 +68,11 @@ public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
         }
 
         cellMapLabels.clear();
-        rule = (Rule) super.visit(rule, _);
+        rule = (Rule) super.visit(rule, _void);
 
         JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
         if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
-            rule = (Rule) super.visit(rule, _);
+            rule = (Rule) super.visit(rule, _void);
             if ((rule.getBody().getSort().equals(Sort.BAG) || rule.getBody().getSort().equals(Sort.BAG_ITEM))
                     && rule.containsAttribute(Attribute.PATTERN_FOLDING_KEY)) {
                 Rewrite body = ((Rewrite) rule.getBody()).shallowCopy();
@@ -130,8 +130,8 @@ public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
-        cell = (Cell) super.visit(cell, _);
+    public ASTNode visit(Cell cell, Void _void)  {
+        cell = (Cell) super.visit(cell, _void);
 
         String cellLabel = cell.getLabel();
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cellLabel);

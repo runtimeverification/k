@@ -52,14 +52,14 @@ public class ProgramSDFVisitor extends BasicVisitor {
         constantSorts.add(Sort.BUILTIN_STRING);
     }
 
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         userSort.add(syn.getDeclaredSort().getSort());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;
     }
 
-    public Void visit(PriorityExtended node, Void _) {
+    public Void visit(PriorityExtended node, Void _void) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
@@ -81,7 +81,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
         return null;
     }
 
-    public Void visit(PriorityExtendedAssoc node, Void _) {
+    public Void visit(PriorityExtendedAssoc node, Void _void) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         PriorityBlock pb1 = new PriorityBlock();
@@ -182,7 +182,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
         }
     }
 
-    public Void visit(Restrictions node, Void _) {
+    public Void visit(Restrictions node, Void _void) {
         restrictions.add(node);
         return null;
     }

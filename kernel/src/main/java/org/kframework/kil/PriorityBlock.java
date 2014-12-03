@@ -114,12 +114,12 @@ public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Pro
     }
 
     @Override
-    public List<Production> getChildren(Enum<?> _) {
+    public List<Production> getChildren(Enum<?> _void) {
         return productions;
     }
 
     @Override
-    public void setChildren(List<Production> children, Enum<?> _) {
+    public void setChildren(List<Production> children, Enum<?> _void) {
         this.productions = children;
     }
 

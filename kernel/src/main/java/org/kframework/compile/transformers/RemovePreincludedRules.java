@@ -21,7 +21,7 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         if (!(node.getSource() instanceof FileSource)) {
             return null;
         }

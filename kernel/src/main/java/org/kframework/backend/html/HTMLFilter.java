@@ -90,41 +90,41 @@ public class HTMLFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         patternsVisitor.visitNode(def);
         title = def.getMainModule();
-        return super.visit(def, _);
+        return super.visit(def, _void);
 
     }
 
     @Override
-    public Void visit(Module mod, Void _) {
+    public Void visit(Module mod, Void _void) {
         if (mod.isPredefined())
-            return _;
+            return _void;
         result.append("<div>" + "MODULE <span class=\"large\">" + mod.getName() + "</span> <br /> <br />" + endl);
-        super.visit(mod, _);
+        super.visit(mod, _void);
         result.append("END MODULE </div>" + endl + "<br />" + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         // These are rendered using a table to position each symbol nicely.
         result.append("<table> <tr> <td> SYNTAX ");
         firstProduction = true;
-        super.visit(syn, _);
+        super.visit(syn, _void);
         result.append("</table>" + endl + "<br />" + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
+    public Void visit(NonTerminal sort, Void _void) {
         result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Production p, Void _) {
+    public Void visit(Production p, Void _void) {
         if (firstProduction) {
             result.append("</td><td> ::= </td> <td>");
             firstProduction = false;
@@ -155,35 +155,35 @@ public class HTMLFilter extends BackendFilter {
              * treated by MathJax. */
             result.append(isLatex ? "\\(" + pattern + "\\)" : pattern);
         } else {
-            super.visit(p, _);
+            super.visit(p, _void);
         }
         this.visitNode(p.getAttributes());
         result.append("</td> </tr>" + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Terminal pi, Void _) {
+    public Void visit(Terminal pi, Void _void) {
         result.append(makeGreek(htmlify(pi.getTerminal())) +" ");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(UserList ul, Void _) {
+    public Void visit(UserList ul, Void _void) {
         result.append("<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Configuration conf, Void _) {
+    public Void visit(Configuration conf, Void _void) {
         result.append("<div> CONFIGURATION : <br />");
-        super.visit(conf, _);
+        super.visit(conf, _void);
         result.append("</div> <br />");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Cell c, Void _) {
+    public Void visit(Cell c, Void _void) {
         String blockClasses = "block";
         String tabClasses = "tab";
 
@@ -228,19 +228,19 @@ public class HTMLFilter extends BackendFilter {
         }
 
         result.append("> <div class=\"center\">");
-        super.visit(c, _);
+        super.visit(c, _void);
         result.append("</div> </div> </div>" + endl);
-        return _;
+        return _void;
     }
 
-    public Void visit(Collection col, Void _) {
+    public Void visit(Collection col, Void _void) {
         if (col.isEmpty()) {
             printEmpty(col.getSort().getName());
-            return _;
+            return _void;
         }
         List<Term> contents = col.getContents();
         printList(contents, "");
-        return _;
+        return _void;
     }
 
     private void printEmpty(String sort) {
@@ -259,30 +259,30 @@ public class HTMLFilter extends BackendFilter {
         }
     }
 
-    public Void visit(TermComment tc, Void _) {
+    public Void visit(TermComment tc, Void _void) {
         result.append("<br />");
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     @Override
-    public Void visit(Variable var, Void _) {
+    public Void visit(Variable var, Void _void) {
         result.append("<span ");
         if (var.getSort() != null) {
             result.append("title =\"" + var.getSort() + "\"");
         }
         result.append(">" + makeGreek(var.getName()));
         result.append(" </span> ");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(ListTerminator e, Void _) {
+    public Void visit(ListTerminator e, Void _void) {
         result.append(" <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {
+    public Void visit(Rule rule, Void _void) {
         result.append("<div> <span ");
         if (!"".equals(rule.getLabel())) {
             result.append("title =\"Rule Label: " + rule.getLabel() + "\"");
@@ -301,11 +301,11 @@ public class HTMLFilter extends BackendFilter {
         }
         this.visitNode(rule.getAttributes());
         result.append("</div> <br />" + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context cxt, Void _) {
+    public Void visit(org.kframework.kil.Context cxt, Void _void) {
         result.append("<div> CONTEXT ");
         this.visitNode(cxt.getBody());
         if (cxt.getRequires() != null) {
@@ -318,30 +318,30 @@ public class HTMLFilter extends BackendFilter {
         }
         this.visitNode(cxt.getAttributes());
         result.append("</div> <br />" + endl);
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Hole hole, Void _) {
+    public Void visit(Hole hole, Void _void) {
         result.append("&#9633;");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Rewrite rew, Void _) {
+    public Void visit(Rewrite rew, Void _void) {
 
         result.append("<table class=\"rewrite\"> <tr class='rewriteLeft'> <td> <em>");
         this.visitNode(rew.getLeft());
         result.append("</em></td></tr> <tr class='rewriteRight'> <td><em>");
         this.visitNode(rew.getRight());
         result.append("</em> </td> </tr> </table>");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Bracket trm, Void _) {
+    public Void visit(Bracket trm, Void _void) {
         if (trm.getContent() instanceof Rewrite)
-            super.visit(trm, _);
+            super.visit(trm, _void);
         else {
             String pattern = getBracketPattern(trm);
             HTMLFilter termFilter = new HTMLFilter(context);
@@ -349,7 +349,7 @@ public class HTMLFilter extends BackendFilter {
             pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
             result.append(pattern);
         }
-        return _;
+        return _void;
     }
 
     private String getBracketPattern(Bracket trm) {
@@ -358,7 +358,7 @@ public class HTMLFilter extends BackendFilter {
 
 
     @Override
-    public Void visit(TermCons trm, Void _) {
+    public Void visit(TermCons trm, Void _void) {
         HTMLPatternType type = patternsVisitor.getPatternType(trm.getProduction());
         if(type == null)
         {
@@ -420,21 +420,21 @@ public class HTMLFilter extends BackendFilter {
             if(empty)
                 result.append("&nbsp; &nbsp; &middot; &nbsp; &nbsp;");
         }
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(KSequence k, Void _) {
+    public Void visit(KSequence k, Void _void) {
         if (k.isEmpty()) {
             printEmpty("K");
-            return _;
+            return _void;
         }
         printList(k.getContents(), "&#x219d; ");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(KApp app, Void _) {
+    public Void visit(KApp app, Void _void) {
         if (app.getLabel() instanceof Token) {
             result.append("<span title =\"" + ((Token)app.getLabel()).tokenSort() + "\"> " + makeGreek(((Token)app.getLabel()).value()) + " </span> ");
         } else {
@@ -443,17 +443,17 @@ public class HTMLFilter extends BackendFilter {
             this.visitNode(app.getChild());
             result.append(")");
         }
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(KList list, Void _) {
+    public Void visit(KList list, Void _void) {
         printList(list.getContents(), "<span class=\"bold\">, </span>");
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(LiterateDefinitionComment comment, Void _) {
+    public Void visit(LiterateDefinitionComment comment, Void _void) {
         /*MathJax does not render these comments correctly.
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
@@ -463,11 +463,11 @@ public class HTMLFilter extends BackendFilter {
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble += comment.getValue();
         }
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(LiterateModuleComment comment, Void _) {
+    public Void visit(LiterateModuleComment comment, Void _void) {
         /*MathJax does not render these comments correctly.
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
@@ -477,11 +477,11 @@ public class HTMLFilter extends BackendFilter {
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble += comment.getValue();
         }
-        return _;
+        return _void;
     }
 
     @Override
-    public Void visit(Attributes attributes, Void _) {
+    public Void visit(Attributes attributes, Void _void) {
         firstAttribute = true;
         for (Attribute entry : attributes.values()) {
             this.visitNode(entry);
@@ -492,7 +492,7 @@ public class HTMLFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Attribute entry, Void _) {
+    public Void visit(Attribute entry, Void _void) {
         if (entry.getLocation() == null)
             return null;
         if (context.isParsingTag(entry.getKey()))

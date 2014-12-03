@@ -377,12 +377,12 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     }
 
     @Override
-    public List<ProductionItem> getChildren(Enum<?> _) {
+    public List<ProductionItem> getChildren(Enum<?> _void) {
         return items;
     }
 
     @Override
-    public void setChildren(List<ProductionItem> children, Enum<?> _) {
+    public void setChildren(List<ProductionItem> children, Enum<?> _void) {
         this.items = children;
     }
 }

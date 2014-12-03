@@ -11,13 +11,13 @@ public class CollectLocationsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         getCurrentDefinition().locations.put(node.getSource() + ":" + node.getLocation(), node);
         return null;
     }
 
     @Override
-    public Void visit(Sentence node, Void _) {
+    public Void visit(Sentence node, Void _void) {
         getCurrentDefinition().locations.put(node.getSource() + ":" + node.getLocation(), node);
         return null;
     }

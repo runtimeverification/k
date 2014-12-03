@@ -32,7 +32,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
     java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
 
         if (prods.containsKey(node)) {
             Production oldProd = prods.get(node);
@@ -147,7 +147,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sentence node, Void _) {
+    public Void visit(Sentence node, Void _void) {
         // optimization to not visit the entire tree
         return null;
     }

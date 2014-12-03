@@ -33,7 +33,7 @@ public class MakeConsList extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         if (tc.getProduction().isListDecl() && tc.getContents().size() > 0) {
             TermCons tail = new TermCons(tc);
             tail.getContents().remove(0);
@@ -43,6 +43,6 @@ public class MakeConsList extends ParseForestTransformer {
             tc.getContents().add(head);
             tc.getContents().add(tail);
         }
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 }
