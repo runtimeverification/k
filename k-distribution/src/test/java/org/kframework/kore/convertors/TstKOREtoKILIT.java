@@ -75,7 +75,6 @@ public class TstKOREtoKILIT extends BaseTest {
     }
 
     @Test
-    @Ignore
     public void userList() throws IOException {
         sdfTest();
     }

@@ -5,6 +5,7 @@ package org.kframework.kore.convertors;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
+import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kore.*;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.function.Function;
 
 import static org.kframework.Collections.*;
@@ -108,7 +110,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
 
             if (prod1Items.size() == 1 && prod1Items.get(0) instanceof NonTerminal) {
                 elem = (NonTerminal) prod1Items.get(0);
-            } else if (prod2Items.get(0) instanceof NonTerminal) {
+            } else if (prod2Items.size() == 1 && prod2Items.get(0) instanceof NonTerminal) {
                 elem = (NonTerminal) prod2Items.get(0);
             } else {
                 elem = (NonTerminal) prod3Items.get(0);
@@ -477,8 +479,11 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKVariable((KVariable) k);
         } else if (k instanceof KToken) {
             return convertKToken((KToken) k);
+        } else if (k instanceof KList) {
+            Stream<K> stream = ((KList) k).stream();
+            List<Term> kilTerms = stream.map(c -> convertK(c)).collect(Collectors.toList());
+            return new org.kframework.kil.KList(kilTerms);
         } else {
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
             throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
                     + ") -> KIL.Term");
         }

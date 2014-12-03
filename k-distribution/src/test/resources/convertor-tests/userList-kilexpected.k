@@ -4,7 +4,7 @@ DEF: null -> null
 module TEST
   syntax Stx ::= "1"
 
-  syntax Stxs ::= NeList{Stx,","}
+  syntax Stxs ::= List{Stx,","}
 
 
 endmodule
