@@ -12,6 +12,7 @@ module K-EQUAL-HOOKS
   imports LIST
   imports MAP
   imports SET
+  imports K-TECHNIQUE
 
 
   syntax Bool ::= left:

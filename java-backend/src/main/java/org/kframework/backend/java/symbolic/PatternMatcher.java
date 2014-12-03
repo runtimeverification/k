@@ -307,8 +307,19 @@ public class PatternMatcher extends AbstractMatcher {
             return;
         }
 
-        throw new UnsupportedOperationException(
-                "list matching is only supported when one of the lists is a variable.");
+        BuiltinList patternList = (BuiltinList) pattern;
+        if (!patternList.isConcreteCollection()) {
+            throw new UnsupportedOperationException(
+                    "list matching is only supported when one of the lists is a variable.");
+        }
+
+        if (patternList.concreteSize() != builtinList.concreteSize()) {
+            this.fail(builtinList, pattern);
+        }
+
+        for (int i = 0; i < builtinList.concreteSize(); i++) {
+            match(builtinList.get(i), patternList.get(i));
+        }
     }
 
     @Override

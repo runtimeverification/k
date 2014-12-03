@@ -47,7 +47,7 @@ public class CheckVariables extends BasicVisitor {
     boolean inCondition = false;
 
     @Override
-    public Void visit(Rewrite node, Void _) {
+    public Void visit(Rewrite node, Void _void) {
         this.visitNode(node.getLeft());
         current = right;
         this.visitNode(node.getRight());
@@ -56,7 +56,7 @@ public class CheckVariables extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Variable node, Void _) {
+    public Void visit(Variable node, Void _void) {
         boolean freshConstant = node.isFreshConstant();
         if (node.isFreshVariable() || freshConstant) {
             if (freshConstant && !context.freshFunctionNames.containsKey(node.getSort())) {
@@ -91,17 +91,17 @@ public class CheckVariables extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Sentence node, Void _) {
+    public Void visit(Sentence node, Void _void) {
         inCondition = false;
         left.clear();
         right.clear();

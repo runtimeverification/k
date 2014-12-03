@@ -1,1 +1,7 @@
-\Q"L" |-> cons ( c (  ), cons ( X, cons ( a (  ), nil (  ) ) ) )\E\s+\Q"T" |-> cons ( a (  ), cons ( X, cons ( c (  ), nil (  ) ) ) )\E\s+\Q"X" |-> X\E
+Search results:
+
+Solution 1:
+Solution:Map -->
+L:Term |-> cons ( c (  ), cons ( X:Term, cons ( a (  ), nil (  ) ) ) )
+T:Term |-> cons ( a (  ), cons ( X, cons ( c (  ), nil (  ) ) ) )
+X:Term |-> X

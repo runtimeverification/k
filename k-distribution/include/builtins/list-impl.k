@@ -3,6 +3,8 @@ require "list.k"
 
 module LIST-IMPL
   imports LIST
+  imports BOOL-HOOKS
+  imports INT-HOOKS
 
   // syntax Bool ::= K "in" List
   rule K:K in ListItem(K) _:List => true

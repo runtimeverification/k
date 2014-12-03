@@ -28,7 +28,7 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
     }
 
     @Override
-    public ASTNode defaultReturnValue(ASTNode node, Void _) {
+    public ASTNode defaultReturnValue(ASTNode node, Void _void) {
         return node;
     }
 

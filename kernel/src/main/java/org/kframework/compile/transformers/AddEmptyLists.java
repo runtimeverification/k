@@ -46,7 +46,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         return null;
     }
 
-    public ASTNode visit(Rewrite r, Void _) {
+    public ASTNode visit(Rewrite r, Void _void) {
         Term left = r.getLeft();
         final Sort target;
         if (left instanceof TermCons) {
@@ -68,21 +68,21 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         if (right != null) {
             r.setRight(right, context);
         }
-        return super.visit(r, _);
+        return super.visit(r, _void);
     }
 
     @Override
-    public ASTNode visit(Cell c, Void _) {
+    public ASTNode visit(Cell c, Void _void) {
         Term t = c.getContents();
         t = wrapTerm(t, context.getCellSort(c));
         if (t != null) {
             c.setContents(t);
         }
-        return super.visit(c, _);
+        return super.visit(c, _void);
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) {
+    public ASTNode visit(TermCons tc, Void _void) {
         Production p = tc.getProduction();
 
         if (p.isListDecl()) {
@@ -115,7 +115,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     private boolean isUserListElement(Sort listSort, Term element, Context context) {

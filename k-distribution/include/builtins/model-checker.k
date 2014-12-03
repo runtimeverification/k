@@ -60,6 +60,7 @@ endmodule
 
 module  MODEL-CHECKER-INTERFACE
   imports #MODEL-CHECKER-INTERFACE
+  imports K-TECHNIQUE
 
   syntax Bool ::= Bag "|=Ltl" K [latex({#1}\mathrel{\models_{\scriptstyle\it Ltl}}{#2})]
 

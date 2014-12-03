@@ -10,6 +10,7 @@ import org.kframework.backend.java.compile.ComputeCellsOfInterest;
 import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.backend.java.compile.GenerateKRewriteMachineInstructions;
 import org.kframework.backend.java.compile.JavaBackendCell2DataStructure;
+import org.kframework.backend.java.compile.KORECompilationSteps;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -92,6 +93,8 @@ public class JavaSymbolicBackend extends BasicBackend {
     public CompilerSteps<Definition> getCompilationSteps() {
         CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
         steps.add(new FirstStep(this, context));
+
+        steps.add(new KORECompilationSteps(context));
 
         steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
         steps.add(new RemoveBrackets(context));

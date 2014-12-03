@@ -44,7 +44,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp kapp, Void _)  {
+    public ASTNode visit(KApp kapp, Void _void)  {
         ASTNode t = internalTransform(kapp);
         try {
             t = new TypeSystemFilter(context).visitNode(t);
@@ -60,12 +60,12 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(TermCons tcParent, Void _)  {
+        public ASTNode visit(TermCons tcParent, Void _void)  {
             for (int i = 0; i < tcParent.getContents().size(); i++) {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
             }
-            return super.visit(tcParent, _);
+            return super.visit(tcParent, _void);
         }
 
         private void internalTransform(TermCons tcParent, int i, Term child) {
@@ -144,7 +144,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 possibleTerms = new ArrayList<Term>();
                 if (listProds != null) {
                     for (Production prod : listProds) {
-                            possibleTerms.add(new ListTerminator(prod.getSort(), null));
+                        if (prod.getSort().isUserListSort()) {
+                            continue;
+                        }
+                        possibleTerms.add(new ListTerminator(prod.getSort(), null));
                     }
                     if (possibleTerms.size() == 0) {
                         return super.visit(kapp, null);
@@ -165,16 +168,16 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
+    public ASTNode visit(Cell cell, Void _void)  {
         // TODO(AndreiS): fix the printing of the cells which are representing maps
         if (cell.getLabel().matches(".*-fragment")) {
             return this.visitNode(cell.getContents());
         }
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 
     @Override
-    public ASTNode visit(Bag bag, Void _)  {
+    public ASTNode visit(Bag bag, Void _void)  {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
             Term accept = (Term) this.visitNode(child);
@@ -243,20 +246,20 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode visit(MapBuiltin map, Void _) {
-        Term kapp = (Term) toKApp.visitNode(super.visit(map, _));
+    public ASTNode visit(MapBuiltin map, Void _void) {
+        Term kapp = (Term) toKApp.visitNode(super.visit(map, _void));
         return this.visitNode(kapp);
     }
 
     @Override
-    public ASTNode visit(ListBuiltin list, Void _) {
-        Term kapp = (Term) toKApp.visitNode(super.visit(list, _));
+    public ASTNode visit(ListBuiltin list, Void _void) {
+        Term kapp = (Term) toKApp.visitNode(super.visit(list, _void));
         return this.visitNode(kapp);
     }
 
     @Override
-    public ASTNode visit(SetBuiltin set, Void _) {
-        Term kapp = (Term) toKApp.visitNode(super.visit(set, _));
+    public ASTNode visit(SetBuiltin set, Void _void) {
+        Term kapp = (Term) toKApp.visitNode(super.visit(set, _void));
         return this.visitNode(kapp);
     }
 }

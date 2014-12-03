@@ -162,7 +162,7 @@ public class FileUtil {
         }
     }
 
-    private void save(File file, String content) {
+    public static void save(File file, String content) {
         try {
             File dir = file.getAbsoluteFile().getParentFile();
             if (!dir.exists() && !dir.mkdirs()) {
@@ -174,7 +174,7 @@ public class FileUtil {
         }
     }
 
-    private String load(File file) {
+    private static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {

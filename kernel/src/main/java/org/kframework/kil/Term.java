@@ -67,7 +67,7 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
         final Set<Variable> result = new HashSet<Variable>();
         new BasicVisitor(null) {
             @Override
-            public Void visit(Variable node, Void _) {
+            public Void visit(Variable node, Void _void) {
                 result.add(node);
                 return null;
             }

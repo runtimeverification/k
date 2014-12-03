@@ -4,8 +4,8 @@ require "int.k"
 
 
 module LIST
-  imports K-EQUAL-HOOKS
-  imports INT-HOOKS
+  imports INT-SYNTAX-HOOKS
+  imports K-TECHNIQUE
 
   /*@ \section{Description} \K lists are ordered collections that may contain
    duplicate elements. These behave more like lists in functional programming

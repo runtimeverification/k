@@ -58,29 +58,29 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Definition node, Void _) {
+    public ASTNode visit(Definition node, Void _void) {
         ConfigurationStructureVisitor cfgVisitor = new ConfigurationStructureVisitor(context);
         cfgVisitor.visitNode(node);
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _)  {
+    public ASTNode visit(Rule rule, Void _void)  {
         rule.addAttribute(JavaBackendRuleData.class, new JavaBackendRuleData());
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
                 || rule.containsAttribute(Attribute.MACRO_KEY)
@@ -97,7 +97,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         writeCell2RHS.clear();
         nestedCellCount = 0;
         topMentionedCellUnderRewrite = false;
-        rule = (Rule) super.visit(rule, _);
+        rule = (Rule) super.visit(rule, _void);
 
         if (compiledForFastRewriting && topMentionedCellUnderRewrite) {
             /**
@@ -131,7 +131,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
+    public ASTNode visit(Cell cell, Void _void)  {
         if (!compiledForFastRewriting) {
             return cell;
         }
@@ -151,7 +151,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         }
 
         nestedCellCount++;
-        cell = (Cell) super.visit(cell, _);
+        cell = (Cell) super.visit(cell, _void);
         nestedCellCount--;
 
         if (nestedCellCount == 0 && hasRewrite) {
@@ -162,7 +162,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp kApp, Void _) {
+    public ASTNode visit(KApp kApp, Void _void) {
         new BasicVisitor(context) {
             @Override
             public Void visit(Rewrite node, Void p) throws RuntimeException {
@@ -181,7 +181,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _)  {
+    public ASTNode visit(Rewrite node, Void _void)  {
         if (nestedCellCount == 0) {
             topMentionedCellUnderRewrite = true;
 

@@ -83,7 +83,7 @@ public class DefinitionLoader {
 
             sw.printIntermediate("Load definition from binary");
 
-            javaDef.preprocess(context);
+            javaDef.preprocess(context, autoinclude);
 
             sw.printIntermediate("Preprocess");
 
@@ -115,10 +115,10 @@ public class DefinitionLoader {
             def.setMainFile(mainFile.getAbsoluteFile());
         }
         def.setMainModule(mainModule);
-        def.setModulesMap(outer.getModulesMap());
+        def.getDefinitionContext().addModules(outer.getModulesMap().values());
         def.setItems(outer.getModuleItems());
 
-        if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
+        if (!def.getDefinitionContext().containsModule(context.kompileOptions.syntaxModule())) {
             String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
             kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
             def.setMainSyntaxModule(mainModule);
@@ -126,7 +126,7 @@ public class DefinitionLoader {
             def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
         }
 
-        if (!def.getModulesMap().containsKey(mainModule)) {
+        if (!def.getDefinitionContext().containsModule(mainModule)) {
             String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
             throw KExceptionManager.compilerError(msg);
         }
@@ -136,9 +136,12 @@ public class DefinitionLoader {
         //parse files importing from other files
         def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
 
-        // HERE: add labels to sorts
+        if(autoinclude)
+            new AddAutoIncludedModulesVisitor(context).visitNode(def);
+        // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
+        new CollectModuleImportsVisitor(context).visitNode(def);
 
-        def.preprocess(context);
+        def.preprocess(context, autoinclude);
 
         sw.printIntermediate("Preprocess");
 
@@ -182,11 +185,6 @@ public class DefinitionLoader {
             files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
             sw.printIntermediate("Generate TBLPgm");
         }
-
-        if(autoinclude)
-            new AddAutoIncludedModulesVisitor(context).visitNode(def);
-        // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
-        new CollectModuleImportsVisitor(context).visitNode(def);
 
         // ------------------------------------- generate parser TBL
         // cache the TBL if the sdf file is the same
@@ -252,8 +250,6 @@ public class DefinitionLoader {
             cachedSentences = clf.getKept().size();
             prf = new ParseRulesFilter(context, clf.getKept());
             def = (Definition) prf.visitNode(def);
-        } catch (ParseFailedException te) {
-            te.printStackTrace();
         } finally {
             // save definition
             loader.saveOrDie(cache, clf.getKept());

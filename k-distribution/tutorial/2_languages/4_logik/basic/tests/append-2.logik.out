@@ -1,2 +1,11 @@
-\Q"L1" |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )\E\s+\Q"L2" |-> nil (  )\E
-\Q"L1" |-> nil (  )\E\s+\Q"L2" |-> cons ( b (  ), cons ( a (  ), nil (  ) ) )\E
+Search results:
+
+Solution 1:
+Solution:Map -->
+L1:Term |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )
+L2:Term |-> nil (  )
+
+Solution 2:
+Solution:Map -->
+L1:Term |-> nil (  )
+L2:Term |-> cons ( b (  ), cons ( a (  ), nil (  ) ) )

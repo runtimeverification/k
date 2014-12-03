@@ -27,7 +27,7 @@ public class VariableTypeFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable r, Void _) throws ParseFailedException {
+    public ASTNode visit(Variable r, Void _void) throws ParseFailedException {
         Variable correctVar = variableTypes.get(r.getName());
         if (correctVar == null)
             return r;

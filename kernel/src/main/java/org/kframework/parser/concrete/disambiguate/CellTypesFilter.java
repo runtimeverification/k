@@ -28,17 +28,17 @@ public class CellTypesFilter extends ParseForestTransformer {
 
     // don't do anything for configuration and syntax
     @Override
-    public ASTNode visit(Configuration cell, Void _) {
+    public ASTNode visit(Configuration cell, Void _void) {
         return cell;
     }
 
     @Override
-    public ASTNode visit(Syntax cell, Void _) {
+    public ASTNode visit(Syntax cell, Void _void) {
         return cell;
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
+    public ASTNode visit(Cell cell, Void _void) throws ParseFailedException {
         Sort sort = context.getCellSort(cell);
 
         if (sort != null) {
@@ -47,7 +47,7 @@ public class CellTypesFilter extends ParseForestTransformer {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getSource(), cell.getLocation()));
         }
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 
     /**
@@ -69,7 +69,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Term trm, Void _) throws ParseFailedException {
+        public ASTNode visit(Term trm, Void _void) throws ParseFailedException {
             if (!context.isSyntacticSubsortedEq(expectedSort, trm.getSort()) &&
                 !(context.isSyntacticSubsortedEq(Sort.KLIST, expectedSort) &&
                                 (trm.getSort().equals(Sort.KLIST) ||
@@ -83,13 +83,13 @@ public class CellTypesFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
+        public ASTNode visit(Bracket node, Void _void) throws ParseFailedException {
             node.setContent((Term) this.visitNode(node.getContent()));
             return node;
         }
 
         @Override
-        public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
+        public ASTNode visit(Rewrite node, Void _void) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
             result.setSort(expectedSort);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
@@ -97,7 +97,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
             ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {

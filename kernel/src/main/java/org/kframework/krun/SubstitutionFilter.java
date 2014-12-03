@@ -16,7 +16,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable var, Void _) {
+    public ASTNode visit(Variable var, Void _void) {
         Term t = args.get(var.getName());
         if (t == null) {
             t = args.get(var.getName() + ":" + var.getSort());

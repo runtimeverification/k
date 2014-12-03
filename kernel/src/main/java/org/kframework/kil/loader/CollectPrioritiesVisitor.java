@@ -22,13 +22,13 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         super(context);
     }
 
-    public Void visit(Definition def, Void _) {
-        super.visit(def, _);
+    public Void visit(Definition def, Void _void) {
+        super.visit(def, _void);
         context.finalizePriority();
         return null;
     }
 
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         // collect left and right associativity
         for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
             PriorityBlock pb1 = node.getPriorityBlocks().get(i);
@@ -56,7 +56,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         return null;
     }
 
-    public Void visit(PriorityExtended node, Void _) {
+    public Void visit(PriorityExtended node, Void _void) {
         for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
             PriorityBlockExtended pb1 = node.getPriorityBlocks().get(i);
             PriorityBlockExtended pb2 = node.getPriorityBlocks().get(i + 1);
@@ -83,7 +83,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         return null;
     }
 
-    public Void visit(PriorityExtendedAssoc node, Void _) {
+    public Void visit(PriorityExtendedAssoc node, Void _void) {
         Set<Production> prods = new HashSet<>();
         for (KLabelConstant label : node.getChildren(null))
             prods.addAll(SDFHelper.getProductionsForTag(label.getLabel(), context));

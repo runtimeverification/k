@@ -31,17 +31,17 @@ public class PreferDotsFilter extends ParseForestTransformer {
 
     // don't do anything for configuration and syntax
     @Override
-    public ASTNode visit(Configuration cell, Void _) {
+    public ASTNode visit(Configuration cell, Void _void) {
         return cell;
     }
 
     @Override
-    public ASTNode visit(Syntax cell, Void _) {
+    public ASTNode visit(Syntax cell, Void _void) {
         return cell;
     }
 
     @Override
-    public ASTNode visit(Rule rl, Void _) throws ParseFailedException {
+    public ASTNode visit(Rule rl, Void _void) throws ParseFailedException {
         if (rl.getBody() instanceof Ambiguity) {
             for (Term t : ((Ambiguity) rl.getBody()).getContents()) {
                 if (t instanceof Rewrite)
@@ -52,7 +52,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
             processRW((Rewrite) rl.getBody());
         }
 
-        return super.visit(rl, _);
+        return super.visit(rl, _void);
     }
 
     private void processRW(Rewrite node) throws ParseFailedException {
@@ -65,7 +65,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
+    public ASTNode visit(Cell cell, Void _void) throws ParseFailedException {
         Sort sort = context.getCellSort(cell);
         if (sort != null) {
             cell.setContents((Term) preferStrict(sort, cell.getContents()));
@@ -73,11 +73,11 @@ public class PreferDotsFilter extends ParseForestTransformer {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getSource(), cell.getLocation()));
         }
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
         if (tc.getProduction().isListDecl()) {
             UserList ulist = tc.getProduction().getListDecl();
@@ -90,13 +90,13 @@ public class PreferDotsFilter extends ParseForestTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     @Override
-    public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
+    public ASTNode visit(Cast cast, Void _void) throws ParseFailedException {
         cast.setContent((Term) preferStrict(cast.getInnerSort(), cast.getContent()));
-        return super.visit(cast, _);
+        return super.visit(cast, _void);
     }
 
     /**

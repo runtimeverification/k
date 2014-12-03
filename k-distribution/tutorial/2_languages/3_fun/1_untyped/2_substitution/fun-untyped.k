@@ -110,7 +110,10 @@ module FUN-UNTYPED-SYNTAX
                   > '_;_
                   > 'fun_
                   > 'datatype_=__
+endmodule
 
+module FUN-UNTYPED-MACROS
+  imports FUN-UNTYPED-SYNTAX
 
 //@ \subsection{Desugaring macros}
 
@@ -145,6 +148,7 @@ endmodule
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-MACROS
   imports SUBSTITUTION
 
   configuration <T color="yellow">

@@ -269,7 +269,7 @@ public class Proc<T> implements Runnable {
     }
 
     public static String toLogString(String[] args) {
-        if (OS.current() == OS.WIN) {
+        if (OS.current() == OS.WINDOWS) {
             return StringUtils.join(args, ' ');
         }
         return StringUtil.escapeShell(args, OS.current());

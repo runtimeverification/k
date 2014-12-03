@@ -4,6 +4,8 @@ require "set.k"
 
 module SET-IMPL
   imports SET
+  imports K-EQUAL-HOOKS
+  imports INT-HOOKS
 
   // syntax Set ::= intersectSet(Set, Set)
   rule intersectSet(S1:Set, S2:Set) => S1 -Set (S1 -Set S2)

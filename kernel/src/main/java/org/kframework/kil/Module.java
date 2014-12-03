@@ -2,10 +2,12 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +17,9 @@ import java.util.Set;
 public class Module extends DefinitionItem implements Interfaces.MutableList<ModuleItem, Enum<?>> {
     private String name;
     private List<ModuleItem> items = new ArrayList<>();
+
+    // keeps easy to access information about the current module
+    private transient ModuleContext moduleContext = new ModuleContext();
 
     // lazily computed set of sorts.
     private Set<Sort> sorts;
@@ -60,7 +65,16 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     @Override
     public String toString() {
         String content = "";
-        for (ModuleItem i : items)
+        List<ModuleItem> sortedItems = new ArrayList<ModuleItem>(items);
+
+        sortedItems.sort(new Comparator<ModuleItem>() {
+            @Override
+            public int compare(ModuleItem o1, ModuleItem o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+
+        for (ModuleItem i : sortedItems)
             content += i + " \n";
 
         return "module " + name + "\n" + content + "\nendmodule";
@@ -190,14 +204,17 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     }
 
     @Override
-    public List<ModuleItem> getChildren(Enum<?> _) {
+    public List<ModuleItem> getChildren(Enum<?> _void) {
         return items;
     }
 
     @Override
-    public void setChildren(List<ModuleItem> children, Enum<?> _) {
+    public void setChildren(List<ModuleItem> children, Enum<?> _void) {
         this.items = children;
         this.sorts = null;
     }
 
+    public ModuleContext getModuleContext() {
+        return moduleContext;
+    }
 }

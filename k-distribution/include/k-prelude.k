@@ -10,6 +10,11 @@ module K-TECHNIQUE
     // so we have to declare things like isSet in less obvious places
 
     syntax KItem
+    syntax K
+    syntax KList
+    syntax KLabel
+    syntax Bag
+    syntax BagItem
 endmodule
 
 module K-LISTK-EXTRAS
@@ -28,6 +33,7 @@ module K-RESULT
     imports K-TECHNIQUE
     imports BOOL-HOOKS
 
+    syntax KResult
     syntax KItem ::= KResult
     syntax Bool ::= isKResult(KItem) [function,klabel(isKResult)]
 
@@ -54,6 +60,7 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
+  imports K-TECHNIQUE
   syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_), impure]
   rule getKLabel(L:KLabel(_:KList)) => L
 

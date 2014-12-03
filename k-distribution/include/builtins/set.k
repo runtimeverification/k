@@ -4,8 +4,8 @@ require "int.k"
 
 
 module SET
-  imports K-EQUAL-HOOKS
-  imports INT-HOOKS
+  imports INT-SYNTAX-HOOKS
+  imports K-TECHNIQUE
 
   /*@ \section{Description} The Set represents a mathematical set (a collection
    of unique items). */

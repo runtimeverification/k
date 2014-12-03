@@ -1,1 +1,5 @@
-\Q"L" |-> cons ( c (  ), cons ( b (  ), cons ( a (  ), nil (  ) ) ) )\E
+Search results:
+
+Solution 1:
+Solution:Map -->
+L:Term |-> cons ( c (  ), cons ( b (  ), cons ( a (  ), nil (  ) ) ) )

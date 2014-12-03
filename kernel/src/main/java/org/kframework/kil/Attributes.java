@@ -119,12 +119,12 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     }
 
     @Override
-    public List<Attribute<?>> getChildren(Enum<?> _) {
+    public List<Attribute<?>> getChildren(Enum<?> _void) {
         return new ArrayList<Attribute<?>>(contents.values());
     }
 
     @Override
-    public void setChildren(List<Attribute<?>> children, Enum<?> _) {
+    public void setChildren(List<Attribute<?>> children, Enum<?> _void) {
         contents.clear();
         for (Attribute<?> attr : children) {
             add(attr);

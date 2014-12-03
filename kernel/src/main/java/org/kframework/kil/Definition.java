@@ -12,6 +12,8 @@ import org.kframework.utils.Poset;
 import com.google.inject.Inject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +31,11 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     private File mainFile;
     private String mainModule;
     /** An index of all modules in {@link #items} by name */
-    private Map<String, Module> modulesMap;
     private String mainSyntaxModule;
-    private Poset<String> modules = Poset.create();
     public Map<String, ASTNode> locations = new HashMap<>();
+
+    // keeps easy to access information about the current definition
+    private transient DefinitionContext definitionContext = new DefinitionContext();
 
     public Definition() {
         super();
@@ -53,30 +56,22 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     @Override
     public String toString() {
         String content = "";
-        for (DefinitionItem di : items)
+        List<DefinitionItem> sortedItems = new ArrayList<>(items);
+        sortedItems.sort(new Comparator<DefinitionItem>() {
+            @Override
+            public int compare(DefinitionItem o1, DefinitionItem o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+        for (DefinitionItem di : sortedItems)
             content += di + " \n";
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
 
-    public void addModuleImport(String mainModule, String importedModule) {
-        if (mainModule.equals(importedModule))
-            return;
-        modules.addRelation(mainModule, importedModule);
-    }
-
-    public boolean isModuleIncludedEq(String localModule, String importedModule) {
-        if (localModule.equals(importedModule))
-            return true;
-        return modules.isInRelation(localModule, importedModule);
-    }
-
-    public void finalizeModules() {
-        modules.transitiveClosure();
-    }
-
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
+        definitionContext.setModules(items);
     }
 
     public List<DefinitionItem> getItems() {
@@ -107,7 +102,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return mainSyntaxModule;
     }
 
-    public void preprocess(org.kframework.kil.loader.Context context) {
+    public void preprocess(org.kframework.kil.loader.Context context, boolean autoinclude) {
         // Collect information
         // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
         new UpdateReferencesVisitor(context).visitNode(this);
@@ -120,6 +115,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         new CollectStartSymbolPgmVisitor(context).visitNode(this);
         new CollectConfigCellsVisitor(context).visitNode(this);
         new CollectLocationsVisitor().visitNode(this);
+        new FillInModuleContext().visitNode(this);
         new CollectVariableTokens(context).visitNode(this);
 
         /* collect lexical token sorts */
@@ -132,14 +128,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
 
         context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
-    }
-
-    public Map<String, Module> getModulesMap() {
-        return modulesMap;
-    }
-
-    public void setModulesMap(Map<String, Module> modulesMap) {
-        this.modulesMap = modulesMap;
     }
 
     public Module getSingletonModule() {
@@ -166,12 +154,20 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     }
 
     @Override
-    public List<DefinitionItem> getChildren(Enum<?> _) {
+    public List<DefinitionItem> getChildren(Enum<?> _void) {
         return items;
     }
 
     @Override
-    public void setChildren(List<DefinitionItem> children, Enum<?> _) {
+    public void setChildren(List<DefinitionItem> children, Enum<?> _void) {
         this.items = children;
+    }
+
+    public DefinitionContext getDefinitionContext() {
+        return definitionContext;
+    }
+
+    public void setDefinitionContext(DefinitionContext definitionContext) {
+        this.definitionContext = definitionContext;
     }
 }

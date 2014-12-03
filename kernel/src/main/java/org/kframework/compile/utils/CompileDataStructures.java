@@ -49,7 +49,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         location = node;
         boolean change = false;
 
@@ -103,14 +103,14 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _)  {
+    public ASTNode visit(Rewrite node, Void _void)  {
         assert false: "CompileDataStructures pass should be applied after ResolveRewrite pass";
         return node;
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _)  {
-        node = (KApp) super.visit(node, _);
+    public ASTNode visit(KApp node, Void _void)  {
+        node = (KApp) super.visit(node, _void);
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
             return node;

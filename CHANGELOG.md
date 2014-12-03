@@ -5,6 +5,9 @@
 ## Kompile ##
 - `kompile --backend [pdf|latex|html|unparse|unflatten|doc]` has been
   moved to a new tool, `kdoc --format [pdf|latex|html|unparse|unflatten|doc]`
+- Modules are required to import or declare constructors for sorts that they
+  use. In the event of a circularity, a forward reference can be introduced
+  using the syntax `syntax Sort` without any declared productions.
 
 # K Framework 3.4 (released 2014-08-05) #
 

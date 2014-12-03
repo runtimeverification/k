@@ -16,12 +16,12 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(TermCons node, Void _)  {
+    public ASTNode visit(TermCons node, Void _void)  {
         boolean change = false;
         ArrayList<Term> terms = new ArrayList<Term>();
         Production prod = node.getProduction();
@@ -54,7 +54,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
             node = node.shallowCopy();
             node.setContents(terms);
         }
-        return visit((Term) node, _);
+        return visit((Term) node, _void);
     }
 
 }

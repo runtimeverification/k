@@ -1,1 +1,6 @@
-"Y" \|-> (.*?)\s+"Z" |-> cons \( a \(  \), \1 \)
+Search results:
+
+Solution 1:
+Solution:Map -->
+Y:Term |-> Y:Term
+Z:Term |-> cons ( a (  ), Y )
