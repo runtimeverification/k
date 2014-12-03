@@ -4,6 +4,7 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.parser.concrete2.Grammar;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -216,5 +217,14 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
 
     public ModuleContext getModuleContext() {
         return moduleContext;
+    }
+
+    public Grammar getRuleGrammar() {
+        if (moduleContext.getRuleGrammar() != null) {
+            return moduleContext.getRuleGrammar();
+        } else {
+            // TODO: generate the grammar for rules
+            return null;
+        }
     }
 }

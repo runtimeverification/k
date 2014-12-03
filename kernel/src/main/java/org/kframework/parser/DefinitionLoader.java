@@ -151,24 +151,6 @@ public class DefinitionLoader {
 
         sw.printIntermediate("Checks");
 
-        // ------------------------------------- generate files
-        DefinitionLocalKParser.init(files.resolveKompiled("."));
-        ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
-        ResourceExtractor.ExtractGroundSDF(files.resolveTemp("ground"));
-
-        ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
-        // ------------------------------------- generate parser TBL
-        // cache the TBL if the sdf file is the same
-        String oldSdfPgm = "";
-        if (files.resolveKompiled("Program.sdf").exists())
-            oldSdfPgm = files.loadFromKompiled("Program.sdf");
-
-        StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
-
-        String newSdfPgm = newSdfPgmBuilder.toString();
-        files.saveToTemp("pgm/Program.sdf", newSdfPgm);
-
-        sw.printIntermediate("File Gen Pgm");
         if (context.kompileOptions.experimental.javaParser) {
             // save the new parser info
             Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
@@ -179,47 +161,69 @@ public class DefinitionLoader {
             loader.saveOrDie(context.files.resolveKompiled("newModuleParsers.bin"), parsers);
             sw.printIntermediate("Gen module parsers");
         }
-        if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
-            sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
-            files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
-            files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
-            sw.printIntermediate("Generate TBLPgm");
-        }
-
-        // ------------------------------------- generate parser TBL
-        // cache the TBL if the sdf file is the same
-        String oldSdf = "";
-        if (files.resolveKompiled("Integration.sdf").exists())
-            oldSdf = files.loadFromKompiled("Integration.sdf");
-        String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
-        files.saveToTemp("def/Integration.sdf", newSdf);
-        files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
-
-        sw.printIntermediate("File Gen Def");
 
         File cache = files.resolveKompiled("defx-cache.bin");
         Thread t2 = null;
-        if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
-                || !files.resolveKompiled("Ground.tbl").exists()) {
-            try {
-                // delete the file with the cached/partially parsed rules
-                if (cache.exists() && !cache.delete()) {
-                    throw KExceptionManager.criticalError("Could not delete file " + cache);
-                }
-                // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
-                t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
-                t1.join();
-                files.copyTempFileToKompiledDirectory("def/Integration.sdf");
-                files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw KExceptionManager.criticalError(
-                        "Thread was interrupted trying to run SDF2Table");
+        if (!context.kompileOptions.experimental.javaParser) {
+            // ------------------------------------- generate files
+            DefinitionLocalKParser.init(files.resolveKompiled("."));
+            ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
+            ResourceExtractor.ExtractGroundSDF(files.resolveTemp("ground"));
+
+            ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
+            // ------------------------------------- generate parser TBL
+            // cache the TBL if the sdf file is the same
+            String oldSdfPgm = "";
+            if (files.resolveKompiled("Program.sdf").exists())
+                oldSdfPgm = files.loadFromKompiled("Program.sdf");
+
+            StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
+
+            String newSdfPgm = newSdfPgmBuilder.toString();
+            files.saveToTemp("pgm/Program.sdf", newSdfPgm);
+
+            sw.printIntermediate("File Gen Pgm");
+
+            if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
+                sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
+                files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
+                files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
+                sw.printIntermediate("Generate TBLPgm");
             }
 
+            // ------------------------------------- generate parser TBL
+            // cache the TBL if the sdf file is the same
+            String oldSdf = "";
+            if (files.resolveKompiled("Integration.sdf").exists())
+                oldSdf = files.loadFromKompiled("Integration.sdf");
+            String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
+            files.saveToTemp("def/Integration.sdf", newSdf);
+            files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
 
-            sw.printIntermediate("Generate TBLDef");
+            sw.printIntermediate("File Gen Def");
+
+            if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
+                    || !files.resolveKompiled("Ground.tbl").exists()) {
+                try {
+                    // delete the file with the cached/partially parsed rules
+                    if (cache.exists() && !cache.delete()) {
+                        throw KExceptionManager.criticalError("Could not delete file " + cache);
+                    }
+                    // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+                    Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
+                    t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
+                    t1.join();
+                    files.copyTempFileToKompiledDirectory("def/Integration.sdf");
+                    files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw KExceptionManager.criticalError(
+                            "Thread was interrupted trying to run SDF2Table");
+                }
+
+
+                sw.printIntermediate("Generate TBLDef");
+            }
         }
 
         def = (Definition) new ParseConfigsFilter(context, kem).visitNode(def);
@@ -263,15 +267,17 @@ public class DefinitionLoader {
 
         sw.printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
 
-        try {
-            if (t2 != null) {
-                t2.join();
-                files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
+        if (!context.kompileOptions.experimental.javaParser) {
+            try {
+                if (t2 != null) {
+                    t2.join();
+                    files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw KExceptionManager.criticalError(
+                        "Thread was interrupted trying to run SDF2Table");
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw KExceptionManager.criticalError(
-                    "Thread was interrupted trying to run SDF2Table");
         }
 
         return def;
