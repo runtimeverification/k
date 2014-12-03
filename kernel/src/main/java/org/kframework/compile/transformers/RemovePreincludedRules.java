@@ -1,14 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import java.io.File;
-
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.FileSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.file.JarInfo;
 
 /**
  *
@@ -22,9 +18,6 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _void)  {
-        if (!(node.getSource() instanceof FileSource)) {
-            return null;
-        }
         return node;
     }
 }
