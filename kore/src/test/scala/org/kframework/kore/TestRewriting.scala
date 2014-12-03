@@ -83,18 +83,17 @@ class TestRewriting {
 
   @Test def testWithVariableInside {
     assertEquals(Set('foo(1, 3)),
-    'foo(1, 'bar(2, 3)).search(KRewrite('foo(1, 'bar(2, X)), 'foo(1, X))))
+      'foo(1, 'bar(2, 3)).search(KRewrite('foo(1, 'bar(2, X)), 'foo(1, X))))
   }
 
   @Test def testToTopWithVariableInside {
     assertEquals(Set('foo(1, 3)),
       'foo(1, 'bar(2, 3)).search('foo(1, KRewrite('bar(2, X), X))))
   }
-  
+
   @Test def testAnywhere {
-    assertEquals(Set(),
-        'foo('bar('foo(0))).search(Anywhere(KRewrite('foo(X), X)))
-        )
+    assertEquals(Set('bar('foo(0)), 'foo('bar(0))),
+      'foo('bar('foo(0))).search(Anywhere(KRewrite('foo(X), X))))
   }
 
   def assertEquals(expected: Any, actual: Any) {
