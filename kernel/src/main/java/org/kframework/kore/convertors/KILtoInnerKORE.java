@@ -203,7 +203,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     private org.kframework.kore.Attributes attributesFromLocation(Location location) {
-        return Attributes(Location(location.lineStart, location.columnStart, location.lineEnd,
+        if(location != null)
+            return Attributes(Location(location.lineStart, location.columnStart, location.lineEnd,
                 location.columnEnd));
+        else
+            return Attributes();
     }
 }

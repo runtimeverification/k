@@ -335,8 +335,11 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             KRewrite body = (KRewrite) rule.body();
             return new org.kframework.kil.Rule(convertK(body.left()), convertK(body.right()),
                     convertKBool(rule.requires()), convertKBool(rule.ensures()), dummyContext);
+        } else {
+            org.kframework.kil.Rule kilRule = new org.kframework.kil.Rule();
+            kilRule.setBody(convertK(rule.body()));
+            return kilRule;
         }
-        throw NOT_IMPLEMENTED("Not implemented: Rule -> KIL.Sentence");
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Context context) {
@@ -562,7 +565,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                         .get();
                 Production production = kilProductionIdToProductionInstance.get(kilProductionId);
                 if (production == null) {
-                    throw new AssertionError("Could not find production for: " + kApply
+                    System.err.println("WARNING: Could not find production for: " + kApply
                             + " with id: " + kilProductionId);
                 }
 
