@@ -1,34 +1,16 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "builtins/builtins.k"
+require "io/io.k"
+require "io/tcp.k"
 
 module URIS
   imports BUILTIN-HOOKS
+  imports K-IO
+  imports TCP-HOOKS
   imports #K-PARSER-INTERFACE
   imports #K-PRINTER-INTERFACE
 
 // B, N, and P are really supposed to be Nat
-  syntax KItem ::= "#open" "(" String ")" [function]
-                 | "#open" "(" String "," String ")" [function, hook(#IO:#open), impure]
-                 | "#tell" "(" Int ")" [function, hook(#IO:#tell), impure]
-                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc), impure]
-                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read), impure]
-
-  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close), impure]
-             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek), impure]
-             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc), impure]
-             | "#write" "(" Int "," String ")" [function, hook(#IO:#write), impure]
-
-  syntax KItem ::= "#ioError" "(" String ")"
-
-  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat), impure]
-                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat), impure]
-                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir), impure]
-
-  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse), impure]
-  syntax KItem ::= #parseInModule(String, // input
-                                  String, // start symbol
-                                  String) // module name
-                                  [function, hook(#K-PARSER:#parseInModule), impure]
 
   rule #open(S:String) => #open(S:String, "rw")
   rule #open(S:String, Mode:String) => #string2Int(#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01")<:TCPAnswer) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
@@ -53,10 +35,6 @@ module URIS
       => String2DotK((#tcpRequest("seek\x01" +String Int2String(N) +String "\x01"
                               +String Int2String(P) +String "\x01"))<:TCPAnswer)
 
-
-  syntax Int ::= "#stdin"   [function]
-                | "#stdout" [function]
-                | "#stderr" [function]
 
   rule #getc(N:Int)
       => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01")) when N =/=Int 1 andBool N =/=Int 2
@@ -94,12 +72,6 @@ module URIS
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
   rule #statTypes(K:K) => K
 
-  syntax Stream ::= #parseInput(String, String)
-  syntax Stream ::= #buffer(K)
-  syntax Stream ::= #istream(Int)
-                  | #ostream(Int)
-  syntax Stream ::= "#noIO"
-
 // ------------------------------
 // Dynamic parsing
 
@@ -114,9 +86,6 @@ module URIS
 
 // ------------------------------
 // System
-
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   rule #system(Cmd:String) => #systemTypes(#string2klist(#tcpRequest("system\x01" +String Cmd +String "\x01")<:TCPAnswer))
   syntax KItem ::= #systemTypes(KList) [function]

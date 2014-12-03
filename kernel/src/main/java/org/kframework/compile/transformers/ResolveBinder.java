@@ -19,13 +19,11 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -105,6 +103,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod, context)),
                     BoolBuiltin.TRUE, context);
             rule.addAttribute(Attribute.ANYWHERE);
+            rule.setSource(Sources.generatedBy(ResolveBinder.class));
             items.add(rule);
 
             Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
@@ -115,6 +114,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bndIdx + 1));
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
+                rule.setSource(Sources.generatedBy(ResolveBinder.class));
                 items.add(rule);
                 //String bndSort = prod.getChildSort(bndIdx - 1);
                 // (AndreiS): the bounded sort is no longer automatically
@@ -131,6 +131,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bodyIdx + 1));
                 rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
+                rule.setSource(Sources.generatedBy(ResolveBinder.class));
                 items.add(rule);
             }
         }

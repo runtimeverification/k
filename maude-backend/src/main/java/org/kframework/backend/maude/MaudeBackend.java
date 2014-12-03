@@ -153,6 +153,7 @@ public class MaudeBackend extends BasicBackend {
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));
         steps.add(new AddStreamCells(context));
+        steps.add(new ResolveHybrid(context));
         steps.add(new AddSymbolicK(context));
         steps.add(new AddSemanticEquality(context));
         steps.add(new ResolveFreshVarMOS(context));
@@ -172,7 +173,6 @@ public class MaudeBackend extends BasicBackend {
         steps.add(new InitializeConfigurationStructure(context));
         steps.add(new AddKStringConversion(context));
         steps.add(new AddKLabelConstant(context));
-        steps.add(new ResolveHybrid(context));
         steps.add(new ResolveConfigurationAbstraction (context, kem));
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));

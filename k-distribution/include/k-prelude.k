@@ -25,7 +25,6 @@ module K-LISTK-EXTRAS
   syntax Bool ::= K "#inKList" KList [function]
   rule K:K inKList L:KList => K #inKList L ==K true
   rule K #inKList (_,,K:K,,_) => true
-  rule isKResult(_:KResult,,K:K,,KL:KList) => isKResult(K,,KL)
   rule isKResult(.KList) => true
 endmodule
 

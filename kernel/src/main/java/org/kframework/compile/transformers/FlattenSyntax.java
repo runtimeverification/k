@@ -66,7 +66,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         Attributes attrs = node.getAttributes().shallowCopy();
         if (node.isListDecl()) {
             listUnits.add(node.getTerminatorKLabel());
-            attrs.add(Attribute.HYBRID);
         }
         node = node.shallowCopy();
         List<ProductionItem> pis = new ArrayList<>();
