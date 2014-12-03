@@ -2,6 +2,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.GeneratedSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -18,6 +19,9 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _void)  {
+        if (node.getSource() instanceof GeneratedSource && ((GeneratedSource)node.getSource()).getSourceClass() == ResolveBinder.class) {
+            return null;
+        }
         return node;
     }
 }
