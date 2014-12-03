@@ -68,8 +68,7 @@ public class RewriteEngineUtils {
 
                     boolean resolved = false;
                     if (evalLookupOrChoice instanceof Bottom
-                            || DataStructures.isLookup(evalLookupOrChoice)
-                            || DataStructures.isChoice(evalLookupOrChoice)) {
+                            || DataStructures.isLookupOrChoice(evalLookupOrChoice)) {
                         /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
                         // when the operation is pending, it is not really a valid match
