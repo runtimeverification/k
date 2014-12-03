@@ -1,10 +1,12 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "builtins/builtins.k"
 require "io/io.k"
+require "io/tcp.k"
 
 module URIS
   imports BUILTIN-HOOKS
   imports K-IO
+  imports TCP-HOOKS
   imports #K-PARSER-INTERFACE
   imports #K-PRINTER-INTERFACE
 

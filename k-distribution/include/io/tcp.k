@@ -1,10 +1,13 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "builtins/string.k"
 require "builtins/k-equal.k"
+require "io/io.k"
+
 module TCP-HOOKS
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS
   imports #TCP-INTERFACE
+  imports K-IO
   syntax TCPAnswer ::= String | TCPError
   syntax TCPError ::= "#tcpError" "(" String ")" | IOError
   rule isKResult(#EOF) => true [function, anywhere]
