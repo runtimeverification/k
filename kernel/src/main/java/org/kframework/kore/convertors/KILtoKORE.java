@@ -73,7 +73,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.kore.outer.Module apply(Module i) {
         Set<org.kframework.kore.outer.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
-        return Module(i.getName(), immutable(items), inner.apply(i.getAttributes()));
+        return Module(i.getName(), immutable(items), inner.convertAttributes(i));
     }
 
     @SuppressWarnings("unchecked")
@@ -86,8 +86,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.kore.outer.Bubble apply(StringSentence sentence) {
-        return Bubble(sentence.getType(), sentence.getContent(),
-                inner.apply(sentence.getAttributes()));
+        return Bubble(sentence.getType(), sentence.getContent(), inner.convertAttributes(sentence));
     }
 
     public Context apply(org.kframework.kil.Context c) {
@@ -95,19 +94,19 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public ModuleComment apply(LiterateModuleComment m) {
-        return new org.kframework.kore.outer.ModuleComment(m.getValue(), inner.apply(m
-                .getAttributes()));
+        return new org.kframework.kore.outer.ModuleComment(m.getValue(),
+                inner.convertAttributes(m));
     }
 
     public org.kframework.kore.outer.Configuration apply(Configuration kilConfiguration) {
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
-                inner.apply(kilConfiguration.getAttributes()));
+                inner.convertAttributes(kilConfiguration));
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
         return Rule(inner.apply(r.getBody()), inner.applyOrTrue(r.getRequires()),
-                inner.applyOrTrue(r.getEnsures()), inner.apply(r.getAttributes()));
+                inner.applyOrTrue(r.getEnsures()), inner.convertAttributes(r));
     }
 
     public org.kframework.kore.outer.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
@@ -144,7 +143,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.kore.outer.Sentence apply(Import s) {
-        return new org.kframework.kore.outer.Import(s.getName(), inner.apply(s.getAttributes()));
+        return new org.kframework.kore.outer.Import(s.getName(), inner.convertAttributes(s));
     }
 
     public Set<org.kframework.kore.outer.Sentence> apply(Syntax s) {
@@ -154,7 +153,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
-            res.add(SyntaxSort(sort, inner.apply(s.getAttributes())));
+            res.add(SyntaxSort(sort, inner.convertAttributes(s)));
             return res;
         }
 
@@ -196,7 +195,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         }
                     }
 
-                    org.kframework.kore.Attributes attrs = inner.apply(p.getAttributes());
+                    org.kframework.kore.Attributes attrs = inner.convertAttributes(p);
 
                     org.kframework.kore.outer.SyntaxProduction prod = SyntaxProduction(
                             sort,
@@ -224,8 +223,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
 
-        org.kframework.kore.Attributes attrs = Attributes(KToken(Sort("userList"),
-                userList.getSort().getName()));
+        org.kframework.kore.Attributes attrs = Attributes().add("userList", p.getSort().getName());
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 

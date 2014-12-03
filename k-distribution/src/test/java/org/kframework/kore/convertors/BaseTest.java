@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -17,6 +18,8 @@ import org.kframework.kil.loader.Context;
 import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
+
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014 K Team. All Rights Reserved.";
 
     static final String ROOT = "src/test/resources/convertor-tests/";
 
@@ -45,21 +48,25 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
+    // WARNING: only use this after checking the results manually
+    private static boolean forceFixAssertionFiles = false;
+
     private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName()
-                + expecteFilePostfix());
+                + expecteFilePostfix()).getAbsoluteFile();
 
         DefintionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
         String actualOutput = convert(defWithContext);
 
-        if (kilExpectedDefinitionFile.isFile()) {
+        if (forceFixAssertionFiles) {
+            PrintWriter printWriter = new PrintWriter(kilExpectedDefinitionFile);
+            printWriter.print(COPYRIGHT_HEADER + "\n\n" + actualOutput);
+            printWriter.close();
+        } else {
             String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile);
             assertEquals(clean(expectedOutput), clean(actualOutput));
-        } else {
-            String definitionText = FileUtils.readFileToString(kilDefinitionFile);
-            assertEquals(clean(definitionText), clean(actualOutput));
         }
     }
 
@@ -88,8 +95,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private String clean(String definitionText) {
-        return definitionText.replace("// Copyright (c) 2014 K Team. All Rights Reserved.", "")
-                .replaceAll(" *\n", "\n").trim();
+        return definitionText.replace(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
     }
 
 }

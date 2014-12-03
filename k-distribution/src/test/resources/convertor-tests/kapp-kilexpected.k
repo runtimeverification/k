@@ -14,7 +14,7 @@ module TEST
 
   syntax Bool ::= #Bool
 
-  syntax Bool ::= List{Bool,","}
+  syntax Bools ::= List{Bool,","}
 
 
 endmodule

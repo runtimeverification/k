@@ -80,7 +80,7 @@ public class TstKILtoKOREIT extends BaseTest {
 
     @Test
     public void userList() throws IOException {
-        outerOnlyTest();
+        sdfTest();
     }
 
     @Test

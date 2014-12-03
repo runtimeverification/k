@@ -77,12 +77,12 @@ public class TstKOREtoKILIT extends BaseTest {
     @Test
     @Ignore
     public void userList() throws IOException {
-        outerOnlyTest();
+        sdfTest();
     }
 
     @Test
     public void userListNonEmpty() throws IOException {
-        outerOnlyTest();
+        sdfTest();
     }
 
     @Test

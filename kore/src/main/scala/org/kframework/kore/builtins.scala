@@ -87,3 +87,11 @@ object KBag extends Sort with KLabel {
 case object Hole extends KLabel with Sort {
   val name = "HOLE"
 }
+
+object Location {
+  import KInt._
+
+  def apply(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = {
+    'location('startLine(startLine), 'startColumn(startColumn), 'endLine(endLine), 'endColumn(endColumn))
+  }
+}

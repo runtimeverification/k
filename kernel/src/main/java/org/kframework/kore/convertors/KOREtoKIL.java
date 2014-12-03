@@ -10,6 +10,8 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
+import scala.Option;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import static org.kframework.Collections.*;
+import static org.kframework.kore.Constructors.*;
 
-public class KOREtoKIL {
+public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
     private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
@@ -49,12 +53,12 @@ public class KOREtoKIL {
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
                     List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    String listType = searchListType(attrs);
-                    if (listType != null) {
-                        List<SyntaxProduction> prods = listProds.get(listType);
+                    Option<String> listType = prod.att().getString("userList");
+                    if (!listType.isEmpty()) {
+                        List<SyntaxProduction> prods = listProds.get(listType.get());
                         if (prods == null) {
                             prods = new ArrayList<>(3);
-                            listProds.put(listType, prods);
+                            listProds.put(listType.get(), prods);
                         }
                         prods.add(prod);
                         iter.remove();
@@ -65,18 +69,6 @@ public class KOREtoKIL {
             return ret;
         }
 
-        private String searchListType(List<K> attrs) {
-            for (K attr : attrs) {
-                if (attr instanceof KToken) {
-                    KToken kToken = (KToken) attr;
-                    if (kToken.sort().name().equals("userList")) {
-                        return (kToken.s());
-                    }
-                }
-            }
-            return null;
-        }
-
         private void generateUserLists() {
             userLists = new ArrayList<>();
             for (Map.Entry<String, List<SyntaxProduction>> entry : listProds.entrySet()) {
@@ -85,7 +77,6 @@ public class KOREtoKIL {
                 if (prods.size() != 3 && prods.size() != 2) {
                     throw new AssertionError("Found list with " + prods.size() + " elements.");
                 }
-
                 if (prods.size() == 2) {
                     userLists.add(makeNonEmptyUserList(prods, listType));
                 } else {
@@ -415,12 +406,14 @@ public class KOREtoKIL {
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                KList klist = attr.klist();
-                if (klist.size() == 1 && klist.get(0) instanceof KToken) {
-                    String value = ((KToken) klist.get(0)).s();
-                    kilAttributes.add(Attribute.of(key.name(), value));
-                } else {
-                    throw NOT_IMPLEMENTED();
+                if (!(key != KLabel("location"))) { // ignoring location information
+                    KList klist = attr.klist();
+                    if (klist.size() == 1 && klist.get(0) instanceof KToken) {
+                        String value = ((KToken) klist.get(0)).s();
+                        kilAttributes.add(Attribute.of(key.name(), value));
+                    } else {
+                        throw NOT_IMPLEMENTED();
+                    }
                 }
             } else if (a instanceof KToken) {
                 KToken attr = (KToken) a;
@@ -429,6 +422,7 @@ public class KOREtoKIL {
             } else {
                 throw NOT_IMPLEMENTED();
             }
+
         });
         return kilAttributes;
     }
@@ -571,5 +565,10 @@ public class KOREtoKIL {
                         kilTerms, production);
             }
         }
+    }
+
+    @Override
+    public org.kframework.kil.Definition apply(Definition d) {
+        return convertDefinition(d);
     }
 }

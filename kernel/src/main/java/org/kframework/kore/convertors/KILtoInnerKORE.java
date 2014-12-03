@@ -32,6 +32,7 @@ import org.kframework.kil.KSequence;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.NonTerminal;
@@ -137,10 +138,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
             if (child instanceof org.kframework.kil.KList) {
                 return KApply(KLabel(((KLabelConstant) label).getLabel()), (KList) apply(child),
-                        apply(kApp.getAttributes()));
+                        convertAttributes(kApp));
             } else if (child instanceof org.kframework.kil.Variable) {
                 // System.out.println(label.getClass());
-                return KApply(null, KList(apply(child)), apply(kApp.getAttributes()));
+                return KApply(null, KList(apply(child)), convertAttributes(kApp));
             } else {
                 throw new AssertionError("encountered " + child.getClass() + " in a KApp");
             }
@@ -159,7 +160,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     private org.kframework.kore.Attributes sortAttributes(Term cons) {
 
-        return apply(cons.getAttributes()).add(
+        return convertAttributes(cons).addAll(
                 Attributes(KApply(KLabel("sort"),
                         KList(KToken(Sorts.KString(), cons.getSort().toString())))));
     }
@@ -184,7 +185,9 @@ public class KILtoInnerKORE extends KILTransformation<K> {
             return new KBoolean(true, Attributes());
     }
 
-    public org.kframework.kore.Attributes apply(Attributes attributes) {
+    public org.kframework.kore.Attributes convertAttributes(ASTNode t) {
+        Attributes attributes = t.getAttributes();
+
         Set<K> attributesSet = attributes
                 .keySet()
                 .stream()
@@ -196,6 +199,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                             KList(KToken(Sort("AttributeValue"), valueString)));
                 }).collect(Collectors.toSet());
 
-        return Attributes(immutable(attributesSet));
+        return Attributes(immutable(attributesSet)).addAll(attributesFromLocation(t.getLocation()));
+    }
+
+    private org.kframework.kore.Attributes attributesFromLocation(Location location) {
+        return Attributes(Location(location.lineStart, location.columnStart, location.lineEnd,
+                location.columnEnd));
     }
 }

@@ -28,6 +28,8 @@ object Constructors {
 
   @annotation.varargs def KBag(ks: K*) = kore.KBag(ks)
 
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = kore.Location(startLine, startColumn, endLine, endColumn)
+
   def KBag(ks: KList) = kore.KBag(ks);
 
   def Sort(name: String) = kore.Sort(name);
@@ -50,7 +52,7 @@ object Constructors {
   def KVariable(name: String) = {
     kore.KVariable(name, Attributes())
   }
-  
+
   def InjectedKLabel(l: KLabel) = kore.InjectedKLabel(l)
 
   @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks: _*)
