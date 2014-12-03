@@ -17,8 +17,8 @@ module ID-HOOKS
 
   syntax CamelCaseId
   syntax PascalCaseId
-  rule isPascalCaseId(X:Id) => isUppercase(substrString(#tokenToString(X), 0, 1))
-  rule isCamelCaseId(X:Id) => isLowercase(substrString(#tokenToString(X), 0, 1))
+  rule isPascalCaseId(X:Id) => isUpperCase(substrString(#tokenToString(X), 0, 1))
+  rule isCamelCaseId(X:Id) => isLowerCase(substrString(#tokenToString(X), 0, 1))
 
   syntax Id ::= freshId(Int)    [freshGenerator, function]
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
