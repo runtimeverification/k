@@ -107,13 +107,12 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 st.setAttributes(ss.getAttributes());
                 st.setLocation(ss.getLocation());
                 st.setSource(ss.getSource());
-            } else {
+            } else  {
                 // parse with the new parser for rules
                 Grammar ruleGrammar = getCurrentModule().getRuleGrammar(kem);
                 Parser parser = new Parser(ss.getContent());
                 ASTNode out = parser.parse(ruleGrammar.get("MetaKList"), 0);
                 try {
-                    // TODO: update location information to match the actual position in the file
                     // only the unexpected character type of errors should be checked in this block
                     new UpdateLocationVisitor(context, ss.getLocation().lineStart, ss.getLocation().columnStart, 1, 1).visitNode(out);
                     out = new TreeCleanerVisitor(context).visitNode(out);
@@ -129,6 +128,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 }
                 out = new MakeConsList(context).visitNode(out);
                 Sentence st = new Sentence();
+                // TODO set the other parts of the sentence
                 st.setBody((Term) out);
                 config = new Configuration(st);
             }

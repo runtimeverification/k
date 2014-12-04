@@ -93,8 +93,9 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
-            tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
-            tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
+            for (int i = 0; i < tc.getContents().size(); i++) {
+                tc.getContents().set(i, (Term) secondFilter.visitNode(tc.getContents().get(i)));
+            }
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSyntacticSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {

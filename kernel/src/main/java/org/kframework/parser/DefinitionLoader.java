@@ -252,7 +252,7 @@ public class DefinitionLoader {
         try {
             def = (Definition) clf.visitNode(def);
             cachedSentences = clf.getKept().size();
-            prf = new ParseRulesFilter(context, clf.getKept());
+            prf = new ParseRulesFilter(context, clf.getKept(), kem);
             def = (Definition) prf.visitNode(def);
         } finally {
             // save definition
