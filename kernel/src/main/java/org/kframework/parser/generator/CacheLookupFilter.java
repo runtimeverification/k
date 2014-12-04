@@ -48,6 +48,8 @@ public class CacheLookupFilter extends ParseForestTransformer {
                 // load from cache
                 CachedSentence cs = cachedDef.get(key);
                 sentence = cs.sentence;
+                // take the attributes from the current StringSentence, since they are being parsed in the outer parser.
+                sentence.setAttributes(ss.getAttributes());
                 if (kept.containsKey(key)) {
                     Source source = ss.getSource();
                     Location location = ss.getLocation();
