@@ -12,7 +12,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.utils.CachedSentence;
-import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -40,8 +39,6 @@ public class CacheLookupFilter extends ParseForestTransformer {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             Sentence sentence;
 
-            int startLine = XmlLoader.getLocNumber(ss.getContentLocation(), 0);
-            int startColumn = XmlLoader.getLocNumber(ss.getContentLocation(), 1);
             String key = localModule + ss.getContent();
 
             if (cachedDef.containsKey(key)) {
@@ -56,9 +53,9 @@ public class CacheLookupFilter extends ParseForestTransformer {
                 }
 
                 // fix the location information
-                new UpdateLocationVisitor(context, startLine, startColumn,
+                new UpdateLocationVisitor(context, ss.getContentStartLine(), ss.getContentStartColumn(),
                                              cs.startLine, cs.startColumn).visitNode(sentence);
-                kept.put(key, new CachedSentence(sentence, startLine, startColumn));
+                kept.put(key, new CachedSentence(sentence, ss.getContentStartLine(), ss.getContentStartColumn()));
                 return sentence;
             }
         }

@@ -274,7 +274,7 @@ public class KOREtoKIL {
 
     public org.kframework.kil.ModuleItem convertModuleItem(Bubble bubble) {
         org.kframework.kil.StringSentence kilBubble = new org.kframework.kil.StringSentence(
-                bubble.contents(), null, bubble.sentenceType(), null);
+                bubble.contents(), 0, 0, bubble.sentenceType(), null);
         kilBubble.setAttributes(convertAttributes(bubble.att()));
         return kilBubble;
     }

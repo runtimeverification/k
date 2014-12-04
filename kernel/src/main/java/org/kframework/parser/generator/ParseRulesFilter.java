@@ -57,8 +57,6 @@ public class ParseRulesFilter extends ParseForestTransformer {
             long startTime = System.currentTimeMillis();
             Sentence sentence;
 
-            int startLine = XmlLoader.getLocNumber(ss.getContentLocation(), 0);
-            int startColumn = XmlLoader.getLocNumber(ss.getContentLocation(), 1);
             String parsed = null;
             if (ss.containsAttribute("kore")) {
 
@@ -80,7 +78,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
             // replace the old xml node with the newly parsed sentence
             Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-            XmlLoader.updateLocation(xmlTerm, startLine, startColumn);
+            XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
             XmlLoader.addSource(xmlTerm, ss.getSource());
             XmlLoader.reportErrors(doc, ss.getType());
 
@@ -107,7 +105,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 String msg = "Duplicate rule found in module " + localModule + " at: " + cachedDef.get(key).sentence.getLocation();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, source, location));
             }
-            cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
+            cachedDef.put(key, new CachedSentence(sentence, ss.getContentStartLine(), ss.getContentStartColumn()));
 
             if (context.globalOptions.debug) {
                 File file = context.files.resolveTemp("timing.log");

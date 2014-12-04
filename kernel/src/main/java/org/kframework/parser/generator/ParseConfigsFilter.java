@@ -95,7 +95,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
                 // replace the old xml node with the newly parsed sentence
                 Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
                 XmlLoader.addSource(xmlTerm, ss.getSource());
                 XmlLoader.reportErrors(doc, ss.getType());
 
@@ -115,6 +115,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 try {
                     // TODO: update location information to match the actual position in the file
                     // only the unexpected character type of errors should be checked in this block
+                    new UpdateLocationVisitor(context, ss.getLocation().lineStart, ss.getLocation().columnStart, 1, 1).visitNode(out);
                     out = new TreeCleanerVisitor(context).visitNode(out);
                 } catch (ParseFailedException te) {
                     Parser.ParseError perror = parser.getErrors();
@@ -122,6 +123,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                             "Parse error: unexpected end of configuration." :
                             "Parse error: unexpected character '" + ss.getContent().charAt(perror.position) + "'.";
                     Location loc = new Location(perror.line, perror.column, perror.line, perror.column + 1);
+                    loc = UpdateLocationVisitor.updateLocation(ss.getContentStartLine(), ss.getContentStartColumn(), 1, 1, loc);
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, ss.getSource(), loc));
                 }
