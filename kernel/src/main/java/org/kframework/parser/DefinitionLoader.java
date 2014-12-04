@@ -132,12 +132,11 @@ public class DefinitionLoader {
         }
         sw.printIntermediate("Outer Parsing");
 
-        //This following line was commented out to make the latex backend
-        //parse files importing from other files
-        def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
-
         if(autoinclude)
             new AddAutoIncludedModulesVisitor(context).visitNode(def);
+
+        def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
+
         // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
         new CollectModuleImportsVisitor(context).visitNode(def);
 

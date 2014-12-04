@@ -16,6 +16,7 @@ module AUTO-INCLUDED-MODULE-SYNTAX
 endmodule
 
 module AUTO-INCLUDED-MODULE
+  imports AUTO-INCLUDED-MODULE-SYNTAX
   imports BUILTIN-HOOKS
   imports K
   imports SYMBOLIC-K
