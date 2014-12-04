@@ -21,7 +21,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes {
+trait K extends HasAttributes with Top {
   protected type This <: K
 
   def copy(att: Attributes): This
@@ -45,7 +45,7 @@ trait Sort extends SortToString {
 /* Data Structures */
 
 class KList(protected[kore] val delegate: List[K])
-  extends KAbstractCollection with Indexed[Int, K]
+  extends Collection[K] with Indexed[Int, K]
   with KListToString with KORE {
   type This = KList
 
@@ -56,6 +56,10 @@ class KList(protected[kore] val delegate: List[K])
   def att = Attributes()
 
   def copy(att: Attributes): KList = this
+
+  def foreach(f: K => Unit): Unit = delegate foreach f
+
+  def iterable: Iterable[K] = delegate
 }
 
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
@@ -85,6 +89,7 @@ case class KUninterpretedToken(sort: Sort, s: String, override val att: Attribut
 
 case class ConcreteKLabel(name: String) extends KLabel with KORE {
   def apply(ks: K*) = new KApply(this, KList(ks))
+  def apply(ks: List[K]) = new KApply(this, KList(ks))
 }
 
 case class KSequence(val ks: List[K], val att: Attributes = Attributes())
@@ -127,7 +132,7 @@ case class InjectedKLabel(klabel: KLabel) extends KItem {
 
 /*  Constructors */
 
-object KList extends CanBuildKCollection {
+object KList {
   type This = KList
 
   def apply(l: Iterable[K]): KList = (newBuilder() ++= l).result()
@@ -136,6 +141,18 @@ object KList extends CanBuildKCollection {
     new AssocBuilder[K, List[K], KList](ListBuffer()) mapResult { new KList(_) }
 
   def unapplySeq(l: KList): Option[Seq[K]] = Some(l.delegate.toSeq)
+
+  def apply(l: K*): This = (canBuildFrom.apply() ++= l).result
+
+  protected val fromList = apply _
+
+  import collection._
+
+  implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
+    new generic.CanBuildFrom[This, K, This] {
+      def apply(): mutable.Builder[K, This] = newBuilder()
+      def apply(from: This): mutable.Builder[K, This] = from.newBuilder.asInstanceOf[Builder[K, This]]
+    }
 }
 
 object KToken {

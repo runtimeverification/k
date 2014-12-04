@@ -31,11 +31,6 @@ public class VisitorTest {
         }
 
         @Override
-        public K apply(KList k) {
-            return (K) k.map(this);
-        }
-
-        @Override
         public K apply(KSequence k) {
             return (K) k.map(this);
         }

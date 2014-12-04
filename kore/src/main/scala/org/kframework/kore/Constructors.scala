@@ -57,7 +57,7 @@ object Constructors {
 
   @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks: _*)
 
-  def KSequence(ks: java.util.List[K]) = kore.KSequence(KList(ks))
+  def KSequence(ks: java.util.List[K]) = kore.KSequence(ks.asScala.toList)
 
   def KRewrite(left: K, right: K) = kore.KRewrite(left, right, Attributes())
 
