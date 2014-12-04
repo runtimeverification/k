@@ -492,7 +492,7 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Rule rule, Void _void) {
         boolean isTransition = false;
         for (String transition : options.transition) {
-            if (rule.containsAttribute(transition)) {
+            if (rule.containsAttribute(transition) && !rule.containsAttribute(Attribute.FUNCTION_KEY) && !rule.containsAttribute(Attribute.PREDICATE_KEY)) {
                 isTransition = true;
                 unusedTransitions.remove(transition);
                 break;
@@ -520,7 +520,7 @@ public class MaudeFilter extends BackendFilter {
         if (conditional) {
             result.append("c");
         }
-        if (isTransition) {
+        if (isTransition ) {
             result.append("rl ");
         } else {
             result.append("eq ");

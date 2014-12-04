@@ -25,7 +25,6 @@ import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddSemanticEquality;
 import org.kframework.compile.transformers.AddStreamCells;
 import org.kframework.compile.transformers.AddSupercoolDefinition;
-import org.kframework.compile.transformers.AddSuperheatRules;
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.AddTopCellRules;
@@ -150,7 +149,6 @@ public class MaudeBackend extends BasicBackend {
         steps.add(new ContextsToHeating(context));
         steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
-        steps.add(new AddSuperheatRules(context));
         steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));

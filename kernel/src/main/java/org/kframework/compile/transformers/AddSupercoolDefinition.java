@@ -67,15 +67,17 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
                                 this, node);
         }
-        final Term cool = kSequenceContents.get(0);
-        kSequenceContents = new ArrayList<Term>(kSequenceContents);
-        kSequenceContents.set(0, KApp.of(KLabelConstant.COOL_KLABEL, cool));
-        kSequence = kSequence.shallowCopy();
-        kSequence.setContents(kSequenceContents);
         rewrite = rewrite.shallowCopy();
+        KSequence left = new KSequence();
+        left.add(rewrite.getLeft());
+        Variable fresh = Variable.getAnonVar(Sort.K);
+        left.add(fresh);
+        KSequence right = new KSequence();
+        right.add(rewrite.getRight());
+        right.add(fresh);
         rewrite.replaceChildren(
-                kSequence,
-                KApp.of(KLabelConstant.COOL_KLABEL, rewrite.getRight()),
+                KApp.of(KLabelConstant.COOL_KLABEL, left),
+                KApp.of(KLabelConstant.COOL_KLABEL, right),
                 context);
         Rule superCoolNode = node.shallowCopy();
         superCoolNode.removeAttribute("cool");

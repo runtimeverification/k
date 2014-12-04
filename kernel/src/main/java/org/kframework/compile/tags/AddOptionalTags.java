@@ -27,7 +27,7 @@ public class AddOptionalTags extends CopyOnWriteTransformer {
                 node.addAttribute(Attribute.SUPERCOOL);
         for (String tag : options.superheat)
             if (node.containsAttribute(tag))
-                node.addAttribute(Attribute.SUPERHEAT);
+                node.addAttribute(Attribute.TRANSITION);
 
         return node;
     }
