@@ -47,10 +47,6 @@ class KoreTest {
     }
   }
 
-  @Test def testKListAssoc {
-    assertEquals(KList(TestK), KList(KList(TestK)))
-  }
-
   @Test def testKRewrite {
     val x = KRewrite(TestK, TestK) copy Attributes(TestK)
     val y = KRewrite(TestK, TestK) copy Attributes(TestK)

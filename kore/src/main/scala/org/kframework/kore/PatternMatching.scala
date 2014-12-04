@@ -10,13 +10,13 @@ import scala.collection.mutable.ListBuffer
 case class MatchException(m: String) extends RuntimeException(m)
 
 object Pattern {
-  type Solution = Map[KVariable, K]
+  type Solution = Map[KVariable, Top]
 }
 
 trait Pattern {
-  def matchOne(k: K, condition: K = true): Option[Map[KVariable, K]] = matchAll(k, condition).headOption
+  def matchOne(k: Top, condition: Top = true): Option[Map[KVariable, Top]] = matchAll(k, condition).headOption
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
 }
 
 trait BindingOps {
@@ -30,7 +30,7 @@ trait BindingOps {
     }).flatten
   }
 
-  def and(m1: Map[KVariable, K], m2: Map[KVariable, K]): Option[Map[KVariable, K]] = {
+  def and(m1: Map[KVariable, Top], m2: Map[KVariable, Top]): Option[Map[KVariable, Top]] = {
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
     if ((m1.keys.toSet & m2.keys.toSet).exists(v => m1(v) != m2(v))) {
       None
@@ -40,16 +40,16 @@ trait BindingOps {
 }
 
 trait Equivalence {
-  def apply(a: K, b: K): Boolean
+  def apply(a: Top, b: Top): Boolean
 }
 
 object EqualsEquivalence extends Equivalence {
-  def apply(a: K, b: K): Boolean = a == b
+  def apply(a: Top, b: Top): Boolean = a == b
 }
 
 trait PatternByReflection {
-  self: { def productIterator: Iterable[K] } =>
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
+  self: { def productIterator: Iterable[Top] } =>
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
     ???
   }
 }
@@ -57,7 +57,7 @@ trait PatternByReflection {
 trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     if (equiv(this, k))
       Set(Map())
     else
@@ -85,15 +85,15 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
   type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 trait KApplyPattern extends Pattern with BindingOps {
   self: KApply =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     (this, k) match {
-      case (KApply(labelVariable: KVariable, contentsP: K, _), KApply(label2, contents, _)) =>
+      case (KApply(labelVariable: KVariable, contentsP: Top, _), KApply(label2, contents, _)) =>
         and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents, condition))
       case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
         contentsP.matchAll(contents, condition)
@@ -104,19 +104,19 @@ trait KApplyPattern extends Pattern with BindingOps {
 trait KVariablePattern extends Pattern with BindingOps {
   self: KVariable =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     Set(Map(this -> k))
 }
 
 trait KRewritePattern extends Pattern with BindingOps {
   self: KRewrite =>
 
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 trait KTokenPattern extends Pattern with BindingOps {
   self: KToken =>
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
     case KToken(`sort`, `s`, _) => Set(Map())
     case _ => Set()
   }
@@ -124,11 +124,11 @@ trait KTokenPattern extends Pattern with BindingOps {
 
 trait KSequencePattern extends Pattern with BindingOps {
   self: KSequence =>
-  def matchAll(k: K, condition: K = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks, condition) map {
-          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, K]] mapValues {
+          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, Top]] mapValues {
             case l: KList => KSequence(l.delegate, Attributes())
             case k => k
           }
@@ -136,7 +136,7 @@ trait KSequencePattern extends Pattern with BindingOps {
     }
 }
 
-case class Anywhere(pattern: K) extends KAbstractCollection with BindingOps {
+case class Anywhere(pattern: Top) extends Collection[Top] with BindingOps {
   type This = Anywhere
 
   def delegate = List(pattern)
@@ -149,18 +149,18 @@ case class Anywhere(pattern: K) extends KAbstractCollection with BindingOps {
   }
   import Anywhere._
 
-  def matchAll(k: K, condition: K)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
-    val localSolution = and(pattern.matchAll(k), Set(Map(TOP -> (HOLE: K))))
+  def matchAll(k: Top, condition: Top)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
+    val localSolution = and(pattern.matchAll(k), Set(Map(TOP -> (HOLE: Top))))
     val childrenSolutions = k match {
-      case k: KCollection =>
-        (k map { c: K =>
+      case k: Collection[Top] =>
+        (k map { c: Top =>
           val solutions = this.matchAll(c)
           val updatedSolutions = solutions map {
             case s =>
-              val newAnywhere: K = k map { childK: K =>
+              val newAnywhere: Top = k map { childK: Top =>
                 childK match {
                   case `c` => s(TOP)
-                  case other: K => other
+                  case other: Top => other
                 }
               }
               val anywhereWrapper = Map(TOP -> newAnywhere)
@@ -172,6 +172,9 @@ case class Anywhere(pattern: K) extends KAbstractCollection with BindingOps {
     }
     or(localSolution, childrenSolutions)
   }
+
+  def foreach(f: Top => Unit): Unit = delegate foreach f
+  def iterable: Iterable[Top] = delegate
 }
 
 object Anywhere {

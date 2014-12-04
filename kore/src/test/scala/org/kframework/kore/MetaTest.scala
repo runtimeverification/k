@@ -45,7 +45,7 @@ class MetaTest {
   }
 
   @Test def testTransformation() {
-    val metaT = Meta(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))): K)
+    val metaT = Meta(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))))
     println(metaT)
 //    println(Concrete(metaT))
   }
