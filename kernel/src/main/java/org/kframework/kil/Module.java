@@ -5,6 +5,9 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
+import org.kframework.parser.generator.CollectTerminalsVisitor;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -219,12 +222,23 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return moduleContext;
     }
 
-    public Grammar getRuleGrammar() {
+    public Grammar getRuleGrammar(KExceptionManager kem) {
         if (moduleContext.getRuleGrammar() != null) {
             return moduleContext.getRuleGrammar();
         } else {
             // TODO: generate the grammar for rules
-            return null;
+            CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
+            ctv.visitNode(this);
+            for (Module m : getModuleContext().getImportedModules())
+                ctv.visitNode(m);
+
+            KSyntax2GrammarStatesFilter generator = new KSyntax2GrammarStatesFilter(ctv, this.getModuleContext().getDeclaredSorts(), kem);
+            generator.visitNode(this);
+            for (Module m : getModuleContext().getImportedModules())
+                generator.visitNode(m);
+
+
+            return generator.getGrammar();
         }
     }
 }

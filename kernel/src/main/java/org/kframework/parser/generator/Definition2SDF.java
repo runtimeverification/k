@@ -33,7 +33,7 @@ public class Definition2SDF {
         sdf.append("context-free syntax\n");
 
         DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(true, context);
-        CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
+        CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
         psdfv.visitNode(def);
         terminals.visitNode(def);
 

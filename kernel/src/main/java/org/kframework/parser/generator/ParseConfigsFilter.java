@@ -4,6 +4,7 @@ package org.kframework.parser.generator;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
@@ -15,6 +16,7 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
+import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -106,11 +108,24 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 st.setSource(ss.getSource());
             } else {
                 // parse with the new parser for rules
-                Grammar ruleGrammar = getCurrentModule().getRuleGrammar();
+                Grammar ruleGrammar = getCurrentModule().getRuleGrammar(kem);
                 Parser parser = new Parser(ss.getContent());
-                Term out = parser.parse(ruleGrammar.get("KList"), 0);
+                ASTNode out = parser.parse(ruleGrammar.get("MetaKList"), 0);
+                try {
+                    // TODO: update location information to match the actual position in the file
+                    // only the unexpected character type of errors should be checked in this block
+                    out = new TreeCleanerVisitor(context).visitNode(out);
+                } catch (ParseFailedException te) {
+                    Parser.ParseError perror = parser.getErrors();
+                    String msg = ss.getContent().length() == perror.position ?
+                            "Parse error: unexpected end of configuration." :
+                            "Parse error: unexpected character '" + ss.getContent().charAt(perror.position) + "'.";
+                    Location loc = new Location(perror.line, perror.column, perror.line, perror.column + 1);
+                    throw new ParseFailedException(new KException(
+                            ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, ss.getSource(), loc));
+                }
                 Sentence st = new Sentence();
-                st.setBody(out);
+                st.setBody((Term) out);
                 config = new Configuration(st);
             }
 

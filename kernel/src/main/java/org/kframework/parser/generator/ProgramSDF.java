@@ -35,7 +35,7 @@ public class ProgramSDF {
 
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
-        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
+        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
         // visit all modules to collect all Terminals first
         for (String modName : csmv.synModNames) {
             Module m = def.getDefinitionContext().getModuleByName(modName);
@@ -194,13 +194,14 @@ public class ProgramSDF {
 
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
-        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
+        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
         // visit all modules to collect all Terminals first
         for (String modName : csmv.synModNames) {
             Module m = def.getDefinitionContext().getModuleByName(modName);
             ctv.visitNode(m);
         }
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv, kem);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(ctv,
+                def.getDefinitionContext().getModuleByName(def.getMainSyntaxModule()).getModuleContext().getDeclaredSorts(), kem);
         // generate SDF and states for the new parser, using the terminals collected from the
         // previous step
         for (String modName : csmv.synModNames) {

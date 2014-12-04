@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CollectTerminalsVisitor extends BasicVisitor {
-    public CollectTerminalsVisitor(Context context) {
-        super(context);
+    public CollectTerminalsVisitor() {
+        super(null);
     }
 
     public Set<Terminal> terminals = new HashSet<>();
