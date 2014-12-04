@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 import kore._
 
-trait Top extends Pattern with Rewriting
+trait Top
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get

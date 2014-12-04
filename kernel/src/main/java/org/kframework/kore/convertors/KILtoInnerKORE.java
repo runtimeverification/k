@@ -85,9 +85,9 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return KBag(KList(contents));
     }
 
-    public K apply(TermComment c) {
-        return KList();
-    }
+//    public K apply(TermComment c) {
+//        return KList();
+//    }
 
     private KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
 
@@ -148,8 +148,8 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         }
     }
 
-    public K apply(org.kframework.kil.KList kList) {
-        return (K) kList.getContents().stream().map(this).collect(toKList());
+    public KList apply(org.kframework.kil.KList kList) {
+        return (KList) kList.getContents().stream().map(this).collect(toKList());
     }
 
     private org.kframework.kore.Attributes attributesFor(TermCons cons) {
