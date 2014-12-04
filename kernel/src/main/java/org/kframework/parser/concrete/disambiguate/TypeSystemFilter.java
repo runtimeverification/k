@@ -22,10 +22,12 @@ public class TypeSystemFilter extends ParseForestTransformer {
     @Override
     public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
-        if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
-            UserList ulist = (UserList) tc.getProduction().getItems().get(0);
-            tc.getContents().set(0, (Term) new TypeSystemFilter2(ulist.getSort(), context).visitNode(tc.getContents().get(0)));
-            tc.getContents().set(1, (Term) new TypeSystemFilter2(tc.getProduction().getSort(), context).visitNode(tc.getContents().get(1)));
+        if (tc.getProduction().isListDecl()) {
+            if (!tc.isListTerminator()) {
+                UserList ulist = (UserList) tc.getProduction().getItems().get(0);
+                tc.getContents().set(0, (Term) new TypeSystemFilter2(ulist.getSort(), context).visitNode(tc.getContents().get(0)));
+                tc.getContents().set(1, (Term) new TypeSystemFilter2(tc.getProduction().getSort(), context).visitNode(tc.getContents().get(1)));
+            }
         } else {
             int j = 0;
             Production prd = tc.getProduction();

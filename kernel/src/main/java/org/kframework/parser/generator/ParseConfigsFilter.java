@@ -15,6 +15,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.MakeConsList;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.KException;
@@ -124,6 +125,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, ss.getSource(), loc));
                 }
+                out = new MakeConsList(context).visitNode(out);
                 Sentence st = new Sentence();
                 st.setBody((Term) out);
                 config = new Configuration(st);
