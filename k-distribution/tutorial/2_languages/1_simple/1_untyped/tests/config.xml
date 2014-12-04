@@ -11,6 +11,10 @@
         <all-programs>
           <krun-option name="--output" value="none" />
         </all-programs>
+        <program name="threads_05.simple">
+          <krun-option name="--search" />
+          <krun-option name="--bound" value="5" />
+        </program>
         <program name="exceptions_07.simple">
           <krun-option name="--search" />
           <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
