@@ -6,14 +6,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.kframework.kil.ASTNode;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
 
     @SuppressWarnings("serial")
     static class VisitingException extends RuntimeException {
-        VisitingException(String m, Throwable e) {
-            super(m, e);
+        VisitingException(String message, Exception e) {
+            super(message, e);
         }
     }
 
@@ -23,9 +24,20 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
             Method visitorMethod = this.getClass().getDeclaredMethod("apply", t.getClass());
             return (R) visitorMethod.invoke(this, t);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException e) {
-            throw new VisitingException(this.getClass().getCanonicalName().toString()
-                    + " doesn't have an apply for " + t.getClass(), e);
+                | IllegalArgumentException e) {
+            throw new VisitingException(makeErrorMessage(t), e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof InvocationTargetException)
+                throw (VisitingException) e.getCause();
+            else if (e.getCause() instanceof RuntimeException)
+                throw (RuntimeException) e.getCause();
+            else
+                throw new VisitingException(makeErrorMessage(t), e);
         }
+    }
+
+    public String makeErrorMessage(ASTNode t) {
+        return t.toString() + " at location " + t.getLocation() + " of class "
+                + t.getClass().toString();
     }
 }

@@ -2,5 +2,5 @@
 
 module TEST
     syntax Stx ::= "1"
-    syntax UserList ::= List{Stx, ","}
+    syntax Stxs ::= List{Stx, ","}
 endmodule

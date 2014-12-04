@@ -17,6 +17,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kompile.KompileOptions.Experimental;
+import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.generator.OuterParser;
@@ -35,7 +36,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public Definition parse(File definitionFile, String mainModule) throws IOException {
+    public DefintionWithContext parse(File definitionFile, String mainModule) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -82,7 +83,7 @@ abstract class SDFCompilerTest extends BaseTestCase {
                 kem, new OuterParser(globalOptions, false, "autoinclude-java.k", fileUtil, kem),
                 false, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
-        return parsedKIL;
+        return new DefintionWithContext(parsedKIL, context);
     }
 
 }

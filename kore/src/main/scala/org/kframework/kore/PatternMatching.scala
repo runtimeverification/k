@@ -136,6 +136,10 @@ trait KSequencePattern extends Pattern with BindingOps {
     }
 }
 
+trait InjectedKLabelPattern extends Pattern {
+  def matchAll(k: Top, condition: Top = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+}
+
 case class Anywhere(pattern: Top) extends Collection[Top] with BindingOps {
   type This = Anywhere
 

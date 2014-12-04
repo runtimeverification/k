@@ -33,7 +33,8 @@ trait KLabel extends KLabelToString {
   val name: String
 }
 
-trait KToken extends KItem with KORE with KTokenPattern with KTokenToString {
+trait KToken extends KItem with KORE with KTokenToString
+  with KTokenPattern {
   val sort: Sort
   val s: String
 }
@@ -46,7 +47,7 @@ trait Sort extends SortToString {
 
 class KList(protected[kore] val delegate: List[K])
   extends Collection[K] with Indexed[Int, K]
-  with KListPattern with Associative[KList]
+  with KListPattern
   with KListToString with KORE {
   type This = KList
 
@@ -122,6 +123,17 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   def newBuilder: Builder[K, KRewrite] = ListBuffer[K]() mapResult {
     case List(left, right) => KRewrite(left, right)
   }
+}
+
+import Pattern.Solution
+
+case class InjectedKLabel(klabel: KLabel) extends KItem 
+  with InjectedKLabelPattern {
+  type This = InjectedKLabel
+  def att() = Attributes()
+  def copy(att: Attributes) = this
+
+  override def toString = "#klabel" + "(" + klabel + ")";
 }
 
 /*  Constructors */
