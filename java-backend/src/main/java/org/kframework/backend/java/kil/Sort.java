@@ -39,7 +39,7 @@ public final class Sort implements MaximalSharing, Serializable {
     public static final Sort BIT_VECTOR     =   Sort.of("MInt");
     public static final Sort META_VARIABLE  =   Sort.of("MetaVariable");
 
-    public static final Sort VARIABLE = Sort.of("Variable");
+    public static final Sort VARIABLE       =   Sort.of("Variable");
 
     public static final Sort BOTTOM         =   Sort.of("Bottom");
     public static final Sort SHARP_BOT      =   Sort.of("#Bot");
