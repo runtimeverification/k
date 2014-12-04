@@ -20,7 +20,7 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
     private final Set<Term> unboundedVariables;
 
     /**
-     * Computes the set of unbounded variables of a given term
+     * Computes the set of unbounded (free) variables of a given term
      * @param term --- the term to compute the set of unbounded vars for
      * @param context
      * @return the set of unbounded vars in {@code term}
@@ -35,18 +35,21 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
         this.context = context;
         boundVariables = HashMultiset.create();
         unboundedVariables = new HashSet<>();
+        // before visiting a term, add all variables bound by this term to the multiset of bound variables
         preVisitor.addVisitor(new LocalVisitor() {
             @Override
             public void visit(KItem kItem) {
                 handleBinderVariables(kItem, true);
             }
         });
+        //after visiting a term remove all variables bound by this term from the multiset of bound variables
         postVisitor.addVisitor(new LocalVisitor() {
             @Override
             public void visit(KItem kItem) {
                 handleBinderVariables(kItem, false);
             }
         });
+        // if the visited term is a user variable and not previously bound, add to the set of free variables
         preVisitor.addVisitor(new LocalVisitor(){
             @Override
             public void visit(Term node) {
@@ -74,6 +77,7 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
             if (kLabelConstant.isBinder()) {  // if label is a binder rename all bound variables
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
                 for (Integer keyIndex : binderMap.keySet()) {
+                    //since a pattern can be on a binding position, we need to collect and bind all variables in the pattern
                     if (add) {
                         boundVariables.addAll(kList.get(keyIndex).userVariableSet(context));
                     } else {
