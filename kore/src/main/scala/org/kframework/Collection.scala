@@ -7,12 +7,16 @@ import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.ListBuffer
 
+import kore._
+
+trait Top extends Pattern with Rewriting
+
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get
   def get(i: I): Option[T]
 }
 
-trait Collection[T] {
+trait Collection[T] extends Top {
   type This <: Collection[T]
 
   def newBuilder(): Builder[T, This]
@@ -24,6 +28,13 @@ trait Collection[T] {
   def mkString(separator: String): String = iterable.mkString(separator)
 
   def iterable: Iterable[T]
+
+  override def equals(that: Any) = {
+    canEqual(that) && (that match {
+      case that: Collection[_] => that.canEqual(this) && iterable == that.iterable
+      case _ => false
+    })
+  }
 
   def iterator: Iterator[T] = iterable.iterator
   def list: java.util.List[T] = iterable.toList.asJava

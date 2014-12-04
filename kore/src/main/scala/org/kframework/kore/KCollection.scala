@@ -19,13 +19,6 @@ trait KAbstractCollection extends KCollection {
 
   protected[kore] def delegate: Iterable[K]
 
-  override def equals(that: Any) = {
-    canEqual(that) && (that match {
-      case that: KAbstractCollection => that.canEqual(this) && delegate == that.delegate
-      case _ => false
-    })
-  }
-
   def foreach(f: K => Unit) = delegate.foreach(f)
 
   def iterable = delegate
