@@ -23,7 +23,7 @@ public class KItemProjection extends Term {
 
     public Term evaluateProjection() {
         // TODO(AndreiS): hack until new KORE makes this class obsolete
-        if (!term.sort().equals(Sort.KITEM) && !term.sort().equals(Sort.BAG) && !term.sort().equals(Sort.BAG_ITEM)) {
+        if (!term.sort().equals(Sort.KITEM) && !term.sort().equals(Sort.BAG)) {
             return term;
         }
 

@@ -199,10 +199,6 @@ public class PatternMatcher extends AbstractMatcher {
             pattern = KCollection.upKind(pattern, subject.kind());
         }
 
-        if (subject.kind().isStructural() && !pattern.kind().isStructural()) {
-            fail(subject, pattern);
-        }
-
         if (subject.kind() != pattern.kind()) {
             fail(subject, pattern);
         }
