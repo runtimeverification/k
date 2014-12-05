@@ -93,13 +93,18 @@ public class TstKILtoKOREIT extends BaseTest {
         sdfTest();
     }
 
+    @Test
+    public void complex() throws IOException {
+        sdfTest();
+    }
+
     protected String convert(DefintionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
         org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
         String koreDefString = koreDef.toString();
         return koreDefString;
     }
-    
+
     protected String expecteFilePostfix() {
         return "-expected.k";
     }

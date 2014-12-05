@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.kframework.kil.ASTNode;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
@@ -37,7 +36,7 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
     }
 
     public String makeErrorMessage(ASTNode t) {
-        return t.toString() + " at location " + t.getLocation() + " of class "
+        return t.toString() + " at location " + t.getLocation() + " in file " + t.getSource() + " of class "
                 + t.getClass().toString();
     }
 }

@@ -44,7 +44,7 @@ trait KToken extends KItem with KORE with KTokenToString
 class KList(val delegate: List[K])
   extends Collection[K] with Indexed[Int, K]
   with KListPattern
-  with KListToString with KORE {
+  with KListToString with KORE with Term {
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]
@@ -128,6 +128,15 @@ case class InjectedKLabel(klabel: KLabel) extends KItem
   def copy(att: Attributes) = this
 
   override def toString = "#klabel" + "(" + klabel + ")";
+}
+
+case class InjectedKList(klist: KList) extends KItem
+  with InjectedKListPattern {
+  type This = InjectedKList
+  def att() = Attributes()
+  def copy(att: Attributes) = this
+
+  override def toString = "#klist" + "(" + klist + ")";
 }
 
 /*  Constructors */

@@ -485,14 +485,21 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKVariable((KVariable) k);
         } else if (k instanceof KToken) {
             return convertKToken((KToken) k);
-        } else if (k instanceof KList) {
-            Stream<K> stream = ((KList) k).stream();
-            List<Term> kilTerms = stream.map(c -> convertK(c)).collect(Collectors.toList());
-            return new org.kframework.kil.KList(kilTerms);
+        } else if (k instanceof InjectedKList) {
+            return convertKList(((InjectedKList) k).klist());
+//        } else if (k instanceof KRewrite) {
+//
         } else {
+            System.out.println(k);
             throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
                     + ") -> KIL.Term");
         }
+    }
+
+    private org.kframework.kil.Term convertKList(KList k) {
+        Stream<K> stream = ((KList) k).stream();
+        List<Term> kilTerms = stream.map(c -> convertK(c)).collect(Collectors.toList());
+        return new org.kframework.kil.KList(kilTerms);
     }
 
     public org.kframework.kil.KApp convertKToken(KToken t) {
@@ -539,7 +546,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.Term convertKBool(K k) {
-        if(k instanceof KToken && ((KToken) k).sort() == Sorts.KBoolean()) {
+        if (k instanceof KToken && ((KToken) k).sort() == Sorts.KBoolean()) {
             return null; // FIXME
             // throw new AssertionError("Unimplemented");
         }

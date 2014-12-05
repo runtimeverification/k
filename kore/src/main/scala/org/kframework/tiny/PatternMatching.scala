@@ -57,6 +57,15 @@ trait PatternByReflection {
   }
 }
 
+trait InjectedKListPattern {
+  self: InjectedKList =>
+
+  import Pattern.Solution;
+  import builtin.KBoolean._
+
+  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+}
+
 trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
