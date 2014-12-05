@@ -241,21 +241,22 @@ public class SymbolicRewriter {
     }
 
     /**
-     * Unifies the term with the pattern, and returns a map from variables in
-     * the pattern to the terms they unify with. Returns {@code null} if the
-     * term can't be unified with the pattern.
+     * Unifies the term with the pattern, and computes a map from variables in
+     * the pattern to the terms they unify with. Adds as many search results
+     * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
-    private Map<Variable, Term> getSubstitutionMap(ConstrainedTerm initialTerm, Rule pattern) {
+    private boolean addSearchResult(List<Map<Variable, Term>> searchResults, ConstrainedTerm initialTerm, Rule pattern, int bound) {
         assert Sets.intersection(initialTerm.term().variableSet(),
                 initialTerm.constraint().substitution().keySet()).isEmpty();
-        List<Map<Variable, Term>> maps = PatternMatcher.match(initialTerm.term(), pattern, initialTerm.termContext());
-        if (maps.size() != 1) {
-            return null;
+        List<Map<Variable, Term>> discoveredSearchResults = PatternMatcher.match(initialTerm.term(), pattern, initialTerm.termContext());
+        for (Map<Variable, Term> searchResult : discoveredSearchResults) {
+            searchResult.entrySet().forEach(e -> e.setValue(new Cell<>(CellLabel.GENERATED_TOP, e.getValue())));
+            searchResults.add(searchResult);
+            if (searchResults.size() == bound) {
+                return true;
+            }
         }
-
-        Map<Variable, Term> map = maps.get(0);
-        map.entrySet().forEach(e -> e.setValue(new Cell<>(CellLabel.GENERATED_TOP, e.getValue())));
-        return map;
+        return false;
     }
 
     /**
@@ -290,10 +291,7 @@ public class SymbolicRewriter {
         // A more clean solution would require a bit of a rework to how patterns
         // are handled in krun.Main when not doing search.
         if (depth == 0) {
-            Map<Variable, Term> map = getSubstitutionMap(initCnstrTerm, pattern);
-            if (map != null) {
-                searchResults.add(map);
-            }
+            addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
             return searchResults;
@@ -310,9 +308,10 @@ public class SymbolicRewriter {
             depth = 1;
         }
         if (searchType == SearchType.STAR) {
-            Map<Variable, Term> map = getSubstitutionMap(initCnstrTerm, pattern);
-            if (map != null) {
-                searchResults.add(map);
+            if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
+                stopwatch.stop();
+                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                return searchResults;
             }
         }
 
@@ -329,12 +328,8 @@ public class SymbolicRewriter {
 //                    }
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
-                    Map<Variable, Term> map = getSubstitutionMap(term, pattern);
-                    if (map != null) {
-                        searchResults.add(map);
-                        if (searchResults.size() == bound) {
-                            break label;
-                        }
+                    if (addSearchResult(searchResults, term, pattern, bound)) {
+                        break label;
                     }
                 }
 
@@ -351,12 +346,8 @@ public class SymbolicRewriter {
                         // If we aren't searching for only final results, then
                         // also add this as a result if it matches the pattern.
                         if (searchType != SearchType.FINAL || currentDepth + 1 == depth) {
-                            Map<Variable, Term> map = getSubstitutionMap(result, pattern);
-                            if (map != null) {
-                                searchResults.add(map);
-                                if (searchResults.size() == bound) {
-                                    break label;
-                                }
+                            if (addSearchResult(searchResults, result, pattern, bound)) {
+                                break label;
                             }
                         }
                     }
