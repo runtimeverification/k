@@ -40,7 +40,7 @@ trait KToken extends KItem with KORE with KTokenToString {
 
 /* Data Structures */
 
-class KList(protected[kore] val delegate: List[K])
+class KList(val delegate: List[K])
   extends Collection[K] with Indexed[Int, K]
   with KListToString with KORE {
   type This = KList

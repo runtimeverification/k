@@ -5,7 +5,7 @@ package org.kframework.kore;
 import java.util.List
 import scala.collection.Seq
 import collection.JavaConverters._
-import org.kframework.kore
+import org.kframework._
 import org.kframework.Collector
 import org.kframework.CombinerFromBuilder
 
@@ -22,15 +22,11 @@ object Constructors {
   def Attributes(ks: Set[K]) = kore.Attributes(ks)
   @annotation.varargs def Attributes(ks: K*) = kore.Attributes(ks: _*)
 
-  def Hole = kore.Hole
+  //  @annotation.varargs def KBag(ks: K*) = kore.KBag(ks)
 
-  def KBagLabel = kore.KBag
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = builtin.Location(startLine, startColumn, endLine, endColumn)
 
-  @annotation.varargs def KBag(ks: K*) = kore.KBag(ks)
-
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = kore.Location(startLine, startColumn, endLine, endColumn)
-
-  def KBag(ks: KList) = kore.KBag(ks);
+  //  def KBag(ks: KList) = kore.KBag(ks);
 
   def Sort(name: String) = kore.Sort(name);
 
@@ -63,7 +59,7 @@ object Constructors {
 
   def KRewrite(left: K, right: K, att: Attributes) = kore.KRewrite(left, right, att)
 
-  def KInt(n: Int) = kore.KInt(n)
+  //  def KInt(n: Int) = kore.KInt(n)
 
   def stream(c: KCollection) = org.kframework.Collections.stream(c);
 

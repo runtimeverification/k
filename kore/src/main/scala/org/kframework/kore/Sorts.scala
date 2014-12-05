@@ -12,9 +12,3 @@ object Sort {
 }
 
 case class UninterpretedSort(name: String) extends Sort
-
-object Sorts {
-  import org.kframework.kore
-
-  def KString = kore.KString
-}

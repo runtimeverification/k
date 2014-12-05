@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.kframework.builtin.Labels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Attributes;
@@ -82,23 +84,25 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
-        return KBag(KList(contents));
+        return KApply(Labels.KBag(), (KList(contents)));
     }
 
-//    public K apply(TermComment c) {
-//        return KList();
-//    }
+    // public K apply(TermComment c) {
+    // return KList();
+    // }
 
     private KApply cellMarker = org.kframework.kore.outer.Configuration.cellMarker();
 
     @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {
-        K x = apply(body.getContents());
-        if (x instanceof KBag && !((KBag) x).isEmpty()) {
-            return KApply(KLabel(body.getLabel()), KList(((KBag) x)), Attributes(cellMarker));
-        } else {
-            return KApply(KLabel(body.getLabel()), KList(x), Attributes(cellMarker));
-        }
+//        K x = ;
+        // if (x instanceof KApply && ((KApply) x).klabel() == Labels.KBag()
+        // && ((KApply) x).size() == 0) {
+        return KApply(KLabel(body.getLabel()), KList(apply(body.getContents())), Attributes(cellMarker));
+        // } else {
+        // return KApply(KLabel(body.getLabel()), KList(x),
+        // Attributes(cellMarker));
+        // }
     }
 
     public K apply(org.kframework.kil.KLabelConstant c) {
@@ -123,7 +127,8 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         Production production = context.listProductions.get(t.getSort());
         String terminatorKLabel = production.getTerminatorKLabel();
 
-        // NOTE: we don't covert it back to ListTerminator because Radu thinks it is not necessary
+        // NOTE: we don't covert it back to ListTerminator because Radu thinks
+        // it is not necessary
 
         return KApply(KLabel(terminatorKLabel), KList(), Attributes().add(LIST_TERMINATOR));
     }
@@ -166,7 +171,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(Hole hole) {
-        return KApply(Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
+        return KApply(Labels.Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
                 sortAttributes(hole));
     }
 
@@ -182,7 +187,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         if (t != null)
             return apply(t);
         else
-            return new KBoolean(true, Attributes());
+            return KToken(Sorts.KBoolean(), "true");
     }
 
     public org.kframework.kore.Attributes convertAttributes(ASTNode t) {
@@ -199,13 +204,14 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                             KList(KToken(Sort("AttributeValue"), valueString)));
                 }).collect(Collectors.toSet());
 
-        return Attributes(immutable(attributesSet)).addAll(attributesFromLocation(t.getLocation()));
+        return Attributes(immutable(attributesSet))
+                .addAll(attributesFromLocation(t.getLocation()));
     }
 
     private org.kframework.kore.Attributes attributesFromLocation(Location location) {
-        if(location != null)
+        if (location != null)
             return Attributes(Location(location.lineStart, location.columnStart, location.lineEnd,
-                location.columnEnd));
+                    location.columnEnd));
         else
             return Attributes();
     }

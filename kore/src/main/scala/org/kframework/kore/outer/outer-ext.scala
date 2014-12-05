@@ -3,6 +3,7 @@
 package org.kframework.kore.outer
 
 import org.kframework.kore._
+import org.kframework.builtin.KBag
 
 case class Configuration(
   body: K,
