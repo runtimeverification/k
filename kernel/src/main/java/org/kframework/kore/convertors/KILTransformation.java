@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.kframework.kil.ASTNode;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
