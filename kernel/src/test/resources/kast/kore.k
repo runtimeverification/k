@@ -53,7 +53,7 @@ module KAST //[ hookNamespace(org.kframework.kore) ]  // the hook will probably 
   syntax KItem  ::= "#token" "(" KString "," KString ")"  [ klabel(#KToken), hook ]
   // @cos proposes to eliminate the next injection, and instead to allow
   // the use of meta-level KAST in definitions: #KApply(#token("_+_","KLabel"),#KList(1,3))
-  // @grosu is skeptic: that would imply to allow KAST syntax in programs; not worth the price
+  // @grosu is sceptic: that would imply to allow KAST syntax in programs; not worth the price
   syntax KItem ::= "#klabel" "(" KLabel ")"              [ klabel(#KLabel), hook(org.kframework.kore.KItem) ]
   syntax KItem ::= KLabel "(" KList ")"                  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
 
@@ -124,8 +124,21 @@ module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   syntax KSentenceList ::= KSentence KSentenceList      [ klabel(#KSentenceList), assoc, comm, unit(#kemptyKSentenceList) ]
   syntax KSentenceList ::= ""                           [ klabel(#emptyKSentenceList), onlyLabel]
 
-  syntax KSentence ::= "syntax" KSort                             KAttributesDeclaration   [ klabel(#KSentenceSyntaxSort), hook(Syntax) ]
-  syntax KSentence ::= "syntax" KSort "::=" KProduction           KAttributesDeclaration   [ klabel(#KSentenceSyntaxProduction), hook(Syntax) ]
+  syntax KSentence ::= "syntax" KSort                      KAttributesDeclaration   [ klabel(#KSentenceSyntaxSort), hook(Syntax) ]
+  syntax KSentence ::= "syntax" KSort "::=" KProduction    KAttributesDeclaration   [ klabel(#KSentenceSyntaxProduction), hook(Syntax) ]
+  syntax KSentence ::= "syntax" "priority"   KPrioritySeq  KAttributesDeclaration   [ klabel(#KSentenceSyntaxPriority), hook(SyntaxPriority) ]
+  syntax KSentence ::= "syntax" "priorities" KPrioritySeq  KAttributesDeclaration   [ klabel(#KSentenceSyntaxPriority), hook(SyntaxPriority) ]
+  syntax KSentence ::= "syntax" KAssoc KNeTagSet           KAttributesDeclaration   [ klabel(#KSentenceSyntaxAssociativity), hook(SyntaxAssociativity) ]
+
+  syntax KAssoc    ::= "left"
+  syntax KAssoc    ::= "right"
+  syntax KAssoc    ::= "non-assoc"
+  syntax KPrioritySeq ::= KNeTagSet ">" KPrioritySeq   [ klabel(#KPrioritySeq), assoc ]
+  syntax KPrioritySeq ::= KNeTagSet                    [ klabel(#KPrioritySeq) ]
+  syntax KNeTagSet    ::= Tag KNeTagSet                [ klabel(#KTagSet), assoc, comm ]
+  syntax KNeTagSet    ::= Tag                          [ klabel(#KTagSet) ]
+  syntax Tag ::= KLabel
+
   syntax KSentence ::= "configuration" K "requires" K             KAttributesDeclaration   [ klabel(#KSentenceConfiguration), hook(Configuration) ]
   syntax KSentence ::= "rule"          K "requires" K "ensures" K KAttributesDeclaration   [ klabel(#KSentenceRule), hook(Rule) ]
   syntax KSentence ::= "context"       K "requires" K             KAttributesDeclaration   [ klabel(#KSentenceContext), hook(Context) ]
