@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.HashMultiset;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -52,6 +53,28 @@ public class CellCollection extends Collection {
 
         public void setContent(Term content) {
             this.content = content;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof Cell)) {
+                return false;
+            }
+
+            Cell cell = (Cell) object;
+            return cellLabel.equals(cell.cellLabel) && content.equals(cell.content);
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + cellLabel.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
+            return hashCode;
         }
     }
 
@@ -213,7 +236,7 @@ public class CellCollection extends Collection {
 
         CellCollection collection = (CellCollection) object;
         return collectionVariables.equals(collection.collectionVariables)
-                && cells.entries().equals(collection.cells.entries());
+                && ImmutableMultiset.copyOf(cells.entries()).equals(ImmutableMultiset.copyOf(collection.cells.entries()));
     }
 
     @Override
@@ -282,11 +305,8 @@ public class CellCollection extends Collection {
     }
 
     public static class Builder {
-
         private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder;
-
         private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder;
-
         private final Context context;
 
         private Builder(Context context) {
