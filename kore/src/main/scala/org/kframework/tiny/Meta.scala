@@ -1,7 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore
+package org.kframework.tiny
 
+import org.kframework._
+import kore._
 import KORE._
 import scala.Enumeration
 import org.kframework.kore.outer.Associativity

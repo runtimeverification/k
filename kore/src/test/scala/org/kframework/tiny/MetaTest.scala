@@ -1,13 +1,12 @@
 package org.kframework.kore
 
 import org.kframework._
-
+import kore._
 import KORE._
 import builtin.KInt._
-import org.kframework.kore.outer._
 import java.io.File
 import org.kframework.kore.outer._
-import org.kframework.tiny.Anywhere
+import org.kframework.tiny._
 
 case class Foo(i: Int)
 
