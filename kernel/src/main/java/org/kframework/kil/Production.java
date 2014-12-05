@@ -283,6 +283,11 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
                 return false;
         } else if (!sort.equals(other.sort))
             return false;
+        if (binderMap == null) {
+            if (other.binderMap != null)
+                return false;
+        } else if (!binderMap.equals(other.binderMap))
+            return false;
         return true;
     }
 
@@ -294,6 +299,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         result = prime * result
                 + ((getKLabel() == null) ? 0 : getKLabel().hashCode());
         result = prime * result + ((sort == null) ? 0 : sort.hashCode());
+        result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
         return result;
     }
 
