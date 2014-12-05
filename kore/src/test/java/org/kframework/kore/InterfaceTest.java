@@ -3,6 +3,8 @@
 package org.kframework.kore;
 
 import org.junit.Test;
+import org.kframework.builtin.Sorts;
+
 import static org.junit.Assert.*;
 import static org.kframework.kore.Constructors.*;
 
@@ -23,23 +25,23 @@ public class InterfaceTest {
 
     @Test
     public void kListIsAssociative() {
-        // assertEquals(KList(KInt(1), KInt(2)), KList(KInt(1), KList(KInt(2))));
+        // assertEquals(KList(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")), KList(KToken(Sorts.KInt(), "1"), KList(KToken(Sorts.KInt(), "2"))));
     }
 
     @Test
     public void manipulatingKList() {
-        KList l = KList(KInt(1), KInt(2)).stream().map(x -> KInt(3)).collect(toKList());
-        assertEquals(KList(KInt(3), KInt(3)), l);
+        KList l = KList(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")).stream().map(x -> KToken(Sorts.KInt(), "3")).collect(toKList());
+        assertEquals(KList(KToken(Sorts.KInt(), "3"), KToken(Sorts.KInt(), "3")), l);
     }
 
     @Test
     public void kSeqIsAssociative() {
-        assertEquals(KSequence(KInt(1), KInt(2)), KSequence(KInt(1), KSequence(KInt(2))));
+        assertEquals(KSequence(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")), KSequence(KToken(Sorts.KInt(), "1"), KSequence(KToken(Sorts.KInt(), "2"))));
     }
 
     @Test
     public void manipulatingKSeq() {
-        KSequence l = stream(KSequence(KInt(1), KInt(2))).map(x -> KInt(3)).collect(toKSequence());
-        assertEquals(KSequence(KInt(3), KInt(3)), l);
+        KSequence l = stream(KSequence(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2"))).map(x -> KToken(Sorts.KInt(), "3")).collect(toKSequence());
+        assertEquals(KSequence(KToken(Sorts.KInt(), "3"), KToken(Sorts.KInt(), "3")), l);
     }
 }

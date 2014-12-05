@@ -1,6 +1,6 @@
 package org.kframework.kore
 
-import KInt._
+import org.kframework.builtin.Sorts
 
 class KoreTest {
   import org.junit._
@@ -48,7 +48,7 @@ class KoreTest {
   }
 
   @Test def testKListAssoc {
-//    assertEquals(KList(TestK), KList(KList(TestK)))
+    //    assertEquals(KList(TestK), KList(KList(TestK)))
   }
 
   @Test def testKRewrite {
@@ -61,8 +61,8 @@ class KoreTest {
     assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KApply(KLabel("bar"), KList(), Attributes()))
     assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KList())
     assertNotEquals(KList(), KApply(KLabel("foo"), KList(), Attributes()))
-    assertNotEquals(KList(5), KApply(KLabel("foo"), KList(5), Attributes()))
-    assertNotEquals(KApply(KLabel("foo"), KList(5), Attributes()), KList(5))
+    assertNotEquals(KList(KToken(Sorts.KInt, "5")), KApply(KLabel("foo"), KList(KToken(Sorts.KInt, "5")), Attributes()))
+    assertNotEquals(KApply(KLabel("foo"), KList(KToken(Sorts.KInt, "5")), Attributes()), KList(KToken(Sorts.KInt, "5")))
   }
 
   @Test def testKSequenceEquals {

@@ -2,6 +2,8 @@
 
 package org.kframework.kore.convertors;
 
+import org.kframework.builtin.Labels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
@@ -411,7 +413,8 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                if (!(key != KLabel("location"))) { // ignoring location information
+                if (!(key != KLabel("location"))) { // ignoring location
+                                                    // information
                     KList klist = attr.klist();
                     if (klist.size() == 1 && klist.get(0) instanceof KToken) {
                         String value = ((KToken) klist.get(0)).s();
@@ -461,14 +464,14 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             // KORE KApply, we need to figure out every one of them and handle
             // here
             return convertKApply(kApply);
-        } else if (k instanceof KBag) {
-            KBag kBag = (KBag) k;
+        } else if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
+            KApply kBag = (KApply) k;
             List<K> bagItems = kBag.list();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
             for (K bagItem : bagItems) {
-                if (bagItem instanceof KBag) {
-                    KBag item = (KBag) bagItem;
+                if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
+                    KApply item = (KApply) bagItem;
                     List<K> kbagItems = item.list();
                     kilBagItems.addAll(kbagItems.stream().map(this::convertK)
                             .collect(Collectors.toList()));
@@ -536,8 +539,9 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.Term convertKBool(K k) {
-        if (k instanceof KBoolean) {
+        if(k instanceof KToken && ((KToken) k).sort() == Sorts.KBoolean()) {
             return null; // FIXME
+            // throw new AssertionError("Unimplemented");
         }
         return convertK(k);
     }
@@ -545,7 +549,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
         List<K> contents = kApply.list();
-        if (label == Hole$.MODULE$) {
+        if (label == Labels.Hole()) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {

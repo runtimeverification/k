@@ -3,6 +3,7 @@ package org.kframework.kore
 import org.kframework._
 import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
+import org.kframework.builtin.Sorts
 import org.kframework.tiny.Pattern
 import org.kframework.tiny.Equivalence
 
@@ -32,7 +33,7 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
 
   def +(k: K): Attributes = new Attributes(att + k)
   def +(k: String): Attributes = add(KApply(KLabel(k), KList()))
-  def +(kv: (String, String)): Attributes = add(KApply(KLabel(kv._1), KList(KToken(KString, kv._2))))
+  def +(kv: (String, String)): Attributes = add(KApply(KLabel(kv._1), KList(KToken(Sorts.KString, kv._2))))
 
   def ++(that: Attributes) = new Attributes(att ++ that.att)
 

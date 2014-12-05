@@ -1,10 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.kore
+package org.kframework.builtin
 
 import org.kframework._
+import kore._
 import KORE._
-import KBoolean._
 import scala.collection.mutable.Builder
 import scala.collection.mutable.SetBuilder
 import org.kframework.tiny.Equivalence
@@ -48,7 +48,7 @@ object KString extends Sort with KLabel {
   val name: String = "Int"
 }
 
-case class KBag private[kore] (val klist: KList) extends KAbstractCollection with Associative[KBag] {
+case class KBag(val klist: KList) extends KAbstractCollection with Associative[KBag] {
   type This = KBag
 
   def canEqual(that: Any) = that.isInstanceOf[KBag]
@@ -68,7 +68,7 @@ object KBag extends Sort with KLabel {
   val name: String = "Bag"
 }
 
-case class KSet private[kore] (val content: Set[K]) extends KAbstractCollection with Associative[KBag] {
+case class KSet(val content: Set[K]) extends KAbstractCollection with Associative[KBag] {
   type This = KSet
 
   def canEqual(that: Any) = that.isInstanceOf[KSet]
@@ -87,8 +87,6 @@ object KSet {
   def apply(ks: K*): KSet = (newBuilder ++= ks).result
 }
 
-case object Hole extends KLabel with Sort {
-  val name = "HOLE"
 }
 
 object Location {

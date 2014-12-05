@@ -13,5 +13,5 @@ endmodule
 
 module TEST [location(startLine(4),startColumn(1),endLine(7),endColumn(9))]
   imports INCLUDE [location(startLine(5),startColumn(3),endLine(5),endColumn(17))]
-  configuration <t><k>.K</k> <env>'.Map() [location(startLine(6),startColumn(70),endLine(6),endColumn(74)) sort(Map)]</env> <stack>.Bag</stack></t> ensures true
+  configuration <t>KBag(k(.K) [cell()],env('.Map() [location(startLine(6),startColumn(70),endLine(6),endColumn(74)) sort(Map)]) [cell()],stack(KBag()) [cell()])</t> ensures true
 endmodule
