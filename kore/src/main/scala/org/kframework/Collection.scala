@@ -9,14 +9,14 @@ import scala.collection.mutable.ListBuffer
 
 import kore._
 
-trait Top extends Pattern with Rewriting
+trait Term extends Pattern with Rewriting
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get
   def get(i: I): Option[T]
 }
 
-trait Collection[T] extends Top {
+trait Collection[T] extends Term {
   type This <: Collection[T]
 
   def newBuilder(): Builder[T, This]
