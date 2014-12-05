@@ -21,7 +21,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Top {
+trait K extends HasAttributes with Term {
   protected type This <: K
 
   def copy(att: Attributes): This

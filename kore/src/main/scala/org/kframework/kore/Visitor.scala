@@ -3,7 +3,7 @@
 package org.kframework.kore
 
 import scala.collection.immutable.Nil
-import org.kframework.Top
+import org.kframework.Term
 
 trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 

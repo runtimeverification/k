@@ -16,7 +16,7 @@ trait Indexed[I, T] {
   def get(i: I): Option[T]
 }
 
-trait Collection[T] extends Top {
+trait Collection[T] extends Term {
   type This <: Collection[T]
 
   def newBuilder(): Builder[T, This]
