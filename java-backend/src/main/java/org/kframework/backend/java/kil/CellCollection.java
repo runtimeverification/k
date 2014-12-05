@@ -139,12 +139,14 @@ public class CellCollection extends Collection {
     private static int numOfMultiplicityCellLabels(Multimap<CellLabel, Cell> cells, Context context) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
-                count++;
-            } else {
-                assert cells.get(cellLabel).size() == 1:
-                        "cell label " + cellLabel + " does not have multiplicity='*', "
-                        + "but multiple cells found " + cells;
+            if (context.getConfigurationStructureMap().containsKey(cellLabel.name())) {
+                if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                    count++;
+                } else {
+                    assert cells.get(cellLabel).size() == 1:
+                            "cell label " + cellLabel + " does not have multiplicity='*', "
+                            + "but multiple cells found " + cells;
+                }
             }
         }
 
