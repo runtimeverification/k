@@ -39,10 +39,6 @@ trait KToken extends KItem with KORE with KTokenToString
   val s: String
 }
 
-trait Sort extends SortToString {
-  def name: String
-}
-
 /* Data Structures */
 
 class KList(val delegate: List[K])
@@ -205,15 +201,10 @@ object KLabelWithQuotes {
   }
 }
 
-case class UninterpretedSort(name: String) extends Sort
-
-object Sort {
-  def apply(s: String) = UninterpretedSort(s)
-  def unapply(s: Sort): Option[String] = Some(s.name)
-}
-
 object KORE {
   implicit def seqOfKsToKList(ks: Seq[K]) = KList(ks: _*)
 
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)
+
+  implicit def StringToKToken(s: String) = KToken(Sort("String"), s)
 }

@@ -2,8 +2,19 @@
 
 package org.kframework.kore
 
-import org.kframework.kore
+trait Sort extends SortToString {
+  def name: String
+}
+
+object Sort {
+  def apply(s: String) = UninterpretedSort(s)
+  def unapply(s: Sort): Option[String] = Some(s.name)
+}
+
+case class UninterpretedSort(name: String) extends Sort
 
 object Sorts {
+  import org.kframework.kore
+
   def KString = kore.KString
 }
