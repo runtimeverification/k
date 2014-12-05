@@ -89,6 +89,11 @@ public class TstKOREtoKILIT extends BaseTest {
         sdfTest();
     }
 
+    @Test
+    public void complex() throws IOException {
+        sdfTest();
+    }
+
     protected String convert(DefintionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
         org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);

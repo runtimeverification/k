@@ -95,10 +95,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {
-//        K x = ;
+        // K x = ;
         // if (x instanceof KApply && ((KApply) x).klabel() == Labels.KBag()
         // && ((KApply) x).size() == 0) {
-        return KApply(KLabel(body.getLabel()), KList(apply(body.getContents())), Attributes(cellMarker));
+        return KApply(KLabel(body.getLabel()), KList(apply(body.getContents())),
+                Attributes(cellMarker));
         // } else {
         // return KApply(KLabel(body.getLabel()), KList(x),
         // Attributes(cellMarker));
@@ -180,7 +181,15 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KRewrite apply(Rewrite r) {
-        return KRewrite(apply(r.getLeft()), apply(r.getRight()), sortAttributes(r));
+        org.kframework.Term right = apply(r.getRight());
+        if (!(right instanceof K))
+            right = new InjectedKList((KList) right);
+
+        org.kframework.Term left = apply(r.getLeft());
+        if (!(left instanceof K))
+            left = new InjectedKList((KList) left);
+
+        return KRewrite((K) left, (K) right, sortAttributes(r));
     }
 
     public K applyOrTrue(Term t) {
@@ -188,6 +197,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
             return apply(t);
         else
             return KToken(Sorts.KBoolean(), "true");
+    }
+
+    public K apply(TermComment t) {
+        return KSequence();
     }
 
     public org.kframework.kore.Attributes convertAttributes(ASTNode t) {
