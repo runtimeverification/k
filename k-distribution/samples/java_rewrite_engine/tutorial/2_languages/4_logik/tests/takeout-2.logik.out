@@ -1,4 +1,0 @@
-\QL:Term |-> cons ( a, cons ( b, cons ( c, cons ( d, nil ) ) ) )\E
-\QL:Term |-> cons ( b, cons ( a, cons ( c, cons ( d, nil ) ) ) )\E
-\QL:Term |-> cons ( b, cons ( c, cons ( a, cons ( d, nil ) ) ) )\E
-\QL:Term |-> cons ( b, cons ( c, cons ( d, cons ( a, nil ) ) ) )\E

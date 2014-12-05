@@ -59,5 +59,5 @@ module LAMBDA
   syntax Exp ::= "callcc" Exp  [strict]
   syntax Val ::= cc(Map,K)
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
-  rule <k> cc(Rho,K) V ~> _ =>  V ~> K </k> <env> _ => Rho </env>
+  rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
 endmodule

@@ -23,16 +23,16 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Definition node, Void _)  {
+    public ASTNode visit(Definition node, Void _void)  {
         node = (Definition) new FlattenTerms(context).visitNode(node);
         //TODO:  Remove the above once we figure out how to split the two phases
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         listUnits.clear();
-        node = (Module) super.visit(node, _);
+        node = (Module) super.visit(node, _void);
         if (listUnits.isEmpty())
             return node;
 
@@ -43,30 +43,29 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         if (!node.getDeclaredSort().getSort().isComputationSort()) {
             isComputation = false;
-            return super.visit(node, _);
+            return super.visit(node, _void);
         }
         isComputation = true;
-        node = (Syntax) super.visit(node, _);
+        node = (Syntax) super.visit(node, _void);
         node.setSort(new NonTerminal(Sort.KLABEL));
         return node;
     }
 
     @Override
-    public ASTNode visit(Production node, Void _)  {
+    public ASTNode visit(Production node, Void _void)  {
         if (node.containsAttribute("KLabelWrapper"))
             return node;
         if (!isComputation)
-            return super.visit(node, _);
+            return super.visit(node, _void);
         if (node.isSubsort())
             return null;
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();
         if (node.isListDecl()) {
             listUnits.add(node.getTerminatorKLabel());
-            attrs.add(Attribute.HYBRID);
         }
         node = node.shallowCopy();
         List<ProductionItem> pis = new ArrayList<>();
@@ -79,7 +78,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(NonTerminal node, Void _)  {
+    public ASTNode visit(NonTerminal node, Void _void)  {
         if (!node.getSort().isComputationSort())
             return node;
         return new NonTerminal(Sort.K);

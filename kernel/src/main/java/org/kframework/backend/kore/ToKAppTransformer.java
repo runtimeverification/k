@@ -39,7 +39,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(SetLookup node, Void _) {
+    public ASTNode visit(SetLookup node, Void _void) {
 
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -50,7 +50,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(ListLookup node, Void _) {
+    public ASTNode visit(ListLookup node, Void _void) {
 
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -61,7 +61,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(MapLookup node, Void _) {
+    public ASTNode visit(MapLookup node, Void _void) {
 
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -72,7 +72,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(SetUpdate node, Void _) {
+    public ASTNode visit(SetUpdate node, Void _void) {
 
         ArrayList<Term> temp = new ArrayList<Term>(node.removeEntries());
         for(int i = 0; i < temp.size(); ++i){
@@ -92,7 +92,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(ListUpdate node, Void _) {
+    public ASTNode visit(ListUpdate node, Void _void) {
 
         ArrayList<Term> tempLeft = new ArrayList<Term>(node.removeLeft());
         for(int i = 0; i < tempLeft.size(); ++i){
@@ -125,7 +125,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(MapUpdate node, Void _) {
+    public ASTNode visit(MapUpdate node, Void _void) {
 
 
         HashMap<Term,Term> removeMap = new HashMap<Term,Term>(node.removeEntries());
@@ -173,18 +173,18 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(SetBuiltin node, Void _) {
-        return ((SetBuiltin)super.visit(node, _)).toKApp(context);
+    public ASTNode visit(SetBuiltin node, Void _void) {
+        return ((SetBuiltin)super.visit(node, _void)).toKApp(context);
     }
 
     @Override
-    public ASTNode visit(ListBuiltin node, Void _) {
-        return ((ListBuiltin)super.visit(node, _)).toKApp(context);
+    public ASTNode visit(ListBuiltin node, Void _void) {
+        return ((ListBuiltin)super.visit(node, _void)).toKApp(context);
     }
 
     @Override
-    public ASTNode visit(MapBuiltin node, Void _) {
-        return ((MapBuiltin)super.visit(node, _)).toKApp(context);
+    public ASTNode visit(MapBuiltin node, Void _void) {
+        return ((MapBuiltin)super.visit(node, _void)).toKApp(context);
     }
 
 }

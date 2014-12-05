@@ -24,8 +24,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
-        return ((Module)super.visit(node, _)).addModuleItems(rules);
+    public ASTNode visit(Module node, Void _void)  {
+        return ((Module)super.visit(node, _void)).addModuleItems(rules);
     }
 
     /* assumes term has exactly one rewrite and returns the list
@@ -36,7 +36,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         v = Variable.getAnonVar(Sort.KITEM);
         final List<Term> list = new ArrayList<Term>();
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("splitter", context) {
-            @Override public ASTNode visit(Rewrite rewrite, Void _) {
+            @Override public ASTNode visit(Rewrite rewrite, Void _void) {
                 list.add(rewrite.getLeft());
                 list.add(rewrite.getRight());
                 return v;
@@ -71,7 +71,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         Term body = (Term) new ResolveAnonymousVariables(context).visitNode(node.getBody());
         int countHoles = MetaK.countHoles(body, context);
         if (countHoles == 0) {
@@ -122,17 +122,17 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) {
+    public ASTNode visit(Syntax node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) {
+    public ASTNode visit(Rule node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) {
+    public ASTNode visit(Configuration node, Void _void) {
         return node;
     }
 }

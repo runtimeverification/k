@@ -20,8 +20,8 @@ public class BestFitFilter extends ParseForestTransformer {
     private GetFitnessUnitBasicVisitor getFitnessUnit;
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
-        amb = (Ambiguity) super.visit(amb, _);
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
+        amb = (Ambiguity) super.visit(amb, _void);
 
         int maximum = getFitnessUnit(amb.getContents().get(0));
 

@@ -19,17 +19,17 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Sentence node, Void _)  {
+    public ASTNode visit(Sentence node, Void _void)  {
         boolean change = false;
         List<Variable> vars = new ArrayList<>(node.getBody().variables());
         // if we kept it as a set then the order of side conditions in maude would be dependent on

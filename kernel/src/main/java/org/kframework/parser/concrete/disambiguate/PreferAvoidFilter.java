@@ -19,7 +19,7 @@ public class PreferAvoidFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
         java.util.List<Term> prefer = new ArrayList<Term>();
         java.util.List<Term> avoid = new ArrayList<Term>();
 
@@ -58,7 +58,7 @@ public class PreferAvoidFilter extends ParseForestTransformer {
 
         if (result instanceof Ambiguity)
             // didn't manage to completely disambiguate, but I still need to go deeper into the tree
-            return super.visit((Ambiguity) result, _);
+            return super.visit((Ambiguity) result, _void);
         else
             // visit the preferred child
             return this.visitNode(result);

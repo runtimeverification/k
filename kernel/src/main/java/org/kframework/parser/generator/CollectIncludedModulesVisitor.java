@@ -29,7 +29,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
         this.kem = kem;
     }
 
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         List<String> synQue = new LinkedList<String>();
         synQue.add(startModuleName);
 

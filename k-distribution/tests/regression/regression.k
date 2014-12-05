@@ -284,4 +284,8 @@ module REGRESSION
        <out>... .List => ListItem("Bye ") ListItem(Id2String(X)) </out>
        [bye]
 
+  // issue1219
+  syntax Int ::= foo1219(Map) [function]
+  rule foo1219((K1 |-> K2) M:Map) => foo1219(M)
+  rule foo1219(.Map) => 0
 endmodule

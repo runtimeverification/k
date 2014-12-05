@@ -39,8 +39,8 @@ public class ConfigurationSubstitutionVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
-        super.visit(cell, _);
+    public Void visit(Cell cell, Void _void) {
+        super.visit(cell, _void);
         substitutionMultimap.put(
                 new Variable(cell.getLabel().toUpperCase().replace("-", ""), context.getCellSort(cell)),
                 cell.getContents());

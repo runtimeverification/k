@@ -17,7 +17,7 @@ public class CheckListDecl extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         if (node.isListDecl() && node.getSort().isBaseSort()) {
             String msg = node.getSort() + " can not be extended to be a list sort.";
             throw KExceptionManager.compilerError(msg, this, node);
@@ -45,7 +45,7 @@ public class CheckListDecl extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sentence node, Void _) {
+    public Void visit(Sentence node, Void _void) {
         // optimization to not visit the entire tree
         return null;
     }

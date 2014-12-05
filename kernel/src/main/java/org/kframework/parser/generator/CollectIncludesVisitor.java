@@ -15,12 +15,12 @@ public class CollectIncludesVisitor extends BasicVisitor {
 
     private java.util.List<Import> importList = new ArrayList<Import>();
 
-    public Void visit(Import i, Void _) {
+    public Void visit(Import i, Void _void) {
         importList.add(i);
         return null;
     }
 
-    public Void visit(ModuleItem mi, Void _) {
+    public Void visit(ModuleItem mi, Void _void) {
         return null;
     }
 

@@ -286,35 +286,35 @@ public class ExecutorDebugger implements Debugger {
         }
 
         @Override
-        public ASTNode visit(Cell cell, Void _)  {
+        public ASTNode visit(Cell cell, Void _void)  {
             if ("stdin".equals(context.cells.get(cell.getLabel())
                 .getCellAttributes().get("stream"))) {
                 inStdin = true;
-                ASTNode result = super.visit(cell, _);
+                ASTNode result = super.visit(cell, _void);
                 inStdin = false;
                 return result;
             }
-            return super.visit(cell, _);
+            return super.visit(cell, _void);
         }
 
         @Override
-        public ASTNode visit(KApp kapp, Void _)  {
+        public ASTNode visit(KApp kapp, Void _void)  {
             if (kapp.getLabel().equals(KLabelConstant.of("'#buffer"))) {
                 inBuffer = true;
-                ASTNode result = super.visit(kapp, _);
+                ASTNode result = super.visit(kapp, _void);
                 inBuffer = false;
                 return result;
             }
-            return super.visit(kapp, _);
+            return super.visit(kapp, _void);
         }
 
         @Override
-        public ASTNode visit(StringBuiltin s, Void _)  {
+        public ASTNode visit(StringBuiltin s, Void _void)  {
             if (inStdin && inBuffer) {
                 succeeded = true;
                 return StringBuiltin.of(s.stringValue() + str);
             }
-            return super.visit(s, _);
+            return super.visit(s, _void);
         }
     }
 

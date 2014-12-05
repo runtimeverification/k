@@ -50,7 +50,7 @@ public interface DataStructures {
                         || ((KItem) term).kLabel().toString().equals(SET_CHOICE))
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
-                && ((KList) ((KItem) term).kList()).concreteSize() == 2;
+                && ((KList) ((KItem) term).kList()).concreteSize() == 1;
     }
 
     static boolean isLookup(Term term) {

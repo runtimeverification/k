@@ -686,7 +686,7 @@ above. */
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
   rule <k> assignTo(.Names,.Vals) => . ...</k>            [structural]
-  rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
+  rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs:Vals => Vs)) ...</k>
        <env>... X |-> L ...</env>
        <store>... .Map => L |-> V ...</store>             [structural]
 

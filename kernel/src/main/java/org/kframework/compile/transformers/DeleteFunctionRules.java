@@ -24,7 +24,7 @@ public class DeleteFunctionRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         Term body = node.getBody();
         if (body instanceof Rewrite) {
             body = ((Rewrite) body).getLeft();

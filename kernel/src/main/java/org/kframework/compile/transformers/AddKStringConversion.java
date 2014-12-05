@@ -21,7 +21,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         Production String2KLabelProd = Production.makeFunction(Sort.KLABEL, "String2KLabel", Sort.STRING, context);
         /* TODO: escape labels when generating KLabel2String and String2KLabel */
         Module retNode = node.shallowCopy();

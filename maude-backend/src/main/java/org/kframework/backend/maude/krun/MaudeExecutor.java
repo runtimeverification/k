@@ -516,10 +516,8 @@ public class MaudeExecutor implements Executor {
         SearchResults results;
         final List<SearchResult> solutions = parseSearchResults
                 (pattern, compilationInfo);
-        final boolean matches = patternString.trim().matches("=>[!*1+] " +
-                "<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
         DirectedGraph<KRunState, Transition> graph = (showGraph) ? parseSearchGraph() : null;
-        results = new SearchResults(solutions, graph, matches);
+        results = new SearchResults(solutions, graph);
         KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
         result.setRawOutput(files.loadFromTemp(outFile));
         return result;

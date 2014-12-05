@@ -18,8 +18,8 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
-        ASTNode result = super.visit(node, _);
+    public ASTNode visit(Module node, Void _void)  {
+        ASTNode result = super.visit(node, _void);
         if (result == node) return node;
         if (result == null) {
             throw KExceptionManager.compilerError(
@@ -43,24 +43,24 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) {
+    public ASTNode visit(Rule node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) {
+    public ASTNode visit(Configuration node, Void _void) {
         node = node.shallowCopy();
         node.setBody(MetaK.wrap(node.getBody(),MetaK.Constants.generatedTopCellLabel,Ellipses.NONE));
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void) {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) {
+    public ASTNode visit(Syntax node, Void _void) {
         return node;
     }
 

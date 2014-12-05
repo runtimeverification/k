@@ -17,7 +17,7 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         for (DefinitionItem di : def.getItems()) {
             if (di instanceof Module) {
                 Module m = (Module) di;

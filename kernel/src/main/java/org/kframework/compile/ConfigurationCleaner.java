@@ -16,14 +16,14 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _)  {
+    public ASTNode visit(Cell node, Void _void)  {
         if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
             if (node.variables().isEmpty()) {
                 return new Bag();
             }
         }
 
-        ASTNode result = super.visit(node, _);
+        ASTNode result = super.visit(node, _void);
         if (result == null) return null;
 
         if (result == node) {

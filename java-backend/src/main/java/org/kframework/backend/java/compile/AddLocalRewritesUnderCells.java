@@ -63,17 +63,17 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
@@ -95,7 +95,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _)  {
+    public ASTNode visit(Rule rule, Void _void)  {
         if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
             return setCellsToCopyForUncompiledRule(rule);
         }
@@ -138,7 +138,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
+    public ASTNode visit(Cell cell, Void _void)  {
         if (status == Status.LHS) {
             if (crntRule.getAttribute(JavaBackendRuleData.class).getReadCells().contains(cell.getLabel())) {
                 if (hasAssocCommMatching(cell)) {
@@ -147,7 +147,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                 lhsOfReadCell.put(cell.getLabel(), cell.getContents());
                 return cell;
             } else {
-                return super.visit(cell, _);
+                return super.visit(cell, _void);
             }
         } else if (status == Status.RHS) {
             if (outerWriteCell != null) {
@@ -155,26 +155,26 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                     cellsToCopy.add(outerWriteCell);
                     return cell;
                 } else {
-                    return super.visit(cell, _);
+                    return super.visit(cell, _void);
                 }
             } else {
                 if (crntRule.getAttribute(JavaBackendRuleData.class).getWriteCells().contains(cell.getLabel())) {
                     rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
 
                     outerWriteCell = cell.getLabel();
-                    cell = (Cell) super.visit(cell, _);
+                    cell = (Cell) super.visit(cell, _void);
                     outerWriteCell = null;
 
                     return cell;
                 } else {
-                    return super.visit(cell, _);
+                    return super.visit(cell, _void);
                 }
             }
         } else if (status == Status.LOOKUP) {
             if (hasAssocCommMatching(cell)) {
                 hasAssocCommMatching = true;
             }
-            return super.visit(cell, _);
+            return super.visit(cell, _void);
         } else {
             assert false;
             return null;
@@ -186,11 +186,11 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         new BasicVisitor(context) {
 
             @Override
-            public Void visit(Cell cell, Void _) {
+            public Void visit(Cell cell, Void _void) {
                 if (hasACMatching.booleanValue()) {
                     return null;
                 }
-                super.visit(cell, _);
+                super.visit(cell, _void);
 
                 if (!hasACMatching.booleanValue()) {
                     for (Term term : cell.getCellTerms()) {
@@ -216,7 +216,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
             Set<Cell> visitedCells = Collections.newSetFromMap(new IdentityHashMap<Cell, Boolean>());
 
             @Override
-            public Void visit(Cell cell, Void _) {
+            public Void visit(Cell cell, Void _void) {
                 if (hasGroundCell.booleanValue()) {
                     return null;
                 }
@@ -226,7 +226,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                     // set to true and the traversal is terminated
                     return null;
                 }
-                super.visit(cell, _);
+                super.visit(cell, _void);
 
                 visitedCells.add(cell);
                 if (!hasGroundCell.booleanValue()) {

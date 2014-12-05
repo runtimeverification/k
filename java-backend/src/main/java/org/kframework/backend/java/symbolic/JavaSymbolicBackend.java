@@ -114,13 +114,14 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));
         steps.add(new ContextsToHeating(context));
-        //steps.add(new AddSupercoolDefinition(context));
+        steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
         //steps.add(new AddSuperheatRules(context));
         steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));
         steps.add(new AddStreamCells(context));
+        steps.add(new ResolveHybrid(context));
         //steps.add(new AddSymbolicK(context));
         //steps.add(new AddSemanticEquality(context));
         // steps.add(new ResolveFresh());
@@ -146,7 +147,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new InitializeConfigurationStructure(context));
         //steps.add(new AddKStringConversion(context));
         //steps.add(new AddKLabelConstant(context));
-        steps.add(new ResolveHybrid(context));
         steps.add(new ResolveConfigurationAbstraction(context, kem));
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
@@ -156,7 +156,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new JavaBackendCell2DataStructure(context));
         steps.add(new DataStructureToLookupUpdate(context));
 
-        //steps.add(new ResolveSupercool(context));
+        steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));
         steps.add(new AddOptionalTags(context));

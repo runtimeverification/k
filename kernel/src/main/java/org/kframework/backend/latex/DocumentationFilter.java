@@ -14,7 +14,7 @@ public class DocumentationFilter extends LatexFilter {
     }
 
     @Override
-    public Void visit(Module mod, Void _) {
+    public Void visit(Module mod, Void _void) {
         result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
         //insert section and label tags for link
         result.append("\\section{" + mod.getName() + "}" + endl);
@@ -28,13 +28,13 @@ public class DocumentationFilter extends LatexFilter {
         for (ModuleItem mi : mod.getItems()) {
             this.visitNode(mi);
         }
-        visit((DefinitionItem) mod, _);
+        visit((DefinitionItem) mod, _void);
         result.append("\\end{module}" + endl);
         return null;
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {
+    public Void visit(Rule rule, Void _void) {
         // termComment = false;
         boolean process = false;
         for(String tag : options.experimental.documentation) {
@@ -43,7 +43,7 @@ public class DocumentationFilter extends LatexFilter {
                 break;
             }
         }
-        if(process) super.visit(rule, _);
+        if(process) super.visit(rule, _void);
         return null;
     }
 }

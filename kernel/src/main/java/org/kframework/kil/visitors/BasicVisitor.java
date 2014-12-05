@@ -23,12 +23,12 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
     }
 
     @Override
-    public Void defaultReturnValue(ASTNode node, Void _) {
+    public Void defaultReturnValue(ASTNode node, Void _void) {
         return null;
     }
 
     @Override
-    public <T extends ASTNode> T processChildTerm(T child, Void _) {
+    public <T extends ASTNode> T processChildTerm(T child, Void _void) {
         return child;
     }
 

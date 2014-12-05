@@ -24,9 +24,9 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         builtinSorts.clear();
-        super.visit(node, _);
+        super.visit(node, _void);
         if (builtinSorts.isEmpty()) return node;
         node = node.shallowCopy();
         List<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
@@ -62,24 +62,24 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(NonTerminal node, Void _)  {
+    public ASTNode visit(NonTerminal node, Void _void)  {
         if (node.getSort().isBuiltinSort())
                 builtinSorts.add(node.getSort());
         return node;
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         return node;
     }
 

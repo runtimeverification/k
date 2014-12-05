@@ -28,7 +28,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Rule visit(Rule rule, Void _) {
+    public Rule visit(Rule rule, Void _void) {
         counter = 0;
         substitution.clear();
         visitor.visitNode(rule);
@@ -37,11 +37,11 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
             return rule;
         }
 
-        return (Rule) super.visit(rule, _);
+        return (Rule) super.visit(rule, _void);
     }
 
     @Override
-    public Variable visit(Variable variable, Void _) {
+    public Variable visit(Variable variable, Void _void) {
          Variable substituteVariable = substitution.get(variable);
         if (substituteVariable != null) {
             return substituteVariable;
@@ -61,7 +61,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
         }
 
         @Override
-        public Void visit(Variable variable, Void _) {
+        public Void visit(Variable variable, Void _void) {
             if (substitution.containsKey(variable)) {
                 return null;
             }
@@ -69,6 +69,15 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
             if (variable.getName().startsWith(GENERATED_ANON_VAR)) {
                 try {
                     Integer.parseInt(variable.getName().substring(GENERATED_ANON_VAR.length()));
+                    substitution.put(
+                            variable,
+                            new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));
+                } catch (NumberFormatException e) { }
+            }
+
+            if (variable.getName().matches("_\\d+")) {
+                try {
+                    Integer.parseInt(variable.getName().substring(1));
                     substitution.put(
                             variable,
                             new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));

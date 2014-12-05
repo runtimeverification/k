@@ -36,11 +36,11 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      * by a KList object. Adding a separate step which checks for exactly this case.
      */
     @Override
-    public ASTNode visit(KApp kapp, Void _) throws ParseFailedException {
+    public ASTNode visit(KApp kapp, Void _void) throws ParseFailedException {
         if (!kapp.getChild().getSort().equals(Sort.KLIST)) {
             kapp.setChild(new KList(kapp.getChild()));
         }
-        return super.visit(kapp, _);
+        return super.visit(kapp, _void);
     }
 
     /**
@@ -51,7 +51,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      * the filter will be applied in every parser call.
      */
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         if (context.getTokenSorts().contains(tc.getSort())) {
             Production p = tc.getProduction();
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
@@ -60,14 +60,14 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
                 return trm;
             }
         }
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     /**
      * The rest of kompile works with these classes. The front end though needs an unified way
      * of looking at the "." productions to make it easier to disambiguate.
      */
-    public ASTNode visit(ListTerminator lt, Void _) throws ParseFailedException {
+    public ASTNode visit(ListTerminator lt, Void _void) throws ParseFailedException {
         ASTNode result = null;
         if (lt.getSort().equals(Sort.K)) {
             result = KSequence.EMPTY;

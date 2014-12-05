@@ -28,7 +28,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity amb, Void _void) throws ParseFailedException {
 
         java.util.List<Term> children = new ArrayList<Term>();
         //IStrategoTerm currentList = amb.getSubterm(0);
@@ -79,7 +79,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
 
         if (newchildren.size() > 1) {
             Ambiguity amb2 = new Ambiguity(Sort.K, newchildren);
-            return super.visit(amb2, _);
+            return super.visit(amb2, _void);
         } else
             return this.visitNode(newchildren.get(0));
     }

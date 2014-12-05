@@ -13,7 +13,7 @@ public class AddStrictStar extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Production node, Void _) {
+    public ASTNode visit(Production node, Void _void) {
         if (node.containsAttribute("strict") || node.containsAttribute("seqstrict"))
             node.putAttribute("strict*", "");
 

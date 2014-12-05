@@ -16,10 +16,10 @@ public class Substitution extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Term node, Void _)  {
+    public ASTNode visit(Term node, Void _void)  {
         Term substitute = substitution.get(node);
         if (!(null ==substitute))
             node = substitute;
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 }

@@ -20,24 +20,24 @@ public class FlattenTerms extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _)  {
+    public ASTNode visit(KApp node, Void _void)  {
         return kTrans.visitNode(node);
     }
 
     @Override
-    public ASTNode visit(KSequence node, Void _)  {
+    public ASTNode visit(KSequence node, Void _void)  {
         return kTrans.visitNode(node);
     }
 
     @Override
-    public ASTNode visit(Variable node, Void _)  {
+    public ASTNode visit(Variable node, Void _void)  {
         if (node.getSort().isComputationSort() && !node.isFreshConstant())
             return kTrans.visitNode(node);
         return node;
     }
 
     @Override
-    public ASTNode visit(ListTerminator node, Void _)  {
+    public ASTNode visit(ListTerminator node, Void _void)  {
         if (node.getSort().isComputationSort())
             return kTrans.visitNode(node);
         return node;
@@ -48,14 +48,14 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      * those defined in {@link org.kframework.kil.Sort}.
      */
     @Override
-    public ASTNode visit(TermCons tc, Void _) {
+    public ASTNode visit(TermCons tc, Void _void) {
         if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     @Override
-    public ASTNode visit(Constant constant, Void _) {
+    public ASTNode visit(Constant constant, Void _void) {
         return kTrans.visitNode(constant);
     }
 
@@ -74,7 +74,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(KApp node, Void _)  {
+        public ASTNode visit(KApp node, Void _void)  {
             Term label = (Term) trans.visitNode(node.getLabel());
             Term child = (Term) trans.visitNode(node.getChild());
             if (child != node.getChild() || label != node.getLabel()) {
@@ -86,12 +86,12 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(Freezer node, Void _)  {
+        public ASTNode visit(Freezer node, Void _void)  {
             return KApp.of(new FreezerLabel((Term) this.visitNode(node.getTerm())));
         }
 
         @Override
-        public ASTNode visit(Constant constant, Void _) {
+        public ASTNode visit(Constant constant, Void _void) {
             Term rez;
             if (constant.getSort().equals(Sort.KLABEL)) {
                 rez = new KLabelConstant(constant.getValue());
@@ -107,7 +107,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(TermCons tc, Void _)  {
+        public ASTNode visit(TermCons tc, Void _void)  {
             if (!tc.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
@@ -128,7 +128,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(KLabel kLabel, Void _)  {
+        public ASTNode visit(KLabel kLabel, Void _void)  {
             return new KApp(
                     kLabel.getLocation(),
                     kLabel.getSource(),
@@ -137,7 +137,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(ListTerminator emp, Void _) {
+        public ASTNode visit(ListTerminator emp, Void _void) {
             Location l = emp.getLocation();
             Source f = emp.getSource();
             if (!emp.getSort().isComputationSort()) {
@@ -152,34 +152,34 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(Collection node, Void _)  {
+        public ASTNode visit(Collection node, Void _void)  {
             if (node instanceof KSequence)
-                return super.visit(node, _);
+                return super.visit(node, _void);
             return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
         }
 
         @Override
-        public ASTNode visit(CollectionItem node, Void _)  {
+        public ASTNode visit(CollectionItem node, Void _void)  {
             return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
         }
 
         @Override
-        public ASTNode visit(CollectionBuiltin node, Void _)  {
+        public ASTNode visit(CollectionBuiltin node, Void _void)  {
             throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override
-        public ASTNode visit(MapBuiltin node, Void _)  {
+        public ASTNode visit(MapBuiltin node, Void _void)  {
             throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override
-        public ASTNode visit(Cell node, Void _)  {
+        public ASTNode visit(Cell node, Void _void)  {
             return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
         }
 
         @Override
-        public ASTNode visit(Variable node, Void _)  {
+        public ASTNode visit(Variable node, Void _void)  {
             if (node.isFreshConstant()) return node;
             if (node.getSort().equals(Sort.KITEM) || node.getSort().equals(Sort.K)) {
                 return node;

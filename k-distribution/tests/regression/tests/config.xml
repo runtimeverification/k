@@ -7,7 +7,7 @@
       programs="."
       results="."
       extension="issue test"
-      exclude="test32"
+      exclude="test32 test29"
       >
     <kompile-option name="--transition" value="bar transition hello bye" />
     <all-programs>

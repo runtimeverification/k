@@ -11,12 +11,15 @@ To make sure that everything works you should be able to call `java -version` an
 `javac -version` from a Terminal.
 
 ## Apache Maven
+
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install maven`)
+
 Mac:
 *   If your version is prior to Mavericks, Maven comes pre-installed with XCode.
     Otherwise, download it from a package manager or from
     http://maven.apache.org/download.cgi and follow the instructions on the webpage.
+
 Windows:
 *   Go to http://maven.apache.org/download.cgi and download the zip with the 
     binary distribution. Unzip it in your desired location and follow the 
