@@ -1,17 +1,17 @@
 package org.kframework.kore
 
 import KBoolean._
-import org.kframework.Top
+import org.kframework.Term
 import org.kframework.Collection
 
 trait Rewriting {
-  self: Top =>
+  self: Term =>
 
   import Anywhere._
   /**
-   * search using the rewrite rule in Top
+   * search using the rewrite rule in Term
    */
-  def search(rules: Set[KRewrite]): Set[Top] = priority(rules) flatMap search
+  def search(rules: Set[KRewrite]): Set[Term] = priority(rules) flatMap search
 
   def priority(rules: Set[KRewrite]): Set[KRewrite] = this match {
     case KApply(KLabel(v), _, _) => rules collect {
@@ -21,39 +21,39 @@ trait Rewriting {
   }
 
   /**
-   * search using the rewrite rule in Top
+   * search using the rewrite rule in Term
    */
-  def search(left: Top, right: Top): Set[Top] = {
+  def search(left: Term, right: Term): Set[Term] = {
     val solutions = left.matchAll(this)
     println(solutions)
     solutions map { substituion => right.transform(substituion) }
   }
 
-  def transform(substituion: Map[KVariable, Top]): Top = this match {
+  def transform(substituion: Map[KVariable, Term]): Term = this match {
     case Anywhere(p) => substituion(TOP).transform(substituion + (HOLE -> p))
     case v: KVariable => substituion(v).transform(substituion)
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
-      val newChildren = klist map { x: Top => x.transform(substituion).asInstanceOf[K] }
+      val newChildren = klist map { x: Term => x.transform(substituion).asInstanceOf[K] }
       KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
-    case c: Collection[Top] =>
-      c map { x: Top => x.transform(substituion) }
+    case c: Collection[Term] =>
+      c map { x: Term => x.transform(substituion) }
     case e => e
   }
 
-  def search(rewrite: Top): Set[Top] = {
+  def search(rewrite: Term): Set[Term] = {
     search(toLeft(rewrite), toRight(rewrite))
   }
 
-  def toLeft(rewrite: Top): Top = rewrite match {
+  def toLeft(rewrite: Term): Term = rewrite match {
     case KRewrite(left, right, _) => left
-    case c: Collection[Top] => c map toLeft
+    case c: Collection[Term] => c map toLeft
     case other => other
   }
 
-  def toRight(rewrite: Top): Top = rewrite match {
+  def toRight(rewrite: Term): Term = rewrite match {
     case KRewrite(left, right, _) => right
     case Anywhere(p) => Anywhere(toRight(p))
-    case c: Collection[Top] => c map toRight
+    case c: Collection[Term] => c map toRight
     case other => other
   }
 }

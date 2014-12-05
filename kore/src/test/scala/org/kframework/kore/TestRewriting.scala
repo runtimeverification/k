@@ -76,7 +76,7 @@ class TestRewriting {
       'foo(1, 2).search(KRewrite('foo(1, 2), 'foo(1, 3))))
   }
 
-  @Test def testSimpleToTop {
+  @Test def testSimpleToTerm {
     assertEquals(Set('foo(1, 3)),
       'foo(1, 2).search('foo(1, KRewrite(2, 3))))
   }
@@ -86,7 +86,7 @@ class TestRewriting {
       'foo(1, 'bar(2, 3)).search(KRewrite('foo(1, 'bar(2, X)), 'foo(1, X))))
   }
 
-  @Test def testToTopWithVariableInside {
+  @Test def testToTermWithVariableInside {
     assertEquals(Set('foo(1, 3)),
       'foo(1, 'bar(2, 3)).search('foo(1, KRewrite('bar(2, X), X))))
   }
