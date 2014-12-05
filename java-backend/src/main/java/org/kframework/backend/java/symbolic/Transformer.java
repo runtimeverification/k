@@ -20,7 +20,6 @@ public interface Transformer {
     public ASTNode transform(BuiltinList builtinList);
     public ASTNode transform(BuiltinMap builtinMap);
     public ASTNode transform(BuiltinSet builtinSet);
-    public ASTNode transform(Cell cell);
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
     public ASTNode transform(ConstrainedTerm constrainedTerm);

@@ -60,6 +60,7 @@ public class RewriteEngineUtils {
         }
 
         /* evaluate data structure lookups/choices and add bindings for them */
+        Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
             Term lookupOrChoice = equality.leftHandSide();
             Term nonLookupOrChoice =  equality.rightHandSide();
@@ -106,11 +107,12 @@ public class RewriteEngineUtils {
                         break;
                     }
         }
+        Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
 
 
         /* evaluate side conditions */
+        Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
         if (crntSubst != null) {
-            Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
             for (Term require : rule.requires()) {
                 // TODO(YilongL): in the future, we may have to accumulate
                 // the substitution obtained from evaluating the side
@@ -121,8 +123,8 @@ public class RewriteEngineUtils {
                     break;
                 }
             }
-            Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
         }
+        Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
 
         return crntSubst;
     }
@@ -152,9 +154,7 @@ public class RewriteEngineUtils {
     }
 
     public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
-        Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         Term evalLookupOrChoice = lookupOrChoice.copyOnShareSubstAndEval(subst, context);
-        Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         return evalLookupOrChoice;
     }
 

@@ -167,4 +167,11 @@ public interface DataStructures {
         return ((KList) (((KItem) term).kList())).get(1);
     }
 
+    static CellCollection.Cell getCellEntry(Term term) {
+        assert term instanceof CellCollection
+               && ((CellCollection) term).isConcreteCollection()
+               && ((CellCollection) term).concreteSize() == 1;
+        return ((CellCollection) term).cells().entries().iterator().next().getValue();
+    }
+
 }

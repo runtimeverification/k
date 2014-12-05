@@ -4,7 +4,7 @@ package org.kframework.backend.java.rewritemachine;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 
@@ -31,14 +31,14 @@ class ExtendedSubstitution {
      * by the rewrite rule; the references are collected as the rewrite machine
      * builds the substitution map.
      */
-    private List<Cell<?>> writeCells;
+    private List<CellCollection.Cell> writeCells;
 
     ExtendedSubstitution() {
         subst = Maps.newHashMap();
         writeCells = Lists.newArrayList();
     }
 
-    ExtendedSubstitution(Map<Variable, Term> subst, List<Cell<?>> writeCells) {
+    ExtendedSubstitution(Map<Variable, Term> subst, List<CellCollection.Cell> writeCells) {
         this.writeCells = writeCells;
         this.setSubst(subst);
     }
@@ -51,11 +51,11 @@ class ExtendedSubstitution {
         this.subst = subst;
     }
 
-    List<Cell<?>> writeCells() {
+    List<CellCollection.Cell> writeCells() {
         return writeCells;
     }
 
-    void addWriteCell(Cell<?> cell) {
+    void addWriteCell(CellCollection.Cell cell) {
         writeCells.add(cell);
     }
 

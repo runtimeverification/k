@@ -1,11 +1,11 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -199,14 +199,8 @@ public class PatternMatcher extends AbstractMatcher {
             pattern = KCollection.upKind(pattern, subject.kind());
         }
 
-        if (subject.kind().isStructural()) {
-            if (!pattern.kind().isStructural()) {
-                fail(subject, pattern);
-            }
-
-            Context context = termContext.definition().context();
-            subject = CellCollection.upKind(subject, pattern.kind(), context);
-            pattern = CellCollection.upKind(pattern, subject.kind(), context);
+        if (subject.kind().isStructural() && !pattern.kind().isStructural()) {
+            fail(subject, pattern);
         }
 
         if (subject.kind() != pattern.kind()) {
@@ -247,9 +241,6 @@ public class PatternMatcher extends AbstractMatcher {
         /* retrieve the exact element when the term is some singleton collection */
         if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.downKind(term);
-        }
-        if (term.kind() == Kind.CELL_COLLECTION) {
-            term = CellCollection.downKind(term);
         }
 
         if (!termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
@@ -482,29 +473,6 @@ public class PatternMatcher extends AbstractMatcher {
                 "set matching is only supported when one of the sets is a variable.");
     }
 
-    /**
-     * Two cells can be unified if and only if they have the same cell label and
-     * their contents can be unified.
-     */
-    @Override
-    public void match(Cell cell, Term pattern) {
-        if (!(pattern instanceof Cell)) {
-            this.fail(cell, pattern);
-        }
-
-        Cell<?> otherCell = (Cell<?>) pattern;
-        if (!cell.getLabel().equals(otherCell.getLabel())) {
-            /*
-             * AndreiS: commented out the check below as matching might fail due
-             * to KItem < K < KList subsorting:
-             * !cell.contentKind().equals(otherCell.contentKind())
-             */
-            fail(cell, otherCell);
-        }
-
-        match(cell.getContent(), otherCell.getContent());
-    }
-
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
         if (!(pattern instanceof CellCollection)) {
@@ -538,8 +506,8 @@ public class PatternMatcher extends AbstractMatcher {
             for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;
-                match(cellCollection.get(label).iterator().next(),
-                        otherCellCollection.get(label).iterator().next());
+                match(cellCollection.get(label).iterator().next().content(),
+                        otherCellCollection.get(label).iterator().next().content());
             }
 
             Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
@@ -573,15 +541,15 @@ public class PatternMatcher extends AbstractMatcher {
                 fail(cellCollection, otherCellCollection);
             }
 
-            ListMultimap<CellLabel, Cell> remainingCellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+            Multimap<CellLabel, CellCollection.Cell> remainingCellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
                 if (!termContext.definition().context().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
-                    match(cellCollection.get(cellLabel).iterator().next(),
-                            otherCellCollection.get(cellLabel).iterator().next());
+                    match(cellCollection.get(cellLabel).iterator().next().content(),
+                            otherCellCollection.get(cellLabel).iterator().next().content());
                 } else {
                     assert starredCellLabel == null;
                     starredCellLabel = cellLabel;
@@ -593,22 +561,23 @@ public class PatternMatcher extends AbstractMatcher {
                 fail(cellCollection, otherCellCollection);
             }
 
+            CellCollection.Cell[] cells = cellCollection.get(starredCellLabel)
+                    .toArray(new CellCollection.Cell[1]);
+            CellCollection.Cell[] otherCells = otherCellCollection.get(starredCellLabel)
+                    .toArray(new CellCollection.Cell[1]);
             if (otherCellCollection.hasFrame()) {
-                if (cellCollection.get(starredCellLabel).size() < otherCellCollection.get(starredCellLabel).size()) {
+                if (cells.length < otherCells.length) {
                     fail(cellCollection, otherCellCollection);
                 }
             } else {
                 // now we know otherCellMap.isEmpty() && otherCellCollection is free of frame
                 if (cellCollection.hasFrame()
                         || numOfDiffCellLabels > 0
-                        || cellCollection.get(starredCellLabel).size() != otherCellCollection
-                                .get(starredCellLabel).size()) {
+                        || cells.length != otherCells.length) {
                     fail(cellCollection, otherCellCollection);
                 }
             }
 
-            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
             Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
@@ -630,7 +599,7 @@ public class PatternMatcher extends AbstractMatcher {
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
-                        match(cells[generator.getSelection(i)], otherCells[i]);
+                        match(cells[generator.getSelection(i)].content(), otherCells[i].content());
                     }
                 } catch (PatternMatchingFailure e) {
                     continue;
@@ -675,7 +644,7 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
 
-    private ListMultimap<CellLabel, Cell> getRemainingCellMap(
+    private Multimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
         Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
             @Override
@@ -684,7 +653,7 @@ public class PatternMatcher extends AbstractMatcher {
             }
         };
 
-        return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
+        return Multimaps.filterKeys(cellCollection.cells(), notRemoved);
     }
 
     @Override

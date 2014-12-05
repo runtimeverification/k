@@ -1,10 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -15,36 +11,62 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 
 
 /**
- * Represents a collection of {@link Cell}s. The ordering of the internal cells
+ * Represents a collection of cells. The ordering of the internal cells
  * is fixed and agrees with the ordering of the cells used to construct this
  * cell collection.
  *
  * @author AndreiS
  *
  */
-@SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
+    public static class Cell implements Serializable {
+        private final CellLabel cellLabel;
+        private Term content;
+
+        public Cell(CellLabel cellLabel, Term content) {
+            this.cellLabel = cellLabel;
+            this.content = content;
+        }
+
+        public CellLabel cellLabel() {
+            return cellLabel;
+        }
+
+        public Term content() {
+            return content;
+        }
+
+        public void setContent(Term content) {
+            this.content = content;
+        }
+    }
+
     public static final CellCollection EMPTY = new CellCollection(
-            ImmutableListMultimap.<CellLabel, Cell> of(),
-            ImmutableMultiset.<Variable> of(),
+            ImmutableListMultimap.of(),
+            ImmutableMultiset.of(),
             false);
 
     /**
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
      * be able to store identical cells.
      */
-    private final ImmutableListMultimap<CellLabel, Cell> cells;
+    private final Multimap<CellLabel, Cell> cells;
 
-    private final ImmutableMultiset<Variable> collectionVariables;
+    private final Multiset<Variable> collectionVariables;
 
     /**
      * Specifies if the explicit content of this cell collection contains
@@ -53,82 +75,33 @@ public class CellCollection extends Collection {
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasMultiplicityCell;
 
-    public static CellCollection singleton(Cell cell, Context context) {
-        return new CellCollection(
-                ImmutableListMultimap.of(cell.getLabel(), cell),
-                ImmutableMultiset.<Variable> of(),
-                context);
+    public static CellCollection singleton(CellLabel cellLabel, Term content, Context context) {
+        return (CellCollection) builder(context).put(cellLabel, content).build();
     }
 
-    public static Term concatenate(Context context, Term... terms) {
+    /**
+     * Static helper method which creates canonicalized cell collection
+     * according to the given contents.
+     */
+    public static Term of(Multimap<CellLabel, Cell> cells, Variable frame, Context context) {
         Builder builder = builder(context);
-        for (Term term : terms) {
-            builder.concatenate(term);
+        builder.putAll(cells);
+        if (frame != null) {
+            builder.concatenate(frame);
         }
         return builder.build();
     }
 
-    /**
-     * Static helper method which creates canonicalized cell collection
-     * according to the given contents.
-     */
-    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame,
-            Context context) {
-        if (cells.isEmpty()) {
-            return frame == null ? EMPTY : frame;
-        } else if (cells.size() == 1 && frame == null) {
-            return cells.values().iterator().next();
-        } else {
-            return new CellCollection(
-                    ImmutableListMultimap.copyOf(cells),
-                    frame != null ? ImmutableMultiset.of(frame) : ImmutableMultiset.<Variable>of(),
-                    numOfMultiplicityCellLabels(cells, context) > 0);
-        }
-    }
-
-    /**
-     * Static helper method which creates canonicalized cell collection
-     * according to the given contents.
-     */
-    public static Term of(ListMultimap<CellLabel, Cell> cells,
-            Multiset<Variable> collectionVariables, Context context) {
-        if (cells.isEmpty()) {
-            if (collectionVariables.isEmpty()) {
-                return EMPTY;
-            } else if (collectionVariables.size() == 1) {
-                return collectionVariables.iterator().next();
-            }
-        } else if (cells.size() == 1 && collectionVariables.isEmpty()) {
-            return cells.values().iterator().next();
-        }
-
-        return new CellCollection(ImmutableListMultimap.copyOf(cells),
-                ImmutableMultiset.copyOf(collectionVariables),
-                numOfMultiplicityCellLabels(cells, context) > 0);
-    }
-
-    /**
-     * Builds a new {@code CellCollection} by removing all the given cell
-     * labels.
-     */
-    public Term removeAll(Set<CellLabel> labelsToRemove, Context context) {
-        ImmutableListMultimap.Builder<CellLabel, Cell> builder = ImmutableListMultimap.builder();
-        for (CellLabel cellLabel : cells.keySet()) {
-            if (!labelsToRemove.contains(cellLabel)) {
-                builder.putAll(cellLabel, cells.get(cellLabel));
-            }
-        }
-        return CellCollection.of(builder.build(), collectionVariables, context);
-    }
-
-    private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
-            ImmutableMultiset<Variable> collectionVariables,
+    private CellCollection(
+            Multimap<CellLabel, Cell> cells,
+            Multiset<Variable> collectionVariables,
             Context context) {
         this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, context) > 0);
     }
 
-    private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
-            ImmutableMultiset<Variable> collectionVariables,
+    private CellCollection(
+            Multimap<CellLabel, Cell> cells,
+            Multiset<Variable> collectionVariables,
             boolean hasMultiplicityCell) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
         this.cells = cells;
@@ -136,11 +109,11 @@ public class CellCollection extends Collection {
         this.hasMultiplicityCell = hasMultiplicityCell;
     }
 
-    private static Variable computeFrame(ImmutableMultiset<Variable> collectionVariables) {
-        return (collectionVariables.size() == 1) ? collectionVariables.iterator().next() : null;
+    private static Variable computeFrame(Multiset<Variable> collectionVariables) {
+        return collectionVariables.size() == 1 ? collectionVariables.iterator().next() : null;
     }
 
-    private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Context context) {
+    private static int numOfMultiplicityCellLabels(Multimap<CellLabel, Cell> cells, Context context) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
             if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
@@ -157,23 +130,19 @@ public class CellCollection extends Collection {
         return count;
     }
 
-    public java.util.Collection<Cell> cells() {
-        return cells.values();
-    }
-
-    public ListMultimap<CellLabel, Cell> cellMap() {
+    public Multimap<CellLabel, Cell> cells() {
         return cells;
     }
 
     public Multiset<Term> baseTerms() {
-        return ImmutableMultiset.<Term>copyOf(collectionVariables);
+        return (Multiset<Term>) (Object) collectionVariables();
     }
 
-    public ImmutableMultiset<Variable> collectionVariables() {
+    public Multiset<Variable> collectionVariables() {
         return collectionVariables;
     }
 
-    public boolean containsKey(CellLabel label) {
+    public boolean containsLabel(CellLabel label) {
         return cells.containsKey(label);
     }
 
@@ -192,6 +161,19 @@ public class CellCollection extends Collection {
 
     public Set<CellLabel> labelSet() {
         return cells.keySet();
+    }
+
+    /**
+     * Builds a new {@code CellCollection} by removing all the given cell
+     * labels.
+     */
+    public Term removeAll(Set<CellLabel> removeLabels, Context context) {
+        Builder builder = builder(context);
+        cells.keySet().stream()
+                .filter(label -> !removeLabels.contains(label))
+                .forEach(label -> builder.addAll(cells.get(label)));
+        builder.concatenate(collectionVariables);
+        return builder.build();
     }
 
     @Override
@@ -230,27 +212,8 @@ public class CellCollection extends Collection {
         }
 
         CellCollection collection = (CellCollection) object;
-        if (!collectionVariables.equals(collection.collectionVariables)) {
-            return false;
-        }
-
-        if (cells.keys().equals(collection.cells.keys())) {
-            for (CellLabel cellLabel : cells.keySet()) {
-                /* YilongL: didn't use the O(N) hash-based approach for
-                 * comparing two bags because 1) the fast destructive rewriter
-                 * destroys hashcode of terms 2) the number of elements is
-                 * usually very small */
-                List<Cell> list = Lists.newArrayList(cells.get(cellLabel));
-                for (Cell<?> c : collection.cells.get(cellLabel)) {
-                    if (!list.remove(c)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
+        return collectionVariables.equals(collection.collectionVariables)
+                && cells.entries().equals(collection.cells.entries());
     }
 
     @Override
@@ -273,7 +236,10 @@ public class CellCollection extends Collection {
         } else {
             StringBuilder stringBuilder = new StringBuilder();
             for (Cell cell : cells.values()) {
-                stringBuilder.append(cell);
+                stringBuilder
+                        .append("<").append(cell.cellLabel()).append(">")
+                        .append(cell.content())
+                        .append("</").append(cell.cellLabel()).append(">");
             }
             Iterator<Term> iter = baseTerms().iterator();
             while (iter.hasNext()) {
@@ -317,44 +283,69 @@ public class CellCollection extends Collection {
 
     public static class Builder {
 
-        private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder = ImmutableListMultimap.builder();
+        private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder;
 
-        private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder = ImmutableMultiset.builder();
+        private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder;
 
         private final Context context;
 
         private Builder(Context context) {
             this.context = context;
+            cellsBuilder = ImmutableListMultimap.builder();
+            collectionVariablesBuilder = ImmutableMultiset.builder();
         }
 
-        public void add(Cell cell) {
-            cellsBuilder.put(cell.getLabel(), cell);
+        public Builder add(Cell cell) {
+            cellsBuilder.put(cell.cellLabel(), cell);
+            return this;
         }
 
-        public void putAll(ListMultimap<CellLabel, Cell> cellMap) {
+        public Builder addAll(Iterable<Cell> cells) {
+            for (Cell cell : cells) {
+                add(cell);
+            }
+            return this;
+        }
+
+        public Builder put(CellLabel cellLabel, Term content) {
+            cellsBuilder.put(cellLabel, new Cell(cellLabel, content));
+            return this;
+        }
+
+        public Builder putAll(Multimap<CellLabel, Cell> cellMap) {
             cellsBuilder.putAll(cellMap);
+            return this;
         }
 
-        public void putAll(CellLabel cellLabel, java.util.Collection<Cell> cells) {
-            cellsBuilder.putAll(cellLabel, cells);
-        }
-
-        public void concatenate(Term term) {
+        public Builder concatenate(Term term) {
             if (term instanceof CellCollection) {
-                CellCollection cellCol = (CellCollection) term;
-                cellsBuilder.putAll(cellCol.cells);
-                collectionVariablesBuilder.addAll(cellCol.collectionVariables);
-            } else if (term instanceof Cell) {
-                add((Cell) term);
-            } else if (term instanceof Variable) {
+                CellCollection cellCollection = (CellCollection) term;
+                cellsBuilder.putAll(cellCollection.cells);
+                collectionVariablesBuilder.addAll(cellCollection.collectionVariables);
+            } else if (term instanceof Variable && term.kind == Kind.CELL_COLLECTION) {
                 collectionVariablesBuilder.add((Variable) term);
             } else {
                 assert false : "unexpected concatenated term " + term;
             }
+            return this;
+        }
+
+        public Builder concatenate(Term... terms) {
+            for (Term term : terms) {
+                concatenate(term);
+            }
+            return this;
+        }
+
+        public Builder concatenate(Iterable<? extends Term> terms) {
+            for (Term term : terms) {
+                concatenate(term);
+            }
+            return this;
         }
 
         public Term build() {
-            ImmutableListMultimap<CellLabel, Cell> cells = cellsBuilder.build();
+            ImmutableMultimap<CellLabel, Cell> cells = cellsBuilder.build();
             ImmutableMultiset<Variable> collectionVariables = collectionVariablesBuilder.build();
             if (cells.isEmpty()) {
                 switch (collectionVariables.size()) {
@@ -363,68 +354,9 @@ public class CellCollection extends Collection {
                     default: return new CellCollection(cells, collectionVariables, context);
                 }
             } else {
-                if (cells.size() == 1 && collectionVariables.isEmpty()) {
-                    return cells.values().iterator().next();
-                } else {
-                    return new CellCollection(cells, collectionVariables, context);
-                }
+                return new CellCollection(cells, collectionVariables, context);
             }
         }
-    }
-
-
-    /**
-     * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
-     * involved in this method can only be {@code Kind#CELL} or
-     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
-     * already above or equal to the target {@code Kind}, do nothing.
-     * <p>
-     * To be more specific, a {@code Cell} can be promoted to a single-element
-     * {@code CellCollection}.
-     *
-     * @param term
-     *            the given term to be promoted
-     * @param kind
-     *            the target kind that the term is to be promoted to
-     * @return the resulting term after kind promotion
-     */
-    public static Term upKind(Term term, Kind kind, Context context) {
-        assert term.kind().isStructural() && kind.isStructural();
-
-        /* promote Cell to CellCollection */
-        if (term instanceof Cell && kind == Kind.CELL_COLLECTION) {
-            return CellCollection.singleton((Cell) term, context);
-        }
-
-        return term;
-    }
-
-    /**
-     * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
-     * involved in this method can only be {@code Kind#CELL} or
-     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
-     * already lower than or equal to the target {@code Kind}, do nothing.
-     * <p>
-     * To be more specific, a single-element {@code CellCollection} can be
-     * degraded to a {@code Cell}.
-     *
-     * @param term
-     *            the given term to be degraded
-     * @return the resulting term after kind degradation
-     */
-    public static Term downKind(Term term) {
-        assert term.kind().isStructural();
-
-        if (term instanceof CellCollection
-                && ((CellCollection) term).baseTerms().isEmpty()
-                && ((CellCollection) term).concreteSize() == 1) {
-            term = ((CellCollection) term).cells().iterator().next();
-        }
-
-        // YilongL: do not degrade the kind of a Variable since you cannot
-        // upgrade it later
-
-        return term;
     }
 
 }

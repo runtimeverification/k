@@ -34,10 +34,7 @@ public class IndexingPair implements Serializable {
         return definition.indexingData.TOP_INDEX;
     }
 
-    public static IndexingPair getKCellIndexingPair(Cell cell, Definition definition) {
-        assert cell.getLabel().equals(CellLabel.K);
-
-        Term term = cell.getContent();
+    public static IndexingPair getKCellIndexingPair(Term term, Definition definition) {
         if (term instanceof KSequence) {
             KSequence kSequence = (KSequence) term;
 

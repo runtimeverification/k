@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingCellsCollector;
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -26,7 +27,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-    private List<Cell<?>> indexingCells = Lists.newArrayList();
+    private List<CellCollection.Cell> indexingCells = Lists.newArrayList();
 
     public FastDestructiveRewriter(Definition definition, TermContext termContext) {
         super(definition, termContext);
@@ -80,7 +81,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         return subject;
     }
 
-    private List<Rule> getRules(List<Cell<?>> indexingCells) {
+    private List<Rule> getRules(List<CellCollection.Cell> indexingCells) {
         Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
         List<Rule> rules = ruleIndex.getRules(indexingCells);
         Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
@@ -121,7 +122,11 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                         }
 
                         Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                        if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
+                        succeed = KAbstractRewriteMachine.rewrite(
+                                rule,
+                                DataStructures.getCellEntry(subject),
+                                termContext);
+                        if (succeed) {
                             if (termContext.definition().context().krunOptions.experimental.trace) {
                                 System.out.println(rule);
                             }
@@ -167,7 +172,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     @Override
     protected final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
-        Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
+        Term rhs = rule.cellsToCopy().contains(DataStructures.getCellEntry(rule.rightHandSide()).cellLabel()) ?
                 DeepCloner.clone(rule.rightHandSide()) :
                 rule.rightHandSide();
         Term result = rhs.copyOnShareSubstAndEval(substitution,

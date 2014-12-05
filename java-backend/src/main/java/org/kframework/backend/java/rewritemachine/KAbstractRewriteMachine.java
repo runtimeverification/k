@@ -2,13 +2,12 @@
 package org.kframework.backend.java.rewritemachine;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Rule;
@@ -38,7 +37,7 @@ import com.google.common.collect.Maps;
 public class KAbstractRewriteMachine {
 
     private final Rule rule;
-    private final Cell<?> subject;
+    private final CellCollection.Cell subject;
     private final List<Instruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
@@ -54,7 +53,7 @@ public class KAbstractRewriteMachine {
 
     private final TermContext context;
 
-    private KAbstractRewriteMachine(Rule rule, Cell<?> subject, TermContext context) {
+    private KAbstractRewriteMachine(Rule rule, CellCollection.Cell subject, TermContext context) {
         this.rule = rule;
         this.subject = subject;
         this.instructions = rule.instructions();
@@ -62,8 +61,8 @@ public class KAbstractRewriteMachine {
         this.patternMatcher = new NonACPatternMatcher(context);
     }
 
-    public static boolean rewrite(Rule rule, Term subject, TermContext context) {
-        KAbstractRewriteMachine machine = new KAbstractRewriteMachine(rule, (Cell<?>) subject, context);
+    public static boolean rewrite(Rule rule, CellCollection.Cell subject, TermContext context) {
+        KAbstractRewriteMachine machine = new KAbstractRewriteMachine(rule, subject, context);
         return machine.rewrite();
     }
 
@@ -98,14 +97,13 @@ public class KAbstractRewriteMachine {
                         context);
 
                 /* perform local rewrites under write cells */
-                for (Cell cell : solution.writeCells()) {
-                    CellLabel cellLabel = cell.getLabel();
-                    Term rightHandSide = getWriteCellRHS(cellLabel);
-                    if (rule.cellsToCopy().contains(cellLabel)) {
+                for (CellCollection.Cell cell : solution.writeCells()) {
+                    Term rightHandSide = getWriteCellRHS(cell.cellLabel());
+                    if (rule.cellsToCopy().contains(cell.cellLabel())) {
                         rightHandSide = DeepCloner.clone(rightHandSide);
                     }
 
-                    cell.unsafeSetContent((Term) rightHandSide.accept(substAndEvalTransformer));
+                    cell.setContent((Term) rightHandSide.accept(substAndEvalTransformer));
                 }
                 Profiler.stopTimer(Profiler.LOCAL_REWRITE_BUILD_RHS_TIMER);
             } else {
@@ -116,8 +114,8 @@ public class KAbstractRewriteMachine {
         return success;
     }
 
-    private void match(Cell<?> crntCell) {
-        CellLabel cellLabel = crntCell.getLabel();
+    private void match(CellCollection.Cell crntCell) {
+        CellLabel cellLabel = crntCell.cellLabel();
         if (isReadCell(cellLabel)) {
             /* 1) perform matching under read cell;
              * 2) record the reference if it is also a write cell. */
@@ -126,7 +124,8 @@ public class KAbstractRewriteMachine {
             /* there should be no AC-matching under the crntCell (violated rule
              * has been filtered out by the compiler) */
             Map<Variable, Term> subst = patternMatcher.patternMatch(
-                    crntCell.getContent(), getReadCellLHS(cellLabel));
+                    crntCell.content(),
+                    getReadCellLHS(cellLabel));
 
             if (subst == null) {
                 success = false;
@@ -166,7 +165,7 @@ public class KAbstractRewriteMachine {
                 nextInstr = nextInstruction();
                 int oldPC = pc; // pgm counter before AC-matching
                 int newPC = -1; // pgm counter on success
-                for (Cell<?> cell : getSubCellsByLabel(crntCell, nextInstr.cellLabel())) {
+                for (CellCollection.Cell cell : getSubCellsByLabel(crntCell.content(), nextInstr.cellLabel())) {
                     pc = oldPC;
                     match(cell);
                     if (success) {
@@ -190,10 +189,9 @@ public class KAbstractRewriteMachine {
                     fExtSubst = oldExtSubst;
                 }
             } else {
-                Iterator<Cell> iter = getSubCellsByLabel(crntCell, nextInstr.cellLabel()).iterator();
+                Iterator<CellCollection.Cell> iter = getSubCellsByLabel(crntCell.content(), nextInstr.cellLabel()).iterator();
                 if (iter.hasNext()) {
-                    Cell<?> nextCell = iter.next();
-                    match(nextCell);
+                    match(iter.next());
                 } else {
                     success = false;
                 }
@@ -225,14 +223,9 @@ public class KAbstractRewriteMachine {
         return rule.rhsOfWriteCell().get(cellLabel);
     }
 
-    private Collection<Cell> getSubCellsByLabel(Cell<?> cell, CellLabel label) {
-        Object content = cell.getContent();
+    private static Collection<CellCollection.Cell> getSubCellsByLabel(Term content, CellLabel label) {
         if (content instanceof CellCollection) {
-            return ((CellCollection) content).cellMap().get(label);
-        } else if (content instanceof Cell) {
-            return ((Cell<?>) content).getLabel().equals(label) ?
-                    Collections.singletonList((Cell) content) :
-                    Collections.<Cell>emptyList();
+            return ((CellCollection) content).cells().get(label);
         } else {
             assert false : "expected contents of cell with label " + label + " to be a cell but found " + content.getClass().getSimpleName();
             return null;
@@ -256,8 +249,9 @@ public class KAbstractRewriteMachine {
                     Map<Variable, Term> composedSubst = RewriteEngineUtils
                             .composeSubstitution(fSubst.substitution(), extSubst.substitution());
                     if (composedSubst != null) {
-                        List<Cell<?>> composedWrtCells = ListUtils.union(fSubst.writeCells(), extSubst.writeCells());
-                        result.add(new ExtendedSubstitution(composedSubst, composedWrtCells));
+                        result.add(new ExtendedSubstitution(
+                                composedSubst,
+                                ListUtils.union(fSubst.writeCells(), extSubst.writeCells())));
                     }
                 }
             } else {
@@ -270,10 +264,13 @@ public class KAbstractRewriteMachine {
                                         subst2.substitution());
 
                         if (composedSubst != null) {
-                            List<Cell<?>> composedWrtCells = ListUtils.union(
-                                    fSubst.writeCells(),
-                                    ListUtils.union(subst1.writeCells(), subst2.writeCells()));
-                            result.add(new ExtendedSubstitution(composedSubst, composedWrtCells));
+                            result.add(new ExtendedSubstitution(
+                                    composedSubst,
+                                    ListUtils.union(
+                                            fSubst.writeCells(),
+                                            ListUtils.union(
+                                                    subst1.writeCells(),
+                                                    subst2.writeCells()))));
                         }
                     }
                 }
