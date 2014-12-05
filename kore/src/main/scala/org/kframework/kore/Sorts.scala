@@ -16,5 +16,6 @@ case class UninterpretedSort(name: String) extends Sort
 object Sorts {
   import org.kframework.kore
 
-  def KString = kore.KString
+  def KString = Sort("KString")
+  def KInt = Sort("KInt")
 }
