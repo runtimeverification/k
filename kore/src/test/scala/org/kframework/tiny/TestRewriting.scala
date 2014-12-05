@@ -2,6 +2,7 @@ package org.kframework.kore
 
 import KORE._
 import KInt._
+import org.kframework.tiny.Anywhere
 
 class TestRewriting {
   import org.junit._

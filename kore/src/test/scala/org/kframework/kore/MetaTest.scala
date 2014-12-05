@@ -5,6 +5,8 @@ import KInt._
 import KString._
 import org.kframework.kore.outer._
 import java.io.File
+import org.kframework.kore.outer._
+import org.kframework.tiny.Anywhere
 
 case class Foo(i: Int)
 
@@ -47,6 +49,6 @@ class MetaTest {
   @Test def testTransformation() {
     val metaT = Meta(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))))
     println(metaT)
-//    println(Concrete(metaT))
+    //    println(Concrete(metaT))
   }
 }

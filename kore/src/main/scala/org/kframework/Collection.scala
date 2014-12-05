@@ -6,8 +6,8 @@ import scala.collection.mutable.Builder
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.ListBuffer
-
 import kore._
+import org.kframework.tiny._
 
 trait Term extends Pattern with Rewriting
 

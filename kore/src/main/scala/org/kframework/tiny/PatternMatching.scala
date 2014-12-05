@@ -1,6 +1,7 @@
-package org.kframework.kore
+package org.kframework.tiny
 
 import org.kframework._
+import kore._
 import KBoolean._
 import KORE._
 

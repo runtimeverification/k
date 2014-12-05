@@ -3,7 +3,6 @@
 package org.kframework.kore
 
 import org.kframework._
-
 import collection.JavaConverters._
 import collection.LinearSeq
 import KORE._
@@ -12,6 +11,7 @@ import scala.collection.IterableLike
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
+import org.kframework.tiny._
 
 /* Interfaces */
 
@@ -45,7 +45,7 @@ trait Sort extends SortToString {
 
 /* Data Structures */
 
-class KList(protected[kore] val delegate: List[K])
+class KList(val delegate: List[K])
   extends Collection[K] with Indexed[Int, K]
   with KListPattern
   with KListToString with KORE {
@@ -125,9 +125,7 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   }
 }
 
-import Pattern.Solution
-
-case class InjectedKLabel(klabel: KLabel) extends KItem 
+case class InjectedKLabel(klabel: KLabel) extends KItem
   with InjectedKLabelPattern {
   type This = InjectedKLabel
   def att() = Attributes()

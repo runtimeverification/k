@@ -1,9 +1,10 @@
 package org.kframework.kore
 
 import org.kframework._
-
 import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
+import org.kframework.tiny.Pattern
+import org.kframework.tiny.Equivalence
 
 case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
   type This = Attributes

@@ -3,11 +3,12 @@
 package org.kframework.kore
 
 import org.kframework._
-
 import KORE._
 import KBoolean._
 import scala.collection.mutable.Builder
 import scala.collection.mutable.SetBuilder
+import org.kframework.tiny.Equivalence
+import org.kframework.tiny.EqualsEquivalence
 
 case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
   type This = KBoolean
