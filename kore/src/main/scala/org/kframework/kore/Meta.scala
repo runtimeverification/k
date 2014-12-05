@@ -18,8 +18,8 @@ object Meta extends (Any => K) {
       case o: Set[_] => 'Set(o map apply toList)
 
       // Primitives
-      case o: Int => KInt(o)
-      case o: String => KString(o)
+      case o: Int => KToken(KInt, o.toString)
+      case o: String => KToken(KString, o.toString)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
 
       case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)

@@ -2,7 +2,6 @@ package org.kframework.kore
 
 import KORE._
 import KInt._
-import KString._
 import org.kframework.kore.outer._
 import java.io.File
 import org.kframework.kore.outer._
@@ -22,8 +21,6 @@ class MetaTest {
       Meta(Definition(Set(Require(new File("foo.k"))), Set())))
 
     assertEquals('Foo(5), Meta(Foo(5)))
-
-    println(Concrete(Meta(KInt(2))))
   }
 
   import outer._
@@ -48,7 +45,5 @@ class MetaTest {
 
   @Test def testTransformation() {
     val metaT = Meta(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))))
-    println(metaT)
-    //    println(Concrete(metaT))
   }
 }
