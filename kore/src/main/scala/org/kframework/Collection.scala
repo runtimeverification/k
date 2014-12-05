@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 import kore._
 
-trait Top
+trait Term
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get
