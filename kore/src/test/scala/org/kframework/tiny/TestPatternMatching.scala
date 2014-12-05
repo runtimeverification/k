@@ -1,7 +1,7 @@
 package org.kframework.kore
 
 import KORE._
-import KInt._
+import org.kframework.builtin.KInt._
 import org.kframework.tiny.Anywhere
 import org.kframework.tiny.MetaKLabel
 

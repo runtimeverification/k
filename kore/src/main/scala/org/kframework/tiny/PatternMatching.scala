@@ -2,7 +2,7 @@ package org.kframework.tiny
 
 import org.kframework._
 import kore._
-import KBoolean._
+import builtin.KBoolean._
 import KORE._
 
 import Pattern.Solution

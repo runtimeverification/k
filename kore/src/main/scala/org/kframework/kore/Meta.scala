@@ -8,6 +8,7 @@ import org.kframework.kore.outer.Associativity
 import java.lang.invoke.MethodType
 import java.lang.invoke.MethodHandles
 import collection.JavaConverters._
+import org.kframework.builtin.Sorts
 
 object Meta extends (Any => K) {
   type HasProductIterator = { def productIterator: Iterator[Any] }
@@ -18,8 +19,8 @@ object Meta extends (Any => K) {
       case o: Set[_] => 'Set(o map apply toList)
 
       // Primitives
-      case o: Int => KToken(KInt, o.toString)
-      case o: String => KToken(KString, o.toString)
+      case o: Int => KToken(Sorts.KInt, o.toString)
+      case o: String => KToken(Sorts.KString, o.toString)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
 
       case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)
@@ -28,7 +29,7 @@ object Meta extends (Any => K) {
       // Already K
       case o: K => o
 
-      case o: Sort => 'Sort(KString(o.name))
+      case o: Sort => 'Sort(KToken(Sorts.KString, o.name))
 
       // Fallback to reflection
       case o if o.getClass().getMethods.exists(_.toString().contains("productIterator")) =>
@@ -80,9 +81,9 @@ object Concrete extends (K => Any) {
 
         methodRef.invoke(module, children.toSeq.asInstanceOf[Seq[Object]]: _*)
 
-      case KInt(x, _) => x
-      case s: KSet => s.delegate map apply
-      case s: KString => s.s
+      //      case KInt(x, _) => x
+      //      case s: KSet => s.delegate map apply
+      //      case s: KString => s.s
     }
     //    println(o + " concretized to " + res)
     res

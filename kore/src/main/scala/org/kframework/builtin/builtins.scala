@@ -54,7 +54,7 @@ case class KBag(val klist: KList) extends KAbstractCollection with Associative[K
   def canEqual(that: Any) = that.isInstanceOf[KBag]
   def att = Attributes()
   def copy(att: Attributes): KBag = this
-  def matchAll(pattern: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
+  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
 
   val delegate = klist.delegate
   def newBuilder: Builder[K, KBag] = KBag.newBuilder
@@ -74,7 +74,7 @@ case class KSet(val content: Set[K]) extends KAbstractCollection with Associativ
   def canEqual(that: Any) = that.isInstanceOf[KSet]
   def att = Attributes()
   def copy(att: Attributes): KSet = this
-  def matchAll(pattern: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
+  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
 
   val delegate = content
   def newBuilder: Builder[K, KSet] = KSet.newBuilder
@@ -85,8 +85,6 @@ case class KSet(val content: Set[K]) extends KAbstractCollection with Associativ
 object KSet {
   def newBuilder: Builder[K, KSet] = new SetBuilder[K, Set[K]](Set[K]()) mapResult { new KSet(_) }
   def apply(ks: K*): KSet = (newBuilder ++= ks).result
-}
-
 }
 
 object Location {
