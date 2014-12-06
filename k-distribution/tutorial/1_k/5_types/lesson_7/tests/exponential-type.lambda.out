@@ -2,8 +2,10 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(1) -> (#symType(73) -> (#symType(70) -> (#symType(65) -> (#symType(
-  62) -> (#symType(55) -> (#symType(52) -> (#symType(47) -> (#symType(44) -> (
-  #symType(35) -> (#symType(32) -> (#symType(27) -> (#symType(24) -> (#symType
-  (17) -> (#symType(14) -> (#symType(9) -> (#symType(6) -> #symType(1)))))))))
-  )))))))))
+GeneratedAnonVar0:Type -> (GeneratedAnonVar1:Type -> (GeneratedAnonVar2:Type 
+  -> (GeneratedAnonVar3:Type -> (GeneratedAnonVar4:Type -> (GeneratedAnonVar5
+  :Type -> (GeneratedAnonVar6:Type -> (GeneratedAnonVar7:Type -> (
+  GeneratedAnonVar8:Type -> (GeneratedAnonVar9:Type -> (GeneratedAnonVar10
+  :Type -> (GeneratedAnonVar11:Type -> (GeneratedAnonVar12:Type -> (
+  GeneratedAnonVar13:Type -> (GeneratedAnonVar14:Type -> (GeneratedAnonVar15
+  :Type -> (GeneratedAnonVar16:Type -> GeneratedAnonVar0))))))))))))))))

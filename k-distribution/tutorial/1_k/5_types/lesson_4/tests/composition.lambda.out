@@ -2,5 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(3) -> #symType(4)) -> ((#symType(4) -> #symType(5)) -> (#symType(3) 
-  -> #symType(5)))
+(GeneratedAnonVar0:Type -> GeneratedAnonVar1:Type) -> ((GeneratedAnonVar1 -> 
+  GeneratedAnonVar2:Type) -> (GeneratedAnonVar0 -> GeneratedAnonVar2))

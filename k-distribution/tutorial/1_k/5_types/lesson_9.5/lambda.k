@@ -52,7 +52,7 @@ module LAMBDA
   rule if bool then T:Type else T => T
 
   syntax KItem ::= env(Map)
-  rule <k> lambda X:Id . E:Exp => ?T:Type -> (E)::K ~> env(TEnv) ...</k>
+  rule <k> lambda X:Id . E:Exp => ?T:Type -> (E):>K ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>

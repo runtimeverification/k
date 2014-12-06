@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-bool -> (#symType(3) -> (#symType(3) -> #symType(3)))
+bool -> (GeneratedAnonVar0:Type -> (GeneratedAnonVar0 -> GeneratedAnonVar0))

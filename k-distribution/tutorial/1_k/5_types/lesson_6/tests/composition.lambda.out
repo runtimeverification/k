@@ -1,6 +1,0 @@
-Search results:
-
-Solution 1:
-V:K -->
-(#symType(10) -> #symType(8)) -> ((#symType(8) -> #symType(6)) -> (#symType(10
-  ) -> #symType(6)))

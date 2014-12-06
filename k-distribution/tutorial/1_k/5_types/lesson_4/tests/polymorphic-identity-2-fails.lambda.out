@@ -2,5 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(2) -> #symType(3)) = ((#symType(1) -> #symType(1)) -> #symType(4))
-   ~> #symType(4)
+GeneratedAnonVar0:Type GeneratedAnonVar0 ~> GeneratedAnonVar0 -> HOLE ~> (HOLE
+   (lambda x . x))

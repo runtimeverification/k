@@ -2,5 +2,6 @@ Search results:
 
 Solution 1:
 V:K -->
-#symType(6) = (bool) ~> #symType(5) = #symType(4) ~> #symType(5) ~> tenv ( x 
-  |-> #symType(1) ) ~> (#symType(1) -> HOLE) ~> tenv ( .Map )
+bool -> GeneratedAnonVar0:Type int ~> if GeneratedAnonVar0 then HOLE else f 2
+   ~> tenv ( x |-> bool -> GeneratedAnonVar0 ) ~> (bool -> GeneratedAnonVar0) 
+  -> HOLE ~> tenv ( .Map )

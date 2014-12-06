@@ -2,12 +2,9 @@ Search results:
 
 Solution 1:
 V:K -->
-#symType(1)
+GeneratedAnonVar0:Type
 
 Solution 2:
 V:K -->
-#symType(5) = #symType(6)
-
-Solution 3:
-V:K -->
-#symType(7) = #symType(4)
+GeneratedAnonVar0:Type -> GeneratedAnonVar0 = (GeneratedAnonVar0 -> 
+  GeneratedAnonVar0) -> GeneratedAnonVar1:Type

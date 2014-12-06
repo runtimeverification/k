@@ -11,6 +11,8 @@ module LAMBDA
 
   syntax Exp ::= Type
 
+  syntax Variable ::= Id
+
   syntax KResult ::= Type
 
   configuration <T color="yellow">
