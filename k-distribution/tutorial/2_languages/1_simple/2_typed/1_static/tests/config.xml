@@ -8,9 +8,25 @@
       programs="../../programs/"
       results="."
       extension="simple" >
+      <kompile-option name="--backend" value="java" />
       <all-programs>
+        <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+        <krun-option name="--smt" value="none" />
+      </all-programs>
+  </test>
+
+  <test
+      definition="simple-typed-static.k"
+      programs="../../programs/"
+      results="."
+      extension="simple" >
+      <kompile-option name="--backend" value="java" />
+      <all-programs>
+        <krun-option name="--pattern-matching" />
         <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
+
+
 
 </tests>
