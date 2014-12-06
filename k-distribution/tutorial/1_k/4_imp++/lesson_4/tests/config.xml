@@ -5,7 +5,7 @@
   <include file="../../lesson_2/tests/config.xml" 
            more-results="."
            exclude="div.imp sum.imp collatz.imp primes.imp">
-    <kompile-option name="" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--output" value="none" />
     </all-programs>
