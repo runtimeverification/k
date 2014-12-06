@@ -11,4 +11,8 @@ seqstrict(2,1).
 
 Also, callcc-env2.lambda evaluates to 3 instead of 4, because of the
 particular order in which the strictness of the application operation is
-applied.  If you make application seqstrict(2,1) then you get 4. 
+applied.  If you make application seqstrict(2,1) then you get 4.
+
+Dec 06, 2014: Looks like we should discuss the --search and --transition
+options before this lesson, and then kompile the definition with option
+--transition = computational and krun it with --search.
