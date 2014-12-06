@@ -2,4 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-x ~> HOLE, .Exps ~> 2, HOLE ~> assignTo ( x, y , HOLE ) ~> y ~> env ( .Map )
+x ~> HOLE, .Exps ~> 2, HOLE ~> assignTo ( x, y , HOLE ) ~> y ~> env ( x |-> 1 
+  ) ~> env ( .Map )

@@ -1,5 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-require "modules/substitution.k"
+require "modules/substitution-java.k"
+require "modules/pattern-matching-java.k"
 
 /*!
 \title{FUN --- Untyped --- Substitution}
@@ -150,6 +151,7 @@ module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
   imports FUN-UNTYPED-MACROS
   imports SUBSTITUTION
+  imports PATTERN-MATCHING
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Exp </k>
@@ -193,6 +195,9 @@ module FUN-UNTYPED
 
   syntax Val ::= "fun" Cases
   syntax Variable ::= Name
+  syntax Name ::= freshName(Int)    [freshGenerator, function]
+  rule freshName(I:Int) => #parseToken("Name", "_" +String Int2String(I))
+
   rule (fun P->E | _) V:Val => E[getMatching(P,V)]  when isMatching(P,V)
   rule (fun (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
   rule decomposeMatching(([H:Exp|T:Exp] => H,T),([V:Val,Vs:Vals] => V,[Vs]))
