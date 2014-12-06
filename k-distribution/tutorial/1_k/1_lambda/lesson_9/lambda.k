@@ -59,7 +59,7 @@ We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
 
-require "modules/substitution.k"
+require "modules/substitution-java.k"
 
 module LAMBDA
   imports SUBSTITUTION
@@ -99,6 +99,7 @@ interleaved) orders.
   syntax Exp ::= Val
                | Exp Exp              [left, strict]
                | "(" Exp ")"          [bracket]
+  syntax Variable ::= Id
   syntax KResult ::= Val
 
 //@ \section{$\beta$-reduction}
