@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
-
-<tests>
-  <include file="../1_untyped/tests/config.xml" directory="1_untyped" />
-  <include file="../2_typed/1_dynamic/tests/config.xml" directory="2_typed/1_dynamic" />
-  <include file="../2_typed/2_static/tests/config.xml" directory="2_typed/2_static" />
-</tests>
-
