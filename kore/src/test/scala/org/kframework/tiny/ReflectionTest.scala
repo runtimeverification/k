@@ -6,6 +6,8 @@ case class Foo(bar: Int = 6, buz: String)(zzz: String = "foo") {
   override def toString = s"Foo($bar,$buz)($zzz)"
 }
 
+case class Bar(x: Int, y: String = "foo")
+
 class ReflectionTest {
 
   @Test def findObject() {
@@ -30,9 +32,13 @@ class ReflectionTest {
   }
 
   @Test def invokeMethodWithDefaultArg {
-    case class Bar(x: Int, y: String = "foo")
     val expected = Bar(3)
     val actual = Reflection.invokeMethod(Bar, "apply", Seq(Seq(3)))
     assertEquals(expected, actual)
+  }
+
+  @Test def constructObject {
+    assertEquals(Bar(4, "Foo"),
+      Reflection.construct("org.kframework.tiny.Bar", Seq(4, "Foo")))
   }
 }
