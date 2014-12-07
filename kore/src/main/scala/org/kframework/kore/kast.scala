@@ -12,6 +12,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
 import org.kframework.tiny._
+import org.kframework.builtin.Sorts
 
 /* Interfaces */
 
@@ -172,6 +173,9 @@ object KToken {
     KUninterpretedToken(sort, s, Attributes())
 
   def unapply(t: KToken) = Some((t.sort, t.s, t.att))
+
+  implicit def from(i: Int) = apply(Sorts.KInt, i.toString)
+  implicit def from(s: String) = apply(Sorts.KString, s)
 }
 
 object KVariable {
@@ -215,5 +219,5 @@ object KORE {
 
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)
 
-  implicit def StringToKToken(s: String) = KToken(Sort("String"), s)
+  implicit def StringToKToken(s: String) = KToken(Sorts.KString, s)
 }
