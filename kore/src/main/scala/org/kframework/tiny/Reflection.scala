@@ -16,11 +16,11 @@ object Reflection {
     moduleMirror.instance
   }
 
-  val unbox = Map[Class[_], Class[_]](
-    classOf[Integer] -> Integer.TYPE).withDefault { x => x }
+  val box = Map[Class[_], Class[_]](
+    Integer.TYPE -> classOf[Integer]).withDefault { x => x }
 
   def <(a: Class[_], b: Class[_]) = {
-    unbox(b).isAssignableFrom(unbox(a))
+    box(b).isAssignableFrom(box(a))
   }
 
   def deconstruct(o: Any): TraversableOnce[Any] = o match {
@@ -28,6 +28,7 @@ object Reflection {
     case o: Product => o.productIterator
     case o: java.lang.Iterable[_] => o.asScala.iterator
     case o: Iterator[_] => o
+    case _ => Seq()
   }
 
   def construct(className: String, args: Seq[Any]) = {
@@ -50,12 +51,21 @@ object Reflection {
     }
   }
 
-  def invokeMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Any]]) = {
+  def invokeMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Any]]): Any = {
+    val (methodMirror, args) = findMethod(obj, methodName, givenArgsLists)
+
+    methodMirror.apply(args: _*)
+  }
+
+  def findMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Any]]) = {
     val instanceMirror = m.reflect(obj)
 
     val methodTermName = newTermName(methodName)
     val typeSignature = instanceMirror.symbol.typeSignature
     val termSymbol = typeSignature member methodTermName
+
+    if (termSymbol == NoSymbol)
+      throw new NoSuchMethodException("Could not find method: " + methodName)
 
     def valueFor(name: String, p: Symbol, i: Int, argsSoFar: List[Any]): Option[Any] = {
       val defarg = typeSignature member newTermName(s"$name$$default$$${i + 1}")
@@ -118,10 +128,12 @@ object Reflection {
           })
       }
 
-    val (methodSymbol, args) = symbolsWithArgs.head
+    val (methodSymbol, args) = symbolsWithArgs.headOption.getOrElse({
+      throw new IllegalArgumentException("Method " + methodName + " cannot be applied to " +
+        (givenArgsLists map { args => "(" + (args map { _.getClass } mkString ",") + ")" } mkString ""))
+    })
 
     val methodMirror = instanceMirror.reflectMethod(methodSymbol)
-
-    methodMirror.apply(args: _*)
+    (methodMirror, args)
   }
 }

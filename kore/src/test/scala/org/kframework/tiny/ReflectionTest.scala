@@ -1,6 +1,7 @@
 package org.kframework.tiny
 
 import org.junit.Test
+import org.junit.rules.ExpectedException
 
 case class Foo(bar: Int = 6, buz: String)(zzz: String = "foo") {
   override def toString = s"Foo($bar,$buz)($zzz)"
@@ -50,6 +51,16 @@ class ReflectionTest {
     assertEquals("string", Reflection.invokeMethod(o, "buz", Seq(Seq("blabla"))))
     assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
     assertEquals("any", Reflection.invokeMethod(o, "buz", Seq(Seq(o))))
+  }
+
+  @Test(expected = classOf[NoSuchMethodException])
+  def missingMethod {
+    Reflection.invokeMethod(Bar(3), "missing", Seq(Seq()))
+  }
+
+  @Test(expected = classOf[IllegalArgumentException])
+  def illigalArgument {
+    Reflection.invokeMethod(Bar(3), "buz", Seq(Seq()))
   }
 
   @Test def constructObject {
