@@ -5,10 +5,20 @@ package org.kframework.kore.outer
 import org.junit.Test
 import org.kframework.tiny.Reflection
 import org.junit.Assert
+import java.lang.reflect.Method
 
 abstract class AbstractVisitor {
+  import scala.reflect.runtime.universe.MethodMirror
+  val cache = collection.mutable.Map[Class[_], MethodMirror]()
+  //  val cache = collection.mutable.Map[Class[_], Method]()
+
   def apply(o: Any) {
-    Reflection.invokeMethod(this, "visit", Seq(Seq(o)))
+    val methodMirror = cache.getOrElseUpdate(o.getClass, {
+      val types = Reflection.typesForArgs(Seq(Seq(o)))
+      val (methodSymbol, _) = Reflection.findMethod(this, "visit", types)
+      Reflection.mirrorForMethod(this, methodSymbol)
+    })
+    methodMirror(o)
     Reflection.deconstruct(o) foreach apply
   }
   def visit(x: AnyRef) {}
@@ -20,6 +30,7 @@ trait Foo {
 case class Bar(x: Int, foo: Foo) extends Foo {
   def accept(x: DoubleDispatchVisitor) {
     x.visitBar(this)
+    foo.accept(x)
   }
 }
 object Buz extends Foo {
@@ -35,53 +46,57 @@ trait DoubleDispatchVisitor {
 
 class FooDoubleDispatchVisitor extends DoubleDispatchVisitor {
   var sumX = 0
-  def visitBar(x: Bar) { sumX += x.x }
+  def visitBar(bar: Bar) { sumX += bar.x }
   def visitBuz(x: Buz.type) {}
+}
+
+case class FooReflectionVisitor() extends AbstractVisitor {
+  var sumX = 0
+  def visit(foo: Bar) {
+    sumX += foo.x
+  }
 }
 
 class VisitorTest {
   import java.lang.Class
   import java.lang.reflect.Constructor
 
-  case class FooVisitor() extends AbstractVisitor {
-    var sumX = 0
-    def visit(foo: Bar) {
-      sumX += foo.x
-    }
-  }
-
   @Test def testSimple {
-    val visitor = FooVisitor()
+    val visitor = FooReflectionVisitor()
     visitor(Bar(1, Bar(2, Buz)))
     Assert.assertEquals(3, visitor.sumX)
   }
 
   @Test def testPerformance {
-    val manyBars = (0 to 2000).foldLeft(Buz: Foo) { case (x, i) => Bar(i, x) }
+    val manyBars = (1 to 1000).foldLeft(Buz: Foo) { case (x, i) => Bar(i, x) }
 
     // by double dispatch
     var startTime = System.nanoTime()
     val ddvisitor = new FooDoubleDispatchVisitor()
-    (0 to 10) foreach { i => manyBars.accept(ddvisitor) }
+    (1 to 100) foreach { i => manyBars.accept(ddvisitor) }
+    Assert.assertEquals(50050000, ddvisitor.sumX)
     println((System.nanoTime() - startTime) / 1000)
 
     // by pattern matching
     startTime = System.nanoTime()
     class PM {
-      var x = 0
+      var sumX = 0
       def apply(x: Foo): Unit = x match {
-        case Bar(x, rest) => apply(rest)
+        case Bar(x, rest) =>
+          sumX += x; apply(rest)
         case Buz =>
       }
     }
-    (0 to 10) foreach { i => new PM()(manyBars) }
+    val visitorPM = new PM()
+    (1 to 100) foreach { i => visitorPM(manyBars) }
+    Assert.assertEquals(50050000, visitorPM.sumX)
     println((System.nanoTime() - startTime) / 1000)
 
     // by reflection
     startTime = System.nanoTime()
-    val visitor = FooVisitor()
-    (0 to 10) foreach { i => visitor(manyBars) }
-    Assert.assertEquals(22011000, visitor.sumX)
+    val visitor = FooReflectionVisitor()
+    (1 to 100) foreach { i => visitor(manyBars) }
+    Assert.assertEquals(50050000, visitor.sumX)
     println((System.nanoTime() - startTime) / 1000)
 
   }

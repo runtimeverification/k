@@ -52,12 +52,40 @@ object Reflection {
   }
 
   def invokeMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Any]]): Any = {
-    val (methodMirror, args) = findMethod(obj, methodName, givenArgsLists)
+    val givenArgsTypes = givenArgsLists map { _ map { _.getClass().asInstanceOf[Class[Any]] } }
+
+    val (methodSymbol, paramsListsWithDefauls) = findMethod(obj, methodName, givenArgsTypes)
+
+    val methodMirror = mirrorForMethod(obj, methodSymbol)
+
+    val args = completeArgsWithDefaults(paramsListsWithDefauls, givenArgsLists)
 
     methodMirror.apply(args: _*)
   }
 
-  def findMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Any]]) = {
+  def mirrorForMethod(obj: Any, methodSymbol: reflect.runtime.universe.MethodSymbol) = {
+    val instanceMirror = m.reflect(obj)
+    instanceMirror.reflectMethod(methodSymbol)
+  }
+
+  def typesForArgs(givenArgsLists: Seq[Seq[Any]]) = {
+    givenArgsLists map { _ map { _.getClass().asInstanceOf[Class[Any]] } }
+  }
+
+  def completeArgsWithDefaults(paramsListsWithDefauls: Seq[Seq[Either[Class[_], reflect.runtime.universe.MethodMirror]]], givenArgsLists: Seq[Seq[Any]]) = {
+    paramsListsWithDefauls.zipAll(givenArgsLists, null, Seq()).foldLeft(Seq[Any]())({
+      case (argsSoFar, (paramsWithDefaults, args)) =>
+        val newArgs = paramsWithDefaults.zipAll(args, null, null) map {
+          case (c: Left[_, _], givenArg) => givenArg
+          case (Right(defaultArg), null) => defaultArg(argsSoFar: _*)
+          case x =>
+            throw new AssertionError("Should be unreachable: ")
+        }
+        argsSoFar ++ newArgs
+    })
+  }
+
+  def findMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Class[Any]]]): (MethodSymbol, Seq[Seq[Either[Class[_], MethodMirror]]]) = {
     val instanceMirror = m.reflect(obj)
 
     val methodTermName = newTermName(methodName)
@@ -67,18 +95,29 @@ object Reflection {
     if (termSymbol == NoSymbol)
       throw new NoSuchMethodException("Could not find method: " + methodName)
 
-    def valueFor(name: String, p: Symbol, i: Int, argsSoFar: List[Any]): Option[Any] = {
+    def valueFor(name: String, p: Symbol, i: Int): Option[MethodMirror] = {
       val defarg = typeSignature member newTermName(s"$name$$default$$${i + 1}")
       if (defarg != NoSymbol) {
-        Some((instanceMirror reflectMethod defarg.asMethod)(argsSoFar: _*))
+        Some(instanceMirror reflectMethod defarg.asMethod)
       } else
         None
-      //        throw new IllegalArgumentException(name + " " + p + " " + i + defarg.toString)
     }
 
     val methodSymbolAlternatives = termSymbol.asTerm.alternatives
 
-    val symbolsWithArgs = methodSymbolAlternatives
+    def typeszip(sym: MethodSymbol, argsLists: Seq[Seq[Either[Class[_], MethodMirror]]]) = {
+      val paramTypes = sym.asMethod.paramLists.flatten
+        .map { _.typeSignature.erasure.typeSymbol.asClass }
+        .map { m.runtimeClass(_) }
+      val argsTypes = argsLists.flatten map {
+        case Left(c) => c
+        case Right(mm) =>
+          m.runtimeClass(mm.symbol.returnType.erasure)
+      }
+      paramTypes.zip(argsTypes)
+    }
+
+    val possibleMethods = methodSymbolAlternatives
       .map { _.asMethod }
       .filter { _.paramLists.size >= givenArgsLists.size }
       .filter {
@@ -89,51 +128,52 @@ object Reflection {
       .map { methodSymbol =>
         val paramsWithGivenArgsLists = methodSymbol.paramLists
           .zipAll(givenArgsLists, null, Seq())
-          .map { case (params, args) => params.zipAll(args map { Option(_) }, null, None) }
+          .map { case (params, args) => params.zipAll(args map { Some(_) }, null, None) }
 
-        val paramsWithGivenArgsAndIndex = paramsWithGivenArgsLists.foldLeft((0, List[List[((Symbol, Option[Any]), Int)]]())) {
+        val paramsWithGivenArgsAndIndex = paramsWithGivenArgsLists.foldLeft((0, List[List[((Symbol, Option[Class[Any]]), Int)]]())) {
           case ((index, newPList), pList) => (index + pList.size, newPList :+
             (pList.zipWithIndex map {
               case (v, i) => (v, i + index)
             }))
         }
 
-        val args = paramsWithGivenArgsAndIndex._2.foldLeft(Option(List[Any]())) {
-          case (Some(argsSoFar), args) =>
+        // the left of Either is a Class, the right is a default value
+        val argsLists = paramsWithGivenArgsAndIndex._2 map {
+          case args =>
             val argsWithDefaults = args
               .map {
-                case ((sym, Some(v)), _) => Some(v)
-                case x @ ((sym, None), index) => valueFor(methodName, sym, index, argsSoFar)
+                case ((sym, Some(v)), _) => Some(Left(v))
+                case x @ ((sym, None), index) => valueFor(methodName, sym, index) map { Right(_) }
               }
             if (argsWithDefaults.contains(None))
               None
-            else
-              Some(argsSoFar ++ (argsWithDefaults map { _.get }))
-
-          case (None, args) => None
+            else {
+              Some((argsWithDefaults map { _.get }): List[Either[Class[_], MethodMirror]])
+            }
         }
-        (methodSymbol, args)
+
+        (methodSymbol, argsLists)
       }
       .collect {
-        case (sym, Some(args)) => (sym, args)
+        case (sym, argsLists) if !argsLists.contains(None) => (sym, argsLists map { case Some(x) => x })
       }
       .filter {
-        case (sym, args) =>
-          val paramTypes = sym.asMethod.paramLists.flatten
-            .map { _.typeSignature.erasure.typeSymbol.asClass }
-            .map { m.runtimeClass(_) }
-          val argsTypes = args map { _.getClass }
-          !(paramTypes.zip(argsTypes) exists {
+        case (sym, argsLists) =>
+          !(typeszip(sym, argsLists) exists {
             case (paramType, argType) => ! <(argType, paramType)
           })
       }
 
-    val (methodSymbol, args) = symbolsWithArgs.headOption.getOrElse({
-      throw new IllegalArgumentException("Method " + methodName + " cannot be applied to " +
-        (givenArgsLists map { args => "(" + (args map { _.getClass } mkString ",") + ")" } mkString ""))
-    })
-
-    val methodMirror = instanceMirror.reflectMethod(methodSymbol)
-    (methodMirror, args)
+    possibleMethods match {
+      case List() => throw new IllegalArgumentException(methodName + " " + givenArgsLists)
+      case List(x) => x
+      case x => (possibleMethods find {
+        case (sym, argsLists) => !(typeszip(sym, argsLists) exists {
+          case (a, b) => box(a) != box(b)
+        })
+      }).getOrElse({
+        throw new RuntimeException("Could not find an exact match for method " + methodName + " with arg types " + givenArgsLists)
+      })
+    }
   }
 }
