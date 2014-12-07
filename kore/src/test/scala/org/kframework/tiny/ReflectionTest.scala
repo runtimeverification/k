@@ -6,7 +6,13 @@ case class Foo(bar: Int = 6, buz: String)(zzz: String = "foo") {
   override def toString = s"Foo($bar,$buz)($zzz)"
 }
 
-case class Bar(x: Int, y: String = "foo")
+case class Bar(x: Int, y: String = "foo") {
+  def buz(x: Any) = "any"
+  def buz(x: Int) = "int"
+  def buz(s: String) = "string"
+  def buz(n: Number) = "number"
+  def buz(s: Int, v: Int) = "intint"
+}
 
 class ReflectionTest {
 
@@ -35,6 +41,15 @@ class ReflectionTest {
     val expected = Bar(3)
     val actual = Reflection.invokeMethod(Bar, "apply", Seq(Seq(3)))
     assertEquals(expected, actual)
+  }
+
+  @Test def invokeOverloadedMethod {
+    val o = Bar(3)
+    assertEquals("int", Reflection.invokeMethod(o, "buz", Seq(Seq(3))))
+    assertEquals("intint", Reflection.invokeMethod(o, "buz", Seq(Seq(3, 4))))
+    assertEquals("string", Reflection.invokeMethod(o, "buz", Seq(Seq("blabla"))))
+    assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
+    assertEquals("any", Reflection.invokeMethod(o, "buz", Seq(Seq(o))))
   }
 
   @Test def constructObject {
