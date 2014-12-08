@@ -49,7 +49,7 @@ class ReflectionTest {
     assertEquals("int", Reflection.invokeMethod(o, "buz", Seq(Seq(3))))
     assertEquals("intint", Reflection.invokeMethod(o, "buz", Seq(Seq(3, 4))))
     assertEquals("string", Reflection.invokeMethod(o, "buz", Seq(Seq("blabla"))))
-    //    assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
+    assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
     assertEquals("any", Reflection.invokeMethod(o, "buz", Seq(Seq(o))))
   }
 
@@ -66,5 +66,37 @@ class ReflectionTest {
   @Test def constructObject {
     assertEquals(Bar(4, "Foo"),
       Reflection.construct("org.kframework.tiny.Bar", Seq(4, "Foo")))
+  }
+
+  @Test def performanceTest {
+    val b = Bar(2)
+
+    val interval = (1 to Int.MaxValue / 100)
+    // warmup
+    interval foreach { x => 1 }
+    interval foreach { x => 1 }
+    interval foreach { x => 1 }
+
+    var startTime = System.nanoTime()
+    interval foreach { x => 1 }
+    val diffTime = System.nanoTime() - startTime
+
+    // direct call
+    startTime = System.nanoTime()
+    interval foreach { x => b.buz(3) }
+    println((System.nanoTime() - startTime - diffTime) / 1000)
+
+    // Scala reflection
+    val method = Reflection.mirrorForMethod(b,
+      Reflection.findMethod(b, "buz", Seq(Seq(3.getClass.asInstanceOf[Class[Any]])))._1)
+    startTime = System.nanoTime()
+    interval foreach { x => method(3) }
+    println((System.nanoTime() - startTime - diffTime) / 1000)
+
+    // Java reflection
+    val javaMethod = b.getClass.getMethod("buz", 3.getClass())
+    startTime = System.nanoTime()
+    interval foreach { x => javaMethod.invoke(b, 3.asInstanceOf[Object]) }
+    println((System.nanoTime() - startTime - diffTime) / 1000)
   }
 }

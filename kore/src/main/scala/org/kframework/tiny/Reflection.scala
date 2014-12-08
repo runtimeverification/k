@@ -19,8 +19,12 @@ object Reflection {
   val box = Map[Class[_], Class[_]](
     Integer.TYPE -> classOf[Integer]).withDefault { x => x }
 
-  def <(a: Class[_], b: Class[_]) = {
+  def <=(a: Class[_], b: Class[_]): Boolean = {
     box(b).isAssignableFrom(box(a))
+  }
+
+  def <=(a: Seq[Class[_]], b: Seq[Class[_]]): Boolean = { // assuming the seqences are equal
+    !(a.zip(b) exists { case (aa, bb) => ! <=(aa, bb) })
   }
 
   def deconstruct(o: Any): TraversableOnce[Any] = o match {
@@ -105,10 +109,12 @@ object Reflection {
 
     val methodSymbolAlternatives = termSymbol.asTerm.alternatives
 
+    def paramTypesFor(sym: MethodSymbol) = sym.asMethod.paramLists.flatten
+      .map { _.typeSignature.erasure.typeSymbol.asClass }
+      .map { m.runtimeClass(_) }
+
     def typeszip(sym: MethodSymbol, argsLists: Seq[Seq[Either[Class[_], MethodMirror]]]) = {
-      val paramTypes = sym.asMethod.paramLists.flatten
-        .map { _.typeSignature.erasure.typeSymbol.asClass }
-        .map { m.runtimeClass(_) }
+      val paramTypes = paramTypesFor(sym: MethodSymbol)
       val argsTypes = argsLists.flatten map {
         case Left(c) => c
         case Right(mm) =>
@@ -160,11 +166,16 @@ object Reflection {
       .filter {
         case (sym, argsLists) =>
           !(typeszip(sym, argsLists) exists {
-            case (paramType, argType) => ! <(argType, paramType)
+            case (paramType, argType) => ! <=(argType, paramType)
           })
       }
+    val eliminatedSubsorted = possibleMethods.filter {
+      case (sym, argsLists) =>
+        val otherMethods = possibleMethods map { _._1 } filter { _ != sym } map paramTypesFor
+        !(otherMethods exists { other => <=(other, paramTypesFor(sym)) })
+    }
 
-    possibleMethods match {
+    eliminatedSubsorted match {
       case List() => throw new IllegalArgumentException(methodName + " " + givenArgsLists)
       case List(x) => x
       case x => (possibleMethods find {
