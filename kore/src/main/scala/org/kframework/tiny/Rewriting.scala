@@ -1,7 +1,7 @@
 package org.kframework.tiny
 
 import org.kframework.kore._
-import org.kframework.builtin.KBoolean._
+import builtin.KBoolean._
 import org.kframework.Term
 import org.kframework.Collection
 
