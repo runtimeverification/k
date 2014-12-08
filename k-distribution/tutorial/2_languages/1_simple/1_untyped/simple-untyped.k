@@ -186,6 +186,9 @@ arguments. */
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
+// NOTE: print strict allows non-deterministic evaluation of its arguments
+// Either keep like this but document, or otherwise make Exps seqstrict.
+// Of define and use a different expression list here, which is seqstrict.
                 | "try" Block "catch" "(" Id ")" Block
                 | "throw" Exp ";"                       [strict]
                 | "join" Exp ";"                        [strict]
