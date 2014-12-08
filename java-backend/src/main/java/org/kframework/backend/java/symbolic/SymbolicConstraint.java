@@ -683,9 +683,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
                 if (equality.leftHandSide() instanceof Variable && equality.rightHandSide().isNormal()
                         && equality.rightHandSide().variableSet().contains(equality.leftHandSide())) {
+                    falsify(equality);
                     return TruthValue.FALSE;
                 } else if (equality.rightHandSide() instanceof Variable && equality.leftHandSide().isNormal()
                         && equality.leftHandSide().variableSet().contains(equality.rightHandSide())) {
+                    falsify(equality);
                     return TruthValue.FALSE;
                 }
 
