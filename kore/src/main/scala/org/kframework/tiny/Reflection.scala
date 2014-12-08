@@ -167,7 +167,8 @@ object Reflection {
         (methodSymbol, argsLists)
       }
       .collect {
-        case (sym, argsLists) if !argsLists.contains(None) => (sym, argsLists map { case Some(x) => x })
+        case (sym, argsLists) if !argsLists.contains(None) =>
+          (sym, argsLists collect { case Some(x) => x })
       }
       .filter {
         case (sym, argsLists) =>
