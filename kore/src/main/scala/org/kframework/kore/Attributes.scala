@@ -6,6 +6,7 @@ import scala.collection.mutable.Builder
 import org.kframework.builtin.Sorts
 import org.kframework.tiny.Pattern
 import org.kframework.tiny.Equivalence
+import sun.security.util.Cache.EqualByteArray
 
 case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
   type This = Attributes
@@ -45,10 +46,14 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
   def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
     ???
   }
+
+  override def equals(that: Any) = that.isInstanceOf[Attributes]
 }
 
 object Attributes {
   def apply(ks: K*) = new Attributes(ks.toSet)
+
+  val classFromUp = "classType"
 }
 
 trait AttributesToString {

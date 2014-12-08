@@ -26,7 +26,6 @@ trait Rewriting {
    */
   def search(left: Term, right: Term): Set[Term] = {
     val solutions = left.matchAll(this)
-    println(solutions)
     solutions map { substituion => right.transform(substituion) }
   }
 

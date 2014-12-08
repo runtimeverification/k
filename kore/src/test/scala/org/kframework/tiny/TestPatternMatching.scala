@@ -1,5 +1,6 @@
-package org.kframework.kore
+package org.kframework.tiny
 
+import org.kframework.kore._
 import KORE._
 import org.kframework.builtin.KInt._
 import org.kframework.tiny.Anywhere
