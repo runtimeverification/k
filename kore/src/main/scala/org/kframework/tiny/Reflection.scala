@@ -36,6 +36,12 @@ object Reflection {
   }
 
   def construct(className: String, args: Seq[Any]) = {
+    constructOption(className, args).getOrElse({
+      throw new AssertionError("Could not find a constructor for arguments: " + (args map { _.getClass() }))
+    })
+  }
+
+  def constructOption(className: String, args: Seq[Any]) = {
     val workingConstructors = Class.forName(className).getConstructors filter {
       case c =>
         c.getParameterCount == args.size
@@ -49,8 +55,8 @@ object Reflection {
     }
 
     workingConstructors.toList match {
-      case List() => throw new AssertionError("Could not find a constructor for arguments: " + (args map { _.getClass() }))
-      case c :: rest => c.newInstance(args.asInstanceOf[Seq[AnyRef]]: _*) // TODO: fix this, taking the first constructor now
+      case List() => None
+      case c :: rest => Some(c.newInstance(args.asInstanceOf[Seq[AnyRef]]: _*)) // TODO: fix this, taking the first constructor now
       //      case tooMany => throw new AssertionError("Found too many constructors for arguments: " + (args map { _.getClass() }) + "\n The constructors are " + tooMany.mkString(" ; "))
     }
   }
