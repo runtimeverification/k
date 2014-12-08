@@ -8,16 +8,16 @@ computational items, and how useful they can be.  Specifically, we fix the
 environment-based definition of `callcc` and give an environment-based
 definition of the `mu` construct for recursion.
 
-Let us first fix `callcc`.  As discussed in Lesson 4, the problem that we noticed
-there was that we only recovered the computation, but not the environment, when
-a value was passed to the current continuation.  This is quite easy to fix:
-we modify `cc` to take both an environment and a computation, and its rules
-to take a snapshot of the current environment with it, and to recover it at
-invocation time:
+Let us first fix `callcc`.  As discussed in Lesson 4, the problem that we
+noticed there was that we only recovered the computation, but not the
+environment, when a value was passed to the current continuation.  This is
+quite easy to fix: we modify `cc` to take both an environment and a
+computation, and its rules to take a snapshot of the current environment with
+it, and to recover it at invocation time:
 
     syntax Val ::= cc(Map,K)
     rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
-    rule <k> cc(Rho,K) V ~> _ =>  V ~> K </k> <env> _ => Rho </env>
+    rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
 
 Let us kompile and make sure it works with the `callcc-env2.lambda` program,
 which should evaluate to `3`, not to `4`.
@@ -38,8 +38,8 @@ We removed the `binder` annotation of `mu`, because it is not necessary
 anymore (since we do not work with substitutions anymore).
 
 To save the number of locations needed to evaluate `mu X . E`, let us replace
-it with a special closure which already binds `X` to a fresh location holding the
-closure itself:
+it with a special closure which already binds `X` to a fresh location holding
+the closure itself:
 
     syntax Exp ::= muclosure(Map,Exp)
 
@@ -49,8 +49,8 @@ closure itself:
       when fresh(N:Nat)  [structural]
 
 Since each time `mu X . E` is encountered during the evaluation it needs to
-evaluate `E`, we conclude that `muclosure` cannot be a value.  We can declare it
-as either an expression or as a computation.  Let's go with the former.
+evaluate `E`, we conclude that `muclosure` cannot be a value.  We can declare
+it as either an expression or as a computation.  Let's go with the former.
 
 Finally, here is the rule unrolling the `muclosure`:
 
@@ -63,8 +63,8 @@ from a context with a completely different environment from the one
 in which `mu X . E` was declared.
 
 We are done.  Let us now `kompile` and `krun` `factorial-letrec.lambda` from
-Lesson 7 in Part 1 of the tutorial on LAMBDA.  Recall that in the previous lesson
-this program generated a lot of garbage into the store, due to the
+Lesson 7 in Part 1 of the tutorial on LAMBDA.  Recall that in the previous
+lesson this program generated a lot of garbage into the store, due to the
 need to allocate space for the arguments of all those lambda abstractions
 needed to run the fixed-point combinator.  Now we need much fewer locations,
 essentially only locations for the argument of the factorial function, one at

@@ -7,6 +7,7 @@ module QUOTE-UNQUOTE-SYNTAX
   syntax Exp ::= "unquote" Exp  [#KAttributes(unquote(.::KList), klabel(unquote(.::KList)))]
   syntax Exp ::= "lift" Exp     [#KAttributes(lift(.::KList), strict(.::KList), klabel(lift(.::KList)))]
   syntax Exp ::= "eval" Exp     [#KAttributes(eval(.::KList), strict(.::KList), klabel(eval(.::KList)))]
+  syntax priority quote > unquote [#KAttributes(.::KList)]
 endmodule
 
 module QUOTE-UNQUOTE
