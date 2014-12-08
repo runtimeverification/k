@@ -7,7 +7,7 @@ import java.io.File
 import kore.outer._
 import scala.reflect.ClassTag
 
-class MetaTest {
+class TestMeta {
   import org.junit._
 
   import KToken._
@@ -34,7 +34,7 @@ class MetaTest {
     'Set('Module("TEST",
       'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")))))))
 
-  val Down = tiny.Down(Set("org.kframework.kore.outer"))
+  val Down = tiny.Down(Set("org.kframework.kore.outer", "scala.collection.immutable"))
 
   @Test def definitionUp() {
     assertEquals(metad, Up(d))

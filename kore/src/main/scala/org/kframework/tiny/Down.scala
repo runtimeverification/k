@@ -13,9 +13,9 @@ case class Down(imports: Set[String]) extends (K => Any) {
 
   def apply(o: K): Any = o match {
     case KToken(`KString`, v, att) => v
-    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
-    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
-    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
+    //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
+    //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
+    //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
     case KApply(KLabel("Sort"), KList(KToken(Sorts.KString, s, _)), _) => Sort(s)
     case KApply(KLabel(l), ks, att) if att.contains(Attributes.classFromUp) =>
       val classNameRecoveredFromUp = att.getString(Attributes.classFromUp).get
@@ -34,14 +34,14 @@ case class Down(imports: Set[String]) extends (K => Any) {
         .headOption.getOrElse {
           matchingClasses
             .view
-            .flatMap { Reflection.constructOption(_, ks map apply) }
+            .flatMap { className => Try(Reflection.construct(className, ks map apply)).toOption }
             .headOption
             .getOrElse {
               throw new AssertionError("Could not find a proper constructor for " + l +
                 "\n with arguments (" + children.mkString(",") +
                 ")\n of types (" + children.map(_.getClass()).mkString(",") +
-                ")\n Tried:\n " +
-                matchingClasses.mkString("\n"))
+                ")\n Tried:\n    " +
+                matchingClasses.mkString("\n    "))
             }
         }
 
