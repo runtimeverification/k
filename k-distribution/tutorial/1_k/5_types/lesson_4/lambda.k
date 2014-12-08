@@ -18,7 +18,7 @@ module LAMBDA
                | "mu" Id "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type                  [smtlib(funcType)]
+                | Type "->" Type
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -41,8 +41,6 @@ module LAMBDA
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule mu X . E => (?T:Type -> ?T) (E[?T/X])
-
-  rule T1 -> T2 =/=K T1 => true [smt-lemma]
 
   syntax KItem ::= Type "=" Type
   rule T = T => .

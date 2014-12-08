@@ -241,6 +241,14 @@ public class Equality {
                 return true;
             }
 
+            if (leftHandSide instanceof Variable && rightHandSide.isNormal()
+                    && rightHandSide.variableSet().contains(leftHandSide)) {
+                return true;
+            } else if (rightHandSide instanceof Variable && leftHandSide.isNormal()
+                    && leftHandSide.variableSet().contains(rightHandSide)) {
+                return true;
+            }
+
             // TODO(YilongL): handle this in SymbolicUnifier?
             if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                 return !leftHandSide.sort().equals(rightHandSide.sort());
