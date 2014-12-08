@@ -21,6 +21,10 @@ class ReflectionTest {
     assertEquals(Foo, Reflection.findObject("org.kframework.tiny.Foo"))
   }
 
+  @Test def findSet() {
+    assertEquals(scala.collection.Set, Reflection.findObject("scala.collection.Set"))
+  }
+
   @Test def invokeMethod {
     val expected = Foo(2, "buzValue")("zzzValue")
     val actual = Reflection.invokeMethod(Foo, "apply", Seq(Seq(2, "buzValue"), Seq("zzzValue")))
