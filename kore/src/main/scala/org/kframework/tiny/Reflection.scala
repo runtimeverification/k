@@ -2,6 +2,8 @@ package org.kframework.tiny
 
 import scala.reflect.ManifestFactory
 import collection.JavaConverters._
+import scala.util.Failure
+import scala.util.Success
 
 object Reflection {
   import scala.reflect.runtime.universe._
@@ -36,12 +38,6 @@ object Reflection {
   }
 
   def construct(className: String, args: Seq[Any]) = {
-    constructOption(className, args).getOrElse({
-      throw new AssertionError("Could not find a constructor for arguments: " + (args map { _.getClass() }))
-    })
-  }
-
-  def constructOption(className: String, args: Seq[Any]) = {
     val workingConstructors = Class.forName(className).getConstructors filter {
       case c =>
         c.getParameterCount == args.size
@@ -55,9 +51,9 @@ object Reflection {
     }
 
     workingConstructors.toList match {
-      case List() => None
-      case c :: rest => Some(c.newInstance(args.asInstanceOf[Seq[AnyRef]]: _*)) // TODO: fix this, taking the first constructor now
-      //      case tooMany => throw new AssertionError("Found too many constructors for arguments: " + (args map { _.getClass() }) + "\n The constructors are " + tooMany.mkString(" ; "))
+      case List() => throw new AssertionError("Could not find a constructor for arguments: " + (args map { _.getClass() }))
+      case c :: rest => c.newInstance(args.asInstanceOf[Seq[AnyRef]]: _*) // TODO: fix this, taking the first constructor now
+      case tooMany => throw new AssertionError("Found too many constructors for arguments: " + (args map { _.getClass() }) + "\n The constructors are " + tooMany.mkString(" ; "))
     }
   }
 
@@ -70,7 +66,8 @@ object Reflection {
 
     val args = completeArgsWithDefaults(paramsListsWithDefauls, givenArgsLists)
 
-    methodMirror.apply(args: _*)
+    try { methodMirror.apply(args: _*) }
+    catch { case reason => methodMirror.apply(args) }
   }
 
   def mirrorForMethod(obj: Any, methodSymbol: reflect.runtime.universe.MethodSymbol) = {
@@ -88,8 +85,8 @@ object Reflection {
         val newArgs = paramsWithDefaults.zipAll(args, null, null) map {
           case (c: Left[_, _], givenArg) => givenArg
           case (Right(defaultArg), null) => defaultArg(argsSoFar: _*)
-          case x =>
-            throw new AssertionError("Should be unreachable: ")
+          case (null, arg) => arg
+          case _ => throw new AssertionError("Should be unreachable: ")
         }
         argsSoFar ++ newArgs
     })
@@ -129,19 +126,30 @@ object Reflection {
       paramTypes.zip(argsTypes)
     }
 
+    def isVarArg(s: Symbol) = s.info.toString().contains("*")
+    def isVarArgs(params: List[Symbol]) = params exists isVarArg
+
     val possibleMethods = methodSymbolAlternatives
       .map { _.asMethod }
       .filter { _.paramLists.size >= givenArgsLists.size }
       .filter {
         !_.paramLists.zipAll(givenArgsLists, null, Seq()).exists({
-          case (params, givenArgs) => params.size < givenArgs.size
+          case (params, givenArgs) =>
+            params.size < givenArgs.size && !isVarArgs(params)
         })
       }
       .map { methodSymbol =>
         val paramsWithGivenArgsLists = methodSymbol.paramLists
           .zipAll(givenArgsLists, null, Seq())
-          .map { case (params, args) => params.zipAll(args map { Some(_) }, null, None) }
-
+          .map {
+            case (params, args) =>
+              val res = params.zipAll(args map { Some(_) }, null, None)
+              if (isVarArgs(params)) {
+                val cutPos = params indexWhere isVarArg
+                res.slice(0, cutPos)
+              } else
+                res
+          }
         val paramsWithGivenArgsAndIndex = paramsWithGivenArgsLists.foldLeft((0, List[List[((Symbol, Option[Class[Any]]), Int)]]())) {
           case ((index, newPList), pList) => (index + pList.size, newPList :+
             (pList.zipWithIndex map {
@@ -155,7 +163,8 @@ object Reflection {
             val argsWithDefaults = args
               .map {
                 case ((sym, Some(v)), _) => Some(Left(v))
-                case x @ ((sym, None), index) => valueFor(methodName, sym, index) map { Right(_) }
+                case ((sym, None), index) =>
+                  valueFor(methodName, sym, index) map { Right(_) }
               }
             if (argsWithDefaults.contains(None))
               None
@@ -163,7 +172,6 @@ object Reflection {
               Some((argsWithDefaults map { _.get }): List[Either[Class[_], MethodMirror]])
             }
         }
-
         (methodSymbol, argsLists)
       }
       .collect {
@@ -186,9 +194,10 @@ object Reflection {
       case List() => throw new IllegalArgumentException(methodName + " " + givenArgsLists)
       case List(x) => x
       case x => (possibleMethods find {
-        case (sym, argsLists) => !(typeszip(sym, argsLists) exists {
-          case (a, b) => box(a) != box(b)
-        })
+        case (sym, argsLists) =>
+          !(typeszip(sym, argsLists) exists {
+            case (a, b) => box(a) != box(b)
+          })
       }).getOrElse({
         throw new RuntimeException("Could not find an exact match for method " + methodName + " with arg types " + givenArgsLists)
       })
