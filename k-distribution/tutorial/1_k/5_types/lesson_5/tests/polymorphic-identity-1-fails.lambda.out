@@ -2,6 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-bool -> GeneratedAnonVar0:Type int ~> if GeneratedAnonVar0 then HOLE else id 2
-   ~> (bool -> GeneratedAnonVar0) -> HOLE ~> tenv ( .Map ) ~> (HOLE (lambda x 
-  . x))
+bool -> _0:Type int ~> if _0 then HOLE else id 2 ~> (bool -> _0) -> HOLE ~> 
+  tenv ( .Map ) ~> (HOLE (lambda x . x))

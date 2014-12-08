@@ -2,33 +2,28 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons
-   ( GeneratedAnonVar2:Term, cons ( GeneratedAnonVar3:Term, nil ) ) ) )
+L1:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _2:Term, cons ( _3:Term, 
+  nil ) ) ) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( 
-  GeneratedAnonVar2, cons ( GeneratedAnonVar3, cons ( a, L2 ) ) ) ) )
+L3:Term |-> cons ( _0, cons ( _1, cons ( _2, cons ( _3, cons ( a, L2 ) ) ) ) )
 
 Solution 2:
 Solution:Map -->
-L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons
-   ( GeneratedAnonVar2:Term, nil ) ) )
+L1:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _2:Term, nil ) ) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( 
-  GeneratedAnonVar2, cons ( a, L2 ) ) ) )
+L3:Term |-> cons ( _0, cons ( _1, cons ( _2, cons ( a, L2 ) ) ) )
 
 Solution 3:
 Solution:Map -->
-L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, nil 
-  ) )
+L1:Term |-> cons ( _0:Term, cons ( _1:Term, nil ) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( a, L2 )
-   ) )
+L3:Term |-> cons ( _0, cons ( _1, cons ( a, L2 ) ) )
 
 Solution 4:
 Solution:Map -->
-L1:Term |-> cons ( GeneratedAnonVar0:Term, nil )
+L1:Term |-> cons ( _0:Term, nil )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( GeneratedAnonVar0, cons ( a, L2 ) )
+L3:Term |-> cons ( _0, cons ( a, L2 ) )
 
 Solution 5:
 Solution:Map -->

@@ -2,5 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-GeneratedAnonVar0:Type GeneratedAnonVar0 ~> GeneratedAnonVar0 -> HOLE ~> tenv 
-  ( .Map ) ~> (HOLE (lambda x . x))
+_0:Type _0 ~> _0 -> HOLE ~> tenv ( .Map ) ~> (HOLE (lambda x . x))
