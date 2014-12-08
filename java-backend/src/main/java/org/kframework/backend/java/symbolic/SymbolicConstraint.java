@@ -8,7 +8,6 @@ import static org.kframework.backend.java.util.RewriteEngineUtils.isSubsortedEq;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
@@ -27,7 +26,6 @@ import org.kframework.utils.options.SMTSolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -680,6 +678,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     falsify(new Equality(
                             unifier.unificationFailureLeftHandSide(),
                             unifier.unificationFailureRightHandSide(), context));
+                    return TruthValue.FALSE;
+                }
+
+                if (equality.leftHandSide() instanceof Variable && equality.rightHandSide().isNormal()
+                        && equality.rightHandSide().variableSet().contains(equality.leftHandSide())) {
+                    return TruthValue.FALSE;
+                } else if (equality.rightHandSide() instanceof Variable && equality.leftHandSide().isNormal()
+                        && equality.leftHandSide().variableSet().contains(equality.rightHandSide())) {
                     return TruthValue.FALSE;
                 }
 
