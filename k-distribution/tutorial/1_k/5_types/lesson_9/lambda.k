@@ -33,16 +33,16 @@ module LAMBDA
   rule I:Int => int
   rule B:Bool => bool
   rule <k> X:Id => T ...</k>  <tenv>... X |-> T:Type ...</tenv>
-  rule int * int => int
-  rule int / int => int
-  rule int + int => int
-  rule int <= int => bool
+  rule T1:Type  * T2:Type => T1 = int ~> T2 = int ~> int
+  rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
+  rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
+  rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
   rule <k> lambda X:Id . E:Exp => E ~> ?T:Type -> HOLE ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
   rule T2:Type ~> T1:Type -> HOLE => T1 -> T2
-  rule (T1:Type -> T2:Type) T1 => T2
-  rule if bool then T:Type else T => T
+  rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
+  rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
   syntax TypeSchema ::= "(" "forall" Set ")" Type
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
@@ -57,6 +57,9 @@ module LAMBDA
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   rule T1 -> T2 =/=K T1 => true [smt-lemma]
+
+  syntax KItem ::= Type "=" Type
+  rule T = T => .
 
   syntax KItem ::= tenv(Map)
   rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
