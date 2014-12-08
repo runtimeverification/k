@@ -123,12 +123,12 @@ public abstract class JavaSymbolicObject extends ASTNode
     }
 
      /**
-     * Returns a {@code Set} view of the user variables in this
+     * Returns a {@code Set} view of the user variables (ie terms of sort Variable) in this
      * {@code JavaSymbolicObject}.
      * <p>
      * When the set of user variables has not been computed, this method will do the
      * computation instead of simply returning {@code null}
-     * {@link JavaSymbolicObject#getVariableSet()}.
+     * {@link JavaSymbolicObject#getUserVariableSet()}.
      */
     public Set<Term> userVariableSet(TermContext context) {
         if (userVariableSet == null) {
