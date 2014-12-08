@@ -49,7 +49,7 @@ class ReflectionTest {
     assertEquals("int", Reflection.invokeMethod(o, "buz", Seq(Seq(3))))
     assertEquals("intint", Reflection.invokeMethod(o, "buz", Seq(Seq(3, 4))))
     assertEquals("string", Reflection.invokeMethod(o, "buz", Seq(Seq("blabla"))))
-    //    assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
+    assertEquals("number", Reflection.invokeMethod(o, "buz", Seq(Seq(3.4))))
     assertEquals("any", Reflection.invokeMethod(o, "buz", Seq(Seq(o))))
   }
 
