@@ -1,10 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "modules/unification-java.k"
-require "modules/substitution-java.k"
 
 module LAMBDA
   imports UNIFICATION
-  imports SUBSTITUTION
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
@@ -45,9 +43,10 @@ module LAMBDA
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
   syntax TypeSchema ::= "(" "forall" Set ")" Type
+  syntax Type ::= MetaVariable
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <tenv> TEnv
-        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) T]
+        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) #freezeVariables(T, tenv(TEnv))]
        </tenv>
   rule <k> X:Id => #rename(T, Tvs) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>

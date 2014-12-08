@@ -5,7 +5,7 @@ module UNIFICATION
 
   syntax K ::= #renameVariables(K)  [function, hook(MetaK:renameVariables), impure]
 
-  syntax Set ::= #variables(K)    [function, hook(#META-K:variables), impure]
+  syntax Set ::= #variables(K)    [function, hook(MetaK:variables), impure]
 
   syntax Set ::= #metaVariables(K)    [function, hook(#META-K:#variables), impure]
 
@@ -13,6 +13,10 @@ module UNIFICATION
 
   syntax K ::= #rename(K, Set)    [function, hook(#META-K:#rename), impure]
 
+  syntax K ::= #freezeVariables(K, K) [function, hook(MetaK:freezeVariables), impure]
+
   syntax Bool ::= #unifiable(K,K) [function, hook(MetaK:unifiable), impure]
+
+  syntax MetaVariable
 
 endmodule

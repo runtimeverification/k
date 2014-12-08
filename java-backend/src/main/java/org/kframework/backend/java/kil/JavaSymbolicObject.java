@@ -170,6 +170,11 @@ public abstract class JavaSymbolicObject extends ASTNode
                                 kItem.functionKLabels.add(kItem.kLabel());
                             }
                         }
+
+                        @Override
+                        public void visit(KItemProjection projection) {
+                            projection.functionKLabels.add(projection);
+                        }
                     });
             accept(visitor);
             functionKLabels = visitor.getResultSet();
