@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.builtin
+package org.kframework.tiny.builtin
 
 import org.kframework._
 import kore._
@@ -90,3 +90,14 @@ object Location {
     'location('startLine(startLine), 'startColumn(startColumn), 'endLine(endLine), 'endColumn(endColumn))
   }
 }
+
+//case class ScalaObject(pckage: String, name: String) extends KLabel {
+//  def fullName = pckage + "." + name
+//}
+//
+//object ScalaObject {
+//  def apply(fullName: String): ScalaObject = {
+//    val r = fullName.split(".").reverse
+//    ScalaObject(r.tail.reverse.mkString("."), r.head)
+//  }
+//}
