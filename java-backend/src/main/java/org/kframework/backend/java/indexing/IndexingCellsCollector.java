@@ -52,7 +52,7 @@ public class IndexingCellsCollector extends BottomUpVisitor {
             }
 
             if (cell.content() instanceof CellCollection) {
-                super.visit((CellCollection) cell.content());
+                visit((CellCollection) cell.content());
             }
         }
     }

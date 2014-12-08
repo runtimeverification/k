@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Multimap;
-
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
@@ -13,6 +11,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
@@ -25,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,12 +37,12 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
-    private List<org.kframework.kil.Term> currentCell;
+    private List<String> currentCellLabels;
 
     public BackendJavaKILtoKILTransformer(Context context) {
         this.context = context;
         configurationStructureMap = context.getConfigurationStructureMap();
-        currentCell = Collections.singletonList(configurationStructureMap.get(MetaK.Constants.generatedTopCellLabel).cell);
+        currentCellLabels = Collections.emptyList();
     }
 
     @Override
@@ -65,19 +66,27 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
-        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (org.kframework.kil.Term term : currentCell) {
-            if (! (term instanceof org.kframework.kil.Cell)) continue;
-            String key = ((org.kframework.kil.Cell) term).getLabel();
-            for (CellCollection.Cell cell : cellCollection.cells().get(CellLabel.of(key))) {
+        Set<CellLabel> cellLabels = !currentCellLabels.isEmpty() ?
+                currentCellLabels.stream().map(CellLabel::of).collect(Collectors.toSet()) :
+                cellCollection.cells().keySet();
+
+        List<org.kframework.kil.Term> contents = new ArrayList<>();
+        for (CellLabel cellLabel : cellLabels) {
+            for (CellCollection.Cell cell : cellCollection.cells().get(cellLabel)) {
                 contents.add(transformCell(cell));
             }
         }
         if (cellCollection.hasFrame()) {
             contents.add((org.kframework.kil.Term) cellCollection.frame().accept(this));
         }
+
+        if (contents.size() == 1 && contents.get(0) instanceof Cell) {
+            return contents.get(0);
+        }
+
         ASTNode kil = new org.kframework.kil.Bag(contents);
-        kil.copyAttributesFrom(cellCollection);
+        // TODO(AndreiS): what cell attributes are preserved by the backend?
+        // kil.copyAttributesFrom(cellCollection);
         return kil;
     }
 
@@ -85,10 +94,14 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         // TODO(AndreiS): fix the printing of the cells which are representing maps
         CellLabel label = cell.cellLabel();
         Term content = cell.content();
-        if (label.isMapCell()) {
-            currentCell = configurationStructureMap.get(label.getRealCellLabel().name()).cell.getCellTerms();
+        if (content instanceof CellCollection) {
+            if (label.isMapCell()) {
+                currentCellLabels = configurationStructureMap.get(label.getRealCellLabel().name()).cell.getCellLabels();
+            } else {
+                currentCellLabels = configurationStructureMap.get(label.name()).cell.getCellLabels();
+            }
         } else {
-            currentCell = configurationStructureMap.get(label.name()).cell.getCellTerms();
+            currentCellLabels = Collections.emptyList();
         }
 
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
