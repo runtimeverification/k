@@ -73,12 +73,8 @@ public class CollectVariablesVisitor extends BasicVisitor {
                     UserList ul = (UserList) node.getProduction().getItems().get(i);
                     Term t1 = node.getContents().get(0);
                     Term t2 = node.getContents().get(1);
-                    try {
-                        new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
-                        new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
-                    } catch (ParseFailedException e) {
-                        e.printStackTrace();
-                    }
+                    new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
+                    new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
                     this.visitNode(t1);
                     this.visitNode(t2);
                 }

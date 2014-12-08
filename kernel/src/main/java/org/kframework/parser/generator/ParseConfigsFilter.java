@@ -74,7 +74,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
         if (ss.getType().equals(Constants.CONFIG)) {
             long startTime2 = System.currentTimeMillis();
             ASTNode config = null;
-            if (!context.kompileOptions.experimental.javaParser) {
+            if (!context.kompileOptions.experimental.javaParserRules) {
                 String parsed = null;
                 if (ss.containsAttribute("kore")) {
                     long startTime = System.currentTimeMillis();
@@ -110,27 +110,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             } else  {
                 // parse with the new parser for rules
                 Grammar ruleGrammar = getCurrentModule().getRuleGrammar(kem);
-                Parser parser = new Parser(ss.getContent());
-                ASTNode out = parser.parse(ruleGrammar.get("MetaKList"), 0);
-                try {
-                    // only the unexpected character type of errors should be checked in this block
-                    new UpdateLocationVisitor(context, ss.getLocation().lineStart, ss.getLocation().columnStart, 1, 1).visitNode(out);
-                    out = new TreeCleanerVisitor(context).visitNode(out);
-                } catch (ParseFailedException te) {
-                    Parser.ParseError perror = parser.getErrors();
-                    String msg = ss.getContent().length() == perror.position ?
-                            "Parse error: unexpected end of configuration." :
-                            "Parse error: unexpected character '" + ss.getContent().charAt(perror.position) + "'.";
-                    Location loc = new Location(perror.line, perror.column, perror.line, perror.column + 1);
-                    loc = UpdateLocationVisitor.updateLocation(ss.getContentStartLine(), ss.getContentStartColumn(), 1, 1, loc);
-                    throw new ParseFailedException(new KException(
-                            ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, ss.getSource(), loc));
-                }
-                out = new MakeConsList(context).visitNode(out);
-                Sentence st = new Sentence();
-                // TODO set the other parts of the sentence
-                st.setBody((Term) out);
-                config = new Configuration(st);
+                config = new Configuration(RuleParserHelper.parseSentence(ss, ruleGrammar.get("MetaKList"), "configuration"));
             }
 
             // disambiguate configs

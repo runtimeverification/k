@@ -12,9 +12,9 @@ public class UpdateLocationVisitor extends BasicVisitor {
     private int cachedStartLine;
     private int cachedStartColumn;
 
-    public UpdateLocationVisitor(Context context, int currentStartLine, int currentStartColumn,
-                                                  int  cachedStartLine, int  cachedStartColumn) {
-        super(context);
+    public UpdateLocationVisitor(int currentStartLine, int currentStartColumn,
+                                 int  cachedStartLine, int  cachedStartColumn) {
+        super(null);
         this.currentStartLine   = currentStartLine;
         this.currentStartColumn = currentStartColumn;
         this.cachedStartColumn  = cachedStartColumn;
