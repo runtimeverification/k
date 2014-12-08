@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.HashMultiset;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -18,9 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multiset;
 
 
@@ -87,7 +85,7 @@ public class CellCollection extends Collection {
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
      * be able to store identical cells.
      */
-    private final Multimap<CellLabel, Cell> cells;
+    private final ListMultimap<CellLabel, Cell> cells;
 
     private final Multiset<Variable> collectionVariables;
 
@@ -106,7 +104,7 @@ public class CellCollection extends Collection {
      * Static helper method which creates canonicalized cell collection
      * according to the given contents.
      */
-    public static Term of(Multimap<CellLabel, Cell> cells, Variable frame, Context context) {
+    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame, Context context) {
         Builder builder = builder(context);
         builder.putAll(cells);
         if (frame != null) {
@@ -116,14 +114,14 @@ public class CellCollection extends Collection {
     }
 
     private CellCollection(
-            Multimap<CellLabel, Cell> cells,
+            ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             Context context) {
         this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, context) > 0);
     }
 
     private CellCollection(
-            Multimap<CellLabel, Cell> cells,
+            ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             boolean hasMultiplicityCell) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
@@ -136,7 +134,7 @@ public class CellCollection extends Collection {
         return collectionVariables.size() == 1 ? collectionVariables.iterator().next() : null;
     }
 
-    private static int numOfMultiplicityCellLabels(Multimap<CellLabel, Cell> cells, Context context) {
+    private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Context context) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
             if (context.getConfigurationStructureMap().containsKey(cellLabel.name())) {
@@ -155,7 +153,7 @@ public class CellCollection extends Collection {
         return count;
     }
 
-    public Multimap<CellLabel, Cell> cells() {
+    public ListMultimap<CellLabel, Cell> cells() {
         return cells;
     }
 
@@ -334,7 +332,7 @@ public class CellCollection extends Collection {
             return this;
         }
 
-        public Builder putAll(Multimap<CellLabel, Cell> cellMap) {
+        public Builder putAll(ListMultimap<CellLabel, Cell> cellMap) {
             cellsBuilder.putAll(cellMap);
             return this;
         }
@@ -367,7 +365,7 @@ public class CellCollection extends Collection {
         }
 
         public Term build() {
-            ImmutableMultimap<CellLabel, Cell> cells = cellsBuilder.build();
+            ImmutableListMultimap<CellLabel, Cell> cells = cellsBuilder.build();
             ImmutableMultiset<Variable> collectionVariables = collectionVariablesBuilder.build();
             if (cells.isEmpty()) {
                 switch (collectionVariables.size()) {

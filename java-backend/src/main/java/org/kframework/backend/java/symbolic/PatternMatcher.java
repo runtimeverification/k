@@ -537,7 +537,7 @@ public class PatternMatcher extends AbstractMatcher {
                 fail(cellCollection, otherCellCollection);
             }
 
-            Multimap<CellLabel, CellCollection.Cell> remainingCellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+            ListMultimap<CellLabel, CellCollection.Cell> remainingCellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
@@ -640,7 +640,7 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
 
-    private Multimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
+    private ListMultimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
         Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
             @Override

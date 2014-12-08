@@ -597,7 +597,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             // from now on, we assume that cellCollection is free of frame
-            Multimap<CellLabel, CellCollection.Cell> cellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+            ListMultimap<CellLabel, CellCollection.Cell> cellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
 
             if (numOfOtherDiffCellLabels > 0) {
                 fail(cellCollection, otherCellCollection);
@@ -691,7 +691,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    private Multimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
+    private ListMultimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
         Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
             @Override
