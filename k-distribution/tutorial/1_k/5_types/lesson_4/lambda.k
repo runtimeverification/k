@@ -34,6 +34,8 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
+  //TODO(AndreiS): replace with strictness when java unification algorithm
+  //correctly handles sorts
   rule lambda X . E:Exp => E[?T/X] ~> ?T:Type -> HOLE
   rule T2:Type ~> T1:Type -> HOLE => T1 -> T2
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
