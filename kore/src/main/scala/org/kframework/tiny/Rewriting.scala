@@ -35,8 +35,8 @@ trait Rewriting {
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
       val newChildren = klist map { x: Term => x.transform(substituion).asInstanceOf[K] }
       KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
-    case c: Collection[Term] =>
-      c map { x: Term => x.transform(substituion) }
+    case c: Collection[_] =>
+      c.asInstanceOf[Collection[Term]] map { x: Term => x.transform(substituion) }
     case e => e
   }
 
@@ -46,14 +46,14 @@ trait Rewriting {
 
   def toLeft(rewrite: Term): Term = rewrite match {
     case KRewrite(left, right, _) => left
-    case c: Collection[Term] => c map toLeft
+    case c: Collection[_] => c.asInstanceOf[Collection[Term]] map toLeft
     case other => other
   }
 
   def toRight(rewrite: Term): Term = rewrite match {
     case KRewrite(left, right, _) => right
     case Anywhere(p) => Anywhere(toRight(p))
-    case c: Collection[Term] => c map toRight
+    case c: Collection[_] => c.asInstanceOf[Collection[Term]] map toRight
     case other => other
   }
 }

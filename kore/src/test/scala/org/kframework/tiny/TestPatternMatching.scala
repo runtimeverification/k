@@ -3,8 +3,6 @@ package org.kframework.tiny
 import org.kframework.kore._
 import KORE._
 import org.kframework.tiny.builtin.KInt._
-import org.kframework.tiny.Anywhere
-import org.kframework.tiny.MetaKLabel
 
 class TestPatternMatching {
   import org.junit._

@@ -167,8 +167,9 @@ case class Anywhere(pattern: Term) extends Collection[Term] with BindingOps {
 
   def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
     val localSolution = and(pattern.matchAll(k), Set(Map(TOP -> (HOLE: Term))))
-    val childrenSolutions = k match {
-      case k: Collection[Term] =>
+    val childrenSolutions: Set[Map[KVariable, Term]] = k match {
+      case kk: Collection[_] =>
+        val k = kk.asInstanceOf[Collection[Term]]
         (k map { c: Term =>
           val solutions = this.matchAll(c)
           val updatedSolutions = solutions map {
