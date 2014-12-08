@@ -75,7 +75,7 @@ class ReflectionTest {
   @Test def performanceTest {
     val b = Bar(2)
 
-    val interval = (1 to Int.MaxValue / 100)
+    val interval = (1 to Int.MaxValue / 10000)
     // warmup
     interval foreach { x => 1 }
     interval foreach { x => 1 }
