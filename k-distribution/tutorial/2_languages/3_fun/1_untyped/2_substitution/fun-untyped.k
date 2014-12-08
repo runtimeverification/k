@@ -196,7 +196,7 @@ module FUN-UNTYPED
   syntax Val ::= "fun" Cases
   syntax Variable ::= Name
   syntax Name ::= freshName(Int)    [freshGenerator, function]
-  rule freshName(I:Int) => #parseToken("Name", "_" +String Int2String(I))
+  rule freshName(I:Int) => #parseToken("Name", "#" +String Int2String(I))
 
   rule (fun P->E | _) V:Val => E[getMatching(P,V)]  when isMatching(P,V)
   rule (fun (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
