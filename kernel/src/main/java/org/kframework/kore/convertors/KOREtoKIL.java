@@ -278,7 +278,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Import anImport) {
-        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.what());
+        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.moduleName());
         kilImport.setAttributes(convertAttributes(anImport.att()));
         return kilImport;
     }
