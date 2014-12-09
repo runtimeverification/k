@@ -7,12 +7,14 @@ import org.kframework.krun.api.io.File;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
@@ -59,9 +61,15 @@ public class PortableFileSystem implements FileSystem {
         try {
             FileDescriptor fileFD;
             File file;
-            RandomAccessFile f = new RandomAccessFile(fileUtil.resolveWorkingDirectory(path), mode);
-            fileFD = f.getFD();
-            file = new RandomAccessFileFile(f);
+            if (mode.equals("w")) {
+                FileOutputStream f = new FileOutputStream(path);
+                fileFD = f.getFD();
+                file = new OutputStreamFile(f, kem);
+            } else {
+                RandomAccessFile f = new RandomAccessFile(fileUtil.resolveWorkingDirectory(path), mode);
+                fileFD = f.getFD();
+                file = new RandomAccessFileFile(f);
+            }
             long fd = fdCounter++;
             descriptors.put(fd, fileFD);
             files.put(fileFD, file);
