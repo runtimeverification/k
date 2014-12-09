@@ -152,7 +152,7 @@ trait InjectedKLabelPattern extends Pattern {
   def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
-case class Anywhere(pattern: Term) extends Collection[Term] with BindingOps {
+case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Collection[Term] with BindingOps {
   type This = Anywhere
 
   def delegate = List(pattern)
@@ -165,8 +165,11 @@ case class Anywhere(pattern: Term) extends Collection[Term] with BindingOps {
   }
   import Anywhere._
 
+  val TOPVariable = KVariable("TOP_" + name)
+  val HOLEVariable = KVariable("HOLE_" + name)
+
   def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
-    val localSolution = and(pattern.matchAll(k), Set(Map(TOP -> (HOLE: Term))))
+    val localSolution = and(pattern.matchAll(k), Set(Map(TOPVariable -> (HOLEVariable: Term))))
     val childrenSolutions: Set[Map[KVariable, Term]] = k match {
       case kk: Collection[_] =>
         val k = kk.asInstanceOf[Collection[Term]]
@@ -176,11 +179,11 @@ case class Anywhere(pattern: Term) extends Collection[Term] with BindingOps {
             case s =>
               val newAnywhere: Term = k map { childK: Term =>
                 childK match {
-                  case `c` => s(TOP)
+                  case `c` => s(TOPVariable)
                   case other: Term => other
                 }
               }
-              val anywhereWrapper = Map(TOP -> newAnywhere)
+              val anywhereWrapper = Map(TOPVariable -> newAnywhere)
               s ++ anywhereWrapper
           }
           updatedSolutions
@@ -195,6 +198,6 @@ case class Anywhere(pattern: Term) extends Collection[Term] with BindingOps {
 }
 
 object Anywhere {
-  val TOP = KVariable("TOP")
-  val HOLE = KVariable("HOLE")
+  //  val TOP = KVariable("TOP")
+  //  val HOLE = KVariable("HOLE")
 }

@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 import kore._
 import org.kframework.tiny._
 
-trait Term extends Pattern with Rewriting
+trait Term extends Pattern
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get

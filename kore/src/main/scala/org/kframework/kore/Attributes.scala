@@ -56,6 +56,15 @@ object Attributes {
   val classFromUp = "classType"
 }
 
+object Location {
+  import KORE._
+
+  def apply(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = {
+    'location('startLine(Sorts.KInt(startLine.toString)), 'startColumn(Sorts.KInt(startColumn.toString)),
+      'endLine(Sorts.KInt(endLine.toString)), 'endColumn(Sorts.KInt(endColumn.toString)))
+  }
+}
+
 trait AttributesToString {
   self: Attributes =>
 

@@ -3,7 +3,6 @@
 package org.kframework.kore.outer
 
 import org.kframework.kore._
-import org.kframework.tiny.builtin.KBag
 
 case class Configuration(
   body: K,
@@ -25,11 +24,11 @@ case class Configuration(
         klist.map(xmlify _).mkString(" ") +
         "</" + label.name + ">"
     }
-    case KBag(klist) =>
-      if (klist.isEmpty)
-        ".Bag"
-      else
-        klist map { xmlify _ } mkString " "
+    //    case KBag(klist) =>
+    //      if (klist.isEmpty)
+    //        ".Bag"
+    //      else
+    //        klist map { xmlify _ } mkString " "
     case e => e.toString
   }
 

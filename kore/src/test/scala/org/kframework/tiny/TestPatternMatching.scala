@@ -134,9 +134,24 @@ class TestPatternMatching {
   @Test def testAnywhere() {
     val o = 'foo('bar('foo()))
     import Anywhere._
+    val a = Anywhere('foo(X))
     assertEquals(
-      Set(Map(X -> 'bar('foo()), TOP -> HOLE), Map(X -> KSequence(), TOP -> 'foo('bar(HOLE)))),
-      Anywhere('foo(X)).matchAll(o))
+      Set(Map(X -> 'bar('foo()), a.TOPVariable -> a.HOLEVariable),
+        Map(X -> KSequence(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
+      a.matchAll(o))
+  }
+
+  @Test def testTwoAnywheres() {
+    val o = 'foo('foo('foo()))
+    import Anywhere._
+    val inner = Anywhere('foo(X), "inner")
+    val outer = Anywhere('foo(inner), "outer")
+    println(outer)
+    assertEquals(
+      Set(Map(X -> 'foo(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> outer.HOLEVariable),
+        Map(X -> KSequence(), inner.TOPVariable -> 'foo(inner.HOLEVariable), outer.TOPVariable -> outer.HOLEVariable),
+        Map(X -> KSequence(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> 'foo(outer.HOLEVariable))),
+      outer.matchAll(o))
   }
 
   def assertEquals(expected: Any, actual: Any) {

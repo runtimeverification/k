@@ -25,7 +25,7 @@ object Constructors {
 
   //  @annotation.varargs def KBag(ks: K*) = kore.KBag(ks)
 
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = builtin.Location(startLine, startColumn, endLine, endColumn)
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = kore.Location(startLine, startColumn, endLine, endColumn)
 
   //  def KBag(ks: KList) = kore.KBag(ks);
 

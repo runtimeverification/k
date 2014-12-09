@@ -11,6 +11,7 @@ class TestMeta {
   import org.junit._
 
   import KToken._
+  import Rewritable._
 
   @Test def simple() {
     assertEquals(1: K, Up(1))
@@ -49,6 +50,6 @@ class TestMeta {
   }
 
   @Test def testTransformation() {
-    val metaT = Up(d).search(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))))
+    val metaT = Up(d).searchFor(Anywhere(KRewrite('Sort("Foo"), 'Sort("Bar"))))
   }
 }
