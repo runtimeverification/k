@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Multimap;
-
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
@@ -11,7 +9,9 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,11 +37,17 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
-    private org.kframework.kil.Cell currentCell;
+    /**
+     * List of expected cell labels, in the oder in which they appear in the configuration.
+     * Used to ensure deterministic order of cells when translating
+     * a {@link org.kframework.backend.java.kil.CellCollection} to a {@link org.kframework.kil.Bag}.
+     */
+    private List<String> currentCellLabels;
 
     public BackendJavaKILtoKILTransformer(Context context) {
         this.context = context;
         configurationStructureMap = context.getConfigurationStructureMap();
+        currentCellLabels = Collections.emptyList();
     }
 
     @Override
@@ -62,41 +70,52 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(Cell cell) {
-        final CellLabel label = cell.getLabel();
-        // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().isMapCell()) {
-            currentCell = configurationStructureMap.get(label.getRealCellLabel().name()).cell;
-        } else {
-            currentCell = configurationStructureMap.get(label.name()).cell;
-        }
-
-        org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
-        returnCell.setLabel(label.name());
-        returnCell.setEndLabel(label.name());
-        returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));
-        returnCell.copyAttributesFrom(cell);
-        return returnCell;
-    }
-
-    @Override
     public ASTNode transform(CellCollection cellCollection) {
-        final Multimap<CellLabel, Cell> cellMap = cellCollection.cellMap();
-        List<org.kframework.kil.Term> terms = currentCell.getCellTerms();
-        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (org.kframework.kil.Term term : terms) {
-            if (! (term instanceof org.kframework.kil.Cell)) continue;
-            String key = ((org.kframework.kil.Cell) term).getLabel();
-            for (Cell<?> cell : cellMap.get(CellLabel.of(key))) {
-                contents.add((org.kframework.kil.Cell) transform(cell));
+        Set<CellLabel> cellLabels = !currentCellLabels.isEmpty() ?
+                currentCellLabels.stream().map(CellLabel::of).collect(Collectors.toSet()) :
+                cellCollection.cells().keySet();
+
+        List<org.kframework.kil.Term> contents = new ArrayList<>();
+        for (CellLabel cellLabel : cellLabels) {
+            for (CellCollection.Cell cell : cellCollection.cells().get(cellLabel)) {
+                contents.add(transformCell(cell));
             }
         }
         if (cellCollection.hasFrame()) {
             contents.add((org.kframework.kil.Term) cellCollection.frame().accept(this));
         }
+
+        if (contents.size() == 1 && contents.get(0) instanceof Cell) {
+            return contents.get(0);
+        }
+
         ASTNode kil = new org.kframework.kil.Bag(contents);
-        kil.copyAttributesFrom(cellCollection);
+        // TODO(AndreiS): what cell attributes are preserved by the backend?
+        // kil.copyAttributesFrom(cellCollection);
         return kil;
+    }
+
+    private org.kframework.kil.Cell transformCell(CellCollection.Cell cell) {
+        // TODO(AndreiS): fix the printing of the cells which are representing maps
+        CellLabel label = cell.cellLabel();
+        Term content = cell.content();
+        if (content instanceof CellCollection) {
+            if (label.isMapCell()) {
+                currentCellLabels = configurationStructureMap.get(label.getRealCellLabel().name()).cell.getCellLabels();
+            } else {
+                currentCellLabels = configurationStructureMap.get(label.name()).cell.getCellLabels();
+            }
+        } else {
+            currentCellLabels = Collections.emptyList();
+        }
+
+        org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
+        returnCell.setLabel(label.name());
+        returnCell.setEndLabel(label.name());
+        returnCell.setContents((org.kframework.kil.Term) content.accept(this));
+        // TODO(AndreiS): what cell attributes are preserved by the backend?
+        // returnCell.copyAttributesFrom(cell);
+        return returnCell;
     }
 
     @Override

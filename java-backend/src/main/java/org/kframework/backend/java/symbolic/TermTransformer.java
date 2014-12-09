@@ -55,11 +55,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell cell) {
-        return transformTerm((Term) super.transform(cell));
-    }
-
-    @Override
     public ASTNode transform(CellCollection cellCollection) {
         return transformTerm((Term) super.transform(cellCollection));
     }

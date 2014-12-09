@@ -12,7 +12,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
@@ -254,7 +254,11 @@ public class SymbolicRewriter {
         }
 
         Map<Variable, Term> map = maps.get(0);
-        map.entrySet().forEach(e -> e.setValue(new Cell<>(CellLabel.GENERATED_TOP, e.getValue())));
+        map.entrySet().forEach(e -> e.setValue(
+                CellCollection.singleton(
+                        CellLabel.GENERATED_TOP,
+                        e.getValue(),
+                        initialTerm.termContext().definition().context())));
         return map;
     }
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -274,6 +275,13 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     @Override
     public int hashCode() {
         return label.hashCode() * 17 + contents.hashCode();
+    }
+
+    public List<String> getCellLabels() {
+        return getCellTerms().stream()
+                .filter(term -> term instanceof Cell)
+                .map(cell -> ((Cell) cell).getLabel())
+                .collect(Collectors.toList());
     }
 
     public List<Term> getCellTerms() {

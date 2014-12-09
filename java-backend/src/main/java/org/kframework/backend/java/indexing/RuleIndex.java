@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing;
 
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 
@@ -17,5 +17,5 @@ public interface RuleIndex {
 
     List<Rule> getRules(Term term);
 
-    List<Rule> getRules(List<Cell<?>> indexingCells);
+    List<Rule> getRules(List<CellCollection.Cell> indexingCells);
 }

@@ -9,7 +9,6 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Hole;
@@ -76,11 +75,6 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         return proceed(builtinSet) ? super.transform(builtinSet) : builtinSet;
-    }
-
-    @Override
-    public ASTNode transform(Cell cell) {
-        return proceed(cell) ? super.transform(cell) : cell;
     }
 
     @Override
