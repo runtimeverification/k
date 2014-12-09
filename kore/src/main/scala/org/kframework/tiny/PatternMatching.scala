@@ -12,6 +12,13 @@ import scala.collection.mutable.ListBuffer
 
 case class MatchException(m: String) extends RuntimeException(m)
 
+trait Equation {
+  def left: Term
+  def right: Term
+}
+
+case class Problem(equations: Set[Equation])
+
 object Pattern {
   type Solution = Map[KVariable, Term]
 }
@@ -69,7 +76,13 @@ trait InjectedKListPattern {
 trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
+  override def matchOne(k: Term, condition: Term = true): Option[Map[KVariable, Term]] =
+    matchAllPrivate(k, condition, true).headOption
+
   def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+    matchAllPrivate(k, condition, true)
+
+  private def matchAllPrivate(k: Term, condition: Term = true, justOne: Boolean)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     if (equiv(this, k))
       Set(Map())
     else

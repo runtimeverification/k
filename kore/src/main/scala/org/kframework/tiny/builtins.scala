@@ -9,8 +9,58 @@ import scala.collection.mutable.Builder
 import scala.collection.mutable.SetBuilder
 import org.kframework.tiny.Equivalence
 import org.kframework.tiny.EqualsEquivalence
+import org.kframework.tiny._
+import Pattern._
+import collection.mutable.ListBuffer
 
-case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken {
+trait Proposition
+
+case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+  type This = KEquals
+  def copy(att: Attributes): KEquals = KEquals(left, right, att)
+  def delegate = List(left, right)
+
+  def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Solution] = {
+    throw new RuntimeException("We shouldn't match directly on an equals. It must be handled by the pattern matcher separately.")
+  }
+  def newBuilder() = KEquals.newBuilder()
+}
+
+object KEquals {
+  def newBuilder(): Builder[K, KEquals] = ListBuffer() mapResult { case List(x, y) => KEquals(x, y) }
+}
+
+case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+  type This = KOr
+  def copy(att: Attributes): KOr = KOr(left, right, att)
+  def delegate = List(left, right)
+
+  def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Solution] = {
+    throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
+  }
+  def newBuilder() = KOr.newBuilder()
+}
+
+object KOr {
+  def newBuilder(): Builder[K, KOr] = ListBuffer() mapResult { case List(x, y) => KOr(x, y) }
+}
+
+case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+  type This = KAnd
+  def copy(att: Attributes): KAnd = KAnd(left, right, att)
+  def delegate = List(left, right)
+
+  def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Solution] = {
+    throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
+  }
+  def newBuilder() = KAnd.newBuilder()
+}
+
+object KAnd {
+  def newBuilder(): Builder[K, KAnd] = ListBuffer() mapResult { case List(x, y) => KAnd(x, y) }
+}
+
+case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken with Proposition {
   type This = KBoolean
   val sort = KBoolean
   val s: String = v.toString
