@@ -6,27 +6,44 @@ import org.kframework.kore
 import org.kframework.kore.Sort
 import scala.util.matching.Regex
 import org.kframework.kore.Attributes
+import org.kframework.POSet
 
 trait OuterKORE
+
+case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal]) extends AssertionError(nonTerminals.toString)
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
 
-  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _) => true }
+  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true }
 }
 
 case class Require(file: java.io.File) extends OuterKORE
 
-case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attributes())
+case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Attributes = Attributes())
   extends ModuleToString with KLabelMappings with OuterKORE {
 
-  def imports(implicit definition: Definition): Set[Module] = sentences flatMap {
-    case Import(name, _) => definition.getModule(name)
-    case _ => None
+  val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
+
+  lazy val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
+
+  private lazy val subsortRelations = sentences flatMap {
+    case SyntaxProduction(endSort, items, _) =>
+      items collect { case NonTerminal(startSort) => (startSort, endSort) }
+    case _ => Set()
   }
 
-  def definedSorts(implicit definition: Definition): Set[Sort] =
-    (sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }) | (imports flatMap { _.definedSorts })
+  lazy val sortLattice = POSet(subsortRelations)
+
+  // check that non-terminals have a defined sort
+  private val nonTerminalsWithUndefinedSort = sentences flatMap {
+    case SyntaxProduction(_, items, _) =>
+      items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+    case _ => Set()
+  }
+  if (!nonTerminalsWithUndefinedSort.isEmpty)
+    throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
+
 }
 // hooked but different from core, Import is a sentence here
 
@@ -50,7 +67,7 @@ case class Rule(
 case class ModuleComment(comment: String, att: Attributes = Attributes())
   extends Sentence with OuterKORE
 
-case class Import(what: String, att: Attributes = Attributes())
+case class Import(moduleName: String, att: Attributes = Attributes())
   extends Sentence with ImportToString with OuterKORE // hooked
 
 // syntax declarations
