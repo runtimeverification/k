@@ -207,7 +207,7 @@ public class ProgramLoader {
             System.err.println("Raw: " + out + "\n");
         try {
             // only the unexpected character type of errors should be checked in this block
-            out = new TreeCleanerVisitor(context).visitNode(out);
+            out = new TreeCleanerVisitor().visitNode(out);
         } catch (ParseFailedException te) {
             ParseError perror = parser.getErrors();
 
@@ -219,7 +219,7 @@ public class ProgramLoader {
             throw new ParseFailedException(new KException(
                     ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
         }
-        out = new MakeConsList(context).visitNode(out);
+        out = new MakeConsList().visitNode(out);
         if (context.globalOptions.debug)
             System.err.println("Clean: " + out + "\n");
         out = new PriorityFilter(context).visitNode(out);

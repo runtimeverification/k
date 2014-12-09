@@ -53,7 +53,7 @@ public class CacheLookupFilter extends ParseForestTransformer {
                 }
 
                 // fix the location information
-                new UpdateLocationVisitor(context, ss.getContentStartLine(), ss.getContentStartColumn(),
+                new UpdateLocationVisitor(ss.getContentStartLine(), ss.getContentStartColumn(),
                                              cs.startLine, cs.startColumn).visitNode(sentence);
                 kept.put(key, new CachedSentence(sentence, ss.getContentStartLine(), ss.getContentStartColumn()));
                 return sentence;
