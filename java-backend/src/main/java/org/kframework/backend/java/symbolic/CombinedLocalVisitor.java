@@ -80,11 +80,6 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
-    public void visit(Cell node) {
-        visitAll(node);
-    }
-
-    @Override
     public void visit(CellCollection node) {
         visitAll(node);
     }

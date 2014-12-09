@@ -19,7 +19,6 @@ public interface Visitor {
     public void visit(BuiltinList builtinList);
     public void visit(BuiltinMap builtinMap);
     public void visit(BuiltinSet builtinSet);
-    public void visit(Cell cell);
     public void visit(CellCollection cellCollection);
     public void visit(Collection collection);
     public void visit(ConstrainedTerm constrainedTerm);

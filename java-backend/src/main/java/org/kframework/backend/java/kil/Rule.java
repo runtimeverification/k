@@ -146,17 +146,7 @@ public class Rule extends JavaSymbolicObject {
             }
         }
 
-        leftHandSide.accept(new BottomUpVisitor() {
-            @Override
-            public void visit(Cell cell) {
-                if (cell.getLabel().equals(CellLabel.K)) {
-                    tempContainsKCell = true;
-                } else if (cell.contentKind().isStructural()) {
-                    super.visit(cell);
-                }
-            }
-        });
-        containsKCell = tempContainsKCell;
+        containsKCell = !leftHandSide.getCellContentsByName(CellLabel.K).isEmpty();
 
         isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
         if (isSortPredicate) {
@@ -260,8 +250,6 @@ public class Rule extends JavaSymbolicObject {
 
         return lhsVariablesToReuse;
     }
-
-    private boolean tempContainsKCell = false;
 
     public String label() {
         return label;

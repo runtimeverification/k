@@ -15,6 +15,7 @@ class C2 extends C {
 
 class Main {
   method Main() {
-    print("(new C2()).c is:",(new C2()).c,"\n");
+    var c = (new C2()).c;
+    print("(new C2()).c is: ",c,"\n");
   }
 }

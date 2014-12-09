@@ -41,17 +41,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * cells of this {@code Term}.
      */
     public List<IndexingPair> getKCellIndexingPairs(final Definition definition) {
-        final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
-        accept(new BottomUpVisitor() {
-            @Override
-            public void visit(Cell cell) {
-                if (cell.getLabel().equals(CellLabel.K)) {
-                    indexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
-                } else if (cell.contentKind().isStructural()) {
-                    super.visit(cell);
-                }
-            }
-        });
+        final List<IndexingPair> indexingPairs = new ArrayList<>();
+        for (Term content : getCellContentsByName(CellLabel.K)) {
+            indexingPairs.add(IndexingPair.getKCellIndexingPair(content, definition));
+        }
         return indexingPairs;
     }
 
@@ -183,10 +176,14 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         final List<Term> contents = new ArrayList<>();
         accept(new BottomUpVisitor() {
             @Override
-            public void visit(Cell cell) {
-                super.visit(cell);
-                if (cell.getLabel().equals(cellLabel)) {
-                    contents.add(cell.getContent());
+            public void visit(CellCollection cellCollection) {
+                for (CellCollection.Cell cell : cellCollection.get(cellLabel)) {
+                    contents.add(cell.content());
+                }
+                for (CellCollection.Cell cell : cellCollection.cells().values()) {
+                    if (cell.content() instanceof CellCollection) {
+                        visit((CellCollection) cell.content());
+                    }
                 }
             }
         });

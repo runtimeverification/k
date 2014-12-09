@@ -463,7 +463,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         substitution.keySet().removeAll(variablesToRemove);
 
         /* reset this symbolic constraint to be true when it becomes empty */
-        if (equalities.isEmpty() && substitution.isEmpty()) {
+        if (equalities.isEmpty() && substitution.isEmpty() && multiConstraints.isEmpty()) {
             truthValue = TruthValue.TRUE;
         }
     }
@@ -733,7 +733,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         renormalize();
 
         /* reset this symbolic constraint to be true when it becomes empty */
-        if (equalities.isEmpty() && substitution.isEmpty()) {
+        if (equalities.isEmpty() && substitution.isEmpty() && multiConstraints.isEmpty()) {
             truthValue = TruthValue.TRUE;
         }
         recursiveNormalize = false;

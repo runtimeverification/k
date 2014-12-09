@@ -9,7 +9,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -191,7 +191,7 @@ public class IndexingTable implements Serializable, RuleIndex {
     }
 
     @Override
-    public List<Rule> getRules(List<Cell<?>> indexingCells) {
+    public List<Rule> getRules(List<CellCollection.Cell> indexingCells) {
         return getRulesFromCfgTermIdx(getConfigurationTermIndex(indexingCells));
     }
 
@@ -236,29 +236,29 @@ public class IndexingTable implements Serializable, RuleIndex {
         return rules;
     }
 
-    private ConfigurationTermIndex getConfigurationTermIndex(List<Cell<?>> indexingCells) {
+    private ConfigurationTermIndex getConfigurationTermIndex(List<CellCollection.Cell> indexingCells) {
         List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
         List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
         List<IndexingPair> outstreamIndexingPairs = new ArrayList<>();
         int maxInputBufLen = 0;
         int maxOutputBufLen = 0;
 
-        for (Cell<?> cell : indexingCells) {
-            CellLabel cellLabel = cell.getLabel();
+        for (CellCollection.Cell cell : indexingCells) {
+            CellLabel cellLabel = cell.cellLabel();
             String streamCellAttr = definition.context()
                     .getConfigurationStructureMap().get(cellLabel.name()).cell
                     .getCellAttribute(Attribute.STREAM_KEY);
 
             if (cellLabel.equals(CellLabel.K)) {
-                kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
+                kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell.content(), definition));
             } else if (Constants.STDIN.equals(streamCellAttr)) {
-                Term instream = cell.getContent();
+                Term instream = cell.content();
                 instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
                 if (instream instanceof BuiltinList) {
                     maxInputBufLen = Math.max(maxInputBufLen, ((BuiltinList) instream).concreteSize());
                 }
             } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
-                Term outstream = cell.getContent();
+                Term outstream = cell.content();
                 outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
                 if (outstream instanceof BuiltinList) {
                     maxOutputBufLen = Math.max(maxOutputBufLen, ((BuiltinList) outstream).concreteSize());

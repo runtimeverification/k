@@ -1,11 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -23,9 +23,9 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -131,12 +131,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());
-        }
-
-        if (term.kind().isStructural()) {
-            Context context = termContext.definition().context();
-            term = CellCollection.upKind(term, otherTerm.kind(), context);
-            otherTerm = CellCollection.upKind(otherTerm, term.kind(), context);
         }
 
         if (term.kind() != otherTerm.kind()) {
@@ -528,34 +522,6 @@ public class SymbolicUnifier extends AbstractUnifier {
                 "set matching is only supported when one of the sets is a variable.");
     }
 
-    /**
-     * Two cells can be unified if and only if they have the same cell label and
-     * their contents can be unified.
-     */
-    @Override
-    public void unify(Cell cell, Term term) {
-        try {
-            if (!(term instanceof Cell)) {
-                this.fail(cell, term);
-            }
-
-            Cell<?> otherCell = (Cell<?>) term;
-            if (!cell.getLabel().equals(otherCell.getLabel())) {
-                /*
-                 * AndreiS: commented out the check below as matching might fail due
-                 * to KItem < K < KList subsorting:
-                 * !cell.contentKind().equals(otherCell.contentKind())
-                 */
-                fail(cell, otherCell);
-            }
-
-            unify(cell.getContent(), otherCell.getContent());
-        } catch (KEMException e) {
-            e.exception.addTraceFrame("While unifying cell with label " + cell.getLabel().name());
-            throw e;
-        }
-    }
-
     @Override
     public void unify(CellCollection cellCollection, Term term) {
         if (!(term instanceof CellCollection)) {
@@ -591,8 +557,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;
-                unify(cellCollection.get(label).iterator().next(),
-                        otherCellCollection.get(label).iterator().next());
+                unify(cellCollection.get(label).iterator().next().content(),
+                        otherCellCollection.get(label).iterator().next().content());
             }
 
             Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
@@ -631,7 +597,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             // from now on, we assume that cellCollection is free of frame
-            ListMultimap<CellLabel, Cell> cellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+            ListMultimap<CellLabel, CellCollection.Cell> cellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
 
             if (numOfOtherDiffCellLabels > 0) {
                 fail(cellCollection, otherCellCollection);
@@ -642,8 +608,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
-                    unify(cellCollection.get(cellLabel).iterator().next(),
-                            otherCellCollection.get(cellLabel).iterator().next());
+                    unify(cellCollection.get(cellLabel).iterator().next().content(),
+                            otherCellCollection.get(cellLabel).iterator().next().content());
                 } else {
                     assert starredCellLabel == null;
                     starredCellLabel = cellLabel;
@@ -660,8 +626,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
             }
 
-            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            CellCollection.Cell[] cells = cellCollection.get(starredCellLabel).toArray(new CellCollection.Cell[1]);
+            CellCollection.Cell[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new CellCollection.Cell[1]);
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
@@ -682,7 +648,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
-                        unify(cells[generator.getSelection(i)], otherCells[i]);
+                        unify(cells[generator.getSelection(i)].content(), otherCells[i].content());
                     }
                 } catch (UnificationFailure e) {
                     continue;
@@ -725,7 +691,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    private ListMultimap<CellLabel, Cell> getRemainingCellMap(
+    private ListMultimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
         Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
             @Override
@@ -734,7 +700,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         };
 
-        return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
+        return Multimaps.filterKeys(cellCollection.cells(), notRemoved);
     }
 
     @Override
