@@ -83,10 +83,10 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         patternsVisitor.visitNode(def);
         result.append("\\begin{kdefinition}" + endl + "\\maketitle" + endl);
-        super.visit(def, _);
+        super.visit(def, _void);
         result.append("\\end{kdefinition}" + endl);
         if (!hasTitle) {
             preamble.append("\\title{" + def.getMainModule() + "}" + endl);
@@ -96,31 +96,31 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(PriorityExtended node, Void _) {
+    public Void visit(PriorityExtended node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(PriorityExtendedAssoc node, Void _) {
+    public Void visit(PriorityExtendedAssoc node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Module mod, Void _) {
+    public Void visit(Module mod, Void _void) {
         if (mod.isPredefined())
             return null;
         result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
-        super.visit(mod, _);
+        super.visit(mod, _void);
         result.append("\\end{module}" + endl);
         return null;
     }
 
     @Override
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         result.append(endl + "\\begin{syntaxBlock}");
         firstProduction = true;
         increaseIndent();
-        super.visit(syn, _);
+        super.visit(syn, _void);
         result.append(endl + "\\end{syntaxBlock}");
         decreaseIndent();
         newLine();
@@ -130,14 +130,14 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
+    public Void visit(NonTerminal sort, Void _void) {
         result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
                 terminalBefore = false;
                 return null;
     }
 
     @Override
-    public Void visit(Production p, Void _) {
+    public Void visit(Production p, Void _void) {
         newLine();
         if (firstProduction) {
             result.append("\\syntax");
@@ -162,7 +162,7 @@ public class LatexFilter extends BackendFilter {
             }
             result.append(pattern);
         } else {
-            super.visit(p, _);
+            super.visit(p, _void);
         }
         result.append("}");
         newLine();
@@ -174,7 +174,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Terminal pi, Void _) {
+    public Void visit(Terminal pi, Void _void) {
         String terminal = pi.getTerminal();
         if (terminal.isEmpty())
             return null;
@@ -189,7 +189,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(UserList ul, Void _) {
+    public Void visit(UserList ul, Void _void) {
         result.append("List\\{");
         this.visitNode(new NonTerminal(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
@@ -198,22 +198,22 @@ public class LatexFilter extends BackendFilter {
     }
 
         @Override
-        public Void visit(Lexical t, Void _) {
+        public Void visit(Lexical t, Void _void) {
                 result.append("Token\\{");
                 result.append(StringUtil.latexify(t.getLexicalRule()) +  "\\}");
                 return null;
         }
 
     @Override
-    public Void visit(Configuration conf, Void _) {
+    public Void visit(Configuration conf, Void _void) {
         result.append("\\kconfig{");
-        super.visit(conf, _);
+        super.visit(conf, _void);
         result.append("}" + endl);
         return null;
     }
 
     @Override
-    public Void visit(Cell c, Void _) {
+    public Void visit(Cell c, Void _void) {
         if(!isOnNewLine()) {
             newLine();
         }
@@ -241,14 +241,14 @@ public class LatexFilter extends BackendFilter {
         result.append("{");
         increaseIndent();
         newLine();
-        super.visit(c, _);
+        super.visit(c, _void);
         decreaseIndentAndNewLineIfNeeded();
         result.append("}");
         wantParens.pop();
         return null;
     }
 
-    public Void visit(Collection col, Void _) {
+    public Void visit(Collection col, Void _void) {
         final boolean parens = wantParens.peek();
         final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
@@ -296,15 +296,15 @@ public class LatexFilter extends BackendFilter {
         }
     }
 
-    public Void visit(TermComment tc, Void _) {
+    public Void visit(TermComment tc, Void _void) {
         // termComment = true;
         result.append("\\\\");
-        super.visit(tc, _);
+        super.visit(tc, _void);
         return null;
     }
 
     @Override
-    public Void visit(Variable var, Void _) {
+    public Void visit(Variable var, Void _void) {
         if (var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             result.append("\\AnyVar");
         } else {
@@ -337,7 +337,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(ListTerminator e, Void _) {
+    public Void visit(ListTerminator e, Void _void) {
         printEmpty(e.getSort().getName());
         return null;
     }
@@ -347,7 +347,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {
+    public Void visit(Rule rule, Void _void) {
         // termComment = false;
         result.append("\\krule");
         if (!"".equals(rule.getLabel())) {
@@ -383,7 +383,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context cxt, Void _) {
+    public Void visit(org.kframework.kil.Context cxt, Void _void) {
         result.append("\\kcontext");
         result.append("{");
         increaseIndent();
@@ -412,13 +412,13 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Hole hole, Void _) {
+    public Void visit(Hole hole, Void _void) {
         result.append("\\khole{}");
         return null;
     }
 
     @Override
-    public Void visit(Rewrite rew, Void _) {
+    public Void visit(Rewrite rew, Void _void) {
         wantParens.push(Boolean.TRUE);
         if (!isOnNewLine()) {
             newLine();
@@ -440,9 +440,9 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Bracket trm, Void _) {
+    public Void visit(Bracket trm, Void _void) {
         if (trm.getContent() instanceof Rewrite)
-            super.visit(trm, _);
+            super.visit(trm, _void);
         else {
             String pattern = "\\left({#1}\\right)";
             LatexFilter termFilter = new LatexFilter(context, indent);
@@ -455,7 +455,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(TermCons trm, Void _) {
+    public Void visit(TermCons trm, Void _void) {
         String pattern = patternsVisitor.getPatterns().get(trm.getProduction());
         if (pattern == null) {
             Production pr = trm.getProduction();
@@ -474,19 +474,19 @@ public class LatexFilter extends BackendFilter {
     }
 
         @Override
-        public Void visit(KLabelConstant c, Void _) {
+        public Void visit(KLabelConstant c, Void _void) {
                 result.append(StringUtil.latexify(c.getLabel()));
                 return null;
         }
 
     @Override
-    public Void visit(Token t, Void _) {
+    public Void visit(Token t, Void _void) {
         result.append("\\constant[" + StringUtil.latexify(t.tokenSort().getName()) + "]{" + StringUtil.latexify(t.value()) + "}");
         return null;
     }
 
     @Override
-    public Void visit(KSequence k, Void _) {
+    public Void visit(KSequence k, Void _void) {
         if (k.getContents().isEmpty()) printEmpty(Sort.K.getName());
         else printList(k.getContents(), "\\kra", false);
         return null;
@@ -494,7 +494,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(KApp app, Void _) {
+    public Void visit(KApp app, Void _void) {
         if (app.getLabel() instanceof Token) {
             result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort().getName()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
         } else {
@@ -507,13 +507,13 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(KList list, Void _) {
+    public Void visit(KList list, Void _void) {
         printList(list.getContents(), "\\kcomma", false);
         return null;
     }
 
     @Override
-    public Void visit(LiterateDefinitionComment comment, Void _) {
+    public Void visit(LiterateDefinitionComment comment, Void _void) {
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("\\begin{kblock}[text]" + endl);
             result.append(comment.getValue());
@@ -530,7 +530,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(LiterateModuleComment comment, Void _) {
+    public Void visit(LiterateModuleComment comment, Void _void) {
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("\\begin{kblock}[text]" + endl);
             result.append(comment.getValue());
@@ -547,7 +547,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Attribute entry, Void _) {
+    public Void visit(Attribute entry, Void _void) {
         if (context.isParsingTag(entry.getKey()))
             return null;
         if (entry.getKey().equals(Attribute.keyOf("latex")))
@@ -568,7 +568,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Attributes attributes, Void _) {
+    public Void visit(Attributes attributes, Void _void) {
         firstAttribute = true;
         for (Attribute<?> entry : attributes.values()) {
             this.visitNode(entry);

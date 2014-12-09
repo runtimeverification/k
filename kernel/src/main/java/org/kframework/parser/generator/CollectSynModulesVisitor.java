@@ -28,9 +28,9 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 
     public Set<String> synModNames = new HashSet<String>();
 
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         List<String> synQue = new LinkedList<String>();
-        if (def.getModulesMap().containsKey(def.getMainSyntaxModule())) {
+        if (def.getDefinitionContext().containsModule(def.getMainSyntaxModule())) {
             synQue.add(def.getMainSyntaxModule());
         } else {
             String msg = "Module " + def.getMainSyntaxModule() + " is not imported by the main module " +
@@ -40,7 +40,7 @@ public class CollectSynModulesVisitor extends BasicVisitor {
             synQue.add(def.getMainModule());
         }
 
-        Module bshm = def.getModulesMap().get("AUTO-INCLUDED-MODULE-SYNTAX");
+        Module bshm = def.getDefinitionContext().getModuleByName("AUTO-INCLUDED-MODULE-SYNTAX");
         if (bshm == null) {
             String msg = "Could not find module AUTO-INCLUDED-MODULE-SYNTAX (automatically included in the main syntax module)!";
             kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
@@ -52,12 +52,12 @@ public class CollectSynModulesVisitor extends BasicVisitor {
             if (!synModNames.contains(mname)) {
                 synModNames.add(mname);
 
-                Module m = def.getModulesMap().get(mname);
+                Module m = def.getDefinitionContext().getModuleByName(mname);
                 for (ModuleItem s : m.getItems())
                     if (s instanceof Import) {
                         Import imp = ((Import) s);
                         String mname2 = imp.getName();
-                        Module mm = def.getModulesMap().get(mname2);
+                        Module mm = def.getDefinitionContext().getModuleByName(mname2);
                         // if the module starts with # it means it is predefined in maude
                         if (!mname2.startsWith("#"))
                             if (mm != null)

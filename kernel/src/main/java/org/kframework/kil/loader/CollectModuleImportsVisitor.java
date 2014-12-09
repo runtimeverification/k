@@ -12,15 +12,15 @@ public class CollectModuleImportsVisitor extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Definition d, Void _) {
-        super.visit(d, _);
-        getCurrentDefinition().finalizeModules();
+    public Void visit(Definition d, Void _void) {
+        super.visit(d, _void);
+        getCurrentDefinition().getDefinitionContext().finalizeModules();
         return null;
     }
 
     @Override
-    public Void visit(Import i, Void _) {
-        getCurrentDefinition().addModuleImport(getCurrentModule().getName(), i.getName());
+    public Void visit(Import i, Void _void) {
+        getCurrentDefinition().getDefinitionContext().addModuleImport(getCurrentModule().getName(), i.getName());
         return null;
     }
 }

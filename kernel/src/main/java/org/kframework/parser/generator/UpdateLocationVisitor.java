@@ -21,7 +21,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
         this.cachedStartLine    = cachedStartLine;
     }
 
-    public Void visit(ASTNode node, Void _) {
+    public Void visit(ASTNode node, Void _void) {
         Location loc = node.getLocation();
         if (loc == null) {
             return null;

@@ -47,7 +47,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 //    }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

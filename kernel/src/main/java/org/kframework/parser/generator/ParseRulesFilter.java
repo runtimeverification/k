@@ -47,12 +47,12 @@ public class ParseRulesFilter extends ParseForestTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode visit(Module m, Void _) throws ParseFailedException {
+    public ASTNode visit(Module m, Void _void) throws ParseFailedException {
         localModule = m.getName();
-        return super.visit(m, _);
+        return super.visit(m, _void);
     }
 
-    public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
+    public ASTNode visit(StringSentence ss, Void _void) throws ParseFailedException {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             long startTime = System.currentTimeMillis();
             Sentence sentence;

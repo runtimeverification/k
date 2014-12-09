@@ -58,13 +58,13 @@ public class ParseConfigsFilter extends ParseForestTransformer {
     boolean checkInclusion = true;
 
     @Override
-    public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        ASTNode rez = super.visit(m, _);
+    public ASTNode visit(Module m, Void _void) throws ParseFailedException {
+        ASTNode rez = super.visit(m, _void);
         new CollectStartSymbolPgmVisitor(context).visitNode(rez);
         return rez;
     }
 
-    public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
+    public ASTNode visit(StringSentence ss, Void _void) throws ParseFailedException {
         if (ss.getType().equals(Constants.CONFIG)) {
             long startTime2 = System.currentTimeMillis();
             ASTNode config = null;

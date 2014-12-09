@@ -42,9 +42,9 @@ public class AddPredicates extends CopyOnWriteTransformer {
         private Set<Sort> lists = new HashSet<>();
 
         @Override
-        public Void visit(Module node, Void _) {
+        public Void visit(Module node, Void _void) {
             lists.clear();
-            super.visit(node, _);
+            super.visit(node, _void);
             if (!lists.isEmpty()) {
                 for (Sort listSort : lists) {
                     Rule rule = new Rule(
@@ -63,7 +63,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         @Override
-        public Void visit(Syntax node, Void _) {
+        public Void visit(Syntax node, Void _void) {
             Sort sort = node.getDeclaredSort().getSort();
 
             if (context.isListSort(sort))
@@ -72,11 +72,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (sort.isKSort())
                 return null;
             else
-                return super.visit(node, _);
+                return super.visit(node, _void);
         }
 
         @Override
-        public Void visit(Production node, Void _) {
+        public Void visit(Production node, Void _void) {
             if (node.containsAttribute("bracket"))
                 return null;
             if (node.containsAttribute("predicate"))
@@ -116,17 +116,17 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         @Override
-        public Void visit(Rule node, Void _) {
+        public Void visit(Rule node, Void _void) {
             return null;
         }
 
         @Override
-        public Void visit(org.kframework.kil.Context node, Void _) {
+        public Void visit(org.kframework.kil.Context node, Void _void) {
             return null;
         }
 
         @Override
-        public Void visit(Configuration node, Void _) {
+        public Void visit(Configuration node, Void _void) {
             return null;
         }
 
@@ -166,7 +166,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

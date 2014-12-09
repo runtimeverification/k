@@ -23,20 +23,20 @@ public class CheckRewrite extends BasicVisitor {
     private int rewritesNo = 0;
 
     @Override
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         inConfig = true;
-        super.visit(node, _);
+        super.visit(node, _void);
         inConfig = false;
         return null;
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         rewritesNo = 0;
         this.visitNode(node.getBody());
         if (rewritesNo == 0) {
@@ -58,7 +58,7 @@ public class CheckRewrite extends BasicVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         this.visitNode(node.getBody());
         if (node.getRequires() != null) {
             inSideCondition = true;
@@ -74,18 +74,18 @@ public class CheckRewrite extends BasicVisitor {
     }
 
     @Override
-    public Void visit(TermCons node, Void _) {
+    public Void visit(TermCons node, Void _void) {
         boolean temp = inFunction;
         if (node.getProduction().containsAttribute("function")) {
             //inFunction = true;
         }
-        super.visit(node, _);
+        super.visit(node, _void);
         inFunction = temp;
         return null;
     }
 
     @Override
-    public Void visit(Rewrite node, Void _) {
+    public Void visit(Rewrite node, Void _void) {
         if (inConfig) {
             String msg = "Rewrites are not allowed in configurations.";
             throw KExceptionManager.compilerError(msg, this, node);
@@ -104,7 +104,7 @@ public class CheckRewrite extends BasicVisitor {
         }
         rewritesNo++;
         inRewrite = true;
-        super.visit(node, _);
+        super.visit(node, _void);
         inRewrite = false;
         return null;
     }

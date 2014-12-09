@@ -36,7 +36,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Term trm, Void _) throws ParseFailedException {
+    public ASTNode visit(Term trm, Void _void) throws ParseFailedException {
         boolean error = false;
         if (strict && !trm.getSort().equals(maxSort))
             error = true;
@@ -60,7 +60,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
         ParseFailedException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
@@ -82,13 +82,13 @@ public class TypeSystemFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
+    public ASTNode visit(Bracket node, Void _void) throws ParseFailedException {
         node.setContent((Term) this.visitNode(node.getContent()));
         return node;
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
+    public ASTNode visit(Rewrite node, Void _void) throws ParseFailedException {
         Rewrite result = new Rewrite(node);
         result.replaceChildren(
                 (Term) this.visitNode(node.getLeft()),

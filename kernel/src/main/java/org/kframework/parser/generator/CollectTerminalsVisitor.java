@@ -24,20 +24,20 @@ public class CollectTerminalsVisitor extends BasicVisitor {
         terminals.add(terminal);
     }
 
-    public Void visit(Production p, Void _) {
+    public Void visit(Production p, Void _void) {
         if (p.containsAttribute("reject"))
             rejects.add(p);
         else
-            super.visit(p, _);
+            super.visit(p, _void);
         return null;
     }
 
-    public Void visit(Terminal t, Void _) {
+    public Void visit(Terminal t, Void _void) {
         addTerminal(t);
         return null;
     }
 
-    public Void visit(UserList ul, Void _) {
+    public Void visit(UserList ul, Void _void) {
         addTerminal(new Terminal(ul.getSeparator()));
         return null;
     }

@@ -19,7 +19,7 @@ public class UpdateAssocVisitor extends BasicVisitor {
      * Because the block associativity is not reflexive in SDF, I have to add it manually.
      */
     @Override
-    public Void visit(PriorityExtendedAssoc pri, Void _) {
+    public Void visit(PriorityExtendedAssoc pri, Void _void) {
         for (KLabelConstant c : pri.getTags()) {
             Set<Production> prods = SDFHelper.getProductionsForTag(c.getLabel(), context);
             for (Production p : prods) {
@@ -34,7 +34,7 @@ public class UpdateAssocVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(PriorityBlock pri, Void _) {
+    public Void visit(PriorityBlock pri, Void _void) {
         if (!pri.getAssoc().equals("")) {
             for (Production p : pri.getProductions()) {
                 if (!p.containsAttribute(Constants.LEFT) &&

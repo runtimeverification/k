@@ -17,7 +17,7 @@ public class PriorityFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             if (tc.getContents().size() == 2) { // I made the parser so it instantiates a TermCons
@@ -39,6 +39,6 @@ public class PriorityFilter extends ParseForestTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 }

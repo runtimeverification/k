@@ -38,7 +38,7 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         String parentLabel = parent.getProduction().getKLabel();
         String localLabel = tc.getProduction().getKLabel();
         if (context.isPriorityWrong(parentLabel, localLabel)) {
@@ -61,7 +61,7 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
         ParseFailedException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
@@ -83,7 +83,7 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Term node, Void _) throws ParseFailedException {
+    public ASTNode visit(Term node, Void _void) throws ParseFailedException {
         return node;
     }
 }

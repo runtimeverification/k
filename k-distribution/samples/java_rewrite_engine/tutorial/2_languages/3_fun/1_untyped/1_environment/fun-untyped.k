@@ -348,7 +348,10 @@ a constructor for function types:  */
                   > '_;_
                   > 'fun_
                   > 'datatype_=__
+endmodule
 
+module FUN-UNTYPED-MACROS
+  imports FUN-UNTYPED-SYNTAX
 
 //@ \subsection{Desugaring macros}
 
@@ -398,6 +401,7 @@ construct as explained above. */
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-MACROS
   imports MY-PATTERN-MATCHING
 
 

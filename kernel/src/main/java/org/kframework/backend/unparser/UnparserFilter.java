@@ -62,14 +62,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         prepare(def);
-        super.visit(def, _);
+        super.visit(def, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(Import imp, Void _) {
+    public Void visit(Import imp, Void _void) {
         prepare(imp);
         indenter.write("imports " + imp.getName());
         indenter.endLine();
@@ -77,14 +77,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Module mod, Void _) {
+    public Void visit(Module mod, Void _void) {
         prepare(mod);
         if (!mod.isPredefined()) {
             indenter.write("module " + mod.getName());
             indenter.endLine();
             indenter.endLine();
             indenter.indent(TAB);
-            super.visit(mod, _);
+            super.visit(mod, _void);
             indenter.unindent();
             indenter.write("endmodule");
             indenter.endLine();
@@ -94,7 +94,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Syntax syn, Void _) {
+    public Void visit(Syntax syn, Void _void) {
         prepare(syn);
         firstPriorityBlock = true;
         indenter.write("syntax " + syn.getDeclaredSort().getName());
@@ -109,7 +109,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(PriorityBlock priorityBlock, Void _) {
+    public Void visit(PriorityBlock priorityBlock, Void _void) {
         prepare(priorityBlock);
         if (firstPriorityBlock) {
             indenter.write(" ::=");
@@ -118,12 +118,12 @@ public class UnparserFilter extends NonCachingVisitor {
         }
         firstPriorityBlock = false;
         firstProduction = true;
-        super.visit(priorityBlock, _);
+        super.visit(priorityBlock, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(Production prod, Void _) {
+    public Void visit(Production prod, Void _void) {
         prepare(prod);
         if (firstProduction) {
             indenter.write(" ");
@@ -149,31 +149,31 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
+    public Void visit(NonTerminal sort, Void _void) {
         prepare(sort);
         indenter.write(sort.getName());
-        super.visit(sort, _);
+        super.visit(sort, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(Terminal terminal, Void _) {
+    public Void visit(Terminal terminal, Void _void) {
         prepare(terminal);
         indenter.write("\"" + terminal.getTerminal() + "\"");
-        super.visit(terminal, _);
+        super.visit(terminal, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(UserList userList, Void _) {
+    public Void visit(UserList userList, Void _void) {
         prepare(userList);
         indenter.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
-        super.visit(userList, _);
+        super.visit(userList, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(KList listOfK, Void _) {
+    public Void visit(KList listOfK, Void _void) {
         prepare(listOfK);
         java.util.List<Term> termList = listOfK.getContents();
         for (int i = 0; i < termList.size(); ++i) {
@@ -189,7 +189,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Attributes attributes, Void _) {
+    public Void visit(Attributes attributes, Void _void) {
         prepare(attributes);
         if (!attributes.isEmpty()) {
             Iterator<Attribute<?>> iter = attributes.values().iterator();
@@ -204,14 +204,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Attribute attribute, Void _) {
+    public Void visit(Attribute attribute, Void _void) {
         prepare(attribute);
         indenter.write(attribute.toString());
         return postpare();
     }
 
     @Override
-    public Void visit(Configuration configuration, Void _) {
+    public Void visit(Configuration configuration, Void _void) {
         prepare(configuration);
         indenter.write("configuration");
         indenter.endLine();
@@ -226,7 +226,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
+    public Void visit(Cell cell, Void _void) {
         prepare(cell);
         String attributes = "";
         for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -282,7 +282,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Variable variable, Void _) {
+    public Void visit(Variable variable, Void _void) {
         prepare(variable);
         if (variable.isFreshVariable())
             indenter.write("?");
@@ -303,14 +303,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(ListTerminator terminator, Void _) {
+    public Void visit(ListTerminator terminator, Void _void) {
         prepare(terminator);
         indenter.write(terminator.toString());
         return postpare();
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {
+    public Void visit(Rule rule, Void _void) {
         prepare(rule);
         indenter.write("rule ");
         if (!"".equals(rule.getLabel())) {
@@ -338,7 +338,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(KApp kapp, Void _) {
+    public Void visit(KApp kapp, Void _void) {
         prepare(kapp);
         this.visitNode(kapp.getLabel());
         indenter.write("(");
@@ -348,7 +348,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(KSequence ksequence, Void _) {
+    public Void visit(KSequence ksequence, Void _void) {
         prepare(ksequence);
         java.util.List<Term> contents = ksequence.getContents();
         if (!contents.isEmpty()) {
@@ -372,7 +372,7 @@ public class UnparserFilter extends NonCachingVisitor {
      * We will also delete the final ListTerminator if the input mode is pretty printing.
      */
     @Override
-    public Void visit(TermCons termCons, Void _) {
+    public Void visit(TermCons termCons, Void _void) {
         prepare(termCons);
         inTerm++;
         Production production = termCons.getProduction();
@@ -416,7 +416,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Constant constant, Void _) {
+    public Void visit(Constant constant, Void _void) {
         prepare(constant);
         indenter.write(constant.getValue());
         return postpare();
@@ -441,7 +441,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Rewrite rewrite, Void _) {
+    public Void visit(Rewrite rewrite, Void _void) {
         prepare(rewrite);
         this.visitNode(rewrite.getLeft());
         indenter.write(" => ");
@@ -450,14 +450,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(KLabelConstant kLabelConstant, Void _) {
+    public Void visit(KLabelConstant kLabelConstant, Void _void) {
         prepare(kLabelConstant);
         indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll(",", "`,"));
         return postpare();
     }
 
     @Override
-    public Void visit(Collection collection, Void _) {
+    public Void visit(Collection collection, Void _void) {
         prepare(collection);
         java.util.List<Term> contents = collection.getContents();
         for (int i = 0; i < contents.size(); ++i) {
@@ -477,44 +477,44 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(CollectionItem collectionItem, Void _) {
+    public Void visit(CollectionItem collectionItem, Void _void) {
         prepare(collectionItem);
-        super.visit(collectionItem, _);
+        super.visit(collectionItem, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(BagItem bagItem, Void _) {
+    public Void visit(BagItem bagItem, Void _void) {
         prepare(bagItem);
         indenter.write("BagItem(");
-        super.visit(bagItem, _);
+        super.visit(bagItem, _void);
         indenter.write(")");
         return postpare();
     }
 
     @Override
-    public Void visit(Hole hole, Void _) {
+    public Void visit(Hole hole, Void _void) {
         prepare(hole);
         indenter.write("HOLE");
         return postpare();
     }
 
     @Override
-    public Void visit(FreezerHole hole, Void _) {
+    public Void visit(FreezerHole hole, Void _void) {
         prepare(hole);
         indenter.write("HOLE(" + hole.getIndex() + ")");
         return postpare();
     }
 
     @Override
-    public Void visit(Freezer freezer, Void _) {
+    public Void visit(Freezer freezer, Void _void) {
         prepare(freezer);
         this.visitNode(freezer.getTerm());
         return postpare();
     }
 
     @Override
-    public Void visit(KInjectedLabel kInjectedLabel, Void _) {
+    public Void visit(KInjectedLabel kInjectedLabel, Void _void) {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
         if (term.getSort().isKSort()) {
@@ -528,22 +528,22 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(TermComment termComment, Void _) {
+    public Void visit(TermComment termComment, Void _void) {
         prepare(termComment);
         indenter.write("<br/>");
-        super.visit(termComment, _);
+        super.visit(termComment, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(Bag bag, Void _) {
+    public Void visit(Bag bag, Void _void) {
         prepare(bag);
-        super.visit(bag, _);
+        super.visit(bag, _void);
         return postpare();
     }
 
     @Override
-    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _) {
+    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _void) {
         prepare(ambiguity);
         indenter.write("amb(");
         indenter.endLine();
@@ -563,7 +563,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context context, Void _) {
+    public Void visit(org.kframework.kil.Context context, Void _void) {
         prepare(context);
         indenter.write("context ");
         variableList.clear();
@@ -588,7 +588,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _) {
+    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _void) {
         prepare(literateDefinitionComment);
         // indenter.write(literateDefinitionComment.getValue());
         // indenter.endLine();
@@ -596,7 +596,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Require require, Void _) {
+    public Void visit(Require require, Void _void) {
         prepare(require);
         indenter.write("require \"" + require.getValue() + "\"");
         indenter.endLine();
@@ -604,14 +604,14 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(BackendTerm term, Void _) {
+    public Void visit(BackendTerm term, Void _void) {
         prepare(term);
         indenter.write(term.getValue());
         return postpare();
     }
 
     @Override
-    public Void visit(Bracket br, Void _) {
+    public Void visit(Bracket br, Void _void) {
         prepare(br);
         indenter.write("(");
         this.visitNode(br.getContent());
@@ -620,7 +620,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Cast c, Void _) {
+    public Void visit(Cast c, Void _void) {
         prepare(c);
         this.visitNode(c.getContent());
         indenter.write(" :");
@@ -637,7 +637,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Token t, Void _) {
+    public Void visit(Token t, Void _void) {
         prepare(t);
         indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
         return postpare();

@@ -20,7 +20,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         String msg = "Multiple top sorts found for " + node.getDeclaredSort() + ": ";
         int count = 0;
         if (context.isSubsorted(Sort.KLIST, node.getDeclaredSort().getSort())) {
@@ -39,7 +39,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sentence node, Void _) {
+    public Void visit(Sentence node, Void _void) {
         // optimization to not visit the entire tree
         return null;
     }

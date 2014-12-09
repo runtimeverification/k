@@ -348,7 +348,10 @@ a constructor for function types:  */
                   > '_;_
                   > 'fun_
                   > 'datatype_=__
+endmodule
 
+module FUN-UNTYPED-MACROS
+  imports FUN-UNTYPED-SYNTAX
 
 //@ \subsection{Desugaring macros}
 
@@ -398,6 +401,7 @@ construct as explained above. */
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-MACROS
   imports PATTERN-MATCHING
 
 
@@ -682,7 +686,7 @@ above. */
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
   rule <k> assignTo(.Names,.Vals) => . ...</k>            [structural]
-  rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
+  rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs:Vals => Vs)) ...</k>
        <env>... X |-> L ...</env>
        <store>... .Map => L |-> V ...</store>             [structural]
 

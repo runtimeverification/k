@@ -1,1 +1,5 @@
-true ~> _\d+:KResult ==K _\d+:Sort
+Search results:
+
+Solution 1:
+V:K -->
+true ~> GeneratedAnonVar0:KResult ==K GeneratedAnonVar1:Sort

@@ -49,7 +49,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         List<ModuleItem> moduleItems = node.getItems();
         List<ModuleItem> newModuleItems = new ArrayList<>();
 
@@ -81,17 +81,17 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _)  {
+    public ASTNode visit(Rule rule, Void _void)  {
         if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
             return rule;
         }
@@ -121,13 +121,13 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     }
 
     @Override
-    public ASTNode visit(KApp kApp, Void _) {
+    public ASTNode visit(KApp kApp, Void _void) {
         /* YilongL: this prevents collecting cells injected inside KItems */
         return kApp;
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
+    public ASTNode visit(Cell cell, Void _void)  {
         String cellLabelName = cell.getLabel();
         if (status == Status.CONFIGURATION) {
             /* compute childrenCells */
@@ -143,7 +143,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             containingCells.get(cellLabelName).add(cellLabelName);
 
             cellStack.push(cellLabelName);
-            cell = (Cell) super.visit(cell, _);
+            cell = (Cell) super.visit(cell, _void);
             cellStack.pop();
             return cell;
         } else if (status == Status.RULE) {
@@ -156,7 +156,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             }
 
             schedule.add(Instruction.GOTO(CellLabel.of(cellLabelName)));
-            cell = (Cell) super.visit(cell, _);
+            cell = (Cell) super.visit(cell, _void);
             schedule.add(Instruction.UP);
 
             return cell;

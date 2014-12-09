@@ -95,8 +95,15 @@ module BINDER
 
 endmodule
 
+module FREE-VARS-SYNTAX
+  imports K-TECHNIQUE
+  syntax Set ::= freeVariables(KList)  [function, latex({\it FV}({#1}))]  // public
+
+endmodule
+
 module FREE-VARS
   imports BINDER
+  imports FREE-VARS-SYNTAX
 
 /* // TODO: (radum) deleted these from k-prelude.k and are required by substitution
   syntax K ::= Set2KTerm(Set)        [function]
@@ -106,7 +113,6 @@ module FREE-VARS
   rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K))) [nojava]
   rule Set2KTermAcc(.Set, K:K) => K
 */
-  syntax Set ::= freeVariables(KList)  [function, latex({\it FV}({#1}))]  // public
   rule freeVariables(Ks:KList) => #freeVars(Ks)
 
 // Grigore: again, I think this should just return a set of variables, not a K

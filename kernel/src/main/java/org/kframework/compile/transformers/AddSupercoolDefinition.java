@@ -22,9 +22,9 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _)  {
+    public ASTNode visit(Module node, Void _void)  {
         superCools.clear();
-        node = (Module) super.visit(node, _);
+        node = (Module) super.visit(node, _void);
         if (!superCools.isEmpty()) {
             node = node.shallowCopy();
             node.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -34,17 +34,17 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         if (!node.containsAttribute(MetaK.Constants.coolingTag)) {
             return node;
         }
@@ -67,15 +67,17 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
                                 this, node);
         }
-        final Term cool = kSequenceContents.get(0);
-        kSequenceContents = new ArrayList<Term>(kSequenceContents);
-        kSequenceContents.set(0, KApp.of(KLabelConstant.COOL_KLABEL, cool));
-        kSequence = kSequence.shallowCopy();
-        kSequence.setContents(kSequenceContents);
         rewrite = rewrite.shallowCopy();
+        KSequence left = new KSequence();
+        left.add(rewrite.getLeft());
+        Variable fresh = Variable.getAnonVar(Sort.K);
+        left.add(fresh);
+        KSequence right = new KSequence();
+        right.add(rewrite.getRight());
+        right.add(fresh);
         rewrite.replaceChildren(
-                kSequence,
-                KApp.of(KLabelConstant.COOL_KLABEL, rewrite.getRight()),
+                KApp.of(KLabelConstant.COOL_KLABEL, left),
+                KApp.of(KLabelConstant.COOL_KLABEL, right),
                 context);
         Rule superCoolNode = node.shallowCopy();
         superCoolNode.removeAttribute("cool");
@@ -86,7 +88,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 }

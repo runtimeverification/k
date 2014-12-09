@@ -29,7 +29,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
         this.kem = kem;
     }
 
-    public Void visit(Definition def, Void _) {
+    public Void visit(Definition def, Void _void) {
         List<String> synQue = new LinkedList<String>();
         synQue.add(startModuleName);
 
@@ -38,13 +38,13 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
             if (!modNames.contains(mname)) {
                 modNames.add(mname);
 
-                Module m = def.getModulesMap().get(mname);
+                Module m = def.getDefinitionContext().getModuleByName(mname);
                 for (ModuleItem s : m.getItems()) {
                     if (s instanceof Import) {
                         Import imp = ((Import) s);
                         String mname2 = imp.getName();
-                        Module mm = def.getModulesMap().get(mname2);
-                        // if the module starts with # it means it is predefined in maude
+                        Module mm = def.getDefinitionContext().getModuleByName(mname2);
+                        // TODO(dwightguth) if the module starts with # it means it is predefined in maude
                         if (!mname2.startsWith("#")) {
                             if (mm != null)
                                 synQue.add(mm.getName());

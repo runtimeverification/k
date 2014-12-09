@@ -5,7 +5,6 @@ require "array.k"
 require "float.k"
 require "string.k"
 require "id.k"
-require "io/tcp.k"
 require "k-equal.k"
 require "random.k"
 require "counter.k"
@@ -33,7 +32,6 @@ module BUILTIN-HOOKS
 //  imports ARRAY
   imports FLOAT-HOOKS
   imports STRING-HOOKS
-  imports TCP-HOOKS
   imports K-EQUAL-HOOKS
   imports RANDOM-HOOKS
   imports COUNTER-HOOKS

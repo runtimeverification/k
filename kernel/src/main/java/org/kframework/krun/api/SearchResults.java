@@ -8,12 +8,10 @@ import java.util.List;
 public class SearchResults {
     private List<SearchResult> solutions;
     private DirectedGraph<KRunState, Transition> graph;
-    private boolean isDefaultPattern;
 
-    public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern) {
+    public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph) {
         this.solutions = solutions;
         this.graph = graph;
-        this.isDefaultPattern = isDefaultPattern;
     }
 
     public DirectedGraph<KRunState, Transition> getGraph() {
@@ -22,10 +20,5 @@ public class SearchResults {
 
     public List<SearchResult> getSolutions() {
         return solutions;
-    }
-
-    public boolean isDefaultPattern(){
-
-        return this.isDefaultPattern;
     }
 }

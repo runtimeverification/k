@@ -1,1 +1,7 @@
-"A" \|-> A\s+"B" \|-> B\s+"C" \|-> A
+Search results:
+
+Solution 1:
+Solution:Map -->
+A:Term |-> A:Term
+B:Term |-> B:Term
+C:Term |-> A

@@ -10,6 +10,11 @@ module K-TECHNIQUE
     // so we have to declare things like isSet in less obvious places
 
     syntax KItem
+    syntax K
+    syntax KList
+    syntax KLabel
+    syntax Bag
+    syntax BagItem
 endmodule
 
 module K-LISTK-EXTRAS
@@ -20,7 +25,6 @@ module K-LISTK-EXTRAS
   syntax Bool ::= K "#inKList" KList [function]
   rule K:K inKList L:KList => K #inKList L ==K true
   rule K #inKList (_,,K:K,,_) => true
-  rule isKResult(_:KResult,,K:K,,KL:KList) => isKResult(K,,KL)
   rule isKResult(.KList) => true
 endmodule
 
@@ -28,6 +32,7 @@ module K-RESULT
     imports K-TECHNIQUE
     imports BOOL-HOOKS
 
+    syntax KResult
     syntax KItem ::= KResult
     syntax Bool ::= isKResult(KItem) [function,klabel(isKResult)]
 
@@ -54,6 +59,7 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
+  imports K-TECHNIQUE
   syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_), impure]
   rule getKLabel(L:KLabel(_:KList)) => L
 
@@ -74,16 +80,8 @@ endmodule
 module K-FREZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
-  syntax KLabel ::= "heat" | "heated" | "redex" | "cool"
 
-  rule heat(heated(K:K)) => K
-  rule heat(heated(_,,K:K,,_)) => K
-     [heat-choice]
-
-  rule heat((redex(_:K,, K:K,, KL:KList) => K,,KL),,_)
-    [owise]
-  rule heat((redex(K:K) => .KList),,_,,heated(_,,(.KList => K)))
-    [owise]
+  syntax K ::= cool(K) [function, klabel(cool)]
 
   rule cool(K:K) => K [owise]
 endmodule

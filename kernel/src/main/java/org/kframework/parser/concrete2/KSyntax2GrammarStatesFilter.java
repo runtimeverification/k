@@ -52,7 +52,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     private final KExceptionManager kem;
 
     @Override
-    public Void visit(Production prd, Void _) {
+    public Void visit(Production prd, Void _void) {
         if (prd.containsAttribute("notInPrograms") || prd.containsAttribute("reject"))
             return null;
         NonTerminal nt = grammar.get(prd.getSort().getName());
@@ -101,8 +101,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                  *
                  * Ids ::= IdsTerminator
                  *       | NeIds
-                 * NeIds ::= Id IdsTerminator [klabel('_,_)]
-                 *         | Id "," NeIds     [klabel('_,_)]
+                 * NeIds ::= Id IdsTerminator [klabel('_,_void)]
+                 *         | Id "," NeIds     [klabel('_,_void)]
                  * IdsTerminator ::= ""       [klabel('.Ids)]
                  *
                  * However, it's implemented by directly generating the grammar because all the labels
@@ -281,19 +281,19 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule s, Void _) {
+    public Void visit(Rule s, Void _void) {
         // skip visiting rules, contexts and configurations
         return null;
     }
 
     @Override
-    public Void visit(Configuration s, Void _) {
+    public Void visit(Configuration s, Void _void) {
         // skip visiting rules, contexts and configurations
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context s, Void _) {
+    public Void visit(org.kframework.kil.Context s, Void _void) {
         // skip visiting rules, contexts and configurations
         return null;
     }

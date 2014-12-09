@@ -1,10 +1,48 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-require "io/uris.k"
+require "builtins/string.k"
 require "builtins/list.k"
 
 module K-IO
   imports LIST
-  imports URIS
+  imports STRING-HOOKS
+
+  syntax IOError ::= "#EOF" | "#noparse" | "#ENOENT" | "#ENOTDIR" | "#EACCES" | "#ELOOP" | "#ENAMETOOLONG" | "#EBADF" | "#ESPIPE" | "#EISDIR" | "#EINVAL"
+
+  // B, N, and P are really supposed to be Nat
+  syntax KItem ::= "#open" "(" String ")" [function]
+                 | "#open" "(" String "," String ")" [function, hook(#IO:#open), impure]
+                 | "#tell" "(" Int ")" [function, hook(#IO:#tell), impure]
+                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc), impure]
+                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read), impure]
+
+  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close), impure]
+             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek), impure]
+             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc), impure]
+             | "#write" "(" Int "," String ")" [function, hook(#IO:#write), impure]
+
+  syntax KItem ::= "#ioError" "(" String ")"
+
+  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat), impure]
+                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat), impure]
+                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir), impure]
+
+  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse), impure]
+  syntax KItem ::= #parseInModule(String, // input
+                                  String, // start symbol
+                                  String) // module name
+                                  [function, hook(#K-PARSER:#parseInModule), impure]
+
+  rule #open(S:String) => #open(S:String, "rw")
+
+  syntax Int ::= "#stdin"   [function]
+                | "#stdout" [function]
+                | "#stderr" [function]
+
+  syntax Stream ::= #parseInput(String, String)
+  syntax Stream ::= #buffer(K)
+  syntax Stream ::= #istream(Int)
+                  | #ostream(Int)
+  syntax Stream ::= "#noIO"
 
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
@@ -80,4 +118,11 @@ module K-IO
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2
+
+// ------------------------------
+// System
+
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system), impure]
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+
 endmodule

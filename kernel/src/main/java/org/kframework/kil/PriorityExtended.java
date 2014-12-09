@@ -84,12 +84,12 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
     }
 
     @Override
-    public List<PriorityBlockExtended> getChildren(Enum<?> _) {
+    public List<PriorityBlockExtended> getChildren(Enum<?> _void) {
         return priorityBlocks;
     }
 
     @Override
-    public void setChildren(List<PriorityBlockExtended> children, Enum<?> _) {
+    public void setChildren(List<PriorityBlockExtended> children, Enum<?> _void) {
         this.priorityBlocks = children;
     }
 }

@@ -53,7 +53,7 @@ public class TokenSortCollector extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production production, Void _) {
+    public Void visit(Production production, Void _void) {
         if (!kompileOptions.experimental.legacyKast) {
             checkIllegalProduction(production);
         } else {
@@ -93,17 +93,17 @@ public class TokenSortCollector extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         return null;
     }
 

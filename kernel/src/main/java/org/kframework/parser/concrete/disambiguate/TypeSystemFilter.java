@@ -20,7 +20,7 @@ public class TypeSystemFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -39,13 +39,13 @@ public class TypeSystemFilter extends ParseForestTransformer {
             }
         }
 
-        return super.visit(tc, _);
+        return super.visit(tc, _void);
     }
 
     @Override
-    public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
+    public ASTNode visit(Cast cast, Void _void) throws ParseFailedException {
         if (cast.getType() != Cast.CastType.OUTER)
             cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), true, context).visitNode(cast.getContent()));
-        return super.visit(cast, _);
+        return super.visit(cast, _void);
     }
 }

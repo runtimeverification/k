@@ -16,8 +16,8 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _)  {
-        node = (Cell) super.visit(node, _);
+    public ASTNode visit(Cell node, Void _void)  {
+        node = (Cell) super.visit(node, _void);
         Ellipses ellipses = node.getEllipses();
         if (ellipses == Ellipses.NONE)
             return node;
@@ -82,17 +82,17 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
