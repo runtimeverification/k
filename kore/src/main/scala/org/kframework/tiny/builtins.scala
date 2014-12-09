@@ -17,7 +17,7 @@ case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KA
   def copy(att: Attributes): KEquals = KEquals(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an equals. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KEquals.newBuilder()
@@ -32,7 +32,7 @@ case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstr
   def copy(att: Attributes): KOr = KOr(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KOr.newBuilder()
@@ -47,7 +47,7 @@ case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbst
   def copy(att: Attributes): KAnd = KAnd(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KAnd.newBuilder()

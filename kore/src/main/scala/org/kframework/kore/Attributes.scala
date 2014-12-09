@@ -7,7 +7,8 @@ import org.kframework.builtin.Sorts
 import org.kframework.tiny.Pattern
 import org.kframework.tiny.Equivalence
 import sun.security.util.Cache.EqualByteArray
-import org.kframework.tiny.Solution
+import org.kframework.tiny.Conjunction
+import org.kframework.tiny.Disjunction
 
 case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
   type This = Attributes
@@ -44,7 +45,7 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
   def add(k: String): Attributes = this + k
   def add(key: String, value: String): Attributes = this + (key -> value)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
     ???
   }
 

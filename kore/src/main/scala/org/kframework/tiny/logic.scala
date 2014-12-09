@@ -10,40 +10,48 @@ trait Equation {
   def right: Term
 }
 
-case class Problem(equations: Set[Equation])
-
-object Solution {
-  def apply(pairs: (KVariable, Term)*): Solution = Solution(pairs.toMap)
+object Conjunction {
+  def apply(pairs: (KVariable, Term)*): Conjunction = Conjunction(pairs.toMap)
 }
 
-case class Solution private (m: Map[KVariable, Term]) extends Proposition {
-  def ++(other: Solution) = Solution(m ++ other.m)
-  def +(other: (KVariable, Term)) = Solution(m + other)
+case class Conjunction private (bindings: Map[KVariable, Term], other: Set[Equation] = Set()) extends Proposition {
+  def ++(other: Conjunction) = Conjunction(bindings ++ other.bindings)
+  def +(other: (KVariable, Term)) = Conjunction(bindings + other)
 
-  def and(that: Solution): Option[Solution] = {
+  def and(that: Conjunction): Option[Conjunction] = {
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
-    if ((m.keys.toSet & that.m.keys.toSet).exists(v => m(v) != that.m(v))) {
+    if ((bindings.keys.toSet & that.bindings.keys.toSet).exists(v => bindings(v) != that.bindings(v))) {
       None
     } else
       Some(this ++ that)
   }
 
-  def apply(v: KVariable) = m(v)
+  def apply(v: KVariable) = bindings(v)
 
-  def mapValues(f: Term => Term) = Solution(m mapValues f)
+  def mapValues(f: Term => Term) = Conjunction(bindings mapValues f)
 
-  def contains(v: KVariable) = m contains v
+  def contains(v: KVariable) = bindings contains v
 }
 
-trait BindingOps {
-  def or(s1: Set[Solution], s2: Set[Solution]): Set[Solution] =
-    s1 | s2
+case class Disjunction(conjunctions: Set[Conjunction]) {
+  def or(other: Disjunction): Disjunction =
+    Disjunction(conjunctions | other.conjunctions)
 
-  def and(s1: Set[Solution], s2: Set[Solution]): Set[Solution] = {
-    (for (m1 <- s1; m2 <- s2) yield {
+  def and(other: Disjunction): Disjunction = {
+    Disjunction((for (m1 <- conjunctions; m2 <- other.conjunctions) yield {
       m1 and m2
-    }).flatten
+    }).flatten)
   }
+
+  def headOption = conjunctions.headOption
+
+  def endomap(f: Conjunction => Conjunction) = Disjunction(conjunctions map f)
+
+  def map[T](f: Conjunction => T) = conjunctions map f
+}
+
+object Disjunction {
+  def apply(conjunctions: Conjunction*): Disjunction = Disjunction(conjunctions.toSet)
 }
 
 trait Equivalence {

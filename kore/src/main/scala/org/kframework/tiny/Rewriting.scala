@@ -13,7 +13,7 @@ object Substitution {
 class Substitution(self: Term) {
   import Substitution._
 
-  def transform(substituion: Solution): Term = self match {
+  def transform(substituion: Map[KVariable, Term]): Term = self match {
     case a @ Anywhere(p, _) => substituion(a.TOPVariable).transform(substituion + (a.HOLEVariable -> p))
     case v: KVariable => substituion(v).transform(substituion)
     case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
@@ -49,7 +49,7 @@ object Rule {
 
     (t: Term) => {
       val pmSolutions = left.matchAll(t)
-      pmSolutions map { substituion => Substitution(right).transform(substituion) }
+      pmSolutions map { substituion => Substitution(right).transform(substituion.bindings) }
     }
   }
 }
