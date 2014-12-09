@@ -57,20 +57,12 @@ object EqualsEquivalence extends Equivalence {
   def apply(a: Term, b: Term): Boolean = a == b
 }
 
-trait PatternByReflection {
-  self: { def productIterator: Iterable[Term] } =>
-  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
-    ???
-  }
-}
-
 trait InjectedKListPattern {
   self: InjectedKList =>
 
   import Pattern.Solution;
   import builtin.KBoolean._
-
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 trait KListPattern extends Pattern with BindingOps {

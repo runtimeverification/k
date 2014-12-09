@@ -43,7 +43,7 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
   def add(k: String): Attributes = this + k
   def add(key: String, value: String): Attributes = this + (key -> value)
 
-  def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
     ???
   }
 
