@@ -2,7 +2,7 @@ package org.kframework
 
 import org.kframework.kore.Sort
 
-case class POSet[T](directRelations: Set[(T, T)]) {
+class POSet[T](directRelations: Set[(T, T)]) {
 
   // TODO: there may be a more efficient algorithm (low priority)
   private def transitiveClosure(relations: Map[T, Set[T]]): Map[T, Set[T]] = {
@@ -18,9 +18,7 @@ case class POSet[T](directRelations: Set[(T, T)]) {
 
   def <(x: T, y: T): Boolean = relations.get(x) map { _.contains(y) } getOrElse (false)
   def >(x: T, y: T): Boolean = relations.get(y) map { _.contains(x) } getOrElse (false)
-  def <=(x: T, y: T): Boolean = x == y || <(x, y)
-  def >=(x: T, y: T): Boolean = x == y || >(x, y)
-  def ~(x: T, y: T) = <=(x, y) || <=(y, x)
+  def ~(x: T, y: T) = <(x, y) || <(y, x)
 
   lazy val lub: Option[T] = {
     val candidates = relations.values reduce { (a, b) => a & b }
@@ -40,15 +38,25 @@ case class POSet[T](directRelations: Set[(T, T)]) {
           }))
     }
   }
+
+  override def toString() = {
+    "POSet(" + (relations map { case (from, tos) => tos map { case to => from + "<" + to } }).mkString(",") + ")"
+  }
+
+  override def hashCode = relations.hashCode()
+
+  override def equals(that: Any) = that match {
+    case that: POSet[_] => relations == that.relations
+    case _ => false
+  }
 }
 
 object POSet {
   def apply[T](relations: (T, T)*) = new POSet(relations.toSet)
+  def apply[T](s: Set[(T, T)]) = new POSet(s)
 
   implicit class PO[T](x: T)(implicit val po: POSet[T]) {
     def <(y: T) = po.<(x, y)
-    def <=(y: T) = po.<=(x, y)
     def >(y: T) = po.>(x, y)
-    def >=(y: T) = po.>=(x, y)
   }
 }

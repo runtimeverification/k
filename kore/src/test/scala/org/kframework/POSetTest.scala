@@ -15,10 +15,8 @@ class POSetTest {
 
     assertTrue(b1 < b3)
     assertTrue(b1 < b2)
-    assertTrue(b1 >= b1)
-    assertTrue(b1 <= b1)
-    assertTrue(b1 <= b2)
-    assertTrue(b1 <= b3)
+    assertFalse(b1 > b1)
+    assertFalse(b1 < b1)
     assertFalse(b1 < b4)
   }
 
