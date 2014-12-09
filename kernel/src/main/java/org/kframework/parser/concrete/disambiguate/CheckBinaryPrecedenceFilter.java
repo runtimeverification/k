@@ -28,7 +28,7 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     Term parentmi = null;
 
     @Override
-    public ASTNode visit(Rewrite rw, Void _) throws ParseFailedException {
+    public ASTNode visit(Rewrite rw, Void _void) throws ParseFailedException {
         if (parent != null || parentks != null || parentmi != null) {
             String msg = "Due to typing errors, rewrite is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getSource(), rw.getLocation());
@@ -38,11 +38,11 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
         parent = null;
         parentks = null;
         parentmi = null;
-        return visit((Term) rw, _);
+        return visit((Term) rw, _void);
     }
 
     @Override
-    public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
+    public ASTNode visit(KSequence ks, Void _void) throws ParseFailedException {
         if (parent != null || parentks != null) {
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
@@ -63,11 +63,11 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
         parentks = null;
         parent = null;
         parentmi = null;
-        return visit((Term) ks, _);
+        return visit((Term) ks, _void);
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         if (tc.getProduction().isListDecl()) {
             Term t = tc.getContents().get(0);
             parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
@@ -98,11 +98,11 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
             }
         }
 
-        return visit((Term) tc, _);
+        return visit((Term) tc, _void);
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
         TermCons lp = parent;
         KSequence ks = parentks;
         Term mi = parentmi;
@@ -132,6 +132,6 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
             return terms.get(0);
         }
         node.setContents(terms);
-        return visit((Term) node, _);
+        return visit((Term) node, _void);
     }
 }

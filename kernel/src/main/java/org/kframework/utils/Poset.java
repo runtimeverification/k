@@ -39,6 +39,15 @@ public class Poset<T> implements Serializable {
         invalidateCache();
     }
 
+    /**
+     * Add all the elements and relations to the current object.
+     * @param poset the new relations.
+     */
+    public void add(Poset<T> poset) {
+        this.relations.addAll(poset.relations);
+        this.elements.addAll(poset.elements);
+    }
+
     public void addRelation(T big, T small) {
         relations.add(new Tuple<T>(big, small));
         elements.add(big);

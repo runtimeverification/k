@@ -42,7 +42,7 @@ public class BuiltinListOperations {
         if (value != null) {
             return value;
         } else if (list.isConcreteCollection()) {
-            return Bottom.of(Kind.K);
+            return Bottom.BOTTOM;
         } else {
             return null;
         }
@@ -67,7 +67,7 @@ public class BuiltinListOperations {
         List<Term> elementsRight = list.elementsRight();
         if (list.isConcreteCollection()) {
             if (removeLeft + removeRight > elementsLeft.size()) {
-                return Bottom.of(Kind.KITEM);
+                return Bottom.BOTTOM;
             }
 
             pendingRemoveLeft = pendingRemoveRight = 0;

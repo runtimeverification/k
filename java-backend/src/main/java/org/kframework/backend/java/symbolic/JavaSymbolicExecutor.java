@@ -155,11 +155,9 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        // TODO(ericmikida): Make the isDefaultPattern option set in some reasonable way
         KRunResult<SearchResults> searchResultsKRunResult = new KRunResult<>(new SearchResults(
                 searchResults,
-                null,
-                false));
+                null));
 
         return searchResultsKRunResult;
     }

@@ -480,7 +480,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             @Override
             protected DataStructureBuiltin doCopy(DataStructureBuiltin node,
                     java.util.Collection<Term> items,
-                    DataStructureBuiltin.ListChildren _) {
+                    DataStructureBuiltin.ListChildren _void) {
                 return node.shallowCopy(items);
             }
 
@@ -496,7 +496,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             @Override
             protected CollectionBuiltin doCopy(CollectionBuiltin node,
                     java.util.Collection<Term> items,
-                    DataStructureBuiltin.ListChildren _) {
+                    DataStructureBuiltin.ListChildren _void) {
                 return node.shallowCopy(node.baseTerms(), items);
             }
 
@@ -544,7 +544,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             @Override
             protected SetUpdate doCopy(SetUpdate node,
                     java.util.Collection<Term> items,
-                    Enum<?> _) {
+                    Enum<?> _void) {
                 return new SetUpdate(node.set(), items);
             }
 
@@ -569,7 +569,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             @Override
             protected ListBuiltin doCopy(ListBuiltin node,
                     java.util.Collection<Term> items,
-                    DataStructureBuiltin.ListChildren _) {
+                    DataStructureBuiltin.ListChildren _void) {
                 return ListBuiltin.of(node.sort(), (List<Term>)node.baseTerms(), node.elementsLeft(), (List<Term>)items);
             }
 

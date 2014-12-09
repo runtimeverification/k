@@ -37,7 +37,7 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         this.kem = kem;
     }
 
-    public ASTNode visit(Sentence ss, Void _) throws ParseFailedException {
+    public ASTNode visit(Sentence ss, Void _void) throws ParseFailedException {
         assert (getCurrentModule() != null);
         ASTNode config = ss;
         config = new SentenceVariablesFilter(context).visitNode(config);

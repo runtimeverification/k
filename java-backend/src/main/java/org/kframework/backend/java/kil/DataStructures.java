@@ -14,17 +14,27 @@ import java.util.Set;
  */
 public interface DataStructures {
 
+    public final String MAP_CHOICE = "Map:choice";
+    public final String SET_CHOICE = "Set:choice";
+    public final String LIST_GET = "List:get";
+    public final String MAP_LOOKUP = "Map:lookup";
+    public final String SET_MEMBERSHIP = "'_in_";
+    public final String LIST_RANGE = "List:range";
+    public final String MAP_UPDATE = "'updateMap";
+    public final String MAP_REMOVE_ALL = "'removeAll";
+    public final String SET_REMOVE_ALL = "'_-Set_";
+
     static KItem lookup(Term base, Term key, TermContext context) {
         KLabelConstant klabel;
         KList kList;
         if (base.sort().equals(Sort.LIST)) {
-            klabel = KLabelConstant.of("List:get", context.definition().context());
+            klabel = KLabelConstant.of(LIST_GET, context.definition().context());
             kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.MAP)) {
-            klabel = KLabelConstant.of("Map:lookup", context.definition().context());
+            klabel = KLabelConstant.of(MAP_LOOKUP, context.definition().context());
             kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.SET)) {
-            klabel = KLabelConstant.of("'_in_", context.definition().context());
+            klabel = KLabelConstant.of(SET_MEMBERSHIP, context.definition().context());
             kList = (KList) KList.concatenate(key, base);
         } else {
             assert false : "unimplemented missing case";
@@ -33,15 +43,29 @@ public interface DataStructures {
         return KItem.of(klabel, kList, context);
     }
 
+    static boolean isChoice(Term term) {
+        return term instanceof KItem
+                && ((KItem) term).kLabel() instanceof KLabelConstant
+                && (((KItem) term).kLabel().toString().equals(MAP_CHOICE)
+                        || ((KItem) term).kLabel().toString().equals(SET_CHOICE))
+                && ((KItem) term).kList() instanceof KList
+                && ((KList) ((KItem) term).kList()).isConcreteCollection()
+                && ((KList) ((KItem) term).kList()).concreteSize() == 1;
+    }
+
     static boolean isLookup(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && (((KItem) term).kLabel().toString().equals("List:get")
-                        || ((KItem) term).kLabel().toString().equals("Map:lookup")
-                        || ((KItem) term).kLabel().toString().equals("'_in_"))
+                && (((KItem) term).kLabel().toString().equals(LIST_GET)
+                        || ((KItem) term).kLabel().toString().equals(MAP_LOOKUP)
+                        || ((KItem) term).kLabel().toString().equals(SET_MEMBERSHIP))
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
                 && ((KList) ((KItem) term).kList()).concreteSize() == 2;
+    }
+
+    static boolean isLookupOrChoice(Term term) {
+        return isLookup(term) || isChoice(term);
     }
 
     static Term getLookupBase(Term term) {
@@ -63,9 +87,9 @@ public interface DataStructures {
     static KItem choice(Term base, TermContext context) {
         KLabelConstant klabel;
         if (base.sort().equals(Sort.MAP)) {
-            klabel = KLabelConstant.of("Map:choice", context.definition().context());
+            klabel = KLabelConstant.of(MAP_CHOICE, context.definition().context());
         } else if (base.sort().equals(Sort.SET)) {
-            klabel = KLabelConstant.of("Set:choice", context.definition().context());
+            klabel = KLabelConstant.of(SET_CHOICE, context.definition().context());
         } else {
             assert false : "unimplemented missing case";
             return null;
@@ -79,7 +103,7 @@ public interface DataStructures {
         }
 
         return KItem.of(
-                KLabelConstant.of("List:range", context.definition().context()),
+                KLabelConstant.of(LIST_RANGE, context.definition().context()),
                 KList.concatenate(base, IntToken.of(removeLeft), IntToken.of(removeRight)),
                 context);
     }
@@ -92,7 +116,7 @@ public interface DataStructures {
         BuiltinSet.Builder builder = BuiltinSet.builder();
         builder.addAll(removeSet);
         return KItem.of(
-                KLabelConstant.of("'removeAll", context.definition().context()),
+                KLabelConstant.of(MAP_REMOVE_ALL, context.definition().context()),
                 KList.concatenate(base, builder.build()),
                 context);
     }
@@ -105,7 +129,7 @@ public interface DataStructures {
         BuiltinMap.Builder builder = new BuiltinMap.Builder();
         builder.putAll(updateMap);
         return KItem.of(
-                KLabelConstant.of("'updateMap", context.definition().context()),
+                KLabelConstant.of(MAP_UPDATE, context.definition().context()),
                 KList.concatenate(base, builder.build()),
                 context);
     }
@@ -118,7 +142,7 @@ public interface DataStructures {
         BuiltinSet.Builder builder = BuiltinSet.builder();
         builder.addAll(removeSet);
         return KItem.of(
-                KLabelConstant.of("'_-Set_", context.definition().context()),
+                KLabelConstant.of(SET_REMOVE_ALL, context.definition().context()),
                 KList.concatenate(base, builder.build()),
                 context);
     }
@@ -126,7 +150,7 @@ public interface DataStructures {
     static boolean isMapUpdate(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && ((KItem) term).kLabel().toString().equals("'updateMap")
+                && ((KItem) term).kLabel().toString().equals(MAP_UPDATE)
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
                 && ((KList) ((KItem) term).kList()).concreteSize() == 2;

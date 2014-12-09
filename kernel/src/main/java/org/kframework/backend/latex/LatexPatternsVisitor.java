@@ -24,21 +24,21 @@ public class LatexPatternsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production p, Void _) {
+    public Void visit(Production p, Void _void) {
         if (p.containsAttribute("latex")) {
             pattern = p.getAttribute("latex");
         } else {
             pattern = "";
             nonTerm = 1;
             prevNonTerm = false;
-            super.visit(p, _);
+            super.visit(p, _void);
         }
         patterns.put(p, pattern);
         return null;
     }
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
+    public Void visit(NonTerminal sort, Void _void) {
         if (prevNonTerm)
             pattern += "\\mathrel{}";
         pattern += "{#" + nonTerm++ + "}";
@@ -47,7 +47,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(UserList sort, Void _) {
+    public Void visit(UserList sort, Void _void) {
         // Should be only nonterminal in a production, so prevNonTerm has no effect
         pattern += "{#" + nonTerm++ + "}";
         pattern += "\\mathpunct{\\terminalNoSpace{" + StringUtil.latexify(sort.getSeparator()) + "}}";
@@ -56,7 +56,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Terminal pi, Void _) {
+    public Void visit(Terminal pi, Void _void) {
         String terminal = pi.getTerminal();
         if (terminal.isEmpty())
             return null;
@@ -71,17 +71,17 @@ public class LatexPatternsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         return null;
     }
 }

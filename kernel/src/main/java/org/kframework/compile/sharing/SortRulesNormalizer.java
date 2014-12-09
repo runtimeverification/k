@@ -20,7 +20,7 @@ public class SortRulesNormalizer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Module visit(Module module, Void _) {
+    public Module visit(Module module, Void _void) {
         Collections.sort(module.getItems(), new Comparator<ModuleItem>() {
             @Override
             public int compare(ModuleItem arg0, ModuleItem arg1) {

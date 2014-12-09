@@ -1,2 +1,0 @@
-\QL:Term |-> cons ( a, cons ( b, nil ) )\E
-\QL:Term |-> cons ( b, cons ( a, nil ) )\E

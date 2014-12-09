@@ -18,18 +18,18 @@ public class CellEndLabelFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax cell, Void _) {
+    public ASTNode visit(Syntax cell, Void _void) {
         return cell;
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
+    public ASTNode visit(Cell cell, Void _void) throws ParseFailedException {
         if (!cell.getLabel().equals(cell.getEndLabel())) {
             String msg = "Cell starts with '" + cell.getLabel() + "' but ends with '" + cell.getEndLabel() + "'";
             // String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getSource(), cell.getLocation());
             throw new ParseFailedException(kex);
         }
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 }

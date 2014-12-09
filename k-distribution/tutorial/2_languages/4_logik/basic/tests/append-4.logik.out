@@ -1,5 +1,37 @@
-"L1" |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( ((?!\1|\2).*?), cons \( ((?!\1|\2|\3).*?), nil \(  \) \) \) \) \)\s+"L2" \|-> L2\s+"L3" \|-> cons \( \1, cons \( \2, cons \( \3, cons \( \4, cons \( a \(  \), L2 \) \) \) \) \)
-"L1" |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( ((?!\1|\2).*?), nil \(  \) \) \) \)\s+"L2" \|-> L2\s+"L3" \|-> cons \( \1, cons \( \2, cons \( \3, cons \( a \(  \), L2 \) \) \) \)
-"L1" |-> cons \( (.*?), cons \( ((?!\1).*?), nil \(  \) \) \)\s+"L2" \|-> L2\s+"L3" \|-> cons \( \1, cons \( \2, cons \( a \(  \), L2 \) \) \)
-"L1" |-> cons \( (.*?), nil \(  \) \)\s+"L2" \|-> L2\s+"L3" \|-> cons \( \1, cons \( a \(  \), L2 \) \)
-"L1" |-> nil \(  \)\s+"L2" \|-> L2\s+"L3" \|-> cons \( a \(  \), L2 \)
+Search results:
+
+Solution 1:
+Solution:Map -->
+L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons
+   ( GeneratedAnonVar2:Term, cons ( GeneratedAnonVar3:Term, nil ) ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( 
+  GeneratedAnonVar2, cons ( GeneratedAnonVar3, cons ( a, L2 ) ) ) ) )
+
+Solution 2:
+Solution:Map -->
+L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons
+   ( GeneratedAnonVar2:Term, nil ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( 
+  GeneratedAnonVar2, cons ( a, L2 ) ) ) )
+
+Solution 3:
+Solution:Map -->
+L1:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, nil 
+  ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( GeneratedAnonVar0, cons ( GeneratedAnonVar1, cons ( a, L2 )
+   ) )
+
+Solution 4:
+Solution:Map -->
+L1:Term |-> cons ( GeneratedAnonVar0:Term, nil )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( GeneratedAnonVar0, cons ( a, L2 ) )
+
+Solution 5:
+Solution:Map -->
+L1:Term |-> nil
+L2:Term |-> L2:Term
+L3:Term |-> cons ( a, L2 )

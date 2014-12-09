@@ -24,13 +24,13 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _)  {
+    public ASTNode visit(Rule node, Void _void)  {
         if (MetaK.isAnywhere(node)) return node;
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _)  {
+    public ASTNode visit(Rewrite node, Void _void)  {
         ASTNode right = new DefaultTermsResolver(context).visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
@@ -40,17 +40,17 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _)  {
+    public ASTNode visit(Configuration node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _)  {
+    public ASTNode visit(Syntax node, Void _void)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
+    public ASTNode visit(org.kframework.kil.Context node, Void _void)  {
         return node;
     }
 
@@ -62,8 +62,8 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(Cell node, Void _)  {
-            Cell cell = (Cell) super.visit(node, _);
+        public ASTNode visit(Cell node, Void _void)  {
+            Cell cell = (Cell) super.visit(node, _void);
             if (cell.getEllipses() == Ellipses.NONE) return cell;
             cell = cell.shallowCopy();
             cell.setCellAttributes(new HashMap<String, String>(cell.getCellAttributes()));
@@ -101,7 +101,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
                     if (! sonCfg.sons.isEmpty()) {
                         son.setContents(new Bag());
                         son.setEllipses(Ellipses.BOTH);
-                        son = (Cell)visit(son, _);
+                        son = (Cell)visit(son, _void);
                     }
                     bag.getContents().add(son);
                     change = true;

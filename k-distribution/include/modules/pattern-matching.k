@@ -3,6 +3,7 @@ require "builtins/k-equal.k"
 
 module PATTERN-MATCHING
    imports K-EQUAL-HOOKS
+   imports ID-SYNTAX-HOOKS
 
 /***********
   VISIBLE

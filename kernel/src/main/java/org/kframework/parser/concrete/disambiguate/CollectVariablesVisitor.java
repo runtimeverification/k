@@ -42,7 +42,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Cell c, Void _) {
+    public Void visit(Cell c, Void _void) {
         Sort s = context.getCellSort(c);
         if (s != null)
             try {
@@ -50,11 +50,11 @@ public class CollectVariablesVisitor extends BasicVisitor {
             } catch (ParseFailedException e) {
                 e.printStackTrace();
             }
-        return super.visit(c, _);
+        return super.visit(c, _void);
     }
 
     @Override
-    public Void visit(TermCons node, Void _) {
+    public Void visit(TermCons node, Void _void) {
         if (cache.containsKey(node))
             return null;
 
@@ -83,11 +83,11 @@ public class CollectVariablesVisitor extends BasicVisitor {
             }
         }
 
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 
     @Override
-    public Void visit(Variable var, Void _) {
+    public Void visit(Variable var, Void _void) {
         if (var.getExpectedSort() == null)
             var.setExpectedSort(var.getSort());
         if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && var.isUserTyped()) {
@@ -119,7 +119,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode visit(Variable node, Void _) throws ParseFailedException {
+        public ASTNode visit(Variable node, Void _void) throws ParseFailedException {
             if (node.isUserTyped()) {
                 node.setExpectedSort(node.getSort());
                 return node;
@@ -138,14 +138,14 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
+        public ASTNode visit(Rewrite node, Void _void) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
-            return visit((Term) result, _);
+            return visit((Term) result, _void);
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
             ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
@@ -163,13 +163,13 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 return terms.get(0);
             }
             node.setContents(terms);
-            return visit((Term) node, _);
+            return visit((Term) node, _void);
         }
 
         @Override
-        public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
+        public ASTNode visit(Bracket node, Void _void) throws ParseFailedException {
             node.setContent((Term) this.visitNode(node.getContent()));
-            return visit((Term) node, _);
+            return visit((Term) node, _void);
         }
     }
 }

@@ -33,7 +33,7 @@ public class ParseForestTransformer extends AbstractTransformer<ParseFailedExcep
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+    public ASTNode visit(Ambiguity node, Void _void) throws ParseFailedException {
         ParseFailedException exception = new ParseFailedException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
                 "Parse forest contains no trees!", node.getSource(), node.getLocation()));

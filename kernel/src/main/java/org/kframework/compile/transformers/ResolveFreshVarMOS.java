@@ -23,9 +23,9 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence node, Void _)  {
+    public ASTNode visit(Sentence node, Void _void)  {
         vars.clear();
-        super.visit(node, _);
+        super.visit(node, _void);
         if (vars.isEmpty())
             return node;
 
@@ -36,12 +36,12 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable node, Void _)  {
+    public ASTNode visit(Variable node, Void _void)  {
         if (node.isFreshVariable()) {
             this.vars.add(node);
             return node;
         }
-        return super.visit(node, _);
+        return super.visit(node, _void);
     }
 
     private Substitution freshSubstitution(Set<Variable> vars) {

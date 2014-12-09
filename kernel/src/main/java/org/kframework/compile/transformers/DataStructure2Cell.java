@@ -39,8 +39,8 @@ public class DataStructure2Cell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _)  {
-        cell = (Cell) super.visit(cell, _);
+    public ASTNode visit(Cell cell, Void _void)  {
+        cell = (Cell) super.visit(cell, _void);
 
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
@@ -94,7 +94,7 @@ public class DataStructure2Cell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration configuration, Void _) {
+    public ASTNode visit(Configuration configuration, Void _void) {
         return configuration;
     }
 

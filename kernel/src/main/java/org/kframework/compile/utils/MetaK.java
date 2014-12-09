@@ -114,23 +114,23 @@ public class MetaK {
         final List<Configuration> result = new LinkedList<Configuration>();
         new BasicVisitor(context) {
             @Override
-            public Void visit(Configuration node, Void _) {
+            public Void visit(Configuration node, Void _void) {
                 result.add(node);
                 return null;
             }
 
             @Override
-            public Void visit(org.kframework.kil.Context node, Void _) {
+            public Void visit(org.kframework.kil.Context node, Void _void) {
                 return null;
             }
 
             @Override
-            public Void visit(Rule node, Void _) {
+            public Void visit(Rule node, Void _void) {
                 return null;
             }
 
             @Override
-            public Void visit(Syntax node, Void _) {
+            public Void visit(Syntax node, Void _void) {
                 return null;
             }
         }.visitNode(node);
@@ -167,9 +167,9 @@ public class MetaK {
         final List<Integer> count = new ArrayList<Integer>();
         count.add(0);
         BasicVisitor countVisitor = new BasicVisitor(context) {
-            @Override public Void visit(Rewrite rewrite, Void _) {
+            @Override public Void visit(Rewrite rewrite, Void _void) {
                 count.set(0, count.get(0) + 1);
-                super.visit(rewrite, _);
+                super.visit(rewrite, _void);
                 return null;
             }
         };
@@ -182,9 +182,9 @@ public class MetaK {
         final List<Integer> count = new ArrayList<Integer>();
         count.add(0);
         BasicVisitor countVisitor = new BasicVisitor(context) {
-            @Override public Void visit(Hole hole, Void _) {
+            @Override public Void visit(Hole hole, Void _void) {
                 count.set(0, count.get(0) + 1);
-                super.visit(hole, _);
+                super.visit(hole, _void);
                 return null;
             }
         };
@@ -196,22 +196,22 @@ public class MetaK {
     public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
         BasicVisitor cellFinder = new BasicVisitor(context) {
             @Override
-            public Void visit(KSequence node, Void _) { return null; }
+            public Void visit(KSequence node, Void _void) { return null; }
 
             @Override
-            public Void visit(TermCons node, Void _) { return null; }
+            public Void visit(TermCons node, Void _void) { return null; }
 
             @Override
-            public Void visit(KApp node, Void _) { return null; }
+            public Void visit(KApp node, Void _void) { return null; }
 
             @Override
-            public Void visit(KList node, Void _) { return null; }
+            public Void visit(KList node, Void _void) { return null; }
 
             @Override
-            public Void visit(UserList node, Void _) { return null; }
+            public Void visit(UserList node, Void _void) { return null; }
 
             @Override
-            public Void visit(Cell node, Void _) {
+            public Void visit(Cell node, Void _void) {
                 NonLocalExit.RETURN();
                 return null;
             }
@@ -269,7 +269,7 @@ public class MetaK {
         final List<Cell> cells = new ArrayList<Cell>();
         new BasicVisitor(context) {
             @Override
-            public Void visit(Cell node, Void _) {
+            public Void visit(Cell node, Void _void) {
                 if (!node.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
                     cells.add(node);
                 }
@@ -283,9 +283,9 @@ public class MetaK {
         final List<String> cells = new ArrayList<String>();
         new BasicVisitor(context) {
             @Override
-            public Void visit(Cell node, Void _) {
+            public Void visit(Cell node, Void _void) {
                 cells.add(node.getLabel());
-                return super.visit(node, _);
+                return super.visit(node, _void);
             }
         }.visitNode(t);
         return cells;

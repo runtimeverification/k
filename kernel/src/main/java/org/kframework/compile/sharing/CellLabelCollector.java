@@ -26,21 +26,21 @@ public class CellLabelCollector extends BasicVisitor {
 
     // Skip every item other than configurations
     @Override
-    public Void visit(Configuration c, Void _) {
-        return super.visit(c, _);
+    public Void visit(Configuration c, Void _void) {
+        return super.visit(c, _void);
     }
     @Override
-    public Void visit(ModuleItem m, Void _) {
+    public Void visit(ModuleItem m, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Cell cell, Void _) {
+    public Void visit(Cell cell, Void _void) {
         cellLabels.add(cell.getLabel());
         if (cell.getMultiplicity() == Multiplicity.SOME ||
                 cell.getMultiplicity() == Multiplicity.ANY) {
             cellLabels.add(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX + cell.getLabel());
         }
-        return super.visit(cell, _);
+        return super.visit(cell, _void);
     }
 }

@@ -17,16 +17,16 @@ public class SyntaxByTag extends BasicVisitor {
     private final String key;
 
     @Override
-    public Void visit(Configuration node, Void _) { return null; }
+    public Void visit(Configuration node, Void _void) { return null; }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) { return null; }
+    public Void visit(org.kframework.kil.Context node, Void _void) { return null; }
 
     @Override
-    public Void visit(Rule node, Void _) { return null; }
+    public Void visit(Rule node, Void _void) { return null; }
 
     @Override
-    public Void visit(Production node, Void _) {
+    public Void visit(Production node, Void _void) {
         if (key.equals("") || node.containsAttribute(key))
             productions.add(node);
         return null;

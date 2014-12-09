@@ -2,8 +2,6 @@ package org.kframework.tiny
 
 import scala.reflect.ManifestFactory
 import collection.JavaConverters._
-import scala.util.Failure
-import scala.util.Success
 
 object Reflection {
   import scala.reflect.runtime.universe._

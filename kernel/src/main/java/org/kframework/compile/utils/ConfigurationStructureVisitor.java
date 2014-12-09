@@ -27,7 +27,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Configuration node, Void _) {
+    public Void visit(Configuration node, Void _void) {
         Term t = node.getBody();
         Cell top = new Cell();
         top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
@@ -38,7 +38,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Cell node, Void _) {
+    public Void visit(Cell node, Void _void) {
         ConfigurationStructure cfg = new ConfigurationStructure();
         cfg.multiplicity = node.getMultiplicity();
         cfg.id = node.getId();
@@ -55,24 +55,24 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
             }
         }
         ancestors.push(cfg);
-        super.visit(node, _);
+        super.visit(node, _void);
         ancestors.pop();
         config.put(cfg.id, cfg);
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) {
+    public Void visit(org.kframework.kil.Context node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Syntax node, Void _) {
+    public Void visit(Syntax node, Void _void) {
         return null;
     }
 
     @Override
-    public Void visit(Rule node, Void _) {
+    public Void visit(Rule node, Void _void) {
         return null;
     }
 

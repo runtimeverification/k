@@ -45,7 +45,7 @@ public class HTMLPatternsVisitor extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Production p, Void _) {
+    public Void visit(Production p, Void _void) {
         if(p.containsAttribute("latex") || p.containsAttribute("html")) {
             if (p.containsAttribute("latex")) {
 
@@ -67,14 +67,14 @@ public class HTMLPatternsVisitor extends BasicVisitor {
             type.put(p, HTMLPatternType.DEFAULT);
             //super.visit(p);
         }
-        return _;
+        return _void;
 
     }
 
 
     @Override
-    public Void visit(NonTerminal sort, Void _) {
-        return _;
+    public Void visit(NonTerminal sort, Void _void) {
+        return _void;
         /*if (prevNonTerm) pattern += "\\mathrel{}";
         pattern += "{#" + nonTerm++ + "}";
         prevNonTerm = true;*/
@@ -82,8 +82,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 
 
     @Override
-    public Void visit(UserList sort, Void _) {
-        return _;
+    public Void visit(UserList sort, Void _void) {
+        return _void;
         //Should be only nonterminal in a production, so prevNonTerm has no effect
         /*pattern += "{#" + nonTerm++ + "}";
         pattern += "\\mathpunct{\\terminalNoSpace{" + StringUtil.latexify(sort.getSeparator()) + "}}";
@@ -92,8 +92,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 
 
     @Override
-    public Void visit(Terminal pi, Void _) {
-        return _;
+    public Void visit(Terminal pi, Void _void) {
+        return _void;
         /*String terminal = pi.getTerminal();
         if (terminal.isEmpty()) return;
         if (context.isSpecialTerminal(terminal)) {

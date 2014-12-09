@@ -62,7 +62,7 @@ class VisitTest {
   def testVisitor() = {
     object myVisitor extends AbstractVisitor {
       val mentionedSorts = collection.mutable.Set[Sort]()
-      def visit(s: Sort) = { println("here"); mentionedSorts += s }
+      def visit(s: Sort) = { mentionedSorts += s }
     }
     myVisitor(dCorrect)
 

@@ -14,7 +14,7 @@ public class CheckStreams extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Cell node, Void _) {
+    public Void visit(Cell node, Void _void) {
 
         this.visitNode(node.getContents());
         String stream = node.getCellAttributes().get("stream");

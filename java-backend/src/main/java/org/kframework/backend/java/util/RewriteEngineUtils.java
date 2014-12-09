@@ -12,6 +12,7 @@ import java.util.Map;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -66,7 +67,8 @@ public class RewriteEngineUtils {
                     Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                     boolean resolved = false;
-                    if (evalLookupOrChoice == null || evalLookupOrChoice instanceof Bottom) {
+                    if (evalLookupOrChoice instanceof Bottom
+                            || DataStructures.isLookupOrChoice(evalLookupOrChoice)) {
                         /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
                         // when the operation is pending, it is not really a valid match

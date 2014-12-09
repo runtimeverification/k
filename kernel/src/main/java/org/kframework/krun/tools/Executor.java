@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
+import org.kframework.backend.unparser.PrintSearchResult;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -105,6 +106,7 @@ public interface Executor {
 
         public KRunResult<?> run(Void v, Attributes a) {
             a.add(Context.class, context);
+            a.add(Boolean.class, PrintSearchResult.IS_DEFAULT_PATTERN, options.pattern == null);
             try {
                 if (options.search()) {
                     return search();

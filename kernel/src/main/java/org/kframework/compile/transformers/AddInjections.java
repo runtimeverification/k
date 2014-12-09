@@ -19,7 +19,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -43,22 +42,22 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public Module visit(Module module, Void _) {
+    public Module visit(Module module, Void _void) {
         state = TransformationState.NORMALIZE_PRODUCTIONS;
         module = normalizeProductions(module);
         state = TransformationState.TRANSFORM_PRODUCTIONS;
-        module = (Module) super.visit(module, _);
+        module = (Module) super.visit(module, _void);
         state = TransformationState.TRANSFORM_TERMS;
-        module = (Module) super.visit(module, _);
+        module = (Module) super.visit(module, _void);
         state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
-        module = (Module) super.visit(module, _);
+        module = (Module) super.visit(module, _void);
         return module;
     }
 
     /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
      * not-terminal has sort subsorted to K */
     @Override
-    public Syntax visit(Syntax node, Void _)  {
+    public Syntax visit(Syntax node, Void _void)  {
         if (state != TransformationState.TRANSFORM_PRODUCTIONS) {
             return node;
         }
@@ -68,7 +67,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         Sort sort = node.getDeclaredSort().getSort();
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
-        production = (Production) visit(production, _);
+        production = (Production) visit(production, _void);
 
         if ((sort.equals(Sort.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
                 || sort.equals(Sort.K) || sort.equals(Sort.KLIST)) {
@@ -105,7 +104,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     /** Transforms {@code Sort} instances occurring as part of
      * {@link org.kframework.kil.ProductionItem}. Other instances are not changed. */
     @Override
-    public NonTerminal visit(NonTerminal node, Void _) {
+    public NonTerminal visit(NonTerminal node, Void _void) {
         assert state == TransformationState.TRANSFORM_PRODUCTIONS;
 
         if (needInjectionFrom(node.getSort())) {
@@ -120,7 +119,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
     /* Phase two: transform terms such that each term respects the transform productions */
     @Override
-    public Rule visit(Rule node, Void _)  {
+    public Rule visit(Rule node, Void _void)  {
         // TODO(AndreiS): remove this check when include files do not contain the old List, Map, and Set
         if (node.containsAttribute("nojava")) {
             return node;
@@ -130,12 +129,14 @@ public class AddInjections extends CopyOnWriteTransformer{
             return node;
         }
 
-        Rule transformedNode = (Rule) super.visit(node, _);
+        Rule transformedNode = (Rule) super.visit(node, _void);
         if (!node.containsAttribute(Attribute.FUNCTION_KEY)) {
             return transformedNode;
         }
 
-        assert transformedNode.getBody() instanceof Rewrite : "Deep rewrites are currently not allowed in function rules.";
+        if (!(transformedNode.getBody() instanceof Rewrite)) {
+            transformedNode = (Rule) new ResolveRewrite(context).visitNode(transformedNode);
+        }
         Term left = ((Rewrite) transformedNode.getBody()).getLeft();
         Term right = ((Rewrite) transformedNode.getBody()).getRight();
         if (!(left instanceof KItemProjection)) {
@@ -152,7 +153,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public ASTNode visit(TermCons node, Void _)  {
+    public ASTNode visit(TermCons node, Void _void)  {
         // TODO(AndreiS): find out why the assertion is failing
         // assert state == TransformationState.TRANSFORM_TERMS;
         if (state != TransformationState.TRANSFORM_TERMS) {

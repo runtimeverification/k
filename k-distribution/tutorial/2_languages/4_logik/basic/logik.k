@@ -1,5 +1,4 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/unification.k"
 
 /*!
 \title{LOGIK}
@@ -196,46 +195,34 @@ one cannot do it in general (same like for all Turing-complete
 languages).  */
 
 module LOGIK
-  imports UNIFICATION
+  syntax KItem ::= renameVariables(K) [function, hook(MetaK:renameVariables), impure]
+  syntax KItem ::= variables(K) [function, hook(MetaK:variables), impure]
+  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap), impure]
+  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable), impure]
+
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
-used in the type inferencers in Tutorial 5. */
+used in the type inferencers in Tutorial 5). */
 
 /*@ \section{Syntax}
 
 The syntax of LOGIK is straightforward: a program is a sequence of
 Horn clauses followed by a query: */
 
-  syntax Term ::= Variable
-                | Literal                           [klabel('LiteralAsTerm)]
-                | Literal "(" Terms ")"
+  syntax Term ::= Literal | Literal "(" Terms ")"
   syntax Terms ::= List{Term,","}
   syntax Clause ::= Term ":-" Terms "." | Term "."
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
-
-
 
 /*@ Variables and literals are defined as tokens following the conventions
 used in Prolog (variables start with \_ or capital letter, while literals
 start with lower case letters): */
 
 
-  syntax Variable ::= Token{[\_A-Z][a-zA-Z0-9\_]*}               [onlyLabel]
+  syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel]
   syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel]
-
-
-
-/*@ \subsection{Normalizing the definition}
-
-The following simple macros ensure that all clauses will have both a
-conclusion and a condition, and that all predicate and operation
-symbols take a (potentially empty) list of arguments.  These will
-simply the semantics later on, by not having to treat special cases. */
-
-  rule L. => L :- .Terms .                                       [macro]
-  rule 'LiteralAsTerm(X:Literal) => X(.Terms)                    [macro]
 
 /*@ \section{Configuration}
 
@@ -252,25 +239,38 @@ discard the main cell. */
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
                   <fresh color="orange"> .K </fresh>
-                  <mgu color="blue"> (.Mgu)::MguOrError </mgu>
                   <br/>
                   <clauses color="red">
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
+                  <mgu> .K </mgu>
                 </T>
-                <solution multiplicity="?"> .Map </solution>
+                <solution multiplicity="?"> .K </solution>
 
 /*@ \section{Pre- and post-processing}
 
 Before we launch the semantics, we first scan the given program and
 place each clause in its own cell, and then place the query in the
-\textsf{k} cell, creating the solution cell, too: */
+\textsf{k} cell and initialize the mgu with the variables from the query.
+
+Note that we put a fresh instance of the clause to avoid interference with
+the query variables.  By a ``fresh instance'' of a clause we mean one whose
+variables are renamed with fresh names; we need that in order to avoid
+undesired unification conflicts due to particular names chosen for
+variables in the original program, as well as conflicts due to
+subsequent uses of the same clause.  It is safe to rename the
+variables in a clause, because clauses are universally quantified in
+their variables.  This process of creating a fresh instance of a
+clause is similar to how we created fresh instances of type schemas in
+the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
+can safely regard clauses as ``clause schemas'' comprising infinitely
+many instances, one for each context.  */
 
   rule <k> C:Clause Pgm => Pgm </k>
-       (. => <clause> C </clause>)
+       (. => <clause> renameVariables(C) </clause>)
 
   rule <k> ?- Ls:Terms. => Ls ...</k>
-       (. => <solution> #metaVariablesMap(Ls) </solution>)
+       <mgu> _ => variablesMap(variables(Ls)) </mgu>
 
 //@ We also sequentialize the goals for easier processing:
   rule L:Term, Ls:Terms => L ~> Ls
@@ -278,11 +278,12 @@ place each clause in its own cell, and then place the query in the
 
 /*@ When all the goals are solved, indicated by the empty \textsf{k}
 cell, the calculated most general unifier (mgu) is in the \textsf{mgu}
-cell.  In that case, to ease reading of the final solution we apply
-the mgu to the solution map and delete the rest of the configuration: */
+cell.  In that case, to ease reading of the final solution we move the
+mgu in the \textsf{solution} cell and delete the rest of the
+configuration: */
 
-  rule (<T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T> => .)
-       <solution> Solution:Map => applyMgu(Theta,Solution) </solution>
+rule <T>... <k> . </k> <mgu> Theta </mgu> ...</T>
+  => <solution> Theta </solution>
 
 /*@ Since we are not interested in seeing the failed attempts to solve
 the query, we collapse all the error configurations into an empty
@@ -291,7 +292,9 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
-  rule <T>... <mgu> _:MguError </mgu> ...</T> <solution> _ </solution> => .
+// this would be nice, but we need feedback from the external unifier
+// for this.
+//  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
 
 /*@ \section{Semantics}
 
@@ -312,36 +315,33 @@ clauses, and then derive {\em false}). */
 /*@ The following two rules are tightly connected and they together
 perform the following core task: pick a fresh instance of a clause
 which unifies with the first goal item, then add its conditions as new
-goals.  By a ``fresh instance'' of a clause we mean one whose
-variables are renamed with fresh names; we need that in order to avoid
-undesired unification conflicts due to particular names chosen for
-variables in the original program, as well as conflicts due to
-subsequent uses of the same clause.  It is safe to rename the
-variables in a clause, because clauses are universally quantified in
-their variables.  This process of creating a fresh instance of a
-clause is similar to how we created fresh instances of type schemas in
-the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
-can safely regard clauses as ``clause schemas'' comprising infinitely
-many instances, one for each context. */
+goals.*/
 
 /*@ Pick a clause and generate a fresh instance of it when the
 \textsf{fresh} cell is empty: */
 
-  rule <fresh> . => renameVariables(C) </fresh>  <clause> C </clause>
+  rule <fresh> . => renameVariables(C) </fresh> <clause> C </clause>
+       <k> T:Term ...</k>
+  requires unifiable(T,head(C))
     [transition]
 
-/*@ Unify the goal with the fresh clause's head, replace the goal
+  syntax Term ::= head(Clause) [function]
+  rule head(L.) => L
+  rule head(L:-_.) => L
+
+/*@ If the goal is unifiable with the fresh clause's head, replace the goal
 with the clause body, and empty the \textsf{fresh} cell (so that
 another clause can be chosen using the rule above):  */
 
-  rule <k> L':Term => Ls ...</k>
+  rule <k> L:Term => . ...</k>
+       <fresh>  L:Term . => . </fresh>
+
+  rule <k> L:Term => Ls ...</k>
        <fresh>  L:Term :- Ls:Terms. => . </fresh>
-       <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
 
 /*@ Note that there is no problem if a clause is chosen whose
-conclusion literal does not unify with the first goal literal.  In
-this case the mgu update operation fails, so the post-processing rule
-above dissolves the configuration in an empty one.  The search
+conclusion literal does not unify with the first goal literal.
+The search
 option of \texttt{krun} will systematically try all clauses, so no
 solution is missed.  Of course, the above is not the most efficient
 way to implement a logic programming language, but recall that our
