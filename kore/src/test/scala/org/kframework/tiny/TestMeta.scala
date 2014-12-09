@@ -36,7 +36,7 @@ class TestMeta {
 
   val Down = tiny.Down(Set("org.kframework.kore.outer", "scala.collection.immutable"))
 
-  @Test def definitionUp() {
+  @Ignore @Test def definitionUp() {
     assertEquals(metad, Up(d))
   }
 

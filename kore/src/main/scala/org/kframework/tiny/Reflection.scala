@@ -65,7 +65,10 @@ object Reflection {
     val args = completeArgsWithDefaults(paramsListsWithDefauls, givenArgsLists)
 
     try { methodMirror.apply(args: _*) }
-    catch { case reason => methodMirror.apply(args) }
+    catch {
+      case _: IllegalArgumentException => methodMirror.apply(args)
+      case _: IndexOutOfBoundsException => methodMirror.apply(args)
+    }
   }
 
   def mirrorForMethod(obj: Any, methodSymbol: reflect.runtime.universe.MethodSymbol) = {
