@@ -33,7 +33,7 @@ trait SyntaxSortToString {
 
 trait ImportToString {
   self: Import =>
-  override def toString() = "imports " + what + att.postfixString
+  override def toString() = "imports " + moduleName + att.postfixString
 }
 
 trait TerminalToString {
