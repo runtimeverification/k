@@ -37,6 +37,11 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
+    /**
+     * List of expected cell labels, in the oder in which they appear in the configuration.
+     * Used to ensure deterministic order of cells when translating
+     * a {@link org.kframework.backend.java.kil.CellCollection} to a {@link org.kframework.kil.Bag}.
+     */
     private List<String> currentCellLabels;
 
     public BackendJavaKILtoKILTransformer(Context context) {
