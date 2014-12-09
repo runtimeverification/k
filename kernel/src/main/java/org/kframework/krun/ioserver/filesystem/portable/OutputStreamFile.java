@@ -19,7 +19,7 @@ public class OutputStreamFile extends File {
 
     public long tell() throws IOException {
         kem.registerInternalWarning("Potentially unsound file system behavior: attempting to tell from "
-            + "stdout or stderr. If you are interested in this behavior, please "
+            + "output-only file. If you are interested in this behavior, please "
             + "file an issue on github.");
         throw new IOException("ESPIPE");
         // technically the above code is incorrect (it should be what is below); however,
@@ -38,7 +38,7 @@ public class OutputStreamFile extends File {
 
     public void seek(long pos) throws IOException {
         kem.registerInternalWarning("Potentially unsound file system behavior: attempting to seek from "
-            + "stdin. If you are interested in this behavior, please "
+            + "output-only file. If you are interested in this behavior, please "
             + "file an issue on github.");
         throw new IOException("ESPIPE");
         //see comment on tell
@@ -66,14 +66,14 @@ public class OutputStreamFile extends File {
         //an IOException here. An IOException in the api corresponds to a system call failing in a
         //well-defined fashion. Here we throw an UnsupportedOperationException because the behavior
         //is undefined.
-        kem.registerInternalWarning("Unsupported file system behavior: tried to read from stdout or stderr."
+        kem.registerInternalWarning("Unsupported file system behavior: tried to read from output-only file."
                 + " If you are interested in this behavior, please file an issue on github.");
         throw new UnsupportedOperationException();
     }
 
     public byte[] read(int n) throws IOException {
         //see comment on getc
-        kem.registerInternalWarning("Unsupported file system behavior: tried to read from stdout or stderr."
+        kem.registerInternalWarning("Unsupported file system behavior: tried to read from output-only file."
                 + " If you are interested in this behavior, please file an issue on github.");
         throw new UnsupportedOperationException();
     }
