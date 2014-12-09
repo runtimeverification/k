@@ -10,6 +10,10 @@ trait Equation {
   def right: Term
 }
 
+trait Equivalence {
+  def apply(a: Term, b: Term): Boolean
+}
+
 object Conjunction {
   def apply(pairs: (KVariable, Term)*): Conjunction = Conjunction(pairs.toMap)
 }
@@ -52,10 +56,6 @@ case class Disjunction(conjunctions: Set[Conjunction]) {
 
 object Disjunction {
   def apply(conjunctions: Conjunction*): Disjunction = Disjunction(conjunctions.toSet)
-}
-
-trait Equivalence {
-  def apply(a: Term, b: Term): Boolean
 }
 
 object EqualsEquivalence extends Equivalence {

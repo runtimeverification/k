@@ -18,7 +18,6 @@ object Optimize {
       case s if s.size == 0 => throw new RuntimeException("Could not find an optimization solution for the given term.")
       case s if s.size == 1 => s.head.asInstanceOf[K]
       case s if s.size > 1 =>
-        System.err.println(s mkString "\n")
         throw new RuntimeException("There is some issue. More than one optimization solution.")
     }
   }
