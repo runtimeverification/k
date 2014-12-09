@@ -10,10 +10,7 @@ import scala.collection.mutable.SetBuilder
 import org.kframework.tiny.Equivalence
 import org.kframework.tiny.EqualsEquivalence
 import org.kframework.tiny._
-import Pattern._
 import collection.mutable.ListBuffer
-
-trait Proposition
 
 case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
   type This = KEquals

@@ -7,7 +7,8 @@ import kore._
 import builtin.KBoolean._
 import KORE._
 
-import Pattern.Solution
+trait Proposition
+
 import scala.collection.mutable.ListBuffer
 
 case class MatchException(m: String) extends RuntimeException(m)
@@ -19,12 +20,31 @@ trait Equation {
 
 case class Problem(equations: Set[Equation])
 
-object Pattern {
-  type Solution = Map[KVariable, Term]
+object Solution {
+  def apply(pairs: (KVariable, Term)*): Solution = Solution(pairs.toMap)
+}
+
+case class Solution private (m: Map[KVariable, Term]) extends Proposition {
+  def ++(other: Solution) = Solution(m ++ other.m)
+  def +(other: (KVariable, Term)) = Solution(m + other)
+
+  def and(that: Solution): Option[Solution] = {
+    //  if variables are bound to distinct terms, m1 and m2 is false (none)
+    if ((m.keys.toSet & that.m.keys.toSet).exists(v => m(v) != that.m(v))) {
+      None
+    } else
+      Some(this ++ that)
+  }
+
+  def apply(v: KVariable) = m(v)
+
+  def mapValues(f: Term => Term) = Solution(m mapValues f)
+
+  def contains(v: KVariable) = m contains v
 }
 
 trait Pattern {
-  def matchOne(k: Term): Option[Map[KVariable, Term]] = matchAll(k).headOption
+  def matchOne(k: Term): Option[Solution] = matchAll(k).headOption
 
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
 }
@@ -36,16 +56,8 @@ trait BindingOps {
 
   def and(s1: Set[Solution], s2: Set[Solution]): Set[Solution] = {
     (for (m1 <- s1; m2 <- s2) yield {
-      and(m1, m2)
+      m1 and m2
     }).flatten
-  }
-
-  def and(m1: Map[KVariable, Term], m2: Map[KVariable, Term]): Option[Map[KVariable, Term]] = {
-    //  if variables are bound to distinct terms, m1 and m2 is false (none)
-    if ((m1.keys.toSet & m2.keys.toSet).exists(v => m1(v) != m2(v))) {
-      None
-    } else
-      Some(m1 ++ m2)
   }
 }
 
@@ -60,7 +72,6 @@ object EqualsEquivalence extends Equivalence {
 trait InjectedKListPattern {
   self: InjectedKList =>
 
-  import Pattern.Solution;
   import builtin.KBoolean._
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
@@ -68,7 +79,7 @@ trait InjectedKListPattern {
 trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
-  override def matchOne(k: Term): Option[Map[KVariable, Term]] =
+  override def matchOne(k: Term): Option[Solution] =
     matchAllPrivate(k, true).headOption
 
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
@@ -76,12 +87,12 @@ trait KListPattern extends Pattern with BindingOps {
 
   private def matchAllPrivate(k: Term, justOne: Boolean)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     if (equiv(this, k))
-      Set(Map())
+      Set(Solution())
     else
       k match {
         case k: KList =>
           (k.delegate, this.delegate) match {
-            case (List(), List()) => Set(Map())
+            case (List(), List()) => Set(Solution())
             //            case (head +: tail, headP +: tailP) if equiv(headP, head) => tailP.matchAll(tail)
             case (_, headP +: tailP) =>
               (0 to k.size)
@@ -111,7 +122,7 @@ trait KApplyPattern extends Pattern with BindingOps {
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     (this, k) match {
       case (KApply(labelVariable: KVariable, contentsP: Term, _), KApply(label2, contents, _)) =>
-        and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents))
+        and(Set(Solution(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents))
       case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
         contentsP.matchAll(contents)
       case (_: KApply, _) => Set()
@@ -122,7 +133,7 @@ trait KVariablePattern extends Pattern with BindingOps {
   self: KVariable =>
 
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
-    Set(Map(this -> k))
+    Set(Solution(this -> k))
 }
 
 trait KRewritePattern extends Pattern with BindingOps {
@@ -134,7 +145,7 @@ trait KRewritePattern extends Pattern with BindingOps {
 trait KTokenPattern extends Pattern with BindingOps {
   self: KToken =>
   def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
-    case KToken(`sort`, `s`, _) => Set(Map())
+    case KToken(`sort`, `s`, _) => Set(Solution())
     case _ => Set()
   }
 }
@@ -145,7 +156,7 @@ trait KSequencePattern extends Pattern with BindingOps {
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks) map {
-          case m: Map[_, _] => m.asInstanceOf[Map[KVariable, Term]] mapValues {
+          case m: Solution => m mapValues {
             case l: KList => KSequence(l.delegate, Attributes())
             case k => k
           }
@@ -173,9 +184,9 @@ case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Co
   val TOPVariable = KVariable("TOP_" + name)
   val HOLEVariable = KVariable("HOLE_" + name)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
-    val localSolution = and(pattern.matchAll(k), Set(Map(TOPVariable -> (HOLEVariable: Term))))
-    val childrenSolutions: Set[Map[KVariable, Term]] = k match {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Solution] = {
+    val localSolution = and(pattern.matchAll(k), Set(Solution(TOPVariable -> (HOLEVariable: Term))))
+    val childrenSolutions: Set[Solution] = k match {
       case kk: Collection[_] =>
         val k = kk.asInstanceOf[Collection[Term]]
         (k map { c: Term =>
@@ -188,7 +199,7 @@ case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Co
                   case other: Term => other
                 }
               }
-              val anywhereWrapper = Map(TOPVariable -> newAnywhere)
+              val anywhereWrapper = Solution(TOPVariable -> newAnywhere)
               s ++ anywhereWrapper
           }
           updatedSolutions
@@ -200,9 +211,4 @@ case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Co
 
   def foreach(f: Term => Unit): Unit = delegate foreach f
   def iterable: Iterable[Term] = delegate
-}
-
-object Anywhere {
-  //  val TOP = KVariable("TOP")
-  //  val HOLE = KVariable("HOLE")
 }
