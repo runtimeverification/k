@@ -24,9 +24,9 @@ object Pattern {
 }
 
 trait Pattern {
-  def matchOne(k: Term, condition: Term = true): Option[Map[KVariable, Term]] = matchAll(k, condition).headOption
+  def matchOne(k: Term): Option[Map[KVariable, Term]] = matchAll(k).headOption
 
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution]
 }
 
 trait BindingOps {
@@ -59,7 +59,7 @@ object EqualsEquivalence extends Equivalence {
 
 trait PatternByReflection {
   self: { def productIterator: Iterable[Term] } =>
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = {
     ???
   }
 }
@@ -76,13 +76,13 @@ trait InjectedKListPattern {
 trait KListPattern extends Pattern with BindingOps {
   self: KList =>
 
-  override def matchOne(k: Term, condition: Term = true): Option[Map[KVariable, Term]] =
-    matchAllPrivate(k, condition, true).headOption
+  override def matchOne(k: Term): Option[Map[KVariable, Term]] =
+    matchAllPrivate(k, true).headOption
 
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
-    matchAllPrivate(k, condition, true)
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+    matchAllPrivate(k, true)
 
-  private def matchAllPrivate(k: Term, condition: Term = true, justOne: Boolean)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  private def matchAllPrivate(k: Term, justOne: Boolean)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     if (equiv(this, k))
       Set(Map())
     else
@@ -110,18 +110,18 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
   type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 trait KApplyPattern extends Pattern with BindingOps {
   self: KApply =>
 
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     (this, k) match {
       case (KApply(labelVariable: KVariable, contentsP: Term, _), KApply(label2, contents, _)) =>
-        and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents, condition))
+        and(Set(Map(labelVariable -> MetaKLabel(label2))), contentsP.matchAll(contents))
       case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
-        contentsP.matchAll(contents, condition)
+        contentsP.matchAll(contents)
       case (_: KApply, _) => Set()
     }
 }
@@ -129,19 +129,19 @@ trait KApplyPattern extends Pattern with BindingOps {
 trait KVariablePattern extends Pattern with BindingOps {
   self: KVariable =>
 
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     Set(Map(this -> k))
 }
 
 trait KRewritePattern extends Pattern with BindingOps {
   self: KRewrite =>
 
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 trait KTokenPattern extends Pattern with BindingOps {
   self: KToken =>
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = k match {
     case KToken(`sort`, `s`, _) => Set(Map())
     case _ => Set()
   }
@@ -149,10 +149,10 @@ trait KTokenPattern extends Pattern with BindingOps {
 
 trait KSequencePattern extends Pattern with BindingOps {
   self: KSequence =>
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] =
     k match {
       case s: KSequence =>
-        ks.matchAll(s.ks, condition) map {
+        ks.matchAll(s.ks) map {
           case m: Map[_, _] => m.asInstanceOf[Map[KVariable, Term]] mapValues {
             case l: KList => KSequence(l.delegate, Attributes())
             case k => k
@@ -162,7 +162,7 @@ trait KSequencePattern extends Pattern with BindingOps {
 }
 
 trait InjectedKLabelPattern extends Pattern {
-  def matchAll(k: Term, condition: Term = true)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
+  def matchAll(k: Term)(implicit equiv: Equivalence = EqualsEquivalence): Set[Solution] = ???
 }
 
 case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Collection[Term] with BindingOps {
@@ -181,7 +181,7 @@ case class Anywhere(pattern: Term, name: String = "SINGLETON") extends K with Co
   val TOPVariable = KVariable("TOP_" + name)
   val HOLEVariable = KVariable("HOLE_" + name)
 
-  def matchAll(k: Term, condition: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
+  def matchAll(k: Term)(implicit equiv: Equivalence): Set[Pattern.Solution] = {
     val localSolution = and(pattern.matchAll(k), Set(Map(TOPVariable -> (HOLEVariable: Term))))
     val childrenSolutions: Set[Map[KVariable, Term]] = k match {
       case kk: Collection[_] =>
