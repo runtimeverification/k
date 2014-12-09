@@ -163,7 +163,7 @@ public class DefinitionLoader {
 
         File cache = files.resolveKompiled("defx-cache.bin");
         Thread t2 = null;
-        if (!context.kompileOptions.experimental.javaParser) {
+        if (!context.kompileOptions.experimental.javaParserRules) {
             // ------------------------------------- generate files
             DefinitionLocalKParser.init(files.resolveKompiled("."));
             ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
@@ -266,7 +266,7 @@ public class DefinitionLoader {
 
         sw.printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
 
-        if (!context.kompileOptions.experimental.javaParser) {
+        if (!context.kompileOptions.experimental.javaParserRules) {
             try {
                 if (t2 != null) {
                     t2.join();
