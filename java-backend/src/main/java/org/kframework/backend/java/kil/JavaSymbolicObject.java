@@ -36,6 +36,7 @@ public abstract class JavaSymbolicObject extends ASTNode
      * Variable (the variable has all fields set to null at the moment of hashing).
      */
     transient Set<Variable> variableSet = null;
+    transient Set<Term> userVariableSet = null;
     transient Set<Term> functionKLabels = null;
 
     /**
@@ -121,6 +122,35 @@ public abstract class JavaSymbolicObject extends ASTNode
         return Collections.unmodifiableSet(variableSet);
     }
 
+     /**
+     * Returns a {@code Set} view of the user variables (ie terms of sort Variable) in this
+     * {@code JavaSymbolicObject}.
+     * <p>
+     * When the set of user variables has not been computed, this method will do the
+     * computation instead of simply returning {@code null}
+     * {@link JavaSymbolicObject#getUserVariableSet()}.
+     */
+    public Set<Term> userVariableSet(TermContext context) {
+        if (userVariableSet == null) {
+            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.setUserVariableSet(set),
+                    term -> term.getUserVariableSet(),
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(Term term) {
+                            if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
+                                term.getUserVariableSet().add(term);
+                            }
+                        }
+                    });
+            accept(visitor);
+            userVariableSet = visitor.getResultSet();
+        }
+        return Collections.unmodifiableSet(userVariableSet);
+    }
+
+
+
     /**
      * Returns true if this {@code JavaSymbolicObject} has no functions or
      * patterns, false otherwise.
@@ -139,6 +169,11 @@ public abstract class JavaSymbolicObject extends ASTNode
                             if (kItem.isSymbolic()) {
                                 kItem.functionKLabels.add(kItem.kLabel());
                             }
+                        }
+
+                        @Override
+                        public void visit(KItemProjection projection) {
+                            projection.functionKLabels.add(projection);
                         }
                     });
             accept(visitor);
@@ -180,6 +215,21 @@ public abstract class JavaSymbolicObject extends ASTNode
 
     public void setVariableSet(Set<Variable> variableSet) {
         this.variableSet = variableSet;
+    }
+
+    /**
+     * Gets the cached set of variables in this {@code JavaSymbolicObject}.
+     *
+     * @return a set of variables in this {@code JavaSymbolicObject} if they
+     *         have been computed; otherwise, {@code null}
+     * @see JavaSymbolicObject#variableSet()
+     */
+    public Set<Term> getUserVariableSet() {
+        return userVariableSet;
+    }
+
+    public void setUserVariableSet(Set<Term> variableSet) {
+        this.userVariableSet = variableSet;
     }
 
     // TODO(YilongL): remove the comments below to enforce that every subclass

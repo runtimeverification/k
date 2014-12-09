@@ -16,6 +16,7 @@
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />

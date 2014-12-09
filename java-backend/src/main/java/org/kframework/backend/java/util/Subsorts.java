@@ -12,6 +12,7 @@ import com.google.common.collect.ArrayTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Subsort relation.
@@ -57,7 +58,15 @@ public class Subsorts implements Serializable {
     }
 
     public boolean isSubsorted(Sort bigSort, Sort smallSort) {
-        return subsort.get(bigSort, smallSort);
+        Boolean isSubsorted = subsort.get(bigSort, smallSort);
+        if (isSubsorted == null) {
+            if (subsort.containsRow(bigSort)) {
+                throw KExceptionManager.criticalError("Sort " + smallSort.toString() + " is undefined.");
+            } else {
+                throw KExceptionManager.criticalError("Sort " + bigSort.toString() + " is undefined.");
+            }
+        }
+        return isSubsorted;
     }
 
     public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {

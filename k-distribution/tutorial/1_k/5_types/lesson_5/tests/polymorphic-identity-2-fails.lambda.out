@@ -1,0 +1,6 @@
+Search results:
+
+Solution 1:
+V:K -->
+_0:Type = (_0 -> _1:Type) ~> _1 ~> _0 -> HOLE ~> tenv ( .Map ) ~> (HOLE (
+  lambda x . x))

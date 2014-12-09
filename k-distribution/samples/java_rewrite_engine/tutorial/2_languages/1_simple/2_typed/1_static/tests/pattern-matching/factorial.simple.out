@@ -1,9 +1,0 @@
-<T>
-    <tasks>
-        .Bag
-    </tasks>
-    <gtenv>
-        factorial |-> ((int) -> (int))
-        main |-> ((void) -> (void))
-    </gtenv>
-</T>

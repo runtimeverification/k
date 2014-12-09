@@ -2,28 +2,8 @@ Search results:
 
 Solution 1:
 V:K -->
-#symType(1)
+int
 
 Solution 2:
 V:K -->
-#symType(10) = #symType(7)
-
-Solution 3:
-V:K -->
-#symType(12) = #symType(7)
-
-Solution 4:
-V:K -->
-#symType(3) = (#symType(13) -> #symType(12))
-
-Solution 5:
-V:K -->
-#symType(5) = #symType(6)
-
-Solution 6:
-V:K -->
-#symType(7) = #symType(4)
-
-Solution 7:
-V:K -->
-#symType(8) = (bool)
+int -> int = bool -> bool

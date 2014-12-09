@@ -7,6 +7,7 @@
            results=".">
     <kompile-option name="--superheat"
                     value="strict" />
+    <kompile-option name="--backend" value="java" />
 <!-- Grigore: explain the superheat option above -->
   </include>
 

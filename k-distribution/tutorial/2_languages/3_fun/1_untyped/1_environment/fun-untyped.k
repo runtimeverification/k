@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/pattern-matching.k"
+require "modules/pattern-matching-java.k"
 
 /*!
 \title{FUN --- Untyped --- Environment}
