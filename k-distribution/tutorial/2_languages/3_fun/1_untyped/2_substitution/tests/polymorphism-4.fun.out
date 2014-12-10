@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-fun (#symName("local",, 1) -> (fun ([ y ] -> y)) [ #symName("local",, 1) ])
+fun (x -> (fun ([ y ] -> y)) [ x ])

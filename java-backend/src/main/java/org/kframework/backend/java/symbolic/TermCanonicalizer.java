@@ -32,7 +32,7 @@ public class TermCanonicalizer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(CellCollection node) {
-        Term transformedNode = CellCollection.downKind((Term) super.transform(node));
+        Term transformedNode = (Term) super.transform(node);
         if (transformedNode instanceof CellCollection) {
             CellCollection cellCol = (CellCollection) transformedNode;
             if (cellCol.hasFrame() && cellCol.concreteSize() == 0) {

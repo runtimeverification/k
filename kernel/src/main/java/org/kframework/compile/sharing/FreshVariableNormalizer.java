@@ -71,7 +71,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     Integer.parseInt(variable.getName().substring(GENERATED_ANON_VAR.length()));
                     substitution.put(
                             variable,
-                            new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));
+                            new Variable("_" + counter++, variable.getSort()));
                 } catch (NumberFormatException e) { }
             }
 
@@ -80,7 +80,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     Integer.parseInt(variable.getName().substring(1));
                     substitution.put(
                             variable,
-                            new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));
+                            new Variable("_" + counter++, variable.getSort()));
                 } catch (NumberFormatException e) { }
             }
 

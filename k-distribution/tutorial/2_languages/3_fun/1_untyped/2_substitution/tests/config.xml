@@ -9,7 +9,9 @@
       exclude="callcc-looping references-5
                constructor-bst-sorting constructor-expr-distributivity factorial-and-list-max nth pattern references-1 stuck-letrec"
       results="../../1_environment/tests ." >
+      <kompile-option name="--backend" value="java" />
       <all-programs>
+        <krun-option name="--pattern-matching" />
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
        </all-programs>
   </test>

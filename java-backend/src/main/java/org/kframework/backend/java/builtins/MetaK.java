@@ -10,8 +10,11 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.kil.ASTNode;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -76,7 +79,7 @@ public class MetaK {
     }
 
     /**
-     * Renames {@link Variable}s of a given {@link Term} if they appear also in
+     * Renames {@link MetaVariable}s of a given {@link Term} to fresh {@link Variable}s if they appear also in
      * a given {@link BuiltinSet} of {@link MetaVariable}s.
      *
      *
@@ -104,7 +107,14 @@ public class MetaK {
             variables.add(new Variable((MetaVariable) element));
         }
 
-        return term.substitute(Variable.getFreshSubstitution(variables), context);
+        term = (Term) term.accept(new CopyOnWriteTransformer(context) {
+            @Override
+            public ASTNode transform(MetaVariable metaVariable) {
+                return new Variable(metaVariable);
+            }
+        });
+
+        return KLabelInjection.injectionOf(term.substitute(Variable.getFreshSubstitution(variables), context), context);
     }
 
     /**
@@ -119,6 +129,19 @@ public class MetaK {
     public static Term renameVariables(Term term, TermContext context) {
         Set<Variable> variables = term.variableSet();
         return term.substitute(Variable.getFreshSubstitution(variables), context);
+    }
+
+    public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {
+        BuiltinSet variables = trueVariables(termWithBoundVars, context);
+        return KLabelInjection.injectionOf((Term) termToFreeze.accept(new CopyOnWriteTransformer(context) {
+            @Override
+            public ASTNode transform(Variable variable) {
+                if (!variables.contains(variable)) {
+                    return new MetaVariable(variable);
+                }
+                return variable;
+            }
+        }), context);
     }
 
     /**

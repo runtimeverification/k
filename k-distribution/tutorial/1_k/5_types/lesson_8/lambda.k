@@ -1,9 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/unification.k"
-require "modules/substitution.k"
+require "modules/substitution-java.k"
 
 module LAMBDA
-  imports UNIFICATION
   imports SUBSTITUTION
 
   syntax Exp ::= Int | Bool | Id
@@ -24,11 +22,11 @@ module LAMBDA
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
+  syntax Variable ::= Id
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
                 <tenv color="red"> .Map </tenv>
-                <mgu color="blue"> .Mgu </mgu>
 
   rule I:Int => int
   rule B:Bool => bool
@@ -37,9 +35,10 @@ module LAMBDA
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
-  syntax Exp ::= Exp "->" Exp  [strict]
-  rule <k> lambda X:Id . E:Exp => ?T:Type -> E ~> tenv(TEnv) ...</k>
+
+  rule <k> lambda X:Id . E:Exp => E ~> ?T:Type -> HOLE ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
+  rule T2:Type ~> T1:Type -> HOLE => T1 -> T2
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => E'[E/X]                                       [macro]
@@ -48,8 +47,7 @@ module LAMBDA
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   syntax KItem ::= Type "=" Type
-  rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
-  rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu  => . </mgu>
+  rule T = T => .
 
   syntax KItem ::= tenv(Map)
   rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>

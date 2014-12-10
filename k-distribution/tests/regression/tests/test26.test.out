@@ -5,11 +5,11 @@
                 <T>
                     <thread>
                         <k>
-                            #noparse ~> GeneratedAnonVar2:K
+                            #noparse ~> _2:K
                         </k>
-                        GeneratedAnonVar1:Bag
+                        _1:Bag
                     </thread>
-                    GeneratedAnonVar0:Bag
+                    _0:Bag
                 </T>
             </generatedTop>
         </k>

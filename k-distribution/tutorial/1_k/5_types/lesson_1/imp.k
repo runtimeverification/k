@@ -78,7 +78,7 @@ module IMP
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv>... .Map => X |-> int ...</tenv>
+  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv> M:Map => M [ X <- int ] </tenv>
   rule int .Ids; => stmt
 
   rule print(_:PrintableType,AEs => AEs);

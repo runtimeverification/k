@@ -2,21 +2,19 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-L:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar0, nil ) )
+L:Term |-> cons ( _0:Term, cons ( _0, nil ) )
 
 Solution 2:
 Solution:Map -->
-L:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons 
-  ( GeneratedAnonVar0, nil ) ) )
+L:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _0, nil ) ) )
 
 Solution 3:
 Solution:Map -->
-L:Term |-> cons ( GeneratedAnonVar0:Term, cons ( GeneratedAnonVar1:Term, cons 
-  ( GeneratedAnonVar1, cons ( GeneratedAnonVar0, nil ) ) ) )
+L:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _1, cons ( _0, nil ) ) ) )
 
 Solution 4:
 Solution:Map -->
-L:Term |-> cons ( GeneratedAnonVar0:Term, nil )
+L:Term |-> cons ( _0:Term, nil )
 
 Solution 5:
 Solution:Map -->

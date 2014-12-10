@@ -79,11 +79,6 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) {
-        return transformAll(node);
-    }
-
-    @Override
     public ASTNode transform(CellCollection node) {
         return transformAll(node);
     }

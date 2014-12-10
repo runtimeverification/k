@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/substitution.k"
+require "modules/substitution-java.k"
 
 module LAMBDA
   imports SUBSTITUTION
@@ -9,6 +9,7 @@ module LAMBDA
   syntax Exp ::= Val
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
+  syntax Variable ::= Id
   syntax KResult ::= Val
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]

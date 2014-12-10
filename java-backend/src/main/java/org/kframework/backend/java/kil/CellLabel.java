@@ -9,7 +9,7 @@ import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.MetaK;
 
 /**
- * Label of a {@link Cell}.
+ * Label of a cell.
  *
  * @author YilongL
  *

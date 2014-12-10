@@ -6,6 +6,7 @@
            more-programs="."
            more-results="." >
     <kompile-option name="--superheat" value="strict" />
+    <kompile-option name="--backend" value="java" />
     <program name="div.imp">
       <krun-option name="--search" />
     </program>

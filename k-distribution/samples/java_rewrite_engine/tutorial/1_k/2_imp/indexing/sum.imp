@@ -1,9 +1,0 @@
-int i, m, n;
-m = 10;  n = 2;
-i=m+n;
-
-//if(m > n) {
-//    i = m-n;
-//} else {
-//    i = n-m
-//}

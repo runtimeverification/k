@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -141,15 +140,7 @@ public class NonACPatternMatcher {
                     return false;
                 }
 
-                if (subject instanceof Cell) {
-                    if (pattern instanceof Cell) {
-                        match((Cell) subject, (Cell) pattern);
-                    } else if (pattern instanceof CellCollection) {
-                        match((Cell) subject, (CellCollection) pattern);
-                    } else {
-                        return false;
-                    }
-                } else if (subject instanceof CellCollection) {
+                if (subject instanceof CellCollection) {
                     if (pattern instanceof CellCollection) {
                         match((CellCollection) subject, (CellCollection) pattern);
                     } else {
@@ -251,27 +242,6 @@ public class NonACPatternMatcher {
         }
     }
 
-    private void match(Cell cell, Cell otherCell) {
-        check(cell.getLabel().equals(otherCell.getLabel()));
-        if (!failed) {
-            addMatchingTask(cell.getContent(), otherCell.getContent());
-        }
-    }
-
-    private void match(Cell cell, CellCollection pattern) {
-        check(pattern.concreteSize() == 1);
-        if (!failed) {
-            /* YilongL: there is no need to assert AC-matching here, because
-             * even if both cells are multiplicity cells, there is still only
-             * one possible way to match */
-
-            addMatchingTask(cell, pattern.cells().iterator().next());
-            if (pattern.hasFrame()) {
-                addSubstitution(pattern.frame(), CellCollection.EMPTY);
-            }
-        }
-    }
-
     private void match(CellCollection cellCollection, CellCollection otherCellCollection) {
         Context context = termContext.definition().context();
 
@@ -311,8 +281,9 @@ public class NonACPatternMatcher {
             /* YilongL: it's okay for two multiplicity cells to pass the above
              * AC-matching check because there is really only one possible way
              * for the matching to succeed */
-            match(cellCollection.get(label).iterator().next(),
-                    otherCellCollection.get(label).iterator().next());
+            addMatchingTask(
+                    cellCollection.get(label).iterator().next().content(),
+                    otherCellCollection.get(label).iterator().next().content());
         }
 
     }

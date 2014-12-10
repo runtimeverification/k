@@ -123,6 +123,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "smt_seq_concat",
             "smt_seq_elem",
             "smt_seq_nil",
+            "smt_seq_len",
             "smt_seq2set",
             "smt_seq_sorted",
             "smt_seq_filter",

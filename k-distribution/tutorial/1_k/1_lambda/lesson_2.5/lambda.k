@@ -9,6 +9,7 @@ module LAMBDA
   syntax Exp ::= Val
                | Exp Exp              [left]
                | "(" Exp ")"          [bracket]
+  syntax Variable ::= Id
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]   [anywhere]
 endmodule
