@@ -11,7 +11,7 @@ module TEST
 
   syntax Id ::= "a" [token]
               | "b" [token]
-			  | "c" [token]
+              | "c" [token]
   syntax KResult ::= Int
   syntax Lit ::= Int | Id
   syntax Term ::= "(" Exp ")"  [bracket]
