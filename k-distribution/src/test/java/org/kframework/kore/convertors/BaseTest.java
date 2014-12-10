@@ -7,7 +7,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -62,7 +64,13 @@ public abstract class BaseTest extends SDFCompilerTest {
 
         if (forceFixAssertionFiles) {
             PrintWriter printWriter = new PrintWriter(kilExpectedDefinitionFile);
-            printWriter.print(COPYRIGHT_HEADER + "" + actualOutput + "\n");
+            String sep = "\n";
+            if(actualOutput.startsWith("\n"))
+                sep = "";
+
+            actualOutput = actualOutput.replaceAll(" +\n", "\n");
+
+            printWriter.print(COPYRIGHT_HEADER + sep + actualOutput + "\n");
             printWriter.close();
         } else {
             String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile);
