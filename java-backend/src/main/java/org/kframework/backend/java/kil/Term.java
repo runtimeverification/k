@@ -148,7 +148,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public Term copyOnShareSubstAndEval(
             Map<Variable, ? extends Term> substitution,
             Set<Variable> variablesToReuse, TermContext context) {
-        if (substitution.isEmpty() || isGround()) {
+        if (!canSubstituteAndEvaluate(substitution)) {
             return this;
         }
         CopyOnShareSubstAndEvalTransformer transformer = new CopyOnShareSubstAndEvalTransformer(
