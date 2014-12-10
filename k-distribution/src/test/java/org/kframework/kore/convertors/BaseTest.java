@@ -49,7 +49,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     // WARNING: only use this after checking the results manually
-    private static boolean forceFixAssertionFiles = true;
+    private static boolean forceFixAssertionFiles = false;
 
     private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
