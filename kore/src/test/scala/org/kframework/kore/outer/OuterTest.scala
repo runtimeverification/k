@@ -51,7 +51,7 @@ class OuterTest {
     val d = Module("TEST", Set(testSyntaxModule), Set(
       SyntaxProduction(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
 
-    println(d.sortLattice)
+    println(d.subsorts)
   }
 
   //      assertEquals(Set(),

@@ -25,7 +25,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  lazy val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
+  val productions: Set[Sentence] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
+
+  val definedSorts: Set[Sort] = productions collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
   private lazy val subsortRelations = sentences flatMap {
     case SyntaxProduction(endSort, items, _) =>
@@ -33,7 +35,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     case _ => Set()
   }
 
-  lazy val sortLattice = POSet(subsortRelations)
+  lazy val subsorts = POSet(subsortRelations)
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
@@ -88,11 +90,19 @@ case class SyntaxAssociativity(
 
 case class Tag(name: String) extends TagToString with OuterKORE
 
+trait Production {
+  def sort: Sort
+  def att: Attributes
+  def items: Seq[ProductionItem]
+}
+
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString with OuterKORE
+  with SyntaxSortToString with OuterKORE with Production {
+  def items = Seq()
+}
 
 case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
-  extends Sentence with SyntaxProductionToString // hooked but problematic, see kast-core.k
+  extends Sentence with SyntaxProductionToString with Production // hooked but problematic, see kast-core.k
 
 sealed trait ProductionItem extends OuterKORE // marker
 
