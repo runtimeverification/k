@@ -21,6 +21,12 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
     case KApply(KLabel(`label`), l, _) => l.mkString(" ")
   } headOption
 
+  def getOptionalString(label: String): java.util.Optional[String] =
+    getString(label) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[String]()
+    }
+
   def addAll(that: Attributes) = this ++ that
 
   def foreach(f: K => Unit): Unit = att foreach f

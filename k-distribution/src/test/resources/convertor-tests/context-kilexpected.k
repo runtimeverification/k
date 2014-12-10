@@ -1,5 +1,4 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-
 DEF: null -> null
 module INCLUDE
   syntax #Bool ::= "false"
@@ -23,3 +22,4 @@ module TEST
 
 endmodule
 require "include.k"
+

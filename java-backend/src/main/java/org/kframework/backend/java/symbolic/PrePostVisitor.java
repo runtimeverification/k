@@ -86,21 +86,12 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(Cell cell) {
-        preVisitor.resetProceed();
-        cell.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        cell.getContent().accept(this);
-        cell.accept(postVisitor);
-    }
-
-    @Override
     public void visit(CellCollection cellCollection) {
         preVisitor.resetProceed();
         cellCollection.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        for (Cell<?> cell : cellCollection.cells()) {
-            cell.accept(this);
+        for (CellCollection.Cell cell : cellCollection.cells().values()) {
+            cell.content().accept(this);
         }
         for (Term term : cellCollection.baseTerms()) {
             term.accept(this);

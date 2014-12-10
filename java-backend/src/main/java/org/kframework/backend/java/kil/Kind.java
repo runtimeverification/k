@@ -20,7 +20,6 @@ import com.google.common.collect.EnumHashBiMap;
  */
 public enum Kind {
     BOTTOM,
-    CELL,
     CELL_COLLECTION,
     K,
     KITEM,
@@ -35,7 +34,6 @@ public enum Kind {
 
     static {
         sorts.put(BOTTOM, Sort.BOTTOM);
-        sorts.put(CELL, Sort.BAG_ITEM);
         sorts.put(CELL_COLLECTION, Sort.BAG);
         sorts.put(K, Sort.KSEQUENCE);
         sorts.put(KITEM, Sort.KITEM);
@@ -65,15 +63,6 @@ public enum Kind {
      */
     public boolean isComputational() {
         return this == Kind.KITEM || this == Kind.K || this == Kind.KLIST;
-    }
-
-    /**
-     * Returns {@code true} if {@code this} kind is one of
-     * {@link org.kframework.backend.java.kil.Kind.CELL} or
-     * {@link org.kframework.backend.java.kil.Kind.CELL_COLLECTION}.
-     */
-    public boolean isStructural() {
-        return this == Kind.CELL || this == Kind.CELL_COLLECTION;
     }
 
     public Sort asSort() {

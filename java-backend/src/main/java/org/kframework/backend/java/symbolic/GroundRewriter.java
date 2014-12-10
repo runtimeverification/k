@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -101,7 +101,11 @@ public class GroundRewriter extends AbstractRewriter {
         }
 
         Map<Variable, Term> map = maps.get(0);
-        map.entrySet().forEach(e -> e.setValue(new Cell<>(CellLabel.GENERATED_TOP, e.getValue())));
+        map.entrySet().forEach(e -> e.setValue(
+                CellCollection.singleton(
+                        CellLabel.GENERATED_TOP,
+                        e.getValue(),
+                        termContext.definition().context())));
         return map;
     }
 

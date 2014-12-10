@@ -1,9 +1,0 @@
-<T>
-    <tasks>
-        .Bag
-    </tasks>
-    <gtenv>
-        collatz |-> ((int) -> (void))
-        main |-> ((void) -> (void))
-    </gtenv>
-</T>

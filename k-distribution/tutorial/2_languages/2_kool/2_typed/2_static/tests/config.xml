@@ -8,13 +8,35 @@
       extension="kool"
       results="." >
       <kompile-option name="--transition" value="inheritance-cycle" />
+      <kompile-option name="--backend" value="java" />
       <all-programs>
         <krun-option name="--output" value="none"/>
+        <krun-option name="--smt" value="none" />
       </all-programs>
       <program name="cycle.kool">
         <krun-option name="--search" />
         <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
+        <krun-option name="--smt" value="none" />
       </program>
   </test>
+
+  <test
+      definition="kool-typed-static.k"
+      programs="../../programs"
+      extension="kool"
+      results="." >
+      <kompile-option name="--transition" value="inheritance-cycle" />
+      <kompile-option name="--backend" value="java" />
+      <all-programs>
+        <krun-option name="--output" value="none"/>
+        <krun-option name="--pattern-matching" />
+      </all-programs>
+      <program name="cycle.kool">
+        <krun-option name="--search" />
+        <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
+        <krun-option name="--pattern-matching" />
+      </program>
+  </test>
+
 
 </tests>

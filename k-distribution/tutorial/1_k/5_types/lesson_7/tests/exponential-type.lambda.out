@@ -2,8 +2,7 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(1) -> (#symType(73) -> (#symType(70) -> (#symType(65) -> (#symType(
-  62) -> (#symType(55) -> (#symType(52) -> (#symType(47) -> (#symType(44) -> (
-  #symType(35) -> (#symType(32) -> (#symType(27) -> (#symType(24) -> (#symType
-  (17) -> (#symType(14) -> (#symType(9) -> (#symType(6) -> #symType(1)))))))))
-  )))))))))
+_0:Type -> (_1:Type -> (_2:Type -> (_3:Type -> (_4:Type -> (_5:Type -> (_6
+  :Type -> (_7:Type -> (_8:Type -> (_9:Type -> (_10:Type -> (_11:Type -> (_12
+  :Type -> (_13:Type -> (_14:Type -> (_15:Type -> (_16:Type -> _0)))))))))))))
+  )))

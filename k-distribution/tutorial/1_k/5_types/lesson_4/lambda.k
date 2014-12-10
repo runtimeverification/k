@@ -1,10 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/substitution.k"
-require "modules/unification.k"
+require "modules/substitution-java.k"
 
 module LAMBDA
   imports SUBSTITUTION
-  imports UNIFICATION
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
@@ -24,10 +22,10 @@ module LAMBDA
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
+  syntax Variable ::= Id
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
-                <mgu color="blue"> .Mgu </mgu>
 
   rule I:Int => int
   rule B:Bool => bool
@@ -35,16 +33,17 @@ module LAMBDA
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
-  syntax Exp ::= Exp "->" Exp  [strict]
 
-  rule lambda X . E:Exp => ?T:Type -> E[?T/X]
+  //TODO(AndreiS): replace with strictness when java unification algorithm
+  //correctly handles sorts
+  rule lambda X . E:Exp => E[?T/X] ~> ?T:Type -> HOLE
+  rule T2:Type ~> T1:Type -> HOLE => T1 -> T2
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule mu X . E => (?T:Type -> ?T) E[?T/X]
+  rule mu X . E => (?T:Type -> ?T) (E[?T/X])
 
   syntax KItem ::= Type "=" Type
-  rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
-  rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu => . </mgu>
+  rule T = T => .
 endmodule

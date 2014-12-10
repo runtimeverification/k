@@ -102,7 +102,7 @@ public class TstKOREtoKILIT extends BaseTest {
         return actualOutput;
     }
 
-    protected String expecteFilePostfix() {
+    protected String expectedFilePostfix() {
         return "-kilexpected.k";
     }
 }

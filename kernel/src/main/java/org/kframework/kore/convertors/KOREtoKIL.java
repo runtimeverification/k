@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,8 +58,8 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
                     List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    Option<String> listType = prod.att().getString("userList");
-                    if (!listType.isEmpty()) {
+                    Optional<String> listType = prod.att().getOptionalString("userList");
+                    if (listType.isPresent()) {
                         List<SyntaxProduction> prods = listProds.get(listType.get());
                         if (prods == null) {
                             prods = new ArrayList<>(3);
@@ -131,7 +132,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                     new org.kframework.kil.NonTerminal(listSort), prodItems);
 
             kilProductionIdToProductionInstance.put(
-                    prods.get(0).att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
+                    prods.get(0).att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
 
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
@@ -172,7 +173,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 new org.kframework.kil.NonTerminal(listSort), prodItems);
 
         kilProductionIdToProductionInstance.put(
-                prods.get(0).att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
+                prods.get(0).att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
 
         org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
         return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
@@ -236,7 +237,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                                     lhs, kilProdItems);
 
                             kilProductionIdToProductionInstance.put(
-                                    sentence.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(),
+                                    sentence.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(),
                                     kilProd);
 
                             org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock(
@@ -320,7 +321,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         kilProd.setAttributes(convertAttributes(syntaxProduction.att()));
 
         kilProductionIdToProductionInstance.put(
-                syntaxProduction.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
+                syntaxProduction.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
 
         org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
 
@@ -560,8 +561,8 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
-            boolean kilProductionIdP = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID)
-                    .isEmpty();
+            boolean kilProductionIdP = !kApply.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID)
+                    .isPresent();
             List<K> args = stream(kApply.klist().iterable()).collect(Collectors.toList());
             List<org.kframework.kil.Term> kilTerms = args.stream().map(this::convertK)
                     .collect(Collectors.toList());
@@ -572,7 +573,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                         kilTerms));
             } else {
                 // TermCons
-                String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID)
+                String kilProductionId = kApply.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID)
                         .get();
                 Production production = kilProductionIdToProductionInstance.get(kilProductionId);
                 if (production == null) {

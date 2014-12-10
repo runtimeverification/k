@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(1) -> (#symType(2) -> (#symType(3) -> #symType(3))))
+_0:Type -> (_1:Type -> (_2:Type -> _2))

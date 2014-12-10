@@ -86,9 +86,6 @@ public class Equality {
         if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.downKind(term);
         }
-        if (term.kind() == Kind.CELL_COLLECTION) {
-            term = CellCollection.downKind(term);
-        }
         return term;
 
         // TODO(YilongL): unable to assume that KList is the only possible

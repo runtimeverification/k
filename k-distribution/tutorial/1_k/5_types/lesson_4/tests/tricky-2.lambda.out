@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-((int) -> (#symType(4) -> (int)))
+int -> (_0:Type -> int)
