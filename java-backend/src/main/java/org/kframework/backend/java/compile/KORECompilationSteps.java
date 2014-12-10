@@ -23,7 +23,10 @@ public class KORECompilationSteps extends BasicCompilerStep<Definition> {
         org.kframework.kore.outer.Definition koreDefinition = kilToKORE.apply(ast);
         Definition newKIL = koreToKIL.convertDefinition(koreDefinition);
 
-        return newKIL;
+        if(false)
+            return newKIL;
+        else
+            return ast;
     }
 
     @Override
