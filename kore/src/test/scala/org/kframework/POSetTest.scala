@@ -20,10 +20,30 @@ class POSetTest {
     assertFalse(b1 < b4)
   }
 
+  @Test(expected = classOf[CircularityException[_]])
+  def circularityTestFail() {
+    POSet(b1 -> b2, b2 -> b1)
+  }
+
+  @Test(expected = classOf[CircularityException[_]])
+  def circularityTestFailId() {
+    POSet(b1 -> b1)
+  }
+
+  @Test
+  def circularityTestFailThree() {
+    try {
+      POSet(b1 -> b2, b2 -> b3, b3 -> b2)
+    } catch {
+      case CircularityException(Seq(`b3`, `b2`, `b3`)) =>
+    }
+  }
+
   @Test def lub() {
     assertEquals(Some(b2), POSet(b1 -> b2).lub)
     assertEquals(Some(b3), POSet(b1 -> b3, b2 -> b3).lub)
     assertEquals(Some(b4), POSet(b1 -> b3, b2 -> b3, b3 -> b4).lub)
     assertEquals(None, POSet(b1 -> b2, b2 -> b3, b4 -> b5).lub)
+    assertEquals(None, POSet(b1 -> b2, b2 -> b3, b2 -> b4).lub)
   }
 }

@@ -2,17 +2,31 @@ package org.kframework
 
 import org.kframework.kore.Sort
 
+case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
+
 class POSet[T](directRelations: Set[(T, T)]) {
 
+  private val directRelationsMap = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet }
   // TODO: there may be a more efficient algorithm (low priority)
   private def transitiveClosure(relations: Map[T, Set[T]]): Map[T, Set[T]] = {
     val newRelations = relations map {
-      case (start, succ) => (start, succ | (succ flatMap { relations.get(_).getOrElse(Set()) }))
+      case (start, succ) =>
+        val newSucc = (succ flatMap { relations.get(_).getOrElse(Set()) })
+        if (newSucc.contains(start))
+          detectCycle(start, start, Seq())
+        (start, succ | newSucc)
     }
     if (relations != newRelations) transitiveClosure(newRelations) else relations
   }
 
-  private val directRelationsMap = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet }
+  private def detectCycle(start: T, current: T, path: Seq[T]) {
+    val currentPath = path :+ current
+    val succs = directRelationsMap(current)
+    if (succs.contains(start))
+      throw new CircularityException(currentPath :+ start)
+
+    succs foreach { detectCycle(start, _, currentPath) }
+  }
 
   val relations = transitiveClosure(directRelationsMap)
 
@@ -40,7 +54,7 @@ class POSet[T](directRelations: Set[(T, T)]) {
   }
 
   override def toString() = {
-    "POSet(" + (relations map { case (from, tos) => tos map { case to => from + "<" + to } }).mkString(",") + ")"
+    "POSet(" + (relations flatMap { case (from, tos) => tos map { case to => from + "<" + to } }).mkString(",") + ")"
   }
 
   override def hashCode = relations.hashCode()
