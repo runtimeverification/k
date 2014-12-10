@@ -65,7 +65,7 @@ object Reflection {
     val args = completeArgsWithDefaults(paramsListsWithDefauls, givenArgsLists)
 
     try { methodMirror.apply(args: _*) }
-    catch { case reason => methodMirror.apply(args) }
+    catch { case reason: IllegalArgumentException => methodMirror.apply(args) }
   }
 
   def mirrorForMethod(obj: Any, methodSymbol: reflect.runtime.universe.MethodSymbol) = {
@@ -194,8 +194,8 @@ object Reflection {
       case x => (possibleMethods find {
         case (sym, argsLists) =>
           !(typeszip(sym, argsLists) exists {
-          case (a, b) => box(a) != box(b)
-        })
+            case (a, b) => box(a) != box(b)
+          })
       }).getOrElse({
         throw new RuntimeException("Could not find an exact match for method " + methodName + " with arg types " + givenArgsLists)
       })

@@ -31,6 +31,11 @@ class ReflectionTest {
     assertEquals(expected, actual)
   }
 
+  @Test def invokeMethodVararg {
+    val actual = Reflection.invokeMethod(Set, "apply", Seq(Seq(2, "buzValue")))
+    assertEquals(Set(2, "buzValue"), actual)
+  }
+
   def assertEquals(expected: Any, actual: Any) = {
     org.junit.Assert.assertEquals(expected, actual)
     org.junit.Assert.assertEquals(expected.toString(), actual.toString())
@@ -88,19 +93,19 @@ class ReflectionTest {
     // direct call
     startTime = System.nanoTime()
     interval foreach { x => b.buz(3) }
-    println((System.nanoTime() - startTime - diffTime) / 1000)
+    //    println((System.nanoTime() - startTime - diffTime) / 1000)
 
     // Scala reflection
     val method = Reflection.mirrorForMethod(b,
       Reflection.findMethod(b, "buz", Seq(Seq(3.getClass.asInstanceOf[Class[Any]])))._1)
     startTime = System.nanoTime()
     interval foreach { x => method(3) }
-    println((System.nanoTime() - startTime - diffTime) / 1000)
+    //    println((System.nanoTime() - startTime - diffTime) / 1000)
 
     // Java reflection
     val javaMethod = b.getClass.getMethod("buz", 3.getClass())
     startTime = System.nanoTime()
     interval foreach { x => javaMethod.invoke(b, 3.asInstanceOf[Object]) }
-    println((System.nanoTime() - startTime - diffTime) / 1000)
+    //    println((System.nanoTime() - startTime - diffTime) / 1000)
   }
 }
