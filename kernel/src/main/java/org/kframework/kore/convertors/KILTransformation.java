@@ -26,7 +26,7 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
                 | IllegalArgumentException e) {
             throw new VisitingException(makeErrorMessage(t), e);
         } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof InvocationTargetException)
+            if (e.getCause() instanceof VisitingException)
                 throw (VisitingException) e.getCause();
             else if (e.getCause() instanceof RuntimeException)
                 throw (RuntimeException) e.getCause();

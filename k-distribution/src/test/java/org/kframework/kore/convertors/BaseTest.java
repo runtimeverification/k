@@ -56,7 +56,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName()
-                + expecteFilePostfix()).getAbsoluteFile();
+                + expectedFilePostfix()).getAbsoluteFile();
 
         DefintionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
@@ -80,7 +80,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     protected abstract String convert(DefintionWithContext defWithContext);
 
-    protected abstract String expecteFilePostfix();
+    protected abstract String expectedFilePostfix();
 
     private DefintionWithContext parseUsingSDF(File definitionFile) {
         try {
