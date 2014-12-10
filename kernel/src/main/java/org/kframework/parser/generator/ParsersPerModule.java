@@ -52,11 +52,11 @@ public class ParsersPerModule {
                 Set<String> imported = getIncludedModules(((Module) di).getName(), def);
 
                 // collect the syntax from those modules
-                CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
+                CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
                 // visit all modules to collect all Terminals first
                 for (String modName : imported)
                     ctv.visitNode(def.getDefinitionContext().getModuleByName(modName));
-                KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv, kem);
+                KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(ctv, ((Module) di).getModuleContext().getDeclaredSorts(), kem);
                 for (String modName : imported)
                     ks2gsf.visitNode(def.getDefinitionContext().getModuleByName(modName));
                 parsers.put(((Module) di).getName(), ks2gsf.getGrammar());

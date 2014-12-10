@@ -23,8 +23,8 @@ import java.util.Set;
  */
 public class MakeConsList extends ParseForestTransformer {
 
-    public MakeConsList(Context context) {
-        super(MakeConsList.class.getName(), context);
+    public MakeConsList() {
+        super(MakeConsList.class.getName(), null);
     }
 
     @Override
