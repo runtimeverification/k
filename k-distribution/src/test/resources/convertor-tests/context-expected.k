@@ -1,6 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
-
-Require(include.k)
+// Copyright (c) 2014 K Team. All Rights Reserved.Require(include.k)
 
 module INCLUDE [location(startLine(3),startColumn(1),endLine(12),endColumn(9))]
   syntax String ::= #String [location(startLine(6),startColumn(21),endLine(6),endColumn(27))]

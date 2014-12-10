@@ -1,14 +1,13 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
-
-DEF: null -> null
+// Copyright (c) 2014 K Team. All Rights Reserved.DEF: null -> null
 module TEST
-  rule #token("#Bool", "true")() =>
-  rule #token("#Bool", "true")() => #token("#Bool", "true")()
-  syntax #Bool ::= "false"
+  rule #token("#Bool", "true")() =>   
+  rule #token("#Bool", "true")() => #token("#Bool", "true")()  
+  syntax #Bool ::= "false" 
+ 
+  syntax #Bool ::= "true" 
+ 
+  syntax Bool ::= #Bool 
+ 
 
-  syntax #Bool ::= "true"
+endmodule 
 
-  syntax Bool ::= #Bool
-
-
-endmodule

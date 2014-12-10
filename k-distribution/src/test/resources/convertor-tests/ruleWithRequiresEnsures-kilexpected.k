@@ -1,11 +1,10 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
-
-DEF: null -> null
+// Copyright (c) 2014 K Team. All Rights Reserved.DEF: null -> null
 module TEST
-  rule A:Exp => A:Exp ensures A:Exp
-  rule A:Exp => A:Exp requires A:Exp
-  rule A:Exp => A:Exp requires A:Exp ensures A:Exp
-  syntax Exp ::=
+  rule A:Exp => A:Exp ensures A:Exp  
+  rule A:Exp => A:Exp requires A:Exp  
+  rule A:Exp => A:Exp requires A:Exp ensures A:Exp  
+  syntax Exp ::= 
+ 
 
+endmodule 
 
-endmodule

@@ -1,9 +1,8 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
-
-DEF: null -> null
+// Copyright (c) 2014 K Team. All Rights Reserved.DEF: null -> null
 module TEST
-  rule A:Exp => A:Exp
-  syntax Exp ::=
+  rule A:Exp => A:Exp  
+  syntax Exp ::= 
+ 
 
+endmodule 
 
-endmodule

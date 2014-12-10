@@ -49,7 +49,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     // WARNING: only use this after checking the results manually
-    private static boolean forceFixAssertionFiles = false;
+    private static boolean forceFixAssertionFiles = true;
 
     private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
@@ -62,7 +62,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
         if (forceFixAssertionFiles) {
             PrintWriter printWriter = new PrintWriter(kilExpectedDefinitionFile);
-            printWriter.print(COPYRIGHT_HEADER + "\n\n" + actualOutput);
+            printWriter.print(COPYRIGHT_HEADER + "" + actualOutput + "\n");
             printWriter.close();
         } else {
             String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile);
