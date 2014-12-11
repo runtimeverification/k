@@ -243,7 +243,7 @@ public class BuiltinList extends Collection {
                 components.add(KItem.of(
                         KLabelConstant.of(sort.elementLabel(), context.definition().context()),
                         KList.singleton(element),
-                        context));
+                        context, element.getSource(), element.getLocation()));
 
         elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
