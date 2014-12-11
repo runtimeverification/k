@@ -10,6 +10,8 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.kil.visitors.Visitor;
 
 import java.io.Serializable;
@@ -38,6 +40,14 @@ public abstract class JavaSymbolicObject extends ASTNode
     transient Set<Variable> variableSet = null;
     transient Set<Term> userVariableSet = null;
     transient Set<Term> functionKLabels = null;
+
+    protected JavaSymbolicObject() {
+        super();
+    }
+
+    protected JavaSymbolicObject(Source source, Location location) {
+        super(location, source);
+    }
 
     /**
      * Returns {@code true} if this JavaSymbolicObject does not contain any variables.

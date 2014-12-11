@@ -182,7 +182,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                 components.add(KItem.of(
                         KLabelConstant.of(sort.elementLabel(), context.definition().context()),
                         KList.concatenate(entry.getKey(), entry.getValue()),
-                        context)));
+                        context, entry.getKey().getSource(), entry.getKey().getLocation())));
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinMap) {
