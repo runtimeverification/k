@@ -50,8 +50,8 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
         experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
 
-        MapBinder<ToolActivation, Transformation<Void, KRunResult<?>>> krunResultTools = MapBinder.newMapBinder(
-                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<Void, KRunResult<?>>>() {});
+        MapBinder<ToolActivation, Transformation<Void, KRunResult>> krunResultTools = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<Void, KRunResult>>() {});
         krunResultTools.addBinding(new ToolActivation.OptionActivation("--simulation")).to(Simulator.class);
 
     }

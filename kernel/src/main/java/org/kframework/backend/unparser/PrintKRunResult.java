@@ -14,7 +14,7 @@ import org.kframework.utils.inject.InjectGeneric;
 
 import com.google.inject.Inject;
 
-public class PrintKRunResult implements Transformation<KRunResult<?>, String> {
+public class PrintKRunResult implements Transformation<KRunResult, String> {
 
     @InjectGeneric private Transformation<KRunState, String> statePrinter;
     @InjectGeneric private Transformation<SearchResults, String> searchResultsPrinter;
@@ -33,11 +33,11 @@ public class PrintKRunResult implements Transformation<KRunResult<?>, String> {
     }
 
     @Override
-    public String run(KRunResult<?> krunResult, Attributes a) {
-        if (krunResult instanceof KRunProofResult && ((KRunProofResult) krunResult).isProven()) {
+    public String run(KRunResult krunResult, Attributes a) {
+        if (krunResult instanceof KRunProofResult && ((KRunProofResult<?>) krunResult).isProven()) {
             return "true";
         }
-        return print(krunResult.getResult(), a);
+        return print(krunResult, a);
     }
 
     private String print(Object result, Attributes a) {

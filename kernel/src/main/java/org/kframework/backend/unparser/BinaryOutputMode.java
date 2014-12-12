@@ -14,7 +14,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import com.google.inject.Inject;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
-public class BinaryOutputMode implements Transformation<KRunResult<?>, String> {
+public class BinaryOutputMode implements Transformation<KRunResult, String> {
 
     private final BinaryLoader loader;
 
@@ -26,14 +26,14 @@ public class BinaryOutputMode implements Transformation<KRunResult<?>, String> {
     }
 
     @Override
-    public String run(KRunResult<?> result, Attributes a) {
+    public String run(KRunResult result, Attributes a) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        Object toSerialize = result.getResult();
-        if (result.getResult() instanceof KRunState) {
-            toSerialize = ((KRunState)result.getResult()).getRawResult();
-        } else if (result.getResult() instanceof SearchResults) {
-            toSerialize = ((SearchResults)result.getResult()).getGraph();
+        Object toSerialize = result;
+        if (result instanceof KRunState) {
+            toSerialize = ((KRunState)result).getRawResult();
+        } else if (result instanceof SearchResults) {
+            toSerialize = ((SearchResults)result).getGraph();
         }
 
         loader.saveOrDie(os, toSerialize);

@@ -80,7 +80,7 @@ public class ExecutorDebugger implements Debugger {
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
-        KRunState reduced = executor.step(initialConfiguration, 0).getResult();
+        KRunState reduced = executor.step(initialConfiguration, 0);
         //reduce may return same node as initial node
         //so we add it just if it is different from the initial node
         if(putState(reduced)){
@@ -135,7 +135,7 @@ public class ExecutorDebugger implements Debugger {
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
         for (int i = 0; steps == null || i < steps; i++) {
-            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1).getResult();
+            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1);
             Entry<Integer, KRunState> prevValue = containsValue(nextStep);
             if (prevValue!=null) {
                 nextStep = prevValue.getValue();
@@ -172,7 +172,7 @@ public class ExecutorDebugger implements Debugger {
                     + "If you previously used the search command you must"
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
-        SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
+        SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo);
         mergeSearchGraph(results.getGraph());
         currentState = null;
         return results;

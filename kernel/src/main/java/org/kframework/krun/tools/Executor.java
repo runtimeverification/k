@@ -41,7 +41,7 @@ public interface Executor {
     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
     term
     */
-    public abstract KRunResult<KRunState> run(Term cfg) throws KRunExecutionException;
+    public abstract KRunState run(Term cfg) throws KRunExecutionException;
 
     /**
     Perform a breadth-first search of the transition system starting at a particular term.
@@ -59,7 +59,7 @@ public interface Executor {
     @return An object containing both metadata about krun's execution, and information about
     the results of the search
     */
-    public abstract KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
+    public abstract SearchResults search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
 
     /**
     Execute a term in normal-execution mode for a specified number of steps
@@ -74,9 +74,9 @@ public interface Executor {
     the resulting term after executing the specified number of steps (or fewer if no further
     rewrites are possible)
     */
-    public abstract KRunResult<KRunState> step(Term cfg, int steps) throws KRunExecutionException;
+    public abstract KRunState step(Term cfg, int steps) throws KRunExecutionException;
 
-    public static class Tool implements Transformation<Void, KRunResult<?>> {
+    public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
         private final Provider<Term> initialConfiguration;
@@ -104,7 +104,7 @@ public interface Executor {
             this.loader = loader;
         }
 
-        public KRunResult<?> run(Void v, Attributes a) {
+        public KRunResult run(Void v, Attributes a) {
             a.add(Context.class, context);
             a.add(Boolean.class, PrintSearchResult.IS_DEFAULT_PATTERN, options.pattern == null);
             try {
@@ -134,10 +134,10 @@ public interface Executor {
             }
         }
 
-        public KRunResult<SearchResults> search() throws ParseFailedException, KRunExecutionException {
+        public SearchResults search() throws ParseFailedException, KRunExecutionException {
             ASTNode pattern = pattern();
             SearchPattern searchPattern = new SearchPattern(pattern);
-            KRunResult<SearchResults> result;
+            SearchResults result;
             result = executor.search(
                         options.bound,
                         options.depth,
@@ -149,8 +149,8 @@ public interface Executor {
             return result;
         }
 
-        public KRunResult<?> execute() throws ParseFailedException, KRunExecutionException {
-            KRunResult<?> result;
+        public KRunResult execute() throws ParseFailedException, KRunExecutionException {
+            KRunState result;
             if (options.depth != null) {
                 result = executor.step(initialConfiguration.get(), options.depth);
                 sw.printIntermediate("Bounded execution total");
@@ -161,10 +161,8 @@ public interface Executor {
             ASTNode pattern = pattern();
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
-                Object krs = result.getResult();
-                assert krs instanceof KRunState;
-                Term res = ((KRunState) krs).getRawResult();
-                result = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
+                Term res = result.getRawResult();
+                return executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
             }
             return result;
         }
