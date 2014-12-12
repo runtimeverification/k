@@ -51,6 +51,7 @@ object Constructors {
   }
 
   def InjectedKLabel(l: KLabel) = kore.InjectedKLabel(l)
+  def InjectedKList(l: KList) = kore.InjectedKList(l)
 
   @annotation.varargs def KSequence(ks: K*) = kore.KSequence(ks: _*)
 

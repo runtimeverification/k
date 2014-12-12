@@ -131,13 +131,22 @@ case class InjectedKLabel(klabel: KLabel) extends KItem
   override def toString = "#klabel" + "(" + klabel + ")";
 }
 
-case class InjectedKList(klist: KList) extends KItem
+case class InjectedKList(klist: KList, att: Attributes = Attributes()) extends KAbstractCollection
   with InjectedKListPattern {
   type This = InjectedKList
-  def att() = Attributes()
-  def copy(att: Attributes) = this
+  def copy(att: Attributes) = InjectedKList(klist, att)
+  def delegate = klist.delegate
 
   override def toString = "#klist" + "(" + klist + ")";
+  def newBuilder(): Builder[K, InjectedKList] = InjectedKList.newBuilder(att)
+}
+
+object InjectedKList extends CanBuildKCollection {
+  type This = InjectedKList
+
+  def newBuilder(att: Attributes = Attributes()) =
+    new AssocBuilder[K, KList, InjectedKList](KList.newBuilder(att))
+      .mapResult { new InjectedKList(_, att) }
 }
 
 /*  Constructors */

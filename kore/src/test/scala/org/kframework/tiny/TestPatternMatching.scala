@@ -13,7 +13,7 @@ class TestPatternMatching {
   implicit val equiv: Equivalence = EqualsEquivalence
   implicit val disj: Disjunction = new Disjunction(Set(Conjunction()))
 
-  implicit def KList(klist: K*) = InjectedKList(klist)
+  implicit def KList(ks: K*) = InjectedKList(ks)
 
   @Test def testSimple() {
     val foo = 'foo()

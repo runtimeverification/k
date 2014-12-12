@@ -64,15 +64,15 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
 trait KApplyPattern extends Pattern {
   self: KApply =>
 
-  def matchAll(k: K)(implicit rest: Disjunction): Disjunction =
+  def matchAll(k: K)(implicit rest: Disjunction): Disjunction = {
     (this, k) match {
-      case (KApply(labelVariable: KVariable, contentsP: K, _), KApply(label2, contents, _)) =>
-        println(this, k)
+      case (KApply(labelVariable: KVariable, contentsP, _), KApply(label2, contents, _)) =>
         Disjunction(Conjunction(labelVariable -> MetaKLabel(label2))) and contentsP.matchAll(contents)
       case (KApply(label, contentsP, att), KApply(label2, contents, att2)) if label == label2 =>
         contentsP.matchAll(contents)
       case (_: KApply, _) => False
     }
+  }
 }
 
 trait KVariablePattern extends Pattern {
@@ -106,7 +106,7 @@ trait KSequencePattern extends Pattern {
       case s: KSequence =>
         ks.matchAll(s.ks) endomap {
           case m: Conjunction => m mapValues {
-            case InjectedKList(l) => KSequence(l.delegate, Attributes())
+            case InjectedKList(l, _) => KSequence(l.delegate, Attributes())
             case k => k
           }
         }
