@@ -43,12 +43,12 @@ object RewriteToTop {
 object Rule {
   import RewriteToTop._
 
-  def apply(termWithRewrite: Term): Rule = {
+  def apply(termWithRewrite: Term)(implicit equiv: Equivalence = EqualsEquivalence): Rule = {
     val left = toLeft(termWithRewrite)
     val right = toRight(termWithRewrite)
 
     (t: Term) => {
-      val pmSolutions = left.matchAll(t)
+      val pmSolutions = left.matchAll(t)(new Disjunction(Set(Conjunction())))
       pmSolutions map { substituion => Substitution(right).transform(substituion.bindings) }
     }
   }
@@ -71,7 +71,7 @@ case class Rewritable(self: Term) {
   }
 
   def searchFor(rewrite: Term): Set[Term] = {
-    Rule(rewrite)(self)
+    Rule(rewrite)()(self)
   }
 }
 

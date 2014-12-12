@@ -17,7 +17,7 @@ case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KA
   def copy(att: Attributes): KEquals = KEquals(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
+  def matchAll(k: Term)(implicit rest: Disjunction): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an equals. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KEquals.newBuilder()
@@ -32,7 +32,7 @@ case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstr
   def copy(att: Attributes): KOr = KOr(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
+  def matchAll(k: Term)(implicit rest: Disjunction): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KOr.newBuilder()
@@ -47,7 +47,7 @@ case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbst
   def copy(att: Attributes): KAnd = KAnd(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: Term)(implicit equiv: Equivalence): Disjunction = {
+  def matchAll(k: Term)(implicit rest: Disjunction): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KAnd.newBuilder()
@@ -101,7 +101,7 @@ object KInt extends Sort with KLabel {
 //  def canEqual(that: Any) = that.isInstanceOf[KBag]
 //  def att = Attributes()
 //  def copy(att: Attributes): KBag = this
-//  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
+//  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit rest: Disjunction = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
 //
 //  val delegate = klist.delegate
 //  def newBuilder: Builder[K, KBag] = KBag.newBuilder
@@ -121,7 +121,7 @@ object KInt extends Sort with KLabel {
 //  def canEqual(that: Any) = that.isInstanceOf[KSet]
 //  def att = Attributes()
 //  def copy(att: Attributes): KSet = this
-//  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit equiv: Equivalence = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
+//  def matchAll(pattern: Term, condition: Term = KBoolean(true))(implicit rest: Disjunction = EqualsEquivalence): Set[Map[KVariable, Term]] = ???
 //
 //  val delegate = content
 //  def newBuilder: Builder[K, KSet] = KSet.newBuilder

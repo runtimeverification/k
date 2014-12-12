@@ -35,9 +35,21 @@ case class Conjunction private (bindings: Map[KVariable, Term], other: Set[Equat
   def mapValues(f: Term => Term) = Conjunction(bindings mapValues f)
 
   def contains(v: KVariable) = bindings contains v
+
+  override def toString =
+    if (bindings.size == 0 && other.size == 0)
+      "True"
+    else {
+      val bindingsString = bindings map { case (k, v) => k + "=" + v } mkString "  /\\  "
+      val otherString = other mkString "  /\\  "
+      if (bindingsString != "" && otherString != "")
+        bindingsString + "  /\\  " + otherString
+      else
+        bindingsString + otherString
+    }
 }
 
-case class Disjunction(conjunctions: Set[Conjunction]) {
+case class Disjunction(conjunctions: Set[Conjunction])(implicit equivalence: Equivalence) {
   def or(other: Disjunction): Disjunction =
     Disjunction(conjunctions | other.conjunctions)
 
@@ -47,17 +59,30 @@ case class Disjunction(conjunctions: Set[Conjunction]) {
     }).flatten)
   }
 
+  val equiv = equivalence
+
   def headOption = conjunctions.headOption
 
   def endomap(f: Conjunction => Conjunction) = Disjunction(conjunctions map f)
 
   def map[T](f: Conjunction => T) = conjunctions map f
+
+  override def toString =
+    if (conjunctions.size == 0)
+      "False"
+    else
+      conjunctions mkString "  \\/  "
 }
 
 object Disjunction {
-  def apply(conjunctions: Conjunction*): Disjunction = Disjunction(conjunctions.toSet)
+  def apply(conjunctions: Conjunction*)(implicit inScope: Disjunction): Disjunction = Disjunction(conjunctions.toSet)(inScope.equiv)
 }
 
 object EqualsEquivalence extends Equivalence {
   def apply(a: Term, b: Term): Boolean = a == b
+}
+
+object Logic {
+  def True(implicit disjunction: Disjunction) = Disjunction(Conjunction())(disjunction)
+  def False(implicit disjunction: Disjunction) = Disjunction()(disjunction)
 }

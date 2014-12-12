@@ -10,6 +10,9 @@ class TestPatternMatching {
 
   val X = KVariable("X")
 
+  implicit val equiv: Equivalence = EqualsEquivalence
+  implicit val disj: Disjunction = new Disjunction(Set(Conjunction()))
+
   @Test def testSimple() {
     val foo = 'foo()
     assertEquals(Some(Conjunction(X -> foo)), X.matchOne(foo))
