@@ -3,12 +3,9 @@
 package org.kframework.tiny.builtin
 
 import org.kframework._
-import kore._
-import KORE._
+import org.kframework.kore._
+import org.kframework.kore.KORE._
 import scala.collection.mutable.Builder
-import scala.collection.mutable.SetBuilder
-import org.kframework.tiny.Equivalence
-import org.kframework.tiny.EqualsEquivalence
 import org.kframework.tiny._
 import collection.mutable.ListBuffer
 
