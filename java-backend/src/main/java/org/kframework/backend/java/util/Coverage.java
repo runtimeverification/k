@@ -101,7 +101,7 @@ public class Coverage {
 
     // Customized toString method for FileSource.
     private static String toString(FileSource source) {
-        return source.getFile().getAbsolutePath().toString();
+        return source.getFile().getAbsolutePath();
     }
 
     // Customized toString method for Location.
