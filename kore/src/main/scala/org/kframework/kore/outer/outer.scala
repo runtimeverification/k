@@ -7,6 +7,8 @@ import org.kframework.kore.Sort
 import scala.util.matching.Regex
 import org.kframework.kore.Attributes
 import org.kframework.POSet
+import org.kframework.kore.KLabel
+import org.kframework.kore.KToken
 
 trait OuterKORE
 
@@ -25,7 +27,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  val productions: Set[Sentence] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
+  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
 
   val definedSorts: Set[Sort] = productions collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
@@ -94,6 +96,12 @@ trait Production {
   def sort: Sort
   def att: Attributes
   def items: Seq[ProductionItem]
+  def klabel: Option[KLabel] =
+    att.get(Production.kLabelAttribute).headOption map { case KToken(_, s, _) => s } map { KLabel(_) }
+}
+
+object Production {
+  val kLabelAttribute = "klabel"
 }
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence

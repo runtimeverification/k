@@ -1,31 +1,30 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2;
+package org.kframework.parser.concrete2kore;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
-
 import org.junit.Test;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Constant;
-import org.kframework.kil.KList;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.parser.concrete2.Grammar.NonTerminal;
-import org.kframework.parser.concrete2.Grammar.NonTerminalState;
-import org.kframework.parser.concrete2.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2.Grammar.RegExState;
-import org.kframework.parser.concrete2.Grammar.RuleState;
-import org.kframework.parser.concrete2.Rule.DeleteRule;
-import org.kframework.parser.concrete2.Rule.WrapLabelRule;
+import org.kframework.builtin.Sorts;
+import org.kframework.kore.Sort;
+import org.kframework.kore.outer.Production;
+import org.kframework.kore.outer.ProductionItem;
+import org.kframework.parser.*;
+
+import static org.kframework.kore.Constructors.*;
+import static org.kframework.kore.outer.Constructors.*;
+
+import org.kframework.parser.concrete2kore.Grammar.NonTerminal;
+import org.kframework.parser.concrete2kore.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2kore.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2kore.Grammar.RegExState;
+import org.kframework.parser.concrete2kore.Grammar.RuleState;
+import org.kframework.parser.concrete2kore.Rule.DeleteRule;
+import org.kframework.parser.concrete2kore.Rule.WrapLabelRule;
 
 public class ParserTest {
     /* public static void main(String[] args) {
@@ -41,7 +40,7 @@ public class ParserTest {
 
     }*/
 
-    private static final Sort EXP_SORT = Sort.of("Exp");
+    private static final Sort EXP_SORT = Sort("Exp");
 
     @Test
     public void testEmptyGrammar() throws Exception {
@@ -54,7 +53,7 @@ public class ParserTest {
 
         Parser parser = new Parser("");
         Term result = parser.parse(grammar.get("startNt"), 0);
-        Term expected = amb(klist(amb(KList.EMPTY)));
+        Term expected = amb(klist(amb(KList())));
 
         Assert.assertEquals("Empty Grammar check: ", expected, result);
         // the start and exit state of the NonTerminal
@@ -77,7 +76,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(new Constant(Sort.K, "asdfAAA1", null)))));
+        Term expected = amb(klist(amb(klist(new Constant("asdfAAA1", null, Optional.empty())))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -103,7 +102,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1 adfsf");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(kapp("seq", new Constant(Sort.K, "asdfAAA1 ", null), new Constant(Sort.K, "adfsf", null))))));
+        Term expected = amb(klist(amb(klist(kapp("seq", new Constant("asdfAAA1 ", null, Optional.empty()), new Constant("adfsf", null, Optional.empty()))))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -137,19 +136,19 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", new Constant(Sort.K, "abc", null))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("abc", null, Optional.empty()))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("ABC").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s3", new Constant(Sort.K, "ABC", null), new Constant(Sort.K, "", null))))));
+            Term expected = amb(klist(amb(klist(kapp("s3", new Constant("ABC", null, Optional.empty()), new Constant("", null, Optional.empty()))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("123").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", new Constant(Sort.K, "123", null))), klist(kapp("s3", new Constant(Sort.K, "12", null), new Constant(Sort.K, "3", null))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("123", null, Optional.empty()))), klist(kapp("s3", new Constant("12", null, Optional.empty()), new Constant("3", null, Optional.empty()))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -177,7 +176,7 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", new Constant(Sort.K, "a", null), new Constant(Sort.K, "b", null), new Constant(Sort.K, "c", null))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", new Constant("a", null, Optional.empty()), new Constant("b", null, Optional.empty()), new Constant("c", null, Optional.empty()))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
@@ -248,12 +247,12 @@ public class ParserTest {
             Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
-                    new Constant(Sort.K, "x", null),
+                    new Constant("x", null, Optional.empty()),
                     amb(klist(kapp("xAy",
-                        new Constant(Sort.K, "x", null),
+                        new Constant("x", null, Optional.empty()),
                         amb(klist(kapp("epsilon"))),
-                            new Constant(Sort.K, "y", null)))),
-                        new Constant(Sort.K, "y", null))))));
+                            new Constant("y", null, Optional.empty())))),
+                        new Constant("y", null, Optional.empty()))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -295,8 +294,8 @@ public class ParserTest {
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
                         amb(klist(kapp("epsilon"))),
-                            new Constant(Sort.K, "y", null)))),
-                        new Constant(Sort.K, "y", null))))));
+                            new Constant("y", null, Optional.empty())))),
+                        new Constant("y", null, Optional.empty()))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -337,9 +336,9 @@ public class ParserTest {
             Term result = new Parser("xx").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xA",
-                        new Constant(Sort.K, "x", null),
+                        new Constant("x", null, Optional.empty()),
                         amb(klist(kapp("xA",
-                                new Constant(Sort.K, "x", null),
+                                new Constant("x", null, Optional.empty()),
                                 amb(klist(kapp("epsilon")))))))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
@@ -379,16 +378,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("x").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("x", new Constant(Sort.K, "x", null))))));
+            Term expected = amb(klist(amb(klist(kapp("x", new Constant("x", null, Optional.empty()))))));
             Assert.assertEquals("Single char check: ", expected, result);
         }
 
         {
             Term result = new Parser("xx").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", new Constant(Sort.K, "x", null)))), amb(klist(kapp("x", new Constant(Sort.K, "x", null)))))))));
+            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", new Constant("x", null, Optional.empty())))), amb(klist(kapp("x", new Constant("x", null, Optional.empty())))))))));
             Assert.assertEquals("AA check: ", expected, result);
         }
-        Term X = kapp("x", new Constant(Sort.K, "x", null));
+        Term X = kapp("x", new Constant("x", null, Optional.empty()));
         {
             Term result = new Parser("xxx").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
@@ -424,7 +423,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", new Constant(Sort.K, "x", null))));
+        Term expected = amb(klist(kapp("x", new Constant("x", null, Optional.empty()))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -466,7 +465,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", new Constant(Sort.K, "", null))));
+        Term expected = amb(klist(kapp("x", new Constant("", null, Optional.empty()))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -716,7 +715,7 @@ public class ParserTest {
         NonTerminal expNt = new NonTerminal("Exp");
 
         NonTerminalState expInt = new NonTerminalState("Int-nts(Exp)", expNt, intNt, false);
-        Production p22 = prod(EXP_SORT, new org.kframework.kil.NonTerminal(Sort.INT));
+        Production p22 = prod(EXP_SORT, NonTerminal(Sorts.KInt()));
         RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22));
         expNt.entryState.next.add(expInt);
         expInt.next.add(rs2);
@@ -725,7 +724,7 @@ public class ParserTest {
         PrimitiveState minus = new RegExState("Minus-State", expNt, Pattern.compile("-", Pattern.LITERAL), null);
         RuleState deleteToken = new RuleState("Minus-Delete", expNt, new DeleteRule(1, true));
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
-        Production p1 = prod(EXP_SORT, new Terminal("-"), new org.kframework.kil.NonTerminal(EXP_SORT));
+        Production p1 = prod(EXP_SORT, Terminal("-"), NonTerminal(EXP_SORT));
         p1.putAttribute("klabel", "'-_");
         RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1));
         expNt.entryState.next.add(minus);
@@ -742,7 +741,7 @@ public class ParserTest {
          */
         NonTerminal expsNt = new NonTerminal("Exps");
         NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt, false);
-        Production p2 = prod(Sort.of("Exps"), new UserList(EXP_SORT, ","));
+        Production p2 = prod(Sort("Exps"), new UserList(EXP_SORT, ","));
         PrimitiveState separator = new RegExState("Sep-State", expsNt, Pattern.compile(",", Pattern.LITERAL), null);
         RuleState deleteToken2 = new RuleState("Separator-Delete", expsNt, new DeleteRule(1, true));
         p2.putAttribute("klabel", "'_,_");
@@ -763,35 +762,35 @@ public class ParserTest {
         Term result2 = (Term) new TreeCleanerVisitor(null).visitNode(result);
         //System.out.println(result2);
 
-        Term one = new Constant(Sort.K, "1", null);
-        Term mone = new Constant(Sort.K, "-1", null);
-        Term mexp = new TermCons(EXP_SORT, Arrays.asList(one), p1);
-        Term expected = new TermCons(Sort.of("Exps"), Arrays.<Term>asList(amb(mone, mexp)), p2);
+        Term one = Constant.apply("1", null);
+        Term mone = Constant.apply("-1", null);
+        Term mexp = TermCons.apply(Arrays.asList(one), p1);
+        Term expected = TermCons.apply(Arrays.<Term>asList(amb(mone, mexp)), p2);
 
         Assert.assertEquals("The error: ", expected, result2);
     }
     public static Ambiguity amb(Term ... terms) {
-        return new Ambiguity(Sort.K, Arrays.asList(terms));
+        return Ambiguity.apply(Arrays.asList(terms));
     }
 
     public static Constant token(String x) {
-        return new Constant(Sort.K, x, null);
+        return Constant.apply(x, null, Optional.empty());
     }
 
     public static Production prod(Sort sort, ProductionItem... pi) {
-        return new Production(new org.kframework.kil.NonTerminal(sort), Arrays.<ProductionItem>asList(pi));
+        return Production.apply(sort, Arrays.<ProductionItem>asList(pi));
     }
 
     public static TermCons kapp(String label, Term ... terms) {
-        return new TermCons(Sort.K, Arrays.asList(terms), label(label));
+        return TermCons.apply(Arrays.asList(terms), label(label), Optional.empty());
     }
 
     public static KList klist(Term ... terms) {
-        return new KList(Arrays.asList(terms));
+        return KList.apply(Arrays.asList(terms));
     }
 
     public static Production label(String x) {
         // using UserList to avoid arity checks
-        return prod(Sort.K, new UserList(Sort.K, x));
+        return prod(Sorts.K(), NonTerminal(Sorts.K()));
     }
 }
