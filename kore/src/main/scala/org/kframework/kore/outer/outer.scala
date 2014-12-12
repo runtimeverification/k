@@ -9,6 +9,7 @@ import org.kframework.kore.Attributes
 import org.kframework.POSet
 import org.kframework.kore.KLabel
 import org.kframework.kore.KToken
+import org.kframework.kore.KList
 
 trait OuterKORE
 
@@ -97,7 +98,7 @@ trait Production {
   def att: Attributes
   def items: Seq[ProductionItem]
   def klabel: Option[KLabel] =
-    att.get(Production.kLabelAttribute).headOption map { case KToken(_, s, _) => s } map { KLabel(_) }
+    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
 }
 
 object Production {

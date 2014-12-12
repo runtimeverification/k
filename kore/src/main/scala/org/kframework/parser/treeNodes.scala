@@ -6,6 +6,7 @@ import org.kframework.kore.outer.Production
 import java.util._
 import java.lang.Iterable
 import collection.JavaConverters._
+import org.apache.commons.lang3.StringEscapeUtils
 
 trait Term {
   // TODO: add source
@@ -19,40 +20,44 @@ trait ProductionReference extends Term {
 
 trait HasChildren {
   def items: Iterable[Term]
-  def shallowCopy(newChildren: Collection[Term]): Term
+  def replaceChildren(newChildren: Collection[Term]): Term
 }
 
 case class Constant(s: String, production: Production, location: Optional[Location]) extends ProductionReference {
   def shallowCopy(l: Location) = Constant(s, production, location)
+  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")"
 }
 
 case class TermCons(items: List[Term], production: Production, location: Optional[Location])
   extends ProductionReference with HasChildren {
   def shallowCopy(l: Location) = TermCons(items, production, location)
 
-  def shallowCopy(newChildren: Collection[Term]) = {
+  def replaceChildren(newChildren: Collection[Term]) = {
     items.clear(); items.addAll(newChildren);
     this
   }
+  override def toString() = production.klabel.getOrElse("NOKLABEL") + "(" + (items.asScala mkString ",") + ")"
 }
 
 case class Ambiguity(items: Set[Term], location: Optional[Location])
   extends Term with HasChildren {
   def shallowCopy(l: Location) = Ambiguity(items, location)
-  def shallowCopy(newChildren: Collection[Term]) = {
+  def replaceChildren(newChildren: Collection[Term]) = {
     items.clear(); items.addAll(newChildren);
     this
   }
+  override def toString() = "amb(" + (items.asScala mkString ",") + ")"
 }
 
 case class KList(items: List[Term], location: Optional[Location])
   extends Term with HasChildren {
   def add(t: Term) { items.add(t) }
   def shallowCopy(l: Location) = KList(items, location)
-  def shallowCopy(newChildren: Collection[Term]) = {
+  def replaceChildren(newChildren: Collection[Term]) = {
     items.clear(); items.addAll(newChildren);
     this
   }
+  override def toString() = "[" + (items.asScala mkString ",") + "]"
 }
 
 object TermCons {
@@ -66,7 +71,7 @@ object KList {
 }
 
 object Ambiguity {
-  def apply(items: List[Term]): Ambiguity = new Ambiguity(items.asScala.toSet.asJava, Optional.empty())
+  def apply(items: List[Term]): Ambiguity = new Ambiguity(new HashSet(items), Optional.empty())
   def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
 }
 

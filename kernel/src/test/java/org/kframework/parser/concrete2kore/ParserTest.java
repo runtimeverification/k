@@ -10,11 +10,14 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
+import org.kframework.kore.Attributes;
 import org.kframework.kore.Sort;
+import org.kframework.kore.UninterpretedSort;
 import org.kframework.kore.outer.Production;
 import org.kframework.kore.outer.ProductionItem;
 import org.kframework.parser.*;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.Constructors.*;
 import static org.kframework.kore.outer.Constructors.*;
 
@@ -53,7 +56,7 @@ public class ParserTest {
 
         Parser parser = new Parser("");
         Term result = parser.parse(grammar.get("startNt"), 0);
-        Term expected = amb(klist(amb(KList())));
+        Term expected = amb(klist(amb(KList.apply())));
 
         Assert.assertEquals("Empty Grammar check: ", expected, result);
         // the start and exit state of the NonTerminal
@@ -702,7 +705,8 @@ public class ParserTest {
         // Int
         // (|-----([\+-]?\d+)------|)
         NonTerminal intNt = new NonTerminal("Int");
-        PrimitiveState ints = new RegExState("Int-State", intNt, Pattern.compile("[\\+-]?\\d+"), null);
+        Production intProd09 = prod(Sort("Int"), RegexTerminal("[0-9]"));
+        PrimitiveState ints = new RegExState("Int-State", intNt, Pattern.compile("[\\+-]?\\d+"), intProd09);
         intNt.entryState.next.add(ints);
         ints.next.add(intNt.exitState);
 
@@ -724,8 +728,7 @@ public class ParserTest {
         PrimitiveState minus = new RegExState("Minus-State", expNt, Pattern.compile("-", Pattern.LITERAL), null);
         RuleState deleteToken = new RuleState("Minus-Delete", expNt, new DeleteRule(1, true));
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
-        Production p1 = prod(EXP_SORT, Terminal("-"), NonTerminal(EXP_SORT));
-        p1.putAttribute("klabel", "'-_");
+        Production p1 = SyntaxProduction(EXP_SORT, Seq(Terminal("-"), NonTerminal(EXP_SORT)), Attributes().add("klabel", "'-_"));
         RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1));
         expNt.entryState.next.add(minus);
         minus.next.add(deleteToken);
@@ -741,10 +744,9 @@ public class ParserTest {
          */
         NonTerminal expsNt = new NonTerminal("Exps");
         NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt, false);
-        Production p2 = prod(Sort("Exps"), new UserList(EXP_SORT, ","));
+        Production p2 = SyntaxProduction(Sort("Exps"), Seq(NonTerminal(EXP_SORT)), Attributes().add("klabel", "'_,_"));
         PrimitiveState separator = new RegExState("Sep-State", expsNt, Pattern.compile(",", Pattern.LITERAL), null);
         RuleState deleteToken2 = new RuleState("Separator-Delete", expsNt, new DeleteRule(1, true));
-        p2.putAttribute("klabel", "'_,_");
         RuleState labelList = new RuleState("RuleStateExps", expsNt, new WrapLabelRule(p2));
         expsNt.entryState.next.add(expExps);
         expExps.next.add(expExps); // circularity
@@ -759,16 +761,17 @@ public class ParserTest {
 
         Term result = new Parser("-1").parse(expsNt, 0);
         //System.out.println(result);
-        Term result2 = (Term) new TreeCleanerVisitor(null).visitNode(result);
+        Term result2 = (Term) new TreeCleanerVisitor().apply(result).right().get();
         //System.out.println(result2);
 
-        Term one = Constant.apply("1", null);
-        Term mone = Constant.apply("-1", null);
+        Term one = Constant.apply("1", intProd09, Optional.empty());
+        Term mone = Constant.apply("-1", intProd09, Optional.empty());
         Term mexp = TermCons.apply(Arrays.asList(one), p1);
         Term expected = TermCons.apply(Arrays.<Term>asList(amb(mone, mexp)), p2);
 
         Assert.assertEquals("The error: ", expected, result2);
     }
+
     public static Ambiguity amb(Term ... terms) {
         return Ambiguity.apply(Arrays.asList(terms));
     }
@@ -778,7 +781,7 @@ public class ParserTest {
     }
 
     public static Production prod(Sort sort, ProductionItem... pi) {
-        return Production.apply(sort, Arrays.<ProductionItem>asList(pi));
+        return SyntaxProduction(sort, immutable(Arrays.<ProductionItem>asList(pi)));
     }
 
     public static TermCons kapp(String label, Term ... terms) {
