@@ -9,14 +9,12 @@ import scala.collection.mutable.ListBuffer
 import kore._
 import org.kframework.tiny._
 
-trait Term extends Pattern
-
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get
   def get(i: I): Option[T]
 }
 
-trait Collection[T] extends Term {
+trait Collection[T] {
   type This <: Collection[T]
 
   def newBuilder(): Builder[T, This]

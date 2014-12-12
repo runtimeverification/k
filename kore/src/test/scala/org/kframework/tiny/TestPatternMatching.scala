@@ -13,6 +13,8 @@ class TestPatternMatching {
   implicit val equiv: Equivalence = EqualsEquivalence
   implicit val disj: Disjunction = new Disjunction(Set(Conjunction()))
 
+  implicit def KList(klist: K*) = InjectedKList(klist)
+
   @Test def testSimple() {
     val foo = 'foo()
     assertEquals(Some(Conjunction(X -> foo)), X.matchOne(foo))
@@ -139,7 +141,7 @@ class TestPatternMatching {
     val a = Anywhere('foo(X))
     assertEquals(
       Disjunction(Conjunction(X -> 'bar('foo()), a.TOPVariable -> a.HOLEVariable),
-        Conjunction(X -> KSequence(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
+        Conjunction(X -> KList(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
       a.matchAll(o))
   }
 
@@ -151,8 +153,8 @@ class TestPatternMatching {
     println(outer)
     assertEquals(
       Disjunction(Conjunction(X -> 'foo(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> outer.HOLEVariable),
-        Conjunction(X -> KSequence(), inner.TOPVariable -> 'foo(inner.HOLEVariable), outer.TOPVariable -> outer.HOLEVariable),
-        Conjunction(X -> KSequence(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> 'foo(outer.HOLEVariable))),
+        Conjunction(X -> KList(), inner.TOPVariable -> 'foo(inner.HOLEVariable), outer.TOPVariable -> outer.HOLEVariable),
+        Conjunction(X -> KList(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> 'foo(outer.HOLEVariable))),
       outer.matchAll(o))
   }
 

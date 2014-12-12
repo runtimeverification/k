@@ -22,7 +22,7 @@ trait HasAttributes {
   def att: Attributes
 }
 
-trait K extends HasAttributes with Term {
+trait K extends HasAttributes with Pattern {
   protected type This <: K
 
   def copy(att: Attributes): This
@@ -45,7 +45,7 @@ trait KToken extends KItem with KORE with KTokenToString
 class KList(val delegate: List[K])
   extends Collection[K] with Indexed[Int, K]
   with KListPattern
-  with KListToString with KORE with Term {
+  with KListToString with KORE {
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]

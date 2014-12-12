@@ -181,11 +181,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KRewrite apply(Rewrite r) {
-        org.kframework.Term right = apply(r.getRight());
+        org.kframework.kore.K right = apply(r.getRight());
         if (!(right instanceof K))
             right = new InjectedKList((KList) right);
 
-        org.kframework.Term left = apply(r.getLeft());
+        org.kframework.kore.K left = apply(r.getLeft());
         if (!(left instanceof K))
             left = new InjectedKList((KList) left);
 

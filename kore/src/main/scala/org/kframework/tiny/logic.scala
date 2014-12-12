@@ -2,25 +2,26 @@ package org.kframework.tiny
 
 import org.kframework._
 import org.kframework.kore.KVariable
+import org.kframework.kore.K
 
 trait Proposition
 
 trait Equation {
-  def left: Term
-  def right: Term
+  def left: K
+  def right: K
 }
 
 trait Equivalence {
-  def apply(a: Term, b: Term): Boolean
+  def apply(a: K, b: K): Boolean
 }
 
 object Conjunction {
-  def apply(pairs: (KVariable, Term)*): Conjunction = Conjunction(pairs.toMap)
+  def apply(pairs: (KVariable, K)*): Conjunction = Conjunction(pairs.toMap)
 }
 
-case class Conjunction private (bindings: Map[KVariable, Term], other: Set[Equation] = Set()) extends Proposition {
+case class Conjunction private (bindings: Map[KVariable, K], other: Set[Equation] = Set()) extends Proposition {
   def ++(other: Conjunction) = Conjunction(bindings ++ other.bindings)
-  def +(other: (KVariable, Term)) = Conjunction(bindings + other)
+  def +(other: (KVariable, K)) = Conjunction(bindings + other)
 
   def and(that: Conjunction): Option[Conjunction] = {
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
@@ -32,7 +33,7 @@ case class Conjunction private (bindings: Map[KVariable, Term], other: Set[Equat
 
   def apply(v: KVariable) = bindings(v)
 
-  def mapValues(f: Term => Term) = Conjunction(bindings mapValues f)
+  def mapValues(f: K => K) = Conjunction(bindings mapValues f)
 
   def contains(v: KVariable) = bindings contains v
 
@@ -79,7 +80,7 @@ object Disjunction {
 }
 
 object EqualsEquivalence extends Equivalence {
-  def apply(a: Term, b: Term): Boolean = a == b
+  def apply(a: K, b: K): Boolean = a == b
 }
 
 object Logic {
