@@ -207,7 +207,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
 
         List<Sentence> sentences = scala.collection.JavaConversions.seqAsJavaList(module
-                .sentences().toList());
+                .localSentences().toList());
         mod = mod.addModuleItems(convertSentences(sentences));
 
         mod.setAttributes(convertAttributes(module.att()));

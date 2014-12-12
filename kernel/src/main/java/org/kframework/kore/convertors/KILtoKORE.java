@@ -99,13 +99,14 @@ public class KILtoKORE extends KILTransformation<Object> {
                     org.kframework.kore.outer.Module result = koreModules.get(mod.getName());
                     if (result == null) {
                         result = apply(mod, allKilModules, koreModules);
-                        koreModules.put(result.name(), result);
                     }
                     return result;
                 }).collect(Collectors.toSet());
 
-        return Module(i.getName(), immutable(importedModules), immutable(items),
+        org.kframework.kore.outer.Module newModule = Module(i.getName(), immutable(importedModules), immutable(items),
                 inner.convertAttributes(i));
+        koreModules.put(newModule.name(), newModule);
+        return newModule;
     }
 
     @SuppressWarnings("unchecked")

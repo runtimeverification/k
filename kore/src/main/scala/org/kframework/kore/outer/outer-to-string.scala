@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringEscapeUtils
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString +
-    "\n" + sentences.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") + "\nendmodule"
+    "\n" + localSentences.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") + "\nendmodule"
 }
 
 trait DefinitionToString {

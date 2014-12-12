@@ -99,6 +99,8 @@ public abstract class BaseTest extends SDFCompilerTest {
             throw new RuntimeException(e);
         }
         def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
+        def.setMainModule("TEST");
+        def.setMainSyntaxModule("TEST");
         return new DefintionWithContext(def, null);
     }
 
