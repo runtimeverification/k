@@ -18,7 +18,7 @@ case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal]
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
 
-  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true }
+  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
 }
 
 case class Require(file: java.io.File) extends OuterKORE

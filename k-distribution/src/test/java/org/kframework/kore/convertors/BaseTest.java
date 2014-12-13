@@ -90,7 +90,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private DefintionWithContext parseUsingOuter(File definitionFile) {
+    protected DefintionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {

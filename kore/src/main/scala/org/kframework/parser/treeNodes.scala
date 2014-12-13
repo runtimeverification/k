@@ -24,13 +24,13 @@ trait HasChildren {
 }
 
 case class Constant(s: String, production: Production, location: Optional[Location]) extends ProductionReference {
-  def shallowCopy(l: Location) = Constant(s, production, location)
+  def shallowCopy(location: Location) = Constant(s, production, Optional.of(location))
   override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")"
 }
 
 case class TermCons(items: List[Term], production: Production, location: Optional[Location])
   extends ProductionReference with HasChildren {
-  def shallowCopy(l: Location) = TermCons(items, production, location)
+  def shallowCopy(location: Location) = TermCons(items, production, Optional.of(location))
 
   def replaceChildren(newChildren: Collection[Term]) = {
     items.clear(); items.addAll(newChildren);
@@ -41,7 +41,7 @@ case class TermCons(items: List[Term], production: Production, location: Optiona
 
 case class Ambiguity(items: Set[Term], location: Optional[Location])
   extends Term with HasChildren {
-  def shallowCopy(l: Location) = Ambiguity(items, location)
+  def shallowCopy(location: Location) = Ambiguity(items, Optional.of(location))
   def replaceChildren(newChildren: Collection[Term]) = {
     items.clear(); items.addAll(newChildren);
     this
