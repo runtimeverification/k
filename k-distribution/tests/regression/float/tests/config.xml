@@ -2,15 +2,7 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 
 <tests>
-  <test definition="test.k" programs="." results=". ../java" extension="test">
-    <kompile-option name="--backend" value="java" />
-    <kompile-option name="--directory" value="java_kompiled" />
-    <all-programs>
-      <krun-option name="--parser" value="kast --parser ground" />
-      <krun-option name="--directory" value="java_kompiled" />
-    </all-programs>
-  </test>
-  <test definition="test.k" programs="." results=". ../maude" extension="test" exclude="double-java.test float.test inf.test">
+  <test definition="test.k" programs="." results="." extension="test">
     <all-programs>
       <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>

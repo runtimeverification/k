@@ -128,6 +128,7 @@ module REGRESSION
   syntax KLabel ::= "#foo" [function]
   syntax K ::= foo6(K)  [function, klabel(#foo)]
   rule #foo(1) => 0
+  rule #foo(0) => -1
 
 
   //strictness
@@ -138,8 +139,8 @@ module REGRESSION
                | foo15(Foo, Foo)
                | Int
                | "print"
-  syntax KLabel ::= "'lbar" [strict]
-                  | "'lbaz" [seqstrict]
+  syntax KLabel ::= "'lbar" [strict, arity(2)]
+                  | "'lbaz" [seqstrict, arity(2)]
   syntax KResult ::= Int
   rule <k> foo15(I:Int, I2:Int) => I +Int I2 ...</k>
        <sum> _ => I +Int I2 </sum>
@@ -223,7 +224,7 @@ module REGRESSION
 
 
   //issue#36
-  syntax KLabel ::= "'L" | "'A"
+  syntax KLabel ::= "'L" [arity(1)] | "'A"
   syntax KItem ::= "dummy"
   syntax KResult ::= "res" "(" Id ")"
   context 'L(HOLE)
@@ -249,8 +250,10 @@ module REGRESSION
 
 
   //label-and-context
-  syntax KLabel  ::= "'ListWrap" | "'B"
-  context 'ListWrap(_,,HOLE,,_)
+  syntax KLabel  ::= "'ListWrap" [arity(3)] | "'B"
+  context 'ListWrap(HOLE,,_:K,,_:K)
+  context 'ListWrap(_:K,,HOLE,,_:K)
+  context 'ListWrap(_:K,,_:K,,HOLE)
   rule 'B(_) => 1
 
 

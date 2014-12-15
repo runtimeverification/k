@@ -1,4 +1,0 @@
-[Error] Critical: Attempting to compile a definition containing -0.0 or NaN
-with the Maude backend. Maude does not support these features, and floating
-point arithmetic is unsupported in the Maude backend. Please recompile with
---backend java.

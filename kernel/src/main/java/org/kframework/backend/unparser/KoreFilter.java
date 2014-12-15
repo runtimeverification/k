@@ -28,9 +28,9 @@ public class KoreFilter extends PrintVisitor {
 
     @Override
     public Void visit(Token t, StringBuilder sb) {
-        sb.append("#token(\"");
-        sb.append(t.value());
-        sb.append("\", \"");
+        sb.append("#token(");
+        sb.append(StringUtil.enquoteCString(t.value()));
+        sb.append(", \"");
         sb.append(t.tokenSort().toString());
         sb.append("\")");
         return null;

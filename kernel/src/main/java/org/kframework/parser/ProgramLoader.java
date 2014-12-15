@@ -9,11 +9,9 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
-import org.kframework.compile.utils.CompilerStepDone;
-import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Location;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
@@ -127,14 +125,9 @@ public class ProgramLoader {
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context, kem).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
-            try {
-                out = new RuleCompilerSteps(context, kem).compile(
-                        new Rule((Sentence) out),
-                        null);
-            } catch (CompilerStepDone e) {
-                out = (ASTNode) e.getResult();
-            }
-            out = ((Rule) out).getBody();
+            out = new ResolveAnonymousVariables(context).visitNode(out);
+            out = new FlattenTerms(context).visitNode(out);
+            out = ((Sentence) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
             try (ByteArrayInputStream in = new ByteArrayInputStream(Base64.decode(content))) {
                 out = loader.loadOrDie(Term.class, in);
