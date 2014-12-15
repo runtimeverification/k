@@ -59,12 +59,14 @@ public final class Sort implements MaximalSharing, Serializable {
      * @return the sort
      */
     public static Sort of(String name) {
-        Sort sort = cache.get(name);
-        if (sort == null) {
-            sort = new Sort(name);
-            cache.put(name, sort);
+        synchronized(cache) {
+            Sort sort = cache.get(name);
+            if (sort == null) {
+                sort = new Sort(name);
+                cache.put(name, sort);
+            }
+            return sort;
         }
-        return sort;
     }
 
     public static Sort of(org.kframework.kil.Sort sort) {
@@ -116,12 +118,14 @@ public final class Sort implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        Sort sort = cache.get(name);
-        if (sort == null) {
-            sort = this;
-            cache.put(name, sort);
+        synchronized(cache) {
+            Sort sort = cache.get(name);
+            if (sort == null) {
+                sort = this;
+                cache.put(name, sort);
+            }
+            return sort;
         }
-        return sort;
     }
 
 }
