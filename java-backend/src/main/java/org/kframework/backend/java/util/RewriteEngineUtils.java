@@ -205,34 +205,31 @@ public class RewriteEngineUtils {
 
     public static List<SymbolicConstraint> getMultiConstraints(
             SymbolicConstraint constraint,
-            List<List<SymbolicConstraint>> multiConstraints) {
-        TermContext context = constraint.termContext();
-        if (!multiConstraints.isEmpty()) {
-            assert multiConstraints.size() <= 2;
-
-            List<SymbolicConstraint> result = Lists.newArrayList();
-            if (multiConstraints.size() == 1) {
-                for (SymbolicConstraint cnstr : multiConstraints.get(0)) {
-                    SymbolicConstraint composedCnstr = SymbolicConstraint
-                            .simplifiedConstraintFrom(context, cnstr, constraint);
-                    result.add(composedCnstr);
-                }
-            } else {
-                List<SymbolicConstraint> constraints1 = multiConstraints.get(0);
-                List<SymbolicConstraint> constraints2 = multiConstraints.get(1);
-                for (SymbolicConstraint cnstr1 : constraints1) {
-                    for (SymbolicConstraint cnstr2 : constraints2) {
-                        SymbolicConstraint composedCnstr = SymbolicConstraint
-                                .simplifiedConstraintFrom(context, constraint, cnstr1, cnstr2);
-                        result.add(composedCnstr);
-                    }
-                }
-            }
-            return result;
-        } else {
+            List<AndOrTree<SymbolicConstraint>> multiConstraints) {
+        if (multiConstraints.size() == 0) {
             // TODO(YilongL): no need to copy the constraint when it becomes immutable
             return Collections.singletonList(new SymbolicConstraint(constraint));
+        } else if (multiConstraints.size() == 1) {
+            return getMultiConstraintsInternal(constraint, multiConstraints.get(0).sumOfProducts());
         }
+        AndOrTree<SymbolicConstraint> root = new AndOrTree<>(true, multiConstraints);
+        return getMultiConstraintsInternal(constraint, root.sumOfProducts());
+    }
+
+    private static List<SymbolicConstraint> getMultiConstraintsInternal(
+            SymbolicConstraint constraint,
+            List<List<SymbolicConstraint>> multiConstraints) {
+        TermContext context = constraint.termContext();
+        assert !multiConstraints.isEmpty();
+        List<SymbolicConstraint> result = Lists.newArrayList();
+        for (List<SymbolicConstraint> product : multiConstraints) {
+            Object[] components = new Object[product.size() + 1];
+            product.toArray(components);
+            components[product.size()] = constraint;
+            SymbolicConstraint composedCnstr = SymbolicConstraint.simplifiedConstraintFrom(context, components);
+            result.add(composedCnstr);
+        }
+        return result;
     }
 
     /**
