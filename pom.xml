@@ -37,6 +37,18 @@
       <releases><enabled>false</enabled></releases>
     </repository>
   </repositories>
+  <distributionManagement>
+    <repository>
+      <id>runtime-verification</id>
+      <name>Runtime Verification Repository</name>
+      <url>http://office.runtimeverification.com:8888/repository/internal</url>
+    </repository>
+    <snapshotRepository>
+      <id>runtime-verification.snapshots</id>
+      <name>Runtime Verification Snapshot Repository</name>
+      <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <base>master</base>
