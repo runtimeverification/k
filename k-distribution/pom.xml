@@ -39,12 +39,6 @@
     </dependency>
     <dependency>
       <groupId>org.kframework.k</groupId>
-      <artifactId>maude-backend</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.k</groupId>
       <artifactId>sdf-parser</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

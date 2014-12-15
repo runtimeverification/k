@@ -59,7 +59,7 @@ We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
 
-require "modules/substitution-java.k"
+require "modules/substitution.k"
 
 module LAMBDA
   imports SUBSTITUTION

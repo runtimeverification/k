@@ -2,7 +2,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
-import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -144,7 +143,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
-            if (!MaudeHelper.isBasicSort(emp.getSort())) {
+            if (!emp.getSort().isBaseSort()) {
                 Production listProd = context.listProductions.get(emp.getSort());
                 return new KApp(l, f, KLabelConstant.of(listProd.getTerminatorKLabel()), KList.EMPTY);
             }

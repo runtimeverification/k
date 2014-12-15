@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.backend.maude.MaudeFilter;
-import org.kframework.backend.unparser.IndentationOptions;
-import org.kframework.backend.unparser.KastFilter;
 import org.kframework.backend.unparser.KoreFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sort;
@@ -84,24 +81,11 @@ public class KastFrontEnd extends FrontEnd {
 
         ASTNode out = loader.processPgm(stringToParse, source, sort, context, options.parser);
         StringBuilder kast;
-        if (options.experimental.pretty) {
-            IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
-                    options.experimental.auxTabSize, options.experimental.tabSize);
-            KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
-            kastFilter.visitNode(out);
-            kast = kastFilter.getResult();
-        } else if (context.kompileOptions.experimental.legacyKast) {
-            MaudeFilter maudeFilter = new MaudeFilter(context, kem);
-            maudeFilter.visitNode(out);
-            kast = maudeFilter.getResult();
-            kast.append("\n");
-        } else {
-            KoreFilter koreFilter = new KoreFilter(context);
-            StringBuilder sb = new StringBuilder();
-            koreFilter.visitNode(out, sb);
-            kast = sb;
-            kast.append("\n");
-        }
+        KoreFilter koreFilter = new KoreFilter(context);
+        StringBuilder sb = new StringBuilder();
+        koreFilter.visitNode(out, sb);
+        kast = sb;
+        kast.append("\n");
 
         System.out.print(kast.toString());
 

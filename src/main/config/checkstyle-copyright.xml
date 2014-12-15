@@ -24,10 +24,6 @@
     <property name="fileExtensions" value="k,kore,java,jj,str" />
   </module>
   <module name="RegexpHeader">
-    <property name="header" value="^--- Copyright \(c\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
-    <property name="fileExtensions" value="maude" />
-  </module>
-  <module name="RegexpHeader">
     <property name="header" value="^/\* Copyright \(c\) (\d\d\d\d-)?2014 K Team. All Rights Reserved. \*/$" />
     <property name="fileExtensions" value="css" />
   </module>

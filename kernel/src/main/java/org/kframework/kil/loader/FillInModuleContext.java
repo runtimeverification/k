@@ -1,30 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.Poset;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 public class FillInModuleContext extends BasicVisitor {
@@ -57,15 +42,12 @@ public class FillInModuleContext extends BasicVisitor {
     @Override
     public Void visit(Import node, Void _void)  {
         Module module;
-        // TODO(dwightguth) remove only the condition the same time with maude backend
-        if (!node.getName().startsWith("#")) { // maude legacy: some modules specified with # are builtin
-            module = this.getCurrentDefinition().getDefinitionContext().getModuleByName(node.getName());
-            if (module == null) {
-                String msg = "Could not find module: " + node.getName() + " imported from: " + this.getCurrentModule().getName();
-                throw KExceptionManager.compilerError(msg, this, node);
-            }
-            this.getCurrentModule().getModuleContext().addImportedModule(module);
+        module = this.getCurrentDefinition().getDefinitionContext().getModuleByName(node.getName());
+        if (module == null) {
+            String msg = "Could not find module: " + node.getName() + " imported from: " + this.getCurrentModule().getName();
+            throw KExceptionManager.compilerError(msg, this, node);
         }
+        this.getCurrentModule().getModuleContext().addImportedModule(module);
         return null;
     }
 

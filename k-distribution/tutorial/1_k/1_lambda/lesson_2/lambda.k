@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-require "modules/substitution-java.k"
+require "modules/substitution.k"
 
 module LAMBDA
   imports SUBSTITUTION

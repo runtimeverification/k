@@ -1,37 +1,20 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import org.kframework.backend.Backends;
-import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
-import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * For each module, collect the included modules and create a new parser.
@@ -81,10 +64,6 @@ public class ParsersPerModule {
         if (visited.contains(modName))
             return;
         Module m = def.getDefinitionContext().getModuleByName(modName);
-        // there are some mockup modules that don't really exist, like #BOOL-INTERFACE
-        // from the old maude days
-        if (m == null)
-            return;
         visited.add(modName);
         for (ModuleItem mi : m.getItems()) {
             if (mi instanceof Import) {
