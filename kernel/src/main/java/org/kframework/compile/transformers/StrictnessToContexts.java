@@ -15,9 +15,8 @@ import java.util.*;
  */
 public class StrictnessToContexts extends CopyOnWriteTransformer {
 
-    public static final String DEFAULT_STRICTNESS_CELL = "k";
-    public static final String STRICT = "strict";
-    public static final String SEQSTRICT = "seqstrict";
+    private static final String STRICT = "strict";
+    private static final String SEQSTRICT = "seqstrict";
     private List<ModuleItem> items = new ArrayList<>();
 
     public StrictnessToContexts(Context context) {
@@ -68,20 +67,14 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 strictType = SEQSTRICT;
             }
             String attribute = prod.getAttribute(strictType);
-            String strictCell = DEFAULT_STRICTNESS_CELL;
 
             String[] strictAttrs = null;
 
-            if (prod.getSort().equals(Sort.KLABEL)) {
-                assert attribute.isEmpty() && strictCell.equals(DEFAULT_STRICTNESS_CELL) :
-                        "Customized strictness for K labels not currently implemented";
-                kLabelStrictness(prod, isSeq);
-                continue;
-            }
+            int arity = prod.getArityOfKItem();
 
             List<Integer> strictnessPositions = new ArrayList<>();
             if (attribute.isEmpty()) {
-                for (int i = 1; i <= prod.getArity(); i++) {
+                for (int i = 1; i <= arity; i++) {
                     strictnessPositions.add(i);
                 }
             } else {
@@ -91,7 +84,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         strictnessPositions.add(Integer.parseInt(strictAttr.trim()));
                     } catch (NumberFormatException e) {
                         throw KExceptionManager.compilerError(
-                                "Expecting a number between 1 and " + prod.getArity() + ", but found " + strictAttr + " as a" +
+                                "Expecting a number between 1 and " + arity + ", but found " + strictAttr + " as a" +
                                         " strict position in " + Arrays.toString(strictAttrs),
                                 this, prod);
                     }
@@ -99,27 +92,28 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             for (int i = 0; i < strictnessPositions.size(); i++) {
-                TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
+                KApp app = (KApp) MetaK.getTerm(prod, context);
+                KList list = (KList) app.getChild();
                 if (context.kompileOptions.experimental.legacyKast) {
-                    for (int j = 0; j < prod.getArity(); ++j) {
-                        termCons.getContents().get(j).setSort(Sort.KITEM);
+                    for (int j = 0; j < arity; ++j) {
+                        list.getContents().get(j).setSort(Sort.KITEM);
                     }
                 }
 
                 // insert HOLE instead of the term
-                termCons.getContents().set(-1 + strictnessPositions.get(i),
+                list.getContents().set(-1 + strictnessPositions.get(i),
                         Hole.KITEM_HOLE);
 
                 // is seqstrict the elements before the argument should be KResult
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
-                        Term arg = termCons.getContents().get(-1 + strictnessPositions.get(j));
+                        Term arg = list.getContents().get(-1 + strictnessPositions.get(j));
                         arg.setSort(Sort.KRESULT);
                     }
                 }
 
                 org.kframework.kil.Context ctx = new org.kframework.kil.Context();
-                ctx.setBody(termCons);
+                ctx.setBody(app);
                 ctx.copyAttributesFrom(prod);
                 ctx.setLocation(prod.getLocation());
                 ctx.setSource(prod.getSource());
@@ -129,37 +123,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         }
 
         return node;
-    }
-
-    /* Add context KLabel(KList1 ,, HOLE ,, KList2).
-     * If KLabel is seqstrict then add the condition isKResult(KList1)
-     */
-    private void kLabelStrictness(Production prod, boolean isSeq) {
-        List<Term> contents = new ArrayList<>(3);
-        //first argument is a variable of sort KList
-        Variable variable = Variable.getAnonVar(Sort.KLIST);
-        contents.add(variable);
-        //second is a HOLE
-        contents.add(Hole.KITEM_HOLE);
-        //third argument is a variable of sort KList
-        contents.add(Variable.getAnonVar(Sort.KLIST));
-        KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
-        //make a context from the TermCons
-        org.kframework.kil.Context ctx = new org.kframework.kil.Context();
-        ctx.setBody(kapp);
-        ctx.copyAttributesFrom(prod);
-        ctx.setLocation(prod.getLocation());
-        ctx.setSource(prod.getSource());
-        if (isSeq) {
-            //set the condition
-            KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
-            ctx.setRequires(condApp);
-            ctx.removeAttribute("seqstrict");
-        } else {
-            ctx.removeAttribute("strict");
-        }
-        //add the context
-        items.add(ctx);
     }
 
 }

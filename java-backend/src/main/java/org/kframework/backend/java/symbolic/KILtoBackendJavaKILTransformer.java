@@ -33,7 +33,6 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -553,7 +552,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabelOfKItem(), context));
         }
 
         return definition;

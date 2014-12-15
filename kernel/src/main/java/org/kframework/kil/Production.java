@@ -2,9 +2,10 @@
 package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
+
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,7 +176,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
             return null;
         } else if (klabel == null) {
             if (sort.equals(Sort.KLABEL) && getArity() == 0)
-                klabel = getPrefixLabel();
+                return null;
             else
                 klabel = "'" + getPrefixLabel();
         }
@@ -213,6 +214,21 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
                 arity++;
         }
         return arity;
+    }
+
+    public int getArityOfKItem() {
+        if (sort.equals(Sort.KLABEL) && !containsAttribute(Attribute.FUNCTION_KEY)) {
+            try {
+                String attr = getAttribute(Attribute.ARITY_KEY);
+                if (attr == null) {
+                    throw KExceptionManager.criticalError("Strict KLabels must declare an 'arity' attribute.", this);
+                }
+                return Integer.parseInt(attr);
+            } catch (NumberFormatException e) {
+                throw KExceptionManager.criticalError("Could not parse 'arity' attribute as an integer.", e, this);
+            }
+        }
+        return getArity();
     }
 
     @Override
@@ -390,5 +406,15 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     @Override
     public void setChildren(List<ProductionItem> children, Enum<?> _void) {
         this.items = children;
+    }
+
+    public String getKLabelOfKItem() {
+        if (sort.equals(Sort.KLABEL) && isConstant()) {
+            return getConstant().getTerminal();
+        }
+        if (getKLabel() == null) {
+            throw KExceptionManager.internalError("Attempted to get null KLabel of production.", this);
+        }
+        return getKLabel();
     }
 }

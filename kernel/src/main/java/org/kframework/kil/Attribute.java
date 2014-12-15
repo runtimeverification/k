@@ -3,6 +3,7 @@ package org.kframework.kil;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 
@@ -38,6 +39,7 @@ public class Attribute<T> extends ASTNode {
     public static final String SMT_LEMMA_KEY = "smt-lemma";
     public static final String CELL_KEY = "cell";
     public static final String EQUALITY_KEY = "equality";
+    public static final String ARITY_KEY = "arity";
 
     public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");

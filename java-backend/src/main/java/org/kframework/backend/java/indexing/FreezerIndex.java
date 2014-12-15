@@ -57,4 +57,8 @@ public class FreezerIndex implements Index {
         return "@" + kLabel + "[" + holeIndex + "]";
     }
 
+    public KLabelConstant getKLabel() {
+        return kLabel;
+    }
+
 }
