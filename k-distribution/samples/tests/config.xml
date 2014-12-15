@@ -5,31 +5,11 @@
   <!-- QUINE -->
   <include file="../quine/tests/config.xml" directory="quine" />
 
+  <!-- AGENT -->
+  <include file="../agent/tests/config.xml" directory="agent" />
+
   <!-- BF -->
   <include file="../bf/tests/config.xml" directory="bf" />
-
-  <!-- AGENT -->
-  <test
-      definition="agent/agent.k"
-      programs="../agent/programs"
-      results="../../tests/examples/agent"
-      extension="agent"
-      >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-    <program name="p22.agent">
-      <krun-option name="--output" value="pretty" />
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
-    </program>
-    <program name="p23.agent">
-      <krun-option name="--output" value="pretty" />
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
-    </program>
-  </test>
 
   <include file="../wcet/tests/config.xml" directory="wcet" />
 

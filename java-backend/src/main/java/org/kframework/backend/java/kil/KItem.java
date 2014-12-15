@@ -119,7 +119,7 @@ public final class KItem extends Term {
             }
 
             /* cache miss, compute sort information and cache it */
-            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext, tool);
+            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext);
             if (enableCache) {
                 definition.getSortCacheTable().put(cacheTabColKey, cacheTabVal);
             }
@@ -142,32 +142,30 @@ public final class KItem extends Term {
     }
 
     private CacheTableValue computeSort(KLabelConstant kLabelConstant,
-            KList kList, TermContext termContext, Tool tool) {
+            KList kList, TermContext termContext) {
         Definition definition = termContext.definition();
         Subsorts subsorts = definition.subsorts();
 
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        if (tool != Tool.KOMPILE) {
-            /**
-             * Sort checks in the Java engine are not implemented as
-             * rewrite rules, so we need to precompute the sort of
-             * terms. However, right now, we also want to allow users
-             * to provide user-defined sort predicate rules, e.g.
-             *      ``rule isVal(cons V:Val) => true''
-             * to express the same meaning as overloaded productions
-             * which are not allowed to write in the current front-end.
-             */
-            /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
-            for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
-                if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
-                        .equals(BoolToken.TRUE)) {
-                    sorts.add(rule.predicateSort());
-                } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
-                        .equals(BoolToken.TRUE)) {
-                    possibleSorts.add(rule.predicateSort());
-                }
+        /**
+         * Sort checks in the Java engine are not implemented as
+         * rewrite rules, so we need to precompute the sort of
+         * terms. However, right now, we also want to allow users
+         * to provide user-defined sort predicate rules, e.g.
+         *      ``rule isVal(cons V:Val) => true''
+         * to express the same meaning as overloaded productions
+         * which are not allowed to write in the current front-end.
+         */
+        /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+        for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
+            if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
+                    .equals(BoolToken.TRUE)) {
+                sorts.add(rule.predicateSort());
+            } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
+                    .equals(BoolToken.TRUE)) {
+                possibleSorts.add(rule.predicateSort());
             }
         }
 
