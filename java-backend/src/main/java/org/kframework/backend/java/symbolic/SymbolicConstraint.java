@@ -16,6 +16,8 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.AndOrTree;
+import org.kframework.backend.java.util.AndOrTree.NodeType;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
@@ -112,7 +114,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private boolean writeProtected = false;
 
-    private List<List<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
+    private List<AndOrTree<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
 
     private final TermContext context;
 
@@ -691,15 +693,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return TruthValue.FALSE;
                 }
 
-                if (unifier.multiConstraints().isEmpty()
+                if (unifier.multiConstraints().getNodeType() == NodeType.LEAF
                         && unifier.constraint().equalities.size() == 1
                         && unifier.constraint().equalities.iterator().next().equals(equality)) {
                     continue;
                 }
 
                 iterator.remove();
-                addAll(unifier.constraint());
-                multiConstraints.addAll(unifier.multiConstraints());
+                if (unifier.multiConstraints().getNodeType() == NodeType.LEAF) {
+                    addAll(unifier.multiConstraints().getLeaf());
+                } else {
+                    multiConstraints.add(unifier.multiConstraints());
+                }
             }
 
             writeProtected = false;

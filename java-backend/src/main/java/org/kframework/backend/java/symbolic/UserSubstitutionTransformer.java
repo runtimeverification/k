@@ -5,6 +5,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.KLabel;
@@ -13,11 +14,9 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.*;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -33,8 +32,9 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     public static Term userSubstitution(Map<Term, Term> substitution, Term term, TermContext context) {
         if (substitution.isEmpty()) return term;
         for (Term var : substitution.keySet()) {
-            assert context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, var.sort()) :
-                    "All keys in substitution should be variables.";
+            if (!context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, var.sort())) {
+                throw KExceptionManager.criticalError("All keys in substitution should be variables, found " + var + " of sort " + var.sort());
+            }
         }
         UserSubstitutionTransformer transformer = new UserSubstitutionTransformer(substitution, context);
         return (Term) term.accept(transformer);
@@ -123,7 +123,8 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         termList.set(idx, resultBindingExp);
                     }
 
-                    kItem = KItem.of(kLabel, KList.concatenate(termList), context);
+                    kItem = KItem.of(kLabel, KList.concatenate(termList), context,
+                                kItem.getSource(), kItem.getLocation());
                     return new DoneTransforming(kItem);
                 }
             }

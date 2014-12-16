@@ -12,6 +12,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 
 
 /**
@@ -52,7 +54,8 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
                         Term freshBoundVars = boundVars.substitute(freshSubstitution, context);
                         Term freshbindingExp = bindingExp.substitute(freshSubstitution, context);
-                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshbindingExp), context);
+                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshbindingExp), context,
+                                    kItem.getSource(), kItem.getLocation());
 //                    }
                 }
             }

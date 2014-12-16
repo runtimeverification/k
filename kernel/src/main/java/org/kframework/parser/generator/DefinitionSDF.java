@@ -34,7 +34,7 @@ public class DefinitionSDF {
         sdf.append("context-free syntax\n");
 
         DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, context);
-        CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
+        CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
         psdfv.visitNode(def);
         terminals.visitNode(def);
 

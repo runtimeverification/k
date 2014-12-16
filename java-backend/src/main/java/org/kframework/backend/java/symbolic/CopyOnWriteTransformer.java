@@ -118,7 +118,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = KItem.of(kLabel, kList, context);
+            kItem = KItem.of(kLabel, kList, context, kItem.getSource(), kItem.getLocation());
         }
         return kItem;
     }

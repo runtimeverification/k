@@ -80,9 +80,11 @@ public class PreferDotsFilter extends ParseForestTransformer {
     public ASTNode visit(TermCons tc, Void _void) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
         if (tc.getProduction().isListDecl()) {
-            UserList ulist = tc.getProduction().getListDecl();
-            tc.getContents().set(0, (Term) preferStrict(ulist.getSort(), tc.getContents().get(0)));
-            tc.getContents().set(1, (Term) preferStrict(tc.getProduction().getSort(), tc.getContents().get(1)));
+            if (!tc.isListTerminator()) {
+                UserList ulist = tc.getProduction().getListDecl();
+                tc.getContents().set(0, (Term) preferStrict(ulist.getSort(), tc.getContents().get(0)));
+                tc.getContents().set(1, (Term) preferStrict(tc.getProduction().getSort(), tc.getContents().get(1)));
+            }
         } else {
             int j = 0;
             for (int i = 0; i < tc.getContents().size(); i++) {

@@ -165,7 +165,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = kList.sort().equals(Sort.KLIST) ? kList : KList.singleton(kList);
         }
-        return KItem.of(kLabel, kList, TermContext.of(globalContext));
+        return KItem.of(kLabel, kList, TermContext.of(globalContext), node.getSource(), node.getLocation());
     }
 
     @Override

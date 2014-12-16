@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
+import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
@@ -96,6 +98,9 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         results.clear();
         assert successorBound == 1;
 
+        File coverage = termContext.definition().context().krunOptions.experimental.coverage;
+        Coverage.print(coverage, subject);
+
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
@@ -130,6 +135,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                             if (termContext.definition().context().krunOptions.experimental.trace) {
                                 System.out.println(rule);
                             }
+                            Coverage.print(coverage, rule);
                             results.add(subject);
 
                             /* the result of rewrite machine must be in the reference results */
@@ -148,6 +154,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                             if (termContext.definition().context().krunOptions.experimental.trace) {
                                 System.out.println(rule);
                             }
+                            Coverage.print(coverage, rule);
                             subject = constructNewSubjectTerm(rule, subst);
                             results.add(subject);
                             succeed = true;

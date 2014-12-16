@@ -69,17 +69,15 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 this.visitNode(t);
                 j++;
             } else if (node.getProduction().getItems().get(i) instanceof UserList) {
-                UserList ul = (UserList) node.getProduction().getItems().get(i);
-                Term t1 = node.getContents().get(0);
-                Term t2 = node.getContents().get(1);
-                try {
+                if (!node.isListTerminator()) {
+                    UserList ul = (UserList) node.getProduction().getItems().get(i);
+                    Term t1 = node.getContents().get(0);
+                    Term t2 = node.getContents().get(1);
                     new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
                     new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
-                } catch (ParseFailedException e) {
-                    e.printStackTrace();
+                    this.visitNode(t1);
+                    this.visitNode(t2);
                 }
-                this.visitNode(t1);
-                this.visitNode(t2);
             }
         }
 
