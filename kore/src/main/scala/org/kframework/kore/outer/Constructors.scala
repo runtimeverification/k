@@ -20,8 +20,8 @@ object Constructors {
     kore.outer.Definition(requires, modules)
 
   def Require(file: java.io.File) = kore.outer.Require(file)
-  def Module(name: String, sentences: Set[Sentence], att: Attributes) =
-    kore.outer.Module(name, sentences, att)
+  def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: Attributes) =
+    kore.outer.Module(name, imports, sentences, att)
 
   def SyntaxSort(sort: Sort) = outer.SyntaxSort(sort)
   def SyntaxSort(sort: Sort, att: Attributes) = outer.SyntaxSort(sort, att)

@@ -8,6 +8,7 @@
       extension="fun"
       results="." >
      <kompile-option name="--superheat" value="strict" />
+     <kompile-option name="--backend" value="java" />
      <all-programs>
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
       </all-programs>
@@ -16,5 +17,24 @@
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
       </program>
   </test>
+
+  <test
+      definition="fun-untyped.k"
+      programs="../../../programs"
+      extension="fun"
+      results="." >
+     <kompile-option name="--superheat" value="strict" />
+     <kompile-option name="--backend" value="java" />
+     <all-programs>
+        <krun-option name="--pattern-matching" />
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </all-programs>
+      <program name="references-5.fun">
+        <krun-option name="--search" />
+        <krun-option name="--pattern-matching" />
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </program>
+  </test>
+
 
 </tests>

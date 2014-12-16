@@ -1,7 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-
-
 module TEST [location(startLine(3),startColumn(1),endLine(18),endColumn(9))]
   syntax Bools ::= Bools "," Bools [userList(Bools)]
   syntax Bools ::= Bool [userList(Bools)]

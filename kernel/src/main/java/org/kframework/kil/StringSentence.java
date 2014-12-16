@@ -11,13 +11,15 @@ import org.kframework.kil.visitors.Visitor;
  */
 public class StringSentence extends ModuleItem {
     private String content;
-    private String contentLocation;
+    private int contentStartLine;
+    private int contentStartColumn;
     private String label;
     private String type;
 
-    public StringSentence(String content, String contentLocation, String type, String label) {
+    public StringSentence(String content, int contentStartLine, int contentStartColumn, String type, String label) {
         this.content = content;
-        this.contentLocation = contentLocation;
+        this.contentStartLine = contentStartLine;
+        this.contentStartColumn = contentStartColumn;
         this.type = type;
         this.label = label;
     }
@@ -44,10 +46,6 @@ public class StringSentence extends ModuleItem {
         this.content = content;
     }
 
-    public String getContentLocation() {
-        return contentLocation;
-    }
-
     @Override
     public StringSentence shallowCopy() {
         return new StringSentence(this);
@@ -67,5 +65,13 @@ public class StringSentence extends ModuleItem {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public int getContentStartLine() {
+        return contentStartLine;
+    }
+
+    public int getContentStartColumn() {
+        return contentStartColumn;
     }
 }

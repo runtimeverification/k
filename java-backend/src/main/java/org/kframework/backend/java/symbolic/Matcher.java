@@ -5,7 +5,6 @@ import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
@@ -32,7 +31,6 @@ public interface Matcher {
     public void match(BuiltinList builtinList, Term pattern);
     public void match(BuiltinMap builtinMap, Term pattern);
     public void match(BuiltinSet builtinSet, Term pattern);
-    public void match(Cell cell, Term pattern);
     public void match(CellCollection cellCollection, Term pattern);
     public void match(Hole hole, Term pattern);
     public void match(KItem kItem, Term pattern);

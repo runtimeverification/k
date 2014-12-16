@@ -105,7 +105,7 @@ public class TstKILtoKOREIT extends BaseTest {
         return koreDefString;
     }
 
-    protected String expecteFilePostfix() {
+    protected String expectedFilePostfix() {
         return "-expected.k";
     }
 }

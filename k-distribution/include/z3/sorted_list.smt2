@@ -52,6 +52,7 @@
 (declare-fun smt_seq_concat (IntSeq IntSeq) IntSeq)
 (declare-fun smt_seq_elem (Int) IntSeq)
 (declare-fun smt_seq_nil () IntSeq)
+(declare-fun smt_seq_len (IntSeq) Int)
 
 (declare-fun smt_seq2set (IntSeq) IntSet)
 (declare-fun smt_seq_sorted (IntSeq) Bool)

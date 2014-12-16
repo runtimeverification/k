@@ -17,16 +17,13 @@ public class KORECompilationSteps extends BasicCompilerStep<Definition> {
 
     @Override
     public Definition compile(Definition ast, String haltAfterStep) throws CompilerStepDone {
-        KILtoKORE kilToKORE = new KILtoKORE(context);
-        KOREtoKIL koreToKIL = new KOREtoKIL();
+//        KILtoKORE kilToKORE = new KILtoKORE(context);
+//        KOREtoKIL koreToKIL = new KOREtoKIL();
 
-        org.kframework.kore.outer.Definition koreDefinition = kilToKORE.apply(ast);
-        Definition newKIL = koreToKIL.convertDefinition(koreDefinition);
+//        org.kframework.kore.outer.Definition koreDefinition = kilToKORE.apply(ast);
+//        Definition newKIL = koreToKIL.convertDefinition(koreDefinition);
 
-        if(false)
-            return newKIL;
-        else
-            return ast;
+        return ast;
     }
 
     @Override

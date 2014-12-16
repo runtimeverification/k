@@ -73,7 +73,7 @@ public class TermLoader {
         def = (Definition) new ParseConfigsFilter(context, false, kem).visitNode(def);
 
         // ----------------------------------- parse rules
-        def = (Definition) new ParseRulesFilter(context).visitNode(def);
+        def = (Definition) new ParseRulesFilter(context, kem).visitNode(def);
         def = (Definition) new DisambiguateRulesFilter(context, false, kem).visitNode(def);
         def = (Definition) new NormalizeASTTransformer(context, kem).visitNode(def);
 

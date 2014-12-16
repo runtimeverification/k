@@ -56,11 +56,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(Cell cell) {
-        return transform((Term) cell);
-    }
-
-    @Override
     public ASTNode transform(CellCollection cellCollection) {
         return transform((Collection) cellCollection);
     }

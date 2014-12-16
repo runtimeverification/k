@@ -9,6 +9,7 @@
                 ../../../4_imp++/lesson_7/tests"
       extension="imp"
       results="." >
+    <kompile-option name="--backend" value="java" />
   </test>
 
 

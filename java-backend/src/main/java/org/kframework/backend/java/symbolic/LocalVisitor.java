@@ -60,11 +60,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(Cell cell) {
-        visit((Term) cell);
-    }
-
-    @Override
     public void visit(CellCollection cellCollection) {
         visit((Collection) cellCollection);
     }

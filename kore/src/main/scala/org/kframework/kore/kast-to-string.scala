@@ -3,6 +3,7 @@
 package org.kframework.kore
 
 import org.kframework._
+import org.apache.commons.lang3.StringEscapeUtils
 
 trait KApplyToString {
   self: KApply =>
@@ -16,7 +17,7 @@ trait SortToString {
 
 trait KTokenToString {
   self: KToken =>
-  override def toString = s
+  override def toString = "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")" + att.postfixString
 }
 
 trait KVariableToString {

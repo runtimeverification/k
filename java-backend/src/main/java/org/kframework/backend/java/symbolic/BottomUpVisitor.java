@@ -60,15 +60,9 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(Cell cell) {
-        cell.getContent().accept(this);
-        visit((Term) cell);
-    }
-
-    @Override
     public void visit(CellCollection cellCollection) {
-        for (Cell cell : cellCollection.cells()) {
-            cell.accept(this);
+        for (CellCollection.Cell cell : cellCollection.cells().values()) {
+            cell.content().accept(this);
         }
         for (Term term : cellCollection.baseTerms()) {
             term.accept(this);

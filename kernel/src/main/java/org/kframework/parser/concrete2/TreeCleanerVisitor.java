@@ -22,8 +22,8 @@ import java.util.HashSet;
 // TODO: simplify by removing leftover "null" checks and recheck this code
 public class TreeCleanerVisitor extends ParseForestTransformer {
 
-    public TreeCleanerVisitor(Context context) {
-        super(TreeCleanerVisitor.class.getName(), context);
+    public TreeCleanerVisitor() {
+        super(TreeCleanerVisitor.class.getName(), null);
     }
 
     @Override

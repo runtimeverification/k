@@ -2,5 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-(#symType(2) -> #symType(3)) = ((#symType(1) -> #symType(1)) -> #symType(4))
-   ~> #symType(4)
+_0:Type = (_0 -> _1:Type) ~> _1 ~> _0 -> HOLE ~> (HOLE (lambda x . x))

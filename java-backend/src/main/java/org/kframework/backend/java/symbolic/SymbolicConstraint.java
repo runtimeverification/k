@@ -8,7 +8,6 @@ import static org.kframework.backend.java.util.RewriteEngineUtils.isSubsortedEq;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
@@ -17,6 +16,8 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.AndOrTree;
+import org.kframework.backend.java.util.AndOrTree.NodeType;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
@@ -27,7 +28,6 @@ import org.kframework.utils.options.SMTSolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -114,7 +114,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private boolean writeProtected = false;
 
-    private List<List<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
+    private List<AndOrTree<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
 
     private final TermContext context;
 
@@ -465,7 +465,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         substitution.keySet().removeAll(variablesToRemove);
 
         /* reset this symbolic constraint to be true when it becomes empty */
-        if (equalities.isEmpty() && substitution.isEmpty()) {
+        if (equalities.isEmpty() && substitution.isEmpty() && multiConstraints.isEmpty()) {
             truthValue = TruthValue.TRUE;
         }
     }
@@ -683,15 +683,28 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return TruthValue.FALSE;
                 }
 
-                if (unifier.multiConstraints().isEmpty()
+                if (equality.leftHandSide() instanceof Variable && equality.rightHandSide().isNormal()
+                        && equality.rightHandSide().variableSet().contains(equality.leftHandSide())) {
+                    falsify(equality);
+                    return TruthValue.FALSE;
+                } else if (equality.rightHandSide() instanceof Variable && equality.leftHandSide().isNormal()
+                        && equality.leftHandSide().variableSet().contains(equality.rightHandSide())) {
+                    falsify(equality);
+                    return TruthValue.FALSE;
+                }
+
+                if (unifier.multiConstraints().getNodeType() == NodeType.LEAF
                         && unifier.constraint().equalities.size() == 1
                         && unifier.constraint().equalities.iterator().next().equals(equality)) {
                     continue;
                 }
 
                 iterator.remove();
-                addAll(unifier.constraint());
-                multiConstraints.addAll(unifier.multiConstraints());
+                if (unifier.multiConstraints().getNodeType() == NodeType.LEAF) {
+                    addAll(unifier.multiConstraints().getLeaf());
+                } else {
+                    multiConstraints.add(unifier.multiConstraints());
+                }
             }
 
             writeProtected = false;
@@ -725,7 +738,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         renormalize();
 
         /* reset this symbolic constraint to be true when it becomes empty */
-        if (equalities.isEmpty() && substitution.isEmpty()) {
+        if (equalities.isEmpty() && substitution.isEmpty() && multiConstraints.isEmpty()) {
             truthValue = TruthValue.TRUE;
         }
         recursiveNormalize = false;

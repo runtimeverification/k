@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableListMultimap;
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
@@ -44,22 +45,13 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(Cell cell) {
-        Term content = (Term) cell.getContent().accept(this);
-        if (content != cell.getContent()) {
-            cell = new Cell<Term>(cell.getLabel(), content);
-        }
-        return cell;
-    }
-
-    @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean changed = false;
         CellCollection.Builder builder = CellCollection.builder(context.definition().context());
-        for (Cell<?> cell : cellCollection.cellMap().values()) {
-            Cell<?> transformedCell = (Cell<?>) cell.accept(this);
-            builder.add(transformedCell);
-            changed = changed || cell != transformedCell;
+        for (CellCollection.Cell cell : cellCollection.cells().values()) {
+            Term transformedContent = (Term) cell.content().accept(this);
+            builder.put(cell.cellLabel(), transformedContent);
+            changed = changed || cell.content() != transformedContent;
         }
         for (Term term : cellCollection.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
@@ -126,7 +118,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = KItem.of(kLabel, kList, context);
+            kItem = KItem.of(kLabel, kList, context, kItem.getSource(), kItem.getLocation());
         }
         return kItem;
     }

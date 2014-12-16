@@ -4,14 +4,20 @@ package org.kframework.parser.generator;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.MakeConsList;
+import org.kframework.parser.concrete2.Parser;
+import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -68,6 +74,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
         if (ss.getType().equals(Constants.CONFIG)) {
             long startTime2 = System.currentTimeMillis();
             ASTNode config = null;
+            if (!context.kompileOptions.experimental.javaParserRules) {
             String parsed = null;
             if (ss.containsAttribute("kore")) {
                 long startTime = System.currentTimeMillis();
@@ -88,7 +95,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
             // replace the old xml node with the newly parsed sentence
             Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-            XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
             XmlLoader.addSource(xmlTerm, ss.getSource());
             XmlLoader.reportErrors(doc, ss.getType());
 
@@ -100,6 +107,11 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             st.setAttributes(ss.getAttributes());
             st.setLocation(ss.getLocation());
             st.setSource(ss.getSource());
+            } else  {
+                // parse with the new parser for rules
+                Grammar ruleGrammar = getCurrentModule().getRuleGrammar(kem);
+                config = new Configuration(RuleParserHelper.parseSentence(ss, ruleGrammar.get("MetaKList"), "configuration"));
+            }
 
             // disambiguate configs
             config = new SentenceVariablesFilter(context).visitNode(config);

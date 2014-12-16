@@ -332,8 +332,6 @@
     </all-programs>
   </test>
 
-  <include file="user_substitution/tests/config.xml" directory="user_substitution" />
-
   <test
       definition="anywhere/test1/test.k"
       programs="anywhere/test1/programs"

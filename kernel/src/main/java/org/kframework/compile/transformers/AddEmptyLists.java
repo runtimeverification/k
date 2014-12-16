@@ -86,18 +86,20 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         Production p = tc.getProduction();
 
         if (p.isListDecl()) {
-            Term t = tc.getContents().get(0);
-            UserList ul = (UserList) p.getItems().get(0);
-            t = wrapTerm(t, ul.getSort());
-            if (t != null) {
-                tc.getContents().set(0, t);
-            }
+            if (!tc.isListTerminator()) {
+                Term t = tc.getContents().get(0);
+                UserList ul = (UserList) p.getItems().get(0);
+                t = wrapTerm(t, ul.getSort());
+                if (t != null) {
+                    tc.getContents().set(0, t);
+                }
 
-            // if the term should be a list, append the empty element
-            t = tc.getContents().get(1);
-            t = wrapTerm(t, p.getSort());
-            if (t != null) {
-                tc.getContents().set(1, t);
+                // if the term should be a list, append the empty element
+                t = tc.getContents().get(1);
+                t = wrapTerm(t, p.getSort());
+                if (t != null) {
+                    tc.getContents().set(1, t);
+                }
             }
         } else {
             for (int i = 0, j = 0; j < p.getItems().size(); j++) {

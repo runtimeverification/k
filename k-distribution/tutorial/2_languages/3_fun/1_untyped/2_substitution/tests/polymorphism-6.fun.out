@@ -2,12 +2,12 @@ Search results:
 
 Solution 1:
 V:K -->
-fun (x -> (fun (x -> (fun (x -> (fun (x -> (fun (x -> fun (y -> x))) ((fun (x 
-  -> fun (y -> x))) x))) ((fun (x -> (fun (x -> fun (y -> x))) ((fun (x -> fun
-   (y -> x))) x))) x))) ((fun (x -> (fun (x -> (fun (x -> fun (y -> x))) ((fun
-   (x -> fun (y -> x))) x))) ((fun (x -> (fun (x -> fun (y -> x))) ((fun (x ->
-   fun (y -> x))) x))) x))) x))) ((fun (x -> (fun (x -> (fun (x -> (fun (x -> 
-  fun (y -> x))) ((fun (x -> fun (y -> x))) x))) ((fun (x -> (fun (x -> fun (y
-   -> x))) ((fun (x -> fun (y -> x))) x))) x))) ((fun (x -> (fun (x -> (fun (x
-   -> fun (y -> x))) ((fun (x -> fun (y -> x))) x))) ((fun (x -> (fun (x -> 
-  fun (y -> x))) ((fun (x -> fun (y -> x))) x))) x))) x))) x))
+fun (#1 -> (fun (#2 -> (fun (#3 -> (fun (x -> (fun (x -> fun (y -> x))) ((fun 
+  (x -> fun (y -> x))) x))) ((fun (x -> (fun (x -> fun (y -> x))) ((fun (x -> 
+  fun (y -> x))) x))) #3))) ((fun (#3 -> (fun (x -> (fun (x -> fun (y -> x))) 
+  ((fun (x -> fun (y -> x))) x))) ((fun (x -> (fun (x -> fun (y -> x))) ((fun 
+  (x -> fun (y -> x))) x))) #3))) #2))) ((fun (#2 -> (fun (#3 -> (fun (x -> (
+  fun (x -> fun (y -> x))) ((fun (x -> fun (y -> x))) x))) ((fun (x -> (fun (x
+   -> fun (y -> x))) ((fun (x -> fun (y -> x))) x))) #3))) ((fun (#3 -> (fun (
+  x -> (fun (x -> fun (y -> x))) ((fun (x -> fun (y -> x))) x))) ((fun (x -> (
+  fun (x -> fun (y -> x))) ((fun (x -> fun (y -> x))) x))) #3))) #2))) #1))

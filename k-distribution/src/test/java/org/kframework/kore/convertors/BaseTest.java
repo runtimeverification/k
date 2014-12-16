@@ -7,7 +7,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -54,7 +56,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
         File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
         File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName()
-                + expecteFilePostfix()).getAbsoluteFile();
+                + expectedFilePostfix()).getAbsoluteFile();
 
         DefintionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
@@ -62,7 +64,13 @@ public abstract class BaseTest extends SDFCompilerTest {
 
         if (forceFixAssertionFiles) {
             PrintWriter printWriter = new PrintWriter(kilExpectedDefinitionFile);
-            printWriter.print(COPYRIGHT_HEADER + "\n\n" + actualOutput);
+            String sep = "\n";
+            if(actualOutput.startsWith("\n"))
+                sep = "";
+
+            actualOutput = actualOutput.replaceAll(" +\n", "\n");
+
+            printWriter.print(COPYRIGHT_HEADER + sep + actualOutput + "\n");
             printWriter.close();
         } else {
             String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile);
@@ -72,7 +80,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     protected abstract String convert(DefintionWithContext defWithContext);
 
-    protected abstract String expecteFilePostfix();
+    protected abstract String expectedFilePostfix();
 
     private DefintionWithContext parseUsingSDF(File definitionFile) {
         try {
@@ -82,7 +90,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    private DefintionWithContext parseUsingOuter(File definitionFile) {
+    protected DefintionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {
@@ -91,6 +99,8 @@ public abstract class BaseTest extends SDFCompilerTest {
             throw new RuntimeException(e);
         }
         def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
+        def.setMainModule("TEST");
+        def.setMainSyntaxModule("TEST");
         return new DefintionWithContext(def, null);
     }
 

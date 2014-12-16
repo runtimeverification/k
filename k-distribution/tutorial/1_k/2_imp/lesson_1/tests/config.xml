@@ -8,6 +8,7 @@
       results="."
       extension="imp"
       >
+    <kompile-option name="--backend" value="java" />
   </test>
 </tests>
 

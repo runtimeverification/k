@@ -13,7 +13,6 @@ import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -166,7 +165,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = kList.sort().equals(Sort.KLIST) ? kList : KList.singleton(kList);
         }
-        return KItem.of(kLabel, kList, TermContext.of(globalContext));
+        return KItem.of(kLabel, kList, TermContext.of(globalContext), node.getSource(), node.getLocation());
     }
 
     @Override
@@ -259,66 +258,23 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Cell node, Void _void)  {
-        if (node.getContents() instanceof org.kframework.kil.Bag) {
-            Term contents = (Term) this.visitNode(node.getContents());
-            if (contents instanceof CellCollection) {
-                return new Cell<CellCollection>(CellLabel.of(node.getLabel()), (CellCollection) contents);
-            } else if (contents instanceof Cell) {
-                return new Cell<Cell<?>>(CellLabel.of(node.getLabel()), (Cell<?>) contents);
-            } else if (contents instanceof Variable) {
-                return new Cell<Variable>(CellLabel.of(node.getLabel()), (Variable) contents);
-            } else {
-                throw new RuntimeException();
-            }
-        } else if (node.getContents() instanceof org.kframework.kil.Cell) {
-            return new Cell<Cell<?>>(CellLabel.of(node.getLabel()), (Cell<?>) this.visitNode(node.getContents()));
-        } else {
-            Term content = (Term) this.visitNode(node.getContents());
-
-            if (content instanceof KItem) {
-                return new Cell<KItem>(CellLabel.of(node.getLabel()), (KItem) content);
-            } else if (content instanceof Token) {
-                return new Cell<Token>(CellLabel.of(node.getLabel()), (Token) content);
-            } else if (content instanceof KSequence) {
-                return new Cell<KSequence>(CellLabel.of(node.getLabel()), (KSequence) content);
-            } else if (content instanceof KList) {
-                return new Cell<KList>(CellLabel.of(node.getLabel()), (KList) content);
-            } else if (content instanceof BuiltinList) {
-                return new Cell<BuiltinList>(CellLabel.of(node.getLabel()), (BuiltinList) content);
-            } else if (content instanceof BuiltinSet) {
-                return new Cell<BuiltinSet>(CellLabel.of(node.getLabel()), (BuiltinSet) content);
-            } else if (content instanceof BuiltinMap) {
-                return new Cell<BuiltinMap>(CellLabel.of(node.getLabel()), (BuiltinMap) content);
-            } else if (content instanceof Variable) {
-                return new Cell<Term>(CellLabel.of(node.getLabel()), content);
-            } else if (content instanceof KItemProjection) {
-                return new Cell<KItemProjection>(CellLabel.of(node.getLabel()), (KItemProjection) content);
-            } else {
-                throw new RuntimeException();
-            }
-        }
+        return CellCollection.singleton(
+                CellLabel.of(node.getLabel()),
+                (Term) this.visitNode(node.getContents()),
+                context);
     }
 
     @Override
     public ASTNode visit(org.kframework.kil.Bag node, Void _void) {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        org.kframework.kil.Bag.flatten(contents,
-                node.getContents());
+        org.kframework.kil.Bag.flatten(contents, node.getContents());
 
         CellCollection.Builder builder = CellCollection.builder(context);
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
                 continue;
             }
-            if (term instanceof org.kframework.kil.Cell) {
-                Cell<?> cell = (Cell<?>) this.visitNode(term);
-                builder.add(cell);
-            } else if (term instanceof org.kframework.kil.Variable
-                    && (term.getSort().equals(org.kframework.kil.Sort.BAG))) {
-                builder.concatenate((Variable) this.visitNode(term));
-            } else {
-                throw new RuntimeException();
-            }
+            builder.concatenate((Term) this.visitNode(term));
         }
 
         return builder.build();
@@ -416,7 +372,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Variable node, Void _void)  {
         String name = node.fullName();
 
-        if (node.getSort().equals(org.kframework.kil.Sort.BAG)) {
+        if (node.getSort().equals(org.kframework.kil.Sort.BAG)
+                || node.getSort().equals(org.kframework.kil.Sort.BAG_ITEM)) {
             return new Variable(name, Kind.CELL_COLLECTION.asSort());
         }
 

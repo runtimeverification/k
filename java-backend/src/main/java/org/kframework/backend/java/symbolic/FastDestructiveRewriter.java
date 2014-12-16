@@ -1,18 +1,21 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingCellsCollector;
-import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
+import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
@@ -26,7 +29,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-    private List<Cell<?>> indexingCells = Lists.newArrayList();
+    private List<CellCollection.Cell> indexingCells = Lists.newArrayList();
 
     public FastDestructiveRewriter(Definition definition, TermContext termContext) {
         super(definition, termContext);
@@ -80,7 +83,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         return subject;
     }
 
-    private List<Rule> getRules(List<Cell<?>> indexingCells) {
+    private List<Rule> getRules(List<CellCollection.Cell> indexingCells) {
         Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
         List<Rule> rules = ruleIndex.getRules(indexingCells);
         Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
@@ -94,6 +97,9 @@ public class FastDestructiveRewriter extends AbstractRewriter {
     protected final void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
         assert successorBound == 1;
+
+        File coverage = termContext.definition().context().krunOptions.experimental.coverage;
+        Coverage.print(coverage, subject);
 
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
@@ -121,10 +127,15 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                         }
 
                         Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                        if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
+                        succeed = KAbstractRewriteMachine.rewrite(
+                                rule,
+                                DataStructures.getCellEntry(subject),
+                                termContext);
+                        if (succeed) {
                             if (termContext.definition().context().krunOptions.experimental.trace) {
                                 System.out.println(rule);
                             }
+                            Coverage.print(coverage, rule);
                             results.add(subject);
 
                             /* the result of rewrite machine must be in the reference results */
@@ -143,6 +154,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                             if (termContext.definition().context().krunOptions.experimental.trace) {
                                 System.out.println(rule);
                             }
+                            Coverage.print(coverage, rule);
                             subject = constructNewSubjectTerm(rule, subst);
                             results.add(subject);
                             succeed = true;
@@ -167,7 +179,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     @Override
     protected final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
-        Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
+        Term rhs = rule.cellsToCopy().contains(DataStructures.getCellEntry(rule.rightHandSide()).cellLabel()) ?
                 DeepCloner.clone(rule.rightHandSide()) :
                 rule.rightHandSide();
         Term result = rhs.copyOnShareSubstAndEval(substitution,

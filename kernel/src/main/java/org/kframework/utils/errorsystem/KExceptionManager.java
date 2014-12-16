@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 @Singleton
 public class KExceptionManager {
@@ -97,6 +98,10 @@ public class KExceptionManager {
 
     public static KEMException compilerError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null, null);
+    }
+
+    public static KEMException compilerError(String message, Throwable e) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, e, null, null);
     }
 
     public static KEMException compilerError(String message, Throwable e, ASTNode node) {
@@ -229,7 +234,7 @@ public class KExceptionManager {
     public static class KEMException extends RuntimeException {
         public final KException exception;
         KEMException(KException e) {
-            super(e.getException());
+            super(e.toString(), e.getException());
             this.exception = e;
         }
 

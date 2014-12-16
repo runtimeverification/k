@@ -2,6 +2,7 @@
 .krun*
 .kast*
 .ktest*
+.kdoc*
 *-kompiled
 *.pdf
 *.swp

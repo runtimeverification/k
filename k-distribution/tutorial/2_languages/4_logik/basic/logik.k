@@ -194,12 +194,10 @@ one may devise techniques to detect non-termination in some cases,
 one cannot do it in general (same like for all Turing-complete
 languages).  */
 
-module LOGIK
-  syntax KItem ::= renameVariables(K) [function, hook(MetaK:renameVariables), impure]
-  syntax KItem ::= variables(K) [function, hook(MetaK:variables), impure]
-  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap), impure]
-  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable), impure]
+require "modules/unification-java.k"
 
+module LOGIK
+  imports UNIFICATION
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
@@ -267,10 +265,10 @@ can safely regard clauses as ``clause schemas'' comprising infinitely
 many instances, one for each context.  */
 
   rule <k> C:Clause Pgm => Pgm </k>
-       (. => <clause> renameVariables(C) </clause>)
+       (. => <clause> #renameVariables(C) </clause>)
 
   rule <k> ?- Ls:Terms. => Ls ...</k>
-       <mgu> _ => variablesMap(variables(Ls)) </mgu>
+       <mgu> _ => #variablesMap(#variables(Ls)) </mgu>
 
 //@ We also sequentialize the goals for easier processing:
   rule L:Term, Ls:Terms => L ~> Ls
@@ -320,9 +318,9 @@ goals.*/
 /*@ Pick a clause and generate a fresh instance of it when the
 \textsf{fresh} cell is empty: */
 
-  rule <fresh> . => renameVariables(C) </fresh> <clause> C </clause>
+  rule <fresh> . => #renameVariables(C) </fresh> <clause> C </clause>
        <k> T:Term ...</k>
-  requires unifiable(T,head(C))
+  requires #unifiable(T,head(C))
     [transition]
 
   syntax Term ::= head(Clause) [function]

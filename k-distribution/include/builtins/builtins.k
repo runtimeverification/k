@@ -26,6 +26,7 @@ module BUILTIN-SYNTAX-HOOKS
 endmodule
 
 module BUILTIN-HOOKS
+  imports BUILTIN-SYNTAX-HOOKS
   imports BOOL-HOOKS
   imports INT-HOOKS
   imports ID-HOOKS
