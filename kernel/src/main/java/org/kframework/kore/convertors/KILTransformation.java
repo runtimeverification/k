@@ -29,9 +29,11 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
             throw new VisitingException("Visitor " + this.getClass()
                     + " is missing a definition for visit(" + t.getClass() + ")"
                     + ". Encounteed when visiting " + makeErrorMessage(t), e);
+        // DISABLE EXCEPTION CHECKING
         } catch (Throwable e) {
             throw new VisitingException(makeErrorMessage(t), e);
         }
+        // ENABLE EXCEPTION CHECKING
     }
 
     public String makeErrorMessage(ASTNode t) {

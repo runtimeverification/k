@@ -16,9 +16,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Production;
+import org.kframework.kil.*;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
@@ -61,6 +59,10 @@ public final class KItem extends Term {
     private Boolean anywhereApplicable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
+           return of(kLabel, kList, termContext, null, null);
+    }
+
+    public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
         /* YilongL: since KList.Builder always canonicalizes its result, the
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
@@ -73,7 +75,7 @@ public final class KItem extends Term {
         }
 
         // TODO(yilongli): break the dependency on the Tool object
-        return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool);
+        return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
 
     KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -89,8 +91,8 @@ public final class KItem extends Term {
         this.possibleSorts = possibleSorts;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext, Tool tool) {
-        super(Kind.KITEM);
+    private KItem(Term kLabel, Term kList, TermContext termContext, Tool tool, Source source, Location location) {
+        super(Kind.KITEM, source, location);
         this.kLabel = kLabel;
         this.kList = kList;
 

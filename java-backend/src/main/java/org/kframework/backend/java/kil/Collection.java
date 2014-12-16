@@ -63,10 +63,11 @@ public abstract class Collection extends Term {
 
         Term result = components.get(components.size() - 1);
         for (int i = components.size() - 2; i >= 0; --i) {
+            Term component = components.get(i);
             result = KItem.of(
                     KLabelConstant.of(sort.constructorLabel(), context.definition().context()),
-                    KList.concatenate(components.get(i), result),
-                    context);
+                    KList.concatenate(component, result),
+                    context, component.getSource(), component.getLocation());
         }
         return result;
     }

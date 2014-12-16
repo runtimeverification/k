@@ -12,9 +12,9 @@ public class UpdateLocationVisitor extends BasicVisitor {
     private int cachedStartLine;
     private int cachedStartColumn;
 
-    public UpdateLocationVisitor(Context context, int currentStartLine, int currentStartColumn,
-                                                  int  cachedStartLine, int  cachedStartColumn) {
-        super(context);
+    public UpdateLocationVisitor(int currentStartLine, int currentStartColumn,
+                                 int  cachedStartLine, int  cachedStartColumn) {
+        super(null);
         this.currentStartLine   = currentStartLine;
         this.currentStartColumn = currentStartColumn;
         this.cachedStartColumn  = cachedStartColumn;
@@ -22,7 +22,15 @@ public class UpdateLocationVisitor extends BasicVisitor {
     }
 
     public Void visit(ASTNode node, Void _void) {
-        Location loc = node.getLocation();
+        node.setLocation(updateLocation(currentStartLine, currentStartColumn, cachedStartColumn, cachedStartLine, node.getLocation()));
+        return null;
+    }
+
+    public static Location updateLocation(  int currentStartLine,
+                                            int currentStartColumn,
+                                            int cachedStartLine,
+                                            int cachedStartColumn,
+                                            Location loc) {
         if (loc == null) {
             return null;
         }
@@ -42,9 +50,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
 
         startLine += lineOffset;
         endLine   += lineOffset;
-
-        node.setLocation(new Location(startLine, startColumn, endLine, endColumn));
-        return null;
+        return new Location(startLine, startColumn, endLine, endColumn);
     }
 
     @Override

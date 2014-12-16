@@ -239,7 +239,7 @@ public class Outer {
     parser.source = source;
     parser.module = null;
     parser.items = new ArrayList<DefinitionItem>();
-    StringSentence ss = new StringSentence("", "", "", "");
+    StringSentence ss = new StringSentence("", 0, 0, "", "");
     try {
       parser.AttributesBodyEOF(ss);
     } catch (TokenMgrError e) {
@@ -360,8 +360,8 @@ public class Outer {
       offset = 0;
     }
 
-    String location = "("+offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset)+
-                      ","+offsetColumn(str, sentenceBeginLine, sentenceBeginColumn, offset)+")";
+    int startLine   = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset);
+    int startColumn = offsetColumn(str, sentenceBeginLine, sentenceBeginColumn, offset);
     // Second, try to parse any attributes at the end.
     // Unfortunately, attributes after a StringSentence are not
     // parsable by an LR parser so we have to try parsing at spots
@@ -376,7 +376,7 @@ public class Outer {
       parser.beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
       parser.beginColumn = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
       try {
-        StringSentence ss = new StringSentence(content.substring(0, i), location, type, label);
+        StringSentence ss = new StringSentence(content.substring(0, i), startLine, startColumn, type, label);
         parser.AttributesEOF(ss);
         return ss;
       } catch (ParseException e) {
@@ -385,7 +385,7 @@ public class Outer {
         /* Our guess was wrong. Try another position. */
       }
     }
-    return new StringSentence(content, location, type, label);
+    return new StringSentence(content, startLine, startColumn, type, label);
   }
 
   private int offsetLine(String str, int line, int column, int index)

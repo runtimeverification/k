@@ -170,7 +170,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                 components.add(KItem.of(
                         KLabelConstant.of(sort.elementLabel(), context.definition().context()),
                         KList.singleton(element),
-                        context)));
+                        context, element.getSource(), element.getLocation())));
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinSet) {

@@ -7,12 +7,14 @@ import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.GeneratedSource;
+import org.kframework.kil.Module;
 import org.kframework.kil.ProductionReference;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Sources;
 import org.kframework.kil.loader.CollectPrioritiesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.FillInModuleContext;
 import org.kframework.kil.loader.UpdateReferencesVisitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
@@ -26,6 +28,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 
 import java.io.File;
+import java.util.Set;
 
 /**
  * Test a the kore definition using the new parser.
@@ -39,6 +42,7 @@ public class KoreTest extends BaseTestCase {
         String kore = FileUtils.readFileToString(new File(getClass().getResource("/kast/kore.k").toURI()));
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(KoreTest.class), kore, null));
+        def.setMainModule(((Module) def.getItems().get(def.getItems().size() - 1)).getName());
         ProductionReference pr = null;
         try {
             pr = parse(quq, Sort.of("KDefinition"), def, kem);
@@ -52,20 +56,22 @@ public class KoreTest extends BaseTestCase {
         //Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1));
     }
 
-    public static ProductionReference parse(String program, Sort startSymbol, ASTNode definition, KExceptionManager kem) throws ParseFailedException {
+    public static ProductionReference parse(String program, Sort startSymbol, Definition definition, KExceptionManager kem) throws ParseFailedException {
         Context context = new Context();
         context.kompileOptions = new KompileOptions();
         context.globalOptions = new GlobalOptions();
 
         new UpdateReferencesVisitor(context).visitNode(definition);
         new CollectSubsortsVisitor(context).visitNode(definition);
+        new FillInModuleContext().visitNode(definition);
         context.setTokenSorts(TokenSortCollector.collectTokenSorts(definition, context));
 
         // collect the syntax from those modules
-        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
+        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
         // visit all modules to collect all Terminals first
         ctv.visitNode(definition);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv, kem);
+        Set<Sort> declaredSorts = definition.getDefinitionContext().getModuleByName(definition.getMainModule()).getModuleContext().getDeclaredSorts();
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(ctv, declaredSorts, kem);
         ks2gsf.visitNode(definition);
         Grammar grammar = ks2gsf.getGrammar();
 

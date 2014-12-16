@@ -22,6 +22,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.backend.java.util.Coverage;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
@@ -132,6 +133,8 @@ public class SymbolicRewriter {
                                 unifConstraint);
                         results.add(result);
                         appliedRules.add(rule);
+                        Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
+                        Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
                         if (results.size() == successorBound) {
                             return;
                         }

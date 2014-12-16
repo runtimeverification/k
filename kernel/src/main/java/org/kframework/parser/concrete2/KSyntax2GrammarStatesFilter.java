@@ -36,13 +36,13 @@ import org.kframework.utils.errorsystem.KExceptionManager;
  * will be referenced each time a NonTerminalState is created.
  */
 public class KSyntax2GrammarStatesFilter extends BasicVisitor {
-    public KSyntax2GrammarStatesFilter(Context context, CollectTerminalsVisitor ctv, KExceptionManager kem) {
-        super(KSyntax2GrammarStatesFilter.class.getName(), context);
+    public KSyntax2GrammarStatesFilter(CollectTerminalsVisitor ctv, Set<Sort> declaredSorts, KExceptionManager kem) {
+        super(KSyntax2GrammarStatesFilter.class.getName(), null);
         this.ctv = ctv;
         this.kem = kem;
 
         // create a NonTerminal for every declared sort
-        for (Sort sort : context.getAllSorts()) {
+        for (Sort sort : declaredSorts) {
             grammar.add(new NonTerminal(sort.getName()));
         }
     }
@@ -220,15 +220,6 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             }
             PrimitiveState pstate = new RegExState(prd.getSort().getName() + "-T",
                 nt, p, prd, rejects);
-            previous.next.add(pstate);
-            previous = pstate;
-        } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
-            // T ::= "value"
-            // just like the above case, but match an exact string instead of a regex
-            Terminal terminal = prd.getConstant();
-            PrimitiveState pstate = new RegExState(
-                prd.getSort().getName() + "-T", nt,
-                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd);
             previous.next.add(pstate);
             previous = pstate;
         } else {

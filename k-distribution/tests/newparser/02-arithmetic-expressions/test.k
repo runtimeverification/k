@@ -9,7 +9,9 @@ module TEST
            c |-> 3
     </env>
 
-  syntax Id ::= "a" | "b" | "c"
+  syntax Id ::= "a" [token]
+              | "b" [token]
+              | "c" [token]
   syntax KResult ::= Int
   syntax Lit ::= Int | Id
   syntax Term ::= "(" Exp ")"  [bracket]

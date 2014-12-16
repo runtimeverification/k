@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,5 +272,8 @@ public final class KRunOptions {
 
         @Parameter(names="--trace", description="Print a trace of every rule applied.")
         public boolean trace = false;
+
+        @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
+        public File coverage = null;
     }
 }

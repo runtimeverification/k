@@ -40,7 +40,7 @@ public interface DataStructures {
             assert false : "unimplemented missing case";
             return null;
         }
-        return KItem.of(klabel, kList, context);
+        return KItem.of(klabel, kList, context, base.getSource(), base.getLocation());
     }
 
     static boolean isChoice(Term term) {
@@ -94,7 +94,7 @@ public interface DataStructures {
             assert false : "unimplemented missing case";
             return null;
         }
-        return KItem.of(klabel, KList.singleton(base), context);
+        return KItem.of(klabel, KList.singleton(base), context, base.getSource(), base.getLocation());
     }
 
     static Term listRange(Term base, int removeLeft, int removeRight, TermContext context) {
@@ -105,7 +105,7 @@ public interface DataStructures {
         return KItem.of(
                 KLabelConstant.of(LIST_RANGE, context.definition().context()),
                 KList.concatenate(base, IntToken.of(removeLeft), IntToken.of(removeRight)),
-                context);
+                context, base.getSource(), base.getLocation());
     }
 
     static Term mapRemoveAll(Term base, Set<Term> removeSet, TermContext context) {
@@ -118,7 +118,7 @@ public interface DataStructures {
         return KItem.of(
                 KLabelConstant.of(MAP_REMOVE_ALL, context.definition().context()),
                 KList.concatenate(base, builder.build()),
-                context);
+                context, base.getSource(), base.getLocation());
     }
 
     static Term mapUpdateAll(Term base, Map<Term, Term> updateMap, TermContext context) {
@@ -131,7 +131,7 @@ public interface DataStructures {
         return KItem.of(
                 KLabelConstant.of(MAP_UPDATE, context.definition().context()),
                 KList.concatenate(base, builder.build()),
-                context);
+                context, base.getSource(), base.getLocation());
     }
 
     static Term setDifference(Term base, Set<Term> removeSet, TermContext context) {
@@ -144,7 +144,7 @@ public interface DataStructures {
         return KItem.of(
                 KLabelConstant.of(SET_REMOVE_ALL, context.definition().context()),
                 KList.concatenate(base, builder.build()),
-                context);
+                context, base.getSource(), base.getLocation());
     }
 
     static boolean isMapUpdate(Term term) {
