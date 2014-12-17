@@ -170,6 +170,12 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return getPrefixLabel();
     }
 
+    /**
+     * Gets the KLabel corresponding to this production. A production has a
+     * KLabel if and only if the production flattens in KORE to a term which is of sort
+     * KItem (ie, is a function or a constructor).
+     * @return
+     */
     public String getKLabel() {
         String klabel = getAttribute("klabel");
         if (klabel == null && isSyntacticSubsort()) {
@@ -205,6 +211,12 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         this.items = items;
     }
 
+    /**
+     * Gets the arity of a production. A production's arity is the number of
+     * nonterminals in the syntactic declaration which the production
+     * corresponds to.
+     * @return
+     */
     public int getArity() {
         int arity = 0;
         for (ProductionItem i : items) {
@@ -216,8 +228,15 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return arity;
     }
 
+    /**
+     * Gets the arity of KItems using the KLabel declared by this production.
+     * A KItem has the arity of its production, if that production is not
+     * a KLabel declaration. KLabel declarations declare KItems with an
+     * arity equal to the value of the required integer attribute "arity".
+     * @return
+     */
     public int getArityOfKItem() {
-        if (sort.equals(Sort.KLABEL) && !containsAttribute(Attribute.FUNCTION_KEY)) {
+        if (sort.equals(Sort.KLABEL) && isConstant()) {
             try {
                 String attr = getAttribute(Attribute.ARITY_KEY);
                 if (attr == null) {
@@ -408,6 +427,13 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         this.items = children;
     }
 
+    /**
+     * Gets the KLabel which is declared in the definition by this production.
+     * A production declares a KLabel if it has a corresponding KLabel (ie,
+     * produces a term of sort KItem), or if it is a constant constructor
+     * of sort KLabel.
+     * @return
+     */
     public String getKLabelOfKItem() {
         if (sort.equals(Sort.KLABEL) && isConstant()) {
             return getConstant().getTerminal();
