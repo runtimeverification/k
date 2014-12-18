@@ -1,6 +1,8 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Set;
 
 import org.kframework.kil.Attributes;
@@ -14,7 +16,7 @@ import org.kframework.utils.inject.InjectGeneric;
 
 import com.google.inject.Inject;
 
-public class PrintKRunResult implements Transformation<KRunResult, String> {
+public class PrintKRunResult implements Transformation<KRunResult, InputStream> {
 
     @InjectGeneric private Transformation<KRunState, String> statePrinter;
     @InjectGeneric private Transformation<SearchResults, String> searchResultsPrinter;
@@ -33,11 +35,11 @@ public class PrintKRunResult implements Transformation<KRunResult, String> {
     }
 
     @Override
-    public String run(KRunResult krunResult, Attributes a) {
+    public InputStream run(KRunResult krunResult, Attributes a) {
         if (krunResult instanceof KRunProofResult && ((KRunProofResult<?>) krunResult).isProven()) {
-            return "true";
+            return new ByteArrayInputStream("true\n".getBytes());
         }
-        return print(krunResult, a);
+        return new ByteArrayInputStream(print(krunResult, a).getBytes());
     }
 
     private String print(Object result, Attributes a) {

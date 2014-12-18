@@ -1,15 +1,18 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import org.kframework.kil.Attributes;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.transformation.Transformation;
 
-public class NoOutputMode implements Transformation<KRunResult, String> {
+public class NoOutputMode implements Transformation<KRunResult, InputStream> {
 
     @Override
-    public String run(KRunResult result, Attributes a) {
-        return "";
+    public InputStream run(KRunResult result, Attributes a) {
+        return new ByteArrayInputStream(new byte[0]);
     }
 
     @Override
