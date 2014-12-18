@@ -2,7 +2,9 @@
 
 package org.kframework.kore.convertors;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -12,19 +14,30 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
 
     @SuppressWarnings("serial")
     static class VisitingException extends RuntimeException {
-        VisitingException(Throwable e) {
-            super(e);
+        VisitingException(String message, Throwable e) {
+            super(message, e);
         }
     }
 
-    @SuppressWarnings("unchecked")
     public R apply(ASTNode t) {
         try {
-            Method visitorMethod = this.getClass().getDeclaredMethod("apply", t.getClass());
-            return (R) visitorMethod.invoke(this, t);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException e) {
-            throw new VisitingException(e);
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            Method visitMethod = this.getClass().getDeclaredMethod("apply", t.getClass());
+            MethodHandle visitMethodHandle = lookup.unreflect(visitMethod);
+            return (R) visitMethodHandle.invoke(this, t);
+        } catch (NoSuchMethodException e) {
+            throw new VisitingException("Visitor " + this.getClass()
+                    + " is missing a definition for visit(" + t.getClass() + ")"
+                    + ". Encounteed when visiting " + makeErrorMessage(t), e);
+        // DISABLE EXCEPTION CHECKSTYLE
+        } catch (Throwable e) {
+            throw new VisitingException(makeErrorMessage(t), e);
         }
+        // ENABLE EXCEPTION CHECKSTYLE
+    }
+
+    public String makeErrorMessage(ASTNode t) {
+        return t.toString() + " at location " + t.getLocation() + " in file " + t.getSource()
+                + " of class " + t.getClass().toString();
     }
 }

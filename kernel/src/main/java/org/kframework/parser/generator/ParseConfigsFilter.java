@@ -84,10 +84,10 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 } else {
                     try {
                         parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
-                        // DISABLE EXCEPTION CHECKSTYLE
+                    // DISABLE EXCEPTION CHECKSTYLE
                     } catch (RuntimeException e) {
                         String msg = "SDF failed to parse a configuration by throwing: " + e.getCause().getLocalizedMessage();
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation(), e));
                     }
                     // ENABLE EXCEPTION CHECKSTYLE
                 }
@@ -95,7 +95,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
                 // replace the old xml node with the newly parsed sentence
                 Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
+                    XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
                 XmlLoader.addSource(xmlTerm, ss.getSource());
                 XmlLoader.reportErrors(doc, ss.getType());
 

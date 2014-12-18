@@ -9,19 +9,32 @@ import org.kframework.kore.Attributes
 
 trait OuterKORE
 
-case class Definition(requires: Set[Require], modules: Set[Module])
-  extends DefinitionToString with OuterKORE
+case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
+  extends DefinitionToString with OuterKORE {
+
+  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _) => true }
+}
 
 case class Require(file: java.io.File) extends OuterKORE
 
 case class Module(name: String, sentences: Set[Sentence], att: Attributes = Attributes())
-  extends ModuleToString with KLabelMappings with OuterKORE
+  extends ModuleToString with KLabelMappings with OuterKORE {
+
+  def imports(implicit definition: Definition): Set[Module] = sentences flatMap {
+    case Import(name, _) => definition.getModule(name)
+    case _ => None
+  }
+
+  def definedSorts(implicit definition: Definition): Set[Sort] =
+    (sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }) | (imports flatMap { _.definedSorts })
+}
 // hooked but different from core, Import is a sentence here
 
 trait Sentence { // marker
   val att: Attributes
 }
 
+// deprecated
 case class Context(
   body: kore.K,
   requires: kore.K,
@@ -50,7 +63,10 @@ object Associativity extends Enumeration {
   val Left, Right, NonAssoc, Unspecified = Value
 }
 
-case class SyntaxAssociativity(assoc: Associativity.Value, tags: collection.immutable.Set[Tag], att: Attributes = Attributes())
+case class SyntaxAssociativity(
+  assoc: Associativity.Value,
+  tags: collection.immutable.Set[Tag],
+  att: Attributes = Attributes())
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
 case class Tag(name: String) extends TagToString with OuterKORE
