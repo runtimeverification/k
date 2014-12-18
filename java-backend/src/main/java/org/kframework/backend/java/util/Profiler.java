@@ -1,7 +1,11 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Ticker;
 
 /**
  * Profiling class.
@@ -67,7 +71,16 @@ public class Profiler {
         private final ThreadLocal<Stopwatch> stopwatch = new ThreadLocal<Stopwatch>() {
             @Override
             protected Stopwatch initialValue() {
-                return Stopwatch.createUnstarted();
+                return Stopwatch.createUnstarted(new Ticker() {
+
+                    ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+
+                    @Override
+                    public long read() {
+                        assert bean.isCurrentThreadCpuTimeSupported();
+                        return bean.getCurrentThreadCpuTime();
+                    }
+                });
             }
         };
 
