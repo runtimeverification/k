@@ -1,10 +1,12 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.kil.Attributes;
@@ -38,8 +40,8 @@ public class WriteOutput implements Transformation<InputStream, Void> {
                 if (options.experimental.outputFile == null) {
                     out = System.out;
                 } else {
-                    out = new AnsiOutputStream(new FileOutputStream(
-                            files.resolveWorkingDirectory(options.experimental.outputFile)));
+                    out = new AnsiOutputStream(new BufferedOutputStream(new FileOutputStream(
+                            files.resolveWorkingDirectory(options.experimental.outputFile))));
                 }
                 out.write(firstByte);
                 IOUtils.copy(output, out);
