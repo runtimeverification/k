@@ -123,7 +123,7 @@
   `--indexing-stats`, `--generate-tests`, `--load-cfg`.
 
 ## KTest ##
-- Improved the output of KTest to display a message for reach running
+- Improved the output of KTest to display a message for each running
   process only when that process is actually run.
 - Add a "Running" message to KTest for compilation and pdf generation stages.
 - Fixed a minor display issue when using `ktest --dry`.
@@ -148,6 +148,7 @@
 - Added support for a `--trace` flag in the matching-based rewriter 
   which prints a list of applied rules.
 - Added increased error logging when the rewriter fails with an error.
+- `--search` now respects `--transition`.
 
 ## Verification ##
 - Updated Z3 API to 4.3.2 beta build bb56885147e4.
@@ -198,7 +199,7 @@
 ## Bug fixes ##
 - Fixed Github issues #543, #720, #738, #780, #781, #789, #800, #825, #850,
   #873, #902, #909, #924, #938, #941, #976, #985, #990, #995, #997, #1047,
-  #1126, #1153, among many other fixes.
+  #1059, #1073, #1088, #1090, #1126, #1153, among many other fixes.
 
 
 # K Framework 3.4 (released 2014-08-05) #
