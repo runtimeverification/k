@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.kframework.k</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5</version>
+    <version>3.6-SNAPSHOT</version>
   </parent>
   <artifactId>maude-backend</artifactId>
   <packaging>jar</packaging>
