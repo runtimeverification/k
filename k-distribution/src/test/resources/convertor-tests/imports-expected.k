@@ -1,5 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-module TEST [location(startLine(3),startColumn(1),endLine(5),endColumn(9))]
-  imports ANOTHER [location(startLine(4),startColumn(3),endLine(4),endColumn(17))]
+module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"5")),endColumn(#token(Int,"9")))]
+  imports ANOTHER [location(startLine(#token(Int,"4")),startColumn(#token(Int,"3")),endLine(#token(Int,"4")),endColumn(#token(Int,"17")))]
 endmodule

@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-module TEST [location(startLine(3),startColumn(1),endLine(5),endColumn(9))]
-  syntax Foo ::= "y" [location(startLine(4),startColumn(25),endLine(4),endColumn(27))]
-  syntax Foo ::= "x" [location(startLine(4),startColumn(19),endLine(4),endColumn(21))]
+module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"5")),endColumn(#token(Int,"9")))]
+  syntax Foo ::= "y" [location(startLine(#token(Int,"4")),startColumn(#token(Int,"25")),endLine(#token(Int,"4")),endColumn(#token(Int,"27")))]
+  syntax Foo ::= "x" [location(startLine(#token(Int,"4")),startColumn(#token(Int,"19")),endLine(#token(Int,"4")),endColumn(#token(Int,"21")))]
 endmodule

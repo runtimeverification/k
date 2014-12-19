@@ -18,7 +18,7 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
   } headOption
 
   def getString(label: String): Option[String] = att collect {
-    case KApply(KLabel(`label`), l, _) => l.mkString(" ")
+    case KApply(KLabel(`label`), KList(KToken(_, l, _)), _) => l
   } headOption
 
   def getOptionalString(label: String): java.util.Optional[String] =
