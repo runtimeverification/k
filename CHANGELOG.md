@@ -1,13 +1,205 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 
-# K Framework 3.5 #
+# K Framework 3.5 (released 2014-12-19) #
+
+## General ##
+- Discontinued compatibility with Java 7.
+- Added an API for users to extend the K framework by means of extending
+  the interface KModule or the abstract class AbstractKModule. Support for:
+    - Adding a new backend to Kompile.
+    - Adding a new backend to KDoc (see section "Kompile" below).
+    - Adding new options to kompile.
+    - Adding new options to krun.
+    - Adding new hooks to the Java backend.
+- Added commands "kserver" and "stop-kserver" to create a local server
+  to run K commands on, implemented using 
+  [Nailgun](http://www.martiansoftware.com/nailgun/). The server
+  is automatically enabled whenever `kompile`, `krun`, `ktest`, `kast`, or
+  `kdoc` is run when the `K_NAILGUN` environment variable is set to a 
+  nonempty string. Running applications with nailgun is an experimental
+  feature, subject to certain bugs, but it can be used to increase the
+  speed of executing K programs by a factor of 3-7x.
+- Migrated build system from Ant to Maven. For information on building
+  K, refer to the [developer README](src/README.md).
+- Removed the `--backend symbolic` option from the distribution.
+  UAIC in Iasi intends to support this functionality using the generic
+  K plugin interface (see "General" above).
+- Removed the `kagreg` tool from the distribution.
+- Removed the `--debug-gui` KRun option from the distribution.
+
+## K Language ##
+- Changed the KLabel for UserList terminators to `'.List{"<KLabel>"}` 
+  instead of `'.List{"<Separator>"}`. This allows for a broader range
+  of syntaxes for user lists, as well as the possibility of custom
+  KLabels.
+- Changed the syntax of fresh variables from `rule foo => N when fresh(N:Int)`
+  to `rule foo => ?N:Int`.
+- Added a syntax for fresh constants: `rule foo => !N:Int`.
+- Added a syntax for adding attributes to arbitrary terms:
+  `<Term>::Sort{attributes}`
+- KResult is now a subsort of KItem.
+
+## K Standard Library ##
+- Changed sorts List, Map, Set to be subsorts of KItem. The tool translates
+  these K expressions into builtin lookups, updates, and selections on the
+  underlying data structures.
+- Changed the syntax of set inclusion: SetItem(1) in SetItem(1) no longer
+  returns true. This is to distinguish between a set of elements and a set
+  of sets.
+- Removed operations ==Set, ==List, ==Map, =/=Set, =/=List, =/=Map. The
+  correct syntax now is to use ==K for all of these.
+- Changed the syntax of Map update from `Map [ Value / Key ]` to
+  `Map [ Key <- Value ]`.
+- Added a new Map difference operator `-Map`.
+- Renamed Map update operator `updateMap`.
+- Separated implementation of Map, List, Set, and MInt sorts from their
+  specification in separate `-impl.k` files.
+- Added syntax predicates isPascalCaseId and isCamelCaseId to refer
+  to Ids which begin with an uppercase or lowercase letter respectively.
+- Added a new builtin function #system which operates like the system()
+  syscall.
+
+## Parsing ##
+- Added a type interencer based on context for the sorts of variables.
+- Correct the behavior of associativity on productions not of the form
+  `syntax Sort ::= Sort1 "op" Sort2`
+- Added a new syntax for case insensitive terminals:
+  `syntax Sort ::= 'terminal'`
+- Added new attribute "noAutoReject" in order to allow users to provide
+  an infinite set of tokens _not_ to reject.
+- Removed the "cons" attribute which was an artifact of the SDF implementation.
+- Added the `--java-parser` and `--java-parser-rules` options to test the
+  experimental new parser written in Java.
+- Added the K function `#parseInModule` which allows the user to parse input
+  in the syntax of a particular K module.
+- Added a friendly error message when the SDF parser crashes.
+
+## Pretty Printing ##
+- Added code which indents Map/List/Set elements from their parent collections.
 
 ## Kompile ##
+- Added a new option `--legacy-kast` which preserves the old behavior of
+  several pieces of functionality which were specific to the Maude
+  implementation.
 - `kompile --backend [pdf|latex|html|unparse|unflatten|doc]` has been
   moved to a new tool, `kdoc --format [pdf|latex|html|unparse|unflatten|doc]`
 - Modules are required to import or declare constructors for sorts that they
   use. In the event of a circularity, a forward reference can be introduced
   using the syntax `syntax Sort` without any declared productions.
+- Added prototype of `--backend coq`.
+- Removed deprecated experimental options `--kore`, `--lib`, `--loud`,
+  `--non-symbolic-rules`, `--symbolic-rules`, `--rule-index`, `--test-gen`.
+
+## Kast ##
+- The default output of `kast` when the `--legacy-kast` flag is not set on
+  `kompile` is now the new KORE syntax which will be utilized by K 4.0.
+  This allows users to write external parsers that output this syntax
+  in the Java rewrite engine, a previously unsupported feature.
+  For information about the new syntax, refer to
+  [the syntax of KORE](https://github.com/kframework/k/blob/kast-in-K/samples/kast/kore.k). Currently 
+  only the KSEQ module is supported by the parser.
+
+## KRun ##
+- Using JCommander to parse KRun options. See notes for version 3.4 under
+  "Kompile" for details.
+- Added option `--coverage-file` to tell KRun to output rule coverage
+  information.
+- Added code to normalize the values of semantic variables in the output
+  of KRun.
+- Added support for greater configuration of KRun output modes, including
+  using `--output` combined with `--debugger` and others.
+- Added new output mode "kast" to represent un-concretized KAST terms.
+- Changed syntax for setting a command line parser from 
+  `--config-var-parser <parser> -cPGM=<term>` to `-pPGM=<parser> -cPGM=<term>`.
+- Removed option `--backend`. Backend is now specified in kompile and read
+  from the compiled definition.
+- Removed deprecated options `--main-module` and `--syntax-module`. These values
+  are now read from the compiled definition.
+- Renamed option `--debug-info` to `--debug` for consistency with other tools.
+  Previous `--debug` for the debugger was renamed to `--debugger`.
+- Changed option `--ltlmc` to accept only formulas. A file may be specified
+  with the `--ltlmc-file` option.
+- Removed deprecated experimental options `--index`,
+  `--indexing-stats`, `--generate-tests`, `--load-cfg`.
+
+## KTest ##
+- Improved the output of KTest to display a message for reach running
+  process only when that process is actually run.
+- Add a "Running" message to KTest for compilation and pdf generation stages.
+- Fixed a minor display issue when using `ktest --dry`.
+- Using JCommander to parse KTest options. See notes for version 3.4 under
+  "Kompile" for details.
+- Improved parallelism of KTest by using a common task queue for all
+  processes to be run.
+- Changed ordering of KTest execution to execute programs for each definition
+  immediately following compiling that definition.
+- `ktest --debug` now propagates `--debug` to the `kompile`, `kdoc`, and
+  `krun` processes it generates.
+
+## Java Rewrite Engine ##
+- Significant improvements to the performance and stability of the rewriter.
+- Support for rules tagged "anywhere" as long as they rewrite a KItem to a
+  KItem.
+- Added support for nested cells of multiplicity * in unification-based
+  rewriter.
+- Added support for `--superheat` and `--supercool`.
+- Added support for rules tagged `function` which do not have a rewrite
+  at the top.
+- Added support for a `--trace` flag in the matching-based rewriter 
+  which prints a list of applied rules.
+- Added increased error logging when the rewriter fails with an error.
+
+## Verification ##
+- Updated Z3 API to 4.3.2 beta build bb56885147e4.
+- Added substantial additional support for verifying static specifications of
+  programs using the `--prove` option, which takes a K file containing
+  reachability rules to verify. Features include:
+    - SMTLib support for various operations on bit vectors, integers, lists,
+      floats, and booleans.
+    - An "smt-lemma" attribute which translates a particular rule into
+      an SMTLib lemma to be used during sat-solving.
+    - A "lemma" attribute which treats a rule as a lemma during proving
+      to be additionally verified.
+    - Conversion from functions with an "smtlib" attribute to
+      uninterpreted functions in SMTLib.
+    - Support for arbitrary bit width of bit vectors variables 
+      using "bitwidth" attribute and the new term attribute syntax.
+    - Support for arbitrary precision and exponent range of floating point
+      variables using "exponent" and "significand" attributes and the
+      new term attribute syntax.
+    - A "pattern" attribute which specifies an associative-commutative-aware
+      configuration abstraction, such as a list or list segment data structure
+      in a heap.
+    - A `--smt_prelude` option to KRun which specifies a prelude to be prepended
+      to SMT queries.
+    - A `--z3-executable` flag to use a separate process for SMT when
+      z3 crashes due to a bug.
+    - A "trusted" attribute which specifies that a particular reachability
+      rule should be assumed sound instead of being proven.
+    - Options `--z3-cnstr-timeout` and `--z3-impl-timeout` to set the Z3 timeout
+      for checking constraints and implications, respectively.
+- Removed support for gappa: z3 now handles all the same functionality.
+
+## Miscellaneous ##
+- Added a friendly error message when the tool throws an uncaught exception:
+  `Uncaught exception thrown of type ...`
+  If you see this error message, please file a bug so that we can either
+  add a better error message, or fix the functionality that caused the error.
+    - Also added a flag --debug which provides developers with the original
+      stack trace.
+- Changed the name of the K temp directory to `.<ToolName>-<Date>-<UUID>`.
+- Improved error logging in cases where exceptions are caught by K code.
+- Converted the K tutorial to use the Java backend for execution instead
+  of Maude.
+- Removed a number of unused files from the repository.
+- Moved the `editor-support` folder to the separate repository 
+  [k-editor-support](https://github.com/kframework/k-editor-support).
+
+## Bug fixes ##
+- Fixed Github issues #543, #720, #738, #780, #781, #789, #800, #825, #850,
+  #873, #902, #909, #924, #938, #941, #976, #985, #990, #995, #997, #1047,
+  #1126, #1153, among many other fixes.
+
 
 # K Framework 3.4 (released 2014-08-05) #
 
