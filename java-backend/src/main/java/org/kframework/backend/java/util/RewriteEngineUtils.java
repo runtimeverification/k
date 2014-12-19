@@ -18,11 +18,13 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Utilities for the Java rewrite engine.
@@ -76,12 +78,22 @@ public class RewriteEngineUtils {
                         // for example, matching ``<env>... X |-> V ...</env>''
                         // against ``<env> Rho </env>'' will result in a pending
                         // choice operation due to the unknown ``Rho''.
+
+                        if (!resolved && RuleAuditing.isAuditBegun()) {
+                            RuleAuditing.addFailureMessage("Matching failure: unable to resolve collection operation "
+                                    + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
+                                    + evalLookupOrChoice);
+                        }
                     } else {
                         if (nonLookupOrChoice instanceof Variable) {
                             Variable variable = (Variable) nonLookupOrChoice;
                             if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
                                 Term term = crntSubst.put(variable, evalLookupOrChoice);
                                 resolved = term == null || term.equals(evalLookupOrChoice);
+                                if (!resolved && RuleAuditing.isAuditBegun()) {
+                                    RuleAuditing.addFailureMessage("Matching failure: " + variable + " must match both "
+                                            + term + " and " + evalLookupOrChoice);
+                                }
                             }
                         } else {
                             // the non-lookup term is not a variable and thus requires further pattern matching
@@ -97,6 +109,10 @@ public class RewriteEngineUtils {
                                 if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                                     resolved = true;
                                     crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                                } else if (!resolved && RuleAuditing.isAuditBegun()) {
+                                    RuleAuditing.addFailureMessage("Matching failure: substitution "
+                                            + lookupMatcher.substitution() + " missing variables "
+                                            + Sets.difference(lookupMatcher.substitution().keySet(), nonLookupOrChoice.variableSet()));
                                 }
                             }
                         }
@@ -119,6 +135,9 @@ public class RewriteEngineUtils {
                 // condition
                 Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
+                    if (RuleAuditing.isAuditBegun()) {
+                        RuleAuditing.addFailureMessage("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
+                    }
                     crntSubst = null;
                     break;
                 }
@@ -256,6 +275,9 @@ public class RewriteEngineUtils {
             if (otherTerm == null) {
                 result.put(variable, term);
             } else if (!otherTerm.equals(term)) {
+                if (RuleAuditing.isAuditBegun()) {
+                    RuleAuditing.addFailureMessage("Incompatible substitutions: " + subst1 + " and " + subst2);
+                }
                 return null;
             }
         }

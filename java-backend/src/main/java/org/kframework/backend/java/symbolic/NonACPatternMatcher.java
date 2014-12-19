@@ -29,7 +29,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -104,10 +103,20 @@ public class NonACPatternMatcher {
         }
     }
 
-    private void check(boolean condition) {
+    private void check(boolean condition, Term subject, Term pattern) {
         failed = failed || !condition;
+        if (failed && RuleAuditing.isAuditBegun()) {
+            RuleAuditing.addFailureMessage("Matching failure: " + subject + " does not match " + pattern);
+        }
     }
 
+    private void check(boolean condition, Variable var, Term subst1, Term subst2) {
+        failed = failed || !condition;
+        if (failed && RuleAuditing.isAuditBegun()) {
+            RuleAuditing.addFailureMessage("Matching failure: " + var + " must match both "
+                    + subst1 + " and " + subst2);
+        }
+    }
     private boolean match() {
         while (!failed) {
             for (int i = taskBuffer.size() - 1; i >= 0; i--) {
@@ -127,7 +136,7 @@ public class NonACPatternMatcher {
 
                 /* special case for concrete collections  */
                 check(!(variable instanceof ConcreteCollectionVariable)
-                        || ((ConcreteCollectionVariable) variable).match(subject));
+                        || ((ConcreteCollectionVariable) variable).match(subject), subject, pattern);
                 if (failed) {
                     return false;
                 }
@@ -135,7 +144,8 @@ public class NonACPatternMatcher {
                 /* add substitution */
                 addSubstitution(variable, subject);
             } else {
-                check(!subject.isSymbolic() || subject instanceof KItem && matchOnFunctionSymbol);
+                check(!subject.isSymbolic() || subject instanceof KItem && matchOnFunctionSymbol,
+                        subject, pattern);
                 if (failed) {
                     return false;
                 }
@@ -147,7 +157,7 @@ public class NonACPatternMatcher {
                         return false;
                     }
                 } else if (subject instanceof KLabelConstant) {
-                    check(subject.equals(pattern));
+                    check(subject.equals(pattern), subject, pattern);
                 } else if (subject instanceof KItem) {
                     if (pattern instanceof KItem) {
                         match((KItem) subject, (KItem) pattern);
@@ -179,10 +189,10 @@ public class NonACPatternMatcher {
                         } else if (pattern instanceof KList) {
                             match((Token) subject, (KList) pattern);
                         } else {
-                            check(subject.equals(pattern));
+                            check(subject.equals(pattern), subject, pattern);
                         }
                     } else {
-                        check(subject.equals(pattern));
+                        check(subject.equals(pattern), subject, pattern);
                     }
                 } else if (subject instanceof KLabelInjection) {
                     if (pattern instanceof KLabelInjection) {
@@ -191,7 +201,7 @@ public class NonACPatternMatcher {
                         return false;
                     }
                 } else if (subject instanceof Hole) {
-                    check(subject.equals(pattern));
+                    check(subject.equals(pattern), subject, pattern);
                 } else if (subject instanceof BuiltinList && matchOnFunctionSymbol) {
                     if (pattern instanceof BuiltinList) {
                         match((BuiltinList) subject, (BuiltinList) pattern);
@@ -229,7 +239,8 @@ public class NonACPatternMatcher {
             term = KCollection.downKind(term);
         }
 
-        check(termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort()));
+        check(termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort()),
+                term, variable);
         if (failed) {
             return;
         }
@@ -238,7 +249,7 @@ public class NonACPatternMatcher {
         if (subst == null) {
             substitution.put(variable, term);
         } else {
-            check(subst.equals(term));
+            check(subst.equals(term), variable, subst, term);
         }
     }
 
@@ -246,7 +257,8 @@ public class NonACPatternMatcher {
         Context context = termContext.definition().context();
 
         Set<CellLabel> unifiableCellLabels = Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet());
-        check(otherCellCollection.labelSet().size() == unifiableCellLabels.size());
+        check(otherCellCollection.labelSet().size() == unifiableCellLabels.size(),
+                cellCollection, otherCellCollection);
         if (failed) {
             return;
         }
@@ -257,7 +269,7 @@ public class NonACPatternMatcher {
         Variable otherFrame = otherCellCollection.hasFrame()? otherCellCollection.frame() : null;
 
         if (frame != null) {
-            check(otherFrame != null);
+            check(otherFrame != null, cellCollection, otherCellCollection);
             if (failed) {
                 return;
             }
@@ -267,7 +279,7 @@ public class NonACPatternMatcher {
             if (otherFrame != null) {
                 addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
             } else {
-                check(numOfDiffCellLabels == 0);
+                check(numOfDiffCellLabels == 0, cellCollection, otherCellCollection);
                 if (failed) {
                     return;
                 }
@@ -319,7 +331,7 @@ public class NonACPatternMatcher {
     }
 
     private void match(KItem kItem, KSequence pattern) {
-        check(pattern.concreteSize() == 1);
+        check(pattern.concreteSize() == 1, kItem, pattern);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
             if (pattern.hasFrame()) {
@@ -329,7 +341,7 @@ public class NonACPatternMatcher {
     }
 
     private void match(KItem kItem, KList pattern) {
-        check(pattern.concreteSize() == 1);
+        check(pattern.concreteSize() == 1, kItem, pattern);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
             if (pattern.hasFrame()) {
@@ -339,7 +351,7 @@ public class NonACPatternMatcher {
     }
 
     private void match(KSequence kSequence, KList pattern) {
-        check(pattern.concreteSize() == 1);
+        check(pattern.concreteSize() == 1, kSequence, pattern);
         if (!failed) {
             addMatchingTask(kSequence, pattern.get(0));
             if (pattern.hasFrame()) {
@@ -361,7 +373,7 @@ public class NonACPatternMatcher {
 
         int len = kCollection.concreteSize();
         int otherLen = pattern.concreteSize();
-        check(len >= otherLen);
+        check(len >= otherLen, kCollection, pattern);
         if (failed) {
             return;
         }
@@ -370,7 +382,7 @@ public class NonACPatternMatcher {
             if (pattern.hasFrame()) {
                 addSubstitution(pattern.frame(), kCollection.fragment(otherLen));
             } else {
-                check(!kCollection.hasFrame() && len == otherLen);
+                check(!kCollection.hasFrame() && len == otherLen, kCollection, pattern);
                 if (failed) {
                     return;
                 }
@@ -384,7 +396,7 @@ public class NonACPatternMatcher {
     }
 
     private void match(Token token, KSequence pattern) {
-        check(pattern.concreteSize() == 1);
+        check(pattern.concreteSize() == 1, token, pattern);
         if (!failed) {
             addMatchingTask(token, pattern.get(0));
             if (pattern.hasFrame()) {
@@ -394,7 +406,7 @@ public class NonACPatternMatcher {
     }
 
     private void match(Token token, KList pattern) {
-        check(pattern.concreteSize() == 1);
+        check(pattern.concreteSize() == 1, token, pattern);
         if (!failed) {
             addMatchingTask(token, pattern.get(0));
             if (pattern.hasFrame()) {

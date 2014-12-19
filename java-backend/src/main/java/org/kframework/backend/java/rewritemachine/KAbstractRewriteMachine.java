@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
@@ -17,6 +15,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.RewriteEngineUtils;
@@ -110,7 +109,6 @@ public class KAbstractRewriteMachine {
                 success = false;
             }
         }
-
         return success;
     }
 
@@ -193,6 +191,10 @@ public class KAbstractRewriteMachine {
                 if (iter.hasNext()) {
                     match(iter.next());
                 } else {
+                    if (RuleAuditing.isAuditBegun()) {
+                        RuleAuditing.addFailureMessage("Cell " + crntCell
+                                + " does not contain requirede cell " + nextInstr.cellLabel());
+                    }
                     success = false;
                 }
 

@@ -54,7 +54,7 @@ public class FreezerIndex implements Index {
 
     @Override
     public String toString() {
-        return "@" + kLabel + "[" + holeIndex + "]";
+        return "@" + kLabel + "[" + holeIndex + "]=HOLE";
     }
 
     public KLabelConstant getKLabel() {

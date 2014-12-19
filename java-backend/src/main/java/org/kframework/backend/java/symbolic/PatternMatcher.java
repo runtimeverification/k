@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -33,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
@@ -144,7 +142,8 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         return RewriteEngineUtils.evaluateConditions(rule,
-                    RewriteEngineUtils.getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
+                    RewriteEngineUtils.getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions),
+                    context);
     }
 
     public PatternMatcher(boolean isLemma, TermContext context) {

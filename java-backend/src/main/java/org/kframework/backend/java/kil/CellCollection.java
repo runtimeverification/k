@@ -74,6 +74,11 @@ public class CellCollection extends Collection {
             hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
             return hashCode;
         }
+
+        @Override
+        public String toString() {
+            return "<" + cellLabel() + ">" + content + "</" + cellLabel() + ">";
+        }
     }
 
     public static final CellCollection EMPTY = new CellCollection(
