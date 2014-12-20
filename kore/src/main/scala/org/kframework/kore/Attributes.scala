@@ -1,7 +1,9 @@
 package org.kframework.kore
 
+import org.kframework._
 import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
+import org.kframework.builtin.Sorts
 
 case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
   type This = Attributes
@@ -19,7 +21,13 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
     case KApply(KLabel(`label`), l, _) => l.mkString(" ")
   } headOption
 
-  def add(that: Attributes) = Attributes(att ++ that.att)
+  def getOptionalString(label: String): java.util.Optional[String] =
+    getString(label) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[String]()
+    }
+
+  def addAll(that: Attributes) = this ++ that
 
   def foreach(f: K => Unit): Unit = att foreach f
 
@@ -29,7 +37,9 @@ case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[St
 
   def +(k: K): Attributes = new Attributes(att + k)
   def +(k: String): Attributes = add(KApply(KLabel(k), KList()))
-  def +(kv: (String, String)): Attributes = add(KApply(KLabel(kv._1), KList(KToken(KString, kv._2))))
+  def +(kv: (String, String)): Attributes = add(KApply(KLabel(kv._1), KList(KToken(Sorts.KString, kv._2))))
+
+  def ++(that: Attributes) = new Attributes(att ++ that.att)
 
   // nice methods for Java
   def add(k: K): Attributes = this + k
@@ -47,7 +57,7 @@ trait AttributesToString {
   override def toString() =
     "[" +
       (this.filteredAtt map {
-        case KApply(KLabel(keyName), KList(KToken(_, KString(value), _)), _) => keyName + "(" + value + ")"
+        case KApply(KLabel(keyName), KList(KToken(_, value, _)), _) => keyName + "(" + value + ")"
         case x => x.toString
       }).toList.sorted.mkString(" ") +
       "]"

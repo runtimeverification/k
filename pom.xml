@@ -5,7 +5,7 @@
   <groupId>org.kframework.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.5-SNAPSHOT</version>
+  <version>3.6-SNAPSHOT</version>
   <name>K Framework Tool Parent</name>
 
   <modules>
@@ -18,6 +18,7 @@
 
   <scm>
     <connection>scm:git:https://github.com/kframework/k.git</connection>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -61,6 +62,11 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-reflect</artifactId>
+        <version>2.11.4</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -240,8 +246,8 @@
         <native.classifier>linux64</native.classifier>
         <native.os.classifier>linux</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>
@@ -258,8 +264,8 @@
         <native.classifier>linux32</native.classifier>
         <native.os.classifier>linux</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>
@@ -274,8 +280,8 @@
         <native.classifier>osx</native.classifier>
         <native.os.classifier>osx</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>

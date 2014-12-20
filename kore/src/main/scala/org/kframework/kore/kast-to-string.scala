@@ -2,6 +2,8 @@
 
 package org.kframework.kore
 
+import org.kframework._
+
 trait KApplyToString {
   self: KApply =>
   override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
@@ -14,7 +16,7 @@ trait SortToString {
 
 trait KTokenToString {
   self: KToken =>
-  override def toString = s.s
+  override def toString = s
 }
 
 trait KVariableToString {
@@ -38,12 +40,11 @@ trait KSequenceToString {
     if (isEmpty) ".K" else mkString("~>")
 }
 
-trait KStringToString {
-  self: KString =>
-  override def toString = s
-}
-
 trait KListToString {
   self: KList =>
-  override def toString = "KList(" + this.mkString(",") + ")"
+  override def toString =
+    if (size == 0)
+      ".K"
+    else
+      "KList(" + this.mkString(",") + ")"
 }

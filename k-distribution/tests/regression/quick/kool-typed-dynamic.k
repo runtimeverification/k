@@ -225,7 +225,7 @@ KOOL).  */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 
 
   syntax Id ::= Token{"$1"} | Token{"$2"}
@@ -271,17 +271,11 @@ KOOL).  */
   rule false || E => E
 
 
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-//    [structural, anywhere]
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]  [structural]
-  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])  [structural]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+    [structural, anywhere]
 
-//  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-//    when N >=Int 0 andBool N <Int M  [structural, anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural]
-  rule lvalue(array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N))
-    when N >=Int 0 andBool N <Int M  [structural]
+    when N >=Int 0 andBool N <Int M  [structural, anywhere]
 
   rule sizeOf(array(_,_,N)) => N
 
@@ -346,7 +340,7 @@ KOOL).  */
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
-  syntax Decl ::= mkDecls(Params,Vals)  [function]
+  syntax Stmts ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
@@ -363,8 +357,8 @@ KOOL).  */
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -736,7 +730,7 @@ Like in untyped KOOL. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue(HOLE . _)
+  context lvalue((HOLE . _)<:Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... ListItem((C,EnvC:Bag)) EStack </envStack>)

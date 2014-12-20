@@ -2,24 +2,36 @@
 
 package org.kframework.kore.convertors;
 
+import org.kframework.builtin.Labels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
+import org.kframework.kil.Term;
+import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.kore.outer.*;
 
+import scala.Option;
+
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.function.Function;
 
-import static org.kframework.kore.Collections.*;
+import static org.kframework.Collections.*;
+import static org.kframework.kore.Constructors.*;
 
-public class KOREtoKIL {
+public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
     private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
@@ -30,7 +42,7 @@ public class KOREtoKIL {
     }
 
     class ListProductionCollector {
-        private Map<KString, List<SyntaxProduction>> listProds;
+        private Map<String, List<SyntaxProduction>> listProds;
         private List<org.kframework.kil.Syntax> userLists;
 
         public List<org.kframework.kil.Syntax> getResults() {
@@ -46,12 +58,12 @@ public class KOREtoKIL {
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
                     List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    KString listType = searchListType(attrs);
-                    if (listType != null) {
-                        List<SyntaxProduction> prods = listProds.get(listType);
+                    Optional<String> listType = prod.att().getOptionalString("userList");
+                    if (listType.isPresent()) {
+                        List<SyntaxProduction> prods = listProds.get(listType.get());
                         if (prods == null) {
                             prods = new ArrayList<>(3);
-                            listProds.put(listType, prods);
+                            listProds.put(listType.get(), prods);
                         }
                         prods.add(prod);
                         iter.remove();
@@ -62,40 +74,31 @@ public class KOREtoKIL {
             return ret;
         }
 
-        private KString searchListType(List<K> attrs) {
-            for (K attr : attrs) {
-                if (attr instanceof KToken) {
-                    KToken kToken = (KToken) attr;
-                    if (kToken.sort().name().equals("userList")) {
-                        return (kToken.s());
-                    }
-                }
-            }
-            return null;
-        }
-
         private void generateUserLists() {
             userLists = new ArrayList<>();
-            for (Map.Entry<KString, List<SyntaxProduction>> entry : listProds.entrySet()) {
-                KString listType = entry.getKey();
+            for (Map.Entry<String, List<SyntaxProduction>> entry : listProds.entrySet()) {
+                String listType = entry.getKey();
                 List<SyntaxProduction> prods = entry.getValue();
                 if (prods.size() != 3 && prods.size() != 2) {
                     throw new AssertionError("Found list with " + prods.size() + " elements.");
                 }
-
                 if (prods.size() == 2) {
-                    userLists.add(makeNonEmptyUserList(prods, listType.s()));
+                    userLists.add(makeNonEmptyUserList(prods, listType));
                 } else {
-                    userLists.add(makeUserList(prods, listType.s()));
+                    userLists.add(makeUserList(prods, listType));
                 }
             }
         }
 
         // TODO: Remove duplicated code (makeUserList and makeNonEmptyUserList)
-        private org.kframework.kil.Syntax makeUserList(List<SyntaxProduction> prods, String listType) {
-            List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(Collectors.toList());
-            List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(Collectors.toList());
-            List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(Collectors.toList());
+        private org.kframework.kil.Syntax makeUserList(List<SyntaxProduction> prods,
+                String listType) {
+            List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(
+                    Collectors.toList());
+            List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(
+                    Collectors.toList());
+            List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(
+                    Collectors.toList());
 
             Terminal sep;
             NonTerminal elem;
@@ -110,7 +113,7 @@ public class KOREtoKIL {
 
             if (prod1Items.size() == 1 && prod1Items.get(0) instanceof NonTerminal) {
                 elem = (NonTerminal) prod1Items.get(0);
-            } else if (prod2Items.get(0) instanceof NonTerminal) {
+            } else if (prod2Items.size() == 1 && prod2Items.get(0) instanceof NonTerminal) {
                 elem = (NonTerminal) prod2Items.get(0);
             } else {
                 elem = (NonTerminal) prod3Items.get(0);
@@ -119,7 +122,8 @@ public class KOREtoKIL {
             org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
-                    org.kframework.kil.Sort.of(elem.sort().name()), sep.value(), UserList.ZERO_OR_MORE);
+                    org.kframework.kil.Sort.of(elem.sort().name()), sep.value(),
+                    UserList.ZERO_OR_MORE);
 
             List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>(1);
             prodItems.add(userList);
@@ -127,14 +131,20 @@ public class KOREtoKIL {
             org.kframework.kil.Production prod = new org.kframework.kil.Production(
                     new org.kframework.kil.NonTerminal(listSort), prodItems);
 
+            kilProductionIdToProductionInstance.put(
+                    prods.get(0).att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
+
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
         }
     }
 
-    private org.kframework.kil.Syntax makeNonEmptyUserList(List<SyntaxProduction> prods, String listType) {
-        List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(Collectors.toList());
-        List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(Collectors.toList());
+    private org.kframework.kil.Syntax makeNonEmptyUserList(List<SyntaxProduction> prods,
+            String listType) {
+        List<ProductionItem> prod1Items = stream(prods.get(0).items())
+                .collect(Collectors.toList());
+        List<ProductionItem> prod2Items = stream(prods.get(1).items())
+                .collect(Collectors.toList());
 
         Terminal sep;
         NonTerminal elem;
@@ -161,6 +171,9 @@ public class KOREtoKIL {
 
         org.kframework.kil.Production prod = new org.kframework.kil.Production(
                 new org.kframework.kil.NonTerminal(listSort), prodItems);
+
+        kilProductionIdToProductionInstance.put(
+                prods.get(0).att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
 
         org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
         return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
@@ -224,7 +237,7 @@ public class KOREtoKIL {
                                     lhs, kilProdItems);
 
                             kilProductionIdToProductionInstance.put(
-                                    sentence.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(),
+                                    sentence.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(),
                                     kilProd);
 
                             org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock(
@@ -266,8 +279,7 @@ public class KOREtoKIL {
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Import anImport) {
-        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(
-                anImport.what());
+        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.what());
         kilImport.setAttributes(convertAttributes(anImport.att()));
         return kilImport;
     }
@@ -281,8 +293,8 @@ public class KOREtoKIL {
 
     public org.kframework.kil.ModuleItem convertModuleItem(ModuleComment moduleComment) {
         org.kframework.kil.LiterateModuleComment kilComment =
-                // TODO: we lost type information
-                new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
+        // TODO: we lost type information
+        new org.kframework.kil.LiterateModuleComment(moduleComment.comment(), null);
         kilComment.setAttributes(convertAttributes(moduleComment.att()));
         return kilComment;
     }
@@ -297,8 +309,8 @@ public class KOREtoKIL {
 
     public org.kframework.kil.ModuleItem convertModuleItem(SyntaxProduction syntaxProduction) {
         List<org.kframework.kil.ProductionItem> kilProdItems = new ArrayList<>();
-        for (ProductionItem it : scala.collection.JavaConversions
-                .seqAsJavaList(syntaxProduction.items())) {
+        for (ProductionItem it : scala.collection.JavaConversions.seqAsJavaList(syntaxProduction
+                .items())) {
             kilProdItems.add(convertProdItem(it));
         }
         org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
@@ -309,10 +321,9 @@ public class KOREtoKIL {
         kilProd.setAttributes(convertAttributes(syntaxProduction.att()));
 
         kilProductionIdToProductionInstance.put(
-                syntaxProduction.att().getString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
+                syntaxProduction.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID).get(), kilProd);
 
-        org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("",
-                kilProd);
+        org.kframework.kil.PriorityBlock kilPB = new org.kframework.kil.PriorityBlock("", kilProd);
 
         return new org.kframework.kil.Syntax(lhs, kilPB);
     }
@@ -325,11 +336,13 @@ public class KOREtoKIL {
     public org.kframework.kil.ModuleItem convertModuleItem(Rule rule) {
         if (rule.body() instanceof KRewrite) {
             KRewrite body = (KRewrite) rule.body();
-            return new org.kframework.kil.Rule(convertK(body.left()), convertK(body
-                    .right()), convertKBool(rule.requires()),
-                    convertKBool(rule.ensures()), dummyContext);
+            return new org.kframework.kil.Rule(convertK(body.left()), convertK(body.right()),
+                    convertKBool(rule.requires()), convertKBool(rule.ensures()), dummyContext);
+        } else {
+            org.kframework.kil.Rule kilRule = new org.kframework.kil.Rule();
+            kilRule.setBody(convertK(rule.body()));
+            return kilRule;
         }
-        throw NOT_IMPLEMENTED("Not implemented: Rule -> KIL.Sentence");
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Context context) {
@@ -341,23 +354,23 @@ public class KOREtoKIL {
 
     public org.kframework.kil.ModuleItem convertModuleItem(SyntaxAssociativity syntaxAssociativity) {
         String assoc = convertAssoc(syntaxAssociativity.assoc());
-        List<org.kframework.kil.KLabelConstant> tags =
-                stream(syntaxAssociativity.tags()).map(this::convertTag).collect(Collectors.toList());
+        List<org.kframework.kil.KLabelConstant> tags = stream(syntaxAssociativity.tags()).map(
+                this::convertTag).collect(Collectors.toList());
         return new org.kframework.kil.PriorityExtendedAssoc(assoc, tags);
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(SyntaxPriority syntaxPriority) {
-        List<org.kframework.kil.PriorityBlockExtended> priorities =
-                stream(syntaxPriority.priorities()).map(set -> {
-                    List<Tag> tags = stream(set).collect(Collectors.toList());
-                    return tagsToPriBlockExt(tags);
-                }).collect(Collectors.toList());
+        List<org.kframework.kil.PriorityBlockExtended> priorities = stream(
+                syntaxPriority.priorities()).map(set -> {
+            List<Tag> tags = stream(set).collect(Collectors.toList());
+            return tagsToPriBlockExt(tags);
+        }).collect(Collectors.toList());
         return new org.kframework.kil.PriorityExtended(priorities);
     }
 
     public org.kframework.kil.PriorityBlockExtended tagsToPriBlockExt(List<Tag> tags) {
-        return new org.kframework.kil.PriorityBlockExtended(
-                tags.stream().map(this::convertTag).collect(Collectors.toList()));
+        return new org.kframework.kil.PriorityBlockExtended(tags.stream().map(this::convertTag)
+                .collect(Collectors.toList()));
     }
 
     public String convertAssoc(scala.Enumeration.Value assoc) {
@@ -401,20 +414,24 @@ public class KOREtoKIL {
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                KList klist = attr.klist();
-                if (klist.size() == 1 && klist.get(0) instanceof KToken) {
-                    String value = ((KToken) klist.get(0)).s().s();
-                    kilAttributes.add(Attribute.of(key.name(), value));
-                } else {
-                    throw NOT_IMPLEMENTED();
+                if (!(key != KLabel("location"))) { // ignoring location
+                                                    // information
+                    KList klist = attr.klist();
+                    if (klist.size() == 1 && klist.get(0) instanceof KToken) {
+                        String value = ((KToken) klist.get(0)).s();
+                        kilAttributes.add(Attribute.of(key.name(), value));
+                    } else {
+                        throw NOT_IMPLEMENTED();
+                    }
                 }
             } else if (a instanceof KToken) {
                 KToken attr = (KToken) a;
-                String stringValue = attr.s().s();
+                String stringValue = attr.s();
                 kilAttributes.add(Attribute.of(stringValue, stringValue));
             } else {
                 throw NOT_IMPLEMENTED();
             }
+
         });
         return kilAttributes;
     }
@@ -448,14 +465,14 @@ public class KOREtoKIL {
             // KORE KApply, we need to figure out every one of them and handle
             // here
             return convertKApply(kApply);
-        } else if (k instanceof KBag) {
-            KBag kBag = (KBag) k;
+        } else if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
+            KApply kBag = (KApply) k;
             List<K> bagItems = kBag.list();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
             for (K bagItem : bagItems) {
-                if (bagItem instanceof KBag) {
-                    KBag item = (KBag) bagItem;
+                if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
+                    KApply item = (KApply) bagItem;
                     List<K> kbagItems = item.list();
                     kilBagItems.addAll(kbagItems.stream().map(this::convertK)
                             .collect(Collectors.toList()));
@@ -467,10 +484,44 @@ public class KOREtoKIL {
             return kilBag;
         } else if (k instanceof KVariable) {
             return convertKVariable((KVariable) k);
+        } else if (k instanceof KToken) {
+            return convertKToken((KToken) k);
+        } else if (k instanceof InjectedKList) {
+            return convertKList(((InjectedKList) k).klist());
+//        } else if (k instanceof KRewrite) {
+//
+        } else {
+            System.out.println(k);
+            throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
+                    + ") -> KIL.Term");
         }
-        System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-        throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
-                + ") -> KIL.Term");
+    }
+
+    private org.kframework.kil.Term convertKList(KList k) {
+        Stream<K> stream = ((KList) k).stream();
+        List<Term> kilTerms = stream.map(c -> convertK(c)).collect(Collectors.toList());
+        return new org.kframework.kil.KList(kilTerms);
+    }
+
+    public org.kframework.kil.KApp convertKToken(KToken t) {
+        // KApp
+        String labelSort = t.sort().name();
+        String value = t.s();
+        org.kframework.kil.Term kAppLabel;
+        if (labelSort.equals("int")) {
+            kAppLabel = org.kframework.kil.IntBuiltin.of(new BigInteger(t.s()));
+        } else if (labelSort.equals("int32")) {
+            kAppLabel = org.kframework.kil.Int32Builtin.of(new Integer(value));
+        } else if (labelSort.equals("string")) {
+            kAppLabel = org.kframework.kil.StringBuiltin.of(value);
+        } else if (labelSort.equals("float")) {
+            kAppLabel = org.kframework.kil.FloatBuiltin.of(value);
+        } else if (labelSort.equals("bool")) {
+            kAppLabel = org.kframework.kil.BoolBuiltin.of(value);
+        } else {
+            kAppLabel = org.kframework.kil.Token.of(org.kframework.kil.Sort.of(labelSort), value);
+        }
+        return new org.kframework.kil.KApp(kAppLabel, new org.kframework.kil.KList());
     }
 
     public org.kframework.kil.Variable convertKVariable(KVariable var) {
@@ -483,7 +534,7 @@ public class KOREtoKIL {
                     List<K> args = kApply.list();
                     if (args.size() == 1 && args.get(0) instanceof KToken) {
                         KToken tok = (KToken) args.get(0);
-                        sort = org.kframework.kil.Sort.of(tok.s().s());
+                        sort = org.kframework.kil.Sort.of(tok.s());
                         break;
                     }
                 }
@@ -496,8 +547,9 @@ public class KOREtoKIL {
     }
 
     public org.kframework.kil.Term convertKBool(K k) {
-        if (k instanceof KBoolean) {
+        if (k instanceof KToken && ((KToken) k).sort() == Sorts.KBoolean()) {
             return null; // FIXME
+            // throw new AssertionError("Unimplemented");
         }
         return convertK(k);
     }
@@ -505,24 +557,38 @@ public class KOREtoKIL {
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
         List<K> contents = kApply.list();
-        if (label == Hole$.MODULE$) {
+        if (label == Labels.Hole()) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
+            boolean kilProductionIdP = !kApply.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID)
+                    .isPresent();
             List<K> args = stream(kApply.klist().iterable()).collect(Collectors.toList());
-            List<org.kframework.kil.Term> kilTerms = new ArrayList<>();
-            for (K arg : args) {
-                kilTerms.add(convertK(arg));
-            }
-            String kilProductionId = kApply.att().getString(KILtoInnerKORE.PRODUCTION_ID).get();
+            List<org.kframework.kil.Term> kilTerms = args.stream().map(this::convertK)
+                    .collect(Collectors.toList());
 
-            Production production = kilProductionIdToProductionInstance.get(kilProductionId);
-            if (production == null) {
-                throw new AssertionError("Could not find production for: " + kApply);
-            }
+            if (kilProductionIdP) {
+                KLabelConstant kAppLabel = KLabelConstant.of(label.name());
+                return new org.kframework.kil.KApp(kAppLabel, new org.kframework.kil.KList(
+                        kilTerms));
+            } else {
+                // TermCons
+                String kilProductionId = kApply.att().getOptionalString(KILtoInnerKORE.PRODUCTION_ID)
+                        .get();
+                Production production = kilProductionIdToProductionInstance.get(kilProductionId);
+                if (production == null) {
+                    System.err.println("WARNING: Could not find production for: " + kApply
+                            + " with id: " + kilProductionId);
+                }
 
-            return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
-                    kilTerms, production);
+                return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
+                        kilTerms, production);
+            }
         }
+    }
+
+    @Override
+    public org.kframework.kil.Definition apply(Definition d) {
+        return convertDefinition(d);
     }
 }

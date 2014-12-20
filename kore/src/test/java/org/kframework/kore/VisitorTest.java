@@ -31,11 +31,6 @@ public class VisitorTest {
         }
 
         @Override
-        public K apply(KList k) {
-            return (K) k.map(this);
-        }
-
-        @Override
         public K apply(KSequence k) {
             return (K) k.map(this);
         }
@@ -44,7 +39,7 @@ public class VisitorTest {
     @Test
     public void testTopLevel() {
         FooTransformer fooTransformer = new FooTransformer();
-        K t = fooTransformer.apply(KToken(Sort("foo"), KString("bla")));
+        K t = fooTransformer.apply(KToken(Sort("foo"), "bla"));
 
         assertEquals(KVariable("T"), t);
     }
@@ -79,7 +74,7 @@ public class VisitorTest {
     @Test
     public void testNested() {
         FooTransformer fooTransformer = new FooTransformer();
-        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken(Sort("foo"), KString("bla")),
+        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken(Sort("foo"), "bla"),
                 KVariable("U")));
 
         assertEquals(KRewrite(KVariable("T"), KVariable("U")), t);
