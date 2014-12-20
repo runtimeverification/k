@@ -2,7 +2,6 @@
 package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
@@ -173,13 +172,7 @@ public class RunProcess {
 
                 String kast = output.stdout != null ? output.stdout : "";
 
-                //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
-                //TODO(dwightguth): parse the output of the external parser into real kil classes
-                if (context.kompileOptions.experimental.legacyKast) {
-                    term = new BackendTerm(Sort.of(""), kast);
-                } else {
-                    return KastParser.parse(kast, source);
-                }
+                return KastParser.parse(kast, source);
         }
 
         return term;

@@ -46,7 +46,7 @@ public class PrintTransition implements Transformation<Transition, String> {
         } else if (trans.getType() == TransitionType.LABEL) {
             sb.append("\nRule labelled " + trans.getLabel());
         } else if (trans.getType() == TransitionType.REDUCE) {
-            sb.append("\nMaude 'reduce' command");
+            sb.append("\nFunction evaluation");
         } else if (trans.getType() == TransitionType.UNLABELLED) {
             sb.append("\nUnlabelled rule");
         } else if (trans.getType() == TransitionType.DEADLOCK) {

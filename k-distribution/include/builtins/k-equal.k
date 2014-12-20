@@ -7,7 +7,6 @@ require "k-prelude.k"
 
 
 module K-EQUAL-HOOKS
-  imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
   imports LIST
   imports MAP

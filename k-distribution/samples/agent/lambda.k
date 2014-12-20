@@ -22,6 +22,8 @@ module LAMBDA
   syntax Val ::= Id
                | Lambda
 
+  syntax Variable ::= Id
+
 // Function application (through beta-substitution)
   rule  (\ X:Id . E:K) V:KResult => E[V / X]
 endmodule

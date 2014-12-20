@@ -63,8 +63,6 @@ The following pieces of software have additional or alternate copyrights,
 licenses, and/or restrictions:
 
 ---------------------------------------
-Maude (http://maude.cs.uiuc.edu) is licensed under the GPL license.
-
 Stratego (http://strategoxt.org) is licensed under the LGPL license.
 
 Xstream (http://xstream.codehaus.org/) is licensed under the BSD license.

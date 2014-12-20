@@ -131,7 +131,7 @@ public class FileUtil {
     }
 
     public File resolveKBase(String file) {
-        return new File(JarInfo.getKBase(false), file);
+        return new File(JarInfo.getKBase(), file);
     }
 
     public void copyTempFileToDefinitionDirectory(String fromPath) {

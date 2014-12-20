@@ -46,7 +46,6 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         this.add(new AddKCell(context));
         this.add(new AddTopCellRules(context));
         this.add(new ResolveAnonymousVariables(context));
-        this.add(new ResolveSyntaxPredicates(context));
         this.add(new ResolveListOfK(context));
         this.add(new FlattenTerms(context));
         final ResolveContextAbstraction resolveContextAbstraction =

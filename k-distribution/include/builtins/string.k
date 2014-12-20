@@ -3,7 +3,6 @@ require "int.k"
 require "float.k"
 
 module STRING-SYNTAX-HOOKS
-  imports #STRING-INTERFACE
 
   // Double Quoted Strings are of the form:
   // DoubleQuote StringChar* DoubleQuote

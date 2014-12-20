@@ -9,6 +9,7 @@ module LAMBDA
                | "lambda" Id "." Exp  [binder, lambda]
 
   syntax KResult ::= Val
+  syntax Variable ::= Id
 
 
   syntax Exp ::= Val

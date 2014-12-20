@@ -1,9 +1,0 @@
---- Copyright (c) 2012-2014 K Team. All Rights Reserved.
-mod #SMT is
-	including #STRING-INTERFACE .
-
-	op #smtCall_ : #String -> #String
-	  [special (id-hook StringOpSymbol (smt)
-				op-hook stringSymbol (<Strings> : ~> #String))] .
-				
-endm

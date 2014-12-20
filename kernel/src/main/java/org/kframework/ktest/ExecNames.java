@@ -28,9 +28,9 @@ public class ExecNames {
     public static String getExecutable(String exe) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
-            return JarInfo.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
+            return JarInfo.getKBase() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
         }
-        return JarInfo.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
+        return JarInfo.getKBase() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
     }
 
     public static String getKDoc() {
