@@ -244,4 +244,14 @@ public class BuiltinFloatOperations {
     public static BoolToken isNaN(FloatToken term, TermContext context) {
         return BoolToken.of(term.bigFloatValue().isNaN());
     }
+
+    public static FloatToken maxValue(IntToken precision, IntToken exponentBits, TermContext context) {
+        BinaryMathContext mc = new BinaryMathContext(precision.intValue(), exponentBits.intValue());
+        return FloatToken.of(BigFloat.maxValue(mc.precision, mc.maxExponent), exponentBits.intValue());
+    }
+
+    public static FloatToken minValue(IntToken precision, IntToken exponentBits, TermContext context) {
+        BinaryMathContext mc = new BinaryMathContext(precision.intValue(), exponentBits.intValue());
+        return FloatToken.of(BigFloat.minValue(mc.precision, mc.minExponent), exponentBits.intValue());
+    }
 }
