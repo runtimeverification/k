@@ -1,8 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +14,8 @@ import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.kframework.backend.unparser.PrintTransition;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.StringBuiltin;
@@ -38,7 +40,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 public interface Debugger {
 
@@ -285,17 +286,17 @@ public interface Debugger {
                         a.add(Boolean.class, PrintTransition.PRINT_VERBOSE_GRAPH, true);
                         System.out.println(transitionPrinter.run(debugger.getEdge(state1, state2), a));
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandSave) {
-                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                        try (Base64OutputStream out = new Base64OutputStream(new FileOutputStream(
+                                files.resolveWorkingDirectory(options.save.file)))) {
                             loader.saveOrDie(out, debugger.getGraph());
-                            files.saveToWorkingDirectory(options.save.file, Base64.encode(out.toByteArray()));
                         } catch (IOException e) {
                             throw KExceptionManager.internalError("Error writing to binary file", e);
                         }
                         System.out.println("File successfully saved.");
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
                         KRunGraph savedGraph;
-                        try (ByteArrayInputStream in = new ByteArrayInputStream(
-                                Base64.decode(files.loadFromWorkingDirectory(options.load.file)))) {
+                        try (Base64InputStream in = new Base64InputStream(new FileInputStream(
+                                files.resolveWorkingDirectory(options.load.file)))) {
                             savedGraph = loader.loadOrDie(KRunGraph.class, in);
                             debugger.setGraph(savedGraph);
                             debugger.setCurrentState(0);

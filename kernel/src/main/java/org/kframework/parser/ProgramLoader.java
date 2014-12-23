@@ -3,8 +3,10 @@ package org.kframework.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64InputStream;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
@@ -42,7 +44,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.inject.Inject;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 public class ProgramLoader {
 
@@ -129,7 +130,7 @@ public class ProgramLoader {
             out = new FlattenTerms(context).visitNode(out);
             out = ((Sentence) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
-            try (ByteArrayInputStream in = new ByteArrayInputStream(Base64.decode(content))) {
+            try (InputStream in = new Base64InputStream(new ByteArrayInputStream(content.getBytes()))) {
                 out = loader.loadOrDie(Term.class, in);
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
