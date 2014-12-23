@@ -80,9 +80,9 @@ public class RewriteEngineUtils {
                         // choice operation due to the unknown ``Rho''.
 
                         if (!resolved && RuleAuditing.isAuditBegun()) {
-                            RuleAuditing.addFailureMessage("Matching failure: unable to resolve collection operation "
-                                    + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
-                                    + evalLookupOrChoice);
+                            System.err.println("Matching failure: unable to resolve collection operation "
+                            + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
+                            + evalLookupOrChoice);
                         }
                     } else {
                         if (nonLookupOrChoice instanceof Variable) {
@@ -91,8 +91,8 @@ public class RewriteEngineUtils {
                                 Term term = crntSubst.put(variable, evalLookupOrChoice);
                                 resolved = term == null || term.equals(evalLookupOrChoice);
                                 if (!resolved && RuleAuditing.isAuditBegun()) {
-                                    RuleAuditing.addFailureMessage("Matching failure: " + variable + " must match both "
-                                            + term + " and " + evalLookupOrChoice);
+                                    System.err.println("Matching failure: " + variable + " must match both "
+                                    + term + " and " + evalLookupOrChoice);
                                 }
                             }
                         } else {
@@ -110,9 +110,9 @@ public class RewriteEngineUtils {
                                     resolved = true;
                                     crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
                                 } else if (!resolved && RuleAuditing.isAuditBegun()) {
-                                    RuleAuditing.addFailureMessage("Matching failure: substitution "
-                                            + lookupMatcher.substitution() + " missing variables "
-                                            + Sets.difference(lookupMatcher.substitution().keySet(), nonLookupOrChoice.variableSet()));
+                                    System.err.println("Matching failure: substitution "
+                                    + lookupMatcher.substitution() + " missing variables "
+                                    + Sets.difference(lookupMatcher.substitution().keySet(), nonLookupOrChoice.variableSet()));
                                 }
                             }
                         }
@@ -136,7 +136,7 @@ public class RewriteEngineUtils {
                 Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
                     if (RuleAuditing.isAuditBegun()) {
-                        RuleAuditing.addFailureMessage("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
+                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
                     }
                     crntSubst = null;
                     break;
@@ -276,7 +276,7 @@ public class RewriteEngineUtils {
                 result.put(variable, term);
             } else if (!otherTerm.equals(term)) {
                 if (RuleAuditing.isAuditBegun()) {
-                    RuleAuditing.addFailureMessage("Incompatible substitutions: " + subst1 + " and " + subst2);
+                    System.err.println("Incompatible substitutions: " + subst1 + " and " + subst2);
                 }
                 return null;
             }

@@ -107,7 +107,7 @@ public class RuleAuditing {
     public static void succeed(Rule rule) {
         if (!isAudit()) return;
         if (isAuditBegun() && getAuditingRule() == null) {
-            addFailureMessage("Audit success!");
+            System.err.println("Audit success!");
             return;
         }
         if (getAuditingRule() != rule) return;
@@ -141,9 +141,5 @@ public class RuleAuditing {
 
     public static boolean isAuditBegun() {
         return isAudit() && auditState.get().isBegun;
-    }
-
-    public static void addFailureMessage(String string) {
-        System.err.println(string);
     }
 }

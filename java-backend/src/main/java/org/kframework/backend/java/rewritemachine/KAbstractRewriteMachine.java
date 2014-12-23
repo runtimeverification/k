@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
@@ -192,8 +193,8 @@ public class KAbstractRewriteMachine {
                     match(iter.next());
                 } else {
                     if (RuleAuditing.isAuditBegun()) {
-                        RuleAuditing.addFailureMessage("Cell " + crntCell
-                                + " does not contain requirede cell " + nextInstr.cellLabel());
+                        System.err.println("Cell " + crntCell
+                        + " does not contain required cell " + nextInstr.cellLabel());
                     }
                     success = false;
                 }

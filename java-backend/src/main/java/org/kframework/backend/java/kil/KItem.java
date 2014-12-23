@@ -282,24 +282,22 @@ public final class KItem extends Term {
                 Term result = kItem.isEvaluable(context) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
-                if (options.debug) {
-                    if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Unable to resolve function symbol:\n\t\t");
-                        sb.append(result);
-                        sb.append('\n');
-                        if (!context.definition().functionRules().isEmpty()) {
-                            sb.append("\tDefined function rules:\n");
-                            for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
-                                sb.append("\t\t");
-                                sb.append(rule);
-                                sb.append('\n');
-                            }
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Unable to resolve function symbol:\n\t\t");
+                    sb.append(result);
+                    sb.append('\n');
+                    if (!context.definition().functionRules().isEmpty()) {
+                        sb.append("\tDefined function rules:\n");
+                        for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                            sb.append("\t\t");
+                            sb.append(rule);
+                            sb.append('\n');
                         }
-                        kem.registerCriticalWarning(sb.toString(), kItem);
-                        if (RuleAuditing.isAuditBegun()) {
-                            RuleAuditing.addFailureMessage("Function failed to evaluate: returned " + result);
-                        }
+                    }
+                    kem.registerCriticalWarning(sb.toString(), kItem);
+                    if (RuleAuditing.isAuditBegun()) {
+                        System.err.println("Function failed to evaluate: returned " + result);
                     }
                 }
                 return result;
@@ -406,7 +404,7 @@ public final class KItem extends Term {
                         if (rule == RuleAuditing.getAuditingRule()) {
                             RuleAuditing.beginAudit();
                         } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                            RuleAuditing.addFailureMessage("\nAuditing " + rule + "...\n");
+                            System.err.println("\nAuditing " + rule + "...\n");
                         }
                         /* function rules should be applied by pattern match rather than unification */
                         Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);

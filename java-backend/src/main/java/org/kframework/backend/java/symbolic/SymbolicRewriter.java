@@ -133,7 +133,7 @@ public class SymbolicRewriter {
                         if (rule == RuleAuditing.getAuditingRule()) {
                             RuleAuditing.beginAudit();
                         } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                            RuleAuditing.addFailureMessage("\nAuditing " + rule + "...\n");
+                            System.err.println("\nAuditing " + rule + "...\n");
                         }
 
                         ConstrainedTerm pattern = buildPattern(rule, subject.termContext());

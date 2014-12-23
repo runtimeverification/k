@@ -29,6 +29,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -106,15 +107,15 @@ public class NonACPatternMatcher {
     private void check(boolean condition, Term subject, Term pattern) {
         failed = failed || !condition;
         if (failed && RuleAuditing.isAuditBegun()) {
-            RuleAuditing.addFailureMessage("Matching failure: " + subject + " does not match " + pattern);
+            System.err.println("Matching failure: " + subject + " does not match " + pattern);
         }
     }
 
     private void check(boolean condition, Variable var, Term subst1, Term subst2) {
         failed = failed || !condition;
         if (failed && RuleAuditing.isAuditBegun()) {
-            RuleAuditing.addFailureMessage("Matching failure: " + var + " must match both "
-                    + subst1 + " and " + subst2);
+            System.err.println("Matching failure: " + var + " must match both "
+            + subst1 + " and " + subst2);
         }
     }
     private boolean match() {

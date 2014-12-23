@@ -15,7 +15,7 @@ public abstract class AbstractMatcher implements Matcher {
      */
     protected void fail(Term term, Term otherTerm) {
         if (RuleAuditing.isAuditBegun()) {
-            RuleAuditing.addFailureMessage("Matching failure: " + term + " must match " + otherTerm);
+            System.err.println("Matching failure: " + term + " must match " + otherTerm);
         }
         throw PatternMatchingFailure.PATTERN_MATCHING_FAILURE;
     }
