@@ -1,8 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Deque;
 import java.util.List;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;

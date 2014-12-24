@@ -3,6 +3,7 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.loader.Context;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,11 +65,26 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
      * @return
      */
     public Set<Variable> variables() {
-        final Set<Variable> result = new HashSet<Variable>();
+        final Set<Variable> result = new HashSet<>();
         new BasicVisitor(null) {
             @Override
             public Void visit(Variable node, Void _void) {
                 result.add(node);
+                return null;
+            }
+        }.visitNode(this);
+        return result;
+    }
+
+    public Set<KLabelConstant> impureFunctions(Context context) {
+        final Set<KLabelConstant> result = new HashSet<>();
+        new BasicVisitor(context) {
+            @Override
+            public Void visit(KLabelConstant node, Void _void) {
+                boolean isImpure = context.productionsOf(node.getLabel()).stream().anyMatch(p -> p.containsAttribute(Attribute.IMPURE_KEY));
+                if (isImpure) {
+                    result.add(node);
+                }
                 return null;
             }
         }.visitNode(this);

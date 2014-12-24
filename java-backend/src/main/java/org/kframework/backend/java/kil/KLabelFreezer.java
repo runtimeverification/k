@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Deque;
+
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -26,5 +28,4 @@ public class KLabelFreezer extends KLabelInjection {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-
 }
