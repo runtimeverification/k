@@ -14,5 +14,5 @@ object TreeNodesToKORE {
   }
 
   def locationToAtt(l: org.kframework.parser.Location): Attributes =
-    Attributes(tiny.builtin.Location.apply(l.startLine, l.startColumn, l.endLine, l.endColumn))
+    Attributes(kore.Location.apply(l.startLine, l.startColumn, l.endLine, l.endColumn))
 }

@@ -27,7 +27,7 @@ class TestMeta {
   import outer._
 
   val d = Definition(Set(),
-    Set(Module("TEST",
+    Set(Module("TEST", Set(),
       Set(SyntaxProduction(Sort("Foo"),
         List(Terminal("Bar")))))))
 

@@ -9,7 +9,7 @@ trait Transformer extends Function1[Definition, Definition] {
 
   def apply(d: Definition): Definition = outer.Definition(d.requires map apply, d.modules map apply)
   def apply(r: Require): Require = r
-  def apply(m: Module): Module = outer.Module(m.name, m.sentences map apply, m.att)
+  def apply(m: Module): Module = outer.Module(m.name, m.imports map apply, m.sentences map apply, m.att)
   def apply(s: Sentence): Sentence = s match {
     case i: Import => apply(i)
     case c: Context => apply(c)
