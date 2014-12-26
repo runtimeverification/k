@@ -15,13 +15,10 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.io.Serializable;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * class for AST Attributes.
@@ -35,7 +32,7 @@ import java.util.TreeMap;
  */
 public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute<?>, Enum<?>>, Map<Key<?>, Attribute<?>> {
 
-    protected transient SortedMap<Key<?>, Attribute<?>> contents;
+    protected transient LinkedHashMap<Key<?>, Attribute<?>> contents;
 
     public Attributes(Attributes c) {
         super(c);
@@ -44,29 +41,20 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     public Attributes(Location location, Source source) {
         super(location, source);
-        contents = new TreeMap<>(comparator);
+        contents = new LinkedHashMap<>();
     }
-
-    private static class C implements Comparator<Key<?>>, Serializable {
-        @Override
-        public int compare(Key<?> o1, Key<?> o2) {
-            return o1.toString().compareTo(o2.toString());
-        }
-    };
-
-    private static C comparator = new C();
 
     public Attributes(Element element, JavaClassesFactory factory) {
         super(element);
 
-        contents = new TreeMap<>(comparator);
+        contents = new LinkedHashMap<>();
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
             add((Attribute<?>) factory.getTerm(e));
     }
 
     public Attributes() {
-        contents = new TreeMap<>(comparator);
+        contents = new LinkedHashMap<>();
     }
 
     @Override
@@ -223,7 +211,7 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        contents = new TreeMap<>(comparator);
+        contents = new LinkedHashMap<>();
         Set<Attribute<?>> attributes = (Set<Attribute<?>>) stream.readObject();
         for (Attribute<?> attr : attributes) {
             contents.put(attr.getKey(), attr);

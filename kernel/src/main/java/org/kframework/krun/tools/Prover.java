@@ -40,7 +40,7 @@ public interface Prover {
     */
     public abstract KRunProofResult<Set<Term>> prove(Module module) throws KRunExecutionException;
 
-    public static class Tool implements Transformation<Void, KRunResult<?>> {
+    public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
         private final Context context;

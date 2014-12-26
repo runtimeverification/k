@@ -5,7 +5,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 
 import java.util.List;
 
-public class SearchResults {
+public class SearchResults implements KRunResult {
     private List<SearchResult> solutions;
     private DirectedGraph<KRunState, Transition> graph;
 

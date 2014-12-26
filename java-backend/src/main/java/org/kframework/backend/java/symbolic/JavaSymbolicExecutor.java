@@ -14,14 +14,10 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.unparser.OutputModes;
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
@@ -64,18 +60,15 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
+    public KRunState run(org.kframework.kil.Term cfg) throws KRunExecutionException {
         return internalRun(cfg, -1);
     }
 
-    private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
+    private KRunState internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
-        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, counter));
-        UnparserFilter unparser = new UnparserFilter(true, ColorSetting.OFF, OutputModes.PRETTY, context);
-        unparser.visitNode(kilTerm);
-        returnResult.setRawOutput(unparser.getResult());
+        KRunState returnResult = new KRunState(kilTerm, counter);
         return returnResult;
     }
 
@@ -94,7 +87,7 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunResult<SearchResults> search(
+    public SearchResults search(
             Integer bound,
             Integer depth,
             SearchType searchType,
@@ -153,15 +146,15 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        KRunResult<SearchResults> searchResultsKRunResult = new KRunResult<>(new SearchResults(
+        SearchResults retval = new SearchResults(
                 searchResults,
-                null));
+                null);
 
-        return searchResultsKRunResult;
+        return retval;
     }
 
     @Override
-    public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
+    public KRunState step(org.kframework.kil.Term cfg, int steps)
             throws KRunExecutionException {
         return internalRun(cfg, steps);
     }

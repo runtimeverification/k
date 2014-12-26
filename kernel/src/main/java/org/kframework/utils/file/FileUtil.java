@@ -3,6 +3,7 @@ package org.kframework.utils.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -179,6 +180,26 @@ public class FileUtil {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {
             throw KExceptionManager.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static Pair<PipedInputStream, PipedOutputStream> pipeOutputToInput() {
+        try {
+            PipedOutputStream out = new PipedOutputStream();
+            PipedInputStream in = new PipedInputStream(out);
+            return Pair.of(in, out);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error creating input/output pipe", e);
+        }
+    }
+
+    public static Pair<PipedOutputStream, PipedInputStream> pipeInputToOutput() {
+        try {
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
+            return Pair.of(out, in);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error creating input/output pipe", e);
         }
     }
 }

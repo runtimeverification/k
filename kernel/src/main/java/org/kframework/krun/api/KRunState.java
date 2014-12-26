@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 
 import java.io.Serializable;
 
-public class KRunState implements Serializable, Comparable<KRunState> {
+public class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 
     /**
     The pretty-printed term associated with this state, as suitable for display

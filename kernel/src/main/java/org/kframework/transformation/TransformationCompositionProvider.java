@@ -107,7 +107,7 @@ public class TransformationCompositionProvider<P, Q, R> implements Transformatio
         final Transformation<P, R> onlyStep = processSubTransformation(this.onlyStep);
         Transformation<P, Q> originalFirstStep = processSubTransformation(this.firstStep);
         final Transformation<P, Q> firstStep;
-        if (onlyStep == null && originalFirstStep == null && ptype.equals(TypeLiteral.get(Void.class)) && qtype.equals(new TypeLiteral<KRunResult<?>>() {})) {
+        if (onlyStep == null && originalFirstStep == null && ptype.equals(TypeLiteral.get(Void.class)) && qtype.equals(new TypeLiteral<KRunResult>() {})) {
             firstStep = (Transformation<P, Q>) executionStep;
         } else {
             firstStep = originalFirstStep;

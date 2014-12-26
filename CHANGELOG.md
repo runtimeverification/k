@@ -1,5 +1,28 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 
+# K Framework 3.6 #
+
+## General ##
+- Maude backend has been discontinued. Please try to convert your
+  definition to the Java backend. If you run into trouble and a particular
+  feature is not supported, please report the feature to us so we can fix it.
+  Limited support for K 3.5 will continue until the release of K 4.0. We will
+  backport bug fixes if necessary. K 4.0 will be released when the
+  Java backend is deemed a suitable complete replacement for maude.
+
+## KRun ##
+
+- `krun --output raw` has been removed. If you are interested in disabling
+  pretty-printing, it is recommended that you try `krun --output kast`.
+
+## Developer API ##
+
+- The KRunResult class has been removed. It contained two fields, `statistics`
+  and `rawResult`. If you are developing a feature that cannot work effectively
+  without one or both of these fields, please file an issue so that we can
+  evaluate your case and attempt to come up with a new API.
+
+
 # K Framework 3.5 (released 2014-12-19) #
 
 ## General ##

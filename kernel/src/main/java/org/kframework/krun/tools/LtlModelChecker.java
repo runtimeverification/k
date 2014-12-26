@@ -36,7 +36,7 @@ public interface LtlModelChecker {
     */
     public abstract KRunProofResult<KRunGraph> modelCheck(Term formula, Term cfg) throws KRunExecutionException;
 
-    public static class Tool implements Transformation<Void, KRunResult<?>> {
+    public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
         private final Provider<Term> initialConfiguration;

@@ -14,9 +14,7 @@ import org.kframework.utils.inject.Spec;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class Simulator implements Transformation<Void, KRunResult<?>> {
-
-    private final KExceptionManager kem;
+public class Simulator implements Transformation<Void, KRunResult> {
 
     @Inject
     Simulator(
@@ -25,9 +23,7 @@ public class Simulator implements Transformation<Void, KRunResult<?>> {
             @Main Provider<org.kframework.kil.Term> implTerm,
             @Spec Provider<org.kframework.kil.Term> specTerm,
             @Main GlobalContext implGlobalContext,
-            @Spec GlobalContext specGlobalContext,
-            KExceptionManager kem) {
-        this.kem = kem;
+            @Spec GlobalContext specGlobalContext) {
     }
 
     @Override

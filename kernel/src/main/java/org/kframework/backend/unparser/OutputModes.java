@@ -7,7 +7,7 @@ package org.kframework.backend.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), RAW(false), KAST(false), BINARY(false), NONE(false), NO_WRAP(true);
+    PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), KAST(false), BINARY(false), NONE(false), NO_WRAP(true);
 
     private boolean isPrettyPrinting;
 
