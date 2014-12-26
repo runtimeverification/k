@@ -9,7 +9,7 @@ import org.kframework.kore.UninterpretedSort
 object Sorts {
   val KString = UninterpretedSort("KString")
   val KBoolean = UninterpretedSort("KBoolean")
-  val KInt = UninterpretedSort("KInt")
+  val Int = UninterpretedSort("Int")
 
   val K = UninterpretedSort("K")
 }
