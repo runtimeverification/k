@@ -26,6 +26,20 @@ public final class JavaExecutionOptions {
     @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table]. (Default: table). This only has effect with '--backend java'.")
     public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;
 
+    @Parameter(names="--audit-file", description="Enforce that the rule applied at the step specified by "
+            + "--apply-step is a rule at the specified file and line, or fail with an error explaining why "
+            + "the rule did not apply.")
+    public String auditingFile;
+
+    @Parameter(names="--audit-line", description="Enforce that the rule applied at the step specified by "
+            + "--apply-step is a rule at the specified file and line, or fail with an error explaining why "
+            + "the rule did not apply.")
+    public Integer auditingLine;
+
+    @Parameter(names="--audit-step", description="Enforce that the rule applied at the specified step is a rule "
+            + "tagged with the value of --apply-tag, or fail with an error explaining why the rule did not apply.")
+    public Integer auditingStep;
+
     public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> {
 
         public RuleIndexConveter(String optionName) {

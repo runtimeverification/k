@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
 
@@ -215,6 +216,28 @@ public class IndexingTable implements Serializable, RuleIndex {
         }
 
         rules.addAll(unindexedRules);
+
+        if (!RuleAuditing.isAuditBegun() && RuleAuditing.isAudit()
+                && !rules.contains(RuleAuditing.getAuditingRule())
+                && !definition.functionRules().containsValue(RuleAuditing.getAuditingRule())) {
+            StringBuilder message = new StringBuilder();
+            for (IndexingPair pair : cfgTermIdx.getInstreamIndexingPairs()) {
+                message.append("Could not find rule matching stdin cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            for (IndexingPair pair : cfgTermIdx.getOutstreamIndexingPairs()) {
+                message.append("Could not find rule matching stdout/stderr cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            for (IndexingPair pair : cfgTermIdx.getKCellIndexingPairs()) {
+                message.append("Could not find rule matching K cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            throw RuleAuditing.fail(message.toString());
+        }
 
         return rules;
     }

@@ -32,11 +32,11 @@ import com.google.inject.Provider;
 
 public class JavaSymbolicExecutor implements Executor {
 
-    private final Definition definition;
     private final JavaExecutionOptions javaOptions;
     private final KILtoBackendJavaKILTransformer kilTransformer;
     private final GlobalContext globalContext;
     private final Provider<SymbolicRewriter> symbolicRewriter;
+    private final Provider<PatternMatchRewriter> patternMatchRewriter;
     private final KILtoBackendJavaKILTransformer transformer;
     private final Context context;
     private final KRunState.Counter counter;
@@ -48,6 +48,7 @@ public class JavaSymbolicExecutor implements Executor {
             KILtoBackendJavaKILTransformer kilTransformer,
             GlobalContext globalContext,
             Provider<SymbolicRewriter> symbolicRewriter,
+            Provider<PatternMatchRewriter> patternMatchRewriter,
             KILtoBackendJavaKILTransformer transformer,
             Definition definition,
             KRunState.Counter counter) {
@@ -56,8 +57,8 @@ public class JavaSymbolicExecutor implements Executor {
         this.kilTransformer = kilTransformer;
         this.globalContext = globalContext;
         this.symbolicRewriter = symbolicRewriter;
+        this.patternMatchRewriter = patternMatchRewriter;
         this.transformer = transformer;
-        this.definition = definition;
         globalContext.setDefinition(definition);
         this.counter = counter;
     }
@@ -83,8 +84,7 @@ public class JavaSymbolicExecutor implements Executor {
         TermContext termContext = TermContext.of(globalContext);
 
         if (javaOptions.patternMatching) {
-            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
             return rewriteResult;
         } else {
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
@@ -92,7 +92,6 @@ public class JavaSymbolicExecutor implements Executor {
             return getSymbolicRewriter().rewrite(constrainedTerm, bound);
         }
     }
-
 
     @Override
     public KRunResult<SearchResults> search(
@@ -125,9 +124,8 @@ public class JavaSymbolicExecutor implements Executor {
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
         if (javaOptions.patternMatching) {
-            GroundRewriter rewriter = new GroundRewriter(definition, termContext);
-            hits = rewriter.search(initialTerm, targetTerm, claims,
-                    patternRule, bound, depth, searchType);
+            hits = getPatternMatchRewriter().search(initialTerm, targetTerm, claims,
+                    patternRule, bound, depth, searchType, termContext);
         } else {
             hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType, termContext);
@@ -170,5 +168,9 @@ public class JavaSymbolicExecutor implements Executor {
 
     public SymbolicRewriter getSymbolicRewriter() {
         return symbolicRewriter.get();
+    }
+
+    private PatternMatchRewriter getPatternMatchRewriter() {
+        return patternMatchRewriter.get();
     }
 }

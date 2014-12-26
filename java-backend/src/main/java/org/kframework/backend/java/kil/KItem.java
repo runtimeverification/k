@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -17,6 +18,7 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
@@ -244,17 +246,20 @@ public final class KItem extends Term {
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
         private final BuiltinFunction builtins;
+        private final GlobalOptions options;
 
         @Inject
         public KItemOperations(
                 Tool tool,
                 JavaExecutionOptions javaOptions,
                 KExceptionManager kem,
-                BuiltinFunction builtins) {
+                BuiltinFunction builtins,
+                GlobalOptions options) {
             this.tool = tool;
             this.javaOptions = javaOptions;
             this.kem = kem;
             this.builtins = builtins;
+            this.options = options;
         }
 
         private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
@@ -274,9 +279,28 @@ public final class KItem extends Term {
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
             try {
-                return kItem.isEvaluable(context) ?
+                Term result = kItem.isEvaluable(context) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Unable to resolve function symbol:\n\t\t");
+                    sb.append(result);
+                    sb.append('\n');
+                    if (!context.definition().functionRules().isEmpty()) {
+                        sb.append("\tDefined function rules:\n");
+                        for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                            sb.append("\t\t");
+                            sb.append(rule);
+                            sb.append('\n');
+                        }
+                    }
+                    kem.registerCriticalWarning(sb.toString(), kItem);
+                    if (RuleAuditing.isAuditBegun()) {
+                        System.err.println("Function failed to evaluate: returned " + result);
+                    }
+                }
+                return result;
             } catch (StackOverflowError e) {
                 throw KExceptionManager.criticalError(TRACE_MSG, e);
             } catch (KEMException e) {
@@ -376,60 +400,79 @@ public final class KItem extends Term {
                 Term owiseResult = null;
 
                 for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                    /* function rules should be applied by pattern match rather than unification */
-                    Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
-                    if (solution == null) {
-                        continue;
-                    }
+                        try {
+                        if (rule == RuleAuditing.getAuditingRule()) {
+                            RuleAuditing.beginAudit();
+                        } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                            System.err.println("\nAuditing " + rule + "...\n");
+                        }
+                        /* function rules should be applied by pattern match rather than unification */
+                        Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
+                        if (solution == null) {
+                            continue;
+                        }
 
-                    Term rightHandSide = rule.rightHandSide();
-                    if (!rule.freshVariables().isEmpty()) {
-                        // this opt. only makes sense when using pattern matching
-                        // because after unification variables can end up in the
-                        // constraint rather than in the form of substitution
+                        Term rightHandSide = rule.rightHandSide();
+                        if (!rule.freshVariables().isEmpty()) {
+                            // this opt. only makes sense when using pattern matching
+                            // because after unification variables can end up in the
+                            // constraint rather than in the form of substitution
 
-                        /* rename unbound variables */
-                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
-                        /* rename rule variables in the rule RHS */
-                        rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                    }
-                    if (copyOnShareSubstAndEval) {
-                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                                solution,
-                                rule.reusableVariables().elementSet(),
-                                context);
-                    } else {
-                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                    }
+                            /* rename unbound variables */
+                            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
+                            /* rename rule variables in the rule RHS */
+                            rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                        }
+                        if (copyOnShareSubstAndEval) {
+                            rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                                    solution,
+                                    rule.reusableVariables().elementSet(),
+                                    context);
+                        } else {
+                            rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                        }
 
-                    if (rule.containsAttribute("owise")) {
-                        /*
-                         * YilongL: consider applying ``owise'' rule only when the
-                         * function is ground. This is fine because 1) it's OK not
-                         * to fully evaluate non-ground function during kompilation;
-                         * and 2) it's better to get stuck rather than to apply the
-                         * wrong ``owise'' rule during execution.
-                         */
-                        if (kItem.isGround()) {
-                            if (owiseResult != null) {
-                                throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                        if (rule.containsAttribute("owise")) {
+                            /*
+                             * YilongL: consider applying ``owise'' rule only when the
+                             * function is ground. This is fine because 1) it's OK not
+                             * to fully evaluate non-ground function during kompilation;
+                             * and 2) it's better to get stuck rather than to apply the
+                             * wrong ``owise'' rule during execution.
+                             */
+                            if (kItem.isGround()) {
+                                if (owiseResult != null) {
+                                    throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                                }
+                                RuleAuditing.succeed(rule);
+                                owiseResult = rightHandSide;
                             }
-                            owiseResult = rightHandSide;
+                        } else {
+                            if (tool == Tool.KRUN) {
+                                assert result == null || result.equals(rightHandSide):
+                                    "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                            }
+                            RuleAuditing.succeed(rule);
+                            result = rightHandSide;
                         }
-                    } else {
-                        if (tool == Tool.KRUN) {
-                            assert result == null || result.equals(rightHandSide):
-                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
-                        }
-                        result = rightHandSide;
-                    }
 
-                    /*
-                     * If the function definitions do not need to be deterministic, try them in order
-                     * and apply the first one that matches.
-                     */
-                    if (!javaOptions.deterministicFunctions && result != null) {
-                        return result;
+                        /*
+                         * If the function definitions do not need to be deterministic, try them in order
+                         * and apply the first one that matches.
+                         */
+                        if (!javaOptions.deterministicFunctions && result != null) {
+                            return result;
+                        }
+                    } finally {
+                        if (RuleAuditing.isAuditBegun()) {
+                            if (RuleAuditing.getAuditingRule() == rule) {
+                                RuleAuditing.endAudit();
+                            }
+                            if (!RuleAuditing.isSuccess()
+                                    && RuleAuditing.getAuditingRule() == rule) {
+                                throw RuleAuditing.fail();
+                            }
+                        }
                     }
                 }
 
@@ -439,7 +482,6 @@ public final class KItem extends Term {
                     return owiseResult;
                 }
             }
-
             return kItem;
         }
     }

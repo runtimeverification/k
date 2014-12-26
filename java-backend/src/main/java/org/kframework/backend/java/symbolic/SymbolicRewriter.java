@@ -42,7 +42,8 @@ import com.google.inject.Inject;
  */
 public class SymbolicRewriter {
 
-    private final Definition definition; // TODO(YilongL): use TermContext instead
+    private final Definition definition;
+    private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
@@ -55,6 +56,7 @@ public class SymbolicRewriter {
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
         this.definition = definition;
+        this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
 
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
@@ -110,46 +112,70 @@ public class SymbolicRewriter {
             return;
         }
 
+        RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
+
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         strategy.reset(getRules(subject.term()));
 
-        while (strategy.hasNext()) {
-            transition = strategy.nextIsTransition();
-            ArrayList<Rule> rules = Lists.newArrayList(strategy.next());
-//            System.out.println("rules.size: " + rules.size());
-            for (Rule rule : rules) {
-                try {
-                    ruleStopwatch.reset();
-                    ruleStopwatch.start();
+        try {
 
-                    ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+            while (strategy.hasNext()) {
+                transition = strategy.nextIsTransition();
+                ArrayList<Rule> rules = Lists.newArrayList(strategy.next());
+    //            System.out.println("rules.size: " + rules.size());
+                for (Rule rule : rules) {
+                    try {
+                        ruleStopwatch.reset();
+                        ruleStopwatch.start();
 
-                    for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
-                        /* compute all results */
-                        ConstrainedTerm result = buildResult(
-                                rule,
-                                unifConstraint);
-                        results.add(result);
-                        appliedRules.add(rule);
-                        Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
-                        Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
-                        if (results.size() == successorBound) {
-                            return;
+                        if (rule == RuleAuditing.getAuditingRule()) {
+                            RuleAuditing.beginAudit();
+                        } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                            System.err.println("\nAuditing " + rule + "...\n");
+                        }
+
+                        ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+
+                        for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
+                            RuleAuditing.succeed(rule);
+                            /* compute all results */
+                            ConstrainedTerm result = buildResult(
+                                    rule,
+                                    unifConstraint);
+                            results.add(result);
+                            appliedRules.add(rule);
+                            Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
+                            Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
+                            if (results.size() == successorBound) {
+                                return;
+                            }
+                        }
+                    } catch (KEMException e) {
+                        e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
+                        throw e;
+                    } finally {
+                        if (RuleAuditing.isAuditBegun()) {
+                            if (RuleAuditing.getAuditingRule() == rule) {
+                                RuleAuditing.endAudit();
+                            }
+                            if (!RuleAuditing.isSuccess()
+                                    && RuleAuditing.getAuditingRule() == rule) {
+                                throw RuleAuditing.fail();
+                            }
                         }
                     }
-                } catch (KEMException e) {
-                    e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
-                    throw e;
+                }
+                // If we've found matching results from one equivalence class then
+                // we are done, as we can't match rules from two equivalence classes
+                // in the same step.
+                if (results.size() > 0) {
+                    return;
                 }
             }
-            // If we've found matching results from one equivalence class then
-            // we are done, as we can't match rules from two equivalence classes
-            // in the same step.
-            if (results.size() > 0) {
-                return;
-            }
+        } finally {
+            RuleAuditing.clearAuditingRule();
         }
     }
 
