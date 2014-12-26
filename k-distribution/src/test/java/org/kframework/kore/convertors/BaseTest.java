@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.function.Function;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -18,7 +19,7 @@ import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright \\(c\\) (....-)?20.. K Team\\. All Rights Reserved\\.";
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
 
     static final String ROOT = "src/test/resources/convertor-tests/";
 
