@@ -61,8 +61,8 @@ class KoreTest {
     assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KApply(KLabel("bar"), KList(), Attributes()))
     assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KList())
     assertNotEquals(KList(), KApply(KLabel("foo"), KList(), Attributes()))
-    assertNotEquals(KList(KToken(Sorts.KInt, "5")), KApply(KLabel("foo"), KList(KToken(Sorts.KInt, "5")), Attributes()))
-    assertNotEquals(KApply(KLabel("foo"), KList(KToken(Sorts.KInt, "5")), Attributes()), KList(KToken(Sorts.KInt, "5")))
+    assertNotEquals(KList(KToken(Sorts.Int, "5")), KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Attributes()))
+    assertNotEquals(KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Attributes()), KList(KToken(Sorts.Int, "5")))
   }
 
   @Test def testKSequenceEquals {

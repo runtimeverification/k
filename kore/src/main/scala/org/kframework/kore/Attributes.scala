@@ -68,8 +68,8 @@ object Location {
   import KORE._
 
   def apply(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = {
-    'location('startLine(Sorts.KInt(startLine.toString)), 'startColumn(Sorts.KInt(startColumn.toString)),
-      'endLine(Sorts.KInt(endLine.toString)), 'endColumn(Sorts.KInt(endColumn.toString)))
+    'location('startLine(Sorts.Int(startLine.toString)), 'startColumn(Sorts.Int(startColumn.toString)),
+      'endLine(Sorts.Int(endLine.toString)), 'endColumn(Sorts.Int(endColumn.toString)))
   }
 }
 
