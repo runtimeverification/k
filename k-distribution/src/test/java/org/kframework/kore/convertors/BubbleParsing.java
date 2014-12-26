@@ -37,9 +37,8 @@ class BubbleParsing {
     private Grammar kastGrammar;
 
     public BubbleParsing(TestParserOnKORE testParserOnKORE) {
-        DefintionWithContext foo = parseUsingOuter(new File(TestParserOnKORE.ROOT + "/kore.k"));
-        KILtoKORE kilToKore1 = new KILtoKORE(foo.context);
-        Definition kilDefinitionOfKORE = foo.definition;
+        Definition kilDefinitionOfKORE = parseUsingOuter(new File(TestParserOnKORE.ROOT + "/kore.k"));
+        KILtoKORE kilToKore1 = new KILtoKORE(null);
         kilDefinitionOfKORE.setMainModule("K");
         org.kframework.kore.outer.Definition definitionOfKORE = kilToKore1.apply(kilDefinitionOfKORE);
         Module kastModule = definitionOfKORE.getModule("K").get();
@@ -47,7 +46,7 @@ class BubbleParsing {
         kastGrammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
     }
 
-    private DefintionWithContext parseUsingOuter(File file) {
+    private Definition parseUsingOuter(File file) {
         Definition def = new Definition();
         String definitionText;
         try {
@@ -58,7 +57,7 @@ class BubbleParsing {
         def.setItems(Outer.parse(Sources.generatedBy(BubbleParsing.class), definitionText, null));
         def.setMainModule("KAST");
         def.setMainSyntaxModule("KAST");
-        return new DefintionWithContext(def, null);
+        return def;
     }
 
     protected Module parseBubbles(Module m) {
