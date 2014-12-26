@@ -255,8 +255,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-
-        org.kframework.kore.Attributes attrs = Attributes().add("userList", p.getSort().getName());
+        org.kframework.kore.Attributes attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 

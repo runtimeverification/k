@@ -33,6 +33,7 @@ import static org.kframework.kore.Constructors.*;
 
 public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
+    public static final String USER_LIST_ATTRIBUTE = "userList";
     private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
     }
@@ -58,7 +59,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 if (sentence instanceof SyntaxProduction) {
                     SyntaxProduction prod = (SyntaxProduction) sentence;
                     List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    Optional<String> listType = prod.att().getOptionalString("userList");
+                    Optional<String> listType = prod.att().getOptionalString(USER_LIST_ATTRIBUTE);
                     if (listType.isPresent()) {
                         List<SyntaxProduction> prods = listProds.get(listType.get());
                         if (prods == null) {
@@ -233,6 +234,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                             }
                             org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
                                     convertSort(syntaxProduction.sort()));
+
                             org.kframework.kil.Production kilProd = new org.kframework.kil.Production(
                                     lhs, kilProdItems);
 
@@ -315,6 +317,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         }
         org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
                 convertSort(syntaxProduction.sort()));
+
         org.kframework.kil.Production kilProd = new org.kframework.kil.Production(lhs,
                 kilProdItems);
 

@@ -1,5 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-module TEST [location(startLine(3),startColumn(1),endLine(5),endColumn(9))]
+module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"5")),endColumn(#token(Int,"9")))]
 
 endmodule
