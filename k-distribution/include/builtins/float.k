@@ -57,6 +57,8 @@ module FLOAT-HOOKS
                  | maxFloat(Float, Float)       [function, smtlib(max), hook(#FLOAT:max)]
                  | minFloat(Float, Float)       [function, smtlib(min), hook(#FLOAT:min)]
                  | sqrtFloat(Float)             [function]
+                 | maxValueFloat(Int, Int)      [function, hook(#FLOAT:maxValue)]
+                 | minValueFloat(Int, Int)      [function, hook(#FLOAT:minValue)]
 
   syntax Bool ::= Float "<=Float" Float       [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:le)]
                 | Float "<Float" Float        [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:lt)]
