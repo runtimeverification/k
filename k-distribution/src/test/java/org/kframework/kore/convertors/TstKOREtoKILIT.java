@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.kil.Definition;
-import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
 
 public class TstKOREtoKILIT extends BaseTest {
 

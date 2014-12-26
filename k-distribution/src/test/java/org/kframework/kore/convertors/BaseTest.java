@@ -7,9 +7,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
