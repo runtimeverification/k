@@ -29,26 +29,17 @@ import com.google.inject.multibindings.Multibinder;
 
 public class KDocModule extends AbstractModule {
 
-    private final KDocOptions options;
-
-    public KDocModule(KDocOptions options) {
-        this.options = options;
-    }
-
     @Override
     protected void configure() {
         bind(FrontEnd.class).to(KDocFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KDOC);
-        bind(KDocOptions.class).toInstance(options);
-        bind(GlobalOptions.class).toInstance(options.global);
-        bind(DefinitionLoadingOptions.class).toInstance(options.definitionLoading);
 
         install(new DefinitionLoadingModule());
 
         bind(Context.class).annotatedWith(Main.class).to(Context.class);
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
-        optionsBinder.addBinding().toInstance(options);
+        optionsBinder.addBinding().to(KDocOptions.class);
         Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
 
         MapBinder<String, PosterBackend> posterBinder = MapBinder.newMapBinder(
@@ -59,6 +50,16 @@ public class KDocModule extends AbstractModule {
         posterBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
         posterBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
         posterBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
+    }
+
+    @Provides
+    GlobalOptions globalOptions(KDocOptions options) {
+        return options.global;
+    }
+
+    @Provides
+    DefinitionLoadingOptions defLoadingOptions(KDocOptions options) {
+        return options.definitionLoading;
     }
 
     @Provides

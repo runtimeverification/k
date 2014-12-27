@@ -2,8 +2,7 @@
 package org.kframework.krun.api;
 
 import org.kframework.kil.Term;
-
-import com.google.inject.Singleton;
+import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
 
@@ -28,7 +27,7 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
      */
     private int stateId;
 
-    @Singleton
+    @RequestScoped
     public static class Counter {
         private int nextState;
     }

@@ -14,7 +14,12 @@ import com.google.common.base.Stopwatch;
  */
 public class Profiler {
 
-    public static final boolean ENABLE_PROFILING_MODE = true;
+    public static final InheritableThreadLocal<Boolean> enableProfilingMode = new InheritableThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
 
     public static final ReentrantStopwatch QUERY_RULE_INDEXING_TIMER            =   new ReentrantStopwatch("Query rule indexing");
     public static final ReentrantStopwatch REWRITE_WITH_KOMPILED_RULES_TIMER    =   new ReentrantStopwatch("Rewrite with kompiled rules");
@@ -30,25 +35,25 @@ public class Profiler {
     public static final ReentrantStopwatch DEEP_CLONE_TIMER                 =   new ReentrantStopwatch("Deep clone");
 
     public static void startTimer(ReentrantStopwatch timer) {
-        if (ENABLE_PROFILING_MODE) {
+        if (enableProfilingMode.get()) {
             timer.start();
         }
     }
 
     public static void stopTimer(ReentrantStopwatch timer) {
-        if (ENABLE_PROFILING_MODE) {
+        if (enableProfilingMode.get()) {
             timer.stop();
         }
     }
 
     public static void resetTimer(ReentrantStopwatch timer) {
-        if (ENABLE_PROFILING_MODE) {
+        if (enableProfilingMode.get()) {
             timer.reset();
         }
     }
 
     public static void printResult() {
-        if (ENABLE_PROFILING_MODE) {
+        if (enableProfilingMode.get()) {
             System.err.printf("%s(mc=%s, eval=%s[%s, %s], rew=%s) + %s%n",
                     REWRITE_WITH_KOMPILED_RULES_TIMER, PATTERN_MATCH_TIMER,
                     EVALUATE_SIDE_CONDITIONS_TIMER,

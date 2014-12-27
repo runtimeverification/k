@@ -19,6 +19,7 @@ import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -36,9 +37,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@RequestScoped
 public class Context implements Serializable {
 
     public static final Set<Key<String>> parsingTags = ImmutableSet.of(
@@ -131,8 +131,8 @@ public class Context implements Serializable {
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     @Deprecated @Inject public transient GlobalOptions globalOptions;
-    @Deprecated public KompileOptions kompileOptions;
-    @Deprecated @Inject(optional=true) public KRunOptions krunOptions;
+    public KompileOptions kompileOptions;
+    @Deprecated @Inject(optional=true) public transient KRunOptions krunOptions;
     @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 
     public Context() {

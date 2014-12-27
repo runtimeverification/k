@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kdoc;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,9 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
@@ -22,18 +25,18 @@ import com.google.inject.Provider;
 
 public class KDocFrontEnd extends FrontEnd {
 
-    public static List<Module> getModules(String[] args) {
-        KDocOptions options = new KDocOptions();
-
+    public static List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
-        modules.add(new KDocModule(options));
-        modules.add(new JCommanderModule(args));
+        modules.add(new KDocModule());
+        modules.add(new JCommanderModule());
         modules.add(new CommonModule());
         return modules;
     }
 
-    private final PosterBackend backend;
+    private final Provider<PosterBackend> backend;
     private final Provider<Definition> def;
+    private final DefinitionScope scope;
+    private final Provider<File> kompiledDir;
 
     @Inject
     public KDocFrontEnd(
@@ -42,18 +45,27 @@ public class KDocFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
-            PosterBackend backend,
+            Provider<PosterBackend> backend,
             Provider<Definition> def,
-            FileUtil files) {
+            FileUtil files,
+            DefinitionScope scope,
+            @KompiledDir Provider<File> kompiledDir) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.backend = backend;
         this.def = def;
+        this.scope = scope;
+        this.kompiledDir = kompiledDir;
     }
 
     @Override
     protected boolean run() {
-        backend.run(def.get());
-        return true;
+        try {
+            scope.enter(kompiledDir.get());
+            backend.get().run(def.get());
+            return true;
+        } finally {
+            scope.exit();
+        }
     }
 
 }

@@ -2,25 +2,30 @@
 package org.kframework.utils;
 
 import java.io.File;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.kframework.kdoc.KDocOptions;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.Main;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.TTYInfo;
-import org.kframework.utils.file.WorkingDir;
+import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.inject.DefinitionScope;
+import org.kframework.utils.inject.SimpleScope;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provides;
+import com.google.inject.name.Names;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseTestCase {
@@ -47,6 +52,7 @@ public abstract class BaseTestCase {
     protected RunProcess rp;
 
     @Mock
+    protected
     File kompiledDir;
 
     @Mock
@@ -58,6 +64,9 @@ public abstract class BaseTestCase {
     @Mock
     protected FileUtil files;
 
+    @Mock
+    protected DefinitionScope scope;
+
     @Before
     public void setUpWiring() {
         context.kompileOptions = new KompileOptions();
@@ -67,11 +76,16 @@ public abstract class BaseTestCase {
 
         @Override
         protected void configure() {
-            bind(Context.class).toInstance(context);
+            bind(KompileOptions.class).toInstance(context.kompileOptions);
             bind(Definition.class).toInstance(definition);
             bind(Configuration.class).toInstance(configuration);
+            bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
         }
 
+        @Provides
+        Context context() {
+            return context;
+        }
     }
 
     public class TestModule extends AbstractModule {
@@ -79,10 +93,15 @@ public abstract class BaseTestCase {
         @Override
         protected void configure() {
             bind(RunProcess.class).toInstance(rp);
-            bind(TTYInfo.class).toInstance(new TTYInfo(true, true, true));
-            bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));
-            bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Environment.class).toInstance(System.getenv());
+            bind(KDocOptions.class).toInstance(new KDocOptions());
+            bind(KRunOptions.class).toInstance(new KRunOptions());
         }
 
+    }
+
+    public void prepInjector(Injector injector, String tool, String[] args) {
+        SimpleScope scope = injector.getInstance(Key.get(SimpleScope.class, Names.named("requestScope")));
+        scope.enter();
+        Main.seedInjector(scope, tool, args, new File("."), System.getenv());
     }
 }

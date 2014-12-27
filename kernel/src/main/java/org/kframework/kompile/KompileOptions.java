@@ -10,20 +10,17 @@ import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
+@RequestScoped
 public class KompileOptions implements Serializable {
-
-    public KompileOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public KompileOptions(Void v) {}
 
     @Parameter(description="<file>")
     private List<String> parameters;
@@ -32,13 +29,13 @@ public class KompileOptions implements Serializable {
         if (parameters == null || parameters.size() == 0) {
             throw KExceptionManager.criticalError("You have to provide exactly one main file in order to compile.");
         }
-        return files.resolveWorkingDirectory(parameters.get(0));
+        return files.get().resolveWorkingDirectory(parameters.get(0));
     }
 
-    private transient FileUtil files;
+    private transient Provider<FileUtil> files;
 
     @Inject
-    public void setFiles(FileUtil files) {
+    public void setFiles(Provider<FileUtil> files) {
         this.files = files;
     }
 

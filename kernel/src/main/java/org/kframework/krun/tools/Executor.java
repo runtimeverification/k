@@ -28,7 +28,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public interface Executor {
 
@@ -79,7 +78,7 @@ public interface Executor {
     public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
-        private final Provider<Term> initialConfiguration;
+        private final Term initialConfiguration;
         private final Context context;
         private final Stopwatch sw;
         private final KExceptionManager kem;
@@ -89,7 +88,7 @@ public interface Executor {
         @Inject
         Tool(
                 KRunOptions options,
-                @Main Provider<Term> initialConfiguration,
+                @Main Term initialConfiguration,
                 Stopwatch sw,
                 @Main Context context,
                 KExceptionManager kem,
@@ -143,7 +142,7 @@ public interface Executor {
                         options.depth,
                         options.searchType(),
                         searchPattern.patternRule,
-                        initialConfiguration.get(), searchPattern.steps);
+                        initialConfiguration, searchPattern.steps);
 
             sw.printIntermediate("Search total");
             return result;
@@ -152,10 +151,10 @@ public interface Executor {
         public KRunResult execute() throws ParseFailedException, KRunExecutionException {
             KRunState result;
             if (options.depth != null) {
-                result = executor.step(initialConfiguration.get(), options.depth);
+                result = executor.step(initialConfiguration, options.depth);
                 sw.printIntermediate("Bounded execution total");
             } else {
-                result = executor.run(initialConfiguration.get());
+                result = executor.run(initialConfiguration);
                 sw.printIntermediate("Normal execution total");
             }
             ASTNode pattern = pattern();

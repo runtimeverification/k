@@ -4,12 +4,12 @@ package org.kframework.utils;
 import java.io.*;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
-@Singleton
+@RequestScoped
 public class BinaryLoader {
 
     private final KExceptionManager kem;

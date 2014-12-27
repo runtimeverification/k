@@ -7,11 +7,11 @@ import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@RequestScoped
 public class GlobalContext {
     private Definition def;
     public final FileSystem fs;

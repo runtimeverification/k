@@ -28,15 +28,10 @@ import com.google.inject.Module;
 
 public class KompileFrontEnd extends FrontEnd {
 
-    public static List<Module> getModules(String[] args) {
-        KompileOptions options = new KompileOptions();
-
-        final Context context = new Context();
-        context.kompileOptions = options;
-
+    public static List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
-        modules.add(new KompileModule(context, options));
-        modules.add(new JCommanderModule(args));
+        modules.add(new KompileModule());
+        modules.add(new JCommanderModule());
         modules.add(new CommonModule());
         return modules;
     }
@@ -83,6 +78,7 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         context.files = files;
+        context.kompileOptions = options;
 
         Definition def = genericCompile(options.experimental.step);
 

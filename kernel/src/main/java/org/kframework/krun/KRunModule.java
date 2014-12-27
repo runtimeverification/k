@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -51,9 +52,13 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.inject.Annotations;
+import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -64,7 +69,6 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
@@ -75,28 +79,16 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder;
 
 public class KRunModule extends AbstractModule {
 
-    private final KRunOptions options;
-
-    public KRunModule(KRunOptions options) {
-        this.options = options;
-    }
-
     @Override
     protected void configure() {
         bind(FrontEnd.class).to(KRunFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KRUN);
-        bind(KRunOptions.class).toInstance(options);
-        bind(SMTOptions.class).toInstance(options.experimental.smt);
-        bind(GlobalOptions.class).toInstance(options.global);
-        bind(ColorOptions.class).toInstance(options.color);
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
-        optionsBinder.addBinding().toInstance(options);
+        optionsBinder.addBinding().to(KRunOptions.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
         experimentalOptionsBinder.addBinding().toInstance(KRunOptions.Experimental.class);
         experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
-
-        bind(OutputModes.class).toInstance(options.output);
 
         ThrowingProviderBinder throwingBinder = ThrowingProviderBinder.create(binder());
 
@@ -174,6 +166,26 @@ public class KRunModule extends AbstractModule {
         }
     }
 
+    @Provides
+    SMTOptions smtOptions(KRunOptions options) {
+        return options.experimental.smt;
+    }
+
+    @Provides
+    GlobalOptions globalOptions(KRunOptions options) {
+        return options.global;
+    }
+
+    @Provides
+    ColorOptions colorOptions(KRunOptions options) {
+        return options.color;
+    }
+
+    @Provides
+    OutputModes outputModes(KRunOptions options) {
+        return options.output;
+    }
+
     public static class CommonModule extends AbstractModule {
 
         @Override
@@ -190,7 +202,7 @@ public class KRunModule extends AbstractModule {
 
             bind(Debugger.class).to(ExecutorDebugger.class);
 
-            bind(Term.class).toProvider(InitialConfigurationProvider.class);
+            bind(Term.class).toProvider(InitialConfigurationProvider.class).in(RequestScoped.class);
 
             bind(FileUtil.class);
 
@@ -233,7 +245,7 @@ public class KRunModule extends AbstractModule {
             return provider.get();
         }
 
-        @Provides @Singleton
+        @Provides @DefinitionScoped
         Configuration configuration(BinaryLoader loader, Context context, Stopwatch sw, FileUtil files) {
             Configuration cfg = loader.loadOrDie(Configuration.class,
                     files.resolveKompiled("configuration.bin"));
@@ -244,18 +256,22 @@ public class KRunModule extends AbstractModule {
 
     public static class MainExecutionContextModule extends AnnotatedByDefinitionModule {
 
-        private final KRunOptions options;
         private final List<Module> definitionSpecificModules;
 
-        public MainExecutionContextModule(KRunOptions options, List<Module> definitionSpecificModules) {
-            this.options = options;
+        public MainExecutionContextModule(List<Module> definitionSpecificModules) {
             this.definitionSpecificModules = definitionSpecificModules;
         }
 
         @Override
         protected void configure() {
             exposeBindings(definitionSpecificModules, Main.class);
-            bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
+            bind(File.class).annotatedWith(Annotations.main(KompiledDir.class)).to(Key.get(File.class, KompiledDir.class));
+            expose(File.class).annotatedWith(Annotations.main(KompiledDir.class));
+        }
+
+        @Provides
+        ConfigurationCreationOptions ccOptions(KRunOptions options) {
+            return options.configurationCreation;
         }
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.File;
 import java.util.List;
 
 import org.kframework.kil.Attributes;
@@ -14,7 +15,9 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.DefinitionLoadingModule;
+import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
@@ -24,29 +27,29 @@ import org.kframework.utils.inject.Main;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 
 public class KRunFrontEnd extends FrontEnd {
 
-    public static List<Module> getDefinitionSpecificModules(String[] argv) {
+    public static List<Module> getDefinitionSpecificModules() {
         return ImmutableList.<Module>of(
                 new KRunModule.CommonModule(),
                 new DefinitionLoadingModule()
         );
     }
 
-    public static List<Module> getModules(String[] args, List<Module> definitionSpecificModules) {
-        KRunOptions options = new KRunOptions();
-
+    public static List<Module> getModules(List<Module> definitionSpecificModules) {
         return ImmutableList.<Module>of(
-                new KRunModule(options),
+                new KRunModule(),
                 new CommonModule(),
-                new JCommanderModule(args),
-                new KRunModule.MainExecutionContextModule(options, definitionSpecificModules));
+                new JCommanderModule(),
+                new KRunModule.MainExecutionContextModule(definitionSpecificModules));
     }
 
 
     private final TransformationProvider<Transformation<Void, Void>> toolProvider;
-    private final KExceptionManager kem;
+    private final DefinitionScope scope;
+    private final Provider<File> kompiledDir;
 
     @Inject
     KRunFrontEnd(
@@ -57,10 +60,13 @@ public class KRunFrontEnd extends FrontEnd {
             KExceptionManager kem,
             BinaryLoader loader,
             JarInfo jarInfo,
-            @Main FileUtil files) {
+            @Main FileUtil files,
+            DefinitionScope scope,
+            @Main(KompiledDir.class) Provider<File> kompiledDir) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.toolProvider = toolProvider;
-        this.kem = kem;
+        this.scope = scope;
+        this.kompiledDir = kompiledDir;
     }
 
     /**
@@ -69,12 +75,15 @@ public class KRunFrontEnd extends FrontEnd {
      */
     public boolean run() {
         try {
+            scope.enter(kompiledDir.get());
             Transformation<Void, Void> tool = toolProvider.get();
             tool.run(null, new Attributes());
             return true;
         } catch (TransformationNotSatisfiedException
                 | AmbiguousTransformationException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);
+        } finally {
+            scope.exit();
         }
     }
 }

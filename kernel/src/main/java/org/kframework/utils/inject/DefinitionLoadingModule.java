@@ -21,8 +21,8 @@ import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 
 public class DefinitionLoadingModule extends AbstractModule {
 
@@ -30,7 +30,7 @@ public class DefinitionLoadingModule extends AbstractModule {
     protected void configure() {
     }
 
-    @Provides @Singleton
+    @Provides @DefinitionScoped
     Context context(
             BinaryLoader loader,
             DefinitionLoadingOptions options,
@@ -47,7 +47,7 @@ public class DefinitionLoadingModule extends AbstractModule {
         return context;
     }
 
-    @Provides
+    @Provides @DefinitionScoped
     Definition definition(Tool tool, BinaryLoader loader, FileUtil files) {
         if (tool == Tool.KDOC) {
             return loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
@@ -57,7 +57,7 @@ public class DefinitionLoadingModule extends AbstractModule {
 
 
     @Provides
-    KompileOptions kompileOptions(Context context, FileUtil files) {
+    KompileOptions kompileOptions(Context context, Provider<FileUtil> files) {
         context.kompileOptions.setFiles(files);
         return context.kompileOptions;
     }
