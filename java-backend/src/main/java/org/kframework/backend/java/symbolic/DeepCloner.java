@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.kframework.backend.java.kil.Immutable;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.Profiler;
 
 import com.rits.cloning.Cloner;
@@ -21,6 +22,7 @@ public class DeepCloner {
 
     static {
         cloner.dontCloneInstanceOf(Immutable.class);
+        cloner.dontCloneInstanceOf(TermContext.class);
     }
 
     public static Term clone(Term term) {
@@ -39,7 +41,7 @@ public class DeepCloner {
 
         @Override
         protected Object fastClone(final Object o, final Map<Object, Object> clones) throws IllegalAccessException {
-            if (o instanceof Term && !((Term) o).isMutable()) {
+            if ((o instanceof Term && !((Term) o).isMutable())) {
                 return o;
             } else {
                 return super.fastClone(o, clones);
