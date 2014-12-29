@@ -8,11 +8,12 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
+import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,11 +36,13 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
         private final Term leftHandSide;
         private final Term rightHandSide;
+        private final ImmutableList<RHSInstruction> instructions;
         private int hashCode;
 
-        private Equality(Term leftHandSide, Term rightHandSide) {
+        private Equality(Term leftHandSide, Term rightHandSide, ImmutableList<RHSInstruction> instructions) {
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
+            this.instructions = instructions;
         }
 
         public Term leftHandSide() {
@@ -48,6 +51,10 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
         public Term rightHandSide() {
             return rightHandSide;
+        }
+
+        public List<RHSInstruction> instructions() {
+            return instructions;
         }
 
         @Override
@@ -156,8 +163,11 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
         private final ImmutableList.Builder<Equality> equalitiesBuilder = ImmutableList.builder();
 
-        public void add(Term leftHandSide, Term rightHandSide) {
-            equalitiesBuilder.add(new Equality(leftHandSide, rightHandSide));
+        public void add(Term leftHandSide, Term rightHandSide, TermContext context) {
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions(context);
+            leftHandSide.accept(visitor);
+            equalitiesBuilder.add(new Equality(leftHandSide, rightHandSide,
+                    visitor.getInstructions()));
         }
 
         public UninterpretedConstraint build() {

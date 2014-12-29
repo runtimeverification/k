@@ -16,31 +16,31 @@ import com.google.common.collect.Maps;
  * @author YilongL
  *
  */
-public final class Instruction implements Serializable {
+public final class MatchingInstruction implements Serializable {
 
     public enum Type {
         UP, CHOICE, GOTO
     }
 
-    public static Instruction UP = new Instruction(Type.UP, null);
-    public static Instruction CHOICE = new Instruction(Type.CHOICE, null);
+    public static final MatchingInstruction UP = new MatchingInstruction(Type.UP, null);
+    public static final MatchingInstruction CHOICE = new MatchingInstruction(Type.CHOICE, null);
 
-    private static final Map<CellLabel, Instruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
+    private static final Map<CellLabel, MatchingInstruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
 
     private final Type type;
     private final CellLabel cellLabel;
     private final int hashCode;
 
-    public static Instruction GOTO(CellLabel cellLabel) {
-        Instruction instr = cachedGOTOInstructions.get(cellLabel);
+    public static MatchingInstruction GOTO(CellLabel cellLabel) {
+        MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
         if (instr == null) {
-            instr = new Instruction(Type.GOTO, cellLabel);
+            instr = new MatchingInstruction(Type.GOTO, cellLabel);
             cachedGOTOInstructions.put(cellLabel, instr);
         }
         return instr;
     }
 
-    private Instruction(Type type, CellLabel cellLabel) {
+    private MatchingInstruction(Type type, CellLabel cellLabel) {
         this.type = type;
         this.cellLabel = cellLabel;
         this.hashCode = type == Type.GOTO ?
@@ -82,9 +82,9 @@ public final class Instruction implements Serializable {
         case CHOICE:
             return CHOICE;
         case GOTO:
-            Instruction instr = cachedGOTOInstructions.get(cellLabel);
+            MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
             if (instr == null) {
-                instr = new Instruction(type, cellLabel);
+                instr = new MatchingInstruction(type, cellLabel);
                 cachedGOTOInstructions.put(cellLabel, instr);
             }
             return instr;

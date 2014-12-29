@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.map.UnmodifiableMap;
-import org.kframework.backend.java.rewritemachine.Instruction;
+import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -27,7 +27,7 @@ public class JavaBackendRuleData implements Serializable {
     private final UnmodifiableMap<String, Term> lhsOfReadCell;
     private final UnmodifiableMap<String, Term> rhsOfWriteCell;
     private final ImmutableSet<String> cellsToCopy;
-    private final ImmutableList<Instruction> instructions;
+    private final ImmutableList<MatchingInstruction> instructions;
 
     public JavaBackendRuleData(ImmutableList<BuiltinLookup> lookups,
             ImmutableMap<Variable, Integer> concreteDataStructureSize,
@@ -36,7 +36,7 @@ public class JavaBackendRuleData implements Serializable {
             UnmodifiableMap<String, Term> lhsOfReadCell,
             UnmodifiableMap<String, Term> rhsOfWriteCell,
             ImmutableSet<String> cellsToCopy,
-            ImmutableList<Instruction> instructions) {
+            ImmutableList<MatchingInstruction> instructions) {
         super();
         this.lookups = lookups;
         this.concreteDataStructureSize = concreteDataStructureSize;
@@ -121,7 +121,8 @@ public class JavaBackendRuleData implements Serializable {
     public JavaBackendRuleData setLhsOfReadCell(Map<String, Term> lhsOfReadCell2) {
         JavaBackendRuleData ruleData = new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
-                (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(lhsOfReadCell2)), rhsOfWriteCell, cellsToCopy, instructions);
+                (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(lhsOfReadCell2)),
+                rhsOfWriteCell, cellsToCopy, instructions);
         return ruleData;
     }
 
@@ -132,15 +133,16 @@ public class JavaBackendRuleData implements Serializable {
     public JavaBackendRuleData setRhsOfWriteCell(Map<String, Term> rhsOfWriteCell2) {
         JavaBackendRuleData ruleData = new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
-                lhsOfReadCell, (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(rhsOfWriteCell2)), cellsToCopy, instructions);
+                lhsOfReadCell, (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(rhsOfWriteCell2)),
+                cellsToCopy, instructions);
         return ruleData;
     }
 
-    public List<Instruction> getInstructions() {
+    public List<MatchingInstruction> getMatchingInstructions() {
         return instructions;
     }
 
-    public JavaBackendRuleData setInstructions(List<Instruction> instructions2) {
+    public JavaBackendRuleData setInstructions(List<MatchingInstruction> instructions2) {
         JavaBackendRuleData ruleData = new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, ImmutableList.copyOf(instructions2));

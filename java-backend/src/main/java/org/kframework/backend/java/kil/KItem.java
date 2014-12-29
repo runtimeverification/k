@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -423,14 +424,8 @@ public final class KItem extends Term {
                             /* rename rule variables in the rule RHS */
                             rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                         }
-                        if (copyOnShareSubstAndEval) {
-                            rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                                    solution,
-                                    rule.reusableVariables().elementSet(),
-                                    context);
-                        } else {
-                            rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                        }
+                        rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
+                                    context, false);
 
                         if (rule.containsAttribute("owise")) {
                             /*
@@ -486,7 +481,7 @@ public final class KItem extends Term {
         }
     }
 
-    private boolean isAnywhereApplicable(TermContext context) {
+    public boolean isAnywhereApplicable(TermContext context) {
         if (anywhereApplicable != null) {
             return anywhereApplicable;
         }

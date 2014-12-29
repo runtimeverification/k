@@ -13,8 +13,8 @@ import java.util.Set;
 
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.JavaBackendRuleData;
-import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
+import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -39,7 +39,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     private enum Status { CONFIGURATION, RULE }
 
     private Status status;
-    private List<Instruction> schedule = new ArrayList<>();
+    private List<MatchingInstruction> schedule = new ArrayList<>();
     private Set<String> cellsToVisit = new HashSet<>();
     private Deque<String> cellStack = new ArrayDeque<>();
     private Map<String, Set<String>> containingCells = new HashMap<>();
@@ -152,12 +152,12 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             }
 
             if (context.getConfigurationStructureMap().get(cellLabelName).isStarOrPlus()) {
-                schedule.add(Instruction.CHOICE);
+                schedule.add(MatchingInstruction.CHOICE);
             }
 
-            schedule.add(Instruction.GOTO(CellLabel.of(cellLabelName)));
+            schedule.add(MatchingInstruction.GOTO(CellLabel.of(cellLabelName)));
             cell = (Cell) super.visit(cell, _void);
-            schedule.add(Instruction.UP);
+            schedule.add(MatchingInstruction.UP);
 
             return cell;
         } else {

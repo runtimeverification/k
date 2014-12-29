@@ -2,17 +2,21 @@
 
 package org.kframework.backend.java.kil;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections15.list.UnmodifiableList;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.rewritemachine.Instruction;
+import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
+import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
-import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
@@ -65,6 +69,14 @@ public class Rule extends JavaSymbolicObject {
      */
     private final Map<CellLabel, Term> rhsOfWriteCells;
     /**
+     * Instructions for constructing rhs of local rewrite operations under write cells.
+     */
+    private final Map<CellLabel, ImmutableList<RHSInstruction>> instructionsOfWriteCells;
+    /**
+     * Instructions for evaluating side condition of rule.
+     */
+    private final List<ImmutableList<RHSInstruction>> instructionsOfRequires;
+    /**
      * @see Rule#computeReusableBoundVars()
      */
     private final Multiset<Variable> reusableVariables;
@@ -78,7 +90,8 @@ public class Rule extends JavaSymbolicObject {
      * Instructions generated from this rule to be executed by the
      * {@link KAbstractRewriteMachine}.
      */
-    private final List<Instruction> instructions;
+    private final List<MatchingInstruction> matchingInstructions;
+    private final List<RHSInstruction> rhsInstructions;
 
     private final boolean modifyCellStructure;
 
@@ -100,9 +113,9 @@ public class Rule extends JavaSymbolicObject {
             Map<CellLabel, Term> lhsOfReadCells,
             Map<CellLabel, Term> rhsOfWriteCells,
             Set<CellLabel> cellsToCopy,
-            List<Instruction> instructions,
+            List<MatchingInstruction> instructions,
             ASTNode oldRule,
-            Definition definition) {
+            TermContext termContext) {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
@@ -130,10 +143,10 @@ public class Rule extends JavaSymbolicObject {
 
             Term streamList = streamListBuilder.build();
             this.indexingPair = oldRule.containsAttribute(Constants.STDIN) ?
-                    IndexingPair.getInstreamIndexingPair(streamList, definition) :
-                    IndexingPair.getOutstreamIndexingPair(streamList, definition);
+                    IndexingPair.getInstreamIndexingPair(streamList, termContext.definition()) :
+                    IndexingPair.getOutstreamIndexingPair(streamList, termContext.definition());
         } else {
-            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(definition);
+            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(termContext.definition());
 
             /*
              * Compute indexing information only if the left-hand side of this rule has precisely one
@@ -142,7 +155,7 @@ public class Rule extends JavaSymbolicObject {
             if (indexingPairs.size() == 1) {
                 this.indexingPair = indexingPairs.iterator().next();
             } else {
-                this.indexingPair = definition.indexingData.TOP_INDEXING_PAIR;
+                this.indexingPair = termContext.definition().indexingData.TOP_INDEXING_PAIR;
             }
         }
 
@@ -183,13 +196,36 @@ public class Rule extends JavaSymbolicObject {
         this.rhsOfWriteCells    = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
         this.reusableVariables  = computeReusableBoundVars();
         this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
-        this.instructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+        this.matchingInstructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+
+        GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions(termContext);
+        rightHandSide.accept(rhsVisitor);
+        this.rhsInstructions = rhsVisitor.getInstructions();
+
+        instructionsOfWriteCells = new HashMap<>();
+        instructionsOfRequires = new ArrayList<>();
+        if (compiledForFastRewriting) {
+            for (Map.Entry<CellLabel, Term> entry :
+                rhsOfWriteCells.entrySet()) {
+                GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+                entry.getValue().accept(visitor);
+                ImmutableList<RHSInstruction> rhsInstructions = visitor.getInstructions();
+                if (rhsInstructions != null) {
+                    instructionsOfWriteCells.put(entry.getKey(), rhsInstructions);
+                }
+            }
+        }
+        for (Term require : requires) {
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+            require.accept(visitor);
+            instructionsOfRequires.add(visitor.getInstructions());
+        }
 
         boolean modifyCellStructure;
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
             for (CellLabel wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (definition.context().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
+                if (termContext.definition().context().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }
@@ -374,6 +410,14 @@ public class Rule extends JavaSymbolicObject {
         return rhsOfWriteCells;
     }
 
+    public Map<CellLabel, ImmutableList<RHSInstruction>> instructionsOfWriteCell() {
+        return instructionsOfWriteCells;
+    }
+
+    public List<ImmutableList<RHSInstruction>> instructionsOfRequires() {
+        return UnmodifiableList.decorate(instructionsOfRequires);
+    }
+
     public Multiset<Variable> reusableVariables() {
         return reusableVariables;
     }
@@ -382,8 +426,12 @@ public class Rule extends JavaSymbolicObject {
         return groundCells;
     }
 
-    public List<Instruction> instructions() {
-        return instructions;
+    public List<MatchingInstruction> matchingInstructions() {
+        return matchingInstructions;
+    }
+
+    public List<RHSInstruction> rhsInstructions() {
+        return rhsInstructions;
     }
 
     /**

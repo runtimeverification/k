@@ -40,6 +40,7 @@ public class Attribute<T> extends ASTNode {
     public static final String CELL_KEY = "cell";
     public static final String EQUALITY_KEY = "equality";
     public static final String ARITY_KEY = "arity";
+    public static final String IMPURE_KEY = "impure";
 
     public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");

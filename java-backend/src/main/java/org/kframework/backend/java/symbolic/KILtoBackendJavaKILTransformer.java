@@ -439,19 +439,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term key = (Term) this.visitNode(lookup.key());
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                    lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key, TermContext.of(globalContext));
                 } else {
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE, TermContext.of(globalContext));
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                        lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key, TermContext.of(globalContext));
                     }
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value, TermContext.of(globalContext));
                 } else { // ListLookup
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value, TermContext.of(globalContext));
                 }
             }
 
@@ -507,9 +507,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 lhsOfReadCell,
                 rhsOfWriteCell,
                 cellsToCopy,
-                ruleData.getInstructions(),
+                ruleData.getMatchingInstructions(),
                 node,
-                globalContext.getDefinition());
+                TermContext.of(globalContext));
 
         if (freshRules) {
             return rule.getFreshRule(TermContext.of(globalContext));
@@ -643,7 +643,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
                 lookupsBuilder.add(
                         equality.leftHandSide().evaluate(termContext),
-                        equality.rightHandSide().evaluate(termContext));
+                        equality.rightHandSide().evaluate(termContext),
+                        termContext);
             }
 
             Map<CellLabel, Term> rhsOfWriteCell = null;
@@ -667,9 +668,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     rule.lhsOfReadCell(),
                     rhsOfWriteCell,
                     rule.cellsToCopy(),
-                    rule.instructions(),
+                    rule.matchingInstructions(),
                     rule,
-                    globalContext.getDefinition());
+                    termContext);
             return newRule.equals(rule) ? origRule : newRule;
         } catch (KEMException e) {
             e.exception.addTraceFrame("while compiling rule at location " + rule.getSource() + rule.getLocation());

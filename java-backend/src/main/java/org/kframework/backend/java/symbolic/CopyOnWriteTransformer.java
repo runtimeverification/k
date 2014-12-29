@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableListMultimap;
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
@@ -137,7 +136,7 @@ public class CopyOnWriteTransformer implements Transformer {
             Term transformedRHS = (Term) equality.rightHandSide().accept(this);
             changed = changed || transformedLHS != equality.leftHandSide()
                     || transformedRHS != equality.rightHandSide();
-            builder.add(transformedLHS, transformedRHS);
+            builder.add(transformedLHS, transformedRHS, context);
         }
         return changed ? builder.build() : uninterpretedConstraint;
     }
@@ -383,9 +382,9 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedLhsOfReadCell,
                     processedRhsOfWriteCell,
                     rule.cellsToCopy(),
-                    rule.instructions(),
+                    rule.matchingInstructions(),
                     rule,
-                    definition);
+                    context);
         } else {
             return rule;
         }
