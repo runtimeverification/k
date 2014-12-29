@@ -97,7 +97,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 processedLhsOfReadCell,
                 processedRhsOfWriteCell,
                 rule.cellsToCopy(),
-                rule.lhsInstructions(),
+                rule.matchingInstructions(),
                 rule,
                 context);
     }

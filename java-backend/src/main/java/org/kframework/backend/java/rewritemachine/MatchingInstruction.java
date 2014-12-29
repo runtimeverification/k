@@ -16,31 +16,31 @@ import com.google.common.collect.Maps;
  * @author YilongL
  *
  */
-public final class LHSInstruction implements Serializable {
+public final class MatchingInstruction implements Serializable {
 
     public enum Type {
         UP, CHOICE, GOTO
     }
 
-    public static final LHSInstruction UP = new LHSInstruction(Type.UP, null);
-    public static final LHSInstruction CHOICE = new LHSInstruction(Type.CHOICE, null);
+    public static final MatchingInstruction UP = new MatchingInstruction(Type.UP, null);
+    public static final MatchingInstruction CHOICE = new MatchingInstruction(Type.CHOICE, null);
 
-    private static final Map<CellLabel, LHSInstruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
+    private static final Map<CellLabel, MatchingInstruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
 
     private final Type type;
     private final CellLabel cellLabel;
     private final int hashCode;
 
-    public static LHSInstruction GOTO(CellLabel cellLabel) {
-        LHSInstruction instr = cachedGOTOInstructions.get(cellLabel);
+    public static MatchingInstruction GOTO(CellLabel cellLabel) {
+        MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
         if (instr == null) {
-            instr = new LHSInstruction(Type.GOTO, cellLabel);
+            instr = new MatchingInstruction(Type.GOTO, cellLabel);
             cachedGOTOInstructions.put(cellLabel, instr);
         }
         return instr;
     }
 
-    private LHSInstruction(Type type, CellLabel cellLabel) {
+    private MatchingInstruction(Type type, CellLabel cellLabel) {
         this.type = type;
         this.cellLabel = cellLabel;
         this.hashCode = type == Type.GOTO ?
@@ -82,9 +82,9 @@ public final class LHSInstruction implements Serializable {
         case CHOICE:
             return CHOICE;
         case GOTO:
-            LHSInstruction instr = cachedGOTOInstructions.get(cellLabel);
+            MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
             if (instr == null) {
-                instr = new LHSInstruction(type, cellLabel);
+                instr = new MatchingInstruction(type, cellLabel);
                 cachedGOTOInstructions.put(cellLabel, instr);
             }
             return instr;

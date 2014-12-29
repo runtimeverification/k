@@ -14,7 +14,7 @@ import org.apache.commons.collections15.list.UnmodifiableList;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
-import org.kframework.backend.java.rewritemachine.LHSInstruction;
+import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -73,7 +73,7 @@ public class Rule extends JavaSymbolicObject {
      */
     private final Map<CellLabel, ImmutableList<RHSInstruction>> instructionsOfWriteCells;
     /**
-     * Instructions for constructing side condition of rule.
+     * Instructions for evaluating side condition of rule.
      */
     private final List<ImmutableList<RHSInstruction>> instructionsOfRequires;
     /**
@@ -90,7 +90,7 @@ public class Rule extends JavaSymbolicObject {
      * Instructions generated from this rule to be executed by the
      * {@link KAbstractRewriteMachine}.
      */
-    private final List<LHSInstruction> lhsInstructions;
+    private final List<MatchingInstruction> matchingInstructions;
     private final List<RHSInstruction> rhsInstructions;
 
     private final boolean modifyCellStructure;
@@ -113,7 +113,7 @@ public class Rule extends JavaSymbolicObject {
             Map<CellLabel, Term> lhsOfReadCells,
             Map<CellLabel, Term> rhsOfWriteCells,
             Set<CellLabel> cellsToCopy,
-            List<LHSInstruction> instructions,
+            List<MatchingInstruction> instructions,
             ASTNode oldRule,
             TermContext termContext) {
         this.label = label;
@@ -196,7 +196,7 @@ public class Rule extends JavaSymbolicObject {
         this.rhsOfWriteCells    = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
         this.reusableVariables  = computeReusableBoundVars();
         this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
-        this.lhsInstructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+        this.matchingInstructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
 
         GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions(termContext);
         rightHandSide.accept(rhsVisitor);
@@ -426,8 +426,12 @@ public class Rule extends JavaSymbolicObject {
         return groundCells;
     }
 
-    public List<LHSInstruction> lhsInstructions() {
-        return lhsInstructions;
+    public List<MatchingInstruction> matchingInstructions() {
+        return matchingInstructions;
+    }
+
+    public List<RHSInstruction> rhsInstructions() {
+        return rhsInstructions;
     }
 
     /**
@@ -518,9 +522,5 @@ public class Rule extends JavaSymbolicObject {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
-    }
-
-    public List<RHSInstruction> rhsInstructions() {
-        return rhsInstructions;
     }
 }

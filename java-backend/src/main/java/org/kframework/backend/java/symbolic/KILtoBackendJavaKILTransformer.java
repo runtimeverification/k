@@ -507,7 +507,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 lhsOfReadCell,
                 rhsOfWriteCell,
                 cellsToCopy,
-                ruleData.getInstructions(),
+                ruleData.getMatchingInstructions(),
                 node,
                 TermContext.of(globalContext));
 
@@ -668,7 +668,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     rule.lhsOfReadCell(),
                     rhsOfWriteCell,
                     rule.cellsToCopy(),
-                    rule.lhsInstructions(),
+                    rule.matchingInstructions(),
                     rule,
                     termContext);
             return newRule.equals(rule) ? origRule : newRule;

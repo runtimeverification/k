@@ -51,14 +51,14 @@ public class KAbstractRewriteMachine {
 
     private final Rule rule;
     private final CellCollection.Cell subject;
-    private final List<LHSInstruction> instructions;
+    private final List<MatchingInstruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
     private List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
 
     // program counter
     private int pc = 1;
-    private LHSInstruction nextInstr;
+    private MatchingInstruction nextInstr;
     private boolean success = true;
     private boolean isStarNested = false;
 
@@ -69,7 +69,7 @@ public class KAbstractRewriteMachine {
     private KAbstractRewriteMachine(Rule rule, CellCollection.Cell subject, TermContext context) {
         this.rule = rule;
         this.subject = subject;
-        this.instructions = rule.lhsInstructions();
+        this.instructions = rule.matchingInstructions();
         this.context = context;
         this.patternMatcher = new NonACPatternMatcher(context);
     }
@@ -294,11 +294,11 @@ public class KAbstractRewriteMachine {
         while (true) {
             nextInstr = nextInstruction();
 
-            if (nextInstr == LHSInstruction.UP) {
+            if (nextInstr == MatchingInstruction.UP) {
                 return;
             }
 
-            if (nextInstr == LHSInstruction.CHOICE) {
+            if (nextInstr == MatchingInstruction.CHOICE) {
                 assert !isStarNested : "nested cells with multiplicity='*' not supported";
                 isStarNested = true; // start of AC-matching
 
@@ -351,7 +351,7 @@ public class KAbstractRewriteMachine {
         }
     }
 
-    private LHSInstruction nextInstruction() {
+    private MatchingInstruction nextInstruction() {
         return instructions.get(pc++);
     }
 

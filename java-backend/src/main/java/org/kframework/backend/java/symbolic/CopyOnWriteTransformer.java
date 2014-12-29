@@ -382,7 +382,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedLhsOfReadCell,
                     processedRhsOfWriteCell,
                     rule.cellsToCopy(),
-                    rule.lhsInstructions(),
+                    rule.matchingInstructions(),
                     rule,
                     context);
         } else {

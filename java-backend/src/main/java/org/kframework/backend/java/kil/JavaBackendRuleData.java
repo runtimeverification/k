@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.map.UnmodifiableMap;
-import org.kframework.backend.java.rewritemachine.LHSInstruction;
+import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -27,7 +27,7 @@ public class JavaBackendRuleData implements Serializable {
     private final UnmodifiableMap<String, Term> lhsOfReadCell;
     private final UnmodifiableMap<String, Term> rhsOfWriteCell;
     private final ImmutableSet<String> cellsToCopy;
-    private final ImmutableList<LHSInstruction> instructions;
+    private final ImmutableList<MatchingInstruction> instructions;
 
     public JavaBackendRuleData(ImmutableList<BuiltinLookup> lookups,
             ImmutableMap<Variable, Integer> concreteDataStructureSize,
@@ -36,7 +36,7 @@ public class JavaBackendRuleData implements Serializable {
             UnmodifiableMap<String, Term> lhsOfReadCell,
             UnmodifiableMap<String, Term> rhsOfWriteCell,
             ImmutableSet<String> cellsToCopy,
-            ImmutableList<LHSInstruction> instructions) {
+            ImmutableList<MatchingInstruction> instructions) {
         super();
         this.lookups = lookups;
         this.concreteDataStructureSize = concreteDataStructureSize;
@@ -138,11 +138,11 @@ public class JavaBackendRuleData implements Serializable {
         return ruleData;
     }
 
-    public List<LHSInstruction> getInstructions() {
+    public List<MatchingInstruction> getMatchingInstructions() {
         return instructions;
     }
 
-    public JavaBackendRuleData setInstructions(List<LHSInstruction> instructions2) {
+    public JavaBackendRuleData setInstructions(List<MatchingInstruction> instructions2) {
         JavaBackendRuleData ruleData = new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, ImmutableList.copyOf(instructions2));
