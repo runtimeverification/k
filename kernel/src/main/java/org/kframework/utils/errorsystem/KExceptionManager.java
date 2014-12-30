@@ -191,6 +191,8 @@ public class KExceptionManager {
     }
 
     private void registerInternal(KException exception) {
+        if (!options.warnings.includesExceptionType(exception.type))
+            return;
         synchronized(exceptions) {
             exceptions.add(exception);
             if (exception.type == ExceptionType.ERROR) {
@@ -209,9 +211,6 @@ public class KExceptionManager {
             });
             KException last = null;
             for (KException e : exceptions) {
-                if (!options.warnings.includesExceptionType(e.type))
-                    continue;
-
                 if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
                     continue;
                 }
