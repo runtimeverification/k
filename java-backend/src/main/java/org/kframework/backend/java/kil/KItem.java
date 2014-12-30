@@ -21,6 +21,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
@@ -284,19 +285,22 @@ public final class KItem extends Term {
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unable to resolve function symbol:\n\t\t");
-                    sb.append(result);
-                    sb.append('\n');
-                    if (!context.definition().functionRules().isEmpty()) {
-                        sb.append("\tDefined function rules:\n");
-                        for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
-                            sb.append("\t\t");
-                            sb.append(rule);
-                            sb.append('\n');
+                    // we do this check because this warning message can be very large and cause OOM
+                    if (options.warnings.includesExceptionType(ExceptionType.WARNING)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Unable to resolve function symbol:\n\t\t");
+                        sb.append(result);
+                        sb.append('\n');
+                        if (!context.definition().functionRules().isEmpty()) {
+                            sb.append("\tDefined function rules:\n");
+                            for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                                sb.append("\t\t");
+                                sb.append(rule);
+                                sb.append('\n');
+                            }
                         }
+                        kem.registerCriticalWarning(sb.toString(), kItem);
                     }
-                    kem.registerCriticalWarning(sb.toString(), kItem);
                     if (RuleAuditing.isAuditBegun()) {
                         System.err.println("Function failed to evaluate: returned " + result);
                     }
