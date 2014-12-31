@@ -3,9 +3,8 @@ package org.kframework.backend.java.rewritemachine;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.Map;
-
 import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.backend.java.util.Utils;
 
 import com.google.common.collect.Maps;
@@ -25,21 +24,14 @@ public final class MatchingInstruction implements Serializable {
     public static final MatchingInstruction UP = new MatchingInstruction(Type.UP, null);
     public static final MatchingInstruction CHOICE = new MatchingInstruction(Type.CHOICE, null);
 
-    private static final Map<CellLabel, MatchingInstruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
+    private static final MapCache<CellLabel, MatchingInstruction> cachedGOTOInstructions = new MapCache<>(Maps.newHashMapWithExpectedSize(100));
 
     private final Type type;
     private final CellLabel cellLabel;
     private final int hashCode;
 
     public static MatchingInstruction GOTO(CellLabel cellLabel) {
-        synchronized(cachedGOTOInstructions) {
-            MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
-            if (instr == null) {
-                instr = new MatchingInstruction(Type.GOTO, cellLabel);
-                cachedGOTOInstructions.put(cellLabel, instr);
-            }
-            return instr;
-        }
+        return cachedGOTOInstructions.get(cellLabel, () -> new MatchingInstruction(Type.GOTO, cellLabel));
     }
 
     private MatchingInstruction(Type type, CellLabel cellLabel) {
@@ -84,14 +76,7 @@ public final class MatchingInstruction implements Serializable {
         case CHOICE:
             return CHOICE;
         case GOTO:
-            synchronized(cachedGOTOInstructions) {
-                MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
-                if (instr == null) {
-                    instr = new MatchingInstruction(type, cellLabel);
-                    cachedGOTOInstructions.put(cellLabel, instr);
-                }
-                return instr;
-            }
+            return cachedGOTOInstructions.get(cellLabel, () -> this);
         default:
             assert false;
             return null;
