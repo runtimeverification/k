@@ -140,20 +140,22 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Context context) {
-        assert label != null;
+        synchronized(cache) {
+            assert label != null;
 
-        ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
-        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
-        if (trie == null) {
-            trie = new PatriciaTrie<>();
-            cache.put(productions, trie);
+            ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
+            PatriciaTrie<KLabelConstant> trie = cache.get(productions);
+            if (trie == null) {
+                trie = new PatriciaTrie<>();
+                cache.put(productions, trie);
+            }
+            KLabelConstant kLabelConstant = trie.get(label);
+            if (kLabelConstant == null) {
+                kLabelConstant = new KLabelConstant(label, productions, context);
+                trie.put(label, kLabelConstant);
+            }
+            return kLabelConstant;
         }
-        KLabelConstant kLabelConstant = trie.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, productions, context);
-            trie.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
     }
 
     /**
@@ -273,17 +275,19 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
-        if (trie == null) {
-            trie = new PatriciaTrie<>();
-            cache.put(productions, trie);
+        synchronized(cache) {
+            PatriciaTrie<KLabelConstant> trie = cache.get(productions);
+            if (trie == null) {
+                trie = new PatriciaTrie<>();
+                cache.put(productions, trie);
+            }
+            KLabelConstant kLabelConstant = trie.get(label);
+            if (kLabelConstant == null) {
+                kLabelConstant = this;
+                trie.put(label, kLabelConstant);
+            }
+            return kLabelConstant;
         }
-        KLabelConstant kLabelConstant = trie.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = this;
-            trie.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
     }
 
     public boolean isMetaBinder() {

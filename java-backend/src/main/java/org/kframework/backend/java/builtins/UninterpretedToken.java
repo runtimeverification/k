@@ -38,19 +38,21 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
     public static UninterpretedToken of(Sort sort, String value) {
-        Map<String, UninterpretedToken> sortCache = cache.get(sort);
-        if (sortCache == null) {
-            sortCache = new HashMap<String, UninterpretedToken>();
-            cache.put(sort, sortCache);
-        }
+        synchronized(cache) {
+            Map<String, UninterpretedToken> sortCache = cache.get(sort);
+            if (sortCache == null) {
+                sortCache = new HashMap<String, UninterpretedToken>();
+                cache.put(sort, sortCache);
+            }
 
-        UninterpretedToken cachedGenericToken = sortCache.get(value);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = new UninterpretedToken(sort, value);
-            sortCache.put(value, cachedGenericToken);
-        }
+            UninterpretedToken cachedGenericToken = sortCache.get(value);
+            if (cachedGenericToken == null) {
+                cachedGenericToken = new UninterpretedToken(sort, value);
+                sortCache.put(value, cachedGenericToken);
+            }
 
-        return cachedGenericToken;
+            return cachedGenericToken;
+        }
     }
 
     @Override
@@ -95,19 +97,21 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        Map<String, UninterpretedToken> sortCache = cache.get(sort);
-        if (sortCache == null) {
-            sortCache = new HashMap<String, UninterpretedToken>();
-            cache.put(sort, sortCache);
-        }
+        synchronized(cache) {
+            Map<String, UninterpretedToken> sortCache = cache.get(sort);
+            if (sortCache == null) {
+                sortCache = new HashMap<String, UninterpretedToken>();
+                cache.put(sort, sortCache);
+            }
 
-        UninterpretedToken cachedGenericToken = sortCache.get(value);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = this;
-            sortCache.put(value, cachedGenericToken);
-        }
+            UninterpretedToken cachedGenericToken = sortCache.get(value);
+            if (cachedGenericToken == null) {
+                cachedGenericToken = this;
+                sortCache.put(value, cachedGenericToken);
+            }
 
-        return cachedGenericToken;
+            return cachedGenericToken;
+        }
     }
 
 }

@@ -38,14 +38,16 @@ public final class IntToken extends Token implements MaximalSharing {
      * method with the same {@code BigInteger} value return the same {@code IntToken} object).
      */
     public static IntToken of(BigInteger value) {
-        assert value != null;
+        synchronized(cache) {
+            assert value != null;
 
-        IntToken intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = new IntToken(value);
-            cache.put(value, intToken);
+            IntToken intToken = cache.get(value);
+            if (intToken == null) {
+                intToken = new IntToken(value);
+                cache.put(value, intToken);
+            }
+            return intToken;
         }
-        return intToken;
     }
 
     public static IntToken of(long value) {
@@ -157,12 +159,14 @@ public final class IntToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        IntToken intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = this;
-            cache.put(value, intToken);
+        synchronized(cache) {
+            IntToken intToken = cache.get(value);
+            if (intToken == null) {
+                intToken = this;
+                cache.put(value, intToken);
+            }
+            return intToken;
         }
-        return intToken;
     }
 
 }

@@ -32,12 +32,14 @@ public final class MatchingInstruction implements Serializable {
     private final int hashCode;
 
     public static MatchingInstruction GOTO(CellLabel cellLabel) {
-        MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
-        if (instr == null) {
-            instr = new MatchingInstruction(Type.GOTO, cellLabel);
-            cachedGOTOInstructions.put(cellLabel, instr);
+        synchronized(cachedGOTOInstructions) {
+            MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
+            if (instr == null) {
+                instr = new MatchingInstruction(Type.GOTO, cellLabel);
+                cachedGOTOInstructions.put(cellLabel, instr);
+            }
+            return instr;
         }
-        return instr;
     }
 
     private MatchingInstruction(Type type, CellLabel cellLabel) {
@@ -82,12 +84,14 @@ public final class MatchingInstruction implements Serializable {
         case CHOICE:
             return CHOICE;
         case GOTO:
-            MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
-            if (instr == null) {
-                instr = new MatchingInstruction(type, cellLabel);
-                cachedGOTOInstructions.put(cellLabel, instr);
+            synchronized(cachedGOTOInstructions) {
+                MatchingInstruction instr = cachedGOTOInstructions.get(cellLabel);
+                if (instr == null) {
+                    instr = new MatchingInstruction(type, cellLabel);
+                    cachedGOTOInstructions.put(cellLabel, instr);
+                }
+                return instr;
             }
-            return instr;
         default:
             assert false;
             return null;

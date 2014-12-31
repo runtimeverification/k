@@ -35,12 +35,14 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * @return the cell label
      */
     public static CellLabel of(String name) {
-        CellLabel cellLabel = cache.get(name);
-        if (cellLabel == null) {
-            cellLabel = new CellLabel(name);
-            cache.put(name, cellLabel);
+        synchronized(cache) {
+            CellLabel cellLabel = cache.get(name);
+            if (cellLabel == null) {
+                cellLabel = new CellLabel(name);
+                cache.put(name, cellLabel);
+            }
+            return cellLabel;
         }
-        return cellLabel;
     }
 
     private CellLabel(String name) {
@@ -80,12 +82,14 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        CellLabel cellLabel = cache.get(name);
-        if (cellLabel == null) {
-            cellLabel = this;
-            cache.put(name, cellLabel);
+        synchronized(cache) {
+            CellLabel cellLabel = cache.get(name);
+            if (cellLabel == null) {
+                cellLabel = this;
+                cache.put(name, cellLabel);
+            }
+            return cellLabel;
         }
-        return cellLabel;
     }
 
 }

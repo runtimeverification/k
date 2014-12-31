@@ -146,11 +146,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
             node.kLabel().accept(this);
             rhsSchedule.add(RHSInstruction.CONSTRUCT(
                     new Constructor(ConstructorType.KITEM)));
-            if (!(node.kLabel() instanceof KLabelConstant)
-                    || (node.isAnywhereApplicable(context)
-                            || ((KLabelConstant)node.kLabel()).isFunction())) {
-                rhsSchedule.add(RHSInstruction.EVAL);
-            }
+            rhsSchedule.add(RHSInstruction.EVAL);
         }
     }
 

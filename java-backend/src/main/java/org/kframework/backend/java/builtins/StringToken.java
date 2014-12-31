@@ -47,14 +47,16 @@ public final class StringToken extends Token implements MaximalSharing {
      * @param value A UTF-16 representation of this sequence of code points.
      */
     public static StringToken of(String value) {
-        assert value != null;
+        synchronized(cache) {
+            assert value != null;
 
-        StringToken stringToken = cache.get(value);
-        if (stringToken == null) {
-            stringToken = new StringToken(value);
-            cache.put(value, stringToken);
+            StringToken stringToken = cache.get(value);
+            if (stringToken == null) {
+                stringToken = new StringToken(value);
+                cache.put(value, stringToken);
+            }
+            return stringToken;
         }
-        return stringToken;
     }
 
     /**
@@ -134,12 +136,14 @@ public final class StringToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        StringToken stringToken = cache.get(value);
-        if (stringToken == null) {
-            stringToken = this;
-            cache.put(value, stringToken);
+        synchronized(cache) {
+            StringToken stringToken = cache.get(value);
+            if (stringToken == null) {
+                stringToken = this;
+                cache.put(value, stringToken);
+            }
+            return stringToken;
         }
-        return stringToken;
     }
 
 }

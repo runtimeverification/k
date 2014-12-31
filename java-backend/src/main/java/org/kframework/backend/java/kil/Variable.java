@@ -174,12 +174,14 @@ public class Variable extends Term implements Immutable {
         if (anonymous) {
             int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
             if (id < counter) {
-                Variable variable = deserializationAnonymousVariableMap.get(id);
-                if (variable == null) {
-                    variable = getFreshCopy();
-                    deserializationAnonymousVariableMap.put(id, variable);
+                synchronized(deserializationAnonymousVariableMap) {
+                    Variable variable = deserializationAnonymousVariableMap.get(Pair.of(id, sort));
+                    if (variable == null) {
+                        variable = getFreshCopy();
+                        deserializationAnonymousVariableMap.put(Pair.of(id, sort), variable);
+                    }
+                    return variable;
                 }
-                return variable;
             } else {
                 counter = id + 1;
                 return this;

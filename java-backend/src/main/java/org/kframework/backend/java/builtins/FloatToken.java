@@ -38,19 +38,21 @@ public class FloatToken extends Token implements MaximalSharing {
      * and {@code int} exponent return the same {@code FloatToken} object).
      */
     public static FloatToken of(BigFloat value, int exponent) {
-        Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
-        if (exponentCache == null) {
-            exponentCache = new HashMap<>();
-            cache.put(exponent, exponentCache);
-        }
+        synchronized(cache) {
+            Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
+            if (exponentCache == null) {
+                exponentCache = new HashMap<>();
+                cache.put(exponent, exponentCache);
+            }
 
-        FloatToken cachedFloatToken = exponentCache.get(value);
-        if (cachedFloatToken == null) {
-            cachedFloatToken = new FloatToken(value, exponent);
-            exponentCache.put(value, cachedFloatToken);
-        }
+            FloatToken cachedFloatToken = exponentCache.get(value);
+            if (cachedFloatToken == null) {
+                cachedFloatToken = new FloatToken(value, exponent);
+                exponentCache.put(value, cachedFloatToken);
+            }
 
-        return cachedFloatToken;
+            return cachedFloatToken;
+        }
     }
 
     public static FloatToken of(String value) {
@@ -143,19 +145,21 @@ public class FloatToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
-        if (exponentCache == null) {
-            exponentCache = new HashMap<>();
-            cache.put(exponent, exponentCache);
-        }
+        synchronized(cache) {
+            Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
+            if (exponentCache == null) {
+                exponentCache = new HashMap<>();
+                cache.put(exponent, exponentCache);
+            }
 
-        FloatToken cachedFloatToken = exponentCache.get(value);
-        if (cachedFloatToken == null) {
-            cachedFloatToken = this;
-            exponentCache.put(value, cachedFloatToken);
-        }
+            FloatToken cachedFloatToken = exponentCache.get(value);
+            if (cachedFloatToken == null) {
+                cachedFloatToken = this;
+                exponentCache.put(value, cachedFloatToken);
+            }
 
-        return cachedFloatToken;
+            return cachedFloatToken;
+        }
     }
 
 }

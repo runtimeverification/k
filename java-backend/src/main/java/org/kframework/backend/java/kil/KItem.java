@@ -552,19 +552,37 @@ public final class KItem extends Term {
         /* TODO(YilongL): make KLabelConstant dependent on Definition and store
          * anywhere rules in KLabelConstant */
         for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
-            /* anywhere rules should be applied by pattern match rather than unification */
-            Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
-            if (solution != null) {
-                Term rightHandSide = rule.rightHandSide();
-                if (copyOnShareSubstAndEval) {
-                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                            solution,
-                            rule.reusableVariables().elementSet(),
-                            context);
-                } else {
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+            try {
+                if (rule == RuleAuditing.getAuditingRule()) {
+                    RuleAuditing.beginAudit();
+                } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                    System.err.println("\nAuditing " + rule + "...\n");
                 }
-                return rightHandSide;
+                /* anywhere rules should be applied by pattern match rather than unification */
+                Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
+                if (solution != null) {
+                    RuleAuditing.succeed(rule);
+                    Term rightHandSide = rule.rightHandSide();
+                    if (copyOnShareSubstAndEval) {
+                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                                solution,
+                                rule.reusableVariables().elementSet(),
+                                context);
+                    } else {
+                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                    }
+                    return rightHandSide;
+                }
+            } finally {
+                if (RuleAuditing.isAuditBegun()) {
+                    if (RuleAuditing.getAuditingRule() == rule) {
+                        RuleAuditing.endAudit();
+                    }
+                    if (!RuleAuditing.isSuccess()
+                            && RuleAuditing.getAuditingRule() == rule) {
+                        throw RuleAuditing.fail();
+                    }
+                }
             }
         }
 
