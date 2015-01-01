@@ -3,6 +3,7 @@ package org.kframework.utils.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -200,6 +201,23 @@ public class FileUtil {
             return Pair.of(out, in);
         } catch (IOException e) {
             throw KExceptionManager.internalError("Error creating input/output pipe", e);
+        }
+    }
+
+    public static String read(Reader reader) {
+        try {
+            return IOUtils.toString(reader);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error reading from " + reader, e);
+        }
+    }
+
+    public Reader readFromWorkingDirectory(String path) {
+        File f = resolveWorkingDirectory(path);
+        try {
+            return new FileReader(f);
+        } catch (FileNotFoundException e) {
+            throw KExceptionManager.criticalError("Could not read from file " + f.getAbsolutePath(), e);
         }
     }
 }
