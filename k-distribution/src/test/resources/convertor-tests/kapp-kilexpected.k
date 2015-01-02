@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 DEF: null -> null
 module TEST
   rule '_,_(#token("#Bool", "true")(), #token("#Bool", "true")()) => '.List{"'_,_"}()

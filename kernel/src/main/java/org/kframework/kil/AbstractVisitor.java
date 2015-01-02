@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil; // in main kil package to avoid access restriction violations
 
 import org.kframework.kil.visitors.AbstractTransformer;

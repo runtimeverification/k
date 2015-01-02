@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 /*@ ensures \result == dmax(a,b); */
 /*
 double max(double a, double b){

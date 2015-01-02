@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module INCLUDE
   syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}

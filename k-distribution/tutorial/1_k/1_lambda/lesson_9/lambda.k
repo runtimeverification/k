@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 // C/Java-like comments like this one are completely ignored by the K tool.
 /* These ones, which may spread over
 several lines, are ignored, too.  */

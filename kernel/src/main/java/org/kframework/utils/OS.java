@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import org.kframework.utils.errorsystem.KException;

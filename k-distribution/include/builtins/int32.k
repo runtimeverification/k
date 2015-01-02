@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 module INT32
 
 syntax Int32 ::= Token{"[0-9]+i32"}

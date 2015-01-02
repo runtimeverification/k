@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 /*@
   requires DISTANCE(x) && DISTANCE(y) ;
   ensures \abs(\result - sqR(x,y)) < E_sqs ;

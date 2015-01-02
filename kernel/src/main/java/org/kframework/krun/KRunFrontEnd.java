@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import java.util.List;

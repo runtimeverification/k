@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module TEST [location(startLine(3),startColumn(1),endLine(10),endColumn(9))]
   syntax Bool ::= #Bool [location(startLine(6),startColumn(19),endLine(6),endColumn(23))]

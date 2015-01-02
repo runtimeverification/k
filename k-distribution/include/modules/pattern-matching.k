@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "builtins/k-equal.k"
 
 module PATTERN-MATCHING
