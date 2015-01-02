@@ -3,14 +3,15 @@ package org.kframework.krun.tools;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
-import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -43,7 +44,7 @@ public interface LtlModelChecker {
         private final Context context;
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
-        private final RunProcess rp;
+        private final ProgramLoader loader;
         private final FileUtil files;
 
         @Inject
@@ -53,14 +54,14 @@ public interface LtlModelChecker {
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
-                RunProcess rp,
+                ProgramLoader loader,
                 @Main FileUtil files) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
             this.sw = sw;
             this.modelChecker = modelChecker;
-            this.rp = rp;
+            this.loader = loader;
             this.files = files;
         }
 
@@ -68,8 +69,8 @@ public interface LtlModelChecker {
         public KRunProofResult<KRunGraph> run(Void v, Attributes a) {
             a.add(Context.class, context);
             try {
-                Term formula = rp.runParser("kast -e",
-                        ltlmc(), false, Sort.of("LtlFormula"), context);
+                Term formula = (Term) loader.loadPgmAst(ltlmc(), Sources.fromCommandLine("parameters"),
+                        Sort.of("LtlFormula"), context);
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 formula,
                                 initialConfiguration.get());

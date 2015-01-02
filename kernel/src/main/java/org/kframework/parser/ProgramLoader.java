@@ -1,12 +1,13 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
@@ -40,6 +41,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -106,7 +108,7 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public Term processPgm(String content, Source source, Sort startSymbol,
+    public Term processPgm(Reader content, Source source, Sort startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         sw.printIntermediate("Importing Files");
         if (!context.getAllSorts().contains(startSymbol)) {
@@ -116,13 +118,13 @@ public class ProgramLoader {
 
         ASTNode out;
         if (whatParser == ParserType.GROUND) {
-            out = termLoader.parseCmdString(content, source, startSymbol, context);
+            out = termLoader.parseCmdString(FileUtil.read(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context, kem).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
         } else if (whatParser == ParserType.RULES) {
-            out = termLoader.parsePattern(content, source, startSymbol, context);
+            out = termLoader.parsePattern(FileUtil.read(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context, kem).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
@@ -130,7 +132,7 @@ public class ProgramLoader {
             out = new FlattenTerms(context).visitNode(out);
             out = ((Sentence) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
-            try (InputStream in = new Base64InputStream(new ByteArrayInputStream(content.getBytes()))) {
+            try (InputStream in = new Base64InputStream(new ReaderInputStream(content))) {
                 out = loader.loadOrDie(Term.class, in);
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
@@ -141,13 +143,13 @@ public class ProgramLoader {
             // TODO(Radu): (the default one) with this branch of the 'if'
             Grammar grammar = loader.loadOrDie(Grammar.class, context.files.resolveKompiled("newParser.bin"));
 
-            out = newParserParse(content, grammar.get(startSymbol.toString()), source, context);
+            out = newParserParse(FileUtil.read(content), grammar.get(startSymbol.toString()), source, context);
             out = new AmbFilter(context, kem).visitNode(out);
             out = new RemoveBrackets(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
             out = new ResolveVariableAttribute(context).visitNode(out);
         } else {
-            out = loadPgmAst(content, source, startSymbol, context);
+            out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
         }
         sw.printIntermediate("Parsing Program");

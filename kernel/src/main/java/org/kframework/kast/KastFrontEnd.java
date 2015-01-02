@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kast;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class KastFrontEnd extends FrontEnd {
      */
     @Override
     public boolean run() {
-        String stringToParse = options.stringToParse();
+        Reader stringToParse = options.stringToParse();
         Source source = options.source();
 
         Context context = contextProvider.get();
