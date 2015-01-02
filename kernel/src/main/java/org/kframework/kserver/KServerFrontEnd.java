@@ -72,7 +72,7 @@ public class KServerFrontEnd extends FrontEnd {
         while (runningPort == 0) {
             try {
                 Thread.sleep(50L);
-            } catch (Throwable toIgnore) {}
+            } catch (InterruptedException e) {}
             runningPort = server.getPort();
         }
         System.out.println("K server started on 127.0.0.1:" + options.port);
