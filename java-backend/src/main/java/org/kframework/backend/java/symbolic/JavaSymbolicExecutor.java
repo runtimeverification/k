@@ -75,6 +75,7 @@ public class JavaSymbolicExecutor implements Executor {
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
+        termContext.setTopTerm(term);
 
         if (javaOptions.patternMatching) {
             ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
