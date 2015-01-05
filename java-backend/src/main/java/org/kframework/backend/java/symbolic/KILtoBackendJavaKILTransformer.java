@@ -138,6 +138,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public boolean cache() {
+        return true;
+    }
+
+    @Override
     public ASTNode visit(org.kframework.kil.KApp node, Void _void)  {
         if (node.getLabel() instanceof org.kframework.kil.Token) {
             if (node.getLabel() instanceof BoolBuiltin) {
