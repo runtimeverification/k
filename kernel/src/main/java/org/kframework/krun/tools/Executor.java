@@ -1,6 +1,9 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.kframework.backend.unparser.PrintSearchResult;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -8,6 +11,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
@@ -19,6 +23,7 @@ import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.parser.TermLoader;
@@ -78,6 +83,7 @@ public interface Executor {
 
     public static class Tool implements Transformation<Void, KRunResult> {
 
+        public static final String EXIT_CODE = "exitCode";
         private final KRunOptions options;
         private final Provider<Term> initialConfiguration;
         private final Context context;
@@ -111,7 +117,7 @@ public interface Executor {
                 if (options.search()) {
                     return search();
                 } else {
-                    return execute();
+                    return execute(a);
                 }
             } catch (KRunExecutionException e) {
                 throw KExceptionManager.criticalError(e.getMessage(), e);
@@ -135,7 +141,7 @@ public interface Executor {
         }
 
         public SearchResults search() throws ParseFailedException, KRunExecutionException {
-            ASTNode pattern = pattern();
+            ASTNode pattern = pattern(options.pattern);
             SearchPattern searchPattern = new SearchPattern(pattern);
             SearchResults result;
             result = executor.search(
@@ -149,7 +155,7 @@ public interface Executor {
             return result;
         }
 
-        public KRunResult execute() throws ParseFailedException, KRunExecutionException {
+        public KRunResult execute(Attributes a) throws ParseFailedException, KRunExecutionException {
             KRunState result;
             if (options.depth != null) {
                 result = executor.step(initialConfiguration.get(), options.depth);
@@ -158,7 +164,11 @@ public interface Executor {
                 result = executor.run(initialConfiguration.get());
                 sw.printIntermediate("Normal execution total");
             }
-            ASTNode pattern = pattern();
+            ASTNode pattern = pattern(options.pattern);
+            if (options.exitCodePattern != null) {
+                Term res = result.getRawResult();
+                a.add(Integer.class, Executor.Tool.EXIT_CODE, getExitCode(res));
+            }
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
                 Term res = result.getRawResult();
@@ -167,8 +177,29 @@ public interface Executor {
             return result;
         }
 
-        public ASTNode pattern() throws ParseFailedException {
-            String pattern = options.pattern;
+        private int getExitCode(Term res) throws KRunExecutionException {
+            ASTNode exitCodePattern = pattern(options.exitCodePattern);
+            SearchPattern searchPattern = new SearchPattern(exitCodePattern);
+            SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
+            if (results.getSolutions().size() != 1) {
+                kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 255.");
+                return 255;
+            }
+            SearchResult solution = results.getSolutions().get(0);
+            Set<Integer> vars = new HashSet<>();
+            for (Term t : solution.getRawSubstitution().values()) {
+                if (t instanceof IntBuiltin) {
+                    vars.add(((IntBuiltin)t).bigIntegerValue().intValue());
+                }
+            }
+            if (vars.size() != 1) {
+                kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 255.");
+                return 255;
+            }
+            return vars.iterator().next();
+        }
+
+        public ASTNode pattern(String pattern) throws ParseFailedException {
             if (pattern == null && !options.search()) {
                 //user did not specify a pattern and it's not a search, so
                 //we should return null to indicate no pattern is needed

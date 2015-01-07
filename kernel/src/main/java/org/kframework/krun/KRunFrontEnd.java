@@ -4,6 +4,7 @@ package org.kframework.krun;
 import java.util.List;
 
 import org.kframework.kil.Attributes;
+import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.transformation.AmbiguousTransformationException;
@@ -67,11 +68,15 @@ public class KRunFrontEnd extends FrontEnd {
      * @param cmds represents the arguments/options given to krun command..
      * @return true if the application completed normally; false otherwise
      */
-    public boolean run() {
+    public int run() {
         try {
             Transformation<Void, Void> tool = toolProvider.get();
-            tool.run(null, new Attributes());
-            return true;
+            Attributes a = new Attributes();
+            tool.run(null, a);
+            if (a.containsAttribute(Executor.Tool.EXIT_CODE)) {
+                return a.getAttribute(Integer.class, Executor.Tool.EXIT_CODE);
+            }
+            return 0;
         } catch (TransformationNotSatisfiedException
                 | AmbiguousTransformationException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);

@@ -51,9 +51,9 @@ public class KDocFrontEnd extends FrontEnd {
     }
 
     @Override
-    protected boolean run() {
+    protected int run() {
         backend.run(def.get());
-        return true;
+        return 0;
     }
 
 }
