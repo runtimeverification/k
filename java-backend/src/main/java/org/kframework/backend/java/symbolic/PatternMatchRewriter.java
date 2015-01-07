@@ -68,6 +68,7 @@ public class PatternMatchRewriter {
         /* first break any possible sharing of mutable terms introduced by macro
          * expansion or front-end */
         subject = EliminateUnsafeSharingTransformer.transformTerm(subject, termContext);
+        termContext.setTopTerm(subject);
 
         /* compute indexing cells of the subject term for the first time */
         computeIndexingCells(subject, termContext);
