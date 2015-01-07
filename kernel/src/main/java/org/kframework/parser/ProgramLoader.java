@@ -133,7 +133,7 @@ public class ProgramLoader {
             out = ((Sentence) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
             try (InputStream in = new Base64InputStream(new ReaderInputStream(content))) {
-                out = loader.loadOrDie(Term.class, in);
+                out = loader.loadOrDie(Term.class, in, source.toString());
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }

@@ -297,7 +297,7 @@ public interface Debugger {
                         KRunGraph savedGraph;
                         try (Base64InputStream in = new Base64InputStream(new FileInputStream(
                                 files.resolveWorkingDirectory(options.load.file)))) {
-                            savedGraph = loader.loadOrDie(KRunGraph.class, in);
+                            savedGraph = loader.loadOrDie(KRunGraph.class, in, options.load.file);
                             debugger.setGraph(savedGraph);
                             debugger.setCurrentState(0);
                             System.out.println("File successfully loaded.");
