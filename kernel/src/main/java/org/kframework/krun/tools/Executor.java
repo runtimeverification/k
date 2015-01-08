@@ -183,8 +183,8 @@ public interface Executor {
             SearchPattern searchPattern = new SearchPattern(exitCodePattern);
             SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
             if (results.getSolutions().size() != 1) {
-                kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 255.");
-                return 255;
+                kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 112.");
+                return 112;
             }
             SearchResult solution = results.getSolutions().get(0);
             Set<Integer> vars = new HashSet<>();
@@ -194,8 +194,8 @@ public interface Executor {
                 }
             }
             if (vars.size() != 1) {
-                kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 255.");
-                return 255;
+                kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
+                return 111;
             }
             return vars.iterator().next();
         }
