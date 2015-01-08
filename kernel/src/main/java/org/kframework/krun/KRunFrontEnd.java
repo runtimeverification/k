@@ -73,10 +73,11 @@ public class KRunFrontEnd extends FrontEnd {
             Transformation<Void, Void> tool = toolProvider.get();
             Attributes a = new Attributes();
             tool.run(null, a);
-            if (a.containsAttribute(Executor.Tool.EXIT_CODE)) {
-                return a.getAttribute(Integer.class, Executor.Tool.EXIT_CODE);
+            Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
+            if (exitCode == null) {
+                exitCode = 0;
             }
-            return 0;
+            return exitCode;
         } catch (TransformationNotSatisfiedException
                 | AmbiguousTransformationException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);

@@ -12,6 +12,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
@@ -188,8 +189,8 @@ public interface Executor {
             SearchResult solution = results.getSolutions().get(0);
             Set<Integer> vars = new HashSet<>();
             for (Term t : solution.getRawSubstitution().values()) {
-                if (t instanceof IntBuiltin) {
-                    vars.add(((IntBuiltin)t).bigIntegerValue().intValue());
+                if (t instanceof KApp && ((KApp)t).getLabel() instanceof IntBuiltin) {
+                    vars.add(((IntBuiltin)((KApp)t).getLabel()).bigIntegerValue().intValue());
                 }
             }
             if (vars.size() != 1) {
