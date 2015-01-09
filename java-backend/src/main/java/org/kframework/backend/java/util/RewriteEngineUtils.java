@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
@@ -53,14 +54,16 @@ public class RewriteEngineUtils {
      * @return the updated substitution if it satisfies the side-condition;
      *         otherwise, {@code null}
      */
-    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
+    public static Substitution<Variable, Term> evaluateConditions(
+            Rule rule,
+            Substitution<Variable, Term> substitution,
             TermContext context) {
         /* handle fresh variables, data structure lookups, and side conditions */
 
-        Map<Variable, Term> crntSubst = substitution;
+        Substitution<Variable, Term> crntSubst = substitution;
         /* add bindings for fresh variables used in the rule */
         for (Variable variable : rule.freshConstants()) {
-            crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
+            crntSubst = crntSubst.plus(variable, FreshOperations.fresh(variable.sort(), context));
         }
 
         /* evaluate data structure lookups/choices and add bindings for them */
@@ -90,12 +93,13 @@ public class RewriteEngineUtils {
                 if (nonLookupOrChoice instanceof Variable) {
                     Variable variable = (Variable) nonLookupOrChoice;
                     if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
-                        Term term = crntSubst.put(variable, evalLookupOrChoice);
-                        resolved = term == null || term.equals(evalLookupOrChoice);
+                        Substitution<Variable, Term> newSubst = crntSubst.plus(variable, evalLookupOrChoice);
+                        resolved = newSubst != null;
                         if (!resolved && RuleAuditing.isAuditBegun()) {
                             System.err.println("Matching failure: " + variable + " must match both "
-                            + term + " and " + evalLookupOrChoice);
+                            + crntSubst.get(variable) + " and " + evalLookupOrChoice);
                         }
+                        crntSubst = newSubst;
                     }
                 } else {
                     // the non-lookup term is not a variable and thus requires further pattern matching
@@ -110,7 +114,7 @@ public class RewriteEngineUtils {
 
                         if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                             resolved = true;
-                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                            crntSubst = crntSubst.plusAll(lookupMatcher.substitution());
                         } else if (!resolved && RuleAuditing.isAuditBegun()) {
                             System.err.println("Matching failure: substitution "
                             + lookupMatcher.substitution() + " missing variables "
@@ -168,7 +172,7 @@ public class RewriteEngineUtils {
         /* handle fresh variables, data structure lookups, and side conditions */
         List<Map<Variable, Term>> results = Lists.newArrayList();
         for (Map<Variable, Term> crntSubst : substitutions) {
-            crntSubst = evaluateConditions(rule, crntSubst, context);
+            crntSubst = evaluateConditions(rule, Substitution.from(crntSubst), context);
             if (crntSubst != null) {
                 results.add(crntSubst);
             }
