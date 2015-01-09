@@ -58,6 +58,9 @@ public class KompileModule extends AbstractModule {
 
     @Provides @DefinitionDir
     File definitionDir(@WorkingDir File workingDir, KompileOptions options) {
+        if (options.directory == null) {
+            return options.mainDefinitionFile().getParentFile();
+        }
         File f = new File(options.directory);
         if (f.isAbsolute()) return f;
         return new File(workingDir, options.directory);
