@@ -5,8 +5,10 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 import org.pcollections.HashPMap;
@@ -93,6 +95,12 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V> {
             entries = entries.plus(entry.getKey(), (V) entry.getValue().evaluate(context));
         }
         return new Substitution<>(entries);
+    }
+
+    public List<Equality> equalities(TermContext context) {
+        return entries.entrySet().stream()
+                .map(entry -> new Equality(entry.getKey(), entry.getValue(), context))
+                .collect(Collectors.toList());
     }
 
     public boolean isFalse(TermContext context) {

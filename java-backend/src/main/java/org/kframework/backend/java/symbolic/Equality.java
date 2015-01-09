@@ -108,10 +108,11 @@ public class Equality {
         return truthValue;
     }
 
-    private boolean isTrue() {
+    public boolean isTrue() {
         return !(leftHandSide instanceof Bottom)
-                && !(rightHandSide instanceof Bottom)
-                && leftHandSide.equals(rightHandSide);
+            && !(rightHandSide instanceof Bottom)
+            && leftHandSide.hashCode() == rightHandSide.hashCode()
+            && leftHandSide.equals(rightHandSide);
     }
 
     private boolean isFalse() {

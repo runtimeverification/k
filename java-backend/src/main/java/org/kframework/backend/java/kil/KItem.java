@@ -54,7 +54,7 @@ import com.google.inject.Inject;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public final class KItem extends Term {
+public class KItem extends Term {
 
     private final Term kLabel;
     private final Term kList;

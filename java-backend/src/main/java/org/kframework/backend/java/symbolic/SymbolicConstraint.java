@@ -397,7 +397,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    private void addAll(Set<Equality> equalites) {
+    public void addAll(Set<Equality> equalites) {
         for (Equality equality : equalites) {
             add(equality);
         }
