@@ -49,7 +49,7 @@ public class KompileOptions implements Serializable {
     /**
      * Directory in which the compiled definition should be put.
      */
-    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.")
+    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the directory containing the main definition file.")
     public String directory;
 
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [coq|java]. Each creates the kompiled K definition.")
