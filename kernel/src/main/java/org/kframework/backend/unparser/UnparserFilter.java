@@ -643,6 +643,14 @@ public class UnparserFilter extends NonCachingVisitor {
         return postpare();
     }
 
+    @Override
+    public Void visit(DataStructureBuiltin node, Void p)
+            throws RuntimeException {
+        prepare(node);
+        super.visit(node, p);
+        return postpare();
+    }
+
     protected void prepare(ASTNode astNode) {
         stack.push(astNode);
         if (annotateLocation) {
@@ -652,6 +660,7 @@ public class UnparserFilter extends NonCachingVisitor {
                 astNode.getLocation().lineStart = indenter.getLineNo();
                 astNode.getLocation().columnStart = indenter.getColNo();
             }
+            astNode.getLocation().offsetStart = indenter.length();
         }
     }
 
@@ -660,6 +669,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (annotateLocation) {
             astNode.getLocation().lineEnd = indenter.getLineNo();
             astNode.getLocation().columnEnd = indenter.getColNo();
+            astNode.getLocation().offsetEnd = indenter.length();
         }
         return null;
     }

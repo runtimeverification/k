@@ -1,4 +1,3 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 /*
  * The Alphanum Algorithm is an improved sorting algorithm for strings
  * containing numbers.  Instead of sorting numbers in ASCII order like
@@ -123,6 +122,97 @@ public class AlphanumComparator implements Comparator<String>
             {
                 result = thisChunk.compareTo(thatChunk);
             }
+
+            if (result != 0)
+                return result;
+        }
+
+        return s1Length - s2Length;
+    }
+
+    private final int getChunkLength(String s, int marker, int end)
+    {
+        int start = marker;
+        char c = s.charAt(marker);
+        marker++;
+        if (isDigit(c))
+        {
+            while (marker < end)
+            {
+                c = s.charAt(marker);
+                if (!isDigit(c))
+                    break;
+                marker++;
+            }
+        } else
+        {
+            while (marker < end)
+            {
+                c = s.charAt(marker);
+                if (isDigit(c))
+                    break;
+                marker++;
+            }
+        }
+        return marker - start;
+    }
+
+    public int compare(String string, int thisOffsetStart, int thisOffsetEnd,
+            int thatOffsetStart, int thatOffsetEnd) {
+        int len = string.length();
+        if (thisOffsetEnd >= len || thatOffsetEnd >= len) {
+            throw new IllegalArgumentException("end offset not within bounds of string");
+        }
+        int thisMarker = thisOffsetStart;
+        int thatMarker = thatOffsetStart;
+        int s1Length = thisOffsetEnd - thisOffsetStart;
+        int s2Length = thatOffsetEnd - thatOffsetStart;
+
+        while (thisMarker < thisOffsetEnd && thatMarker < thatOffsetEnd)
+        {
+            int thisChunkLength = getChunkLength(string, thisMarker, thisOffsetEnd);
+            int thatChunkLength = getChunkLength(string, thatMarker, thatOffsetEnd);
+
+            // If both chunks contain numeric characters, sort them numerically
+            int result = 0;
+            if (isDigit(string.charAt(thisMarker)) && isDigit(string.charAt(thatMarker)))
+            {
+                // Simple chunk comparison by length.
+                result = thisChunkLength - thatChunkLength;
+                // If equal, the first different number counts
+                if (result == 0)
+                {
+                    for (int i = 0; i < thisChunkLength; i++)
+                    {
+                        result = string.charAt(thisMarker + i) - string.charAt(thatMarker + i);
+                        if (result != 0)
+                        {
+                            return result;
+                        }
+                    }
+                }
+            } else
+            {
+                int lim = Math.min(thisChunkLength, thatChunkLength);
+                int k = 0;
+                boolean different = false;
+                while (k < lim) {
+                    char c1 = string.charAt(thisMarker + k);
+                    char c2 = string.charAt(thatMarker + k);
+                    if (c1 != c2) {
+                        result = c1 - c2;
+                        different = true;
+                        break;
+                    }
+                    k++;
+                }
+                if (!different) {
+                    result = thisChunkLength - thatChunkLength;
+                }
+            }
+
+            thisMarker += thisChunkLength;
+            thatMarker += thatChunkLength;
 
             if (result != 0)
                 return result;

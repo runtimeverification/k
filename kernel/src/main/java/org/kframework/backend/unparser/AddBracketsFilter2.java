@@ -112,7 +112,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             }
             return result;
         }
-        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputModes.SMART, true, context);
+        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputModes.SOUND, true, context);
         unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {

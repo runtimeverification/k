@@ -3,7 +3,6 @@ package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 import java.util.ArrayList;
@@ -12,6 +11,11 @@ import java.util.List;
 import java.util.Stack;
 
 public class AddBracketsFilter extends CopyOnWriteTransformer {
+
+    @Override
+    public boolean cache() {
+        return true;
+    }
 
     public AddBracketsFilter(Context context) {
         super("Add brackets", context);
@@ -250,27 +254,8 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return set;
     }
 
-    private static class ContainsVisitor extends BasicVisitor {
-        private boolean found = false;
-        private Term inner;
-        public ContainsVisitor(Term inner, Context context) {
-            super("Term contains target term", context);
-            this.inner = inner;
-        }
-        @Override
-        public Void visit(Term t, Void _void) {
-            if (t == inner) found = true;
-            return super.visit(t, _void);
-        }
-        public boolean getFound() {
-            return found;
-        }
-    }
-
-    private static boolean contains(Term outer, Term inner, org.kframework.kil.loader.Context context) {
-        ContainsVisitor visit = new ContainsVisitor(inner, context);
-        visit.visitNode(outer);
-        return visit.getFound();
+    private static boolean contains(Term outer, Term inner) {
+        return outer == inner;
     }
 
     /** compute fixity of nonterminal within production */
@@ -279,7 +264,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             TermCons tc = (TermCons)outer;
             int i;
             for (i = 0; i < tc.getContents().size(); i++) {
-                if (contains(tc.getContents().get(i), inner, context))
+                if (contains(tc.getContents().get(i), inner))
                     break;
             }
             Production p = tc.getProduction();
@@ -304,7 +289,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Collection c = (Collection) outer;
             int i;
             for (i = 0; i < c.getContents().size(); i++) {
-                if (contains(c.getContents().get(i), inner, context))
+                if (contains(c.getContents().get(i), inner))
                     break;
             }
             EnumSet<Fixity> set = EnumSet.allOf(Fixity.class);
@@ -319,7 +304,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof KApp) {
             KApp kapp = (KApp) outer;
-            if (contains(kapp.getLabel(), inner, context))
+            if (contains(kapp.getLabel(), inner))
                 return EnumSet.of(Fixity.BARE_LEFT);
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof Freezer) {
