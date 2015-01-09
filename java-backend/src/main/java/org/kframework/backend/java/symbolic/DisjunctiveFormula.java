@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.Kind;
@@ -6,7 +7,9 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.ASTNode;
 
 /**
- * Created by andrei on 12/8/14.
+ * A disjunction of conjunctions.
+ *
+ * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
 public class DisjunctiveFormula extends Term {
 
