@@ -12,7 +12,6 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
@@ -279,12 +278,6 @@ public class SymbolicRewriter {
                 initialTerm.constraint().substitution().keySet()).isEmpty();
         List<Map<Variable, Term>> discoveredSearchResults = PatternMatcher.match(initialTerm.term(), pattern, initialTerm.termContext());
         for (Map<Variable, Term> searchResult : discoveredSearchResults) {
-            searchResult.entrySet().forEach(e -> e.setValue(
-                CellCollection.singleton(
-                        CellLabel.GENERATED_TOP,
-                        e.getValue(),
-                        initialTerm.termContext().definition().context())));
-
             searchResults.add(searchResult);
             if (searchResults.size() == bound) {
                 return true;

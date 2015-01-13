@@ -93,8 +93,8 @@ public class Main {
 
         kem.installForUncaughtExceptions();
         try {
-            boolean succeeded = injector.getInstance(FrontEnd.class).main();
-            return succeeded ? 0 : 1;
+            int retval = injector.getInstance(FrontEnd.class).main();
+            return retval;
         } catch (ProvisionException e) {
             for (Message m : e.getErrorMessages()) {
                 if (!(m.getCause() instanceof KEMException)) {
