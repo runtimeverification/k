@@ -61,6 +61,10 @@ public class UnparserFilter extends NonCachingVisitor {
         return indenter.toString();
     }
 
+    public StringBuilder getStringBuilder() {
+        return indenter.stringBuilder;
+    }
+
     @Override
     public Void visit(Definition def, Void _void) {
         prepare(def);

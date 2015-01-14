@@ -1,9 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import java.awt.Color;
 import java.util.Collections;
 import java.util.Comparator;
-
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bag;
@@ -16,13 +16,9 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.krun.ColorSetting;
 
-import com.davekoelle.AlphanumComparator;
-
 public class SortCollections extends CopyOnWriteTransformer {
 
     private Comparator<Term> comparator = new Comparator<Term>() {
-
-        AlphanumComparator alphanum = new AlphanumComparator();
 
         @Override
         public int compare(Term o1, Term o2) {
@@ -42,27 +38,23 @@ public class SortCollections extends CopyOnWriteTransformer {
                 return sons.positionOf(c1.getLabel()) < sons.positionOf(c2.getLabel()) ? -1 : 1;
             }
 
-            return alphanum.compare(unparsed,
-                    o1.getLocation().offsetStart, o1.getLocation().offsetEnd,
-                    o2.getLocation().offsetStart, o2.getLocation().offsetEnd);
+            return unparser.compare(o1, o2);
         }
     };
 
-    private final String unparsed;
+    private final Unparser unparser;
 
     public SortCollections(Context context, Term termToSort) {
         super("Sort collections", context);
-        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputModes.NO_WRAP, true, context);
-        unparser.visitNode(termToSort);
-        unparsed = unparser.getResult();
+        unparser = new Unparser(context, ColorSetting.OFF, Color.BLACK);
     }
 
     @Override
     public ASTNode visit(Bag node, Void p) throws RuntimeException {
-        Collections.sort(node.getContents(), comparator);
-        return super.visit(node, p);
+        Bag sorted = (Bag) super.visit(node, p);
+        Collections.sort(sorted.getContents(), comparator);
+        return sorted;
     }
-
 
     @Override
     public ASTNode visit(SetBuiltin node, Void _void) {
