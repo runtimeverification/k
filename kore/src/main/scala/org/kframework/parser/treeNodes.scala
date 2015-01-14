@@ -72,7 +72,7 @@ object KList {
 
 object Ambiguity {
   def apply(items: List[Term]): Ambiguity = new Ambiguity(new HashSet(items), Optional.empty())
-  def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
+  @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
 }
 
 case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int)

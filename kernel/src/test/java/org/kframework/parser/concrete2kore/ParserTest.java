@@ -719,7 +719,7 @@ public class ParserTest {
         NonTerminal expNt = new NonTerminal("Exp");
 
         NonTerminalState expInt = new NonTerminalState("Int-nts(Exp)", expNt, intNt, false);
-        Production p22 = prod(EXP_SORT, NonTerminal(Sorts.KInt()));
+        Production p22 = prod(EXP_SORT, NonTerminal(Sorts.Int()));
         RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22));
         expNt.entryState.next.add(expInt);
         expInt.next.add(rs2);

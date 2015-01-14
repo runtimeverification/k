@@ -12,4 +12,7 @@ object Sorts {
   val Int = UninterpretedSort("Int")
 
   val K = UninterpretedSort("K")
+  val KVariable = UninterpretedSort("KVariable")
+  val KList = UninterpretedSort("KList")
+  val KToken = UninterpretedSort("KToken")
 }

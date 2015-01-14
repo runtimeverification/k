@@ -46,7 +46,7 @@ abstract class Transformer[O] {
     val newItems = t.items.asScala.map(apply)
     val newCorrectItems = newItems.collect { case Right(v) => v }.toList
     newCorrectItems match {
-      case List() => {
+      case List() if !newItems.isEmpty => {
         val allProblems = newItems.collect { case Left(v) => v }
         Left(allProblems reduceLeft merge)
       }

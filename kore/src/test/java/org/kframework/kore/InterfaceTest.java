@@ -25,23 +25,23 @@ public class InterfaceTest {
 
     @Test
     public void kListIsAssociative() {
-        // assertEquals(KList(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")), KList(KToken(Sorts.KInt(), "1"), KList(KToken(Sorts.KInt(), "2"))));
+        // assertEquals(KList(KToken(Sorts.Int(), "1"), KToken(Sorts.Int(), "2")), KList(KToken(Sorts.Int(), "1"), KList(KToken(Sorts.Int(), "2"))));
     }
 
     @Test
     public void manipulatingKList() {
-        KList l = KList(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")).stream().map(x -> KToken(Sorts.KInt(), "3")).collect(toKList());
-        assertEquals(KList(KToken(Sorts.KInt(), "3"), KToken(Sorts.KInt(), "3")), l);
+        KList l = KList(KToken(Sorts.Int(), "1"), KToken(Sorts.Int(), "2")).stream().map(x -> KToken(Sorts.Int(), "3")).collect(toKList());
+        assertEquals(KList(KToken(Sorts.Int(), "3"), KToken(Sorts.Int(), "3")), l);
     }
 
     @Test
     public void kSeqIsAssociative() {
-        assertEquals(KSequence(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2")), KSequence(KToken(Sorts.KInt(), "1"), KSequence(KToken(Sorts.KInt(), "2"))));
+        assertEquals(KSequence(KToken(Sorts.Int(), "1"), KToken(Sorts.Int(), "2")), KSequence(KToken(Sorts.Int(), "1"), KSequence(KToken(Sorts.Int(), "2"))));
     }
 
     @Test
     public void manipulatingKSeq() {
-        KSequence l = stream(KSequence(KToken(Sorts.KInt(), "1"), KToken(Sorts.KInt(), "2"))).map(x -> KToken(Sorts.KInt(), "3")).collect(toKSequence());
-        assertEquals(KSequence(KToken(Sorts.KInt(), "3"), KToken(Sorts.KInt(), "3")), l);
+        KSequence l = stream(KSequence(KToken(Sorts.Int(), "1"), KToken(Sorts.Int(), "2"))).map(x -> KToken(Sorts.Int(), "3")).collect(toKSequence());
+        assertEquals(KSequence(KToken(Sorts.Int(), "3"), KToken(Sorts.Int(), "3")), l);
     }
 }
