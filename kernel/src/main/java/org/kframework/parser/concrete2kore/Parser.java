@@ -4,6 +4,8 @@ package org.kframework.parser.concrete2kore;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.builtin.Sorts;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.kore.Sort;
 import org.kframework.kore.outer.Production;
 import org.kframework.parser.Ambiguity;
@@ -22,6 +24,10 @@ import org.kframework.parser.concrete2kore.Grammar.State;
 import org.kframework.parser.concrete2kore.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2kore.Rule.ContextSensitiveRule;
 import org.kframework.utils.algorithms.AutoVivifyingBiMap;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -691,6 +697,19 @@ public class Parser {
             if (stateReturn.key.stateEnd == s.input.length()) {
                 result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull(), Optional.empty())));
             }
+        }
+
+        if(result.equals(Ambiguity.apply())) {
+            CharSequence content = s.input;
+            ParseError perror = getErrors();
+
+            String msg = content.length() == perror.position ?
+                    "Parse error: unexpected end of file." :
+                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+            Location loc = new Location(perror.line, perror.column,
+                    perror.line, perror.column + 1);
+            throw new ParseFailedException(new KException(
+                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, (Source) null, loc));
         }
 
         return result;
