@@ -9,7 +9,7 @@ import scala.util.Try
 import scala.util.Success
 
 case class Down(imports: Set[String]) extends (K => Any) {
-  import Sorts._
+  import Sorts.KString
 
   def apply(o: K): Any = o match {
     case KToken(`KString`, v, att) => v

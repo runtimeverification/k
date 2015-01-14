@@ -20,7 +20,7 @@ object Up extends (Any => K) {
       case o: Set[_] => 'Set(o map apply toList)
 
       // Primitives
-      case o: Int => KToken(Sorts.KInt, o.toString)
+      case o: Int => KToken(Sorts.Int, o.toString)
       case o: String => KToken(Sorts.KString, o.toString)
       case o: Boolean => KToken(Sort("Boolean"), o.toString)
 
