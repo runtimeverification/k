@@ -11,7 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Location;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.outer.Bubble;
@@ -25,7 +27,16 @@ import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.Parser;
 import org.kframework.parser.concrete2kore.Parser.ParseError;
 import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.Parser;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+
+import static org.kframework.kore.outer.Constructors.*;
+import static org.kframework.kore.Constructors.*;
+import static org.kframework.Collections.*;
 
 /**
  * Takes a KORE module with bubble and returns a new KORE module with all
