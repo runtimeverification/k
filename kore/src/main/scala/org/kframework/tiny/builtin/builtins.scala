@@ -60,6 +60,9 @@ case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken w
   val s: String = v.toString
 
   def copy(att: Attributes) = KBoolean(v, att)
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 object KBoolean extends Sort with KLabel {
@@ -72,6 +75,9 @@ case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
   val sort = KInt
   val s: String = n.toString
   def copy(att: Attributes) = KInt(n, att)
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 object KInt extends Sort with KLabel {

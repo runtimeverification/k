@@ -12,6 +12,9 @@ trait KCollection extends Collection[K] with K {
   type This <: KCollection
 
   def copy(att: Attributes): This
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this map { _.transform(t) })
 }
 
 trait KAbstractCollection extends KCollection {

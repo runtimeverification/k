@@ -26,6 +26,7 @@ trait K extends HasAttributes with Pattern {
   protected type This <: K
 
   def copy(att: Attributes): This
+  def transform(t: PartialFunction[K, K]): K
 }
 
 trait KItem extends K
@@ -85,6 +86,9 @@ case class KUninterpretedToken(sort: Sort, s: String, override val att: Attribut
   extends KToken with KTokenToString with KORE {
   type This = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 case class ConcreteKLabel(name: String) extends KLabel with KORE {
@@ -107,6 +111,9 @@ case class KVariable(name: String, att: Attributes = Attributes())
   extends KItem with KORE with KLabel with KVariablePattern with KVariableToString {
   type This = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
@@ -129,6 +136,9 @@ case class InjectedKLabel(klabel: KLabel) extends KItem
   def copy(att: Attributes) = this
 
   override def toString = "#klabel" + "(" + klabel + ")";
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 case class InjectedKList(klist: KList, att: Attributes = Attributes()) extends KAbstractCollection

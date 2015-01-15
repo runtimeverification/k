@@ -59,6 +59,9 @@ case class MetaKLabel(klabel: KLabel) extends KItem {
   def copy(att: Attributes) = this
   def att = Attributes()
   def matchAll(k: K)(implicit rest: Disjunction): Disjunction = ???
+
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
 }
 
 trait KApplyPattern extends Pattern {
