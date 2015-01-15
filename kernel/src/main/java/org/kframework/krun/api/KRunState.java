@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 
 import java.io.Serializable;
 
-public class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
+public abstract class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 
     /**
     The pretty-printed term associated with this state, as suitable for display
@@ -38,9 +38,7 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
         this.stateId = counter.nextState++;
     }
 
-    public Term getRawResult() {
-        return rawResult;
-    }
+    public abstract Term getRawResult();
 
     public Integer getStateId() {
         return stateId;
@@ -51,22 +49,11 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof KRunState)) return false;
-        KRunState s = (KRunState)o;
-        /*jung uses intensively equals while drawing graphs
-          use SemanticEquals since it caches results
-        */
-        return SemanticEqual.checkEquality(rawResult, s.rawResult);
-    }
+    public abstract boolean equals(Object o);
 
     @Override
-    public int hashCode() {
-        return rawResult.hashCode();
-    }
+    public abstract int hashCode();
 
     @Override
-    public int compareTo(KRunState arg0) {
-        return Integer.compare(stateId, arg0.stateId);
-    }
+    public abstract int compareTo(KRunState arg0);
 }
