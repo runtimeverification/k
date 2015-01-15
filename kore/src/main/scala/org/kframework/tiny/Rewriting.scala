@@ -12,16 +12,26 @@ object Substitution {
 class Substitution(self: K) {
   import Substitution._
 
-  def transform(substituion: Map[KVariable, K]): K = self match {
-    case a @ Anywhere(p, _) => substituion(a.TOPVariable).transform(substituion + (a.HOLEVariable -> p))
-    case v: KVariable => substituion(v).transform(substituion)
-    case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
-      val newChildren = klist map { x: K => x.transform(substituion).asInstanceOf[K] }
-      KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
-    case c: Collection[_] =>
-      c.asInstanceOf[KCollection] map { x: K => x.transform(substituion) }
-    case e => e
+  def transform(substituion: Map[KVariable, K]): K = {
+    (doSubstitution _).andThen(flattenInjections)(substituion)
   }
+
+  private def flattenInjections(term: K): K = term.transform({
+    case KApply(l, kl, att) =>
+      KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att)
+  })
+
+  private def doSubstitution(substituion: Map[KVariable, K]) =
+    self match {
+      case a @ Anywhere(p, _) => substituion(a.TOPVariable).transform(substituion + (a.HOLEVariable -> p))
+      case v: KVariable => substituion(v).transform(substituion)
+      case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
+        val newChildren = klist map { x: K => x.transform(substituion).asInstanceOf[K] }
+        KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
+      case c: Collection[_] =>
+        c.asInstanceOf[KCollection] map { x: K => x.transform(substituion) }
+      case e => e
+    }
 }
 
 object RewriteToTop {

@@ -157,6 +157,14 @@ object InjectedKList extends CanBuildKCollection {
   def newBuilder(att: Attributes = Attributes()) =
     new AssocBuilder[K, KList, InjectedKList](KList.newBuilder(att))
       .mapResult { new InjectedKList(_, att) }
+
+  def flattenKList(l: KList): KList =
+    KList(l map { x: Any =>
+      x match {
+        case il: InjectedKList => il.klist.iterator
+        case x: K => List(x)
+      }
+    } flatten)
 }
 
 /*  Constructors */

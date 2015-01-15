@@ -32,7 +32,7 @@ class TestMeta {
         List(Terminal("Bar")))))))
 
   val metad = 'Definition('Set(),
-    'Set('Module("TEST",
+    'Set('Module("TEST", 'Set(),
       'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")))))))
 
   val Down = tiny.Down(Set("org.kframework.kore.outer", "scala.collection.immutable"))
