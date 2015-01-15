@@ -38,6 +38,7 @@ import org.kframework.kil.KSequence;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.LiterateDefinitionComment;
+import org.kframework.kil.Location;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -66,16 +67,24 @@ import com.davekoelle.AlphanumComparator;
 
 public class Unparser implements Comparator<ASTNode> {
 
-    public Unparser(Context context, ColorSetting color, Color terminalColor) {
+    public Unparser(Context context) {
+        this(context, ColorSetting.OFF, Color.BLACK, true, false);
+    }
+
+    public Unparser(Context context, ColorSetting color, Color terminalColor, boolean wrap, boolean annotateLocation) {
         this.context = context;
         this.color = color;
         this.terminalColor = terminalColor;
+        this.wrap = wrap;
+        this.annotateLocation = annotateLocation;
     }
 
     private final AlphanumComparator comparator = new AlphanumComparator();
     private final Context context;
     private final ColorSetting color;
     private final Color terminalColor;
+    private final boolean wrap;
+    private final boolean annotateLocation;
     private Set<String> variableList = new HashSet<>();
 
     @Override
@@ -104,9 +113,12 @@ public class Unparser implements Comparator<ASTNode> {
         }
     }
 
-    public String print(ASTNode node, IndentationOptions indent) {
+    public String print(ASTNode node) {
         Deque<Component> stack = new LinkedList<>();
-        Indenter string = new Indenter(indent);
+        Indenter string = new Indenter();
+        if (!wrap) {
+            string.setWidth(-1);
+        }
         stack.push(new TermComponent(node));
         while(!stack.isEmpty()) {
             processStack(stack, string);
@@ -124,7 +136,8 @@ public class Unparser implements Comparator<ASTNode> {
             return;
         }
         if (comp instanceof FormatComponent) {
-            switch (((FormatComponent) comp).format) {
+            FormatComponent format = (FormatComponent) comp;
+            switch (format.format) {
             case INDENT:
                 string.indent(4);
                 break;
@@ -137,12 +150,22 @@ public class Unparser implements Comparator<ASTNode> {
             case NEWLINE:
                 string.endLine();
                 break;
+            case END_TERM:
+                if (annotateLocation) {
+                    format.term.getLocation().lineEnd = string.getLineNo();
+                    format.term.getLocation().columnEnd = string.getColNo();
+                }
+                break;
             }
             return;
         }
         ASTNode term = ((TermComponent) comp).term;
+        if (annotateLocation) {
+            term.setLocation(new Location(string.getLineNo(), string.getColNo(), 0, 0));
+        }
         ComponentVisitor visitor = new ComponentVisitor(context);
         visitor.visitNode(term);
+        stack.push(new FormatComponent(Format.END_TERM, term));
         while(!visitor.getStack().isEmpty()) {
             stack.push(visitor.getStack().pollLast());
         }
@@ -178,14 +201,16 @@ public class Unparser implements Comparator<ASTNode> {
     }
 
     private static enum Format {
-        INDENT, DEDENT, NEWLINE, INDENT_TO_CURRENT
+        INDENT, DEDENT, NEWLINE, INDENT_TO_CURRENT, END_TERM
     }
 
     private static class FormatComponent implements Component {
         private final Format format;
+        private final ASTNode term;
 
-        public FormatComponent(Format format) {
+        public FormatComponent(Format format, ASTNode term) {
             this.format = format;
+            this.term = term;
         }
 
         @Override
@@ -219,7 +244,7 @@ public class Unparser implements Comparator<ASTNode> {
         }
 
         private void format(Format f) {
-            stack.addLast(new FormatComponent(f));
+            stack.addLast(new FormatComponent(f, null));
         }
 
         @Override
@@ -388,13 +413,11 @@ public class Unparser implements Comparator<ASTNode> {
                 }
             }
             string(">");
+            if (cell.hasLeftEllipsis()) {
+                string("...");
+            }
             format(Format.NEWLINE);
             format(Format.INDENT);
-            if (cell.hasLeftEllipsis()) {
-                string("... ");
-            } else {
-                string(" ");
-            }
             if (!colorCode.equals("")) {
                 string(ColorUtil.ANSI_NORMAL);
             }
@@ -405,9 +428,7 @@ public class Unparser implements Comparator<ASTNode> {
             format(Format.NEWLINE);
             format(Format.DEDENT);
             if (cell.hasRightEllipsis()) {
-                string(" ...");
-            } else {
-                string(" ");
+                string("...");
             }
             string("</" + cell.getLabel() + ">");
             if (!colorCode.equals("")) {
@@ -642,8 +663,11 @@ public class Unparser implements Comparator<ASTNode> {
 
         @Override
         public Void visit(Bag bag, Void _void) {
+            boolean first = true;
             for (Term t : bag.getContents()) {
+                if (!first) format(Format.NEWLINE);
                 term(t);
+                first = false;
             }
             return null;
         }

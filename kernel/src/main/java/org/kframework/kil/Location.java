@@ -15,8 +15,6 @@ public class Location implements Comparable<Location>, Serializable {
     public int columnStart;
     public int lineEnd;
     public int columnEnd;
-    public int offsetStart;
-    public int offsetEnd;
 
     @Override
     public int hashCode() {

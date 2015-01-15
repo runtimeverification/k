@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import java.awt.Color;
 import java.util.Collections;
 import java.util.Comparator;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -14,7 +13,6 @@ import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.ColorSetting;
 
 public class SortCollections extends CopyOnWriteTransformer {
 
@@ -46,7 +44,7 @@ public class SortCollections extends CopyOnWriteTransformer {
 
     public SortCollections(Context context, Term termToSort) {
         super("Sort collections", context);
-        unparser = new Unparser(context, ColorSetting.OFF, Color.BLACK);
+        unparser = new Unparser(context);
     }
 
     @Override
