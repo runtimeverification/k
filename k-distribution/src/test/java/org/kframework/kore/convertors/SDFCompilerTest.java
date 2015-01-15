@@ -30,13 +30,13 @@ import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.util.Providers;
 
-abstract class SDFCompilerTest extends BaseTestCase {
+public abstract class SDFCompilerTest extends BaseTestCase {
 
     @Rule
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public DefintionWithContext parse(File definitionFile, String mainModule) throws IOException {
+    public DefintionWithContext parse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -80,8 +80,8 @@ abstract class SDFCompilerTest extends BaseTestCase {
         BinaryLoader binaryLoader = new BinaryLoader(kem, null);
 
         Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
-                kem, new OuterParser(globalOptions, false, "autoinclude-java.k", fileUtil, kem),
-                false, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
+                kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),
+                true, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
         return new DefintionWithContext(parsedKIL, context);
     }

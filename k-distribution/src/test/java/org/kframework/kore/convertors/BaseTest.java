@@ -38,7 +38,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         testConversion(this::parseUsingSDF);
     }
 
-    static class DefintionWithContext {
+    public static class DefintionWithContext {
         public final Definition definition;
         public final Context context;
 
@@ -82,7 +82,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     private DefintionWithContext parseUsingSDF(File definitionFile) {
         try {
-            return parse(definitionFile, "TEST");
+            return parse(definitionFile, "TEST", false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
