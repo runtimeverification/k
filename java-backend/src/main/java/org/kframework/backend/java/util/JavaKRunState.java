@@ -12,8 +12,8 @@ import org.kframework.krun.api.KRunState;
  */
 public class JavaKRunState extends KRunState{
     private org.kframework.backend.java.kil.Term javaKilTerm;
-    private Context context;
 
+    private Context context;
     public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
         super(null, counter);
         this.context = context;
@@ -22,6 +22,10 @@ public class JavaKRunState extends KRunState{
 
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter);
+    }
+
+    public org.kframework.backend.java.kil.Term getJavaKilTerm() {
+        return javaKilTerm;
     }
 
     @Override
@@ -34,16 +38,17 @@ public class JavaKRunState extends KRunState{
 
     @Override
     public boolean equals(Object o) {
-        return false;
+        if (!(o instanceof JavaKRunState)) {
+            return false;
+        }
+        JavaKRunState state2 = (JavaKRunState) o;
+        return javaKilTerm.equals(state2.getJavaKilTerm());
+
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return javaKilTerm.hashCode();
     }
 
-    @Override
-    public int compareTo(KRunState arg0) {
-        return 0;
-    }
 }

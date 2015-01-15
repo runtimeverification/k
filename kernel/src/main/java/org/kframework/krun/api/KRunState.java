@@ -56,5 +56,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     public abstract int hashCode();
 
     @Override
-    public abstract int compareTo(KRunState arg0);
+    public int compareTo(KRunState arg0) {
+        return Integer.compare(stateId, arg0.stateId);
+    }
 }
