@@ -82,29 +82,31 @@ public class Unparser implements Comparator<ASTNode> {
     public int compare(ASTNode o1, ASTNode o2) {
         Deque<Component> thisStack = new LinkedList<>();
         Deque<Component> thatStack = new LinkedList<>();
-        StringBuilder thisString = new StringBuilder();
-        StringBuilder thatString = new StringBuilder();
+        Indenter thisString = new Indenter();
+        thisString.setWidth(-1);
+        Indenter thatString = new Indenter();
+        thisString.setWidth(-1);
         thisStack.push(new TermComponent(o1));
         thatStack.push(new TermComponent(o2));
+        int lastIdx = 0;
         while (true) {
             processStack(thisStack, thisString);
             processStack(thatStack, thatString);
             int lim = Math.min(thisString.length(), thatString.length());
-            String s1 = thisString.substring(0, lim);
-            String s2 = thisString.substring(0, lim);
+            String s1 = thisString.stringBuilder.substring(lastIdx, lim);
+            String s2 = thatString.stringBuilder.substring(lastIdx, lim);
+            lastIdx = lim;
             int result = comparator.compare(s1, s2);
             if (result != 0) return result;
-            thisString.delete(0, lim);
-            thatString.delete(0, lim);
             if (thisStack.isEmpty() && thatStack.isEmpty()) {
-                return comparator.compare(thisString.toString(), thatString.toString());
+                return comparator.compare(thisString.stringBuilder.substring(lim), thatString.stringBuilder.substring(lim));
             }
         }
     }
 
-    public String print(ASTNode node) {
+    public String print(ASTNode node, IndentationOptions indent) {
         Deque<Component> stack = new LinkedList<>();
-        StringBuilder string = new StringBuilder();
+        Indenter string = new Indenter(indent);
         stack.push(new TermComponent(node));
         while(!stack.isEmpty()) {
             processStack(stack, string);
@@ -112,13 +114,30 @@ public class Unparser implements Comparator<ASTNode> {
         return string.toString();
     }
 
-    private void processStack(Deque<Component> stack, StringBuilder string) {
+    private void processStack(Deque<Component> stack, Indenter string) {
         if (stack.isEmpty()) {
             return;
         }
         Component comp = stack.pop();
         if (comp instanceof StringComponent) {
-            string.append(((StringComponent)comp).s);
+            string.write(((StringComponent)comp).s);
+            return;
+        }
+        if (comp instanceof FormatComponent) {
+            switch (((FormatComponent) comp).format) {
+            case INDENT:
+                string.indent(4);
+                break;
+            case DEDENT:
+                string.unindent();
+                break;
+            case INDENT_TO_CURRENT:
+                string.indentToCurrent();
+                break;
+            case NEWLINE:
+                string.endLine();
+                break;
+            }
             return;
         }
         ASTNode term = ((TermComponent) comp).term;
@@ -138,6 +157,11 @@ public class Unparser implements Comparator<ASTNode> {
         public StringComponent(String s) {
             this.s = s;
         }
+
+        @Override
+        public String toString() {
+            return s;
+        }
     }
 
     private static class TermComponent implements Component {
@@ -145,6 +169,11 @@ public class Unparser implements Comparator<ASTNode> {
 
         public TermComponent(ASTNode term) {
             this.term = term;
+        }
+
+        @Override
+        public String toString() {
+            return term.toString();
         }
     }
 
@@ -157,6 +186,11 @@ public class Unparser implements Comparator<ASTNode> {
 
         public FormatComponent(Format format) {
             this.format = format;
+        }
+
+        @Override
+        public String toString() {
+            return format.toString();
         }
     }
 
