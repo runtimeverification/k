@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
@@ -66,9 +67,7 @@ public class JavaSymbolicExecutor implements Executor {
 
     private KRunState internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         ConstrainedTerm result = javaKILRun(cfg, bound);
-        org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTransformer(context));
-        KRunState returnResult = new KRunState(kilTerm, counter);
+        KRunState returnResult = new JavaKRunState(result.term(), context, counter);
         return returnResult;
     }
 
@@ -142,7 +141,7 @@ public class JavaSymbolicExecutor implements Executor {
                         .visitNode(pattern.getBody());
 
             searchResults.add(new SearchResult(
-                    new KRunState(rawResult, counter),
+                    new JavaKRunState(rawResult, counter),
                     substitutionMap,
                     compilationInfo));
         }

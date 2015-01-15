@@ -14,9 +14,14 @@ public class JavaKRunState extends KRunState{
     private org.kframework.backend.java.kil.Term javaKilTerm;
     private Context context;
 
-    public JavaKRunState(Context context, Counter counter) {
+    public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
         super(null, counter);
         this.context = context;
+        this.javaKilTerm = javaTerm;
+    }
+
+    public JavaKRunState(Term term, Counter counter) {
+        super(term, counter);
     }
 
     @Override
