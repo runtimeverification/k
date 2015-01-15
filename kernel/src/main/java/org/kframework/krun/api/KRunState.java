@@ -6,6 +6,7 @@ import org.kframework.kil.Term;
 import com.google.inject.Singleton;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 public abstract class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 
@@ -17,7 +18,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     /**
     The raw term associated with this state, as suitable for further rewriting
     */
-    private Term rawResult;
+    protected Optional<Term> rawResult;
 
     /**
      * A state ID corresponding to this state. The contract of a {@link KRun} object
@@ -34,7 +35,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     }
 
     public KRunState(Term rawResult, Counter counter) {
-        this.rawResult = rawResult;
+        this.rawResult = Optional.ofNullable(rawResult);
         this.stateId = counter.nextState++;
     }
 
