@@ -1,5 +1,9 @@
 // Copyright (c) 2010-2014 K Team. All Rights Reserved.
 
+module MAP
+  syntax Map ::= ".Map"                         [function, hook(Map:.Map)]
+endmodule
+
 module INT
   syntax Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
 endmodule
@@ -41,12 +45,13 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+  imports MAP
 
   syntax KResult ::= Int | Bool
 
-  configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm </k>
-                  <state color="red"> .Map </state>
+  configuration <T>
+                  <k> $PGM:Pgm </k>
+                  <state> .Map </state>
                 </T>
 
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
