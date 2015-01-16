@@ -23,6 +23,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.ConstrainedExecutionGraph;
+import org.kframework.backend.java.util.ConstrainedTransition;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
@@ -76,10 +77,9 @@ public class SymbolicRewriter {
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
                 if (computeGraph) {
-                    Rule rule = getRule(0);
-                    Map<Variable, Term> subs = getSubstitution(0);
-                    executionGraph.addEdge(new Pair<Rule, Map<Variable, Term>>() {
-                    })
+                    ConstrainedTransition transition = new ConstrainedTransition(
+                            getRule(0), getSubstitution(0));
+
                 }
                 constrainedTerm = result;
             } else {

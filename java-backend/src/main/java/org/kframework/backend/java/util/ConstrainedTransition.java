@@ -17,7 +17,7 @@ public class ConstrainedTransition {
 
     private Map<Variable, Term> substitution;
 
-    public ConstrainedTransition(Map<Variable, Term> substitution, Rule rule) {
+    public ConstrainedTransition(Rule rule, Map<Variable, Term> substitution) {
         this.substitution = substitution;
         this.rule = rule;
     }
