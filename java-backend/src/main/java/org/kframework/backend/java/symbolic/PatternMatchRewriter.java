@@ -12,7 +12,6 @@ import java.util.Set;
 import org.kframework.backend.java.indexing.IndexingCellsCollector;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -302,21 +301,23 @@ public class PatternMatchRewriter {
         return result;
     }
 
-    private Substitution<Variable, Term> getSubstitutionMap(
+    private boolean addSearchResult(
+            List<Substitution<Variable, Term>> searchResults,
             Term term,
             Rule pattern,
-            TermContext termContext) {
-        List<Substitution<Variable, Term>> substitutions = PatternMatcher.match(
-                term,
-                pattern,
-                termContext);
-        if (substitutions.size() != 1) {
-            return null;
+            TermContext termContext,
+            int bound) {
+        List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(term, pattern, termContext);
+        for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
+            searchResults.add(searchResult);
+            if (searchResults.size() == bound) {
+                return true;
+            }
         }
-        return SymbolicRewriter.addGeneratedTop(substitutions.get(0), termContext);
+        return false;
     }
 
-    public List<Map<Variable,Term>> search(
+    public List<Substitution<Variable,Term>> search(
             Term initialTerm,
             Term targetTerm,
             List<Rule> rules,
@@ -327,17 +328,14 @@ public class PatternMatchRewriter {
             TermContext termContext) {
         stopwatch.start();
 
-        List<Map<Variable,Term>> searchResults = new ArrayList<Map<Variable,Term>>();
+        List<Substitution<Variable,Term>> searchResults = new ArrayList<>();
         Set<Term> visited = new HashSet<Term>();
 
         // If depth is 0 then we are just trying to match the pattern.
         // A more clean solution would require a bit of a rework to how patterns
         // are handled in krun.Main when not doing search.
         if (depth == 0) {
-            Map<Variable, Term> map = getSubstitutionMap(initialTerm, pattern, termContext);
-            if (map != null) {
-                searchResults.add(map);
-            }
+            addSearchResult(searchResults, initialTerm, pattern, termContext, bound);
             stopwatch.stop();
             if (options.experimental.statistics) {
                 System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
@@ -356,9 +354,10 @@ public class PatternMatchRewriter {
             depth = 1;
         }
         if (searchType == SearchType.STAR) {
-            Map<Variable, Term> map = getSubstitutionMap(initialTerm, pattern, termContext);
-            if (map != null) {
-                searchResults.add(map);
+            if (addSearchResult(searchResults, initialTerm, pattern, termContext, bound)) {
+                stopwatch.stop();
+                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                return searchResults;
             }
         }
 
@@ -370,12 +369,8 @@ public class PatternMatchRewriter {
                 computeSearchRewriteStep(term, -1, termContext);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
-                    Map<Variable, Term> map = getSubstitutionMap(term, pattern, termContext);
-                    if (map != null) {
-                        searchResults.add(map);
-                        if (searchResults.size() == bound) {
-                            break label;
-                        }
+                    if (addSearchResult(searchResults, term, pattern, termContext, bound)) {
+                        break label;
                     }
                 }
 
@@ -392,12 +387,8 @@ public class PatternMatchRewriter {
                         // If we aren't searching for only final results, then
                         // also add this as a result if it matches the pattern.
                         if (searchType != SearchType.FINAL || currentDepth + 1 == depth) {
-                            Map<Variable, Term> map = getSubstitutionMap(result, pattern, termContext);
-                            if (map != null) {
-                                searchResults.add(map);
-                                if (searchResults.size() == bound) {
-                                    break label;
-                                }
+                            if (addSearchResult(searchResults, result, pattern, termContext, bound)) {
+                                break label;
                             }
                         }
                     }

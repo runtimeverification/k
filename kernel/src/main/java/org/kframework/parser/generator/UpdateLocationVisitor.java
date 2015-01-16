@@ -22,7 +22,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
     }
 
     public Void visit(ASTNode node, Void _void) {
-        node.setLocation(updateLocation(currentStartLine, currentStartColumn, cachedStartColumn, cachedStartLine, node.getLocation()));
+        node.setLocation(updateLocation(currentStartLine, currentStartColumn, cachedStartLine, cachedStartColumn, node.getLocation()));
         return null;
     }
 

@@ -12,7 +12,6 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
@@ -261,7 +260,11 @@ public class SymbolicRewriter {
      * the pattern to the terms they unify with. Adds as many search results
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
-    private boolean addSearchResult(List<Map<Variable, Term>> searchResults, ConstrainedTerm initialTerm, Rule pattern, int bound) {
+    private boolean addSearchResult(
+            List<Substitution<Variable, Term>> searchResults,
+            ConstrainedTerm initialTerm,
+            Rule pattern,
+            int bound) {
         assert Sets.intersection(initialTerm.term().variableSet(),
                 initialTerm.constraint().substitution().keySet()).isEmpty();
         List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
@@ -269,27 +272,12 @@ public class SymbolicRewriter {
                 pattern,
                 initialTerm.termContext());
         for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
-            searchResults.add(addGeneratedTop(searchResult, initialTerm.termContext()));
+            searchResults.add(searchResult);
             if (searchResults.size() == bound) {
                 return true;
             }
         }
         return false;
-    }
-
-    public static Substitution<Variable, Term> addGeneratedTop(
-            Substitution<Variable, Term> substitution,
-            TermContext context) {
-        Substitution<Variable, Term> result = Substitution.empty();
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            result = result.plus(
-                    entry.getKey(),
-                    CellCollection.singleton(
-                            CellLabel.GENERATED_TOP,
-                            entry.getValue(),
-                            context.definition().context()));
-        }
-        return result;
     }
 
     /**
@@ -304,7 +292,7 @@ public class SymbolicRewriter {
 
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Map<Variable,Term>> search(
+    public List<Substitution<Variable,Term>> search(
             Term initialTerm,
             Term targetTerm,
             List<Rule> rules,
@@ -315,7 +303,7 @@ public class SymbolicRewriter {
             TermContext context) {
         stopwatch.start();
 
-        List<Map<Variable,Term>> searchResults = Lists.newArrayList();
+        List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);

@@ -76,7 +76,7 @@ public class KompileFrontEnd extends FrontEnd {
     }
 
     @Override
-    public boolean run() {
+    public int run() {
         if (!options.mainDefinitionFile().exists()) {
             throw KExceptionManager.criticalError("Definition file doesn't exist: " +
                     options.mainDefinitionFile().getAbsolutePath());
@@ -90,7 +90,7 @@ public class KompileFrontEnd extends FrontEnd {
         loader.saveOrDie(files.resolveKompiled("definition.bin"), def);
 
         verbose(def);
-        return true;
+        return 0;
     }
 
     private void verbose(Definition def) {

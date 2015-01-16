@@ -73,7 +73,7 @@ public class KastFrontEnd extends FrontEnd {
      * @return true if the application terminated normally; false otherwise
      */
     @Override
-    public boolean run() {
+    public int run() {
         Reader stringToParse = options.stringToParse();
         Source source = options.source();
 
@@ -92,7 +92,7 @@ public class KastFrontEnd extends FrontEnd {
 
         sw.printIntermediate("Maudify Program");
         sw.printTotal("Total");
-        return true;
+        return 0;
     }
 
 

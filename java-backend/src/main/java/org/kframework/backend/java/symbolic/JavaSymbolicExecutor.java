@@ -112,7 +112,7 @@ public class JavaSymbolicExecutor implements Executor {
         Rule patternRule = transformer.transformAndEval(pattern);
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
-        List<Map<Variable,Term>> hits;
+        List<Substitution<Variable,Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
