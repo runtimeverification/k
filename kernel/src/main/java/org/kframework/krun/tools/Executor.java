@@ -80,7 +80,7 @@ public interface Executor {
     the resulting term after executing the specified number of steps (or fewer if no further
     rewrites are possible)
     */
-    public abstract KRunState step(Term cfg, int steps) throws KRunExecutionException;
+    public abstract KRunState step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
 
     public static class Tool implements Transformation<Void, KRunResult> {
 
