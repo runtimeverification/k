@@ -12,7 +12,6 @@ import org.kframework.krun.api.Transition;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Java Backend Specific Transition Class
@@ -31,19 +30,12 @@ public class JavaTransition extends Transition {
 
     private Context context;
 
-    public JavaTransition(TransitionType type, String label, Rule rule,
+    public JavaTransition(Rule javaRule,
                           Map<org.kframework.backend.java.kil.Variable, org.kframework.backend.java.kil.Term> javaSubs,
-                          String readString, Context context) {
-        super(type, label, null, null, readString);
-        javaRule = rule;
+                          Context context) {
+        super(TransitionType.RULE, null, null, null, null);
+        this.javaRule = javaRule;
         this.javaSubs = javaSubs;
-        this.context = context;
-    }
-
-    public JavaTransition(TransitionType type, String label, ASTNode rule, Map<Variable, Term> subs,
-                          String readString) {
-        super(type, label, rule, subs, readString);
-        javaRule = null;
     }
 
     public Rule getJavaRule() {
@@ -75,6 +67,5 @@ public class JavaTransition extends Transition {
         substitution = genericSubs;
         return substitution;
     }
-
 
 }
