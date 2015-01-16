@@ -6,24 +6,44 @@ import org.kframework.kore.K
 
 trait Proposition
 
-trait Equation {
-  def left: K
-  def right: K
+case class Equation(left: K, right: K) extends Proposition
+
+trait TruthValue
+
+object True extends Conjunction(Set()) with TruthValue {
+  def toString = "True"
+}
+object False extends Disjunction(Set()) with TruthValue {
+  def toString = "False"
 }
 
-trait Equivalence {
-  def apply(a: K, b: K): Boolean
+trait Theory {
+  /**
+   * Tells whether the proposition is valid in this theory.
+   * If we cannot find an answer (e.g., we have symbolic values), return None
+   */
+  def apply(proposition: Proposition): Option[TruthValue]
 }
 
-object Conjunction {
-  def apply(pairs: (KVariable, K)*): Conjunction = Conjunction(pairs.toMap)
+case class ExtendedTheory(base: Theory, extra: Proposition) {
+  def apply(proposition: Proposition): Option[TruthValue] = {
+    base.apply(Conjunction(proposition, extra))
+  }
 }
 
-case class Conjunction private (bindings: Map[KVariable, K], other: Set[Equation] = Set()) extends Proposition {
-  def ++(other: Conjunction) = Conjunction(bindings ++ other.bindings)
-  def +(other: (KVariable, K)) = Conjunction(bindings + other)
+object Bindings {
+  def apply(pairs: (KVariable, K)*): Bindings = Bindings(pairs.toMap)
+}
 
-  def and(that: Conjunction): Option[Conjunction] = {
+case class Bindings(bindings: Map[KVariable, K]) extends Proposition {
+  def apply(v: KVariable) = bindings(v)
+  def mapValues(f: K => K) = Bindings(bindings mapValues f)
+  def contains(v: KVariable) = bindings contains v
+
+  def ++(other: Bindings) = Bindings(bindings ++ other.bindings)
+  def +(other: (KVariable, K)) = Bindings(bindings + other)
+
+  def and(that: Bindings): Option[Bindings] = {
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
     if ((bindings.keys.toSet & that.bindings.keys.toSet).exists(v => bindings(v) != that.bindings(v))) {
       None
@@ -31,36 +51,45 @@ case class Conjunction private (bindings: Map[KVariable, K], other: Set[Equation
       Some(this ++ that)
   }
 
-  def apply(v: KVariable) = bindings(v)
-
-  def mapValues(f: K => K) = Conjunction(bindings mapValues f)
-
-  def contains(v: KVariable) = bindings contains v
-
   override def toString =
-    if (bindings.size == 0 && other.size == 0)
+    if (bindings.size == 0)
       "True"
-    else {
-      val bindingsString = bindings map { case (k, v) => k + "=" + v } mkString "  /\\  "
-      val otherString = other mkString "  /\\  "
-      if (bindingsString != "" && otherString != "")
-        bindingsString + "  /\\  " + otherString
-      else
-        bindingsString + otherString
-    }
+    else
+      bindings map { case (k, v) => k + "=" + v } mkString "  /\\  "
+
 }
 
-case class Disjunction(conjunctions: Set[Conjunction])(implicit equivalence: Equivalence) {
-  def or(other: Disjunction): Disjunction =
-    Disjunction(conjunctions | other.conjunctions)
-
-  def and(other: Disjunction): Disjunction = {
-    Disjunction((for (m1 <- conjunctions; m2 <- other.conjunctions) yield {
-      m1 and m2
-    }).flatten)
+object Conjunction {
+  def apply(propositions: Proposition*): Proposition =
+    propositions.foldLeft(True: Proposition) {
+    case (sum: Conjunction, c: Conjunction) => Conjunction(sum.ps | c.ps)
+    case (sum: Conjunction, d: Disjunction) => Conjunction(sum.ps | c.ps)
   }
 
-  val equiv = equivalence
+    if(propositions.exists { p => p.isInstanceOf[Disjunction] })
+      propositions map {
+        case d: Disjunction => d
+        case p => Disjunction(p)
+      }
+    }
+    else
+        Disjunction(conjunctions.toSet)
+
+  def and(other: Disjunction): Disjunction = {
+    Disjunction(
+      for (m1 <- conjunctions; m2 <- other.conjunctions) yield {
+        m1 and m2
+      })
+  }
+}
+
+case class Conjunction(ps: Set[Equation]) extends Proposition {
+  def toString = ps mkString "  /\\  "
+
+  def and(that: Conjunction): Conjunction = Conjunction(this.ps | that.ps)
+}
+
+case class Disjunction(conjunctions: Set[Conjunction]) extends Proposition {
 
   def headOption = conjunctions.headOption
 
@@ -76,14 +105,16 @@ case class Disjunction(conjunctions: Set[Conjunction])(implicit equivalence: Equ
 }
 
 object Disjunction {
-  def apply(conjunctions: Conjunction*)(implicit inScope: Disjunction): Disjunction = Disjunction(conjunctions.toSet)(inScope.equiv)
+  def apply(ps: Proposition*): Disjunction =
+    ps.foldLeft(False: Disjunction){
+    case (d: Disjunction, p: Disjunction) => or(d, p)
+    case (d: Disjunction, p: Proposition) => or(d, Disjunction(p))
+  }
+
+  def or(t: Disjunction, other: Disjunction): Disjunction =
+    Disjunction(t.conjunctions | other.conjunctions)
 }
 
-object EqualsEquivalence extends Equivalence {
+object FreeTheory extends Theory {
   def apply(a: K, b: K): Boolean = a == b
-}
-
-object Logic {
-  def True(implicit disjunction: Disjunction) = Disjunction(Conjunction())(disjunction)
-  def False(implicit disjunction: Disjunction) = Disjunction()(disjunction)
 }
