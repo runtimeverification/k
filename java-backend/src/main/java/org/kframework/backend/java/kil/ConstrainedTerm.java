@@ -4,17 +4,16 @@ package org.kframework.backend.java.kil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.TruthValue;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
@@ -27,8 +26,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     public static class Data {
         public final Term term;
-        public final SymbolicConstraint constraint;
-        public Data(Term term, SymbolicConstraint constraint) {
+        public final ConjunctiveFormula constraint;
+        public Data(Term term, ConjunctiveFormula constraint) {
             super();
             this.term = term;
             this.constraint = constraint;
@@ -69,7 +68,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     private final TermContext context;
 
-    public ConstrainedTerm(Term term, SymbolicConstraint constraint) {
+    public ConstrainedTerm(Term term, ConjunctiveFormula constraint) {
         Data data = new Data(term, constraint);
         this.data = data;
         this.context = TermContext.of(data.constraint.termContext().global(),
@@ -77,14 +76,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, new SymbolicConstraint(context));
+        this(term, ConjunctiveFormula.trueFormula(context));
     }
 
     public TermContext termContext() {
         return context;
     }
 
-    public SymbolicConstraint constraint() {
+    public ConjunctiveFormula constraint() {
         return data.constraint;
     }
 
@@ -97,32 +96,32 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * occurring only in the given constrained term (but not in this constrained term) are
      * existentially quantified.
      */
-    public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm) {
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
-        unificationConstraint.addAll(data.constraint.substitution());
-        unificationConstraint.add(data.term, constrainedTerm.data.term);
-        unificationConstraint.simplifyBeforePatternFolding();
-        if (unificationConstraint.isFalse()) {
+    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm) {
+        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(constrainedTerm.termContext())
+                .add(data.constraint.substitution())
+                .add(data.term, constrainedTerm.data.term)
+                .simplifyBeforePatternFolding();
+        if (constraint.isFalse()) {
             return null;
         }
 
         /* apply pattern folding */
-        unificationConstraint.simplifyModuloPatternFolding();
-        unificationConstraint.addAll(constrainedTerm.data.constraint);
-        unificationConstraint.simplifyModuloPatternFolding();
-        if (unificationConstraint.isFalse()) {
+        constraint = constraint.simplifyModuloPatternFolding()
+                .addAll(constrainedTerm.data.constraint.equalities())
+                .simplifyModuloPatternFolding();
+        if (constraint.isFalse()) {
             return null;
         }
 
-        unificationConstraint.expandPatternsAndSimplify(false);
-
-        final Set<Variable> variables = Sets.newHashSet(unificationConstraint.variableSet());
-        variables.removeAll(variableSet());
-        if (!unificationConstraint.orientSubstitution(variables)) {
+        Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
+        constraint = constraint.expandPatternsAndSimplify(false)
+                .orientSubstitution(rightOnlyVariables);
+        if (constraint == null) {
             return null;
         }
 
-        SymbolicConstraint leftHandSide = SymbolicConstraint
+        /*
+        ConjunctiveFormula leftHandSide = SymbolicConstraint
                 .simplifiedConstraintFrom(constrainedTerm.termContext(), data.constraint);
 
         Predicate<Variable> notInVariables = new Predicate<Variable>() {
@@ -135,16 +134,15 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         SymbolicConstraint rightHandSide = SymbolicConstraint
                 .simplifiedConstraintFrom(constrainedTerm.termContext(),
                         leftHandSide.substitution(),
-                        Maps.filterKeys(unificationConstraint.substitution(), notInVariables),
-                        unificationConstraint.equalities());
-
-        if (!leftHandSide.implies(rightHandSide, variables)) {
+                        Maps.filterKeys(constraint.substitution(), notInVariables),
+                        constraint.equalities());
+        if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
         }
+        */
 
-        unificationConstraint.addAllThenSimplify(data.constraint);
-
-        return unificationConstraint;
+        constraint = constraint.addAndSimplify(data.constraint);
+        return constraint;
     }
 
     public Term term() {
@@ -158,65 +156,49 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      *            another constrained term
      * @return solutions to the unification problem
      */
-    public List<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
+    public List<ConjunctiveFormula> unify(ConstrainedTerm constrainedTerm) {
         /* unify the subject term and the pattern term without considering those associated constraints */
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
-        unificationConstraint.add(data.term, constrainedTerm.data.term);
-        unificationConstraint.simplify();
-        if (unificationConstraint.isFalse()) {
+        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(constrainedTerm.termContext())
+                .add(term(), constrainedTerm.term())
+                .simplify();
+        if (constraint.isFalse()) {
             return Collections.emptyList();
         }
 
-        List<SymbolicConstraint> candidates = Lists.newArrayList();
-        for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
-            if (TruthValue.FALSE == candidate.addAllThenSimplify(constrainedTerm.data.constraint)) {
-                continue;
-            }
-            candidates.addAll(candidate.getMultiConstraints());
-        }
+        List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
+                .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
+                .filter(c -> !c.isFalse())
+                .map(ConjunctiveFormula::getDisjunctiveNormalForm)
+                .map(DisjunctiveFormula::conjunctions)
+                .flatMap(List::stream)
+                .map(ConjunctiveFormula::simplify)
+                .filter(c -> !c.isFalse())
+                .collect(Collectors.toList());
 
-        List<SymbolicConstraint> solutions = Lists.newArrayList();
-        for (SymbolicConstraint candidate : candidates) {
-            if (candidate.isMatching(constrainedTerm.variableSet())) {
-                /* OPTIMIZATION: since no narrowing happens, the symbolic
-                 * constraint remains unchanged; thus, there is no need to check
-                 * satisfiability or expand patterns */
-                if (TruthValue.FALSE == candidate.addAllThenSimplify(data.constraint)) {
-                    continue;
-                }
-            } else {
-                if (TruthValue.FALSE == candidate.addAllThenSimplify(data.constraint)) {
-                    continue;
-                }
-
-                if (candidate.checkUnsat()) {
+        List<ConjunctiveFormula> solutions = Lists.newArrayList();
+        for (ConjunctiveFormula candidate : candidates) {
+            ConjunctiveFormula solution = candidate
+                    .addAndSimplify(constraint())
+                    .orientSubstitution(constrainedTerm.variableSet());
+            /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
+             * thus, there is no need to check satisfiability or expand patterns */
+            if (!candidate.isMatching(constrainedTerm.variableSet())) {
+                if (solution.isFalse() || solution.checkUnsat()) {
                     continue;
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion
-                candidate.expandPatternsAndSimplify(true);
-
-                if (candidate.isFalse()) {
-                    continue;
-                }
-
-                if (candidate.checkUnsat()) {
+                solution = solution.expandPatternsAndSimplify(true);
+                if (solution.isFalse() || solution.checkUnsat()) {
                     continue;
                 }
             }
 
-            assert candidate.getMultiConstraints().size() == 1;
-            solutions.add(candidate);
+            assert solution.disjunctions().isEmpty();
+            solutions.add(solution);
         }
 
         return solutions;
-    }
-
-    @Override
-    public Set<Variable> variableSet() {
-        // TODO(YilongL): get rid of this once SymbolicConstraint becomes immutable
-        setVariableSet(null);
-        return super.variableSet();
     }
 
     @Override
@@ -242,7 +224,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public String toString() {
-        return data.term + SymbolicConstraint.SEPARATOR + data.constraint;
+        return data.term + ConjunctiveFormula.SEPARATOR + data.constraint;
     }
 
     @Override

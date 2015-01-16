@@ -71,13 +71,12 @@ public class JavaSymbolicProver implements Prover {
             }
 
             Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
-            SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
-            initialConstraint.addAll(rule.requires());
-            ConstrainedTerm initialTerm = new ConstrainedTerm(rule.leftHandSide(), initialConstraint);
-            SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
-            targetConstraint.addAll(rule.ensures());
-            ConstrainedTerm targetTerm = new ConstrainedTerm(rule.rightHandSide(), targetConstraint);
-
+            ConstrainedTerm initialTerm = new ConstrainedTerm(
+                    rule.leftHandSide(),
+                    ConjunctiveFormula.trueFormula(termContext).addAll(rule.requires()));
+            ConstrainedTerm targetTerm = new ConstrainedTerm(
+                    rule.rightHandSide(),
+                    ConjunctiveFormula.trueFormula(termContext).addAll(rule.ensures()));
             proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
         }
 

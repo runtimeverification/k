@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -40,16 +41,16 @@ public class MetaK {
      *         {@code null}
      */
     public static BoolToken unifiable(Term term1, Term term2, TermContext context) {
-        SymbolicConstraint constraint = new SymbolicConstraint(context);
-        constraint.add(term1, term2);
-        constraint.simplify();
+        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(context)
+                .add(term1, term2)
+                .simplify();
         if (constraint.isFalse()) {
             return BoolToken.FALSE;
         }
 
         BoolToken result = BoolToken.FALSE;
-        for (SymbolicConstraint solution : constraint.getMultiConstraints()) {
-            solution.simplify();
+        for (ConjunctiveFormula solution : constraint.getDisjunctiveNormalForm().conjunctions()) {
+            solution = solution.simplify();
             if (solution.isSubstitution()) {
                 return BoolToken.TRUE;
             } else if (!solution.isFalse()) {

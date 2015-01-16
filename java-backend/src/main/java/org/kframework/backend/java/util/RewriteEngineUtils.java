@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
@@ -19,11 +20,11 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
+import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -68,10 +69,11 @@ public class RewriteEngineUtils {
 
         /* evaluate data structure lookups/choices and add bindings for them */
         Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
-        for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+        int i = 0;
+        for (Equality equality : rule.lookups().equalities()) {
             Term lookupOrChoice = equality.leftHandSide();
             Term nonLookupOrChoice =  equality.rightHandSide();
-            List<RHSInstruction> instructions = equality.instructions();
+            List<RHSInstruction> instructions = rule.instructionsOfRequires().get(i);
             Term evalLookupOrChoice = KAbstractRewriteMachine.construct(instructions, crntSubst, null, context, false);
 
             boolean resolved = false;
@@ -110,8 +112,6 @@ public class RewriteEngineUtils {
 
                     PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
                     if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
-                        assert lookupMatcher.multiSubstitutions().isEmpty();
-
                         if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                             resolved = true;
                             crntSubst = crntSubst.plusAll(lookupMatcher.substitution());
@@ -128,6 +128,7 @@ public class RewriteEngineUtils {
                 crntSubst = null;
                 break;
             }
+            ++i;
         }
         Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
 
@@ -135,7 +136,7 @@ public class RewriteEngineUtils {
         /* evaluate side conditions */
         Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
         if (crntSubst != null) {
-            int i = 0;
+            i = 0;
             for (Term require : rule.requires()) {
                 // TODO(YilongL): in the future, we may have to accumulate
                 // the substitution obtained from evaluating the side
@@ -167,17 +168,15 @@ public class RewriteEngineUtils {
      *         of which is updated with extra bindings introduced during the
      *         evaluation
      */
-    public static List<Map<Variable, Term>> evaluateConditions(Rule rule, List<Map<Variable, Term>> substitutions,
+    public static List<Substitution<Variable, Term>> evaluateConditions(
+            Rule rule,
+            List<Substitution<Variable, Term>> substitutions,
             TermContext context) {
         /* handle fresh variables, data structure lookups, and side conditions */
-        List<Map<Variable, Term>> results = Lists.newArrayList();
-        for (Map<Variable, Term> crntSubst : substitutions) {
-            crntSubst = evaluateConditions(rule, Substitution.from(crntSubst), context);
-            if (crntSubst != null) {
-                results.add(crntSubst);
-            }
-        }
-        return results;
+        return substitutions.stream()
+                .map(s -> evaluateConditions(rule, Substitution.from(s), context))
+                .filter(s -> s != null)
+                .collect(Collectors.toList());
     }
 
     public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
@@ -228,35 +227,6 @@ public class RewriteEngineUtils {
             Map<Variable, Term> substitution = Maps.newHashMap(fSubstitution);
             return Collections.singletonList(substitution);
         }
-    }
-
-    public static List<SymbolicConstraint> getMultiConstraints(
-            SymbolicConstraint constraint,
-            List<AndOrTree<SymbolicConstraint>> multiConstraints) {
-        if (multiConstraints.size() == 0) {
-            // TODO(YilongL): no need to copy the constraint when it becomes immutable
-            return Collections.singletonList(new SymbolicConstraint(constraint));
-        } else if (multiConstraints.size() == 1) {
-            return getMultiConstraintsInternal(constraint, multiConstraints.get(0).sumOfProducts());
-        }
-        AndOrTree<SymbolicConstraint> root = new AndOrTree<>(true, multiConstraints);
-        return getMultiConstraintsInternal(constraint, root.sumOfProducts());
-    }
-
-    private static List<SymbolicConstraint> getMultiConstraintsInternal(
-            SymbolicConstraint constraint,
-            List<List<SymbolicConstraint>> multiConstraints) {
-        TermContext context = constraint.termContext();
-        assert !multiConstraints.isEmpty();
-        List<SymbolicConstraint> result = Lists.newArrayList();
-        for (List<SymbolicConstraint> product : multiConstraints) {
-            Object[] components = new Object[product.size() + 1];
-            product.toArray(components);
-            components[product.size()] = constraint;
-            SymbolicConstraint composedCnstr = SymbolicConstraint.simplifiedConstraintFrom(context, components);
-            result.add(composedCnstr);
-        }
-        return result;
     }
 
     /**

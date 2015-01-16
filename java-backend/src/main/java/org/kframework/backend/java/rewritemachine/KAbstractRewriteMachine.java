@@ -385,7 +385,7 @@ public class KAbstractRewriteMachine {
     }
 
     /**
-     * Similar to {@link RewriteEngineUtils#getMultiSubstitutions(Map, Collection)}
+     * Similar to {@link org.kframework.backend.java.symbolic.ConjunctiveFormula#getDisjunctiveNormalForm}
      * except that this method operates on {@code ExtendedSubstitution}.
      */
     private static List<ExtendedSubstitution> getCNFExtendedSubstitutions(

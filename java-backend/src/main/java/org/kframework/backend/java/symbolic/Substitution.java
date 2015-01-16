@@ -89,6 +89,14 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V> {
         return result;
     }
 
+    public Substitution<K, V> minus(K key) {
+        return new Substitution<>(entries.minus(key));
+    }
+
+    public Substitution<K, V> minusAll(Collection<? extends K> keys) {
+        return new Substitution<>(entries.minusAll(keys));
+    }
+
     @SuppressWarnings("unchecked")
     public Substitution<K, V> evaluate(TermContext context) {
         HashPMap<K, V> entries = HashTreePMap.empty();

@@ -438,25 +438,25 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
 
-        UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
+        ConjunctiveFormula lookups = ConjunctiveFormula.trueFormula(TermContext.of(globalContext));
         for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key, TermContext.of(globalContext));
+                    lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                 } else {
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE, TermContext.of(globalContext));
+                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookupsBuilder.add(DataStructures.choice(base, TermContext.of(globalContext)), key, TermContext.of(globalContext));
+                        lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                     }
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value, TermContext.of(globalContext));
+                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 } else { // ListLookup
-                    lookupsBuilder.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value, TermContext.of(globalContext));
+                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 }
             }
 
@@ -507,7 +507,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 freshConstants,
                 freshVariables,
-                lookupsBuilder.build(),
+                lookups,
                 ruleData.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
@@ -565,10 +565,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     /**
      * Partially evaluate the right-hand side and the conditions for each rule.
-     *
-     * @param definition
-     *            the definition used for evaluation
-     * @return the partially evaluated definition
      */
     private static Definition evaluateDefinition(GlobalContext globalContext) {
         Definition definition = globalContext.getDefinition();
@@ -619,12 +615,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     /**
      * Partially evaluate the right-hand side and the conditions of a specified rule.
-     * @param rule
-     *          the rule being partially evaluated
-     * @param definition
-     *          the definition used for evaluation
-     * @return
-     *          the partially evaluated rule
      */
     private static Rule evaluateRule(Rule rule, GlobalContext globalContext) {
         try {
@@ -644,12 +634,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             for (Term term : rule.ensures()) {
                 ensures.add(term.evaluate(termContext));
             }
-            UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
-            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-                lookupsBuilder.add(
+            ConjunctiveFormula lookups = ConjunctiveFormula.trueFormula(termContext);
+            for (Equality equality : rule.lookups().equalities()) {
+                lookups = lookups.add(
                         equality.leftHandSide().evaluate(termContext),
-                        equality.rightHandSide().evaluate(termContext),
-                        termContext);
+                        equality.rightHandSide().evaluate(termContext));
             }
 
             Map<CellLabel, Term> rhsOfWriteCell = null;
@@ -668,7 +657,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     ensures,
                     rule.freshConstants(),
                     rule.freshVariables(),
-                    lookupsBuilder.build(),
+                    lookups,
                     rule.isCompiledForFastRewriting(),
                     rule.lhsOfReadCell(),
                     rhsOfWriteCell,

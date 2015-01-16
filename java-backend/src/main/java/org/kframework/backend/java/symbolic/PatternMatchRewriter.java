@@ -140,7 +140,7 @@ public class PatternMatchRewriter {
      * This method is extracted to simplify the profiling script.
      * </p>
      */
-    private final List<Map<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
+    private final List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
         return PatternMatcher.match(subject, rule, termContext);
     }
 
@@ -302,19 +302,18 @@ public class PatternMatchRewriter {
         return result;
     }
 
-    private Map<Variable, Term> getSubstitutionMap(Term term, Rule pattern, TermContext termContext) {
-        List<Map<Variable, Term>> maps = PatternMatcher.match(term, pattern, termContext);
-        if (maps.size() != 1) {
+    private Substitution<Variable, Term> getSubstitutionMap(
+            Term term,
+            Rule pattern,
+            TermContext termContext) {
+        List<Substitution<Variable, Term>> substitutions = PatternMatcher.match(
+                term,
+                pattern,
+                termContext);
+        if (substitutions.size() != 1) {
             return null;
         }
-
-        Map<Variable, Term> map = maps.get(0);
-        map.entrySet().forEach(e -> e.setValue(
-                CellCollection.singleton(
-                        CellLabel.GENERATED_TOP,
-                        e.getValue(),
-                        termContext.definition().context())));
-        return map;
+        return SymbolicRewriter.addGeneratedTop(substitutions.get(0), termContext);
     }
 
     public List<Map<Variable,Term>> search(

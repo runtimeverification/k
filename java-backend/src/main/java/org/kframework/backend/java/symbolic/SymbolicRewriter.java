@@ -136,14 +136,12 @@ public class SymbolicRewriter {
                             System.err.println("\nAuditing " + rule + "...\n");
                         }
 
-                        ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+                        ConstrainedTerm pattern = buildPattern(rule);
 
-                        for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
+                        for (ConjunctiveFormula unificationConstraint : subject.unify(pattern)) {
                             RuleAuditing.succeed(rule);
                             /* compute all results */
-                            ConstrainedTerm result = buildResult(
-                                    rule,
-                                    unifConstraint);
+                            ConstrainedTerm result = buildResult(rule, unificationConstraint);
                             results.add(result);
                             appliedRules.add(rule);
                             Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
@@ -182,17 +180,9 @@ public class SymbolicRewriter {
     /**
      * Builds the pattern term used in unification by composing the left-hand
      * side of a specified rule and its preconditions.
-     *
-     * @param rule
-     *            the specified rule
-     * @param termContext
-     *            the term context
-     * @return the pattern term
      */
-    private static ConstrainedTerm buildPattern(Rule rule, TermContext termContext) {
-        SymbolicConstraint constraint = rule.lookups().getSymbolicConstraint(termContext);
-        constraint.addAll(rule.requires());
-        return new ConstrainedTerm(rule.leftHandSide(), constraint);
+    private static ConstrainedTerm buildPattern(Rule rule) {
+        return new ConstrainedTerm(rule.leftHandSide(), rule.lookups().addAll(rule.requires()));
     }
 
     /**
@@ -205,43 +195,40 @@ public class SymbolicRewriter {
      *            the resulting symbolic constraint of unification
      * @return the new subject term
      */
-    public static ConstrainedTerm buildResult(
-            Rule rule,
-            SymbolicConstraint constraint) {
+    public static ConstrainedTerm buildResult(Rule rule, ConjunctiveFormula constraint) {
         return buildResult(rule, constraint, false);
     }
 
-    private static ConstrainedTerm buildResult(Rule rule,
-            SymbolicConstraint constraint, boolean expandPattern) {
+    private static ConstrainedTerm buildResult(
+            Rule rule,
+            ConjunctiveFormula constraint,
+            boolean expandPattern) {
         for (Variable variable : rule.freshConstants()) {
-            constraint.add(variable, FreshOperations.fresh(variable.sort(), constraint.termContext()));
+            constraint = constraint.add(
+                    variable,
+                    FreshOperations.fresh(variable.sort(), constraint.termContext()));
         }
-        constraint.addAllThenSimplify(rule.ensures());
+        constraint = constraint.addAll(rule.ensures()).simplify();
 
         /* get fresh substitutions of rule variables */
         BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
         /* rename rule variables in the constraints */
-        /* TODO(YilongL): implement a faster rename method in
-         * SymbolicConstraint which do not require calling simplify after */
-        constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
-        constraint.simplify();
+        constraint = (ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
 
         /* rename rule variables in the rule RHS */
         Term term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
         /* apply the constraints substitution on the rule RHS */
-        constraint.orientSubstitution(rule.boundVariables().stream()
-                .map(p -> freshSubstitution.get(p))
+        constraint = constraint.orientSubstitution(rule.boundVariables().stream()
+                .map(freshSubstitution::get)
                 .collect(Collectors.toSet()));
-        term = term.substituteAndEvaluate(
-                constraint.substitution(),
-                constraint.termContext());
+        term = term.substituteAndEvaluate(constraint.substitution(), constraint.termContext());
         /* eliminate bindings of rule variables */
-        constraint.removeBindings(freshSubstitution.values());
+        constraint = constraint.removeBindings(freshSubstitution.values());
 
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
-            constraint.expandPatternsAndSimplify(true);
+            constraint = constraint.expandPatternsAndSimplify(true);
             term = term.expandPatterns(constraint, true);
 //            System.err.println(rule.getLocation() + " " + rule.getSource());
         }
@@ -257,8 +244,8 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
-            SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
+            ConstrainedTerm leftHandSideTerm = buildPattern(rule);
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(leftHandSideTerm);
             if (constraint == null) {
                 continue;
             }
@@ -277,20 +264,32 @@ public class SymbolicRewriter {
     private boolean addSearchResult(List<Map<Variable, Term>> searchResults, ConstrainedTerm initialTerm, Rule pattern, int bound) {
         assert Sets.intersection(initialTerm.term().variableSet(),
                 initialTerm.constraint().substitution().keySet()).isEmpty();
-        List<Map<Variable, Term>> discoveredSearchResults = PatternMatcher.match(initialTerm.term(), pattern, initialTerm.termContext());
-        for (Map<Variable, Term> searchResult : discoveredSearchResults) {
-            searchResult.entrySet().forEach(e -> e.setValue(
-                CellCollection.singleton(
-                        CellLabel.GENERATED_TOP,
-                        e.getValue(),
-                        initialTerm.termContext().definition().context())));
-
-            searchResults.add(searchResult);
+        List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
+                initialTerm.term(),
+                pattern,
+                initialTerm.termContext());
+        for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
+            searchResults.add(addGeneratedTop(searchResult, initialTerm.termContext()));
             if (searchResults.size() == bound) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static Substitution<Variable, Term> addGeneratedTop(
+            Substitution<Variable, Term> substitution,
+            TermContext context) {
+        Substitution<Variable, Term> result = Substitution.empty();
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            result = result.plus(
+                    entry.getKey(),
+                    CellCollection.singleton(
+                            CellLabel.GENERATED_TOP,
+                            entry.getValue(),
+                            context.definition().context()));
+        }
+        return result;
     }
 
     /**
@@ -415,9 +414,7 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
         initialTerm = new ConstrainedTerm(
-                initialTerm.term().expandPatterns(
-                        initialTerm.constraint(),
-                        true),
+                initialTerm.term().expandPatterns(initialTerm.constraint(), true),
                 initialTerm.constraint());
 
         visited.add(initialTerm);

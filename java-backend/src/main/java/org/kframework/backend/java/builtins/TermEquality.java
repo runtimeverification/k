@@ -5,6 +5,7 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.TruthValue;
 
@@ -46,16 +47,11 @@ public class TermEquality {
 
     /**
      * Establishes the truth value of an equality between the two given terms by creating a
-     * {@link org.kframework.backend.java.symbolic.SymbolicConstraint} with one equality and
+     * {@link org.kframework.backend.java.symbolic.ConjunctiveFormula} with one equality and
      * simplifying it.
      */
-    private static TruthValue getEqualityTruthValue(
-            Term term1,
-            Term term2,
-            TermContext context) {
-        SymbolicConstraint constraint = new SymbolicConstraint(context);
-        constraint.add(term1, term2);
-        return constraint.simplify();
+    private static TruthValue getEqualityTruthValue(Term term1, Term term2, TermContext context) {
+        return ConjunctiveFormula.trueFormula(context).add(term1, term2).simplify().truthValue();
     }
 
     private static boolean hasKLabelVariables(Term term) {
