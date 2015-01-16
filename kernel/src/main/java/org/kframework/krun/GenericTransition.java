@@ -20,29 +20,13 @@ public class GenericTransition extends Transition {
     }
     @Override
     public ASTNode getRule() {
-        if (rule.isPresent()) {
-            return rule.get();
-        }
-        return null;
+        return rule;
     }
 
-    @Override
-    public int hashCode() {
-        return rule.get().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof GenericTransition)) {
-            return false;
-        }
-        GenericTransition obj1 = (GenericTransition) obj;
-        return rule.equals(obj1.getRule());
-    }
 
     @Override
     public Map<Variable, Term> getSubstitution() {
-        return substitution.get();
+        return substitution;
     }
 
     public static GenericTransition rule(ASTNode rule) {

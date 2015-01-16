@@ -52,18 +52,18 @@ public class JavaTransition extends Transition {
 
     @Override
     public ASTNode getRule() {
-        if (rule.isPresent()) {
-            return rule.get();
+        if (rule != null) {
+            return rule;
         }
 
-        rule = Optional.of(javaRule.accept(new BackendJavaKILtoKILTransformer(context)));
-        return rule.get();
+        rule = javaRule.accept(new BackendJavaKILtoKILTransformer(context));
+        return rule;
     }
 
     @Override
     public Map<Variable, Term> getSubstitution() {
-        if (substitution.isPresent()) {
-            return substitution.get();
+        if (substitution != null) {
+            return substitution;
         }
         Map<Variable, Term> genericSubs = new LinkedHashMap<>();
         for (org.kframework.backend.java.kil.Variable key : javaSubs.keySet()) {
@@ -72,21 +72,9 @@ public class JavaTransition extends Transition {
             Term genericValue = (Term) value.accept(new BackendJavaKILtoKILTransformer(context));
             genericSubs.put(genericKey, genericValue);
         }
-        substitution = Optional.of(genericSubs);
-        return substitution.get();
+        substitution = genericSubs;
+        return substitution;
     }
 
-    @Override
-    public int hashCode() {
-        return javaRule.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof JavaTransition)) {
-            return false;
-        }
-        JavaTransition transition2 = (JavaTransition) obj;
-        return transition2.getJavaRule().equals(javaRule);
-    }
+  
 }

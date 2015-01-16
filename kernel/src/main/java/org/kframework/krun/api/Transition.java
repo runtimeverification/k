@@ -19,12 +19,12 @@ public abstract class Transition implements Serializable{
     /**
     The rule transforming the origin state to the destination state
     */
-    protected Optional<ASTNode> rule;
+    protected ASTNode rule;
 
     /**
     The substitution that the rule resulted in.
      */
-    protected Optional<Map<Variable, Term>> substitution;
+    protected Map<Variable, Term> substitution;
 
     /**
     The label of the rule transforming the origin state to the destination state, if the entire
@@ -43,15 +43,15 @@ public abstract class Transition implements Serializable{
         String readString) {
         this.type = type;
         this.label = label;
-        this.rule = Optional.ofNullable(rule);
+        this.rule = rule;
         this.readString = readString;
-        this.substitution = Optional.ofNullable(substitution);
+        this.substitution = substitution;
     }
 
     public abstract ASTNode getRule();
 
     public void setRule(ASTNode rule) {
-        this.rule = Optional.ofNullable(rule);
+        this.rule = rule;
     }
 
     public String getLabel() {
@@ -62,15 +62,9 @@ public abstract class Transition implements Serializable{
         this.label = label;
     }
 
-    @Override
-    public abstract int hashCode();
-
-    @Override
-    public abstract boolean equals(Object obj);
-
     public abstract Map<Variable, Term> getSubstitution();
 
-    public void setSubstitution(Optional<Map<Variable, Term>> substitution) {
+    public void setSubstitution(Map<Variable, Term> substitution) {
         this.substitution = substitution;
     }
 
