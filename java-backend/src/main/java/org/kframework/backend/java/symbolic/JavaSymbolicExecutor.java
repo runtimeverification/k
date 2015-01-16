@@ -157,7 +157,7 @@ public class JavaSymbolicExecutor implements Executor {
     @Override
     public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return internalRun(cfg, steps);
+        return internalRun(cfg, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {
