@@ -1,10 +1,10 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.krun.api.Transition;
-import sun.net.www.content.text.Generic;
 
 import java.util.Map;
 
