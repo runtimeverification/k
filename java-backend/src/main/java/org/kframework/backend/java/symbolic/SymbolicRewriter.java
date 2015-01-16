@@ -66,10 +66,15 @@ public class SymbolicRewriter {
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
+    public ConstrainedExecutionGraph getExecutionGraph() {
+        return executionGraph;
+    }
+
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
         stopwatch.start();
         if (computeGraph) {
             executionGraph = new ConstrainedExecutionGraph();
+            executionGraph.addVertex(constrainedTerm);
         }
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
@@ -79,7 +84,7 @@ public class SymbolicRewriter {
                 if (computeGraph) {
                     ConstrainedTransition transition = new ConstrainedTransition(
                             getRule(0), getSubstitution(0));
-
+                    executionGraph.addEdge(transition, constrainedTerm, result);
                 }
                 constrainedTerm = result;
             } else {

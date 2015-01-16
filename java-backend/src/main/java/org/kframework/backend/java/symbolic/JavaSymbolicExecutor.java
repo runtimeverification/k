@@ -82,7 +82,7 @@ public class JavaSymbolicExecutor implements Executor {
         } else {
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
-            return getSymbolicRewriter().rewrite(constrainedTerm, bound);
+            return getSymbolicRewriter().rewrite(constrainedTerm, bound, false);
         }
     }
 
