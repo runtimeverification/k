@@ -164,10 +164,10 @@ public interface Executor {
         public KRunResult execute(Attributes a) throws ParseFailedException, KRunExecutionException {
             KRunState result;
             if (options.depth != null) {
-                result = executor.step(initialConfiguration.get(), options.depth);
+                result = executor.step(initialConfiguration.get(), options.depth, false).getFinalState();
                 sw.printIntermediate("Bounded execution total");
             } else {
-                result = executor.run(initialConfiguration.get());
+                result = executor.run(initialConfiguration.get(), false).getFinalState();
                 sw.printIntermediate("Normal execution total");
             }
             ASTNode pattern = pattern(options.pattern);

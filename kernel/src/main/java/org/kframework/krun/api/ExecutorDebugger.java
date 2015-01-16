@@ -16,6 +16,8 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.krun.GenericKRunState;
+import org.kframework.krun.GenericTransition;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.Transition.TransitionType;
@@ -28,6 +30,7 @@ import com.google.inject.Inject;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
+import sun.net.www.content.text.Generic;
 
 import java.util.Map.Entry;
 
@@ -74,18 +77,17 @@ public class ExecutorDebugger implements Debugger {
         } catch (CompilerStepDone e) {
             e.printStackTrace();
         }
-        KRunState initialState = executor.step(initialConfiguration, 0);
-        KRunState initialState = new JavaKRunState(initialConfiguration, counter);
+        KRunState initialState = new GenericKRunState(initialConfiguration, counter);
         graph = new KRunGraph();
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
-        KRunState reduced = executor.step(initialConfiguration, 0);
+        KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
         //reduce may return same node as initial node
         //so we add it just if it is different from the initial node
         if(putState(reduced)){
             graph.addVertex(reduced);
-            graph.addEdge(Transition.reduce(), initialState, reduced);
+            graph.addEdge(GenericTransition.reduce(), initialState, reduced);
             currentState = reduced.getStateId();
         }else {
             currentState = initialState.getStateId();
@@ -135,7 +137,7 @@ public class ExecutorDebugger implements Debugger {
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
         for (int i = 0; steps == null || i < steps; i++) {
-            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1);
+            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1, false).getFinalState();
             Entry<Integer, KRunState> prevValue = containsValue(nextStep);
             if (prevValue!=null) {
                 nextStep = prevValue.getValue();
@@ -153,7 +155,7 @@ public class ExecutorDebugger implements Debugger {
                 putState(nextStep);
             }
             graph.addVertex(nextStep);
-            graph.addEdge(Transition.unlabelled(), getState(currentState), nextStep);
+            graph.addEdge(GenericTransition.unlabelled(), getState(currentState), nextStep);
             currentState = nextStep.getStateId();
         }
     }
@@ -250,13 +252,13 @@ public class ExecutorDebugger implements Debugger {
             throw new IllegalStateException("Cannot perform command: Configuration does not " +
                 "have an stdin buffer");
         }
-        KRunState newState = new KRunState(result, counter);
+        KRunState newState = new GenericKRunState(result, counter);
         Entry<Integer, KRunState> prevValue = containsValue(newState);
         if (prevValue!=null) {
             KRunState canonicalNewState = canonicalizeState(newState);
             Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
             if (edge == null) {
-                graph.addEdge(Transition.stdin(s),
+                graph.addEdge(GenericTransition.stdin(s),
                     getState(currentState), canonicalNewState);
             }
             currentState = canonicalNewState.getStateId();
@@ -264,7 +266,7 @@ public class ExecutorDebugger implements Debugger {
         }
         putState(newState);
         graph.addVertex(newState);
-        graph.addEdge(Transition.stdin(s),
+        graph.addEdge(GenericTransition.stdin(s),
             getState(currentState), newState);
         currentState = newState.getStateId();
     }
