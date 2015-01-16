@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -21,6 +22,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.backend.java.util.ConstrainedExecutionGraph;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
@@ -49,6 +51,8 @@ public class SymbolicRewriter {
     private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
+    private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
+    private ConstrainedExecutionGraph executionGraph;
     private boolean transition;
     private RuleIndex ruleIndex;
 
@@ -61,14 +65,22 @@ public class SymbolicRewriter {
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
-    public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
+    public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
         stopwatch.start();
-
+        if (computeGraph) {
+            executionGraph = new ConstrainedExecutionGraph();
+        }
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
+                if (computeGraph) {
+                    Rule rule = getRule(0);
+                    Map<Variable, Term> subs = getSubstitution(0);
+                    executionGraph.addEdge(new Pair<Rule, Map<Variable, Term>>() {
+                    })
+                }
                 constrainedTerm = result;
             } else {
                 break;
@@ -99,6 +111,15 @@ public class SymbolicRewriter {
         return n < results.size() ? results.get(n) : null;
     }
 
+    private Rule getRule(int n) {
+        return n < appliedRules.size() ? appliedRules.get(n) : null;
+    }
+
+    private Map<Variable, Term> getSubstitution(int n) {
+        return n < substitutions.size() ? substitutions.get(n) : null;
+    }
+
+
     private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
         computeRewriteStep(constrainedTerm, -1);
     }
@@ -106,7 +127,7 @@ public class SymbolicRewriter {
     private void computeRewriteStep(ConstrainedTerm subject, int successorBound) {
         results.clear();
         appliedRules.clear();
-
+        substitutions.clear();
         if (successorBound == 0) {
             return;
         }
@@ -145,6 +166,7 @@ public class SymbolicRewriter {
                                     unifConstraint);
                             results.add(result);
                             appliedRules.add(rule);
+                            substitutions.add(unifConstraint.substitution());
                             Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
                             Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
                             if (results.size() == successorBound) {
