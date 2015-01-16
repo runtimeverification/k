@@ -1,0 +1,39 @@
+package org.kframework.krun;
+
+import org.kframework.kil.Term;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SemanticEqual;
+
+/**
+ * Generic KRunState object. Can be used for used for storing generic Terms.
+ */
+public class GenericKRunState extends KRunState{
+
+    public GenericKRunState(Term term, Counter counter) {
+        super(term, counter);
+
+    }
+    @Override
+    public Term getRawResult() {
+        return rawResult.get();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof GenericKRunState)) {
+            return false;
+        }
+        GenericKRunState obj = (GenericKRunState) o;
+        return SemanticEqual.checkEquality(rawResult.get(), obj.getRawResult());
+    }
+
+    @Override
+    public int hashCode() {
+        return rawResult.get().hashCode();
+    }
+
+    @Override
+    public int compareTo(KRunState arg0) {
+        return Integer.compare(stateId, arg0.getStateId());
+    }
+}

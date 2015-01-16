@@ -27,7 +27,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
      * to ensure that the mapping is one-to-one to maintain a cache of states
      * and canonicalize the output of the KRun object.
      */
-    private int stateId;
+    protected int stateId;
 
     @Singleton
     public static class Counter {

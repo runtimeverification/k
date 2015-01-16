@@ -20,6 +20,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
@@ -61,17 +62,17 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunState run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        return internalRun(cfg, -1);
+    public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
+        return internalRun(cfg, -1, computeGraph);
     }
 
-    private KRunState internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
-        ConstrainedTerm result = javaKILRun(cfg, bound);
+    private RewriteRelation internalRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) throws KRunExecutionException {
+        ConstrainedTerm result = javaKILRun(cfg, bound, computeGraph);
         KRunState returnResult = new JavaKRunState(result.term(), context, counter);
         return returnResult;
     }
 
-    private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
+    private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
@@ -154,7 +155,7 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunState step(org.kframework.kil.Term cfg, int steps)
+    public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
         return internalRun(cfg, steps);
     }
