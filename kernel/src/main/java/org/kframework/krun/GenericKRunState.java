@@ -15,7 +15,7 @@ public class GenericKRunState extends KRunState{
     }
     @Override
     public Term getRawResult() {
-        return rawResult.get();
+        return rawResult;
     }
 
     @Override
@@ -24,12 +24,12 @@ public class GenericKRunState extends KRunState{
             return false;
         }
         GenericKRunState obj = (GenericKRunState) o;
-        return SemanticEqual.checkEquality(rawResult.get(), obj.getRawResult());
+        return SemanticEqual.checkEquality(rawResult, obj.getRawResult());
     }
 
     @Override
     public int hashCode() {
-        return rawResult.get().hashCode();
+        return rawResult.hashCode();
     }
 
     @Override

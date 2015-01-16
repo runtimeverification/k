@@ -30,10 +30,11 @@ public class JavaKRunState extends KRunState{
 
     @Override
     public Term getRawResult() {
-        if (rawResult.isPresent()) {
-            return rawResult.get();
+        if (rawResult != null) {
+            return rawResult;
         }
-        return (Term) javaKilTerm.accept(new BackendJavaKILtoKILTransformer(context));
+        rawResult = (Term) javaKilTerm.accept(new BackendJavaKILtoKILTransformer(context));
+        return rawResult;
     }
 
     @Override

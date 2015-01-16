@@ -18,7 +18,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     /**
     The raw term associated with this state, as suitable for further rewriting
     */
-    protected Optional<Term> rawResult;
+    protected Term rawResult;
 
     /**
      * A state ID corresponding to this state. The contract of a {@link KRun} object
@@ -35,7 +35,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     }
 
     public KRunState(Term rawResult, Counter counter) {
-        this.rawResult = Optional.ofNullable(rawResult);
+        this.rawResult = rawResult;
         this.stateId = counter.nextState++;
     }
 

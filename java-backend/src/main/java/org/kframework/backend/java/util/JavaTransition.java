@@ -76,5 +76,5 @@ public class JavaTransition extends Transition {
         return substitution;
     }
 
-  
+
 }
