@@ -74,8 +74,8 @@ public class ExecutorDebugger implements Debugger {
         } catch (CompilerStepDone e) {
             e.printStackTrace();
         }
-
-        KRunState initialState = new KRunState(initialConfiguration, counter);
+        KRunState initialState = executor.step(initialConfiguration, 0);
+        KRunState initialState = new JavaKRunState(initialConfiguration, counter);
         graph = new KRunGraph();
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();

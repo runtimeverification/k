@@ -2,6 +2,7 @@
 package org.kframework.krun.api;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.kframework.kil.ASTNode;
 
@@ -9,12 +10,12 @@ import org.kframework.kil.ASTNode;
 A transitition in the transition system of a semantics. Used to represent edges in the search graph
 associated with breadth-first search, LTL model-checking, and debugging.
 */
-public class Transition implements Serializable{
+public abstract class Transition implements Serializable{
 
     /**
     The rule transforming the origin state to the destination state
     */
-    private ASTNode rule;
+    protected Optional<ASTNode> rule;
 
     /**
     The label of the rule transforming the origin state to the destination state, if the entire
@@ -33,40 +34,14 @@ public class Transition implements Serializable{
         String readString) {
         this.type = type;
         this.label = label;
-        this.rule = rule;
+        this.rule = Optional.ofNullable(rule);
         this.readString = readString;
     }
 
-    public static Transition rule(ASTNode rule) {
-        return new Transition(TransitionType.RULE, null, rule, null);
-    }
-
-    public static Transition label(String label) {
-        return new Transition(TransitionType.LABEL, label, null, null);
-    }
-
-    public static Transition unlabelled() {
-        return new Transition(TransitionType.UNLABELLED, null, null, null);
-    }
-
-    public static Transition deadlock() {
-        return new Transition(TransitionType.DEADLOCK, null, null, null);
-    }
-
-    public static Transition reduce() {
-        return new Transition(TransitionType.REDUCE, null, null, null);
-    }
-
-    public static Transition stdin(String readString) {
-        return new Transition(TransitionType.STDIN, null, null, readString);
-    }
-
-    public ASTNode getRule() {
-        return rule;
-    }
+    public abstract ASTNode getRule();
 
     public void setRule(ASTNode rule) {
-        this.rule = rule;
+        this.rule = Optional.ofNullable(rule);
     }
 
     public String getLabel() {
@@ -76,6 +51,12 @@ public class Transition implements Serializable{
     public void setLabel(String label) {
         this.label = label;
     }
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
 
     public enum TransitionType {
         /**
@@ -112,4 +93,6 @@ public class Transition implements Serializable{
     public String getReadString() {
         return readString;
     }
+
+
 }
