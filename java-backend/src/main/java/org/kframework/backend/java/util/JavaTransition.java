@@ -46,6 +46,10 @@ public class JavaTransition extends Transition {
         javaRule = null;
     }
 
+    public Rule getJavaRule() {
+        return javaRule;
+    }
+
     @Override
     public ASTNode getRule() {
         if (rule.isPresent()) {
@@ -74,11 +78,15 @@ public class JavaTransition extends Transition {
 
     @Override
     public int hashCode() {
-        return 0;
+        return javaRule.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        if (!(obj instanceof JavaTransition)) {
+            return false;
+        }
+        JavaTransition transition2 = (JavaTransition) obj;
+        return transition2.getJavaRule().equals(javaRule);
     }
 }
