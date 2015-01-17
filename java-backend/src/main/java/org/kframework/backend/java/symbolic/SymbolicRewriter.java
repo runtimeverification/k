@@ -55,7 +55,7 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
-    private KRunGraph executionGraph;
+    private KRunGraph executionGraph = null;
     private boolean transition;
     private RuleIndex ruleIndex;
     private KRunState.Counter counter;

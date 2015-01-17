@@ -70,13 +70,9 @@ public class JavaSymbolicExecutor implements Executor {
 
     @Override
     public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
-        return internalRun(cfg, -1, computeGraph);
+        return javaKILRun(cfg, -1, computeGraph);
     }
 
-    private RewriteRelation internalRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) throws KRunExecutionException {
-        return javaKILRun(cfg, bound, computeGraph);
-    }
-    
 
     private RewriteRelation javaKILRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
@@ -90,17 +86,13 @@ public class JavaSymbolicExecutor implements Executor {
             ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
             JavaKRunState finalState = new JavaKRunState(rewriteResult.term(), context, counter);
             return new RewriteRelation(finalState, null);
-        } else {
-            SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
-            SymbolicRewriter rewriter = symbolicRewriter.get();
-            KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
-            KRunGraph executionGraph = null;
-            if (computeGraph) {
-                executionGraph = rewriter.getExecutionGraph();
-            }
-            return new RewriteRelation(finalState, executionGraph);
         }
+
+        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
+        SymbolicRewriter rewriter = symbolicRewriter.get();
+        KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
+        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
     }
 
     @Override
@@ -173,7 +165,7 @@ public class JavaSymbolicExecutor implements Executor {
     @Override
     public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return internalRun(cfg, steps, computeGraph);
+        return javaKILRun(cfg, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {

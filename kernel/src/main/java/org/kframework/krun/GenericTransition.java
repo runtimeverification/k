@@ -13,43 +13,43 @@ import java.util.Map;
  */
 public class GenericTransition extends Transition {
 
-    public GenericTransition(TransitionType type, String label, ASTNode rule,
+    /**
+     The string read from stdin.
+     */
+    private String readString;
+
+
+    private GenericTransition(TransitionType type, ASTNode rule,
                              Map<Variable, Term> substitution,
                              String readString) {
-        super(type, label, rule, substitution, readString);
+        super(type, rule, substitution);
+        this.readString = readString;
     }
     @Override
     public ASTNode getRule() {
         return rule;
     }
 
+    public String getReadString() {
+        return readString;
+    }
 
     @Override
     public Map<Variable, Term> getSubstitution() {
         return substitution;
     }
 
-    public static GenericTransition rule(ASTNode rule) {
-        return new GenericTransition(TransitionType.RULE, null, rule, null, null);
-    }
-
-    public static GenericTransition label(String label) {
-        return new GenericTransition(TransitionType.LABEL, label, null, null, null);
-    }
 
     public static GenericTransition unlabelled() {
-        return new GenericTransition(TransitionType.UNLABELLED, null, null, null, null);
+        return new GenericTransition(TransitionType.UNLABELLED, null, null, null);
     }
 
-    public static GenericTransition deadlock() {
-        return new GenericTransition(TransitionType.DEADLOCK, null, null, null, null);
-    }
 
     public static GenericTransition reduce() {
-        return new GenericTransition(TransitionType.REDUCE, null, null, null, null);
+        return new GenericTransition(TransitionType.REDUCE, null, null, null);
     }
 
     public static GenericTransition stdin(String readString) {
-        return new GenericTransition(TransitionType.STDIN, null, null, null, readString);
+        return new GenericTransition(TransitionType.STDIN, null, null, readString);
     }
 }

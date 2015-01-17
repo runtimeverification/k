@@ -26,25 +26,12 @@ public abstract class Transition implements Serializable{
      */
     protected Map<Variable, Term> substitution;
 
-    /**
-    The label of the rule transforming the origin state to the destination state, if the entire
-    rule is unavailable
-    */
-    private String label;
-
-    /**
-    The string read from stdin.
-    */
-    private String readString;
 
     private TransitionType type;
 
-    protected Transition(TransitionType type, String label, ASTNode rule, Map<Variable, Term> substitution,
-        String readString) {
+    protected Transition(TransitionType type, ASTNode rule, Map<Variable, Term> substitution) {
         this.type = type;
-        this.label = label;
         this.rule = rule;
-        this.readString = readString;
         this.substitution = substitution;
     }
 
@@ -52,14 +39,6 @@ public abstract class Transition implements Serializable{
 
     public void setRule(ASTNode rule) {
         this.rule = rule;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
     }
 
     public abstract Map<Variable, Term> getSubstitution();
@@ -73,23 +52,18 @@ public abstract class Transition implements Serializable{
         A transition for which the rule transforming the origin to the destination is known
         */
         RULE,
-        /**
-        A transition for which only the rule label of the underlying rule is known.
-        */
-        LABEL,
+
         /**
         A transition for which no further information is available, except that the rule had no
         label.
         */
         UNLABELLED,
-        /**
-        A transition corresponding to a model-checking deadlock.
-        */
-        DEADLOCK,
+
         /**
         A rewrite or set of rewrites containing no transitions.
         */
         REDUCE,
+
         /**
         An action signifying that the user has entered data on the standard input stream.
         */
@@ -98,10 +72,6 @@ public abstract class Transition implements Serializable{
 
     public TransitionType getType() {
         return type;
-    }
-
-    public String getReadString() {
-        return readString;
     }
 
 
