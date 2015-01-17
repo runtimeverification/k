@@ -1,13 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import edu.uci.ics.jung.graph.util.Pair;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -15,25 +10,24 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.ConstrainedExecutionGraph;
-import org.kframework.backend.java.util.ConstrainedTransition;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.Transition;
 import org.kframework.krun.tools.Executor;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JavaSymbolicExecutor implements Executor {
 
