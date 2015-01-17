@@ -1,6 +1,9 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
+import com.google.inject.Inject;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.compile.utils.CompilerStepDone;
@@ -25,12 +28,6 @@ import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.parser.TermLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
-
-import com.google.inject.Inject;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.util.Pair;
-import sun.net.www.content.text.Generic;
 
 import java.util.Map.Entry;
 

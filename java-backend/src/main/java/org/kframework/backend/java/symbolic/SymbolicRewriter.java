@@ -84,7 +84,9 @@ public class SymbolicRewriter {
             executionGraph.addVertex(initialState);
         }
         KRunState finalState = null;
+        boolean loopRan = false;
         for (step = 0; step != bound; ++step) {
+            loopRan = true;
             /* get the first solution */
             computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
@@ -106,7 +108,9 @@ public class SymbolicRewriter {
         if (definition.context().krunOptions.experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
-
+        if (!loopRan) {
+            finalState = initialState;
+        }
         return finalState;
     }
 

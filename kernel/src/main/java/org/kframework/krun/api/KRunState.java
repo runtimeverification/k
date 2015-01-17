@@ -1,12 +1,10 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
+import com.google.inject.Singleton;
 import org.kframework.kil.Term;
 
-import com.google.inject.Singleton;
-
 import java.io.Serializable;
-import java.util.Optional;
 
 public abstract class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 

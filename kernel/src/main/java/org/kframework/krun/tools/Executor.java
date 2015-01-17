@@ -1,9 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.kframework.backend.unparser.PrintSearchResult;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -13,19 +12,17 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
-import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.api.RewriteRelation;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
@@ -33,10 +30,11 @@ import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.util.HashSet;
+import java.util.Set;
 
 public interface Executor {
 

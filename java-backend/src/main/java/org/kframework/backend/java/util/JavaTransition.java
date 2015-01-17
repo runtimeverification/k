@@ -33,7 +33,7 @@ public class JavaTransition extends Transition {
     public JavaTransition(Rule javaRule,
                           Map<org.kframework.backend.java.kil.Variable, org.kframework.backend.java.kil.Term> javaSubs,
                           Context context) {
-        super(TransitionType.RULE, null, null);
+        super(TransitionType.RULE, null, null, null);
         this.javaRule = javaRule;
         this.javaSubs = javaSubs;
         this.context = context;

@@ -1,14 +1,12 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Optional;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.omg.CORBA.portable.ValueInputStream;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /**
 A transitition in the transition system of a semantics. Used to represent edges in the search graph
@@ -26,13 +24,18 @@ public abstract class Transition implements Serializable{
      */
     protected Map<Variable, Term> substitution;
 
+    /**
+     The string read from stdin.
+     */
+    private String readString;
 
     private TransitionType type;
 
-    protected Transition(TransitionType type, ASTNode rule, Map<Variable, Term> substitution) {
+    protected Transition(TransitionType type, ASTNode rule, Map<Variable, Term> substitution, String readString) {
         this.type = type;
         this.rule = rule;
         this.substitution = substitution;
+        this.readString = readString;
     }
 
     public abstract ASTNode getRule();
@@ -45,6 +48,10 @@ public abstract class Transition implements Serializable{
 
     public void setSubstitution(Map<Variable, Term> substitution) {
         this.substitution = substitution;
+    }
+
+    public String getReadString() {
+        return readString;
     }
 
     public enum TransitionType {

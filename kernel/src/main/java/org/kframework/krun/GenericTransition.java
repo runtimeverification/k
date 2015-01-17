@@ -13,26 +13,16 @@ import java.util.Map;
  */
 public class GenericTransition extends Transition {
 
-    /**
-     The string read from stdin.
-     */
-    private String readString;
-
-
     private GenericTransition(TransitionType type, ASTNode rule,
                              Map<Variable, Term> substitution,
                              String readString) {
-        super(type, rule, substitution);
-        this.readString = readString;
+        super(type, rule, substitution, readString);
     }
     @Override
     public ASTNode getRule() {
         return rule;
     }
 
-    public String getReadString() {
-        return readString;
-    }
 
     @Override
     public Map<Variable, Term> getSubstitution() {
