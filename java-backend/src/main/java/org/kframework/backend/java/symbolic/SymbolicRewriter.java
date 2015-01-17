@@ -21,10 +21,13 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.ConstrainedExecutionGraph;
-import org.kframework.backend.java.util.ConstrainedTransition;
 import org.kframework.backend.java.util.Coverage;
+import org.kframework.backend.java.util.JavaKRunState;
+import org.kframework.backend.java.util.JavaTransition;
+import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.api.KRunGraph;
+import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
@@ -52,40 +55,48 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
-    private ConstrainedExecutionGraph executionGraph;
+    private KRunGraph executionGraph;
     private boolean transition;
     private RuleIndex ruleIndex;
+    private KRunState.Counter counter;
 
     @Inject
-    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
+    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
+                            KRunState.Counter counter) {
         this.definition = definition;
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
-
+        this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
-    public ConstrainedExecutionGraph getExecutionGraph() {
+    public KRunGraph getExecutionGraph() {
         return executionGraph;
     }
 
-    public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
         stopwatch.start();
+        Context context = definition.context();
+        KRunState initialState = new JavaKRunState(constrainedTerm.term(),
+                context, counter);
         if (computeGraph) {
-            executionGraph = new ConstrainedExecutionGraph();
-            executionGraph.addVertex(constrainedTerm);
+            executionGraph = new KRunGraph();
+            executionGraph.addVertex(initialState);
         }
+        KRunState finalState = null;
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
+                finalState = new JavaKRunState(result.term(), context, counter);
                 if (computeGraph) {
-                    ConstrainedTransition transition = new ConstrainedTransition(
-                            getRule(0), getSubstitution(0));
-                    executionGraph.addEdge(transition, constrainedTerm, result);
+                    JavaTransition javaTransition = new JavaTransition(
+                            getRule(0), getSubstitution(0), context);
+                    executionGraph.addEdge(javaTransition, initialState, finalState);
                 }
                 constrainedTerm = result;
+                initialState = finalState;
             } else {
                 break;
             }
@@ -96,7 +107,7 @@ public class SymbolicRewriter {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
-        return constrainedTerm;
+        return finalState;
     }
 
     /**

@@ -76,20 +76,7 @@ public class JavaSymbolicExecutor implements Executor {
     private RewriteRelation internalRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) throws KRunExecutionException {
         return javaKILRun(cfg, bound, computeGraph);
     }
-
-    private KRunGraph processGraph(ConstrainedExecutionGraph constrainedGraph) {
-        KRunGraph finalGraph = new KRunGraph();
-        for (ConstrainedTransition constrainedTransition : constrainedGraph.getEdges()) {
-            JavaTransition finalTransition = new JavaTransition(Transition.TransitionType.RULE, null,
-                    constrainedTransition.getRule(), constrainedTransition.getSubstitution(),
-                    null, context);
-            Pair<ConstrainedTerm> vertices = constrainedGraph.getEndpoints(constrainedTransition);
-            JavaKRunState state1 = new JavaKRunState(vertices.getFirst().term(), context, counter);
-            JavaKRunState state2 = new JavaKRunState(vertices.getSecond().term(), context, counter);
-            finalGraph.addEdge(finalTransition, state1, state2);
-        }
-        return finalGraph;
-    }
+    
 
     private RewriteRelation javaKILRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
@@ -107,15 +94,12 @@ public class JavaSymbolicExecutor implements Executor {
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
             SymbolicRewriter rewriter = symbolicRewriter.get();
-            ConstrainedTerm finalTerm = rewriter.rewrite(constrainedTerm, bound, computeGraph);
-            JavaKRunState finalState = new JavaKRunState(finalTerm.term(), context, counter);
-            ConstrainedExecutionGraph executionGraph = null;
-            KRunGraph finalGraph = null;
+            KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
+            KRunGraph executionGraph = null;
             if (computeGraph) {
                 executionGraph = rewriter.getExecutionGraph();
-                finalGraph = processGraph(executionGraph);
             }
-            return new RewriteRelation(finalState, finalGraph);
+            return new RewriteRelation(finalState, executionGraph);
         }
     }
 

@@ -36,6 +36,7 @@ public class JavaTransition extends Transition {
         super(TransitionType.RULE, null, null, null, null);
         this.javaRule = javaRule;
         this.javaSubs = javaSubs;
+        this.context = context;
     }
 
     public Rule getJavaRule() {
