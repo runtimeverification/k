@@ -83,13 +83,12 @@ public class SymbolicRewriter {
             executionGraph = new KRunGraph();
             executionGraph.addVertex(initialState);
         }
-        KRunState finalState = null;
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
-                finalState = new JavaKRunState(result.term(), context, counter);
+                KRunState finalState = new JavaKRunState(result.term(), context, counter);
                 if (computeGraph) {
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
