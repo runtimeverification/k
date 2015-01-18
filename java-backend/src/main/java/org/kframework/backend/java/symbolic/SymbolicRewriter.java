@@ -135,7 +135,7 @@ public class SymbolicRewriter {
                             System.err.println("\nAuditing " + rule + "...\n");
                         }
 
-                        ConstrainedTerm pattern = buildPattern(rule);
+                        ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
 
                         for (ConjunctiveFormula unificationConstraint : subject.unify(pattern)) {
                             RuleAuditing.succeed(rule);
@@ -180,8 +180,10 @@ public class SymbolicRewriter {
      * Builds the pattern term used in unification by composing the left-hand
      * side of a specified rule and its preconditions.
      */
-    private static ConstrainedTerm buildPattern(Rule rule) {
-        return new ConstrainedTerm(rule.leftHandSide(), rule.lookups().addAll(rule.requires()));
+    private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
+        return new ConstrainedTerm(
+                rule.leftHandSide(),
+                ConjunctiveFormula.trueFormula(context).add(rule.lookups()).addAll(rule.requires()));
     }
 
     /**
@@ -243,7 +245,7 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            ConstrainedTerm leftHandSideTerm = buildPattern(rule);
+            ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(leftHandSideTerm);
             if (constraint == null) {
                 continue;

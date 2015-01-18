@@ -444,19 +444,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term key = (Term) this.visitNode(lookup.key());
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                    lookups = lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                 } else {
-                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
+                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                        lookups = lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
                     }
-                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 } else { // ListLookup
-                    lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
                 }
             }
 

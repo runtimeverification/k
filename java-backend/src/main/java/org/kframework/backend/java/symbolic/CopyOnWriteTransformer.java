@@ -398,7 +398,9 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        return transformedConjunctiveFormula;
+        return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
+                transformedConjunctiveFormula :
+                conjunctiveFormula;
     }
 
     @Override
@@ -406,7 +408,11 @@ public class CopyOnWriteTransformer implements Transformer {
         List<ConjunctiveFormula> transformedConjunctions = disjunctiveFormula.conjunctions().stream()
                 .map(c -> (ConjunctiveFormula) c.accept(this))
                 .collect(Collectors.toList());
-        return new DisjunctiveFormula(PersistentUniqueList.from(transformedConjunctions));
+        DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
+                PersistentUniqueList.from(transformedConjunctions));
+        return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
+                transformedDisjunctiveFormula :
+                disjunctiveFormula;
     }
 
     @Override

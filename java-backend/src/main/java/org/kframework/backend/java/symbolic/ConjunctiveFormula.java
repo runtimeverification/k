@@ -57,7 +57,7 @@ public class ConjunctiveFormula extends Term {
 
     private final TruthValue truthValue;
 
-    private final TermContext context;
+    private transient final TermContext context;
 
     public ConjunctiveFormula(ConjunctiveFormula formula) {
         this(formula.substitution,
@@ -326,7 +326,7 @@ public class ConjunctiveFormula extends Term {
                                 context);
                     } else {
                         // unsimplified equation
-                        pendingEqualities.add(equality);
+                        pendingEqualities = pendingEqualities.plus(equality);
                     }
                 }
             }

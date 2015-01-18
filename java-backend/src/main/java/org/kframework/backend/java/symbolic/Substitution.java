@@ -5,7 +5,15 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +27,7 @@ import org.pcollections.HashTreePMap;
 /**
  */
 // TODO(AndreiS): extend/implement KItem
-public class Substitution<K extends Term, V extends Term> implements Map<K, V> {
+public class Substitution<K extends Term, V extends Term> implements Map<K, V>, Serializable {
 
     private static final Substitution EMPTY = new Substitution<>(
             HashTreePMap.<Term, Term>empty());
@@ -196,4 +204,22 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V> {
         return entries.hashCode();
     }
 
+    private void writeObject(final ObjectOutputStream out) throws IOException {
+        out.writeObject(new HashMap<>(entries));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        try {
+            Field entriesField = getClass().getDeclaredField("entries");
+            entriesField.setAccessible(true);
+            entriesField.set(this, HashTreePMap.from((Map<K, V>) in.readObject()));
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private void readObjectNoData() throws ObjectStreamException {
+        throw new InvalidObjectException("Stream data required");
+    }
 }

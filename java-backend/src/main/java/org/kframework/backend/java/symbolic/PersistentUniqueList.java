@@ -1,18 +1,29 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
-import java.util.AbstractList;
-import java.util.Collection;
-
 
 /**
  */
-public class PersistentUniqueList<E> extends AbstractList<E> implements PVector<E> {
+public class PersistentUniqueList<E> extends AbstractList<E> implements PVector<E>, Serializable {
     private static final PersistentUniqueList EMPTY = new PersistentUniqueList<>(
             TreePVector.empty(),
             HashTreePSet.empty());
@@ -114,5 +125,28 @@ public class PersistentUniqueList<E> extends AbstractList<E> implements PVector<
         return new PersistentUniqueList<>(
                 contents.subList(start, end),
                 HashTreePSet.from(contents.subList(start, end)));
+    }
+
+    private void writeObject(final ObjectOutputStream out) throws IOException {
+        out.writeObject(new ArrayList<>(contents));
+        out.writeObject(new HashSet<>(mark));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        try {
+            Field contentsField = getClass().getDeclaredField("contents");
+            contentsField.setAccessible(true);
+            contentsField.set(this, TreePVector.from((List<E>) in.readObject()));
+            Field markField = getClass().getDeclaredField("mark");
+            markField.setAccessible(true);
+            markField.set(this, HashTreePSet.from((Set<E>) in.readObject()));
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private void readObjectNoData() throws ObjectStreamException {
+        throw new InvalidObjectException("Stream data required");
     }
 }

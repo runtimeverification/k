@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
@@ -29,13 +30,13 @@ import com.google.inject.Provider;
 /**
  * An equality between two canonicalized terms.
  */
-public class Equality {
+public class Equality implements Serializable {
 
     public static final String SEPARATOR = " =? ";
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private final TermContext context;
+    private transient final TermContext context;
 
     private TruthValue truthValue = null;
 
