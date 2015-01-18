@@ -73,7 +73,7 @@ public class RewriteEngineUtils {
         for (Equality equality : rule.lookups().equalities()) {
             Term lookupOrChoice = equality.leftHandSide();
             Term nonLookupOrChoice =  equality.rightHandSide();
-            List<RHSInstruction> instructions = rule.instructionsOfRequires().get(i);
+            List<RHSInstruction> instructions = rule.instructionsOfLookups().get(i);
             Term evalLookupOrChoice = KAbstractRewriteMachine.construct(instructions, crntSubst, null, context, false);
 
             boolean resolved = false;
