@@ -81,7 +81,7 @@ public class JavaSymbolicExecutor implements Executor {
             ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
             return rewriteResult;
         } else {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.trueFormula(termContext));
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
             return getSymbolicRewriter().rewrite(constrainedTerm, bound);
         }
     }

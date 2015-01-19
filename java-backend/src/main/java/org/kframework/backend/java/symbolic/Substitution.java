@@ -121,8 +121,7 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V>, 
     }
 
     public boolean isFalse(TermContext context) {
-        return entries.entrySet().stream()
-                .allMatch(entry -> new Equality(entry.getKey(), entry.getValue(), context).truthValue() != TruthValue.FALSE);
+        return equalities(context).stream().anyMatch(e -> e.truthValue() == TruthValue.FALSE);
     }
 
     @Override

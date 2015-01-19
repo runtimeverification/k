@@ -51,7 +51,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
         for (Rule rule : context.definition().patternRules().get(kLabel)) {
             Term ruleInputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternInput());
             Term ruleOutputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternOutput());
-            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.trueFormula(context)
+            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.of(context)
                     .add(inputKList, ruleInputKList)
                     .simplify();
             // TODO(AndreiS): there is only one solution here, so no list of constraints

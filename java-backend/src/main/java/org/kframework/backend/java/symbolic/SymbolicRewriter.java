@@ -183,7 +183,7 @@ public class SymbolicRewriter {
     private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
                 rule.leftHandSide(),
-                ConjunctiveFormula.trueFormula(context).add(rule.lookups()).addAll(rule.requires()));
+                ConjunctiveFormula.of(context).add(rule.lookups()).addAll(rule.requires()));
     }
 
     /**
@@ -215,7 +215,7 @@ public class SymbolicRewriter {
         BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
         /* rename rule variables in the constraints */
-        constraint = (ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
+        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
 
         /* rename rule variables in the rule RHS */
         Term term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());

@@ -76,7 +76,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, ConjunctiveFormula.trueFormula(context));
+        this(term, ConjunctiveFormula.of(context));
     }
 
     public TermContext termContext() {
@@ -97,7 +97,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * existentially quantified.
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(constrainedTerm.termContext())
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext())
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
                 .simplifyBeforePatternFolding();
@@ -158,7 +158,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      */
     public List<ConjunctiveFormula> unify(ConstrainedTerm constrainedTerm) {
         /* unify the subject term and the pattern term without considering those associated constraints */
-        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(constrainedTerm.termContext())
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext())
                 .add(term(), constrainedTerm.term())
                 .simplify();
         if (constraint.isFalse()) {
@@ -171,15 +171,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 .map(ConjunctiveFormula::getDisjunctiveNormalForm)
                 .map(DisjunctiveFormula::conjunctions)
                 .flatMap(List::stream)
-                .map(ConjunctiveFormula::simplify)
+                .map(c -> c.addAndSimplify(constraint()))
                 .filter(c -> !c.isFalse())
                 .collect(Collectors.toList());
 
         List<ConjunctiveFormula> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
-            ConjunctiveFormula solution = candidate
-                    .addAndSimplify(constraint())
-                    .orientSubstitution(constrainedTerm.variableSet());
+            ConjunctiveFormula solution = candidate.orientSubstitution(constrainedTerm.variableSet());
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             if (!candidate.isMatching(constrainedTerm.variableSet())) {

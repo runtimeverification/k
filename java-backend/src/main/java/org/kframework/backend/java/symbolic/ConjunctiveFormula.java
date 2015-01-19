@@ -42,12 +42,43 @@ public class ConjunctiveFormula extends Term {
 
     public static final String SEPARATOR = " /\\ ";
 
-    public static ConjunctiveFormula trueFormula(TermContext context) {
+    public static ConjunctiveFormula of(TermContext context) {
         return new ConjunctiveFormula(
                 Substitution.empty(),
-                PersistentUniqueList.<Equality>empty(),
-                PersistentUniqueList.<DisjunctiveFormula>empty(),
+                PersistentUniqueList.empty(),
+                PersistentUniqueList.empty(),
                 TruthValue.TRUE,
+                context);
+    }
+
+    public static ConjunctiveFormula of(ConjunctiveFormula formula) {
+        return new ConjunctiveFormula(
+                formula.substitution,
+                formula.equalities,
+                formula.disjunctions,
+                formula.truthValue,
+                formula.context);
+    }
+
+    public static ConjunctiveFormula of(Substitution<Variable, Term> substitution, TermContext context) {
+        return new ConjunctiveFormula(
+                substitution,
+                PersistentUniqueList.empty(),
+                PersistentUniqueList.empty(),
+                substitution.isEmpty() ? TruthValue.TRUE : TruthValue.UNKNOWN,
+                context);
+    }
+
+    public static ConjunctiveFormula of(
+            Substitution<Variable, Term> substitution,
+            PersistentUniqueList<Equality> equalities,
+            PersistentUniqueList<DisjunctiveFormula> disjunctions,
+            TermContext context) {
+        return new ConjunctiveFormula(
+                substitution,
+                equalities,
+                disjunctions,
+                substitution.isEmpty() && equalities.isEmpty() && disjunctions.isEmpty() ? TruthValue.TRUE : TruthValue.UNKNOWN,
                 context);
     }
 
@@ -59,19 +90,12 @@ public class ConjunctiveFormula extends Term {
 
     private transient final TermContext context;
 
-    public ConjunctiveFormula(ConjunctiveFormula formula) {
-        this(formula.substitution,
-             formula.equalities,
-             formula.disjunctions,
-             formula.truthValue,
-             formula.context);
-    }
-
     public ConjunctiveFormula(
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
-            TruthValue truthValue, TermContext context) {
+            TruthValue truthValue,
+            TermContext context) {
         super(Kind.KITEM);
 
         this.substitution = substitution;
@@ -131,7 +155,7 @@ public class ConjunctiveFormula extends Term {
                 substitution,
                 equalities.plus(equality),
                 disjunctions,
-                truthValue,
+                truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
                 context);
     }
 
@@ -144,7 +168,7 @@ public class ConjunctiveFormula extends Term {
                 substitution,
                 equalities,
                 disjunctions.plus(disjunction),
-                truthValue,
+                truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
                 context);
     }
 
@@ -199,11 +223,10 @@ public class ConjunctiveFormula extends Term {
      * variables after building the rewrite result.
      */
     public ConjunctiveFormula removeBindings(Set<Variable> variablesToRemove) {
-        return new ConjunctiveFormula(
+        return ConjunctiveFormula.of(
                 substitution.minusAll(variablesToRemove),
                 equalities,
                 disjunctions,
-                truthValue,
                 context);
     }
 
@@ -233,6 +256,7 @@ public class ConjunctiveFormula extends Term {
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification) {
+        assert !isFalse();
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
@@ -333,12 +357,7 @@ public class ConjunctiveFormula extends Term {
             equalities = pendingEqualities;
         } while(change);
 
-        return new ConjunctiveFormula(
-                substitution,
-                equalities,
-                disjunctions,
-                truthValue,
-                context);
+        return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
     }
 
     /**
@@ -382,7 +401,7 @@ public class ConjunctiveFormula extends Term {
             }
         }
 
-        return (ConjunctiveFormula) this.substituteWithBinders(orientationSubstitution, context);
+        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, context)).simplify();
     }
 
     public ConjunctiveFormula expandPatternsAndSimplify(boolean narrowing) {
@@ -434,11 +453,10 @@ public class ConjunctiveFormula extends Term {
             return new DisjunctiveFormula(PersistentUniqueList.singleton(this));
         }
 
-        ConjunctiveFormula result = new ConjunctiveFormula(
+        ConjunctiveFormula result = ConjunctiveFormula.of(
                 substitution,
                 equalities,
                 PersistentUniqueList.empty(),
-                truthValue,
                 context);
 
         List<Set<ConjunctiveFormula>> collect = disjunctions.stream()

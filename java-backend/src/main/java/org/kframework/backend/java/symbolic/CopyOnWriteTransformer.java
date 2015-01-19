@@ -379,7 +379,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.trueFormula(context);
+        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(context);
 
         for (Map.Entry<Variable, Term> entry : conjunctiveFormula.substitution().entrySet()) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.add(

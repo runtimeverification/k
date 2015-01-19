@@ -151,7 +151,7 @@ public class PatternMatcher extends AbstractMatcher {
     public PatternMatcher(boolean isLemma, TermContext context) {
         this.matchOnFunctionSymbol = isLemma;
         this.termContext = context;
-        this.fSubstitution = ConjunctiveFormula.trueFormula(context);
+        this.fSubstitution = ConjunctiveFormula.of(context);
     }
 
     /**
@@ -322,7 +322,7 @@ public class PatternMatcher extends AbstractMatcher {
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
-                fSubstitution = ConjunctiveFormula.trueFormula(termContext);
+                fSubstitution = ConjunctiveFormula.of(termContext);
                 if (patternMatch(entry.getKey(), patternEntry.getKey())
                         && patternMatch(entry.getValue(), patternEntry.getValue())) {
                     assert fSubstitution.isSubstitution();
@@ -339,7 +339,7 @@ public class PatternMatcher extends AbstractMatcher {
         for (KItem patternKItem : patternBuiltinMap.collectionPatterns()) {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (KItem kItem : builtinMap.collectionPatterns()) {
-                fSubstitution = ConjunctiveFormula.trueFormula(termContext);
+                fSubstitution = ConjunctiveFormula.of(termContext);
                 if (kItem.kLabel().equals(patternKItem.kLabel())) {
                     if (patternMatch(kItem.kList(), patternKItem.kList())) {
                         assert fSubstitution.isSubstitution();
@@ -374,8 +374,7 @@ public class PatternMatcher extends AbstractMatcher {
         if (substitutions.size() != 1) {
             PersistentUniqueList<ConjunctiveFormula> conjunctions = PersistentUniqueList.empty();
             for (Substitution<Variable, Term> substitution : substitutions) {
-                conjunctions = conjunctions.plus(
-                        ConjunctiveFormula.trueFormula(termContext).add(substitution));
+                conjunctions = conjunctions.plus(ConjunctiveFormula.of(substitution, termContext));
             }
             fSubstitution = fSubstitution.add(
                     new DisjunctiveFormula(PersistentUniqueList.from(conjunctions)));
@@ -577,7 +576,7 @@ public class PatternMatcher extends AbstractMatcher {
             // start searching for all possible unifiers
             do {
                 // clear the substitution before each attempt of matching
-                fSubstitution = ConjunctiveFormula.trueFormula(termContext);
+                fSubstitution = ConjunctiveFormula.of(termContext);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {

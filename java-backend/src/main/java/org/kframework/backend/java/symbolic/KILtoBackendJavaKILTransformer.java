@@ -438,7 +438,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
 
-        ConjunctiveFormula lookups = ConjunctiveFormula.trueFormula(TermContext.of(globalContext));
+        ConjunctiveFormula lookups = ConjunctiveFormula.of(TermContext.of(globalContext));
         for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
@@ -634,7 +634,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             for (Term term : rule.ensures()) {
                 ensures.add(term.evaluate(termContext));
             }
-            ConjunctiveFormula lookups = ConjunctiveFormula.trueFormula(termContext);
+            ConjunctiveFormula lookups = ConjunctiveFormula.of(termContext);
             for (Equality equality : rule.lookups().equalities()) {
                 lookups = lookups.add(
                         equality.leftHandSide().evaluate(termContext),

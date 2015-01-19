@@ -13,7 +13,6 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.kil.ASTNode;
 
 import java.util.HashSet;
@@ -41,7 +40,7 @@ public class MetaK {
      *         {@code null}
      */
     public static BoolToken unifiable(Term term1, Term term2, TermContext context) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.trueFormula(context)
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(context)
                 .add(term1, term2)
                 .simplify();
         if (constraint.isFalse()) {

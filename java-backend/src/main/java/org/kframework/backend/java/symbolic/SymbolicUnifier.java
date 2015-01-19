@@ -67,7 +67,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     public SymbolicUnifier(boolean patternFold, boolean partialSimpl, TermContext context) {
-        this.constraint = ConjunctiveFormula.trueFormula(context);
+        this.constraint = ConjunctiveFormula.of(context);
         this.patternFold = patternFold;
         this.partialSimpl = partialSimpl;
         this.termContext = context;
@@ -628,7 +628,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             // start searching for all possible unifiers
             do {
                 // clear the constraint before each attempt of unification
-                this.constraint = ConjunctiveFormula.trueFormula(termContext);
+                this.constraint = ConjunctiveFormula.of(termContext);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
