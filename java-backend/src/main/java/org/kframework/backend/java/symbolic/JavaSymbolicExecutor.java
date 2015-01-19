@@ -64,11 +64,11 @@ public class JavaSymbolicExecutor implements Executor {
 
     @Override
     public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
-        return javaKILRun(cfg, -1, computeGraph);
+        return javaBackendRewriteWrapper(cfg, -1, computeGraph);
     }
 
 
-    private RewriteRelation javaKILRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
+    private RewriteRelation javaBackendRewriteWrapper(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
@@ -159,7 +159,7 @@ public class JavaSymbolicExecutor implements Executor {
     @Override
     public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return javaKILRun(cfg, steps, computeGraph);
+        return javaBackendRewriteWrapper(cfg, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {
