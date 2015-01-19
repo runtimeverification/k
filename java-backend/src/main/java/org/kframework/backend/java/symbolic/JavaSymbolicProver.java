@@ -91,7 +91,7 @@ public class JavaSymbolicProver implements Prover {
     public Module preprocess(Module module, Term cfg) throws KRunExecutionException {
         Map<Term, Term> substitution = null;
         if (cfg != null) {
-            cfg = executor.run(cfg).getRawResult();
+            cfg = executor.run(cfg, false).getFinalState().getRawResult();
             cfg = (Term) (new DataStructure2Cell(context)).visitNode(cfg);
             ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
                     new ConfigurationSubstitutionVisitor(context);
