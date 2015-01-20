@@ -1,10 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.main;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -15,7 +11,7 @@ import com.beust.jcommander.ParameterException;
 
 public abstract class FrontEnd {
 
-    protected abstract boolean run();
+    protected abstract int run();
 
     private final KExceptionManager kem;
     private final GlobalOptions globalOptions;
@@ -38,18 +34,21 @@ public abstract class FrontEnd {
         this.files = files;
     }
 
-    public boolean main() {
-        boolean succeeded = true;
+    public int main() {
+        int retval;
         try {
             if (globalOptions.help) {
                 System.out.print(usage);
+                retval = 0;
             } else if (globalOptions.helpExperimental) {
                 System.out.print(experimentalUsage);
+                retval = 0;
             } else if (globalOptions.version) {
                 jarInfo.printVersionMessage();
+                retval = 0;
             } else {
                 try {
-                    succeeded = run();
+                    retval = run();
                 } catch (ParameterException e) {
                     throw KExceptionManager.criticalError(e.getMessage(), e);
                 } finally {
@@ -59,14 +58,14 @@ public abstract class FrontEnd {
             }
         } catch (KExceptionManager.KEMException e) {
             // terminated with errors, so we need to return nonzero error code.
-            succeeded = false;
+            retval = 113;
             if (globalOptions.debug) {
                 e.printStackTrace();
             }
             e.register(kem);
             kem.print();
         }
-        return succeeded;
+        return retval;
     }
 
     public static void printBootError(String message) {

@@ -65,10 +65,10 @@ public class KTestFrontEnd extends FrontEnd {
         this.files = files;
     }
 
-    public boolean run() {
+    public int run() {
         try {
             options.validateArgs(files);
-            return makeTestSuite(options.getTargetFile(), options).run();
+            return makeTestSuite(options.getTargetFile(), options).run() ? 0 : 1;
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException
                 | ParameterException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);

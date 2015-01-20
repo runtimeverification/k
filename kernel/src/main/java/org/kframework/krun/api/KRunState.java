@@ -6,7 +6,7 @@ import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
 
-public class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
+public abstract class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 
     /**
     The pretty-printed term associated with this state, as suitable for display
@@ -16,7 +16,7 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
     /**
     The raw term associated with this state, as suitable for further rewriting
     */
-    private Term rawResult;
+    protected Term rawResult;
 
     /**
      * A state ID corresponding to this state. The contract of a {@link KRun} object
@@ -25,7 +25,7 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
      * to ensure that the mapping is one-to-one to maintain a cache of states
      * and canonicalize the output of the KRun object.
      */
-    private int stateId;
+    protected int stateId;
 
     @RequestScoped
     public static class Counter {
@@ -37,9 +37,7 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
         this.stateId = counter.nextState++;
     }
 
-    public Term getRawResult() {
-        return rawResult;
-    }
+    public abstract Term getRawResult();
 
     public Integer getStateId() {
         return stateId;
@@ -50,19 +48,10 @@ public class KRunState implements Serializable, Comparable<KRunState>, KRunResul
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof KRunState)) return false;
-        KRunState s = (KRunState)o;
-        /*jung uses intensively equals while drawing graphs
-          use SemanticEquals since it caches results
-        */
-        return SemanticEqual.checkEquality(rawResult, s.rawResult);
-    }
+    public abstract boolean equals(Object o);
 
     @Override
-    public int hashCode() {
-        return rawResult.hashCode();
-    }
+    public abstract int hashCode();
 
     @Override
     public int compareTo(KRunState arg0) {

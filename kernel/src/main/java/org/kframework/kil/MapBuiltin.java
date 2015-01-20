@@ -4,12 +4,10 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.backend.unparser.UnparserLexicalComparator;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 
@@ -74,23 +72,18 @@ public class MapBuiltin extends DataStructureBuiltin {
     }
 
     @Override
-    public Term toKApp(Context context) {
+    public Term toKApp(Context context, Comparator<Term> comparator) {
         List<Term> items = new ArrayList<>();
-        Map<Term, String> unparsed = new HashMap<>();
-
         for (java.util.Map.Entry<Term, Term> entry : elements().entrySet()) {
-            Term item = KApp.of(sort().elementLabel(),
+            //TODO(dwightguth): compute real location including value
+            Term item = KApp.of(entry.getKey().getLocation(), entry.getKey().getSource(), sort().elementLabel(),
                     entry.getKey(), entry.getValue());
             items.add(item);
-            UnparserFilter unparser = new UnparserFilter(context);
-            unparser.visitNode(item);
-            String s = unparser.getResult();
-            unparsed.put(item, s);
         }
-        Collections.sort(items, new UnparserLexicalComparator(unparsed));
         for (Term base : baseTerms()) {
             items.add(base);
         }
+        Collections.sort(items, comparator);
         return toKApp(items);
     }
 }

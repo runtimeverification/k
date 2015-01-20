@@ -107,8 +107,8 @@ public class Main {
         KExceptionManager kem = this.kem.get();
         kem.installForUncaughtExceptions();
         try {
-            boolean succeeded = frontEnd.get().main();
-            return succeeded ? 0 : 1;
+            int retval = frontend.get().main();
+            return retval;
         } catch (ProvisionException e) {
             for (Message m : e.getErrorMessages()) {
                 if (!(m.getCause() instanceof KEMException)) {

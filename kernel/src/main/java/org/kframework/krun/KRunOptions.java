@@ -212,6 +212,9 @@ public final class KRunOptions {
     @Parameter(names="--pattern", description="Specify a term and/or side condition that the result of execution or search must match in order to succeed. Return the resulting matches as a list of substitutions. In conjunction with it you can specify other 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search).")
     public String pattern;
 
+    @Parameter(names="--exit-code", description="Specify a term containing a named integer variable which will be used as the exit status of krun.")
+    public String exitCodePattern;
+
     public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
 
 

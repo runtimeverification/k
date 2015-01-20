@@ -4,6 +4,7 @@ package org.kframework.kil;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.kframework.kil.loader.Context;
@@ -99,7 +100,7 @@ public class ListBuiltin extends CollectionBuiltin {
     }
 
     @Override
-    public Term toKApp(Context context) {
+    public Term toKApp(Context context, Comparator<Term> unused) {
         List<Term> items = new ArrayList<>();
         for (Term element : elementsLeft()) {
             items.add(KApp.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, element));

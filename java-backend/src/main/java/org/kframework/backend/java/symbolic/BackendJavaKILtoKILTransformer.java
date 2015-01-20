@@ -9,7 +9,6 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.DataStructureSort;
@@ -22,6 +21,7 @@ import org.kframework.kil.loader.Context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +37,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
+    private final IdentityHashMap<Term, ASTNode> cache = new IdentityHashMap<>();
     /**
      * List of expected cell labels, in the oder in which they appear in the configuration.
      * Used to ensure deterministic order of cells when translating
@@ -64,13 +65,16 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      * @return the translated term
      */
     private ASTNode transformJavaBackendSpecificTerm(Term term) {
+        if (cache.containsKey(term)) return cache.get(term);
         ASTNode kil = new org.kframework.kil.BackendTerm(term.sort().toFrontEnd(), term.toString());
         kil.copyAttributesFrom(term);
+        cache.put(term, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
+        if (cache.containsKey(cellCollection)) return cache.get(cellCollection);
         Set<CellLabel> cellLabels = !currentCellLabels.isEmpty() ?
                 currentCellLabels.stream().map(CellLabel::of).collect(Collectors.toSet()) :
                 cellCollection.cells().keySet();
@@ -90,8 +94,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         }
 
         ASTNode kil = new org.kframework.kil.Bag(contents);
-        // TODO(AndreiS): what cell attributes are preserved by the backend?
-        // kil.copyAttributesFrom(cellCollection);
+        kil.copyAttributesFrom(cellCollection);
+        cache.put(cellCollection, kil);
         return kil;
     }
 
@@ -126,58 +130,72 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KItem kItem) {
+        if (cache.containsKey(kItem)) return cache.get(kItem);
         ASTNode kil = new org.kframework.kil.KApp(
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
         kil.copyAttributesFrom(kItem);
+        cache.put(kItem, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KItemProjection kItemProj) {
+        if (cache.containsKey(kItemProj)) return cache.get(kItemProj);
         ASTNode kil = new org.kframework.kil.KItemProjection(
                 Sort.of(kItemProj.kind().toString()),
                 (org.kframework.kil.Term) kItemProj.term().accept(this));
         kil.copyAttributesFrom(kItemProj);
+        cache.put(kItemProj, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
+        if (cache.containsKey(kLabelConstant)) return cache.get(kLabelConstant);
         ASTNode kil = org.kframework.kil.KLabelConstant.of(kLabelConstant.label());
         kil.copyAttributesFrom(kLabelConstant);
+        cache.put(kLabelConstant, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KLabelFreezer kLabelFreezer) {
+        if (cache.containsKey(kLabelFreezer)) return cache.get(kLabelFreezer);
         ASTNode kil = new org.kframework.kil.FreezerLabel(
                 (org.kframework.kil.Term) kLabelFreezer.term().accept(this));
         kil.copyAttributesFrom(kLabelFreezer);
+        cache.put(kLabelFreezer, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KLabelInjection kLabelInjection) {
+        if (cache.containsKey(kLabelInjection)) return cache.get(kLabelInjection);
         ASTNode kil = new org.kframework.kil.KInjectedLabel(
                 (org.kframework.kil.Term) kLabelInjection.term().accept(this));
         kil.copyAttributesFrom(kLabelInjection);
+        cache.put(kLabelInjection, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KList kList) {
+        if (cache.containsKey(kList)) return cache.get(kList);
         List<org.kframework.kil.Term> terms = transformTerms(kList);
         ASTNode kil = new org.kframework.kil.KList(terms);
         kil.copyAttributesFrom(kList);
+        cache.put(kList, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(KSequence kSequence) {
+        if (cache.containsKey(kSequence)) return cache.get(kSequence);
         List<org.kframework.kil.Term> terms = transformTerms(kSequence);
         ASTNode kil = new org.kframework.kil.KSequence(terms);
         kil.copyAttributesFrom(kSequence);
+        cache.put(kSequence, kil);
         return kil;
     }
 
@@ -194,6 +212,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(BuiltinSet set) {
+        if (cache.containsKey(set)) return cache.get(set);
         List<org.kframework.kil.Term> elements = new ArrayList<org.kframework.kil.Term>();
         List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
         for (Term entry : set.elements()) {
@@ -208,12 +227,14 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
                 baseTerms,
                 elements);
         kil.copyAttributesFrom(set);
+        cache.put(set, kil);
         return kil;
     }
 
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
+        if (cache.containsKey(builtinList)) return cache.get(builtinList);
         List<org.kframework.kil.Term> elementsLeft = new ArrayList<org.kframework.kil.Term>();
         List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
         List<org.kframework.kil.Term> elementsRight = new ArrayList<org.kframework.kil.Term>();
@@ -229,11 +250,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         ASTNode kil = ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
                 baseTerms, elementsLeft, elementsRight);
         kil.copyAttributesFrom(builtinList);
+        cache.put(builtinList, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(BuiltinMap map) {
+        if (cache.containsKey(map)) return cache.get(map);
         final Map<Term, Term> entries = map.getEntries();
         List<Term> keys = new ArrayList<Term>(entries.keySet());
         Collections.sort(keys);
@@ -253,23 +276,28 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
                 baseTerms,
                 elements);
         kil.copyAttributesFrom(map);
+        cache.put(map, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(Token token) {
+        if (cache.containsKey(token)) return cache.get(token);
         ASTNode kil = org.kframework.kil.Token.kAppOf(token.sort().toFrontEnd(), token.value());
         kil.copyAttributesFrom(token);
+        cache.put(token, kil);
         return kil;
     }
 
     @Override
     public ASTNode transform(Variable variable) {
+        if (cache.containsKey(variable)) return cache.get(variable);
 //        System.out.println("VARIABLE*************"+ variable.name()+"->"+variable.sort());
         ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort().toFrontEnd());
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
         node.copyAttributesFrom(variable);
+        cache.put(variable, node);
         return node;
     }
 

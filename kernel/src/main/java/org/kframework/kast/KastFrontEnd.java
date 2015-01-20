@@ -78,7 +78,7 @@ public class KastFrontEnd extends FrontEnd {
      * @return true if the application terminated normally; false otherwise
      */
     @Override
-    public boolean run() {
+    public int run() {
         try {
             scope.enter(kompiledDir.get());
             Reader stringToParse = options.stringToParse();
@@ -99,7 +99,7 @@ public class KastFrontEnd extends FrontEnd {
 
             sw.printIntermediate("Maudify Program");
             sw.printTotal("Total");
-            return true;
+            return 0;
         } finally {
             scope.exit();
         }

@@ -50,17 +50,16 @@ public class KppFrontEnd extends FrontEnd {
         return modules;
     }
 
-    public boolean run() {
+    public int run() {
         File f = new File(fileName);
         if (!f.exists())
             System.err.println("File not found.");
 
         try (BufferedReader input = new BufferedReader(new FileReader(f))) {
             KppFrontEnd.codeClean(input, System.out);
-            return true;
+            return 0;
         } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            throw KExceptionManager.criticalError(e.getMessage(), e);
         }
     }
 

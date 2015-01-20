@@ -99,11 +99,7 @@ public class BinaryLoader {
         }
     }
 
-    public <T> T loadOrDie(Class<T> cls, InputStream in) {
-        return loadOrDie(cls, in, "input stream");
-    }
-
-    private <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
+    public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
 
         try {
             return load(cls, in);
