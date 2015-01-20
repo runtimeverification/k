@@ -251,10 +251,10 @@ public class PatternMatcher extends AbstractMatcher {
 
         ConjunctiveFormula newSubstitution = fSubstitution.add(variable, term).simplify();
         if (newSubstitution.isFalse()) {
-            // TODO(AndreiS): the check below is to strong, as the substitution may not be normalized
-            // variable = A, term = C, fSubstitution = { A |-> B, B |-> C}
             fail(fSubstitution.substitution().get(variable), term);
         }
+
+        fSubstitution = newSubstitution;
     }
 
     @Override
