@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.backend.unparser.Unparser;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.BoolBuiltin;
@@ -62,9 +62,8 @@ public class AmbFilter extends ParseForestTransformer {
                 msg += constant.getProduction().getSort() + " ::= ";
                 msg += constant.getProduction().toString();
             }
-            UnparserFilter unparserFilter = new UnparserFilter(context);
-            unparserFilter.visitNode(elem);
-            msg += "\n   " + unparserFilter.getResult().replace("\n", "\n   ");
+            Unparser unparser = new Unparser(context);
+            msg += "\n   " + unparser.print(elem).replace("\n", "\n   ");
         }
         kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, getName(), amb.getSource(), amb.getLocation()));
 

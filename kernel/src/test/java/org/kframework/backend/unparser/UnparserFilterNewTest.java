@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 public class UnparserFilterNewTest {
     Context context;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setup() {
         context = Mockito.mock(Context.class);
@@ -27,10 +26,9 @@ public class UnparserFilterNewTest {
      */
     @Test
     public void testTrailingUnderscores() {
-        UnparserFilter v = new UnparserFilter(context);
+        Unparser v = new Unparser(context);
         KApp t = KApp.of(KLabelConstant.of("'__"), Variable.getAnonVar(Sort.K), Variable.getAnonVar(Sort.K));
-        v.visit(t, null);
-        v.getResult();
+        v.print(t);
     }
 
 }

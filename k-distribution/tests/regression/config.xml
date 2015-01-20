@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
 
 <tests>
 
@@ -16,7 +16,7 @@
       extension="issue"
       >
     <all-programs>
-      <krun-option name="--output" value="smart" />
+      <krun-option name="--output" value="sound" />
 	    <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
   </test>

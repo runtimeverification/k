@@ -6,6 +6,7 @@ import org.kframework.kil.visitors.Visitor;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
@@ -74,7 +75,7 @@ public abstract class CollectionBuiltin extends DataStructureBuiltin {
     }
 
     @Override
-    public Term toKApp(Context context) {
+    public Term toKApp(Context context, Comparator<Term> comparator) {
         throw new UnsupportedOperationException("cannot convert abstract collection to KApp");
     }
 

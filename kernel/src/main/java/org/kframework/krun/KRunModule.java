@@ -96,8 +96,6 @@ public class KRunModule extends AbstractModule {
         experimentalOptionsBinder.addBinding().toInstance(KRunOptions.Experimental.class);
         experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
 
-        bind(OutputModes.class).toInstance(options.output);
-
         ThrowingProviderBinder throwingBinder = ThrowingProviderBinder.create(binder());
 
         // bind Transformation<P, Q> to TransformationProvider<Transformation<P, Q>>
@@ -172,6 +170,11 @@ public class KRunModule extends AbstractModule {
                 astNodePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrintTerm.class);
             }
         }
+    }
+
+    @Provides
+    OutputModes outputMode(KRunOptions options) {
+        return options.output;
     }
 
     public static class CommonModule extends AbstractModule {

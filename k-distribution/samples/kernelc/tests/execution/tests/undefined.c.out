@@ -5,15 +5,16 @@
             value |-> int)
     </struct>
     <fun>
-        main |-> functionBody ( .ParameterDeclarations , int , { 
-          .VariableDeclarations { struct listNode * x ; x = ( struct listNode 
-          * ) malloc ( sizeof ( struct listNode ) ) ; printf ( "%d\n", x -> 
-          value ) ; return 0 ; } return tv ( void , undef ) ; } )
+        main |-> functionBody ( .EvaluatedExpressions , int , { .Statements 
+          (({ struct listNode * x ; ((x = ( struct listNode * ) malloc ( 
+          sizeof ( struct listNode ) ) ;) (printf ( "%d\n", (x -> value) ) ;
+          ) (return 0 ;)) }) (return tv ( void , undef ) ;)) } )
     </fun>
     <k>
-        * tv ( int * , member ( 2 , value ) ) ~> HOLE, .Expressions ~> "%d\n"
-          , HOLE ~> printf ( HOLE ) ~> HOLE ; ~> return 0 ; .Statements ~> 
-          .Map ~> .List ~> return tv ( void , undef ) ; .Statements
+        * tv ( int * , member ( 2 , value ) ) ~> HOLE, .EvaluatedExpressions
+           ~> "%d\n", HOLE ~> printf ( HOLE ) ~> HOLE ; ~> (return 0 ;) 
+          .Statements ~> .Map ~> .List ~> (return tv ( void , undef ) ;) 
+          .Statements
     </k>
     <env>
         x |-> tv ( struct listNode * * , object ( 1 ) )
