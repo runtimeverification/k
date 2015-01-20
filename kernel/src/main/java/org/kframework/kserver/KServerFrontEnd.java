@@ -59,7 +59,7 @@ public class KServerFrontEnd extends FrontEnd {
     private final Map<String, Injector> injectors = new HashMap<>();
 
     @Override
-    protected boolean run() {
+    protected int run() {
         for (String tool : tools) {
             injectors.put(tool, Main.getInjector(tool));
         }
@@ -79,10 +79,10 @@ public class KServerFrontEnd extends FrontEnd {
 
         try {
             t.join();
-            return true;
+            return 0;
         } catch (InterruptedException e) {
             //application is about to die
-            return false;
+            return 1;
         }
     }
 
