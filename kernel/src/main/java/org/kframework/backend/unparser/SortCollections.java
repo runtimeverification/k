@@ -14,6 +14,13 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+/**
+ * Sorts terms of sort List, Map, Set, and Bag alphanumerically
+ * according to their unparsed representation. This is used to normalize
+ * the KAST of terms output by the rewriter.
+ * @author dwightguth
+ *
+ */
 public class SortCollections extends CopyOnWriteTransformer {
 
     private Comparator<Term> comparator = new Comparator<Term>() {

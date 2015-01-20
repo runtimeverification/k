@@ -254,17 +254,13 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return set;
     }
 
-    private static boolean contains(Term outer, Term inner) {
-        return outer == inner;
-    }
-
     /** compute fixity of nonterminal within production */
     private EnumSet<Fixity> getFixity(Term inner, Term outer) {
         if (outer instanceof TermCons) {
             TermCons tc = (TermCons)outer;
             int i;
             for (i = 0; i < tc.getContents().size(); i++) {
-                if (contains(tc.getContents().get(i), inner))
+                if (tc.getContents().get(i) == inner)
                     break;
             }
             Production p = tc.getProduction();
@@ -289,7 +285,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Collection c = (Collection) outer;
             int i;
             for (i = 0; i < c.getContents().size(); i++) {
-                if (contains(c.getContents().get(i), inner))
+                if (c.getContents().get(i) == inner)
                     break;
             }
             EnumSet<Fixity> set = EnumSet.allOf(Fixity.class);
@@ -304,7 +300,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof KApp) {
             KApp kapp = (KApp) outer;
-            if (contains(kapp.getLabel(), inner))
+            if (kapp.getLabel() == inner)
                 return EnumSet.of(Fixity.BARE_LEFT);
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof Freezer) {

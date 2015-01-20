@@ -65,6 +65,12 @@ import org.kframework.utils.ColorUtil;
 
 import com.davekoelle.AlphanumComparator;
 
+/**
+ * Unparses (ie converts an AST to text) a term written in concrete syntax.
+ * Provides two methods: {@link #print} and {@link #compare}.
+ * @author dwightguth
+ *
+ */
 public class Unparser implements Comparator<ASTNode> {
 
     public Unparser(Context context) {
@@ -87,6 +93,20 @@ public class Unparser implements Comparator<ASTNode> {
     private final boolean annotateLocation;
     private Set<String> variableList = new HashSet<>();
 
+    /**
+     * Compares the textual representation of two terms.
+     *
+     *
+     * This method is implemented by creating a
+     * list of term components consisting of the terminal
+     * and non-terminal components of the terms involved.
+     * The nonterminals are iteratively resolved when they
+     * reach the top of the list, and strings at the top
+     * of the list are appended to the textual representation
+     * of the term. Only the common prefix of the two term's textual
+     * representation is generated; the first difference
+     * encountered halts the algorithm.
+     */
     @Override
     public int compare(ASTNode o1, ASTNode o2) {
         Deque<Component> thisStack = new LinkedList<>();
@@ -113,6 +133,18 @@ public class Unparser implements Comparator<ASTNode> {
         }
     }
 
+    /**
+     * Outputs the textual representation of a term.
+     *
+     * This method is implemented by creating a
+     * list of term components consisting of the terminal
+     * and non-terminal components of the term involved.
+     * The nonterminals are iteratively resolved when they
+     * reach the top of the list, and strings at the top
+     * of the list are appended to the textual representation
+     * of the term. When the queue is empty, the resulting
+     * string is returned.
+     */
     public String print(ASTNode node) {
         Deque<Component> stack = new LinkedList<>();
         Indenter string = new Indenter();
@@ -126,6 +158,13 @@ public class Unparser implements Comparator<ASTNode> {
         return string.toString();
     }
 
+    /**
+     * Pops the top element of the stack and handles it.
+     * If it is a string or format character, it is
+     * appended to the Indenter. If it is a nonterminal,
+     * it computes the components of the corresponding subtertm
+     * and adds them to the top of the stack in order.
+     */
     private void processStack(Deque<Component> stack, Indenter string) {
         if (stack.isEmpty()) {
             return;
@@ -173,6 +212,11 @@ public class Unparser implements Comparator<ASTNode> {
 
     private static interface Component {}
 
+    /**
+     * A terminal component of the output string: ie, a literal
+     * string contained in the output.
+     *
+     */
     private static class StringComponent implements Component {
 
         private final String s;
@@ -187,6 +231,14 @@ public class Unparser implements Comparator<ASTNode> {
         }
     }
 
+    /**
+     * A nonterminal component of the output string. This
+     * forms an intermediate representation that is iteratively
+     * resolved according to the production corresponding to the
+     * term contained at that location in the AST.
+     * @author dwightguth
+     *
+     */
     private static class TermComponent implements Component {
         private final ASTNode term;
 
@@ -204,6 +256,14 @@ public class Unparser implements Comparator<ASTNode> {
         INDENT, DEDENT, NEWLINE, INDENT_TO_CURRENT, END_TERM
     }
 
+    /**
+     * A component of the output string corresponding to a
+     * control sequence. This handles the case of indentation,
+     * newlines, as well as the option to annotate the AST
+     * with the location of the terms in the resulting AST.
+     * @author dwightguth
+     *
+     */
     private static class FormatComponent implements Component {
         private final Format format;
         private final ASTNode term;
@@ -219,6 +279,12 @@ public class Unparser implements Comparator<ASTNode> {
         }
     }
 
+    /**
+     * Locally visits a term and generatres the {@link Component}s
+     * corresponding to that term to be put on the top of the stack.
+     * @author dwightguth
+     *
+     */
     private class ComponentVisitor extends NonCachingVisitor {
         private final Deque<Component> stack= new LinkedList<>();
 
