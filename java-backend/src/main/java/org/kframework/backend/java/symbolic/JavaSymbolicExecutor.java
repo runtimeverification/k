@@ -1,12 +1,8 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -14,29 +10,32 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.unparser.OutputModes;
-import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.tools.Executor;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JavaSymbolicExecutor implements Executor {
 
-    private final Definition definition;
     private final JavaExecutionOptions javaOptions;
     private final KILtoBackendJavaKILTransformer kilTransformer;
     private final GlobalContext globalContext;
     private final Provider<SymbolicRewriter> symbolicRewriter;
+    private final Provider<PatternMatchRewriter> patternMatchRewriter;
     private final KILtoBackendJavaKILTransformer transformer;
     private final Context context;
     private final KRunState.Counter counter;
@@ -48,6 +47,7 @@ public class JavaSymbolicExecutor implements Executor {
             KILtoBackendJavaKILTransformer kilTransformer,
             GlobalContext globalContext,
             Provider<SymbolicRewriter> symbolicRewriter,
+            Provider<PatternMatchRewriter> patternMatchRewriter,
             KILtoBackendJavaKILTransformer transformer,
             Definition definition,
             KRunState.Counter counter) {
@@ -56,46 +56,41 @@ public class JavaSymbolicExecutor implements Executor {
         this.kilTransformer = kilTransformer;
         this.globalContext = globalContext;
         this.symbolicRewriter = symbolicRewriter;
+        this.patternMatchRewriter = patternMatchRewriter;
         this.transformer = transformer;
-        this.definition = definition;
         globalContext.setDefinition(definition);
         this.counter = counter;
     }
 
     @Override
-    public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        return internalRun(cfg, -1);
+    public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
+        return javaRewriteEngineRun(cfg, -1, computeGraph);
     }
 
-    private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
-        ConstrainedTerm result = javaKILRun(cfg, bound);
-        org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTransformer(context));
-        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, counter));
-        UnparserFilter unparser = new UnparserFilter(true, ColorSetting.OFF, OutputModes.PRETTY, context);
-        unparser.visitNode(kilTerm);
-        returnResult.setRawOutput(unparser.getResult());
-        return returnResult;
-    }
 
-    private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
+    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
+        termContext.setTopTerm(term);
 
         if (javaOptions.patternMatching) {
-            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
-            return rewriteResult;
-        } else {
-            SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
-            return getSymbolicRewriter().rewrite(constrainedTerm, bound);
+            if (computeGraph) {
+                KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            }
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
+            JavaKRunState finalState = new JavaKRunState(rewriteResult.term(), context, counter);
+            return new RewriteRelation(finalState, null);
         }
+
+        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
+        SymbolicRewriter rewriter = symbolicRewriter.get();
+        KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
+        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
     }
 
-
     @Override
-    public KRunResult<SearchResults> search(
+    public SearchResults search(
             Integer bound,
             Integer depth,
             SearchType searchType,
@@ -125,9 +120,8 @@ public class JavaSymbolicExecutor implements Executor {
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
         if (javaOptions.patternMatching) {
-            GroundRewriter rewriter = new GroundRewriter(definition, termContext);
-            hits = rewriter.search(initialTerm, targetTerm, claims,
-                    patternRule, bound, depth, searchType);
+            hits = getPatternMatchRewriter().search(initialTerm, targetTerm, claims,
+                    patternRule, bound, depth, searchType, termContext);
         } else {
             hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType, termContext);
@@ -150,25 +144,29 @@ public class JavaSymbolicExecutor implements Executor {
                         .visitNode(pattern.getBody());
 
             searchResults.add(new SearchResult(
-                    new KRunState(rawResult, counter),
+                    new JavaKRunState(rawResult, counter),
                     substitutionMap,
                     compilationInfo));
         }
 
-        KRunResult<SearchResults> searchResultsKRunResult = new KRunResult<>(new SearchResults(
+        SearchResults retval = new SearchResults(
                 searchResults,
-                null));
+                null);
 
-        return searchResultsKRunResult;
+        return retval;
     }
 
     @Override
-    public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
+    public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return internalRun(cfg, steps);
+        return javaRewriteEngineRun(cfg, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {
         return symbolicRewriter.get();
+    }
+
+    private PatternMatchRewriter getPatternMatchRewriter() {
+        return patternMatchRewriter.get();
     }
 }

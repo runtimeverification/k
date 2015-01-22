@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.kframework.k</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5-SNAPSHOT</version>
+    <version>3.6-SNAPSHOT</version>
   </parent>
   <artifactId>k-distribution</artifactId>
   <packaging>jar</packaging>
@@ -34,12 +34,6 @@
     <dependency>
       <groupId>org.kframework.k</groupId>
       <artifactId>java-backend</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.k</groupId>
-      <artifactId>maude-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

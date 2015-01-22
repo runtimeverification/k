@@ -78,9 +78,5 @@
       <directory>${project.build.directory}/lib</directory>
       <outputDirectory>/lib</outputDirectory>
     </fileSet>
-    <fileSet>
-      <directory>src/main/maude</directory>
-      <outputDirectory>/lib/maude/lib</outputDirectory>
-    </fileSet>
   </fileSets>
 </assembly>

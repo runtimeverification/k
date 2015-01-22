@@ -1,8 +1,12 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
+import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Attributes;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
@@ -10,11 +14,11 @@ import org.kframework.krun.api.SearchResults;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
-public class BinaryOutputMode implements Transformation<KRunResult<?>, String> {
+public class BinaryOutputMode implements Transformation<KRunResult, InputStream> {
 
     private final BinaryLoader loader;
 
@@ -26,18 +30,23 @@ public class BinaryOutputMode implements Transformation<KRunResult<?>, String> {
     }
 
     @Override
-    public String run(KRunResult<?> result, Attributes a) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+    public InputStream run(KRunResult result, Attributes a) {
 
-        Object toSerialize = result.getResult();
-        if (result.getResult() instanceof KRunState) {
-            toSerialize = ((KRunState)result.getResult()).getRawResult();
-        } else if (result.getResult() instanceof SearchResults) {
-            toSerialize = ((SearchResults)result.getResult()).getGraph();
+        Object toSerialize = result;
+        if (result instanceof KRunState) {
+            toSerialize = ((KRunState)result).getRawResult();
+        } else if (result instanceof SearchResults) {
+            toSerialize = ((SearchResults)result).getGraph();
         }
 
-        loader.saveOrDie(os, toSerialize);
-        return Base64.encode(os.toByteArray());
+        final Object o = toSerialize;
+
+        Pair<PipedInputStream, PipedOutputStream> pipe = FileUtil.pipeOutputToInput();
+        new Thread(() ->
+        {
+            loader.saveOrDie(new Base64OutputStream(pipe.getRight()), o);
+        }).start();
+        return pipe.getLeft();
     }
 
     @Override

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import org.kframework.compile.utils.MetaK;
@@ -44,14 +44,11 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
                         Import imp = ((Import) s);
                         String mname2 = imp.getName();
                         Module mm = def.getDefinitionContext().getModuleByName(mname2);
-                        // TODO(dwightguth) if the module starts with # it means it is predefined in maude
-                        if (!mname2.startsWith("#")) {
-                            if (mm != null)
-                                synQue.add(mm.getName());
-                            else if (!MetaK.isKModule(mname2)) {
-                                String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
-                                kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, imp.getSource(), imp.getLocation()));
-                            }
+                        if (mm != null)
+                            synQue.add(mm.getName());
+                        else if (!MetaK.isKModule(mname2)) {
+                            String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
+                            kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, imp.getSource(), imp.getLocation()));
                         }
                     }
                 }

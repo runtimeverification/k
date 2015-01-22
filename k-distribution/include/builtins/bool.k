@@ -1,9 +1,7 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "../k-prelude.k"
 
 module BOOL-SYNTAX-HOOKS
-  imports #BOOL-INTERFACE
-
   syntax #Bool ::= "true"
   syntax #Bool ::= "false"
   syntax Bool ::= #Bool

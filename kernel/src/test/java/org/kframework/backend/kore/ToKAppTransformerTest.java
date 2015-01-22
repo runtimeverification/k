@@ -1,8 +1,10 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+
+import java.util.Comparator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +18,7 @@ import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.mockito.Mock;
@@ -37,7 +40,13 @@ public class ToKAppTransformerTest {
 
     @Before
     public void setUp() {
-        transformer = new ToKAppTransformer(context);
+        transformer = new ToKAppTransformer(context, new Comparator<Term>() {
+
+            @Override
+            public int compare(Term o1, Term o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
         mapSort = new DataStructureSort("Map", Sort.MAP, "'_Map_", "'_|->_", "'.Map", Maps.<String, String>newHashMap());
         listSort = new DataStructureSort("List", Sort.LIST, "'_List_", "'ListItem", "'.List", Maps.<String, String>newHashMap());
         setSort = new DataStructureSort("Set", Sort.SET, "'_Set_", "'SetItem", "'.Set", Maps.<String, String>newHashMap());

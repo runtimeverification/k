@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import java.util.Map;
@@ -114,19 +114,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
             result = ((KItem) super
                     .transform(BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
                     .resolveFunctionAndAnywhere(copyOnShareSubstAndEval, context);
-
-            // TODO(YilongL): visitor/imp.k would fail the following assertion
-            if (context.definition().context().globalOptions.debug) {
-                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
-                    System.err.println("Unable to resolve function symbol:\n\t\t" + result);
-                    if (!definition.functionRules().isEmpty()) {
-                        System.err.println("\tDefined function rules:");
-                        for (Rule rule : definition.functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
-                            System.err.println("\t\t" + rule);
-                        }
-                    }
-                }
-            }
         }
 
         return result;

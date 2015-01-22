@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
@@ -9,6 +9,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 import org.kframework.parser.TermLoader;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,9 +113,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             }
             return result;
         }
-        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputModes.SMART, true, context);
-        unparser.visitNode(ast);
-        String unparsed = unparser.getResult();
+        String unparsed = new Unparser(context, ColorSetting.OFF, Color.BLACK, true, true).print(ast);
         try {
             ASTNode rule = loader.parsePatternAmbiguous(unparsed, context);
             Term reparsed = ((Sentence)rule).getBody();

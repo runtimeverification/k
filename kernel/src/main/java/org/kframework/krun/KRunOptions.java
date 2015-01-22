@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import java.io.File;
@@ -148,7 +148,7 @@ public final class KRunOptions {
     public ColorOptions color = new ColorOptions();
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
-            description="How to display Maude results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")
+            description="How to display krun results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")
     public OutputModes output = OutputModes.PRETTY;
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
@@ -215,6 +215,9 @@ public final class KRunOptions {
 
     @Parameter(names="--pattern", description="Specify a term and/or side condition that the result of execution or search must match in order to succeed. Return the resulting matches as a list of substitutions. In conjunction with it you can specify other 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search).")
     public String pattern;
+
+    @Parameter(names="--exit-code", description="Specify a term containing a named integer variable which will be used as the exit status of krun.")
+    public String exitCodePattern;
 
     public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
 

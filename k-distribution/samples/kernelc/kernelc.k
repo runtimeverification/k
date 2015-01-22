@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 require "modules/verification_lemmas.k"
 require "kernelc-syntax.k"
 require "kernelc-semantics.k"

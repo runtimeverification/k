@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "bool.k"
 
 module LTL-SYNTAX-HOOKS
-  imports #LTL-INTERFACE
   syntax #LtlFormula ::= "TrueLtl"
   syntax #LtlFormula ::= "FalseLtl"
 
@@ -59,7 +58,6 @@ endmodule
 
 
 module  MODEL-CHECKER-INTERFACE
-  imports #MODEL-CHECKER-INTERFACE
   imports K-TECHNIQUE
 
   syntax Bool ::= Bag "|=Ltl" K [latex({#1}\mathrel{\models_{\scriptstyle\it Ltl}}{#2})]

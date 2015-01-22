@@ -1,11 +1,12 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-public class KRunProofResult<T> extends KRunResult<T> {
-    private boolean proven;
+public class KRunProofResult<T> implements KRunResult {
+    private final boolean proven;
+    private final T result;
 
     public KRunProofResult(boolean proven, T result) {
-        super(result);
+        this.result = result;
         this.proven = proven;
     }
 
@@ -18,7 +19,7 @@ public class KRunProofResult<T> extends KRunResult<T> {
         if (proven) {
             return "true";
         } else {
-            return super.toString();
+            return result.toString();
         }
     }
 }

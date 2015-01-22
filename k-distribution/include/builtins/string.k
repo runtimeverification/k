@@ -1,9 +1,8 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "int.k"
 require "float.k"
 
 module STRING-SYNTAX-HOOKS
-  imports #STRING-INTERFACE
 
   // Double Quoted Strings are of the form:
   // DoubleQuote StringChar* DoubleQuote

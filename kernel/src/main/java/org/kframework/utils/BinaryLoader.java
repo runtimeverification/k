@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import java.io.*;
@@ -99,11 +99,7 @@ public class BinaryLoader {
         }
     }
 
-    public <T> T loadOrDie(Class<T> cls, InputStream in) {
-        return loadOrDie(cls, in, "input stream");
-    }
-
-    private <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
+    public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
 
         try {
             return load(cls, in);

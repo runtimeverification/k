@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
@@ -15,7 +14,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.compile.transformers.DataStructure2Cell;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Module;
@@ -93,7 +91,7 @@ public class JavaSymbolicProver implements Prover {
     public Module preprocess(Module module, Term cfg) throws KRunExecutionException {
         Map<Term, Term> substitution = null;
         if (cfg != null) {
-            cfg = executor.run(cfg).getResult().getRawResult();
+            cfg = executor.run(cfg, false).getFinalState().getRawResult();
             cfg = (Term) (new DataStructure2Cell(context)).visitNode(cfg);
             ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
                     new ConfigurationSubstitutionVisitor(context);

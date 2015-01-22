@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 /*@  requires DISTANCE(s_x) && DISTANCE(s_y);
      requires VELOCITY(v_x) && VELOCITY(v_y);
       ensures  \abs(\result - tauR(s_x, s_y, v_x, v_y,0.0,T)) <= E_tau ;

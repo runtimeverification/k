@@ -1,3 +1,4 @@
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 /*
  * The Alphanum Algorithm is an improved sorting algorithm for strings
  * containing numbers.  Instead of sorting numbers in ASCII order like

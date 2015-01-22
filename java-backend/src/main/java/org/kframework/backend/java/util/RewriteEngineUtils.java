@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
 import java.util.ArrayList;
@@ -17,12 +17,16 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
+import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Utilities for the Java rewrite engine.
@@ -64,48 +68,62 @@ public class RewriteEngineUtils {
         for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
             Term lookupOrChoice = equality.leftHandSide();
             Term nonLookupOrChoice =  equality.rightHandSide();
+            List<RHSInstruction> instructions = equality.instructions();
+            Term evalLookupOrChoice = KAbstractRewriteMachine.construct(instructions, crntSubst, null, context, false);
 
-                    Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
+            boolean resolved = false;
+            if (evalLookupOrChoice instanceof Bottom
+                    || DataStructures.isLookupOrChoice(evalLookupOrChoice)) {
+                /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
-                    boolean resolved = false;
-                    if (evalLookupOrChoice instanceof Bottom
-                            || DataStructures.isLookupOrChoice(evalLookupOrChoice)) {
-                        /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
+                // when the operation is pending, it is not really a valid match
+                // for example, matching ``<env>... X |-> V ...</env>''
+                // against ``<env> Rho </env>'' will result in a pending
+                // choice operation due to the unknown ``Rho''.
 
-                        // when the operation is pending, it is not really a valid match
-                        // for example, matching ``<env>... X |-> V ...</env>''
-                        // against ``<env> Rho </env>'' will result in a pending
-                        // choice operation due to the unknown ``Rho''.
-                    } else {
-                        if (nonLookupOrChoice instanceof Variable) {
-                            Variable variable = (Variable) nonLookupOrChoice;
-                            if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
-                                Term term = crntSubst.put(variable, evalLookupOrChoice);
-                                resolved = term == null || term.equals(evalLookupOrChoice);
-                            }
-                        } else {
-                            // the non-lookup term is not a variable and thus requires further pattern matching
-                            // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
-                            //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-
-                            Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
-
-                            PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
-                            if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
-                                assert lookupMatcher.multiSubstitutions().isEmpty();
-
-                                if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
-                                    resolved = true;
-                                    crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
-                                }
-                            }
+                if (!resolved && RuleAuditing.isAuditBegun()) {
+                    System.err.println("Matching failure: unable to resolve collection operation "
+                    + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
+                    + evalLookupOrChoice);
+                }
+            } else {
+                if (nonLookupOrChoice instanceof Variable) {
+                    Variable variable = (Variable) nonLookupOrChoice;
+                    if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
+                        Term term = crntSubst.put(variable, evalLookupOrChoice);
+                        resolved = term == null || term.equals(evalLookupOrChoice);
+                        if (!resolved && RuleAuditing.isAuditBegun()) {
+                            System.err.println("Matching failure: " + variable + " must match both "
+                            + term + " and " + evalLookupOrChoice);
                         }
                     }
+                } else {
+                    // the non-lookup term is not a variable and thus requires further pattern matching
+                    // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
+                    //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
 
-                    if (!resolved) {
-                        crntSubst = null;
-                        break;
+                    Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+
+                    PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
+                    if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
+                        assert lookupMatcher.multiSubstitutions().isEmpty();
+
+                        if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
+                            resolved = true;
+                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                        } else if (!resolved && RuleAuditing.isAuditBegun()) {
+                            System.err.println("Matching failure: substitution "
+                            + lookupMatcher.substitution() + " missing variables "
+                            + Sets.difference(lookupMatcher.substitution().keySet(), nonLookupOrChoice.variableSet()));
+                        }
                     }
+                }
+            }
+
+            if (!resolved) {
+                crntSubst = null;
+                break;
+            }
         }
         Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
 
@@ -113,15 +131,20 @@ public class RewriteEngineUtils {
         /* evaluate side conditions */
         Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
         if (crntSubst != null) {
+            int i = 0;
             for (Term require : rule.requires()) {
                 // TODO(YilongL): in the future, we may have to accumulate
                 // the substitution obtained from evaluating the side
                 // condition
-                Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
+                Term evaluatedReq = KAbstractRewriteMachine.construct(rule.instructionsOfRequires().get(i), crntSubst, null, context, false);
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
+                    if (RuleAuditing.isAuditBegun()) {
+                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
+                    }
                     crntSubst = null;
                     break;
                 }
+                i++;
             }
         }
         Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
@@ -256,6 +279,9 @@ public class RewriteEngineUtils {
             if (otherTerm == null) {
                 result.put(variable, term);
             } else if (!otherTerm.equals(term)) {
+                if (RuleAuditing.isAuditBegun()) {
+                    System.err.println("Incompatible substitutions: " + subst1 + " and " + subst2);
+                }
                 return null;
             }
         }

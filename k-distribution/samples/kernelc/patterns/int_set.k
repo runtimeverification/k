@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module INT-SET
   syntax IntSet ::= IntSet "U" IntSet           [function, left, smtlib(smt_set_cup)]

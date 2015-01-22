@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
@@ -6,6 +6,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.StringUtil;
 
@@ -15,8 +16,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A string token. String tokens represent a sequence of unicode code points.
@@ -30,7 +29,7 @@ public final class StringToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.STRING;
 
     /* StringToken cache */
-    private static final Map<String, StringToken> cache = new HashMap<String, StringToken>();
+    private static final MapCache<String, StringToken> cache = new MapCache<>();
 
     /* String value wrapped by this StringToken */
     private final String value;
@@ -47,14 +46,7 @@ public final class StringToken extends Token implements MaximalSharing {
      * @param value A UTF-16 representation of this sequence of code points.
      */
     public static StringToken of(String value) {
-        assert value != null;
-
-        StringToken stringToken = cache.get(value);
-        if (stringToken == null) {
-            stringToken = new StringToken(value);
-            cache.put(value, stringToken);
-        }
-        return stringToken;
+        return cache.get(value, () -> new StringToken(value));
     }
 
     /**
@@ -134,12 +126,7 @@ public final class StringToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        StringToken stringToken = cache.get(value);
-        if (stringToken == null) {
-            stringToken = this;
-            cache.put(value, stringToken);
-        }
-        return stringToken;
+        return cache.get(value, () -> this);
     }
 
 }

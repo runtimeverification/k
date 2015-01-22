@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "modules/substitution.k"
 require "basic-exp.k"
 require "id.k"
@@ -21,6 +21,8 @@ module LAMBDA
 
   syntax Val ::= Id
                | Lambda
+
+  syntax Variable ::= Id
 
 // Function application (through beta-substitution)
   rule  (\ X:Id . E:K) V:KResult => E[V / X]

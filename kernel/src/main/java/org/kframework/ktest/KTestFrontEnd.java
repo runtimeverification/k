@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.ktest;
 
 import org.apache.commons.io.FilenameUtils;
@@ -67,10 +67,10 @@ public class KTestFrontEnd extends FrontEnd {
         this.files = files;
     }
 
-    public boolean run() {
+    public int run() {
         try {
             options.validateArgs(files);
-            return makeTestSuite(options.getTargetFile(), options).run();
+            return makeTestSuite(options.getTargetFile(), options).run() ? 0 : 1;
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException
                 | ParameterException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);

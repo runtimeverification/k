@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
@@ -228,6 +227,14 @@ public class MetaK {
         if (prod.isSubsort()) {
             return Variable.getAnonVar(prod.getSubsort());
         }
+        if (prod.getArity() != prod.getArityOfKItem()) {
+            KList list = new KList();
+            KApp app = new KApp(KLabelConstant.of(prod.getConstant().getTerminal()), list);
+            for (int i = 0; i < prod.getArityOfKItem(); i++) {
+                list.getContents().add(Variable.getAnonVar(Sort.KITEM));
+            }
+            return app;
+        }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(Sort.KLABEL)) {
@@ -247,18 +254,19 @@ public class MetaK {
                            StringBuiltin.kAppOf(prod.getSort().getName()),
                            Variable.getAnonVar(Sort.STRING));
         }
-        TermCons t = new TermCons(prod.getSort(), prod);
+        KList list = new KList();
+        KApp app = new KApp(KLabelConstant.of(prod.getKLabel()), list);
         if (prod.isListDecl()) {
-            t.getContents().add(Variable.getAnonVar(((UserList) prod.getItems().get(0)).getSort()));
-            t.getContents().add(Variable.getAnonVar(prod.getSort()));
-            return t;
+            list.getContents().add(Variable.getAnonVar(((UserList) prod.getItems().get(0)).getSort()));
+            list.getContents().add(Variable.getAnonVar(prod.getSort()));
+            return app;
         }
         for (ProductionItem item : prod.getItems()) {
             if (item instanceof NonTerminal) {
-                t.getContents().add(Variable.getAnonVar(((NonTerminal) item).getSort()));
+                list.getContents().add(Variable.getAnonVar(((NonTerminal) item).getSort()));
             }
         }
-        return t;
+        return app;
     }
 
     public static boolean isAnonVar(Variable node) {

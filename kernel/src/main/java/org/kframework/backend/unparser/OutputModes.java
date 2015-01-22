@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 /**
@@ -7,7 +7,7 @@ package org.kframework.backend.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), RAW(false), KAST(false), BINARY(false), NONE(false), NO_WRAP(true);
+    PRETTY(true), SOUND(true), KAST(false), BINARY(false), NONE(false), NO_WRAP(true);
 
     private boolean isPrettyPrinting;
 

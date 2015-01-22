@@ -1,8 +1,5 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.MaximalSharing;
@@ -10,6 +7,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.FloatBuiltin;
@@ -21,7 +19,7 @@ public class FloatToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.FLOAT;
 
     /* Token cache */
-    private static final Map<Integer, Map<BigFloat, FloatToken>> cache = new HashMap<>();
+    private static final MapCache<Integer, MapCache<BigFloat, FloatToken>> cache = new MapCache<>();
 
     private final BigFloat value;
     private final int exponent;
@@ -38,18 +36,8 @@ public class FloatToken extends Token implements MaximalSharing {
      * and {@code int} exponent return the same {@code FloatToken} object).
      */
     public static FloatToken of(BigFloat value, int exponent) {
-        Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
-        if (exponentCache == null) {
-            exponentCache = new HashMap<>();
-            cache.put(exponent, exponentCache);
-        }
-
-        FloatToken cachedFloatToken = exponentCache.get(value);
-        if (cachedFloatToken == null) {
-            cachedFloatToken = new FloatToken(value, exponent);
-            exponentCache.put(value, cachedFloatToken);
-        }
-
+        MapCache<BigFloat, FloatToken> exponentCache = cache.get(exponent, MapCache::new);
+        FloatToken cachedFloatToken = exponentCache.get(value, () -> new FloatToken(value, exponent));
         return cachedFloatToken;
     }
 
@@ -143,18 +131,8 @@ public class FloatToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        Map<BigFloat, FloatToken> exponentCache = cache.get(exponent);
-        if (exponentCache == null) {
-            exponentCache = new HashMap<>();
-            cache.put(exponent, exponentCache);
-        }
-
-        FloatToken cachedFloatToken = exponentCache.get(value);
-        if (cachedFloatToken == null) {
-            cachedFloatToken = this;
-            exponentCache.put(value, cachedFloatToken);
-        }
-
+        MapCache<BigFloat, FloatToken> exponentCache = cache.get(exponent, MapCache::new);
+        FloatToken cachedFloatToken = exponentCache.get(value, () -> this);
         return cachedFloatToken;
     }
 

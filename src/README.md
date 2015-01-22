@@ -97,9 +97,6 @@ skip the lengthy `ktest` execution.
 # Changing the KORE data structures
 once [#1133](https://github.com/kframework/k/pull/1133) is merged, see the [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures)
 
-# Work on Maude code
-Modify the Maude files found in src/main/maude and rerun `mvn package`.
-
 # Build the final release directory/archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
 maven repository containing a zip and tar.gz of the distribution.

@@ -1,8 +1,10 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -131,7 +133,7 @@ public class FileUtil {
     }
 
     public File resolveKBase(String file) {
-        return new File(JarInfo.getKBase(false), file);
+        return new File(JarInfo.getKBase(), file);
     }
 
     public void copyTempFileToDefinitionDirectory(String fromPath) {
@@ -179,6 +181,43 @@ public class FileUtil {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {
             throw KExceptionManager.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static Pair<PipedInputStream, PipedOutputStream> pipeOutputToInput() {
+        try {
+            PipedOutputStream out = new PipedOutputStream();
+            PipedInputStream in = new PipedInputStream(out);
+            return Pair.of(in, out);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error creating input/output pipe", e);
+        }
+    }
+
+    public static Pair<PipedOutputStream, PipedInputStream> pipeInputToOutput() {
+        try {
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
+            return Pair.of(out, in);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error creating input/output pipe", e);
+        }
+    }
+
+    public static String read(Reader reader) {
+        try {
+            return IOUtils.toString(reader);
+        } catch (IOException e) {
+            throw KExceptionManager.internalError("Error reading from " + reader, e);
+        }
+    }
+
+    public Reader readFromWorkingDirectory(String path) {
+        File f = resolveWorkingDirectory(path);
+        try {
+            return new FileReader(f);
+        } catch (FileNotFoundException e) {
+            throw KExceptionManager.criticalError("Could not read from file " + f.getAbsolutePath(), e);
         }
     }
 }

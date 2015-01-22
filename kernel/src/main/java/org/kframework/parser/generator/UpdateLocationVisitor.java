@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
@@ -22,7 +22,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
     }
 
     public Void visit(ASTNode node, Void _void) {
-        node.setLocation(updateLocation(currentStartLine, currentStartColumn, cachedStartColumn, cachedStartLine, node.getLocation()));
+        node.setLocation(updateLocation(currentStartLine, currentStartColumn, cachedStartLine, cachedStartColumn, node.getLocation()));
         return null;
     }
 

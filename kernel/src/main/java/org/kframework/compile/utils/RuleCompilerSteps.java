@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.compile.transformers.*;
@@ -46,7 +46,6 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         this.add(new AddKCell(context));
         this.add(new AddTopCellRules(context));
         this.add(new ResolveAnonymousVariables(context));
-        this.add(new ResolveSyntaxPredicates(context));
         this.add(new ResolveListOfK(context));
         this.add(new FlattenTerms(context));
         final ResolveContextAbstraction resolveContextAbstraction =

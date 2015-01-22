@@ -5,7 +5,7 @@
   <groupId>org.kframework.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.5-SNAPSHOT</version>
+  <version>3.6-SNAPSHOT</version>
   <name>K Framework Tool Parent</name>
 
   <modules>
@@ -13,12 +13,12 @@
     <module>kernel</module>
     <module>k-distribution</module>
     <module>java-backend</module>
-    <module>maude-backend</module>
     <module>sdf-parser</module>
   </modules>
 
   <scm>
     <connection>scm:git:https://github.com/kframework/k.git</connection>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -246,8 +246,8 @@
         <native.classifier>linux64</native.classifier>
         <native.os.classifier>linux</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>
@@ -264,8 +264,8 @@
         <native.classifier>linux32</native.classifier>
         <native.os.classifier>linux</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>
@@ -280,8 +280,8 @@
         <native.classifier>osx</native.classifier>
         <native.os.classifier>osx</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
+        <native.exe.extension />
+        <native.script.extension />
       </properties>
     </profile>
     <profile>

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -15,25 +15,14 @@ import java.util.Date;
 import java.util.jar.Manifest;
 
 public class JarInfo {
-    public static String windowfyPath(String file) {
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            file = file.replaceFirst("([a-zA-Z]):(.*)", "/cygdrive/$1$2");
-            file = file.replaceAll("\\\\", "/");
-        }
-        return file;
-    }
-
-    private static final String JAR_PATH = "k-distribution/target/release/k/lib/java/k-core-3.0.jar";
-    public static final String MAUDE_LIB_DIR = "/lib/maude/lib";
+    private static final String JAR_PATH = "k-distribution/target/release/k/lib/java/JAR_FILENAME_PLACEHOLDER.jar";
 
     /**
      * Returns the K installation directory
      *
-     * @param windowfy
-     *            - if true, then the path will be transformed into /cygdirve/c/... when on windows (just for maude)
      * @return The path to the K installation
      */
-    public static String getKBase(boolean windowfy) {
+    public static String getKBase() {
         // String env = System.getenv("K_BASE");
         String path = new File(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
         if (!path.endsWith(".jar") || new File(path).getParentFile().getName().equals("target"))
@@ -41,10 +30,7 @@ public class JarInfo {
         try {
             String decodedPath = URLDecoder.decode(path, "UTF-8");
             File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();
-            if (windowfy)
-                return windowfyPath(parent.getAbsolutePath());
-            else
-                return parent.getAbsolutePath();
+            return parent.getAbsolutePath();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

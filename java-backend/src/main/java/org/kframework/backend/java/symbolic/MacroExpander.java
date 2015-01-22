@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import java.util.HashMap;
@@ -97,9 +97,9 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 processedLhsOfReadCell,
                 processedRhsOfWriteCell,
                 rule.cellsToCopy(),
-                rule.instructions(),
+                rule.matchingInstructions(),
                 rule,
-                definition);
+                context);
     }
 
     public Term processTerm(Term term) {

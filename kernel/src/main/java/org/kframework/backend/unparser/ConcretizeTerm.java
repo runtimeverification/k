@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import java.util.HashMap;
@@ -15,11 +15,11 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
-import org.kframework.krun.KRunOptions;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.parser.TermLoader;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.utils.Stopwatch;
 
 import com.google.inject.Inject;
 
@@ -32,12 +32,14 @@ import com.google.inject.Inject;
 public class ConcretizeTerm {
 
     private final TermLoader loader;
-    private final KRunOptions krunOptions;
+    private final OutputModes mode;
+    private final Stopwatch sw;
 
     @Inject
-    public ConcretizeTerm(TermLoader loader, KRunOptions krunOptions) {
+    public ConcretizeTerm(TermLoader loader, OutputModes mode, Stopwatch sw) {
         this.loader = loader;
-        this.krunOptions = krunOptions;
+        this.mode = mode;
+        this.sw = sw;
     }
 
     public Map<String, Term> concretizeSubstitution(Context context, SearchResult result) {
@@ -53,16 +55,23 @@ public class ConcretizeTerm {
     }
 
     public Term concretize(Context context, Term result) {
+        boolean sound = mode == OutputModes.SOUND;
         FreshVariableNormalizer normalizer = new FreshVariableNormalizer(context);
         normalizer.new FreshVariableCounter(context).visitNode(result);
         result = (Term) normalizer.visitNode(result);
         result = (Term) new DataStructure2Cell(context).visitNode(result);
-        result = (Term) new ConcretizeSyntax(context).visitNode(result);
-        result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
-        result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
+        result = (Term) new SortCollections(context, result).visitNode(result);
+        sw.printIntermediate("Normalizing result");
+        result = (Term) new ConcretizeSyntax(context, sound).visitNode(result);
+        sw.printIntermediate("Concretizing");
+        if (sound) {
+            result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
+            result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
+        }
         result = (Term) new ConcretizeSyntax.RemoveEmptyLists(context).visitNode(result);
         result = (Term) new AddBracketsFilter(context).visitNode(result);
-        if (krunOptions.output == OutputModes.SMART) {
+        sw.printIntermediate("Adding brackets");
+        if (mode == OutputModes.SOUND) {
             /* collect existing free variables in the result */
             final Set<Variable> existingFreeVariables = new HashSet<Variable>();
             BasicVisitor variableCollector = new BasicVisitor(context) {

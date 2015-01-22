@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 
 package org.kframework.backend.java.symbolic;
 
@@ -242,9 +242,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             boolean result = false;
             try {
-                result = z3.checkQuery(
-                        KILtoSMTLib.translateConstraint(constraint),
-                        smtOptions.z3CnstrTimeout);
+                String query = KILtoSMTLib.translateConstraint(constraint);
+                result = z3.checkQuery(query, smtOptions.z3CnstrTimeout);
+                if (result && RuleAuditing.isAuditBegun()) {
+                    System.err.println("SMT query returned unsat: " + query);
+                }
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
@@ -604,6 +606,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private void falsify(Equality equality) {
         // TODO(AndreiS): this assertion should not fail
         assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
+        if (RuleAuditing.isAuditBegun()) {
+            System.err.println("Unification failure: " + equality.leftHandSide()
+            + " does not unify with " + equality.rightHandSide());
+        }
         truthValue = TruthValue.FALSE;
         isNormal = true;
         falsifyingEquality = equality;
@@ -762,7 +768,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     iter.remove();
                     continue;
                 } else if (evalEquality.truthValue() == TruthValue.FALSE) {
-                    falsify(evalEquality);
+                    falsify(equality.substitute(substitution));
                     return;
                 }
 

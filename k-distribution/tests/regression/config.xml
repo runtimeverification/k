@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
 
 <tests>
 
   <include file="tests/config.xml" />
-  <include file="regression-maude/tests/config.xml" directory="regression-maude" />
+<!-- TODO(dwightguth): add back in when we have assoc matching and BagItem -->
+<!--  <include file="regression-maude/tests/config.xml" directory="regression-maude" /> -->
 
   <include file="java-rewrite-engine/config.xml" directory="java-rewrite-engine" />
 
@@ -15,7 +16,7 @@
       extension="issue"
       >
     <all-programs>
-      <krun-option name="--output" value="smart" />
+      <krun-option name="--output" value="sound" />
 	    <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
   </test>
@@ -55,11 +56,6 @@
            directory="user_substitution"
            programs="user_substitution/tests"
            results="user_substitution/tests" />
-
-  <include file="list-applyMGU/tests/config.xml"
-           directory="list-applyMGU"
-           programs="list-applyMGU/tests"
-           results="list-applyMGU/tests" />
 
   <include file="external/tests/config.xml"
            directory="external"

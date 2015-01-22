@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.kframework.k</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5-SNAPSHOT</version>
+    <version>3.6-SNAPSHOT</version>
   </parent>
   <artifactId>kernel</artifactId>
   <packaging>jar</packaging>
@@ -27,22 +27,22 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>4.0-beta4</version>
+      <version>4.0-beta5</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
-      <version>4.0-beta4</version>
+      <version>4.0-beta5</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-grapher</artifactId>
-      <version>4.0-beta4</version>
+      <version>4.0-beta5</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-throwingproviders</artifactId>
-      <version>4.0-beta4</version>
+      <version>4.0-beta5</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -63,6 +63,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
       <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.10</version>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
@@ -130,35 +135,28 @@
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>nailgun-server</artifactId>
-      <version>0.9.2-SNAPSHOT</version>
+      <version>0.9.2-k3.5</version>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>ng</artifactId>
-      <version>0.9.2-SNAPSHOT</version>
+      <version>0.9.2-k3.5</version>
       <classifier>linux</classifier>
       <type>uexe</type>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>ng</artifactId>
-      <version>0.9.2-SNAPSHOT</version>
+      <version>0.9.2-k3.5</version>
       <classifier>osx</classifier>
       <type>uexe</type>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>ng</artifactId>
-      <version>0.9.2-SNAPSHOT</version>
+      <version>0.9.2-k3.5</version>
       <classifier>windows</classifier>
       <type>exe</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>maude</artifactId>
-      <version>2.6</version>
-      <type>zip</type>
     </dependency>
 
     <dependency>

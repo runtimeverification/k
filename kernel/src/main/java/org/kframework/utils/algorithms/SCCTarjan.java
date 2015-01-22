@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 // This is a modified version of
 // https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
 // which is licensed under the Unlicense http://unlicense.org/UNLICENSE

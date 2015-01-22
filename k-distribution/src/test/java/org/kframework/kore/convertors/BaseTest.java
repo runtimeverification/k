@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -7,10 +7,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -21,7 +18,7 @@ import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014 K Team. All Rights Reserved.";
+    private static final String COPYRIGHT_HEADER = "// Copyright \\(c\\) (....-)?20.. K Team\\. All Rights Reserved\\.";
 
     static final String ROOT = "src/test/resources/convertor-tests/";
 
@@ -105,7 +102,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private String clean(String definitionText) {
-        return definitionText.replace(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
+        return definitionText.replaceAll(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
     }
 
 }

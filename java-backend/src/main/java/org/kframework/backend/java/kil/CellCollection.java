@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Matcher;
@@ -73,6 +73,11 @@ public class CellCollection extends Collection {
             hashCode = hashCode * Utils.HASH_PRIME + cellLabel.hashCode();
             hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
             return hashCode;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + cellLabel() + ">" + content + "</" + cellLabel() + ">";
         }
     }
 

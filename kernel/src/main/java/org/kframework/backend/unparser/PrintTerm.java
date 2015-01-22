@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.kil.ASTNode;
@@ -24,10 +24,9 @@ public class PrintTerm implements Transformation<ASTNode, String> {
 
     @Override
     public String run(ASTNode node, Attributes a) {
-        UnparserFilter printer = new UnparserFilter(true,colorOptions.color(),
-                mode, false, a.typeSafeGet(Context.class));
-        printer.visitNode(node);
-        return printer.getResult();
+        return new Unparser(a.typeSafeGet(Context.class),
+                colorOptions.color(), colorOptions.terminalColor(),
+                mode != OutputModes.NO_WRAP, false).print(node);
     }
 
     @Override
