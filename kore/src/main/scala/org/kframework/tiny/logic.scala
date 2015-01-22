@@ -5,12 +5,20 @@ import org.kframework.kore.KVariable
 import org.kframework.kore.K
 
 trait Proposition
+trait Predicate
 
-case class Equation(left: K, right: K) extends Proposition
+trait Equation extends Proposition with Predicate {
+  def left: K
+  def right: K
+}
+
+case class Equals(left: K, right: K) extends Equation
+
+case class Binding(v: KVariable, t: K) extends Equation
 
 trait TruthValue
 
-object True extends Conjunction(Set()) with TruthValue {
+object True extends Conjunction(Set(), Bindings()) with TruthValue {
   def toString = "True"
 }
 object False extends Disjunction(Set()) with TruthValue {
@@ -23,6 +31,11 @@ trait Theory {
    * If we cannot find an answer (e.g., we have symbolic values), return None
    */
   def apply(proposition: Proposition): Option[TruthValue]
+
+  /**
+   * Helper method
+   */
+  def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(True)
 }
 
 case class ExtendedTheory(base: Theory, extra: Proposition) {
@@ -56,63 +69,60 @@ case class Bindings(bindings: Map[KVariable, K]) extends Proposition {
       "True"
     else
       bindings map { case (k, v) => k + "=" + v } mkString "  /\\  "
-
 }
 
 object Conjunction {
-  def apply(propositions: Proposition*): Proposition =
-    propositions.foldLeft(True: Proposition) {
-    case (sum: Conjunction, c: Conjunction) => Conjunction(sum.ps | c.ps)
-    case (sum: Conjunction, d: Disjunction) => Conjunction(sum.ps | c.ps)
-  }
-
-    if(propositions.exists { p => p.isInstanceOf[Disjunction] })
-      propositions map {
-        case d: Disjunction => d
-        case p => Disjunction(p)
-      }
+  def apply(propositions: Proposition*): Conjunction =
+    propositions.foldLeft(True: Conjunction) {
+      case (sum: Conjunction, c: Conjunction) => Conjunction(sum, c)
+      case (sum: Conjunction, e: Predicate) => Conjunction(sum.ps + Disjunction(Set(e)), sum.bindings)
+      case (sum: Conjunction, d: Disjunction) => Conjunction(sum.ps + d, sum.bindings)
     }
-    else
-        Disjunction(conjunctions.toSet)
 
-  def and(other: Disjunction): Disjunction = {
-    Disjunction(
-      for (m1 <- conjunctions; m2 <- other.conjunctions) yield {
-        m1 and m2
-      })
+  def apply(a: Conjunction, b: Conjunction): Conjunction = {
+    val newBindings = a.bindings and b.bindings
+    newBindings map { Conjunction(a.ps | b.ps, _) } getOrElse Conjunction(False)
   }
 }
 
-case class Conjunction(ps: Set[Equation]) extends Proposition {
+case class Conjunction(ps: Set[Disjunction], bindings: Bindings) extends Proposition {
   def toString = ps mkString "  /\\  "
-
-  def and(that: Conjunction): Conjunction = Conjunction(this.ps | that.ps)
 }
 
-case class Disjunction(conjunctions: Set[Conjunction]) extends Proposition {
+case class Disjunction(ps: Set[Predicate]) extends Proposition {
 
-  def headOption = conjunctions.headOption
+  def headOption = ps.headOption
 
-  def endomap(f: Conjunction => Conjunction) = Disjunction(conjunctions map f)
+  def endomap(f: Predicate => Predicate) = Disjunction(ps map f)
 
-  def map[T](f: Conjunction => T) = conjunctions map f
+  def map[T](f: Predicate => T) = ps map f
 
   override def toString =
-    if (conjunctions.size == 0)
+    if (ps.size == 0)
       "False"
     else
-      conjunctions mkString "  \\/  "
+      ps mkString "  \\/  "
 }
 
 object Disjunction {
-  def apply(ps: Proposition*): Disjunction =
-    ps.foldLeft(False: Disjunction){
-    case (d: Disjunction, p: Disjunction) => or(d, p)
-    case (d: Disjunction, p: Proposition) => or(d, Disjunction(p))
-  }
+  def apply(ps: Proposition*): Proposition =
+    ps.foldLeft(False: Proposition) {
+      case (sum: Disjunction, p: Predicate) => Disjunction(sum.ps + p)
+      case (sum: Disjunction, d: Disjunction) => Disjunction(sum.ps | d.ps)
+      case (sum: Disjunction, c: Conjunction) => or(Conjunction(sum), c)
+      case (sum: Conjunction, c: Conjunction) => or(sum, c)
+      case (sum: Conjunction, c: Disjunction) => or(sum, Conjunction(c))
+    }
 
-  def or(t: Disjunction, other: Disjunction): Disjunction =
-    Disjunction(t.conjunctions | other.conjunctions)
+  def or(a: Conjunction, b: Conjunction): Conjunction = {
+    (a.bindings and b.bindings)
+      .map { bindings =>
+        Conjunction((for (m1 <- a.ps; m2 <- b.ps) yield {
+          Disjunction(m1, m2).asInstanceOf[Disjunction]
+        }), bindings)
+      }
+      .getOrElse(Conjunction(False))
+  }
 }
 
 object FreeTheory extends Theory {
