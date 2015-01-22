@@ -298,7 +298,7 @@ public class ConjunctiveFormula extends Term {
                                     context);
                         }
                         // TODO(AndreiS): fix this in a general way
-                        if (unifier.constraint().equalities.get(0).equals(equality)) {
+                        if (!unifier.constraint().equalities.isEmpty() && unifier.constraint().equalities.get(0).equals(equality)) {
                             pendingEqualities = pendingEqualities.plus(equality);
                             continue;
                         }
@@ -364,7 +364,7 @@ public class ConjunctiveFormula extends Term {
                 }
             }
             equalities = pendingEqualities;
-        } while(change);
+        } while (change);
 
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
     }
