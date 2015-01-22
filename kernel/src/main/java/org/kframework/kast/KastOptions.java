@@ -1,6 +1,8 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kast;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
@@ -30,12 +32,12 @@ public final class KastOptions {
     @Parameter(description="<file>")
     private List<String> parameters;
 
-    public String stringToParse() {
+    public Reader stringToParse() {
         if (parameters != null && parameters.size() > 0 && expression != null) {
             throw KExceptionManager.criticalError("It is an error to provide both a file and an expression to parse.");
         }
         if (expression != null) {
-            return expression;
+            return new StringReader(expression);
         }
         if (parameters != null && parameters.size() > 1) {
             throw KExceptionManager.criticalError("You can only parse one program at a time.");
@@ -43,7 +45,7 @@ public final class KastOptions {
         if (parameters == null || parameters.size() != 1) {
             throw KExceptionManager.criticalError("You have to provide a file in order to kast a program.");
         }
-        return files.loadFromWorkingDirectory(parameters.get(0));
+        return files.readFromWorkingDirectory(parameters.get(0));
     }
 
     private FileUtil files;

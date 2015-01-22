@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
@@ -6,11 +6,9 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -22,7 +20,7 @@ import java.util.Map;
 public final class UninterpretedToken extends Token implements MaximalSharing {
 
     /* Token cache */
-    private static final Map<Sort, Map<String, UninterpretedToken>> cache = new HashMap<>();
+    private static final MapCache<Sort, MapCache<String, UninterpretedToken>> cache = new MapCache<>();
 
     private final Sort sort;
     private final String value;
@@ -38,19 +36,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
     public static UninterpretedToken of(Sort sort, String value) {
-        Map<String, UninterpretedToken> sortCache = cache.get(sort);
-        if (sortCache == null) {
-            sortCache = new HashMap<String, UninterpretedToken>();
-            cache.put(sort, sortCache);
-        }
-
-        UninterpretedToken cachedGenericToken = sortCache.get(value);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = new UninterpretedToken(sort, value);
-            sortCache.put(value, cachedGenericToken);
-        }
-
-        return cachedGenericToken;
+        MapCache<String, UninterpretedToken> sortCache = cache.get(sort, MapCache::new);
+        return sortCache.get(value, () -> new UninterpretedToken(sort, value));
     }
 
     @Override
@@ -95,19 +82,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        Map<String, UninterpretedToken> sortCache = cache.get(sort);
-        if (sortCache == null) {
-            sortCache = new HashMap<String, UninterpretedToken>();
-            cache.put(sort, sortCache);
-        }
-
-        UninterpretedToken cachedGenericToken = sortCache.get(value);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = this;
-            sortCache.put(value, cachedGenericToken);
-        }
-
-        return cachedGenericToken;
+        MapCache<String, UninterpretedToken> sortCache = cache.get(sort, MapCache::new);
+        return sortCache.get(value, () -> this);
     }
 
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kdoc;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +51,9 @@ public class KDocFrontEnd extends FrontEnd {
     }
 
     @Override
-    protected boolean run() {
+    protected int run() {
         backend.run(def.get());
-        return true;
+        return 0;
     }
 
 }

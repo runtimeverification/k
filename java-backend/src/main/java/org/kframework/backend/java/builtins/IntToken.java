@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
@@ -6,11 +6,10 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -23,7 +22,7 @@ public final class IntToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.INT;
 
     /* IntToken cache */
-    private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
+    private static final MapCache<BigInteger, IntToken> cache = new MapCache<BigInteger, IntToken>();
 
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
@@ -39,13 +38,7 @@ public final class IntToken extends Token implements MaximalSharing {
      */
     public static IntToken of(BigInteger value) {
         assert value != null;
-
-        IntToken intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = new IntToken(value);
-            cache.put(value, intToken);
-        }
-        return intToken;
+        return cache.get(value, () -> new IntToken(value));
     }
 
     public static IntToken of(long value) {
@@ -157,12 +150,7 @@ public final class IntToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        IntToken intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = this;
-            cache.put(value, intToken);
-        }
-        return intToken;
+        return cache.get(value, () -> this);
     }
 
 }

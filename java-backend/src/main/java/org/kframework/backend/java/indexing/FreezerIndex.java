@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing;
 
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -54,7 +54,11 @@ public class FreezerIndex implements Index {
 
     @Override
     public String toString() {
-        return "@" + kLabel + "[" + holeIndex + "]";
+        return "@" + kLabel + "[" + holeIndex + "]=HOLE";
+    }
+
+    public KLabelConstant getKLabel() {
+        return kLabel;
     }
 
 }

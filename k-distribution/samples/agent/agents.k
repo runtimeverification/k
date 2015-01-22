@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "int.k"
 require "bool.k"
 require "seq.k"
@@ -48,7 +48,7 @@ module AGENTS
     [transition]
   rule <k>me => N ...</k> <me>N</me>
   rule <k>parent => N ...</k> <parent>N</parent>
-  rule <me>N1</me> <k>send V to N2 => skip ...</k>
+  rule <me>N1</me> <k>send V:Val to N2 => skip ...</k>
        (. => <message> <from>N1</from> <to>SetItem(N2)</to> <body>V</body>
              </message>)
   rule <me>N</me> <k>receive=>V:Val ...</k>

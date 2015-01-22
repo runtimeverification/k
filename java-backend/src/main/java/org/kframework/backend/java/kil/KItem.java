@@ -1,13 +1,15 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -17,10 +19,14 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,9 +58,14 @@ public final class KItem extends Term {
 
     private final Term kLabel;
     private final Term kList;
-    private final boolean isExactSort;
-    private final Sort sort;
-    private final Set<Sort> possibleSorts;
+
+    // sort info, computed lazily
+    private boolean isExactSort;
+    private Sort sort;
+    private Set<Sort> possibleSorts;
+    private transient boolean enableCache; // for lazy computation
+    private transient TermContext termContext; // for lazy computation
+
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
@@ -89,6 +100,19 @@ public final class KItem extends Term {
         this.sort = sort;
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
+        this.termContext = null;
+        this.enableCache = false;
+    }
+
+    private KItem(Term kLabel, Term kList, boolean enableCache, TermContext termContext, Source source, Location location) {
+        super(Kind.KITEM, source, location);
+        this.kLabel = kLabel;
+        this.kList = kList;
+        this.sort = null;
+        this.isExactSort = false;
+        this.possibleSorts = null;
+        this.termContext = termContext;
+        this.enableCache = enableCache;
     }
 
     private KItem(Term kLabel, Term kList, TermContext termContext, Tool tool, Source source, Location location) {
@@ -105,7 +129,7 @@ public final class KItem extends Term {
             /* at runtime, checks if the result has been cached */
             CacheTableColKey cacheTabColKey = null;
             CacheTableValue cacheTabVal = null;
-            boolean enableCache = (tool != Tool.KOMPILE)
+            enableCache = (tool != Tool.KOMPILE)
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
@@ -114,19 +138,15 @@ public final class KItem extends Term {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
                     possibleSorts = cacheTabVal.possibleSorts;
+                    this.termContext = null;
                     return;
                 }
             }
 
-            /* cache miss, compute sort information and cache it */
-            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext, tool);
-            if (enableCache) {
-                definition.getSortCacheTable().put(cacheTabColKey, cacheTabVal);
-            }
-
-            sort = cacheTabVal.sort;
-            isExactSort = cacheTabVal.isExactSort;
-            possibleSorts = cacheTabVal.possibleSorts;
+            sort = null;
+            isExactSort = false;
+            possibleSorts = null;
+            this.termContext = termContext;
         } else {
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
@@ -138,36 +158,41 @@ public final class KItem extends Term {
 
             sort = kind.asSort();
             possibleSorts = Collections.singleton(sort);
+            this.termContext = null;
+            enableCache = false;
         }
     }
 
-    private CacheTableValue computeSort(KLabelConstant kLabelConstant,
-            KList kList, TermContext termContext, Tool tool) {
+    private void computeSort() {
+        if (sort != null) {
+            //computed already
+            return;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        KList kList = (KList) this.kList;
         Definition definition = termContext.definition();
         Subsorts subsorts = definition.subsorts();
 
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        if (tool != Tool.KOMPILE) {
-            /**
-             * Sort checks in the Java engine are not implemented as
-             * rewrite rules, so we need to precompute the sort of
-             * terms. However, right now, we also want to allow users
-             * to provide user-defined sort predicate rules, e.g.
-             *      ``rule isVal(cons V:Val) => true''
-             * to express the same meaning as overloaded productions
-             * which are not allowed to write in the current front-end.
-             */
-            /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
-            for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
-                if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
-                        .equals(BoolToken.TRUE)) {
-                    sorts.add(rule.predicateSort());
-                } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
-                        .equals(BoolToken.TRUE)) {
-                    possibleSorts.add(rule.predicateSort());
-                }
+        /**
+         * Sort checks in the Java engine are not implemented as
+         * rewrite rules, so we need to precompute the sort of
+         * terms. However, right now, we also want to allow users
+         * to provide user-defined sort predicate rules, e.g.
+         *      ``rule isVal(cons V:Val) => true''
+         * to express the same meaning as overloaded productions
+         * which are not allowed to write in the current front-end.
+         */
+        /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+        for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
+            if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
+                    .equals(BoolToken.TRUE)) {
+                sorts.add(rule.predicateSort());
+            } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
+                    .equals(BoolToken.TRUE)) {
+                possibleSorts.add(rule.predicateSort());
             }
         }
 
@@ -225,7 +250,15 @@ public final class KItem extends Term {
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
         possibleSorts.add(sort);
 
-        return new CacheTableValue(sort, isExactSort, possibleSorts);
+        this.sort = sort;
+        this.isExactSort = isExactSort;
+        this.possibleSorts = possibleSorts;
+
+        CacheTableValue cacheTabVal = new CacheTableValue(sort, isExactSort, possibleSorts);
+
+        if (enableCache) {
+            definition.getSortCacheTable().put(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
+        }
     }
 
     public boolean isEvaluable(TermContext context) {
@@ -246,17 +279,20 @@ public final class KItem extends Term {
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
         private final BuiltinFunction builtins;
+        private final GlobalOptions options;
 
         @Inject
         public KItemOperations(
                 Tool tool,
                 JavaExecutionOptions javaOptions,
                 KExceptionManager kem,
-                BuiltinFunction builtins) {
+                BuiltinFunction builtins,
+                GlobalOptions options) {
             this.tool = tool;
             this.javaOptions = javaOptions;
             this.kem = kem;
             this.builtins = builtins;
+            this.options = options;
         }
 
         private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
@@ -276,9 +312,31 @@ public final class KItem extends Term {
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
             try {
-                return kItem.isEvaluable(context) ?
+                Term result = kItem.isEvaluable(context) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                    // we do this check because this warning message can be very large and cause OOM
+                    if (options.warnings.includesExceptionType(ExceptionType.WARNING) && tool != Tool.KOMPILE) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Unable to resolve function symbol:\n\t\t");
+                        sb.append(result);
+                        sb.append('\n');
+                        if (!context.definition().functionRules().isEmpty()) {
+                            sb.append("\tDefined function rules:\n");
+                            for (Rule rule : context.definition().functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                                sb.append("\t\t");
+                                sb.append(rule);
+                                sb.append('\n');
+                            }
+                        }
+                        kem.registerCriticalWarning(sb.toString(), kItem);
+                    }
+                    if (RuleAuditing.isAuditBegun()) {
+                        System.err.println("Function failed to evaluate: returned " + result);
+                    }
+                }
+                return result;
             } catch (StackOverflowError e) {
                 throw KExceptionManager.criticalError(TRACE_MSG, e);
             } catch (KEMException e) {
@@ -378,60 +436,73 @@ public final class KItem extends Term {
                 Term owiseResult = null;
 
                 for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                    /* function rules should be applied by pattern match rather than unification */
-                    Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
-                    if (solution == null) {
-                        continue;
-                    }
+                        try {
+                        if (rule == RuleAuditing.getAuditingRule()) {
+                            RuleAuditing.beginAudit();
+                        } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                            System.err.println("\nAuditing " + rule + "...\n");
+                        }
+                        /* function rules should be applied by pattern match rather than unification */
+                        Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
+                        if (solution == null) {
+                            continue;
+                        }
 
-                    Term rightHandSide = rule.rightHandSide();
-                    if (!rule.freshVariables().isEmpty()) {
-                        // this opt. only makes sense when using pattern matching
-                        // because after unification variables can end up in the
-                        // constraint rather than in the form of substitution
+                        Term rightHandSide = rule.rightHandSide();
+                        if (!rule.freshVariables().isEmpty()) {
+                            // this opt. only makes sense when using pattern matching
+                            // because after unification variables can end up in the
+                            // constraint rather than in the form of substitution
 
-                        /* rename unbound variables */
-                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
-                        /* rename rule variables in the rule RHS */
-                        rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                    }
-                    if (copyOnShareSubstAndEval) {
-                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                                solution,
-                                rule.reusableVariables().elementSet(),
-                                context);
-                    } else {
-                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                    }
+                            /* rename unbound variables */
+                            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
+                            /* rename rule variables in the rule RHS */
+                            rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                        }
+                        rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
+                                    context, false);
 
-                    if (rule.containsAttribute("owise")) {
-                        /*
-                         * YilongL: consider applying ``owise'' rule only when the
-                         * function is ground. This is fine because 1) it's OK not
-                         * to fully evaluate non-ground function during kompilation;
-                         * and 2) it's better to get stuck rather than to apply the
-                         * wrong ``owise'' rule during execution.
-                         */
-                        if (kItem.isGround()) {
-                            if (owiseResult != null) {
-                                throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                        if (rule.containsAttribute("owise")) {
+                            /*
+                             * YilongL: consider applying ``owise'' rule only when the
+                             * function is ground. This is fine because 1) it's OK not
+                             * to fully evaluate non-ground function during kompilation;
+                             * and 2) it's better to get stuck rather than to apply the
+                             * wrong ``owise'' rule during execution.
+                             */
+                            if (kItem.isGround()) {
+                                if (owiseResult != null) {
+                                    throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                                }
+                                RuleAuditing.succeed(rule);
+                                owiseResult = rightHandSide;
                             }
-                            owiseResult = rightHandSide;
+                        } else {
+                            if (tool == Tool.KRUN) {
+                                assert result == null || result.equals(rightHandSide):
+                                    "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                            }
+                            RuleAuditing.succeed(rule);
+                            result = rightHandSide;
                         }
-                    } else {
-                        if (tool == Tool.KRUN) {
-                            assert result == null || result.equals(rightHandSide):
-                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
-                        }
-                        result = rightHandSide;
-                    }
 
-                    /*
-                     * If the function definitions do not need to be deterministic, try them in order
-                     * and apply the first one that matches.
-                     */
-                    if (!javaOptions.deterministicFunctions && result != null) {
-                        return result;
+                        /*
+                         * If the function definitions do not need to be deterministic, try them in order
+                         * and apply the first one that matches.
+                         */
+                        if (!javaOptions.deterministicFunctions && result != null) {
+                            return result;
+                        }
+                    } finally {
+                        if (RuleAuditing.isAuditBegun()) {
+                            if (RuleAuditing.getAuditingRule() == rule) {
+                                RuleAuditing.endAudit();
+                            }
+                            if (!RuleAuditing.isSuccess()
+                                    && RuleAuditing.getAuditingRule() == rule) {
+                                throw RuleAuditing.fail();
+                            }
+                        }
                     }
                 }
 
@@ -441,12 +512,11 @@ public final class KItem extends Term {
                     return owiseResult;
                 }
             }
-
             return kItem;
         }
     }
 
-    private boolean isAnywhereApplicable(TermContext context) {
+    public boolean isAnywhereApplicable(TermContext context) {
         if (anywhereApplicable != null) {
             return anywhereApplicable;
         }
@@ -482,19 +552,37 @@ public final class KItem extends Term {
         /* TODO(YilongL): make KLabelConstant dependent on Definition and store
          * anywhere rules in KLabelConstant */
         for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
-            /* anywhere rules should be applied by pattern match rather than unification */
-            Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
-            if (solution != null) {
-                Term rightHandSide = rule.rightHandSide();
-                if (copyOnShareSubstAndEval) {
-                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                            solution,
-                            rule.reusableVariables().elementSet(),
-                            context);
-                } else {
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+            try {
+                if (rule == RuleAuditing.getAuditingRule()) {
+                    RuleAuditing.beginAudit();
+                } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                    System.err.println("\nAuditing " + rule + "...\n");
                 }
-                return rightHandSide;
+                /* anywhere rules should be applied by pattern match rather than unification */
+                Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
+                if (solution != null) {
+                    RuleAuditing.succeed(rule);
+                    Term rightHandSide = rule.rightHandSide();
+                    if (copyOnShareSubstAndEval) {
+                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                                solution,
+                                rule.reusableVariables().elementSet(),
+                                context);
+                    } else {
+                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                    }
+                    return rightHandSide;
+                }
+            } finally {
+                if (RuleAuditing.isAuditBegun()) {
+                    if (RuleAuditing.getAuditingRule() == rule) {
+                        RuleAuditing.endAudit();
+                    }
+                    if (!RuleAuditing.isSuccess()
+                            && RuleAuditing.getAuditingRule() == rule) {
+                        throw RuleAuditing.fail();
+                    }
+                }
             }
         }
 
@@ -511,6 +599,7 @@ public final class KItem extends Term {
 
     @Override
     public boolean isExactSort() {
+        computeSort();
         return isExactSort;
     }
 
@@ -528,10 +617,12 @@ public final class KItem extends Term {
 
     @Override
     public Sort sort() {
+        computeSort();
         return sort;
     }
 
     public Set<Sort> possibleSorts() {
+        computeSort();
         return Collections.unmodifiableSet(possibleSorts);
     }
 
@@ -724,6 +815,16 @@ public final class KItem extends Term {
                     && Arrays.deepEquals(sorts, key.sorts)
                     && Arrays.equals(bools, key.bools);
         }
+    }
+
+    /**
+     * When serializing a KItem, compute its sort so that we don't end up serializing the TermContext
+     * @param out
+     * @throws IOException
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        computeSort();
+        out.defaultWriteObject();
     }
 
     static final class CacheTableValue {

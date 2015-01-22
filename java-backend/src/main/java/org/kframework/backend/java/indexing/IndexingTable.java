@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing;
 
 import com.google.common.collect.ImmutableMap;
@@ -16,14 +16,16 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Production;
 import org.kframework.kil.loader.Constants;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * The indexing scheme currently used in the Java Backend
@@ -58,18 +60,15 @@ public class IndexingTable implements Serializable, RuleIndex {
     @Override
     public void buildIndex() {
         /* populate the table of rules rewriting the top configuration */
-        List<Index> indices = new ArrayList<Index>();
+        Set<Index> indices = new HashSet<Index>();
         indices.add(data.TOP_INDEX);
         indices.add(data.BOTTOM_INDEX);
+        for (Rule rule : definition.rules()) {
+            addFreezerIndices(indices, rule.indexingPair().first);
+            addFreezerIndices(indices, rule.indexingPair().second);
+        }
         for (KLabelConstant kLabel : definition.kLabels()) {
             indices.add(new KLabelIndex(kLabel));
-            indices.add(new FreezerIndex(kLabel, -1));
-            if (!kLabel.productions().isEmpty()) {
-                int maxArity = getMaxArityForProductions(kLabel.productions());
-                for (int i = 0; i < maxArity; ++i) {
-                    indices.add(new FreezerIndex(kLabel, i));
-                }
-            }
         }
         //for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
         //    for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
@@ -157,27 +156,12 @@ public class IndexingTable implements Serializable, RuleIndex {
         unindexedRules = unindexedRulesBuilder.build();
     }
 
-    /**
-     * This methos takes a list of productions with the same kLabel, and finds the maximum arity.
-     * This is needed to avoid situations where there might be more productions with different
-     * arities belonging to same label, for example:
-     *
-     *          syntax Foo ::= Bar "*" Bar [klabel(Foo)]
-     *          syntax Foo ::= Bar "*" [klabel(Foo)]
-     *
-     * @param productions
-     * @return
-     */
-    private int getMaxArityForProductions(List<Production> productions) {
-        int max = productions.get(0).getArity();
-        if (productions.size() > 1){
-            for (Production production : productions.subList(1,productions.size())){
-                if (production.getArity() > max){
-                    max = production.getArity();
-                }
-            }
+    private void addFreezerIndices(Set<Index> indices, Index index) {
+        if (index instanceof FreezerIndex) {
+            KLabelConstant kLabel = ((FreezerIndex) index).getKLabel();
+            indices.add(new FreezerIndex(kLabel, -1));
+            indices.add(index);
         }
-        return max;
     }
 
     /**
@@ -232,6 +216,28 @@ public class IndexingTable implements Serializable, RuleIndex {
         }
 
         rules.addAll(unindexedRules);
+
+        if (!RuleAuditing.isAuditBegun() && RuleAuditing.isAudit()
+                && !rules.contains(RuleAuditing.getAuditingRule())
+                && !definition.functionRules().containsValue(RuleAuditing.getAuditingRule())) {
+            StringBuilder message = new StringBuilder();
+            for (IndexingPair pair : cfgTermIdx.getInstreamIndexingPairs()) {
+                message.append("Could not find rule matching stdin cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            for (IndexingPair pair : cfgTermIdx.getOutstreamIndexingPairs()) {
+                message.append("Could not find rule matching stdout/stderr cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            for (IndexingPair pair : cfgTermIdx.getKCellIndexingPairs()) {
+                message.append("Could not find rule matching K cell index ");
+                message.append(pair);
+                message.append("\n");
+            }
+            throw RuleAuditing.fail(message.toString());
+        }
 
         return rules;
     }

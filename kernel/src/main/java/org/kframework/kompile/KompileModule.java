@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import java.io.File;
@@ -58,6 +58,9 @@ public class KompileModule extends AbstractModule {
 
     @Provides @DefinitionDir
     File definitionDir(@WorkingDir File workingDir, KompileOptions options) {
+        if (options.directory == null) {
+            return options.mainDefinitionFile().getParentFile();
+        }
         File f = new File(options.directory);
         if (f.isAbsolute()) return f;
         return new File(workingDir, options.directory);

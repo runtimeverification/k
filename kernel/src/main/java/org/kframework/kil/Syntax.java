@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
@@ -90,8 +90,9 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
             return lbls;
         for (PriorityBlock pb : priorityBlocks) {
             for (Production prod : pb.getProductions()) {
-                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL) && prod.isConstant())
-                    lbls.add(prod.getKLabel());
+                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL) && prod.isConstant()) {
+                    lbls.add(prod.getKLabelOfKItem());
+                }
             }
         }
         return lbls;

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
@@ -79,12 +79,12 @@ public class SortMembership {
             term = KCollection.downKind(term);
         }
 
-        if (term instanceof UninterpretedToken) {
+        if (term instanceof Token) {
             return BoolToken.TRUE;
         } else if (term.isGround()) {
             return BoolToken.FALSE;
         } else {
-            throw new IllegalArgumentException("argument " + term + " is not ground");
+            return null;
         }
     }
 

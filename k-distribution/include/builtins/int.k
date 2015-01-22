@@ -1,7 +1,6 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "k-equal.k"
 module INT-SYNTAX-HOOKS
-  imports #INT-INTERFACE
   syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
   syntax Int ::= #Int
 endmodule

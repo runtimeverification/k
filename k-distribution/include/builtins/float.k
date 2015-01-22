@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "bool.k"
 require "int.k"
 module FLOAT-SYNTAX-HOOKS
-  imports #FLOAT-INTERFACE
   syntax #Float ::= Token{[\+\-]?[0-9]+"."[0-9]+([eE][\+\-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?}
                  [regex("([\\+-]?\\d(\\.\\d*)?|\\.\\d+)([eE][\\+-]?(\\d(\\.\\d*)?|\\.\\d+))?([fFdD]|([pP]\\d+[xX]\\d+))?")]
   syntax #Float ::= Token{[\+\-]?"Infinity"([fFdD]|([pP][0-9]+[xX][0-9]+))?}
@@ -27,6 +26,7 @@ module FLOAT-HOOKS
 
   syntax Bool ::= signFloat(Float)      [function, hook(#FLOAT:sign)]
                 | isNaN(Float)          [function, smtlib((not (== #1 #1))), hook(#FLOAT:isNaN)]
+                | isInfinite(Float)     [function]
   syntax MInt ::= significandFloat(Float) [function, hook(#FLOAT:significand)]
 
   syntax Float ::= fpNaN(Int, Int)              [smtlib((as NaN (_ FP #1 #2)))]
@@ -58,6 +58,8 @@ module FLOAT-HOOKS
                  | maxFloat(Float, Float)       [function, smtlib(max), hook(#FLOAT:max)]
                  | minFloat(Float, Float)       [function, smtlib(min), hook(#FLOAT:min)]
                  | sqrtFloat(Float)             [function]
+                 | maxValueFloat(Int, Int)      [function, hook(#FLOAT:maxValue)]
+                 | minValueFloat(Int, Int)      [function, hook(#FLOAT:minValue)]
 
   syntax Bool ::= Float "<=Float" Float       [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:le)]
                 | Float "<Float" Float        [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:lt)]
@@ -73,5 +75,7 @@ module FLOAT-HOOKS
   syntax Int ::= Float2Int(Float)    [function, klabel(Float2Int), latex({\\it{}Float2Int}), hook(#CONVERSION:float2Int)]
 
   rule sqrtFloat(F:Float) => rootFloat(F, 2)
+
+  rule isInfinite(F:Float) => F >Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F)) orBool F <Float --Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F))
 
 endmodule

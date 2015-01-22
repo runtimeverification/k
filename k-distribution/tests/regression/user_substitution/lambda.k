@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 require "modules/substitution.k"
 
 module LAMBDA
@@ -9,6 +9,7 @@ module LAMBDA
                | "lambda" Id "." Exp  [binder, lambda]
 
   syntax KResult ::= Val
+  syntax Variable ::= Id
 
 
   syntax Exp ::= Val

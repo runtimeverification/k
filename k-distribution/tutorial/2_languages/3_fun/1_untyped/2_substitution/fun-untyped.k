@@ -1,6 +1,6 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
-require "modules/substitution-java.k"
-require "modules/pattern-matching-java.k"
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+require "modules/substitution.k"
+require "modules/pattern-matching.k"
 
 /*!
 \title{FUN --- Untyped --- Substitution}

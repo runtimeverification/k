@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import java.io.ObjectStreamException;
@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.backend.java.util.MapCache;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -17,7 +19,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public final class Sort implements MaximalSharing, Serializable {
 
-    private static final PatriciaTrie<Sort> cache = new PatriciaTrie<>();
+    private static final MapCache<String, Sort> cache = new MapCache<>(new PatriciaTrie<>());
 
     public static final Sort KITEM          =   Sort.of("KItem");
     public static final Sort KSEQUENCE      =   Sort.of("K");
@@ -59,14 +61,7 @@ public final class Sort implements MaximalSharing, Serializable {
      * @return the sort
      */
     public static Sort of(String name) {
-        synchronized(cache) {
-            Sort sort = cache.get(name);
-            if (sort == null) {
-                sort = new Sort(name);
-                cache.put(name, sort);
-            }
-            return sort;
-        }
+        return cache.get(name, () -> new Sort(name));
     }
 
     public static Sort of(org.kframework.kil.Sort sort) {
@@ -118,14 +113,7 @@ public final class Sort implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        synchronized(cache) {
-            Sort sort = cache.get(name);
-            if (sort == null) {
-                sort = this;
-                cache.put(name, sort);
-            }
-            return sort;
-        }
+        return cache.get(name, () -> this);
     }
 
 }

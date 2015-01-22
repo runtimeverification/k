@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -12,7 +12,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.ColorOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
@@ -133,7 +132,6 @@ public class Context implements Serializable {
     @Deprecated @Inject public transient GlobalOptions globalOptions;
     @Deprecated public KompileOptions kompileOptions;
     @Deprecated @Inject(optional=true) public KRunOptions krunOptions;
-    @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 
     public Context() {
         initSubsorts(subsorts);

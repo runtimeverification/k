@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
 import java.util.Set;
@@ -40,7 +40,7 @@ public interface Prover {
     */
     public abstract KRunProofResult<Set<Term>> prove(Module module) throws KRunExecutionException;
 
-    public static class Tool implements Transformation<Void, KRunResult<?>> {
+    public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
         private final Context context;

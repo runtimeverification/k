@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.*;
@@ -35,7 +35,17 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
      */
     public static KApp of(Term label, Term... elements) {
-        return new KApp(label, new KList(Arrays.asList(elements)));
+        return KApp.of(null, null, label, elements);
+    }
+
+    public static KApp of(Location location, Source source,
+            String label, Term... elements) {
+        return KApp.of(location, source, KLabelConstant.of(label), elements);
+    }
+
+    public static KApp of(Location location, Source source,
+            Term label, Term... elements) {
+        return new KApp(location, source, label, new KList(Arrays.asList(elements)));
     }
 
     /**

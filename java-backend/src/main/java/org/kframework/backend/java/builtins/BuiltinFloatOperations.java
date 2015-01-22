@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import java.math.RoundingMode;
@@ -243,5 +243,15 @@ public class BuiltinFloatOperations {
 
     public static BoolToken isNaN(FloatToken term, TermContext context) {
         return BoolToken.of(term.bigFloatValue().isNaN());
+    }
+
+    public static FloatToken maxValue(IntToken precision, IntToken exponentBits, TermContext context) {
+        BinaryMathContext mc = new BinaryMathContext(precision.intValue(), exponentBits.intValue());
+        return FloatToken.of(BigFloat.maxValue(mc.precision, mc.maxExponent), exponentBits.intValue());
+    }
+
+    public static FloatToken minValue(IntToken precision, IntToken exponentBits, TermContext context) {
+        BinaryMathContext mc = new BinaryMathContext(precision.intValue(), exponentBits.intValue());
+        return FloatToken.of(BigFloat.minValue(mc.precision, mc.minExponent), exponentBits.intValue());
     }
 }

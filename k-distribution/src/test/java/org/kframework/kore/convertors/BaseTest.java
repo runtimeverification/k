@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -19,7 +19,7 @@ import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014 K Team. All Rights Reserved.";
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
 
     static final String ROOT = "src/test/resources/convertor-tests/";
 

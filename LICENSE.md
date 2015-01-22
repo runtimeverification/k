@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2015 K Team. All Rights Reserved. -->
 ==============================================================================
 The K Release License
 ==============================================================================
@@ -63,8 +63,6 @@ The following pieces of software have additional or alternate copyrights,
 licenses, and/or restrictions:
 
 ---------------------------------------
-Maude (http://maude.cs.uiuc.edu) is licensed under the GPL license.
-
 Stratego (http://strategoxt.org) is licensed under the LGPL license.
 
 Xstream (http://xstream.codehaus.org/) is licensed under the BSD license.

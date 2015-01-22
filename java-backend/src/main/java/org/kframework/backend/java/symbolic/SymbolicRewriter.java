@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
@@ -23,7 +22,12 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
+import org.kframework.backend.java.util.JavaKRunState;
+import org.kframework.backend.java.util.JavaTransition;
+import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.api.KRunGraph;
+import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
@@ -42,34 +46,60 @@ import com.google.inject.Inject;
  */
 public class SymbolicRewriter {
 
-    private final Definition definition; // TODO(YilongL): use TermContext instead
+    private final Definition definition;
+    private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
     private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
+    private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
+    private KRunGraph executionGraph = null;
     private boolean transition;
     private RuleIndex ruleIndex;
+    private KRunState.Counter counter;
 
     @Inject
-    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
+    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
+                            KRunState.Counter counter) {
         this.definition = definition;
+        this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
-
+        this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
-    public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        stopwatch.start();
+    public KRunGraph getExecutionGraph() {
+        return executionGraph;
+    }
 
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+        stopwatch.start();
+        Context context = definition.context();
+        KRunState initialState = null;
+        if (computeGraph) {
+            executionGraph = new KRunGraph();
+            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+            executionGraph.addVertex(initialState);
+        }
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
+            KRunState finalState = null;
             if (result != null) {
+                if (computeGraph) {
+                    finalState = new JavaKRunState(result.term(), context, counter);
+                    JavaTransition javaTransition = new JavaTransition(
+                            getRule(0), getSubstitution(0), context);
+                    executionGraph.addEdge(javaTransition, initialState, finalState);
+                }
                 constrainedTerm = result;
             } else {
+                if (computeGraph) {
+                    initialState = finalState;
+                }
                 break;
             }
         }
@@ -79,7 +109,10 @@ public class SymbolicRewriter {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
-        return constrainedTerm;
+        if (initialState == null) {
+            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+        }
+        return initialState;
     }
 
     /**
@@ -98,6 +131,15 @@ public class SymbolicRewriter {
         return n < results.size() ? results.get(n) : null;
     }
 
+    private Rule getRule(int n) {
+        return n < appliedRules.size() ? appliedRules.get(n) : null;
+    }
+
+    private Map<Variable, Term> getSubstitution(int n) {
+        return n < substitutions.size() ? substitutions.get(n) : null;
+    }
+
+
     private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
         computeRewriteStep(constrainedTerm, -1);
     }
@@ -105,51 +147,76 @@ public class SymbolicRewriter {
     private void computeRewriteStep(ConstrainedTerm subject, int successorBound) {
         results.clear();
         appliedRules.clear();
-
+        substitutions.clear();
         if (successorBound == 0) {
             return;
         }
+
+        RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
 
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         strategy.reset(getRules(subject.term()));
 
-        while (strategy.hasNext()) {
-            transition = strategy.nextIsTransition();
-            ArrayList<Rule> rules = Lists.newArrayList(strategy.next());
-//            System.out.println("rules.size: " + rules.size());
-            for (Rule rule : rules) {
-                try {
-                    ruleStopwatch.reset();
-                    ruleStopwatch.start();
+        try {
 
-                    ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+            while (strategy.hasNext()) {
+                transition = strategy.nextIsTransition();
+                ArrayList<Rule> rules = Lists.newArrayList(strategy.next());
+    //            System.out.println("rules.size: " + rules.size());
+                for (Rule rule : rules) {
+                    try {
+                        ruleStopwatch.reset();
+                        ruleStopwatch.start();
 
-                    for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
-                        /* compute all results */
-                        ConstrainedTerm result = buildResult(
-                                rule,
-                                unifConstraint);
-                        results.add(result);
-                        appliedRules.add(rule);
-                        Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
-                        Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
-                        if (results.size() == successorBound) {
-                            return;
+                        if (rule == RuleAuditing.getAuditingRule()) {
+                            RuleAuditing.beginAudit();
+                        } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                            System.err.println("\nAuditing " + rule + "...\n");
+                        }
+
+                        ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
+
+                        for (SymbolicConstraint unifConstraint : subject.unify(pattern)) {
+                            RuleAuditing.succeed(rule);
+                            /* compute all results */
+                            ConstrainedTerm result = buildResult(
+                                    rule,
+                                    unifConstraint);
+                            results.add(result);
+                            appliedRules.add(rule);
+                            substitutions.add(unifConstraint.substitution());
+                            Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
+                            Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
+                            if (results.size() == successorBound) {
+                                return;
+                            }
+                        }
+                    } catch (KEMException e) {
+                        e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
+                        throw e;
+                    } finally {
+                        if (RuleAuditing.isAuditBegun()) {
+                            if (RuleAuditing.getAuditingRule() == rule) {
+                                RuleAuditing.endAudit();
+                            }
+                            if (!RuleAuditing.isSuccess()
+                                    && RuleAuditing.getAuditingRule() == rule) {
+                                throw RuleAuditing.fail();
+                            }
                         }
                     }
-                } catch (KEMException e) {
-                    e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
-                    throw e;
+                }
+                // If we've found matching results from one equivalence class then
+                // we are done, as we can't match rules from two equivalence classes
+                // in the same step.
+                if (results.size() > 0) {
+                    return;
                 }
             }
-            // If we've found matching results from one equivalence class then
-            // we are done, as we can't match rules from two equivalence classes
-            // in the same step.
-            if (results.size() > 0) {
-                return;
-            }
+        } finally {
+            RuleAuditing.clearAuditingRule();
         }
     }
 
@@ -253,12 +320,6 @@ public class SymbolicRewriter {
                 initialTerm.constraint().substitution().keySet()).isEmpty();
         List<Map<Variable, Term>> discoveredSearchResults = PatternMatcher.match(initialTerm.term(), pattern, initialTerm.termContext());
         for (Map<Variable, Term> searchResult : discoveredSearchResults) {
-            searchResult.entrySet().forEach(e -> e.setValue(
-                CellCollection.singleton(
-                        CellLabel.GENERATED_TOP,
-                        e.getValue(),
-                        initialTerm.termContext().definition().context())));
-
             searchResults.add(searchResult);
             if (searchResults.size() == bound) {
                 return true;

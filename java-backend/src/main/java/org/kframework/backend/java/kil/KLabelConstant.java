@@ -1,16 +1,14 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
@@ -30,7 +28,7 @@ import com.google.common.collect.Multimap;
 public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
-    private static final Map<ImmutableSet<Production>, PatriciaTrie<KLabelConstant>> cache = new HashMap<>();
+    private static final MapCache<ImmutableSet<Production>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
 
     /* un-escaped label */
     private final String label;
@@ -140,20 +138,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Context context) {
-        assert label != null;
-
         ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
-        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
-        if (trie == null) {
-            trie = new PatriciaTrie<>();
-            cache.put(productions, trie);
-        }
-        KLabelConstant kLabelConstant = trie.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, productions, context);
-            trie.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
+        MapCache<String, KLabelConstant> trie = cache.get(productions, () -> new MapCache<>(new PatriciaTrie<>()));
+        return trie.get(label, () -> new KLabelConstant(label, productions, context));
     }
 
     /**
@@ -273,17 +260,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        PatriciaTrie<KLabelConstant> trie = cache.get(productions);
-        if (trie == null) {
-            trie = new PatriciaTrie<>();
-            cache.put(productions, trie);
-        }
-        KLabelConstant kLabelConstant = trie.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = this;
-            trie.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
+        MapCache<String, KLabelConstant> trie = cache.get(productions, () -> new MapCache<>(new PatriciaTrie<>()));
+        return trie.get(label, () -> this);
     }
 
     public boolean isMetaBinder() {

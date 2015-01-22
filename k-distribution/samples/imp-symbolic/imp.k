@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP. It contains the normal semantics if IMP
 and the rules for symbolic execution, as described in the technical report

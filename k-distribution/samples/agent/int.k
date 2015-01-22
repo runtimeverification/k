@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 require "val.k"
 module INT-EXP-SYNTAX
   syntax Exp ::= Int

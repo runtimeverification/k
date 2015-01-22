@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 // C/Java-like comments like this one are completely ignored by the K tool.
 /* These ones, which may spread over
 several lines, are ignored, too.  */
@@ -59,7 +59,7 @@ We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
 
-require "modules/substitution-java.k"
+require "modules/substitution.k"
 
 module LAMBDA
   imports SUBSTITUTION

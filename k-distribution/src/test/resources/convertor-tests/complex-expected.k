@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"10")),endColumn(#token(Int,"9")))]
   syntax Bool ::= #Bool [location(startLine(#token(Int,"6")),startColumn(#token(Int,"19")),endLine(#token(Int,"6")),endColumn(#token(Int,"23")))]

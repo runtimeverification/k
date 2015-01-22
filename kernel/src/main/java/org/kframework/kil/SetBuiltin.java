@@ -1,17 +1,14 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.backend.unparser.UnparserLexicalComparator;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A builtin set
@@ -40,21 +37,16 @@ public class SetBuiltin extends CollectionBuiltin {
     }
 
     @Override
-    public Term toKApp(Context context) {
+    public Term toKApp(Context context, Comparator<Term> comparator) {
         List<Term> items = new ArrayList<>();
-        Map<Term, String> unparsed = new HashMap<>();
         for (Term element : elements()) {
-            Term item = KApp.of(sort().elementLabel(), element);
+            Term item = KApp.of(element.getLocation(), element.getSource(), sort().elementLabel(), element);
             items.add(item);
-            UnparserFilter unparser = new UnparserFilter(context);
-            unparser.visitNode(item);
-            String s = unparser.getResult();
-            unparsed.put(item, s);
         }
-        Collections.sort(items, new UnparserLexicalComparator(unparsed));
         for (Term base : baseTerms()) {
             items.add(base);
         }
+        Collections.sort(items, comparator);
         return toKApp(items);
     }
 }

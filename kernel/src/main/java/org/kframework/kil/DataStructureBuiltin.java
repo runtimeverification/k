@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,7 +316,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         }
     }
 
-    public abstract Term toKApp(Context context);
+    public abstract Term toKApp(Context context, Comparator<Term> comparator);
 
     public Term toKApp(List<Term> items) {
         if(items.isEmpty()){

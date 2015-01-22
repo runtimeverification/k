@@ -1,7 +1,8 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import org.kframework.kil.ASTNode;
@@ -34,8 +35,11 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
         super(name, context);
     }
 
-    public ToKAppTransformer(Context context) {
+    private Comparator<Term> comparator;
+
+    public ToKAppTransformer(Context context, Comparator<Term> comparator) {
         super("Transform NEW into KAPP", context);
+        this.comparator = comparator;
     }
 
     @Override
@@ -174,17 +178,17 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(SetBuiltin node, Void _void) {
-        return ((SetBuiltin)super.visit(node, _void)).toKApp(context);
+        return ((SetBuiltin)super.visit(node, _void)).toKApp(context, comparator);
     }
 
     @Override
     public ASTNode visit(ListBuiltin node, Void _void) {
-        return ((ListBuiltin)super.visit(node, _void)).toKApp(context);
+        return ((ListBuiltin)super.visit(node, _void)).toKApp(context, comparator);
     }
 
     @Override
     public ASTNode visit(MapBuiltin node, Void _void) {
-        return ((MapBuiltin)super.visit(node, _void)).toKApp(context);
+        return ((MapBuiltin)super.visit(node, _void)).toKApp(context, comparator);
     }
 
 }

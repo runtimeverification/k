@@ -1,18 +1,18 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -25,7 +25,7 @@ public class Variable extends Term implements Immutable {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;
-    private static Map<Integer, Variable> deserializationAnonymousVariableMap = new HashMap<>();
+    private static MapCache<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new MapCache<>();
 
     /**
      * Given a set of {@link Variable}s, returns a substitution that maps each
@@ -174,12 +174,7 @@ public class Variable extends Term implements Immutable {
         if (anonymous) {
             int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
             if (id < counter) {
-                Variable variable = deserializationAnonymousVariableMap.get(id);
-                if (variable == null) {
-                    variable = getFreshCopy();
-                    deserializationAnonymousVariableMap.put(id, variable);
-                }
-                return variable;
+                return deserializationAnonymousVariableMap.get(Pair.of(id, sort), this::getFreshCopy);
             } else {
                 counter = id + 1;
                 return this;

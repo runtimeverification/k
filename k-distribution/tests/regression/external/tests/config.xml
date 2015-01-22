@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
   <tests>
-
     <test
         definition="external.k"
         programs="."
         extension="external"
         posixInitScript="dummy.sh"
         results="." >
-    <kompile-option name="--directory" value="maude" />
-    <all-programs>
-      <krun-option name="--directory" value="maude" />
-    </all-programs>
-    </test>
-
-    <test
-        definition="external.k"
-        programs="."
-        extension="external"
-        posixInitScript="dummy.sh"
-        results="." >
-    <kompile-option name="--backend" value="java" />
-    <kompile-option name="--directory" value="java" />
-    <all-programs>
-      <krun-option name="--directory" value="java" />
-    </all-programs>
     </test>
 
   </tests>

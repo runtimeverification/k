@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
@@ -22,6 +21,8 @@ import com.google.inject.Provider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -117,40 +118,36 @@ public class RunProcess {
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm();
         }
-        String content = value;
+        Reader content = new StringReader(value);
         Source source = Sources.fromCommandLine("parameters");
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = context.files.loadFromWorkingDirectory(value);
+                    content = context.files.readFromWorkingDirectory(value);
                     source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
-                term = loader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
-                break;
             case "kast -e":
-                term = loader.processPgm(value, source, startSymbol, context, ParserType.PROGRAM);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
-                    content = context.files.loadFromWorkingDirectory(value);
+                    content = context.files.readFromWorkingDirectory(value);
                     source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
-                term = loader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
-                break;
             case "kast --parser ground -e":
-                term = loader.processPgm(value, source, startSymbol, context, ParserType.GROUND);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
-                    content = context.files.loadFromWorkingDirectory(value);
+                    content = context.files.readFromWorkingDirectory(value);
                     source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
-                    content = context.files.loadFromWorkingDirectory(value);
+                    content = context.files.readFromWorkingDirectory(value);
                     source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
@@ -173,13 +170,7 @@ public class RunProcess {
 
                 String kast = output.stdout != null ? output.stdout : "";
 
-                //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
-                //TODO(dwightguth): parse the output of the external parser into real kil classes
-                if (context.kompileOptions.experimental.legacyKast) {
-                    term = new BackendTerm(Sort.of(""), kast);
-                } else {
-                    return KastParser.parse(kast, source);
-                }
+                return KastParser.parse(kast, source);
         }
 
         return term;

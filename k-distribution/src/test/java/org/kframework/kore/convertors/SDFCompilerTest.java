@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -81,7 +81,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
 
         Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
                 kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),
-                true, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
+                autoinclude, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
         return new DefintionWithContext(parsedKIL, context);
     }

@@ -1,3 +1,0 @@
-[Warning] Internal: The Maude backend does not officially support floating
-point numbers. The results of this semantics may be undefined or, in some
-cases, incorrect.

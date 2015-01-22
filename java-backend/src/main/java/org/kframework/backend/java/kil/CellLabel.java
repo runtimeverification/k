@@ -1,10 +1,11 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.backend.java.util.MapCache;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.MetaK;
 
@@ -16,7 +17,7 @@ import org.kframework.compile.utils.MetaK;
  */
 public final class CellLabel implements MaximalSharing, Serializable {
 
-    private static final PatriciaTrie<CellLabel> cache = new PatriciaTrie<>();
+    private static final MapCache<String, CellLabel> cache = new MapCache<>(new PatriciaTrie<>());
 
     public static final CellLabel GENERATED_TOP =   CellLabel.of(MetaK.Constants.generatedTopCellLabel);
     public static final CellLabel K             =   CellLabel.of("k");
@@ -35,12 +36,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * @return the cell label
      */
     public static CellLabel of(String name) {
-        CellLabel cellLabel = cache.get(name);
-        if (cellLabel == null) {
-            cellLabel = new CellLabel(name);
-            cache.put(name, cellLabel);
-        }
-        return cellLabel;
+        return cache.get(name, () -> new CellLabel(name));
     }
 
     private CellLabel(String name) {
@@ -80,12 +76,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        CellLabel cellLabel = cache.get(name);
-        if (cellLabel == null) {
-            cellLabel = this;
-            cache.put(name, cellLabel);
-        }
-        return cellLabel;
+        return cache.get(name, () -> this);
     }
 
 }

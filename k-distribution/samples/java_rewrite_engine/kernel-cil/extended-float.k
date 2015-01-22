@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 module EXTENDED-FLOAT
   syntax Float ::= Token{[\-]? [0][xX] [0-9a-fA-F] [\.] [0-9a-fA-F]* [pP] [\-\+]? [0-9]+}
 

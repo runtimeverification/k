@@ -1,4 +1,1 @@
-<k>
-    V:Int{foo} ~> foo ::A{bar} ~> V ~> V ~> _0:K ::K{baz}
-</k>
-_1:Bag
+V:Int{ foo()} ~> foo ::A{ bar()} ~> V ~> V ::K{ baz()}

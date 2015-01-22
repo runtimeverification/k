@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 
 require "builtins/k-equal.k"
 
@@ -76,6 +76,8 @@ The action and the predicate can be regarded as curried functions, taking the
                             #visitor(#label(A),,#klist(Kla),,#label(P),,#klist(Klp))))
        #fi
     when #label(L) =/=K #label(#klist)  [structural]
+  rule #visit(K:KItem,,Vz:KItem) => #visited(K)
+    when isToken(K)
   rule #visit(K:KItem ~> Kr,,Vz:KItem) => #visiting.kseq(#visit(K,,Vz),,#visit(Kr,,Vz))
     when Kr =/=K .K  [structural]
   rule #visit(#klist(.KList),,Vz:KItem) => #visited(.KList)  [structural]

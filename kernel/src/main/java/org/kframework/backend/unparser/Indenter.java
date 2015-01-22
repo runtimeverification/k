@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 public class Indenter {
@@ -53,9 +53,7 @@ public class Indenter {
                 colNo++;
             }
         }
-        int indexEndLine = stringBuilder.lastIndexOf(endl) + endl.length();
-        int indexEndString = stringBuilder.length();
-        if (indexEndString - indexEndLine + string.length() > getWidth() && getWidth() >= 0) {
+        if (getWidth() >= 0 && stringBuilder.length() - stringBuilder.lastIndexOf(endl) + endl.length() + string.length() > getWidth()) {
             stringBuilder.append(endl);
             lineNo++;
             colNo = 1;
@@ -104,5 +102,9 @@ public class Indenter {
 
     public int getColNo() {
         return colNo;
+    }
+
+    public int length() {
+        return stringBuilder.length();
     }
 }

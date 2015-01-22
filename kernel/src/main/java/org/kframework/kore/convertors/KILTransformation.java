@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -19,6 +19,7 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
         }
     }
 
+    // DISABLE EXCEPTION CHECKING
     public R apply(ASTNode t) {
         try {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
@@ -37,6 +38,7 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
         }
         // ENABLE EXCEPTION CHECKSTYLE
     }
+    // ENABLE EXCEPTION CHECKING
 
     public String makeErrorMessage(ASTNode t) {
         return t.toString() + " at location " + t.getLocation() + " in file " + t.getSource()
