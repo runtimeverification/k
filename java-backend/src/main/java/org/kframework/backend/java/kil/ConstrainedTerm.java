@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
+import org.kframework.backend.java.symbolic.PatternExpander;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -91,6 +92,22 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return matchImplies(constrainedTerm) != null;
     }
 
+    public ConstrainedTerm expandPatterns(boolean narrowing) {
+        ConstrainedTerm result = this;
+        while (true) {
+            PatternExpander patternExpander = new PatternExpander(result.constraint(), narrowing);
+            ConstrainedTerm expandedTerm = (ConstrainedTerm) result.accept(patternExpander);
+            if (expandedTerm == result) {
+                break;
+            }
+            result = new ConstrainedTerm(
+                    expandedTerm.term(),
+                    expandedTerm.constraint().add(patternExpander.extraConstraint()).simplify());
+        }
+
+        return result;
+    }
+
     /**
      * Checks if this constrained term implies the given constrained term, assuming the variables
      * occurring only in the given constrained term (but not in this constrained term) are
@@ -107,42 +124,27 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding()
-                .addAll(constrainedTerm.data.constraint.equalities())
+                .add(constrainedTerm.data.constraint)
                 .simplifyModuloPatternFolding();
         if (constraint.isFalse()) {
             return null;
         }
 
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
-        constraint = constraint.expandPatternsAndSimplify(false)
+        constraint = constraint.expandPatterns(false)
+                .simplifyModuloPatternFolding()
                 .orientSubstitution(rightOnlyVariables);
-        if (constraint == null) {
+        if (constraint == null || constraint.isFalse()) {
             return null;
         }
 
-        /*
-        ConjunctiveFormula leftHandSide = SymbolicConstraint
-                .simplifiedConstraintFrom(constrainedTerm.termContext(), data.constraint);
-
-        Predicate<Variable> notInVariables = new Predicate<Variable>() {
-            @Override
-            public boolean apply(Variable var) {
-                return !variables.contains(var);
-            }
-        };
-
-        SymbolicConstraint rightHandSide = SymbolicConstraint
-                .simplifiedConstraintFrom(constrainedTerm.termContext(),
-                        leftHandSide.substitution(),
-                        Maps.filterKeys(constraint.substitution(), notInVariables),
-                        constraint.equalities());
+        ConjunctiveFormula leftHandSide = data.constraint;
+        ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
         if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
         }
-        */
 
-        constraint = constraint.addAndSimplify(data.constraint);
-        return constraint;
+        return data.constraint.addAndSimplify(constraint);
     }
 
     public Term term() {
@@ -186,7 +188,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion
-                solution = solution.expandPatternsAndSimplify(true);
+                solution = solution.expandPatterns(true).simplify();
                 if (solution.isFalse() || solution.checkUnsat()) {
                     continue;
                 }

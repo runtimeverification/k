@@ -1,10 +1,10 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Kind;
@@ -12,21 +12,23 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -303,7 +305,7 @@ public class ConjunctiveFormula extends Term {
                         // eliminate
                         substitution = Substitution.composeAndEvaluate(
                                 substitution,
-                                Substitution.singleton((Variable) leftHandSide, rightHandSide),
+                                getSubstitution((Variable) leftHandSide, rightHandSide),
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
@@ -319,7 +321,7 @@ public class ConjunctiveFormula extends Term {
                         // swap + eliminate
                         substitution = Substitution.composeAndEvaluate(
                                 substitution,
-                                Substitution.singleton((Variable) rightHandSide, leftHandSide),
+                                getSubstitution((Variable) rightHandSide, leftHandSide),
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
@@ -360,6 +362,29 @@ public class ConjunctiveFormula extends Term {
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
     }
 
+    public Substitution<Variable, Term> getSubstitution(Variable variable, Term term) {
+        if (RewriteEngineUtils.isSubsortedEq(variable, term, context)) {
+            return Substitution.singleton(variable, term);
+        } else if (term instanceof Variable) {
+            if (RewriteEngineUtils.isSubsortedEq(term, variable, context)) {
+                return Substitution.singleton((Variable) term, variable);
+            } else {
+                Sort leastSort = context.definition().subsorts().getGLBSort(
+                        variable.sort(),
+                        term.sort());
+                assert leastSort != null;
+
+                Variable freshVariable = Variable.getAnonVariable(leastSort);
+                return Substitution.<Variable, Term>singleton(variable, freshVariable)
+                        .plus((Variable) term, freshVariable);
+            }
+        } else {
+            // TODO(AndreiS): fix missing unification case
+            assert false;
+            return null;
+        }
+    }
+
     /**
      * Checks if this constraint is a substitution of the given variables.
      * <p>
@@ -378,7 +403,7 @@ public class ConjunctiveFormula extends Term {
             return this;
         }
 
-        /* compute the preimages of each variable in the codomain of the substitution */
+        /* compute the pre-images of each variable in the co-domain of the substitution */
         Multimap<Variable, Variable> equivalenceClasses = HashMultimap.create();
         substitution.entrySet().stream()
                 .filter(e -> e.getValue() instanceof Variable)
@@ -404,48 +429,8 @@ public class ConjunctiveFormula extends Term {
         return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, context)).simplify();
     }
 
-    public ConjunctiveFormula expandPatternsAndSimplify(boolean narrowing) {
-//        Map<Variable, Term> oldSubst = null;
-//        Set<Equality> oldEqualities = null;
-//
-//        while (truthValue == TruthValue.UNKNOWN) {
-//            assert isNormal;
-//            if (oldSubst != null && oldEqualities != null
-//                    && substitution.equals(oldSubst)
-//                    && equalities.equals(oldEqualities)) {
-//                break;
-//            }
-//            oldSubst = Maps.newHashMap(substitution);
-//            oldEqualities = Sets.newHashSet(equalities);
-//
-//            // TODO(AndreiS): patterns should be expanded before are put in the substitution
-//            Set<Variable> keys = Sets.newLinkedHashSet(substitution.keySet());
-//            writeProtected = true;
-//            for (Variable variable : keys) {
-//                Term term = substitution.get(variable);
-//                Term expandedTerm = term.expandPatterns(this, narrowing);
-//                if (term != expandedTerm) {
-//                    substitution.put(variable, expandedTerm);
-//                }
-//            }
-//
-//            LinkedHashSet<Equality> expandedEqualities = Sets.newLinkedHashSet();
-//            for (Equality equality : equalities) {
-//                Equality expandedEquality = equality.expandPatterns(this, narrowing);
-//                expandedEqualities.add(expandedEquality);
-//            }
-//            equalities = expandedEqualities;
-//            writeProtected = false;
-//
-//            // TODO(AndreiS): move folding from here (this is way too fragile)
-//            /* simplify with pattern folding if not performing narrowing */
-//            if (!narrowing) {
-//                return simplifyModuloPatternFolding();
-//            } else {
-//                return simplify();
-//            }
-//        }
-        return null;
+    public ConjunctiveFormula expandPatterns(boolean narrowing) {
+        return new ConstrainedTerm(Bottom.BOTTOM, this).expandPatterns(narrowing).constraint();
     }
 
     public DisjunctiveFormula getDisjunctiveNormalForm() {
@@ -477,60 +462,94 @@ public class ConjunctiveFormula extends Term {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
         assert !constraint.isFalse();
 
-//        LinkedList<Pair<SymbolicConstraint, SymbolicConstraint>> implications = new LinkedList<>();
-//        implications.add(Pair.of(this, constraint));
-//        while (!implications.isEmpty()) {
-//            Pair<SymbolicConstraint, SymbolicConstraint> implication = implications.remove();
-//
-//            SymbolicConstraint left = implication.getLeft();
-//            SymbolicConstraint right = implication.getRight();
-//            if (left.isFalse()) continue;
-//
-//            if (context.definition().context().globalOptions.debug) {
-//                System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
+        LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
+        implications.add(Pair.of(this, constraint));
+        while (!implications.isEmpty()) {
+            Pair<ConjunctiveFormula, ConjunctiveFormula> implication = implications.remove();
+            ConjunctiveFormula left = implication.getLeft();
+            ConjunctiveFormula right = implication.getRight();
+            if (left.isFalse()) {
+                continue;
+            }
+
+            if (context.definition().context().globalOptions.debug) {
+                System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
+            }
+
+            right = right.orientSubstitution(rightOnlyVariables);
+            right = left.simplifyConstraint(right);
+            right = right.orientSubstitution(rightOnlyVariables);
+            if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
+                if (context.definition().context().globalOptions.debug) {
+                    System.err.println("Implication proved by simplification");
+                }
+                continue;
+            }
+
+            IfThenElseFinder ifThenElseFinder = new IfThenElseFinder(context);
+            right.accept(ifThenElseFinder);
+            if (!ifThenElseFinder.result.isEmpty()) {
+                KItem ite = ifThenElseFinder.result.get(0);
+                // TODO (AndreiS): handle KList variables
+                Term condition = ((KList) ite.kList()).get(0);
+                if (context.definition().context().globalOptions.debug) {
+                    System.err.println("Split on " + condition);
+                }
+                implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
+                implications.add(Pair.of(left.add(condition, BoolToken.FALSE).simplify(), right));
+                continue;
+            }
+
+            if (!impliesSMT(left,right, rightOnlyVariables)) {
+                if (context.definition().context().globalOptions.debug) {
+                    System.err.println("Failure!");
+                }
+                return false;
+            } else {
+                if (context.definition().context().globalOptions.debug) {
+                    System.err.println("Proved!");
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Simplifies the given constraint by eliding the equalities and substitution entries that are
+     * implied by this constraint.
+     */
+    private ConjunctiveFormula simplifyConstraint(ConjunctiveFormula constraint) {
+        Substitution<Variable, Term> simplifiedSubstitution = constraint.substitution.minusAll(
+                Maps.difference(constraint.substitution, substitution).entriesInCommon().keySet());
+        Predicate<Equality> inConstraint = equality -> !equalities().contains(equality)
+                && !equalities().contains(new Equality(equality.rightHandSide(), equality.leftHandSide(), context));
+        PersistentUniqueList<Equality> simplifiedEqualities= PersistentUniqueList.from(
+                constraint.equalities().stream().filter(inConstraint).collect(Collectors.toList()));
+        ConjunctiveFormula simplifiedConstraint = ConjunctiveFormula.of(
+                simplifiedSubstitution,
+                simplifiedEqualities,
+                constraint.disjunctions,
+                constraint.context);
+
+        if (simplifiedConstraint.isTrue()) {
+            return simplifiedConstraint;
+        }
+
+        // TODO(AndreiS): investigate what this code does
+//        Map<Term, Term> substitution = Maps.newLinkedHashMap();
+//        for (Equality e1:equalities()) {
+//            if (e1.rightHandSide().isGround()) {
+//                substitution.put(e1.leftHandSide(), e1.rightHandSide());
 //            }
-//
-//            right.orientSubstitution(rightOnlyVariables);
-//            right = left.simplifyConstraint(right);
-//            right.orientSubstitution(rightOnlyVariables);
-//            if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-//                if (context.definition().context().globalOptions.debug) {
-//                    System.err.println("Implication proved by simplification");
-//                }
-//                continue;
-//            }
-//            IfThenElseFinder ifThenElseFinder = new IfThenElseFinder(context);
-//            right.accept(ifThenElseFinder);
-//            if (!ifThenElseFinder.result.isEmpty()) {
-//                KItem ite = ifThenElseFinder.result.get(0);
-//                // TODO (AndreiS): handle KList variables
-//                Term condition = ((KList) ite.kList()).get(0);
-//                if (context.definition().context().globalOptions.debug) {
-//                    System.err.println("Split on " + condition);
-//                }
-//                SymbolicConstraint left1 = new SymbolicConstraint(left);
-//                left1.add(condition, BoolToken.TRUE);
-//                implications.add(Pair.of(left1, new SymbolicConstraint(right)));
-//                SymbolicConstraint left2 = new SymbolicConstraint(left);
-//                left2.add(condition, BoolToken.FALSE);
-//                implications.add(Pair.of(left2, new SymbolicConstraint(right)));
-//                continue;
-//            }
-////            if (DEBUG) {
-////                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
-////            }
-//            if (!impliesSMT(left,right, rightOnlyVariables)) {
-//                if (context.definition().context().globalOptions.debug) {
-//                    System.err.println("Failure!");
-//                }
-//                return false;
-//            } else {
-//                if (context.definition().context().globalOptions.debug) {
-//                    System.err.println("Proved!");
-//                }
+//            if (e1.leftHandSide().isGround()) {
+//                substitution.put(e1.rightHandSide(), e1.leftHandSide());
 //            }
 //        }
-        return true;
+//        simplifiedConstraint = (SymbolicConstraint) TermSubstitutionTransformer
+//                .substitute(simplifiedConstraint, substitution, context);
+
+        return simplifiedConstraint;
     }
 
     private static boolean impliesSMT(

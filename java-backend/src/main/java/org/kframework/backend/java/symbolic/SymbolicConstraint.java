@@ -927,34 +927,5 @@ public class SymbolicConstraint {
 //    public void accept(Visitor visitor) {
 //        visitor.visit(this);
 //    }
-//
-//    /**
-//     * Finds an innermost occurrence of the #if_#then_#else_#fi function.
-//     *
-//     * @author Traian
-//     */
-//    private class IfThenElseFinder extends PrePostVisitor {
-//        final List<KItem> result;
-//        private String IF_THEN_ELSE_LABEL="'#if_#then_#else_#fi";
-//
-//        public IfThenElseFinder(TermContext context) {
-//            result = new ArrayList<>();
-//            preVisitor.addVisitor(new LocalVisitor() {
-//                @Override
-//                protected void visit(JavaSymbolicObject object) {
-//                    proceed = result.isEmpty();
-//                }
-//            });
-//            postVisitor.addVisitor(new LocalVisitor(){
-//                @Override
-//                public void visit(KItem kItem) {
-//                    if (!result.isEmpty()) return;
-//                    if (kItem.kLabel() instanceof KLabelConstant &&
-//                            ((KLabelConstant) kItem.kLabel()).label().equals(IF_THEN_ELSE_LABEL)) {
-//                        result.add(kItem);
-//                    }
-//                }
-//            });
-//        }
-//    }
+
 }

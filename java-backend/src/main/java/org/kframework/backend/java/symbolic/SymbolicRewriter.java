@@ -227,14 +227,13 @@ public class SymbolicRewriter {
         /* eliminate bindings of rule variables */
         constraint = constraint.removeBindings(freshSubstitution.values());
 
+        ConstrainedTerm result = new ConstrainedTerm(term, constraint);
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
-            constraint = constraint.expandPatternsAndSimplify(true);
-            term = term.expandPatterns(constraint, true);
-//            System.err.println(rule.getLocation() + " " + rule.getSource());
+            result = result.expandPatterns(true);
         }
 
-        return new ConstrainedTerm(term, constraint);
+        return result;
     }
 
     /**
@@ -403,9 +402,7 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        initialTerm = new ConstrainedTerm(
-                initialTerm.term().expandPatterns(initialTerm.constraint(), true),
-                initialTerm.constraint());
+        initialTerm = initialTerm.expandPatterns(true);
 
         visited.add(initialTerm);
         queue.add(initialTerm);

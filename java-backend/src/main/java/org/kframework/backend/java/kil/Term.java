@@ -205,10 +205,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return (Term) super.substituteWithBinders(variable, term, context);
     }
 
-    public Term expandPatterns(ConjunctiveFormula constraint, boolean narrowing) {
-        return (Term) this.accept(new PatternExpander(constraint, narrowing));
-    }
-
     @Override
     public final int compareTo(Term o) {
         /* implement compareTo() in a way that the expensive toString() is

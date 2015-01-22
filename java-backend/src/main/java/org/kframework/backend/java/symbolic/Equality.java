@@ -121,50 +121,6 @@ public class Equality implements Serializable {
     }
 
     /**
-     * Returns an {@code Equality} obtained by applying the {@code substitution} on
-     * {@code this} equality.
-     *
-     * @param substitution
-     *            the specified substitution map
-     */
-    public Equality substitute(Map<Variable, ? extends Term> substitution) {
-        Term returnLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-        Term returnRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
-    }
-
-    /**
-     * Returns an {@code Equality} obtained by applying the {@code substitution} on
-     * {@code this} equality and then evaluating pending functions.
-     *
-     * @param substitution
-     *            the specified substitution map
-     */
-    public Equality substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
-        Term returnLeftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-        Term returnRightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
-    }
-
-    public Equality expandPatterns(ConjunctiveFormula constraint, boolean narrowing) {
-        Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrowing);
-        Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrowing);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
-    }
-
-    /**
      * Specifies whether this equality can be further decomposed by the
      * unification algorithm of {@code SymbolicUnifier}.
      */

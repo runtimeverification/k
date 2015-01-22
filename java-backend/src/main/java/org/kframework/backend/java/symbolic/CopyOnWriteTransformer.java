@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.main.Tool;
 
 
 /**
@@ -398,6 +399,9 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
+        if (context.global().kItemOps.tool != Tool.KOMPILE) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
+        }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
                 transformedConjunctiveFormula :
                 conjunctiveFormula;

@@ -107,11 +107,13 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V>, 
 
     @SuppressWarnings("unchecked")
     public Substitution<K, V> evaluate(TermContext context) {
-        HashPMap<K, V> entries = HashTreePMap.empty();
+        HashPMap<K, V> evaluatedEntries = HashTreePMap.empty();
         for (Entry<K, V> entry : entries.entrySet()) {
-            entries = entries.plus(entry.getKey(), (V) entry.getValue().evaluate(context));
+            evaluatedEntries = evaluatedEntries.plus(
+                    entry.getKey(),
+                    (V) entry.getValue().evaluate(context));
         }
-        return new Substitution<>(entries);
+        return new Substitution<>(evaluatedEntries);
     }
 
     public List<Equality> equalities(TermContext context) {

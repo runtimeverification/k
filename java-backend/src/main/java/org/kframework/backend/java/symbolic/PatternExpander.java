@@ -20,13 +20,20 @@ import java.util.Set;
  */
 public class PatternExpander extends CopyOnWriteTransformer {
 
-    private ConjunctiveFormula constraint;
+    private final ConjunctiveFormula constraint;
     private final boolean narrowing;
+
+    private ConjunctiveFormula extraConstraint;
 
     public PatternExpander(ConjunctiveFormula constraint, boolean narrowing) {
         super(constraint.termContext());
         this.constraint = constraint;
         this.narrowing = narrowing;
+        extraConstraint = ConjunctiveFormula.of(constraint.termContext());
+    }
+
+    public ConjunctiveFormula extraConstraint() {
+        return extraConstraint;
     }
 
     @Override
@@ -93,7 +100,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
         }
 
         if (results.size() == 1) {
-            constraint = constraint.add(results.get(0).constraint()).simplify();
+            extraConstraint = extraConstraint.add(results.get(0).constraint()).simplify();
             return results.get(0).term().accept(this);
         } else {
             return kItem;

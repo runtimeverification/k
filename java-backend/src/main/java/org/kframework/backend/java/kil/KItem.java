@@ -275,7 +275,8 @@ public class KItem extends Term {
 
     public static class KItemOperations {
 
-        private final Tool tool;
+        // TODO(AndreiS): make private again
+        public final Tool tool;
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
         private final BuiltinFunction builtins;
