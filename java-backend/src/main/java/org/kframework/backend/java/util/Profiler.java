@@ -1,6 +1,16 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.comparators.ReverseComparator;
+import org.kframework.backend.java.kil.KLabelConstant;
+
 import com.google.common.base.Stopwatch;
 
 /**
@@ -28,6 +38,17 @@ public class Profiler {
     public static final ReentrantStopwatch EVALUATE_REQUIRES_TIMER          =   new ReentrantStopwatch("Evaluate requires");
 
     public static final ReentrantStopwatch DEEP_CLONE_TIMER                 =   new ReentrantStopwatch("Deep clone");
+
+    private static final Map<KLabelConstant, ReentrantStopwatch> FUNCTION_PROFILING_TIMERS = new HashMap<>();
+
+    public static ReentrantStopwatch getTimerForFunction(KLabelConstant klabel) {
+        ReentrantStopwatch stopwatch = FUNCTION_PROFILING_TIMERS.get(klabel);
+        if (stopwatch == null) {
+           stopwatch = new ReentrantStopwatch(klabel.label());
+           FUNCTION_PROFILING_TIMERS.put(klabel, stopwatch);
+        }
+        return stopwatch;
+    }
 
     public static void startTimer(ReentrantStopwatch timer) {
         if (ENABLE_PROFILING_MODE) {
@@ -57,10 +78,18 @@ public class Profiler {
                     REWRITE_WITH_UNKOMPILED_RULES_TIMER);
             System.err.println(QUERY_RULE_INDEXING_TIMER);
             System.err.println(DEEP_CLONE_TIMER);
+            System.err.println("Top 10 most expensive functions:");
+            SortedSet<ReentrantStopwatch> sorted = new TreeSet<>(new ReverseComparator<>());
+            sorted.addAll(FUNCTION_PROFILING_TIMERS.values());
+            Iterator<ReentrantStopwatch> iter = sorted.iterator();
+            for (int i = 0; i < 10 && iter.hasNext(); i++) {
+                ReentrantStopwatch stopwatch = iter.next();
+                System.err.printf("%s = %s%n", stopwatch.name, stopwatch.toString());
+            }
         }
     }
 
-    private static class ReentrantStopwatch {
+    private static class ReentrantStopwatch implements Comparable<ReentrantStopwatch> {
 
         private final String name;
 
@@ -106,6 +135,12 @@ public class Profiler {
         @Override
         public String toString() {
             return stopwatch.get().toString();
+        }
+
+        @Override
+        public int compareTo(ReentrantStopwatch o) {
+            return Long.compare(stopwatch.get().elapsed(TimeUnit.MICROSECONDS),
+                    o.stopwatch.get().elapsed(TimeUnit.MICROSECONDS));
         }
     }
 
