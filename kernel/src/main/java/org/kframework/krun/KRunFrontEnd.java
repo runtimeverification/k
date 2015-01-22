@@ -77,19 +77,21 @@ public class KRunFrontEnd extends FrontEnd {
     public int run() {
         try {
             scope.enter(kompiledDir.get());
-            Transformation<Void, Void> tool = toolProvider.get();
-            Attributes a = new Attributes();
-            tool.run(null, a);
-            Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
-            if (exitCode == null) {
-                exitCode = 0;
+            try {
+                Transformation<Void, Void> tool = toolProvider.get();
+                Attributes a = new Attributes();
+                tool.run(null, a);
+                Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
+                if (exitCode == null) {
+                    exitCode = 0;
+                }
+                return exitCode;
+            } finally {
+                scope.exit();
             }
-            return exitCode;
         } catch (TransformationNotSatisfiedException
                 | AmbiguousTransformationException e) {
             throw KExceptionManager.criticalError(e.getMessage(), e);
-        } finally {
-            scope.exit();
         }
     }
 }

@@ -79,8 +79,8 @@ public class KastFrontEnd extends FrontEnd {
      */
     @Override
     public int run() {
+        scope.enter(kompiledDir.get());
         try {
-            scope.enter(kompiledDir.get());
             Reader stringToParse = options.stringToParse();
             Source source = options.source();
 

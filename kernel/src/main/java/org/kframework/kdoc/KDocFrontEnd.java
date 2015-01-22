@@ -59,8 +59,8 @@ public class KDocFrontEnd extends FrontEnd {
 
     @Override
     protected int run() {
+        scope.enter(kompiledDir.get());
         try {
-            scope.enter(kompiledDir.get());
             backend.get().run(def.get());
             return 0;
         } finally {
