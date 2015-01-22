@@ -27,12 +27,6 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete2.Grammar;
-import org.kframework.parser.concrete2.Grammar.NonTerminal;
-import org.kframework.parser.concrete2.MakeConsList;
-import org.kframework.parser.concrete2.Parser;
-import org.kframework.parser.concrete2.Parser.ParseError;
-import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -137,17 +131,6 @@ public class ProgramLoader {
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
-        } else if (whatParser == ParserType.NEWPROGRAM) {
-            // load the new parser
-            // TODO(Radu): after the parser is in a good enough shape, replace the program parser
-            // TODO(Radu): (the default one) with this branch of the 'if'
-            Grammar grammar = loader.loadOrDie(Grammar.class, context.files.resolveKompiled("newParser.bin"));
-
-            out = newParserParse(FileUtil.read(content), grammar.get(startSymbol.toString()), source, context);
-            out = new AmbFilter(context, kem).visitNode(out);
-            out = new RemoveBrackets(context).visitNode(out);
-            out = new FlattenTerms(context).visitNode(out);
-            out = new ResolveVariableAttribute(context).visitNode(out);
         } else {
             out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
@@ -157,71 +140,4 @@ public class ProgramLoader {
         return (Term) out;
     }
 
-    public Term parseInModule(String content, Source source, Sort startSymbol,
-                                  String moduleName, Context context) throws ParseFailedException {
-        @SuppressWarnings("unchecked")
-        Map<String, Grammar> grammars = loader.loadOrDie(Map.class, context.files.resolveKompiled("newModuleParsers.bin"));
-
-        ASTNode out;
-        Grammar grammar = grammars.get(moduleName);
-        if (grammar == null) {
-            String msg = "Could not find module: " + moduleName + " when trying to parseInModule.";
-            throw new ParseFailedException(new KException(
-                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, null));
-        }
-        NonTerminal nt = grammar.get(startSymbol.toString());
-        if (nt == null) {
-            String msg = "Could not find start symbol: " + startSymbol + " when trying to parseInModule " + moduleName;
-            throw new ParseFailedException(new KException(
-                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, null));
-        }
-        out = newParserParse(content, nt, source, context);
-        out = new AmbFilter(context, kem).visitNode(out);
-        out = new RemoveBrackets(context).visitNode(out);
-        out = new FlattenTerms(context).visitNode(out);
-        out = new ResolveVariableAttribute(context).visitNode(out);
-        return (Term) out;
-    }
-
-    /**
-     *
-     * @param content String to be parsed.
-     * @param nt      Start symbol.
-     * @param source  Source information for error reporting and term annotation.
-     * @param context The context in which to disambiguate the AST.
-     * @return AST representation of the input.
-     * @throws ParseFailedException In case the parse failed.
-     */
-    public static ASTNode newParserParse(String content,
-                                         NonTerminal nt,
-                                         Source source,
-                                         Context context) throws ParseFailedException {
-        Parser parser = new Parser(content);
-        ASTNode out;
-        out = parser.parse(nt, 0);
-        if (context.globalOptions.debug)
-            System.err.println("Raw: " + out + "\n");
-        try {
-            // only the unexpected character type of errors should be checked in this block
-            out = new TreeCleanerVisitor().visitNode(out);
-        } catch (ParseFailedException te) {
-            ParseError perror = parser.getErrors();
-
-            String msg = content.length() == perror.position ?
-                    "Parse error: unexpected end of file." :
-                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
-            Location loc = new Location(perror.line, perror.column,
-                    perror.line, perror.column + 1);
-            throw new ParseFailedException(new KException(
-                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
-        }
-        out = new MakeConsList().visitNode(out);
-        if (context.globalOptions.debug)
-            System.err.println("Clean: " + out + "\n");
-        out = new PriorityFilter(context).visitNode(out);
-        out = new PreferAvoidFilter(context).visitNode(out);
-        if (context.globalOptions.debug)
-            System.err.println("Filtered: " + out + "\n");
-        return out;
-    }
 }
