@@ -103,7 +103,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private String clean(String definitionText) {
-        return definitionText.replaceAll(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
+        return definitionText.replace(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
     }
 
 }
