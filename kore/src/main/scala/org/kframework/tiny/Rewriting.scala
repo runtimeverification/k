@@ -52,7 +52,7 @@ object RewriteToTop {
 object Rule {
   import RewriteToTop._
 
-  def apply(termWithRewrite: K)(implicit equiv: Equivalence = EqualsEquivalence): Rule = {
+  def apply(termWithRewrite: K)(implicit equiv: Theory = FreeTheory): Rule = {
     val left = toLeft(termWithRewrite)
     val right = toRight(termWithRewrite)
 

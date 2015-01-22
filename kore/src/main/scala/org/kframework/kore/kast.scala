@@ -65,7 +65,7 @@ class KList(val delegate: List[K])
 case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
   extends KAbstractCollection with Indexed[Int, K]
   with KApplyPattern with Associative[KList]
-  with KApplyToString with KORE with Equals {
+  with KApplyToString with KORE {
   type This = KApply
 
   protected[kore] def delegate: Iterable[K] = klist.delegate

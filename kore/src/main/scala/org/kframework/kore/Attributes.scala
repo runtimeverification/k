@@ -5,7 +5,7 @@ import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
 import org.kframework.builtin.Sorts
 import org.kframework.tiny.Pattern
-import org.kframework.tiny.Equivalence
+import org.kframework.tiny.Theory
 import sun.security.util.Cache.EqualByteArray
 import org.kframework.tiny.Conjunction
 import org.kframework.tiny.Disjunction
