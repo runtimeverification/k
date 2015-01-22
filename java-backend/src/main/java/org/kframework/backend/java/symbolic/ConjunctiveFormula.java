@@ -297,6 +297,11 @@ public class ConjunctiveFormula extends Term {
                                     TruthValue.FALSE,
                                     context);
                         }
+                        // TODO(AndreiS): fix this in a general way
+                        if (unifier.constraint().equalities.get(0).equals(equality)) {
+                            pendingEqualities = pendingEqualities.plus(equality);
+                            continue;
+                        }
                         equalities = equalities.plusAll(i + 1, unifier.constraint().equalities);
                         equalities = equalities.plusAll(i + 1, unifier.constraint().substitution.equalities(context));
                         disjunctions = disjunctions.plusAll(unifier.constraint().disjunctions);
@@ -335,6 +340,7 @@ public class ConjunctiveFormula extends Term {
                     } else if (leftHandSide instanceof Variable
                             && rightHandSide.isNormal()
                             && rightHandSide.variableSet().contains(leftHandSide)) {
+                        // occurs
                         return new ConjunctiveFormula(
                                 substitution,
                                 equalities,
@@ -344,6 +350,7 @@ public class ConjunctiveFormula extends Term {
                     } else if (rightHandSide instanceof Variable
                             && leftHandSide.isNormal()
                             && leftHandSide.variableSet().contains(rightHandSide)) {
+                        // swap + occurs
                         return new ConjunctiveFormula(
                                 substitution,
                                 equalities,
@@ -556,7 +563,6 @@ public class ConjunctiveFormula extends Term {
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
-        assert left.context == right.context;
         return left.context.global().constraintOps.impliesSMT(left, right, rightOnlyVariables);
     }
 

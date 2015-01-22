@@ -76,7 +76,8 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 }
             } else {
                 Set<Variable> existVariables = ruleInputKList.variableSet();
-                if (!unificationConstraint.isMatching(existVariables)) {
+                unificationConstraint = unificationConstraint.orientSubstitution(existVariables);
+                if (unificationConstraint == null || !unificationConstraint.isMatching(existVariables)) {
                     continue;
                 }
 

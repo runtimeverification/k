@@ -130,11 +130,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
+        constraint = constraint.expandPatterns(false).simplifyModuloPatternFolding();
+        if (constraint.isFalse()) {
+            return null;
+        }
+
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
-        constraint = constraint.expandPatterns(false)
-                .simplifyModuloPatternFolding()
-                .orientSubstitution(rightOnlyVariables);
-        if (constraint == null || constraint.isFalse()) {
+        constraint = constraint.orientSubstitution(rightOnlyVariables);
+        if (constraint == null) {
             return null;
         }
 

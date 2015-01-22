@@ -26,6 +26,7 @@ import org.kframework.backend.java.util.Utils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.kframework.kil.MapBuiltin;
 
 /**
  * An equality between two canonicalized terms.
@@ -126,9 +127,12 @@ public class Equality implements Serializable {
      */
     public boolean isSimplifiableByCurrentAlgorithm() {
         return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
-                && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap)
+                && (!(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap))
                 && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList)
-                && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet);
+                && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet)
+                || BuiltinMap.isMapUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
+                || BuiltinSet.isSetUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
+                || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
     }
 
     @Override
