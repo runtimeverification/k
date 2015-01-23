@@ -82,10 +82,11 @@ public class JavaSymbolicExecutor implements Executor {
             return new RewriteRelation(finalState, null);
         }
 
-        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
         SymbolicRewriter rewriter = symbolicRewriter.get();
-        KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
+        KRunState finalState = rewriter.rewrite(
+                new ConstrainedTerm(term, ConjunctiveFormula.of(termContext)),
+                bound,
+                computeGraph);
         return new RewriteRelation(finalState, rewriter.getExecutionGraph());
     }
 
