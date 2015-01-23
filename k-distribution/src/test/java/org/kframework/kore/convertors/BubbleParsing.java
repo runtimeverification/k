@@ -35,12 +35,16 @@ import org.kframework.parser.outer.Outer;
  *
  * Works for KORE bubbles for now.
  *
+ * TODO: WORK IN PROGRESS
  */
 
 public class BubbleParsing {
 
     private Grammar kastGrammar;
 
+    /**
+     * TODO: WARNING: paths are hardwired for now.
+     */
     public BubbleParsing() {
         Definition kilDefinitionOfKORE = parseUsingOuter(new File(TestParserOnKORE.ROOT + "/kore.k"));
         KILtoKORE kilToKore1 = new KILtoKORE(null);
@@ -65,6 +69,9 @@ public class BubbleParsing {
         return def;
     }
 
+    /**
+     * Replaces the bubbles in m with their parsing.
+     */
     public Module parseBubbles(Module m) {
         Set<Module> newImports = stream(m.imports()).map(this::parseBubbles).collect(Collectors.toSet());
 
