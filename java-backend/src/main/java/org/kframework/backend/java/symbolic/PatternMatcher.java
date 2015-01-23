@@ -379,7 +379,7 @@ public class PatternMatcher extends AbstractMatcher {
             fSubstitution = fSubstitution.add(
                     new DisjunctiveFormula(PersistentUniqueList.from(conjunctions)));
         } else {
-            fSubstitution = fSubstitution.add(substitutions.get(0));
+            fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
         }
     }
 
@@ -616,7 +616,7 @@ public class PatternMatcher extends AbstractMatcher {
             if (substitutions.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
             } else if (substitutions.size() == 1) {
-                fSubstitution = fSubstitution.add(substitutions.get(0));
+                fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
             } else {
                 fSubstitution = fSubstitution.add(
                         new DisjunctiveFormula(PersistentUniqueList.from(substitutions)));

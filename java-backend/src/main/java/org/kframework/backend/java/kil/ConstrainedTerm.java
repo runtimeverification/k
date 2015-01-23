@@ -176,13 +176,21 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 .map(ConjunctiveFormula::getDisjunctiveNormalForm)
                 .map(DisjunctiveFormula::conjunctions)
                 .flatMap(List::stream)
-                .map(c -> c.addAndSimplify(constraint()))
+                .map(ConjunctiveFormula::simplify)
                 .filter(c -> !c.isFalse())
                 .collect(Collectors.toList());
 
         List<ConjunctiveFormula> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
-            ConjunctiveFormula solution = candidate.orientSubstitution(constrainedTerm.variableSet());
+            if (candidate.orientSubstitution(constrainedTerm.variableSet()) != null) {
+                candidate = candidate.orientSubstitution(constrainedTerm.variableSet());
+            }
+
+            ConjunctiveFormula solution = candidate.addAndSimplify(constraint());
+            if (solution.isFalse()) {
+                continue;
+            }
+
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             if (!candidate.isMatching(constrainedTerm.variableSet())) {

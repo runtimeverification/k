@@ -276,12 +276,7 @@ public class ConjunctiveFormula extends Term {
                     // delete
                 } else if (equality.truthValue() == TruthValue.FALSE) {
                     // conflict
-                    return new ConjunctiveFormula(
-                            substitution,
-                            equalities,
-                            disjunctions,
-                            TruthValue.FALSE,
-                            context);
+                    return falsify(substitution, equalities, disjunctions);
                 } else {
                     if (equality.isSimplifiableByCurrentAlgorithm()) {
                         // (decompose + conflict)*
@@ -290,15 +285,10 @@ public class ConjunctiveFormula extends Term {
                                 partialSimplification,
                                 context);
                         if (!unifier.symbolicUnify(leftHandSide, rightHandSide)) {
-                            return new ConjunctiveFormula(
-                                    substitution,
-                                    equalities,
-                                    disjunctions,
-                                    TruthValue.FALSE,
-                                    context);
+                            return falsify(substitution, equalities, disjunctions);
                         }
                         // TODO(AndreiS): fix this in a general way
-                        if (!unifier.constraint().equalities.isEmpty() && unifier.constraint().equalities.get(0).equals(equality)) {
+                        if (unifier.constraint().equalities.contains(equality)) {
                             pendingEqualities = pendingEqualities.plus(equality);
                             continue;
                         }
@@ -314,12 +304,7 @@ public class ConjunctiveFormula extends Term {
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
-                            return new ConjunctiveFormula(
-                                    substitution,
-                                    equalities,
-                                    disjunctions,
-                                    TruthValue.FALSE,
-                                    context);
+                            return falsify(substitution, equalities, disjunctions);
                         }
                     } else if (rightHandSide instanceof Variable
                             && !leftHandSide.variableSet().contains(rightHandSide)) {
@@ -330,33 +315,18 @@ public class ConjunctiveFormula extends Term {
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
-                            return new ConjunctiveFormula(
-                                    substitution,
-                                    equalities,
-                                    disjunctions,
-                                    TruthValue.FALSE,
-                                    context);
+                            return falsify(substitution, equalities, disjunctions);
                         }
                     } else if (leftHandSide instanceof Variable
                             && rightHandSide.isNormal()
                             && rightHandSide.variableSet().contains(leftHandSide)) {
                         // occurs
-                        return new ConjunctiveFormula(
-                                substitution,
-                                equalities,
-                                disjunctions,
-                                TruthValue.FALSE,
-                                context);
+                        return falsify(substitution, equalities, disjunctions);
                     } else if (rightHandSide instanceof Variable
                             && leftHandSide.isNormal()
                             && leftHandSide.variableSet().contains(rightHandSide)) {
                         // swap + occurs
-                        return new ConjunctiveFormula(
-                                substitution,
-                                equalities,
-                                disjunctions,
-                                TruthValue.FALSE,
-                                context);
+                        return falsify(substitution, equalities, disjunctions);
                     } else {
                         // unsimplified equation
                         pendingEqualities = pendingEqualities.plus(equality);
@@ -367,6 +337,18 @@ public class ConjunctiveFormula extends Term {
         } while (change);
 
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
+    }
+
+    private ConjunctiveFormula falsify(
+            Substitution<Variable, Term> substitution,
+            PersistentUniqueList<Equality> equalities,
+            PersistentUniqueList<DisjunctiveFormula> disjunctions) {
+        return new ConjunctiveFormula(
+                substitution,
+                equalities,
+                disjunctions,
+                TruthValue.FALSE,
+                context);
     }
 
     public Substitution<Variable, Term> getSubstitution(Variable variable, Term term) {

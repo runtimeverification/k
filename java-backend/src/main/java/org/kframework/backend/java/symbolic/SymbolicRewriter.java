@@ -476,8 +476,14 @@ public class SymbolicRewriter {
                 }
 
                 for (int i = 0; getTransition(i) != null; ++i) {
-                    if (visited.add(getTransition(i))) {
-                        nextQueue.add(getTransition(i));
+                    ConstrainedTerm result = new ConstrainedTerm(
+                            getTransition(i).term(),
+                            getTransition(i).constraint().removeBindings(
+                                    Sets.difference(
+                                            getTransition(i).constraint().substitution().keySet(),
+                                            initialTerm.variableSet())));
+                    if (visited.add(result)) {
+                        nextQueue.add(result);
                     }
                 }
             }
