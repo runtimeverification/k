@@ -40,6 +40,7 @@ module BASIC-K
   syntax K   //[...]   // no constructors at this stage
   syntax KString ::= r"[\\\"]([^\\\"\\n\\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"   [token, noAutoReject, onlyLabel]
          // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
+  syntax KLabel
 endmodule
 
 
