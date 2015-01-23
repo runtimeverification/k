@@ -19,9 +19,6 @@ import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.RemoveUnusedModules;
-import org.kframework.parser.generator.ParsersPerModule;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete.DefinitionLocalKParser;
 import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.generator.OuterParser;
@@ -150,79 +147,66 @@ public class DefinitionLoader {
 
         sw.printIntermediate("Checks");
 
-        if (context.kompileOptions.experimental.javaParser) {
-            // save the new parser info
-            Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context, kem);
-            loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
-
-            Map<String, Grammar> parsers = ParsersPerModule.generateParsersForModules(def, context, kem);
-            // save the new parser info for all modules. This should make the previous call obsolete (soon)
-            loader.saveOrDie(context.files.resolveKompiled("newModuleParsers.bin"), parsers);
-            sw.printIntermediate("Gen module parsers");
-        }
-
         File cache = files.resolveKompiled("defx-cache.bin");
         Thread t2 = null;
-        if (!context.kompileOptions.experimental.javaParserRules) {
-            // ------------------------------------- generate files
-            DefinitionLocalKParser.init(files.resolveKompiled("."));
-            ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
-            ResourceExtractor.ExtractGroundSDF(files.resolveTemp("ground"));
+        // ------------------------------------- generate files
+        DefinitionLocalKParser.init(files.resolveKompiled("."));
+        ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
+        ResourceExtractor.ExtractGroundSDF(files.resolveTemp("ground"));
 
-            ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
-            // ------------------------------------- generate parser TBL
-            // cache the TBL if the sdf file is the same
-            String oldSdfPgm = "";
-            if (files.resolveKompiled("Program.sdf").exists())
-                oldSdfPgm = files.loadFromKompiled("Program.sdf");
+        ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
+        // ------------------------------------- generate parser TBL
+        // cache the TBL if the sdf file is the same
+        String oldSdfPgm = "";
+        if (files.resolveKompiled("Program.sdf").exists())
+            oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
-            StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
+        StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context, kem);
 
-            String newSdfPgm = newSdfPgmBuilder.toString();
-            files.saveToTemp("pgm/Program.sdf", newSdfPgm);
+        String newSdfPgm = newSdfPgmBuilder.toString();
+        files.saveToTemp("pgm/Program.sdf", newSdfPgm);
 
-            sw.printIntermediate("File Gen Pgm");
+        sw.printIntermediate("File Gen Pgm");
 
-            if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
-                sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
-                files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
-                files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
-                sw.printIntermediate("Generate TBLPgm");
-            }
+        if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
+            sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
+            files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
+            files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
+            sw.printIntermediate("Generate TBLPgm");
+        }
 
-            // ------------------------------------- generate parser TBL
-            // cache the TBL if the sdf file is the same
-            String oldSdf = "";
-            if (files.resolveKompiled("Integration.sdf").exists())
-                oldSdf = files.loadFromKompiled("Integration.sdf");
-            String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
-            files.saveToTemp("def/Integration.sdf", newSdf);
-            files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
+        // ------------------------------------- generate parser TBL
+        // cache the TBL if the sdf file is the same
+        String oldSdf = "";
+        if (files.resolveKompiled("Integration.sdf").exists())
+            oldSdf = files.loadFromKompiled("Integration.sdf");
+        String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
+        files.saveToTemp("def/Integration.sdf", newSdf);
+        files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
 
-            sw.printIntermediate("File Gen Def");
+        sw.printIntermediate("File Gen Def");
 
-            if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
-                    || !files.resolveKompiled("Ground.tbl").exists()) {
-                try {
-                    // delete the file with the cached/partially parsed rules
-                    if (cache.exists() && !cache.delete()) {
-                        throw KExceptionManager.criticalError("Could not delete file " + cache);
-                    }
-                    // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                    Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
-                    t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
-                    t1.join();
-                    files.copyTempFileToKompiledDirectory("def/Integration.sdf");
-                    files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw KExceptionManager.criticalError(
-                            "Thread was interrupted trying to run SDF2Table");
+        if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
+                || !files.resolveKompiled("Ground.tbl").exists()) {
+            try {
+                // delete the file with the cached/partially parsed rules
+                if (cache.exists() && !cache.delete()) {
+                    throw KExceptionManager.criticalError("Could not delete file " + cache);
                 }
-
-
-                sw.printIntermediate("Generate TBLDef");
+                // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+                Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
+                t2 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
+                t1.join();
+                files.copyTempFileToKompiledDirectory("def/Integration.sdf");
+                files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw KExceptionManager.criticalError(
+                        "Thread was interrupted trying to run SDF2Table");
             }
+
+
+            sw.printIntermediate("Generate TBLDef");
         }
 
         def = (Definition) new ParseConfigsFilter(context, kem).visitNode(def);
@@ -266,17 +250,15 @@ public class DefinitionLoader {
 
         sw.printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
 
-        if (!context.kompileOptions.experimental.javaParserRules) {
-            try {
-                if (t2 != null) {
-                    t2.join();
-                    files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw KExceptionManager.criticalError(
-                        "Thread was interrupted trying to run SDF2Table");
+        try {
+            if (t2 != null) {
+                t2.join();
+                files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw KExceptionManager.criticalError(
+                    "Thread was interrupted trying to run SDF2Table");
         }
 
         return def;
