@@ -464,8 +464,19 @@ public class PatternMatcher extends AbstractMatcher {
             this.fail(builtinSet, pattern);
         }
 
-        throw new UnsupportedOperationException(
-                "set matching is only supported when one of the sets is a variable.");
+        BuiltinSet patternSet = (BuiltinSet) pattern;
+        if (!patternSet.isConcreteCollection() || patternSet.concreteSize() > 1) {
+            throw new UnsupportedOperationException(
+                    "set matching is only supported when one of the sets is a variable.");
+        }
+
+        if (builtinSet.concreteSize() != patternSet.concreteSize()) {
+            this.fail(builtinSet, pattern);
+        }
+
+        if (builtinSet.concreteSize() > 0) {
+            match(builtinSet.elements().iterator().next(), patternSet.elements().iterator().next());
+        }
     }
 
     @Override
