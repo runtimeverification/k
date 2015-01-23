@@ -151,18 +151,7 @@ public class BuiltinIOOperations {
     }
 
     public Term parseInModule(StringToken input, StringToken startSymbol, StringToken moduleName, TermContext termContext) {
-        try {
-            org.kframework.kil.Term kast = programLoader.parseInModule(
-                    input.stringValue(),
-                    Sources.generatedBy(this.getClass()),
-                    Sort.of(startSymbol.stringValue()),
-                    moduleName.stringValue(), context);
-            Term term = kilTransformerProvider.get().transformAndEval(kast);
-            term = term.evaluate(termContext);
-            return term;
-        } catch (ParseFailedException e) {
-            return processIOException("noparse", termContext);
-        }
+        throw new RuntimeException("Not implemented!");
     }
 
     public Term system(StringToken term, TermContext termContext) {

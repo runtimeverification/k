@@ -8,7 +8,6 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
-import org.kframework.parser.concrete2.Grammar;
 import org.kframework.utils.Poset;
 
 import java.io.Serializable;
@@ -35,7 +34,6 @@ public class ModuleContext implements Serializable {
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
 
-    private Grammar ruleGrammar = null;
 
     /**
      * Represents the bijection map between conses and productions.
@@ -112,11 +110,4 @@ public class ModuleContext implements Serializable {
         syntacticSubsorts.addRelation(bigSort, smallSort);
     }
 
-    public Grammar getRuleGrammar() {
-        return ruleGrammar;
-    }
-
-    public void setRuleGrammar(Grammar ruleGrammar) {
-        this.ruleGrammar = ruleGrammar;
-    }
 }

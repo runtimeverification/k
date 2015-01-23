@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module TEST [location(startLine(3),startColumn(1),endLine(6),endColumn(9))]
-  syntax Exp [location(startLine(4),startColumn(3),endLine(4),endColumn(12))]
-  rule A [location(startLine(5),startColumn(8),endLine(5),endColumn(13)) sort(Exp)]=>A [location(startLine(5),startColumn(17),endLine(5),endColumn(18)) sort(Exp)] requires true ensures true [location(startLine(5),startColumn(3),endLine(5),endColumn(17))]
+module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"6")),endColumn(#token(Int,"9")))]
+  syntax Exp [location(startLine(#token(Int,"4")),startColumn(#token(Int,"3")),endLine(#token(Int,"4")),endColumn(#token(Int,"12")))]
+  rule A [location(startLine(#token(Int,"5")),startColumn(#token(Int,"8")),endLine(#token(Int,"5")),endColumn(#token(Int,"13"))) sort(Exp)]=>A [location(startLine(#token(Int,"5")),startColumn(#token(Int,"17")),endLine(#token(Int,"5")),endColumn(#token(Int,"18"))) sort(Exp)] requires #token(KBoolean,"true") ensures #token(KBoolean,"true") [location(startLine(#token(Int,"5")),startColumn(#token(Int,"3")),endLine(#token(Int,"5")),endColumn(#token(Int,"17")))]
 endmodule

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2015 K Team. All Rights Reserved. -->
 K tool, version 3.5
 -------------------
 

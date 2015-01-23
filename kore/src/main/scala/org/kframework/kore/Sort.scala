@@ -11,4 +11,6 @@ object Sort {
   def unapply(s: Sort): Option[String] = Some(s.name)
 }
 
-case class UninterpretedSort(name: String) extends Sort
+case class UninterpretedSort(name: String) extends Sort {
+ def apply(s: String) = KToken(this, s)
+}
