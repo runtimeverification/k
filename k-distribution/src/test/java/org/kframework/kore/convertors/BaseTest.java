@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.function.Function;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -18,7 +19,7 @@ import org.kframework.parser.outer.Outer;
 
 public abstract class BaseTest extends SDFCompilerTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright \\(c\\) (....-)?20.. K Team\\. All Rights Reserved\\.";
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
 
     static final String ROOT = "src/test/resources/convertor-tests/";
 
@@ -37,7 +38,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         testConversion(this::parseUsingSDF);
     }
 
-    static class DefintionWithContext {
+    public static class DefintionWithContext {
         public final Definition definition;
         public final Context context;
 
@@ -81,13 +82,13 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     private DefintionWithContext parseUsingSDF(File definitionFile) {
         try {
-            return parse(definitionFile, "TEST");
+            return parse(definitionFile, "TEST", false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private DefintionWithContext parseUsingOuter(File definitionFile) {
+    protected DefintionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {
@@ -96,11 +97,13 @@ public abstract class BaseTest extends SDFCompilerTest {
             throw new RuntimeException(e);
         }
         def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
+        def.setMainModule("TEST");
+        def.setMainSyntaxModule("TEST");
         return new DefintionWithContext(def, null);
     }
 
     private String clean(String definitionText) {
-        return definitionText.replaceAll(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
+        return definitionText.replace(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
     }
 
 }

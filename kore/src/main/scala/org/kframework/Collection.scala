@@ -43,6 +43,14 @@ trait Collection[T] extends Term {
   def isEmpty: Boolean = size == 0
   def size: Int = { var s = 0; foreach { x => s += 1 }; s }
 
+  def head: T = iterator.toList.head
+
+  def tail: Collection[T] = {
+    val builder = newBuilder();
+    iterator foreach { builder += _ }
+    builder.result()
+  }
+
   def map(f: T => T): This = {
     val builder = newBuilder()
     foreach { builder += f(_) }

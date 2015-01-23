@@ -4,9 +4,15 @@ package org.kframework.builtin
 
 import org.kframework.kore.UninterpretedSort
 import org.kframework.kore.KLabel
+import org.kframework.kore.UninterpretedSort
 
 object Sorts {
   val KString = UninterpretedSort("KString")
   val KBoolean = UninterpretedSort("KBoolean")
-  val KInt = UninterpretedSort("KInt")
+  val Int = UninterpretedSort("Int")
+
+  val K = UninterpretedSort("K")
+  val KVariable = UninterpretedSort("KVariable")
+  val KList = UninterpretedSort("KList")
+  val KToken = UninterpretedSort("KToken")
 }

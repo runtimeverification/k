@@ -43,14 +43,10 @@ public class PrintTransition implements Transformation<Transition, String> {
                 sb.append("\nRule tagged ");
                 sb.append(astNodePrinter.run(ruleAttrs, a));
             }
-        } else if (trans.getType() == TransitionType.LABEL) {
-            sb.append("\nRule labelled " + trans.getLabel());
         } else if (trans.getType() == TransitionType.REDUCE) {
             sb.append("\nFunction evaluation");
         } else if (trans.getType() == TransitionType.UNLABELLED) {
             sb.append("\nUnlabelled rule");
-        } else if (trans.getType() == TransitionType.DEADLOCK) {
-            sb.append("\nDeadlock");
         } else {
             sb.append("\nRead " + StringBuiltin.of(trans.getReadString()).value());
         }

@@ -1,20 +1,16 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2;
+package org.kframework.parser.concrete2kore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import org.kframework.kil.Constant;
-import org.kframework.kil.KList;
-import org.kframework.kil.Location;
-import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
+import org.kframework.kore.outer.Production;
+import org.kframework.parser.*;
 
 /**
  * An action that transforms an AST into another AST
@@ -82,15 +78,14 @@ public abstract class Rule implements Serializable {
         protected KList apply(KList klist, MetaData metaData) {
             //Term term = new KApp(label, klist);
             Term term;
-            if (label.containsAttribute("token")) {
+            if (label.att().contains("token")) {
                 // TODO: radum, figure out how to reject constants from here.
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                term = new Constant(label.getSort(), value, label);
+                term = Constant.apply(value, label, Optional.empty());
             } else {
-                term = new TermCons(label.getSort(), klist.getContents(), label);
-                term.setSort(label.getSort());
+                term = TermCons.apply(klist.items(), label, Optional.empty());
             }
-            return new KList(Arrays.asList(term));
+            return new KList(Arrays.asList(term), Optional.empty());
         }
     }
 
@@ -109,7 +104,7 @@ public abstract class Rule implements Serializable {
         protected abstract List<Term> applySuffix(List<Term> suffix, MetaData metaData);
 
         protected KList apply(KList klist, MetaData metaData) {
-            List<Term> terms = klist.getContents();
+            List<Term> terms = klist.items();
             int i = terms.size() - this.getSuffixLength();
             if (i < 0) {
                 return this.rejectSmallKLists() ? null : klist;
@@ -122,10 +117,10 @@ public abstract class Rule implements Serializable {
                 if (result == null) { return null; }
                 else if (result == suffix) { return klist; }
                 else {
-                    KList prefix = new KList(klist);
+                    KList prefix = KList.apply(klist);
                     for (int j = terms.size() - 1;
                          j >= terms.size() - this.getSuffixLength(); j--) {
-                        prefix.getContents().remove(j);
+                        prefix.items().remove(j);
                     }
                     for (Term term : result) {
                         prefix.add(term);
@@ -175,9 +170,9 @@ public abstract class Rule implements Serializable {
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 1; }
         public List<Term> applySuffix(List<Term> terms, MetaData metaData) {
-            Term newTerm = terms.get(0).shallowCopy();
-            newTerm.setLocation(new Location(metaData.start.line, metaData.start.column,
-                                             metaData.end.line, metaData.end.column));
+            Term newTerm = terms.get(0).shallowCopy(
+                    new Location(metaData.start.line, metaData.start.column,
+                                 metaData.end.line, metaData.end.column));
             return Arrays.asList(newTerm);
         }
     }

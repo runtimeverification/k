@@ -198,8 +198,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 
 //        ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
         Term list;
-        DataStructureSort myList = context.dataStructureListSortOf(
-            DataStructureSort.DEFAULT_LIST_SORT);
+        DataStructureSort myList = context.getDefaultListDataStructureSort();
         Term term1 = new Rewrite(
             KApp.of(KLabelConstant.of(myList.unitLabel())),
             KApp.of(KLabelConstant.of(myList.elementLabel()), parseTerm),

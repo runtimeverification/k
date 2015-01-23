@@ -1,12 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -14,17 +10,24 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.tools.Executor;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JavaSymbolicExecutor implements Executor {
 
@@ -60,30 +63,30 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunState run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        return internalRun(cfg, -1);
+    public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
+        return javaRewriteEngineRun(cfg, -1, computeGraph);
     }
 
-    private KRunState internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
-        ConstrainedTerm result = javaKILRun(cfg, bound);
-        org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTransformer(context));
-        KRunState returnResult = new KRunState(kilTerm, counter);
-        return returnResult;
-    }
 
-    private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
+    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
 
         if (javaOptions.patternMatching) {
+            if (computeGraph) {
+                KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            }
             ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
-            return rewriteResult;
-        } else {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
-            return getSymbolicRewriter().rewrite(constrainedTerm, bound);
+            JavaKRunState finalState = new JavaKRunState(rewriteResult.term(), context, counter);
+            return new RewriteRelation(finalState, null);
         }
+
+        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint);
+        SymbolicRewriter rewriter = symbolicRewriter.get();
+        KRunState finalState = rewriter.rewrite(constrainedTerm, bound, computeGraph);
+        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
     }
 
     @Override
@@ -141,7 +144,7 @@ public class JavaSymbolicExecutor implements Executor {
                         .visitNode(pattern.getBody());
 
             searchResults.add(new SearchResult(
-                    new KRunState(rawResult, counter),
+                    new JavaKRunState(rawResult, counter),
                     substitutionMap,
                     compilationInfo));
         }
@@ -154,9 +157,9 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
-    public KRunState step(org.kframework.kil.Term cfg, int steps)
+    public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return internalRun(cfg, steps);
+        return javaRewriteEngineRun(cfg, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {

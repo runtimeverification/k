@@ -34,13 +34,11 @@ public class UnparserBackend extends PosterBackend {
     @Override
     public void run(Definition definition) {
         if (unflattenFirst) {
-            ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
+            ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context, true);
             definition = (Definition) concretizeSyntax.visitNode(definition);
         }
-        UnparserFilter unparserFilter = new UnparserFilter(context);
-        unparserFilter.visitNode(definition);
 
-        String unparsedText = unparserFilter.getResult();
+        String unparsedText = new Unparser(context).print(definition);
 
         files.saveToDefinitionDirectory(FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
     }

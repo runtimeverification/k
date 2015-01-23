@@ -21,10 +21,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.parser.concrete2.Grammar;
-import org.kframework.parser.concrete2.MakeConsList;
-import org.kframework.parser.concrete2.Parser;
-import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.utils.CachedSentence;
 import org.kframework.utils.XmlLoader;
@@ -67,43 +63,37 @@ public class ParseRulesFilter extends ParseForestTransformer {
             Sentence sentence;
             Sentence st;
 
-            if (!context.kompileOptions.experimental.javaParserRules) {
-                String parsed = null;
-                if (ss.containsAttribute("kore")) {
+            String parsed = null;
+            if (ss.containsAttribute("kore")) {
 
-                    long koreStartTime = System.currentTimeMillis();
-                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
-                    if (context.globalOptions.verbose)
-                        System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
-                } else {
-                    try {
-                        parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
-                    // DISABLE EXCEPTION CHECKSTYLE
-                    } catch (RuntimeException e) {
-                        String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation(), e));
-                    }
-                    // ENABLE EXCEPTION CHECKSTYLE
+                long koreStartTime = System.currentTimeMillis();
+                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
+                if (context.globalOptions.verbose)
+                    System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
+            } else {
+                try {
+                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
+                // DISABLE EXCEPTION CHECKSTYLE
+                } catch (RuntimeException e) {
+                    String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation(), e));
                 }
-                Document doc = XmlLoader.getXMLDoc(parsed);
-
-                // replace the old xml node with the newly parsed sentence
-                Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
-                XmlLoader.addSource(xmlTerm, ss.getSource());
-                XmlLoader.reportErrors(doc, ss.getType());
-
-                st = (Sentence) new JavaClassesFactory(context).getTerm((Element) xmlTerm);
-                assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
-                st.setLabel(ss.getLabel());
-                st.setAttributes(ss.getAttributes());
-                st.setLocation(ss.getLocation());
-                st.setSource(ss.getSource());
-            } else  {
-                // parse with the new parser for rules
-                Grammar ruleGrammar = getCurrentModule().getRuleGrammar(kem);
-                st = RuleParserHelper.parseSentence(ss, ruleGrammar.get("MetaKList"), ss.getType());
+                // ENABLE EXCEPTION CHECKSTYLE
             }
+            Document doc = XmlLoader.getXMLDoc(parsed);
+
+            // replace the old xml node with the newly parsed sentence
+            Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+            XmlLoader.updateLocation(xmlTerm, ss.getContentStartLine(), ss.getContentStartColumn());
+            XmlLoader.addSource(xmlTerm, ss.getSource());
+            XmlLoader.reportErrors(doc, ss.getType());
+
+            st = (Sentence) new JavaClassesFactory(context).getTerm((Element) xmlTerm);
+            assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
+            st.setLabel(ss.getLabel());
+            st.setAttributes(ss.getAttributes());
+            st.setLocation(ss.getLocation());
+            st.setSource(ss.getSource());
 
             if (Constants.CONTEXT.equals(ss.getType()))
                 sentence = new org.kframework.kil.Context(st);

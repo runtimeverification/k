@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TstKILtoKOREIT extends BaseTest {

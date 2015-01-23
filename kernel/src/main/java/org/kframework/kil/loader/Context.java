@@ -12,7 +12,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.ColorOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
@@ -133,7 +132,6 @@ public class Context implements Serializable {
     @Deprecated @Inject public transient GlobalOptions globalOptions;
     @Deprecated public KompileOptions kompileOptions;
     @Deprecated @Inject(optional=true) public KRunOptions krunOptions;
-    @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 
     public Context() {
         initSubsorts(subsorts);
@@ -425,15 +423,39 @@ public class Context implements Serializable {
         this.dataStructureSorts = new HashMap<>(dataStructureSorts);
     }
 
+    /**
+     * Return the DataStructureSort corresponding to the given Sort, or null if
+     * the sort is not known as a data structure sort.
+     */
     public DataStructureSort dataStructureSortOf(Sort sort) {
         return dataStructureSorts.get(sort);
     }
 
+    /**
+     * Like dataStructureSortOf, except it returns null also if
+     * the sort corresponds to a DataStructureSort which isn't a list sort.
+     */
     public DataStructureSort dataStructureListSortOf(Sort sort) {
         DataStructureSort dataStructSort = dataStructureSorts.get(sort);
         if (dataStructSort == null) return null;
         if (!dataStructSort.type().equals(Sort.LIST)) return null;
         return dataStructSort;
+    }
+
+    /**
+     * Get a DataStructureSort for the default list sort, or raise a nice exception.
+     * Equivalent to
+     * <code>dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT)</code>,
+     * if it succeeds.
+     */
+    public DataStructureSort getDefaultListDataStructureSort() {
+        DataStructureSort list = dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+        if (list == null) {
+            throw KExceptionManager.internalError(
+                    "A sort List must exist and be recognized as a data structure sort."
+                    + " Installation is corrupt or --no-prelude used with incomplete definition.");
+        }
+        return list;
     }
 
     /**
