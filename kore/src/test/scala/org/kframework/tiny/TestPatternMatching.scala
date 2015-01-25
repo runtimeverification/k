@@ -3,8 +3,10 @@ package org.kframework.tiny
 import org.kframework.kore._
 import KORE._
 import org.kframework.tiny.builtin.KInt._
+import TrueAndFalse._
 
 class TestPatternMatching {
+
   import org.junit._
   import Assert._
 
@@ -19,20 +21,37 @@ class TestPatternMatching {
     assertEquals(Some(And(X -> foo)), X.matchOne(foo))
   }
 
+  @Test def testSimpleWithFalseSideCondition() {
+    val foo = 'foo()
+    assertEquals(False, X.matchAll(foo)(PropositionTheory(False)))
+  }
+
   @Test def testSimpleWithTrueSideCondition() {
     val foo = 'foo()
-    assertEquals(None, X.matchOne(foo)(PropositionTheory(False)))
+    assertEquals(Or(And(X -> 'foo())), X.matchAll(foo)(PropositionTheory(True)))
   }
 
   @Test def testEmptyMatch() {
     val foo = 'foo()
-    assertEquals(Some(And()), foo.matchOne(foo))
+    assertEquals(Some(True), foo.matchOne(foo))
   }
 
   @Test def testKApply() {
     val foo = 'foo((5: K))
     val pattern = 'foo(X)
     assertEquals(Some(And(X -> ((5: K): K))), pattern.matchOne(foo))
+  }
+
+  @Test def testKApplyWithCondition() {
+    val foo = 'foo((5: K))
+    val pattern = 'foo(X)
+    assertEquals(Some(And(X -> ((5: K): K))), pattern.matchOne(foo)(PropositionTheory(Equals(X, 5: K))))
+  }
+
+  @Test def testKApplyWithFailingCondition() {
+    val foo = 'foo((5: K))
+    val pattern = 'foo(X)
+    assertEquals(False, pattern.matchAll(foo)(PropositionTheory(Equals(X, 4: K))))
   }
 
   @Test def testKApply1() {
@@ -99,6 +118,14 @@ class TestPatternMatching {
     val pattern = 'foo(X, (5: K), Y)
     assertEquals(Or(And(X -> KList(), Y -> KList((5: K), (5: K))), And(X -> (5: K), Y -> (5: K)), And(X -> KList((5: K), (5: K)), Y -> KList())),
       pattern.matchAll(foo))
+  }
+
+  @Test def testKListAssoc3WithCondition() {
+    val foo = 'foo((5: K), (5: K), (5: K))
+    val Y = KVariable("Y")
+    val pattern = 'foo(X, (5: K), Y)
+    assertEquals(Or(And(X -> (5: K), Y -> (5: K))),
+      pattern.matchAll(foo)(PropositionTheory(Equals(X, 5: K))))
   }
 
   @Test def testKListMultipleVar() {
