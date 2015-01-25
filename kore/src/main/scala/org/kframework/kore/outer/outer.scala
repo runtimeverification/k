@@ -13,7 +13,15 @@ import org.kframework.kore.KList
 
 trait OuterKORE
 
-case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal]) extends AssertionError(nonTerminals.toString)
+case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
+  extends AssertionError(nonTerminals.toString)
+
+//object NonTerminalsWithUndefinedSortException {
+//  def apply(nonTerminals: Set[NonTerminal]) =
+//    new NonTerminalsWithUndefinedSortException(nonTerminals.toString, nonTerminals)
+//
+//}
+
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
