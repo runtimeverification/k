@@ -14,7 +14,7 @@ case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KA
   def copy(att: Attributes): KEquals = KEquals(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Disjunction): Disjunction = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an equals. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KEquals.newBuilder()
@@ -29,7 +29,7 @@ case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstr
   def copy(att: Attributes): KOr = KOr(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Disjunction): Disjunction = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KOr.newBuilder()
@@ -44,7 +44,7 @@ case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbst
   def copy(att: Attributes): KAnd = KAnd(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Disjunction): Disjunction = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KAnd.newBuilder()
@@ -54,15 +54,13 @@ object KAnd {
   def newBuilder(): Builder[K, KAnd] = ListBuffer() mapResult { case List(x, y) => KAnd(x, y) }
 }
 
-case class KBoolean(v: Boolean, att: Attributes = Attributes()) extends KToken with Proposition {
+case class KBoolean(v: Boolean, att: Attributes = Attributes())
+  extends KToken with Proposition with Leaf {
   type This = KBoolean
   val sort = KBoolean
   val s: String = v.toString
 
   def copy(att: Attributes) = KBoolean(v, att)
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
 }
 
 object KBoolean extends Sort with KLabel {
@@ -70,14 +68,11 @@ object KBoolean extends Sort with KLabel {
   val name: String = "Boolean"
 }
 
-case class KInt(n: Int, att: Attributes = Attributes()) extends KToken {
+case class KInt(n: Int, att: Attributes = Attributes()) extends KToken with Leaf {
   type This = KInt
   val sort = KInt
   val s: String = n.toString
   def copy(att: Attributes) = KInt(n, att)
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
 }
 
 object KInt extends Sort with KLabel {

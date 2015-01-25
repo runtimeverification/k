@@ -10,8 +10,7 @@ class TestPatternMatching {
 
   val X = KVariable("X")
 
-  implicit val equiv: Equivalence = EqualsEquivalence
-  implicit val disj: Disjunction = new Disjunction(Set(Conjunction()))
+  implicit val theory: Theory = FreeTheory
 
   implicit def KList(ks: K*) = InjectedKList(ks)
 

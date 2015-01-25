@@ -25,8 +25,23 @@ trait HasAttributes {
 trait K extends HasAttributes with Pattern {
   protected type This <: K
 
-  def copy(att: Attributes): This
   def transform(t: PartialFunction[K, K]): K
+  def copy(att: Attributes): This
+}
+
+trait Leaf extends K {
+  def transform(t: PartialFunction[K, K]): K =
+    t.lift.apply(this).getOrElse(this)
+}
+
+trait EmptyAttributes extends K {
+  protected type This = EmptyAttributes
+  def att: Attributes = Attributes()
+  def copy(att: Attributes): This =
+    if(att != Attributes)
+      throw new UnsupportedOperationException("Attributes must be empty.")
+    else
+      this
 }
 
 trait KItem extends K
@@ -79,16 +94,13 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
     case _ => false
   }
 
-  def copy(att: Attributes): KApply = KApply(klabel, klist, att)
+  override def copy(att: Attributes): This = KApply(klabel, klist, att)
 }
 
 case class KUninterpretedToken(sort: Sort, s: String, override val att: Attributes = Attributes())
-  extends KToken with KTokenToString with KORE {
+  extends KToken with KTokenToString with KORE with Leaf {
   type This = KToken
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
 }
 
 case class ConcreteKLabel(name: String) extends KLabel with KORE {
@@ -108,12 +120,9 @@ case class KSequence(val ks: List[K], val att: Attributes = Attributes())
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
-  extends KItem with KORE with KLabel with KVariablePattern with KVariableToString {
+  extends KItem with KORE with KLabel with KVariablePattern with KVariableToString with Leaf {
   type This = KVariable
   def copy(att: Attributes): KVariable = new KVariable(name, att)
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
@@ -130,15 +139,12 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
 }
 
 case class InjectedKLabel(klabel: KLabel) extends KItem
-  with InjectedKLabelPattern {
+  with InjectedKLabelPattern with Leaf {
   type This = InjectedKLabel
   def att() = Attributes()
   def copy(att: Attributes) = this
 
   override def toString = "#klabel" + "(" + klabel + ")";
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
 }
 
 case class InjectedKList(klist: KList, att: Attributes = Attributes()) extends KAbstractCollection

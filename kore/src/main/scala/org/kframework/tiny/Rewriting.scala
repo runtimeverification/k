@@ -57,7 +57,7 @@ object Rule {
     val right = toRight(termWithRewrite)
 
     (t: K) => {
-      val pmSolutions = left.matchAll(t)(new Disjunction(Set(Conjunction())))
+      val pmSolutions = left.matchAll(t)
       pmSolutions map { substituion => Substitution(right).transform(substituion.bindings) }
     }
   }

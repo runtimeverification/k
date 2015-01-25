@@ -10,34 +10,34 @@ import KORE._
 import scala.collection.mutable.ListBuffer
 
 trait Pattern {
-  def matchOne(k: K)(implicit theory: Theory): Option[Conjunction] = matchAll(k).headOption
+  def matchOne(k: K)(implicit theory: Theory): Option[K] = matchAll(k).headOption
 
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction]
+  def matchAll(k: K)(implicit rest: Theory): Disjunction
 }
 
 trait InjectedKListPattern {
   self: InjectedKList =>
 
   import builtin.KBoolean._
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = ???
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = ???
 }
 
 trait KListPattern {
   self: KList =>
 
-  def matchOne(klist: KList)(implicit rest: Theory): Option[Conjunction] =
+  def matchOne(klist: KList)(implicit rest: Theory): Option[K] =
     matchAllPrivate(klist, true).headOption
 
-  def matchAll(klist: KList)(implicit rest: Theory): Set[Conjunction] =
+  def matchAll(klist: KList)(implicit rest: Theory): Disjunction =
     matchAllPrivate(klist, true)
 
-  private def matchAllPrivate(klist: KList, justOne: Boolean)(implicit rest: Theory): Set[Conjunction] = {
+  private def matchAllPrivate(klist: KList, justOne: Boolean)(implicit rest: Theory): Disjunction = {
     if (!this.delegate.zipAll(klist.delegate, KSequence(), KSequence())
-      .exists({ case (a, b) => rest(a, b) == Some(True) }))
-      Set(True)
+      .exists({ case (a, b) => !rest(a, b) }))
+      Disjunction(True)
     else
       (klist.delegate, this.delegate) match {
-        case (List(), List()) => Set(True)
+        case (List(), List()) => Disjunction(True)
         case (head +: tail, headP +: tailP) if rest(headP, head) => tailP.matchAll(tail)
         case (_, headP +: tailP) =>
           (0 to klist.size)
@@ -54,20 +54,17 @@ trait KListPattern {
   }
 }
 
-case class MetaKLabel(klabel: KLabel) extends KItem {
+case class MetaKLabel(klabel: KLabel) extends KItem with Leaf {
   type This = MetaKLabel
   def copy(att: Attributes) = this
   def att = Attributes()
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = ???
-
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = ???
 }
 
 trait KApplyPattern extends Pattern {
   self: KApply =>
 
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     (this, k) match {
       case (KApply(labelVariable: KVariable, contentsP, _), KApply(label2, contents, _)) =>
         Disjunction(Conjunction(labelVariable -> MetaKLabel(label2))) and contentsP.matchAll(contents)
@@ -81,7 +78,7 @@ trait KApplyPattern extends Pattern {
 trait KVariablePattern extends Pattern {
   self: KVariable =>
 
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     Disjunction(Conjunction(this -> k))
   }
 }
@@ -89,22 +86,22 @@ trait KVariablePattern extends Pattern {
 trait KRewritePattern extends Pattern {
   self: KRewrite =>
 
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = ???
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = ???
 }
 
 trait KTokenPattern extends Pattern {
   self: KToken =>
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     k match {
-      case KToken(`sort`, `s`, _) => Set(True)
-      case _ => Set(Conjunction(False))
+      case KToken(`sort`, `s`, _) => Disjunction(True)
+      case _ => False
     }
   }
 }
 
 trait KSequencePattern extends Pattern {
   self: KSequence =>
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] =
+  def matchAll(k: K)(implicit rest: Theory): Disjunction =
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks) endomap {
@@ -117,7 +114,7 @@ trait KSequencePattern extends Pattern {
 }
 
 trait InjectedKLabelPattern extends Pattern {
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = ???
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = ???
 }
 
 case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KCollection {
@@ -125,7 +122,7 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
 
   def delegate = List(pattern)
   def att = Attributes()
-  def copy(att: Attributes) = this
+  def copy(att: Attributes) = Anywhere(pattern, name)
 
   def newBuilder = ListBuffer() mapResult {
     case List(x) => Anywhere(x)
@@ -136,7 +133,7 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
   val TOPVariable = KVariable("TOP_" + name)
   val HOLEVariable = KVariable("HOLE_" + name)
 
-  def matchAll(k: K)(implicit rest: Theory): Set[Conjunction] = {
+  def matchAll(k: K)(implicit rest: Theory): Disjunction = {
     val localSolution = pattern.matchAll(k) and Disjunction(Conjunction(TOPVariable -> (HOLEVariable: K)))
     val childrenSolutions: Disjunction = k match {
       case k: KCollection =>
@@ -150,8 +147,8 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
                   case rest: K => rest
                 }
               }
-              val anywhereWrapper = Conjunction(TOPVariable -> newAnywhere)
-              s ++ anywhereWrapper
+              val anywhereWrapper = TOPVariable -> newAnywhere
+              Conjunction(s.propositions, s.bindings + anywhereWrapper)
           }
           updatedSolutions
         }).fold(Disjunction())((a, b) => a or b)
