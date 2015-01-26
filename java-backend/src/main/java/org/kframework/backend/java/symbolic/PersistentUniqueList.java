@@ -22,6 +22,7 @@ import org.pcollections.TreePVector;
 
 
 /**
+ * Persistent list with unique elements. Similar to {@link java.util.LinkedHashSet}.
  */
 public class PersistentUniqueList<E> extends AbstractList<E> implements PVector<E>, Serializable {
     private static final PersistentUniqueList EMPTY = new PersistentUniqueList<>(

@@ -436,11 +436,9 @@ public class ConjunctiveFormula extends Term {
         List<Set<ConjunctiveFormula>> collect = disjunctions.stream()
                 .map(disjunction -> ImmutableSet.<ConjunctiveFormula>copyOf(disjunction.conjunctions()))
                 .collect(Collectors.toList());
-        List<ConjunctiveFormula> collect1 = Sets.cartesianProduct(collect).stream()
+        return new DisjunctiveFormula(Sets.cartesianProduct(collect).stream()
                 .map(result::addAll)
-                .collect(Collectors.toList());
-
-        return new DisjunctiveFormula(PersistentUniqueList.from(collect1));
+                .collect(Collectors.toList()));
     }
 
     public boolean checkUnsat() {

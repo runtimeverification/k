@@ -24,9 +24,7 @@ import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.RuleAuditing;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 

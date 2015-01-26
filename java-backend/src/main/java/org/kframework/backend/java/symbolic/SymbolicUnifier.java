@@ -344,10 +344,23 @@ public class SymbolicUnifier extends AbstractUnifier {
         while (!queue.isEmpty()) {
             BuiltinMap candidate = queue.remove();
             for (Rule rule : termContext.definition().patternFoldingRules()) {
-                for (Map<Variable, Term> substitution : PatternMatcher.match(candidate, rule, termContext)) {
+                for (Substitution<Variable, Term> substitution : PatternMatcher.match(candidate, rule, termContext)) {
                     BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
                     if (foldedMaps.add(result)) {
                         queue.add(result);
+
+                        SymbolicUnifier unifier = new SymbolicUnifier(termContext);
+                        if (!unifier.symbolicUnify(result, otherMap)) {
+                            continue;
+                        }
+                        ConjunctiveFormula resultConstraint = unifier.constraint().simplify();
+
+                        /* since here we have a non-deterministic choice to make, we only make
+                         * a choice if it eliminates all map equalities */
+                        if (!resultConstraint.hasMapEqualities() && !resultConstraint.isFalse()) {
+                            constraint = constraint.add(resultConstraint);
+                            return;
+                        }
                     }
                 }
             }
@@ -357,21 +370,6 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (foldedMaps.size() == 1) {
             unifyMap(map, otherMap);
             return;
-        }
-
-        for (BuiltinMap foldedMap : foldedMaps) {
-            SymbolicUnifier unifier = new SymbolicUnifier(termContext);
-            if (!unifier.symbolicUnify(foldedMap, otherMap)) {
-                continue;
-            }
-            ConjunctiveFormula result = unifier.constraint().simplify();
-
-            /* since here we have a non-deterministic choice to make, we only make a choice
-             * if it eliminates all map equalities */
-            if (!result.hasMapEqualities() && !result.isFalse()) {
-                constraint = constraint.add(result);
-                return;
-            }
         }
 
         /* made no progress */
@@ -665,8 +663,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             } else if (constraints.size() == 1) {
                 this.constraint = this.constraint.add(constraints.get(0));
             } else {
-                this.constraint = this.constraint.add(
-                        new DisjunctiveFormula(PersistentUniqueList.from(constraints)));
+                this.constraint = this.constraint.add(new DisjunctiveFormula(constraints));
             }
         }
     }

@@ -182,8 +182,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         List<ConjunctiveFormula> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
-            if (candidate.orientSubstitution(constrainedTerm.variableSet()) != null) {
-                candidate = candidate.orientSubstitution(constrainedTerm.variableSet());
+            ConjunctiveFormula orientedCandidate = candidate
+                    .orientSubstitution(constrainedTerm.variableSet());
+            if (orientedCandidate != null) {
+                candidate = orientedCandidate;
             }
 
             ConjunctiveFormula solution = candidate.addAndSimplify(constraint());

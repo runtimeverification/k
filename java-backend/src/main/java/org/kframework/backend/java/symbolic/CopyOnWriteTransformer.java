@@ -409,11 +409,10 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
-        List<ConjunctiveFormula> transformedConjunctions = disjunctiveFormula.conjunctions().stream()
-                .map(c -> (ConjunctiveFormula) c.accept(this))
-                .collect(Collectors.toList());
         DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
-                PersistentUniqueList.from(transformedConjunctions));
+                disjunctiveFormula.conjunctions().stream()
+                        .map(c -> (ConjunctiveFormula) c.accept(this))
+                        .collect(Collectors.toList()));
         return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
                 transformedDisjunctiveFormula :
                 disjunctiveFormula;

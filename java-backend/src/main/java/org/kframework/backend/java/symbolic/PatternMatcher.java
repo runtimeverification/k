@@ -372,12 +372,9 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (substitutions.size() != 1) {
-            PersistentUniqueList<ConjunctiveFormula> conjunctions = PersistentUniqueList.empty();
-            for (Substitution<Variable, Term> substitution : substitutions) {
-                conjunctions = conjunctions.plus(ConjunctiveFormula.of(substitution, termContext));
-            }
-            fSubstitution = fSubstitution.add(
-                    new DisjunctiveFormula(PersistentUniqueList.from(conjunctions)));
+            fSubstitution = fSubstitution.add(new DisjunctiveFormula(substitutions.stream()
+                    .map(s -> ConjunctiveFormula.of(s, termContext))
+                    .collect(Collectors.toList())));
         } else {
             fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
         }
@@ -618,8 +615,7 @@ public class PatternMatcher extends AbstractMatcher {
             } else if (substitutions.size() == 1) {
                 fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
             } else {
-                fSubstitution = fSubstitution.add(
-                        new DisjunctiveFormula(PersistentUniqueList.from(substitutions)));
+                fSubstitution = fSubstitution.add(new DisjunctiveFormula(substitutions));
             }
         }
     }

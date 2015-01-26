@@ -6,6 +6,8 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.ASTNode;
 
+import java.util.Collection;
+
 /**
  * A disjunction of conjunctions.
  *
@@ -15,9 +17,11 @@ public class DisjunctiveFormula extends Term {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 
-    public DisjunctiveFormula(PersistentUniqueList<ConjunctiveFormula> conjunctions) {
+    public DisjunctiveFormula(Collection<ConjunctiveFormula> conjunctions) {
         super(Kind.KITEM);
-        this.conjunctions = conjunctions;
+        this.conjunctions = conjunctions instanceof PersistentUniqueList ?
+                (PersistentUniqueList<ConjunctiveFormula>) conjunctions :
+                PersistentUniqueList.<ConjunctiveFormula>empty().plusAll(conjunctions);
     }
 
     public PersistentUniqueList<ConjunctiveFormula> conjunctions() {
