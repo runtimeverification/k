@@ -35,16 +35,17 @@ public class SMTOperations {
             return false;
         }
 
+        boolean result = false;
         try {
             String query = KILtoSMTLib.translateConstraint(constraint);
-            boolean result = z3.checkQuery(query, smtOptions.z3CnstrTimeout);
+            result = z3.checkQuery(query, smtOptions.z3CnstrTimeout);
             if (result && RuleAuditing.isAuditBegun()) {
                 System.err.println("SMT query returned unsat: " + query);
             }
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
-        return false;
+        return result;
     }
 
     public boolean impliesSMT(
