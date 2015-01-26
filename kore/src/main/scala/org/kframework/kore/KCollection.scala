@@ -17,6 +17,12 @@ trait KCollection extends Collection[K] with K {
     val transformedChildren: K = this map { _.transform(t) }
     t.lift.apply(transformedChildren).getOrElse(transformedChildren)
   }
+
+  def find(f: K => Boolean): immutable.Set[K] = {
+    val fromChildren = (this.iterable flatMap { _.find(f) }).toSet
+
+    fromChildren | (if (f(this)) Set(this) else Set())
+  }
 }
 
 trait KAbstractCollection extends KCollection {
@@ -45,9 +51,9 @@ trait IsProduct extends Product {
 trait SimpleCaseClass extends KAbstractCollection with WithDelegation with IsProduct {
   val companion = Reflection.findObject(this.getClass.getCanonicalName)
 
-//  override def copy(children: Iterator[K], att: Attributes): This = {
-//    Reflection.invokeMethod(companion, "apply", Seq(children.toSeq :+ att)).asInstanceOf[This]
-//  }
+  //  override def copy(children: Iterator[K], att: Attributes): This = {
+  //    Reflection.invokeMethod(companion, "apply", Seq(children.toSeq :+ att)).asInstanceOf[This]
+  //  }
 }
 
 /**

@@ -22,8 +22,9 @@ trait Equals extends Proposition with Predicate {
 
 object Equals {
   def apply(left: K, right: K, att: Attributes = Attributes()): Equals = (left, right) match {
-    case (left: KVariable, right) => Binding(left, right, att)
-    case (left, right: KVariable) => Binding(right, left, att)
+    // case (left: KVariable, right: KVariable) => throw new UnsupportedOperationException("We do not support direct equality of variables yet.")
+    case (left: KVariable, right) if right.find(x => x.isInstanceOf[KVariable]) == Set() => Binding(left, right, att)
+    case (left, right: KVariable) if !left.isInstanceOf[KVariable] => apply(left, right, att)
     case (left, right) => SimpleEquals(right, left, att)
   }
 
@@ -42,6 +43,8 @@ case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) exten
   override def copy(att: Attributes): This = SimpleEquals(left, right, att)
 
   override def transform(t: PartialFunction[K, K]): K = ???
+
+  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()) extends Equals {
@@ -54,6 +57,8 @@ case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()
   override def copy(att: Attributes): This = Binding(variable, value, att)
 
   override def transform(t: PartialFunction[K, K]): K = ???
+
+  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 import TrueAndFalse._
@@ -108,7 +113,8 @@ object And {
         Or((for (m1 <- sum.conjunctions; m2 <- p.conjunctions) yield {
           m1 and m2
         }).toSeq: _*)
-      case (sum: And, Binding(k, v, _)) => (sum andOption new And(Set[Predicate](), Map(k -> v))) getOrElse False
+      case (sum: And, Binding(k, v, _)) =>
+        (sum andOption new And(Set[Predicate](), Map(k -> v))) getOrElse False
       case (sum: And, p: Predicate) => new And(sum.predicates + p, sum.bindings)
       case (sum: Or, p: Predicate) => And(sum, And(p))
     }
@@ -157,6 +163,8 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K]) extends 
   override def matchAll(k: K)(implicit rest: Theory): Or = ???
 
   override def att: Attributes = ???
+
+  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 case class Or(conjunctions: Set[And]) extends Proposition {
@@ -186,6 +194,8 @@ case class Or(conjunctions: Set[And]) extends Proposition {
   override def att: Attributes = ???
 
   override def matchAll(k: K)(implicit rest: Theory): Or = ???
+
+  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 object Or {

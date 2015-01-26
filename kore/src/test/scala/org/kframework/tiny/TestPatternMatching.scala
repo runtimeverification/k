@@ -58,13 +58,13 @@ class TestPatternMatching {
   @Test def testKApplyIdWithFailingCondition() {
     val foo = 'foo(5: K, 6: K)
     val pattern = 'foo(X, Y)
-    assertEquals(Or(And(X -> (5: K), Y -> (6: K))), pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
+    assertEquals(False, pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
   }
 
   @Test def testKApplyIdWithPassingCondition() {
     val foo = 'foo(5: K, 5: K)
     val pattern = 'foo(X, Y)
-    assertEquals(False, pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
+    assertEquals(Or(And(X -> (5: K), Y -> (5: K))), pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
   }
 
   @Test def testKApply1() {

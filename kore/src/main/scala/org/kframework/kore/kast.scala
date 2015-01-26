@@ -26,12 +26,15 @@ trait K extends HasAttributes with Pattern {
   protected type This <: K
 
   def transform(t: PartialFunction[K, K]): K
+  def find(f: K => Boolean) : Set[K]
   def copy(att: Attributes): This
 }
 
 trait Leaf extends K {
   def transform(t: PartialFunction[K, K]): K =
     t.lift.apply(this).getOrElse(this)
+
+  def find(f: K => Boolean) : Set[K] = if (f(this)) Set(this) else Set()
 }
 
 trait EmptyAttributes extends K {
