@@ -101,7 +101,7 @@ endmodule
 module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   imports BASIC-K
 
-  syntax KDefinition   ::= KRequireList KModuleList   [ hook ]
+  syntax KDefinition   ::= KRequireList KModuleList   [ hook, klabel(#Definition) ]
 
   syntax KRequire      ::= "require" KString          [ klabel(#KRequire), hook ]
   // Radu: These list declarations are a bit tricky (no separator, and the empty element is null).
