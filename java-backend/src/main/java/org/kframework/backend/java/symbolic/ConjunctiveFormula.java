@@ -551,7 +551,7 @@ public class ConjunctiveFormula extends Term {
     public boolean hasMapEqualities() {
         for (Equality equality : equalities) {
             if (equality.leftHandSide() instanceof BuiltinMap
-                    && equality.rightHandSide() instanceof BuiltinMap) {
+                    || equality.rightHandSide() instanceof BuiltinMap) {
                 return true;
             }
         }
