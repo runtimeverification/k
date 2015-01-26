@@ -13,6 +13,8 @@ class TestMeta {
   import KToken._
   import Rewritable._
 
+  implicit val theory = FreeTheory
+
   @Test def simple() {
     assertEquals(1: K, Up(1))
     assertEquals('List(1, 2, 3), Up(List[Int](1, 2, 3)))

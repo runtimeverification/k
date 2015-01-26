@@ -120,8 +120,11 @@ object And {
 case class And(predicates: Set[Predicate], bindings: Map[KVariable, K]) extends Proposition {
 
   def andOption(that: And): Option[And] = {
+    def clashingBindings(v: KVariable): Boolean =
+      bindings(v) != that.bindings(v)
+
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
-    if ((bindings.keys.toSet & that.bindings.keys.toSet).exists(v => bindings(v) != that.bindings(v))) {
+    if ((bindings.keys.toSet & that.bindings.keys.toSet).exists(clashingBindings)) {
       None
     } else
       Some(And(predicates ++ that.predicates, bindings ++ that.bindings))

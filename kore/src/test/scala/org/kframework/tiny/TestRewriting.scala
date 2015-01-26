@@ -3,17 +3,30 @@ package org.kframework.tiny
 import org.kframework.kore._
 import KORE._
 import org.kframework.tiny.builtin.KInt._
+import TrueAndFalse._
 
 class TestRewriting {
   import org.junit._
   import Assert._
   import Rewritable._
 
+  implicit val theory = FreeTheory
   val X = KVariable("X")
+  val Y = KVariable("Y")
 
   @Test
   def testSimple() {
     assertEquals(Set(5: K), (4: K).searchFor(KRewrite(4, 5)))
+  }
+
+  @Test
+  def testSimpleWithFalseSideCondition() {
+    assertEquals(Set(), (4: K).searchFor(KRewrite(4, 5))(PropositionTheory(False)))
+  }
+
+  @Test
+  def testSimpleWithTrueSideCondition() {
+    assertEquals(Set(5: K), (4: K).searchFor(KRewrite(4, 5))(PropositionTheory(True)))
   }
 
   @Test
@@ -47,6 +60,16 @@ class TestRewriting {
   }
 
   @Test
+  def testVarSubstitutionWithTrueSideCondition() {
+    assertEquals(Set('foo(5, 4)), 'foo(4).searchFor(KRewrite('foo(X), 'foo(5, X)))(PropositionTheory(Equals(X, 4))))
+  }
+
+  @Test
+  def testVarSubstitutionWithFalseSideCondition() {
+    assertEquals(Set(), 'foo(4).searchFor(KRewrite('foo(X), 'foo(5, X)))(PropositionTheory(Equals(X, 7))))
+  }
+
+  @Test
   def testVarSubstitution1() {
     assertEquals(Set('foo(5, 4, 5)),
       'foo(4, 5, 6).searchFor(KRewrite('foo(X, 6), 'foo(5, X))))
@@ -76,6 +99,18 @@ class TestRewriting {
   def simple() {
     assertEquals(Set('foo(1, 3)),
       'foo(1, 2).searchFor(KRewrite('foo(1, 2), 'foo(1, 3))))
+  }
+
+  @Test
+  def simpleSwap() {
+    assertEquals(Set('foo(2, 1)),
+      'foo(1, 2).searchFor(KRewrite('foo(X, Y), 'foo(Y, X)))(PropositionTheory(Equals(X, 1))))
+  }
+
+  @Test
+  def simpleSwapOfId() {
+    assertEquals(Set('foo(1, 1)),
+      'foo(1, 1).searchFor(KRewrite('foo(X, Y), 'foo(Y, X)))(PropositionTheory(Equals(X, Y))))
   }
 
   @Test def testSimpleToTerm {

@@ -11,6 +11,7 @@ class TestPatternMatching {
   import Assert._
 
   val X = KVariable("X")
+  val Y = KVariable("Y")
 
   implicit val theory: Theory = FreeTheory
 
@@ -54,6 +55,18 @@ class TestPatternMatching {
     assertEquals(False, pattern.matchAll(foo)(PropositionTheory(Equals(X, 4: K))))
   }
 
+  @Test def testKApplyIdWithFailingCondition() {
+    val foo = 'foo(5: K, 6: K)
+    val pattern = 'foo(X, Y)
+    assertEquals(Or(And(X -> (5: K), Y -> (6: K))), pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
+  }
+
+  @Test def testKApplyIdWithPassingCondition() {
+    val foo = 'foo(5: K, 5: K)
+    val pattern = 'foo(X, Y)
+    assertEquals(False, pattern.matchAll(foo)(PropositionTheory(Equals(X, Y))))
+  }
+
   @Test def testKApply1() {
     val five = KToken(Sort("Int"), "(5:K)")
     val foo = 'foo(five)
@@ -91,14 +104,14 @@ class TestPatternMatching {
 
   @Test def testKListAssoc() {
     val foo = 'foo((5: K))
-    val Y = KVariable("Y")
+
     val pattern = 'foo(X, Y)
     assertEquals(Or(And(X -> KList(), Y -> (5: K)), And(X -> (5: K), Y -> KList())), pattern.matchAll(foo))
   }
 
   @Test def testKListAssoc1() {
     val foo = 'foo((5: K), 6)
-    val Y = KVariable("Y")
+
     val pattern = 'foo(X, Y)
     assertEquals(Or(And(X -> KList(), Y -> KList((5: K), 6)), And(X -> (5: K), Y -> (6: K)), And(X -> KList((5: K), 6), Y -> KList())),
       pattern.matchAll(foo))
@@ -106,7 +119,7 @@ class TestPatternMatching {
 
   @Test def testKListAssoc2() {
     val foo = 'foo((5: K), 7, 6)
-    val Y = KVariable("Y")
+
     val pattern = 'foo(X, 7, Y)
     assertEquals(Or(And(X -> (5: K), Y -> (6: K))),
       pattern.matchAll(foo))
@@ -114,7 +127,7 @@ class TestPatternMatching {
 
   @Test def testKListAssoc3() {
     val foo = 'foo((5: K), (5: K), (5: K))
-    val Y = KVariable("Y")
+
     val pattern = 'foo(X, (5: K), Y)
     assertEquals(Or(And(X -> KList(), Y -> KList((5: K), (5: K))), And(X -> (5: K), Y -> (5: K)), And(X -> KList((5: K), (5: K)), Y -> KList())),
       pattern.matchAll(foo))
@@ -122,7 +135,7 @@ class TestPatternMatching {
 
   @Test def testKListAssoc3WithCondition() {
     val foo = 'foo((5: K), (5: K), (5: K))
-    val Y = KVariable("Y")
+
     val pattern = 'foo(X, (5: K), Y)
     assertEquals(Or(And(X -> (5: K), Y -> (5: K))),
       pattern.matchAll(foo)(PropositionTheory(Equals(X, 5: K))))
@@ -155,7 +168,7 @@ class TestPatternMatching {
 
   @Test def testKSeqAssoc() {
     val foo = KSequence((5: K), (5: K), (5: K))
-    val Y = KVariable("Y")
+
     val pattern = KSequence(X, (5: K), Y)
     assertEquals(Or(And(X -> KSequence(), Y -> KSequence((5: K), (5: K))), And(X -> KSequence((5: K)), Y -> KSequence((5: K))), And(X -> KSequence((5: K), (5: K)), Y -> KSequence())),
       pattern.matchAll(foo))
@@ -175,6 +188,8 @@ class TestPatternMatching {
         And(X -> KList(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
       a.matchAll(o))
   }
+
+
 
   @Test def testTwoAnywheres() {
     val o = 'foo('foo('foo()))

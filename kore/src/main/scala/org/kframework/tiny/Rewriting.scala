@@ -52,7 +52,7 @@ object RewriteToTop {
 object Rule {
   import RewriteToTop._
 
-  def apply(termWithRewrite: K)(implicit equiv: Theory = FreeTheory): Rule = {
+  def apply(termWithRewrite: K)(implicit theory: Theory = FreeTheory): Rule = {
     val left = toLeft(termWithRewrite)
     val right = toRight(termWithRewrite)
 
@@ -70,7 +70,7 @@ case class Rewritable(self: K) {
   /**
    * search using the rewrite rule in K
    */
-  private def search(rules: Set[KRewrite]): Set[K] = priority(rules) flatMap searchFor
+  private def search(rules: Set[KRewrite])(implicit theory: Theory): Set[K] = priority(rules) flatMap searchFor
 
   private def priority(rules: Set[KRewrite]): Set[KRewrite] = self match {
     case KApply(KLabel(v), _, _) => rules collect {
@@ -79,8 +79,8 @@ case class Rewritable(self: K) {
     case _ => rules
   }
 
-  def searchFor(rewrite: K): Set[K] = {
-    Rule(rewrite)()(self)
+  def searchFor(rewrite: K)(implicit theory: Theory): Set[K] = {
+    Rule(rewrite)(theory)(self)
   }
 }
 
