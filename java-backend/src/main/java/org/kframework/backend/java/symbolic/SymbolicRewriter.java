@@ -184,7 +184,7 @@ public class SymbolicRewriter {
                             ConstrainedTerm result = buildResult(rule, unificationConstraint);
                             results.add(result);
                             appliedRules.add(rule);
-                            substitutions.add(unifConstraint.substitution());
+                            substitutions.add(unificationConstraint.substitution());
                             Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
                             Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
                             if (results.size() == successorBound) {
