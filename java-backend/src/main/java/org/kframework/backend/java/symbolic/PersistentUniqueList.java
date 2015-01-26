@@ -115,7 +115,7 @@ public class PersistentUniqueList<E> extends AbstractList<E> implements PVector<
     public PersistentUniqueList<E> plusAll(int i, Collection<? extends E> collection) {
         PersistentUniqueList<E> result = this;
         for (E e : collection) {
-            result = result.plus(i++, e);
+            result = result.plus(i + result.size() - size(), e);
         }
         return result;
     }
