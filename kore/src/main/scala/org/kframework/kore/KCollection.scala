@@ -45,7 +45,7 @@ trait WithDelegation extends KCollection {
 }
 
 trait IsProduct extends Product {
-  def delegate: Iterable[K] = productIterator.asInstanceOf[Iterator[K]].toIterable
+  val delegate: Iterable[K] = productIterator.collect({ case k: K => k }).toIterable
 }
 
 trait SimpleCaseClass extends KAbstractCollection with WithDelegation with IsProduct {

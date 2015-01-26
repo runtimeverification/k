@@ -2,19 +2,18 @@
 
 package org.kframework.tiny.builtin
 
-import org.kframework._
 import org.kframework.kore._
-import org.kframework.kore.KORE._
-import scala.collection.mutable.Builder
+import org.kframework.tiny.TrueAndFalse._
 import org.kframework.tiny._
-import collection.mutable.ListBuffer
+
+import scala.collection.mutable.{Builder, ListBuffer}
 
 case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
   type This = KEquals
   def copy(att: Attributes): KEquals = KEquals(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Theory): Or = {
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit rest: Theory): Or = {
     throw new RuntimeException("We shouldn't match directly on an equals. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KEquals.newBuilder()
@@ -29,7 +28,7 @@ case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstr
   def copy(att: Attributes): KOr = KOr(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Theory): Or = {
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit rest: Theory): Or = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KOr.newBuilder()
@@ -44,7 +43,7 @@ case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbst
   def copy(att: Attributes): KAnd = KAnd(left, right, att)
   def delegate = List(left, right)
 
-  def matchAll(k: K)(implicit rest: Theory): Or = {
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit rest: Theory): Or = {
     throw new RuntimeException("We shouldn't match directly on an OR. It must be handled by the pattern matcher separately.")
   }
   def newBuilder() = KAnd.newBuilder()

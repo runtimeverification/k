@@ -1,15 +1,14 @@
 package org.kframework.tiny
 
-import org.kframework._
 import org.kframework.kore._
-import org.kframework.tiny.Or
+import org.kframework.tiny.TrueAndFalse._
 
 import scala.collection.mutable
 
 trait Proposition extends K {
-  def and(p: Proposition): Proposition = And(this, p)
+  def and(p: Proposition)(implicit theory: Theory): Proposition = And(this, p)
 
-  def or(p: Proposition): Proposition = Or(this, p)
+  def or(p: Proposition)(implicit theory: Theory): Proposition = Or(this, p)
 }
 
 trait Predicate extends Proposition
@@ -35,16 +34,14 @@ object Equals {
 }
 
 
-case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) extends Equals {
+case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) extends SimpleCaseClass with Equals {
   def matchAll(k: K)(implicit rest: Theory): Or = ???
 
   override type This = SimpleEquals
 
   override def copy(att: Attributes): This = SimpleEquals(left, right, att)
 
-  override def transform(t: PartialFunction[K, K]): K = ???
-
-  override def find(f: (K) => Boolean): Set[K] = ???
+  override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
 }
 
 case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()) extends Equals {
@@ -52,7 +49,7 @@ case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()
   val right = value
   override type This = Binding
 
-  override def matchAll(k: K)(implicit rest: Theory): Or = ???
+  override def matchAll(k: K, sideConditions: Proposition = True)(implicit rest: Theory): Or = ???
 
   override def copy(att: Attributes): This = Binding(variable, value, att)
 
@@ -61,9 +58,12 @@ case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()
   override def find(f: (K) => Boolean): Set[K] = ???
 }
 
-import TrueAndFalse._
+import org.kframework.tiny.TrueAndFalse._
 
 trait Theory {
+
+  implicit val thisIsImplicit = this
+
   /**
    * Tells whether the proposition is valid in this theory.
    * If we cannot find an answer (e.g., we have symbolic values), return None
@@ -71,31 +71,54 @@ trait Theory {
    */
   def apply(proposition: Proposition): Option[Boolean]
 
-  def normalize(p: Or): Or = Or((p.conjunctions map normalize).toSeq: _*)
+  def normalize(or: Or): Or = {
+    val normalizedConjunctions = or.conjunctions.map(normalize(_))
+
+    if (normalizedConjunctions.contains(True))
+      Or(True)
+    else {
+      val noFalse = normalizedConjunctions.filterNot { _ == False }
+      for (p <- noFalse) {assert(p.isInstanceOf[And]) }
+      Or(noFalse.asInstanceOf[Set[And]])
+    }
+  }
+
+  def normalize(and: And): Proposition = {
+    //            apply(and) map toProposition getOrElse and
+    val newPredicates: Set[Predicate] =
+      and.predicates
+        .map { p => apply(p) map toProposition getOrElse p }
+        .filterNot { _ == True }
+        .asInstanceOf[Set[Predicate]]
+
+    if (newPredicates.exists(_ == False) || apply(True) == Some(false))
+      False
+    else
+      And(newPredicates, and.bindings)
+  }
 
   def normalize(p: Proposition): Proposition = p match {
     case p: Or => normalize(p)
-    case p: Proposition => apply(p) map toProposition getOrElse p
+    case p: Proposition => normalize(p)
   }
 
   /**
-   * Helper method
+   * Helper method; Returns true when left == right
    */
   def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(True)
 }
 
-case class PropositionTheory(p: Proposition) extends Theory {
-  def apply(proposition: Proposition): Option[Boolean] = (proposition and p) match {
-    case True => Some(true)
-    case False => Some(false)
-    case sum => FreeTheory.apply(sum)
-  }
-}
+//case class PropositionTheory(p: Proposition) extends Theory {
+//  def apply(proposition: Proposition): Option[Boolean] = (proposition and p) match {
+//    case True => Some(true)
+//    case False => Some(false)
+//    case sum => FreeTheory.apply(sum)
+//  }
+//}
 
 object And {
-  def apply(propositions: Proposition*): Proposition =
+  def apply(propositions: Proposition*)(implicit theory: Theory): Proposition =
     propositions.fold(True: Proposition) {
-      case (True, p: And) => p
       case (True, Binding(k, v, _)) => new And(Set(), Map(k -> v))
       case (True, p: Predicate) => new And(Set(p), Map())
       case (sum: Proposition, True) => sum
@@ -123,7 +146,13 @@ object And {
     Some(and.predicates.toSeq ++ (and.bindings map { case (k, v) => Binding(k, v) }))
 }
 
-case class And(predicates: Set[Predicate], bindings: Map[KVariable, K]) extends Proposition {
+case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+
+  // invariant: a bound KVariable will not appear in predicates
+  for (p <- predicates;
+       v <- bindings.keys) {
+    assert(p.find(_ == v) == Set())
+  }
 
   def andOption(that: And): Option[And] = {
     def clashingBindings(v: KVariable): Boolean =
@@ -154,24 +183,22 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K]) extends 
         bindingsString + otherString
     }
 
-  override protected type This = this.type
+  override type This = And
 
-  override def transform(t: PartialFunction[K, K]): K = ???
+  override def delegate: Iterable[K] = predicates ++ bindings.keys ++ bindings.values
 
   override def copy(att: Attributes): This = ???
 
-  override def matchAll(k: K)(implicit rest: Theory): Or = ???
+  override def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 
-  override def att: Attributes = ???
-
-  override def find(f: (K) => Boolean): Set[K] = ???
+  override def newBuilder(): mutable.Builder[K, This] = ???
 }
 
-case class Or(conjunctions: Set[And]) extends Proposition {
-  def or(other: Or): Or = Or(this, other)
+case class Or(conjunctions: Set[And], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+  def or(other: Or)(implicit theory: Theory): Or = Or(this, other)
 
 
-  def and(other: Or): Or = Or(And(this, other))
+  def and(other: Or)(implicit theory: Theory): Or = Or(And(this, other))
 
   def headOption = conjunctions.headOption
 
@@ -185,21 +212,19 @@ case class Or(conjunctions: Set[And]) extends Proposition {
     else
       conjunctions mkString "  \\/  "
 
-  override protected type This = this.type
+  override type This = Or
 
-  override def transform(t: PartialFunction[K, K]): K = ???
+  override def delegate: Iterable[K] = conjunctions
 
   override def copy(att: Attributes): This = ???
 
-  override def att: Attributes = ???
+  override def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 
-  override def matchAll(k: K)(implicit rest: Theory): Or = ???
-
-  override def find(f: (K) => Boolean): Set[K] = ???
+  override def newBuilder(): mutable.Builder[K, This] = ???
 }
 
 object Or {
-  def apply(propositions: Proposition*): Or =
+  def apply(propositions: Proposition*)(implicit theory: Theory): Or =
     propositions.foldLeft(False: Or) {
       case (sum: Or, True) => new Or(Set(True))
       case (or, p: Proposition) if or.conjunctions.contains(True) => new Or(Set(True))

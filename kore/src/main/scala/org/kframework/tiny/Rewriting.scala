@@ -4,6 +4,7 @@ import org.kframework.kore._
 import builtin.KBoolean._
 import org.kframework.Collection
 import org.kframework.tiny.Strategy.Rule
+import org.kframework.tiny.TrueAndFalse._
 
 object Substitution {
   implicit def apply(self: K): Substitution = new Substitution(self)
@@ -52,12 +53,12 @@ object RewriteToTop {
 object Rule {
   import RewriteToTop._
 
-  def apply(termWithRewrite: K)(implicit theory: Theory = FreeTheory): Rule = {
+  def apply(termWithRewrite: K, sideConditions: Proposition = True)(implicit theory: Theory = FreeTheory): Rule = {
     val left = toLeft(termWithRewrite)
     val right = toRight(termWithRewrite)
 
     (t: K) => {
-      val pmSolutions = left.matchAll(t)
+      val pmSolutions = left.matchAll(t, sideConditions)
       pmSolutions map { substituion => Substitution(right).transform(substituion.bindings) }
     }
   }
@@ -70,7 +71,7 @@ case class Rewritable(self: K) {
   /**
    * search using the rewrite rule in K
    */
-  private def search(rules: Set[KRewrite])(implicit theory: Theory): Set[K] = priority(rules) flatMap searchFor
+//  private def search(rules: Set[KRewrite])(implicit theory: Theory): Set[K] = priority(rules) flatMap searchFor
 
   private def priority(rules: Set[KRewrite]): Set[KRewrite] = self match {
     case KApply(KLabel(v), _, _) => rules collect {
@@ -79,8 +80,8 @@ case class Rewritable(self: K) {
     case _ => rules
   }
 
-  def searchFor(rewrite: K)(implicit theory: Theory): Set[K] = {
-    Rule(rewrite)(theory)(self)
+  def searchFor(rewrite: K, sideConditions: Proposition = True)(implicit theory: Theory): Set[K] = {
+    Rule(rewrite, sideConditions)(theory)(self)
   }
 }
 

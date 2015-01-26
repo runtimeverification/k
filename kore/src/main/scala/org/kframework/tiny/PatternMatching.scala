@@ -2,34 +2,30 @@
 
 package org.kframework.tiny
 
-import org.kframework._
-import kore._
-import builtin.KBoolean._
-import KORE._
-import TrueAndFalse._
+import org.kframework.kore.KORE._
+import org.kframework.kore._
+import org.kframework.tiny.TrueAndFalse._
 
 import scala.collection.mutable.ListBuffer
 
 trait Pattern {
-  def matchOne(k: K)(implicit theory: Theory): Option[K] = matchAll(k).headOption
+  def matchOne(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Option[K] = matchAll(k).headOption
 
 
-  def matchAll(k: K)(implicit theory: Theory): Or
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or
 }
 
 trait Normalization {
-  def matchAll(k: K)(implicit theory: Theory): Or =
-    theory.normalize(matchAllInternal(k))
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or =
+    theory.normalize((matchAllInternal(k) and sideConditions).asInstanceOf[Or])
 
-  def matchAllInternal(k: K)(implicit theory: Theory): Or
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or
 }
 
 trait InjectedKListPattern {
   self: InjectedKList =>
 
-  import builtin.KBoolean._
-
-  def matchAll(k: K)(implicit theory: Theory): Or = ???
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 }
 
 trait KListPattern {
@@ -71,13 +67,13 @@ case class MetaKLabel(klabel: KLabel) extends KItem with Leaf {
 
   def att = Attributes()
 
-  def matchAll(k: K)(implicit theory: Theory): Or = ???
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 }
 
 trait KApplyPattern extends Pattern with Normalization {
   self: KApply =>
 
-  def matchAllInternal(k: K)(implicit theory: Theory): Or = {
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = {
     (this, k) match {
       case (KApply(labelVariable: KVariable, contentsP, _), KApply(label2, contents, _)) =>
         Or(And(labelVariable -> MetaKLabel(label2))) and contentsP.matchAll(contents)
@@ -91,7 +87,7 @@ trait KApplyPattern extends Pattern with Normalization {
 trait KVariablePattern extends Pattern with Normalization {
   self: KVariable =>
 
-  def matchAllInternal(k: K)(implicit theory: Theory): Or = {
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = {
     Or(And(this -> k))
   }
 }
@@ -99,12 +95,12 @@ trait KVariablePattern extends Pattern with Normalization {
 trait KRewritePattern extends Pattern with Normalization {
   self: KRewrite =>
 
-  def matchAllInternal(k: K)(implicit theory: Theory): Or = ???
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 }
 
 trait KTokenPattern extends Pattern with Normalization {
   self: KToken =>
-  def matchAllInternal(k: K)(implicit theory: Theory): Or = {
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = {
     k match {
       case KToken(`sort`, `s`, _) => Or(True)
       case _ => False
@@ -114,7 +110,7 @@ trait KTokenPattern extends Pattern with Normalization {
 
 trait KSequencePattern extends Pattern with Normalization {
   self: KSequence =>
-  def matchAllInternal(k: K)(implicit theory: Theory): Or =
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or =
     k match {
       case s: KSequence =>
         ks.matchAll(s.ks) endomap {
@@ -127,7 +123,7 @@ trait KSequencePattern extends Pattern with Normalization {
 }
 
 trait InjectedKLabelPattern extends Pattern with Normalization {
-  def matchAllInternal(k: K)(implicit theory: Theory): Or = ???
+  def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 }
 
 case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KCollection {
@@ -144,18 +140,16 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
     case _ => throw new UnsupportedOperationException()
   }
 
-  import Anywhere._
-
   val TOPVariable = KVariable("TOP_" + name)
   val HOLEVariable = KVariable("HOLE_" + name)
 
-  def matchAll(k: K)(implicit theory: Theory): Or = {
+  def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = {
     val localSolution = pattern.matchAll(k) and Or(And(TOPVariable -> (HOLEVariable: K)))
     val childrenSolutions: Or = k match {
       case k: KCollection =>
         k.map[Or]({ c: K =>
-          val solutions = this.matchAll(c)
-          val updatedSolutions: Or = Or(solutions map {
+          val solutions: Or = this.matchAll(c)
+          val updatedSolutions: Or = Or(solutions.conjunctions map {
             case s =>
               val newAnywhere: K = k map { childK: K =>
                 childK match {
