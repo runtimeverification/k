@@ -40,19 +40,21 @@ public class DefinitionScope implements Scope {
             public T get() {
               Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
 
-              @SuppressWarnings("unchecked")
-              T current = (T) scopedObjects.get(key);
-              if (current == null && !scopedObjects.containsKey(key)) {
-                current = unscoped.get();
+              synchronized(scopedObjects) {
+                  @SuppressWarnings("unchecked")
+                  T current = (T) scopedObjects.get(key);
+                  if (current == null && !scopedObjects.containsKey(key)) {
+                    current = unscoped.get();
 
-                // don't remember proxies; these exist only to serve circular dependencies
-                if (Scopes.isCircularProxy(current)) {
+                    // don't remember proxies; these exist only to serve circular dependencies
+                    if (Scopes.isCircularProxy(current)) {
+                      return current;
+                    }
+
+                    scopedObjects.put(key, current);
+                  }
                   return current;
-                }
-
-                scopedObjects.put(key, current);
               }
-              return current;
             }
           };
     }
@@ -63,12 +65,14 @@ public class DefinitionScope implements Scope {
           throw new OutOfScopeException("Cannot access " + key
               + " outside of a scoping block");
         }
-        Map<Key<?>, Object> scopedObjects = values.get(definitionId);
-        if (scopedObjects == null) {
-            scopedObjects = Maps.newHashMap();
-            values.put(definitionId, scopedObjects);
+        synchronized(values) {
+            Map<Key<?>, Object> scopedObjects = values.get(definitionId);
+            if (scopedObjects == null) {
+                scopedObjects = Maps.newHashMap();
+                values.put(definitionId, scopedObjects);
+            }
+            return scopedObjects;
         }
-        return scopedObjects;
       }
 
 }
