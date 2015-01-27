@@ -169,7 +169,7 @@ object KToken {
 
   def unapply(t: KToken) = Some((t.sort, t.s, t.att))
 
-  implicit def from(i: Int) = apply(Sorts.KInt, i.toString)
+  implicit def from(i: Int) = apply(Sorts.Int, i.toString)
   implicit def from(s: String) = apply(Sorts.KString, s)
 }
 

@@ -4,16 +4,21 @@ package org.kframework.kore.convertors;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Lexical;
@@ -57,23 +62,51 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(i -> i instanceof Require).map(i -> apply((Require) i))
                 .collect(Collectors.toSet());
 
-        Set<org.kframework.kore.outer.Module> modules = d.getItems().stream()
-                .filter(i -> i instanceof Module).map(i -> apply((Module) i))
-                .collect(Collectors.toSet());
+        Set<Module> kilModules = d.getItems().stream().filter(i -> i instanceof Module)
+                .map(mod -> (Module) mod).collect(Collectors.toSet());
+
+        Module mainModule = kilModules.stream()
+                .filter(mod -> mod.getName().equals(d.getMainModule())).findFirst().get();
+
+        HashMap<String, org.kframework.kore.outer.Module> koreModules = new HashMap<>();
+        apply(mainModule, kilModules, koreModules);
+
+        // Set<org.kframework.kore.outer.Module> modules = kilModules.map(i ->
+        // apply((Module) i))
+        // .collect(Collectors.toSet());
 
         // TODO: handle LiterateDefinitionComments
 
-        return Definition(immutable(requires), immutable(modules));
+        return Definition(immutable(requires), immutable(new HashSet<>(koreModules.values())));
     }
 
     public org.kframework.kore.outer.Require apply(Require i) {
         return Require(new File(i.getValue()));
     }
 
-    public org.kframework.kore.outer.Module apply(Module i) {
+    public org.kframework.kore.outer.Module apply(Module i, Set<Module> allKilModules,
+            Map<String, org.kframework.kore.outer.Module> koreModules) {
         Set<org.kframework.kore.outer.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
-        return Module(i.getName(), immutable(items), inner.convertAttributes(i));
+
+        Set<String> importedModuleNames = items.stream()
+                .filter(imp -> imp instanceof org.kframework.kore.outer.Import)
+                .map(imp -> ((org.kframework.kore.outer.Import) imp).moduleName())
+                .collect(Collectors.toSet());
+
+        Set<org.kframework.kore.outer.Module> importedModules = allKilModules.stream()
+                .filter(mod -> importedModuleNames.contains(mod.getName())).map(mod -> {
+                    org.kframework.kore.outer.Module result = koreModules.get(mod.getName());
+                    if (result == null) {
+                        result = apply(mod, allKilModules, koreModules);
+                    }
+                    return result;
+                }).collect(Collectors.toSet());
+
+        org.kframework.kore.outer.Module newModule = Module(i.getName(), immutable(importedModules), immutable(items),
+                inner.convertAttributes(i));
+        koreModules.put(newModule.name(), newModule);
+        return newModule;
     }
 
     @SuppressWarnings("unchecked")
@@ -222,8 +255,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-
-        org.kframework.kore.Attributes attrs = Attributes().add("userList", p.getSort().getName());
+        org.kframework.kore.Attributes attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.kore.outer.SyntaxProduction prod1, prod2, prod3;
 

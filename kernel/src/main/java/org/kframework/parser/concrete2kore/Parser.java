@@ -1,31 +1,39 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2;
+package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Constant;
-import org.kframework.kil.KList;
-import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.parser.concrete2.Grammar.EntryState;
-import org.kframework.parser.concrete2.Grammar.ExitState;
-import org.kframework.parser.concrete2.Grammar.NextableState;
-import org.kframework.parser.concrete2.Grammar.NonTerminal;
-import org.kframework.parser.concrete2.Grammar.NonTerminalState;
-import org.kframework.parser.concrete2.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2.Grammar.RegExState;
-import org.kframework.parser.concrete2.Grammar.RuleState;
-import org.kframework.parser.concrete2.Grammar.State;
-import org.kframework.parser.concrete2.Rule.ContextFreeRule;
-import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
+import org.kframework.builtin.Sorts;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
+import org.kframework.kore.Sort;
+import org.kframework.kore.outer.Production;
+import org.kframework.parser.Ambiguity;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.concrete2kore.Grammar.EntryState;
+import org.kframework.parser.concrete2kore.Grammar.ExitState;
+import org.kframework.parser.concrete2kore.Grammar.NextableState;
+import org.kframework.parser.concrete2kore.Grammar.NonTerminal;
+import org.kframework.parser.concrete2kore.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2kore.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2kore.Grammar.RegExState;
+import org.kframework.parser.concrete2kore.Grammar.RuleState;
+import org.kframework.parser.concrete2kore.Grammar.State;
+import org.kframework.parser.concrete2kore.Rule.ContextFreeRule;
+import org.kframework.parser.concrete2kore.Rule.ContextSensitiveRule;
 import org.kframework.utils.algorithms.AutoVivifyingBiMap;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -457,7 +465,7 @@ public class Parser {
          */
         static final Function IDENTITY = new Function();
         static {
-            ((Nil) IDENTITY.mapping).values.add(KList.EMPTY);
+            ((Nil) IDENTITY.mapping).values.add(KList.apply());
         }
 
         /**
@@ -559,12 +567,12 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed.
          */
         boolean addToken(Function that, String string, Production prd) {
-            final Constant token = new Constant(prd != null ? prd.getSort() : Sort.K, string, prd);
+            final Constant token =  Constant.apply(string, prd, Optional.empty());
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
                     for (KList klist : set) {
-                        KList newKList = new KList(klist);
+                        KList newKList = KList.apply(klist);
                         newKList.add(token);
                         result.add(newKList);
                     }
@@ -598,8 +606,8 @@ public class Parser {
                         } else { throw unknownMappingType(); }
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
-                            KList newKList = new KList(context);
-                            newKList.add(new Ambiguity(Sort.K, new ArrayList<Term>(matches)));
+                            KList newKList = KList.apply(context);
+                            newKList.add(Ambiguity.apply(new ArrayList<Term>(matches)));
                             result.add(newKList);
                         }
                     }
@@ -684,12 +692,24 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = new Ambiguity(Sort.K, new ArrayList<Term>());
+        Ambiguity result = Ambiguity.apply(new ArrayList<Term>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                result.getContents().add(new KList(new Ambiguity(
-                    Sort.K, stateReturn.function.applyToNull())));
+                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull(), Optional.empty())));
             }
+        }
+
+        if(result.equals(Ambiguity.apply())) {
+            CharSequence content = s.input;
+            ParseError perror = getErrors();
+
+            String msg = content.length() == perror.position ?
+                    "Parse error: unexpected end of file." :
+                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+            Location loc = new Location(perror.line, perror.column,
+                    perror.line, perror.column + 1);
+            throw new ParseFailedException(new KException(
+                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, (Source) null, loc));
         }
 
         return result;

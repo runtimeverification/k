@@ -18,8 +18,6 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
-import org.kframework.parser.concrete2.Grammar;
-import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -185,44 +183,5 @@ public class ProgramSDF {
         }
 
         return sdf;
-    }
-
-    public static Grammar getNewParserForPrograms(Definition def, Context context, KExceptionManager kem) {
-        // collect all the syntax modules
-        CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context, kem);
-        csmv.visitNode(def);
-
-        // collect the syntax from those modules
-        ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
-        CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
-        // visit all modules to collect all Terminals first
-        for (String modName : csmv.synModNames) {
-            Module m = def.getDefinitionContext().getModuleByName(modName);
-            ctv.visitNode(m);
-        }
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(ctv,
-                def.getDefinitionContext().getModuleByName(def.getMainSyntaxModule()).getModuleContext().getDeclaredSorts(), kem);
-        // generate SDF and states for the new parser, using the terminals collected from the
-        // previous step
-        for (String modName : csmv.synModNames) {
-            Module m = def.getDefinitionContext().getModuleByName(modName);
-            psdfv.visitNode(m);
-            ks2gsf.visitNode(m);
-        }
-
-        // for each start sort in the grammar
-        // automatically add a production of the type K ::= <start-sort>
-        // this will allow the parser to accept any sort as input if the definition doesn't contain
-        // a configuration, or the $PGM variable has sort K
-        for (Sort s : psdfv.startSorts) {
-            if (!s.isBaseSort() && !context.isListSort(s)) {
-                List<ProductionItem> pi = new ArrayList<>();
-                pi.add(new NonTerminal(s));
-                Production prod = new Production(new NonTerminal(Sort.K), pi);
-                ks2gsf.visitNode(prod);
-            }
-        }
-
-        return ks2gsf.getGrammar();
     }
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.Backends;
-import org.kframework.backend.coq.CoqBackend;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
@@ -43,7 +42,6 @@ public class KompileModule extends AbstractModule {
 
         MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), String.class, Backend.class);
-        mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);
     }
 
     @Provides

@@ -81,7 +81,7 @@ public class OuterParser {
 
             setMainFile(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw KExceptionManager.criticalError("Exception: "+ e);
         }
     }
 

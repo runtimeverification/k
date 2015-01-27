@@ -20,6 +20,7 @@ import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
@@ -118,6 +119,14 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return contents.stream().map(this).collect(Collectors.toList());
     }
 
+    public org.kframework.kore.KApply apply(Bracket b) {
+        Object content = apply(b.getContent());
+        if(content instanceof KList) {
+            content = InjectedKList((KList) content);
+        }
+        return KApply(KLabel("bracket"), KList((K) content));
+    }
+
     public KApply apply(TermCons cons) {
         org.kframework.kore.Attributes att = attributesFor(cons);
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
@@ -143,15 +152,25 @@ public class KILtoInnerKORE extends KILTransformation<K> {
             Term child = kApp.getChild();
 
             if (child instanceof org.kframework.kil.KList) {
-                return KApply(KLabel(((KLabelConstant) label).getLabel()), (KList) apply(child),
+                return KApply(applyToLabel(label), (KList) apply(child),
                         convertAttributes(kApp));
             } else if (child instanceof org.kframework.kil.Variable) {
-                // System.out.println(label.getClass());
-                return KApply(null, KList(apply(child)), convertAttributes(kApp));
+                return KApply(applyToLabel(label), KList(apply(child)), convertAttributes(kApp));
             } else {
                 throw new AssertionError("encountered " + child.getClass() + " in a KApp");
             }
         }
+    }
+
+    public KLabel applyToLabel(Term label) {
+        if(label instanceof KLabelConstant) {
+            return KLabel(((KLabelConstant) label).getLabel());
+        } else if(label instanceof KApp) {
+            throw new RuntimeException(label.toString());
+        } else if(label instanceof Variable) {
+            return (KLabel) apply(label);
+        }
+        throw new RuntimeException(label.getClass().toString());
     }
 
     public KList apply(org.kframework.kil.KList kList) {

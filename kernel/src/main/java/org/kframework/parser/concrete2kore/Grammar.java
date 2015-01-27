@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2;
+package org.kframework.parser.concrete2kore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.kil.Production;
-import org.kframework.parser.concrete2.Rule.DeleteRule;
+import org.kframework.kore.outer.Production;
+import org.kframework.parser.concrete2kore.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 
 import com.google.common.collect.BiMap;

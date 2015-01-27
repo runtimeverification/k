@@ -14,7 +14,7 @@ public class KompileModuleTest extends BaseTestCase {
 
     @Test
     public void testCreateInjection() {
-        String[] argv = new String[] { "test.k", "--backend", "coq" };
+        String[] argv = new String[] { "test.k", "--backend", "test" };
         Injector injector = Guice.createInjector(Modules.override(KompileFrontEnd.getModules()).with(new DefinitionSpecificTestModule(), new TestModule()));
         prepInjector(injector, "-kompile", argv);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);

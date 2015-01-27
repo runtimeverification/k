@@ -3,9 +3,11 @@ package org.kframework.utils;
 
 import java.io.File;
 
+import com.google.inject.multibindings.MapBinder;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.kframework.kdoc.KDocOptions;
+import org.kframework.backend.Backend;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -95,6 +97,8 @@ public abstract class BaseTestCase {
             bind(RunProcess.class).toInstance(rp);
             bind(KDocOptions.class).toInstance(new KDocOptions());
             bind(KRunOptions.class).toInstance(new KRunOptions());
+            MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(binder(), String.class, Backend.class);
+            mapBinder.addBinding("test").to(TestBackend.class);
         }
 
     }
