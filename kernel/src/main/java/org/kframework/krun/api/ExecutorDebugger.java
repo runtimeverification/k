@@ -79,6 +79,7 @@ public class ExecutorDebugger implements Debugger {
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
+        currentState = initialState.getStateId();
     }
 
     /**
