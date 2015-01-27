@@ -79,7 +79,7 @@ public class ExecutorDebugger implements Debugger {
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
-        KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
+        KRunState reduced = executor.step(initialConfiguration, 0, true).getFinalState();
         //reduce may return same node as initial node
         //so we add it just if it is different from the initial node
         if(putState(reduced)){
@@ -158,7 +158,17 @@ public class ExecutorDebugger implements Debugger {
     }
 
     public void step(int steps) throws KRunExecutionException {
-        steppingLoop(steps);
+        if (currentState == null) {
+            throw new IllegalStateException("Cannot step without a current state to step from. "
+                    + "If you previously used the search command you must"
+                    + "first select a solution with the select command before executing steps of rewrites!");
+        }
+        RewriteRelation finalRelation = executor.step(getState(currentState).getRawResult(), steps, true);
+        KRunGraph currentGraph = finalRelation.getExecutionGraph().get();
+        //merge the new graph into the current graph
+        mergeSearchGraph(currentGraph);
+        KRunState finalState = finalRelation.getFinalState();
+        currentState = finalState.getStateId();
     }
 
     public void resume() throws KRunExecutionException {
