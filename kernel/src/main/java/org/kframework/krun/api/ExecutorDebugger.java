@@ -79,16 +79,6 @@ public class ExecutorDebugger implements Debugger {
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
-        KRunState reduced = executor.step(initialConfiguration, 0, true).getFinalState();
-        //reduce may return same node as initial node
-        //so we add it just if it is different from the initial node
-        if(putState(reduced)){
-            graph.addVertex(reduced);
-            graph.addEdge(GenericTransition.reduce(), initialState, reduced);
-            currentState = reduced.getStateId();
-        }else {
-            currentState = initialState.getStateId();
-        }
     }
 
     /**
