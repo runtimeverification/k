@@ -71,7 +71,9 @@ public abstract class BaseTest extends SDFCompilerTest {
             printWriter.print(COPYRIGHT_HEADER + sep + actualOutput + "\n");
             printWriter.close();
         } else {
-            String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile).replaceAll("\r\n","\n");
+            String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile).replaceAll("\r\n","\n"); 
+            // replacing line endings for those still stuck with Windows
+            
             assertEquals(clean(expectedOutput), clean(actualOutput));
         }
     }
