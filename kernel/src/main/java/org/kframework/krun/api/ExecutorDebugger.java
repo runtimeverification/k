@@ -74,12 +74,11 @@ public class ExecutorDebugger implements Debugger {
         } catch (CompilerStepDone e) {
             e.printStackTrace();
         }
-        KRunState initialState = new GenericKRunState(initialConfiguration, counter);
+        KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
         graph = new KRunGraph();
-        graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
-        putState(initialState);
-        currentState = initialState.getStateId();
+        putState(reduced);
+        currentState = reduced.getStateId();
     }
 
     /**
