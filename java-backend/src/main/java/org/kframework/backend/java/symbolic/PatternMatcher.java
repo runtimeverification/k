@@ -372,9 +372,10 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (substitutions.size() != 1) {
-            fSubstitution = fSubstitution.add(new DisjunctiveFormula(substitutions.stream()
+            List<ConjunctiveFormula> conjunctions = substitutions.stream()
                     .map(s -> ConjunctiveFormula.of(s, termContext))
-                    .collect(Collectors.toList())));
+                    .collect(Collectors.toList());
+            fSubstitution = fSubstitution.add(new DisjunctiveFormula(conjunctions, termContext));
         } else {
             fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
         }
@@ -615,7 +616,9 @@ public class PatternMatcher extends AbstractMatcher {
             } else if (substitutions.size() == 1) {
                 fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
             } else {
-                fSubstitution = fSubstitution.add(new DisjunctiveFormula(substitutions));
+                fSubstitution = fSubstitution.add(new DisjunctiveFormula(
+                        substitutions,
+                        termContext));
             }
         }
     }

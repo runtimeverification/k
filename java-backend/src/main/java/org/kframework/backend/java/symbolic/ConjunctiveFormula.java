@@ -6,11 +6,15 @@ import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.InternalRepresentationToK;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
@@ -24,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -32,15 +37,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
-import static org.kframework.backend.java.util.RewriteEngineUtils.isSubsortedEq;
-
 /**
  * A conjunction of equalities (between terms with variables) and disjunctions
  *
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term {
+public class ConjunctiveFormula extends Term implements InternalRepresentationToK {
 
     public static final String SEPARATOR = " /\\ ";
 
@@ -424,7 +427,7 @@ public class ConjunctiveFormula extends Term {
 
     public DisjunctiveFormula getDisjunctiveNormalForm() {
         if (disjunctions.isEmpty()) {
-            return new DisjunctiveFormula(PersistentUniqueList.singleton(this));
+            return new DisjunctiveFormula(PersistentUniqueList.singleton(this), context);
         }
 
         ConjunctiveFormula result = ConjunctiveFormula.of(
@@ -438,7 +441,7 @@ public class ConjunctiveFormula extends Term {
                 .collect(Collectors.toList());
         return new DisjunctiveFormula(Sets.cartesianProduct(collect).stream()
                 .map(result::addAll)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()), context);
     }
 
     public boolean checkUnsat() {
@@ -577,6 +580,26 @@ public class ConjunctiveFormula extends Term {
     }
 
     @Override
+    public List<Term> getKComponents(TermContext context) {
+        Stream<Term> stream = Stream.concat(
+                Stream.concat(
+                        substitution.equalities(context).stream().map(e -> e.toK(context)),
+                        equalities.stream().map(e -> e.toK(context))),
+                disjunctions.stream().map(d -> d.toK(context)));
+        return stream.collect(Collectors.toList());
+    }
+
+    @Override
+    public KLabel constructorLabel(TermContext context) {
+        return KLabelConstant.of("'_andBool_", context.definition().context());
+    }
+
+    @Override
+    public Token unit(TermContext context) {
+        return BoolToken.TRUE;
+    }
+
+    @Override
     protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
@@ -598,6 +621,11 @@ public class ConjunctiveFormula extends Term {
         return substitution.equals(conjunction.substitution)
                 && equalities.equals(conjunction.equalities)
                 && disjunctions.equals(conjunction.disjunctions);
+    }
+
+    @Override
+    public String toString() {
+        return toK(context).toString();
     }
 
     @Override

@@ -663,7 +663,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             } else if (constraints.size() == 1) {
                 this.constraint = this.constraint.add(constraints.get(0));
             } else {
-                this.constraint = this.constraint.add(new DisjunctiveFormula(constraints));
+                this.constraint = this.constraint.add(new DisjunctiveFormula(
+                        constraints,
+                        termContext));
             }
         }
     }

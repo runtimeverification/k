@@ -135,6 +135,13 @@ public class Equality implements Serializable {
                 || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
     }
 
+    public KItem toK(TermContext context) {
+        return KItem.of(
+                KLabelConstant.of("'_==K_", context.definition().context()),
+                KList.concatenate(leftHandSide, rightHandSide),
+                context);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
