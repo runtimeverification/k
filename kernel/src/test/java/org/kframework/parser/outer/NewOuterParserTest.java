@@ -1,3 +1,5 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+
 package org.kframework.parser.outer;
 
 import org.apache.commons.io.FileUtils;
@@ -28,7 +30,8 @@ public class NewOuterParserTest {
         CharSequence theTextToParse = "module FOO endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
-        File definitionFile = new File("k-distribution/src/test/resources/convertor-tests/kore.k").getAbsoluteFile();
+        File definitionFile = new File(NewOuterParserTest.class.getResource
+                ("/convertor-tests/kore.k").toURI()).getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
         System.out.println(kBody);

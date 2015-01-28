@@ -7,12 +7,13 @@ import static org.kframework.Collections.stream;
 import static org.kframework.kore.outer.Constructors.Module;
 import static org.kframework.kore.outer.Constructors.Rule;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
@@ -46,7 +47,8 @@ public class BubbleParsing {
      * TODO: WARNING: paths are hardwired for now.
      */
     public BubbleParsing() {
-        Definition kilDefinitionOfKORE = parseUsingOuter(new File(TestParserOnKORE.ROOT + "/kore.k"));
+        Definition kilDefinitionOfKORE = parseUsingOuter(
+                BubbleParsing.class.getResource("/convertor-tests/kore.k"));
         KILtoKORE kilToKore1 = new KILtoKORE(null);
         kilDefinitionOfKORE.setMainModule("K");
         org.kframework.kore.outer.Definition definitionOfKORE = kilToKore1.apply(kilDefinitionOfKORE);
@@ -55,11 +57,11 @@ public class BubbleParsing {
         kastGrammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
     }
 
-    private Definition parseUsingOuter(File file) {
+    private Definition parseUsingOuter(URL file) {
         Definition def = new Definition();
         String definitionText;
         try {
-            definitionText = FileUtils.readFileToString(file);
+            definitionText = Resources.toString(file, Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
