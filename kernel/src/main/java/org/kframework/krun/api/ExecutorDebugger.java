@@ -118,35 +118,6 @@ public class ExecutorDebugger implements Debugger {
         return state;
     }
 
-    private void steppingLoop(Integer steps) throws KRunExecutionException {
-        if (currentState == null) {
-            throw new IllegalStateException("Cannot step without a current state to step from. "
-                    + "If you previously used the search command you must"
-                    + "first select a solution with the select command before executing steps of rewrites!");
-        }
-        for (int i = 0; steps == null || i < steps; i++) {
-            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1, false).getFinalState();
-            Entry<Integer, KRunState> prevValue = containsValue(nextStep);
-            if (prevValue!=null) {
-                nextStep = prevValue.getValue();
-
-                int stateId = prevValue.getKey();
-                if (stateId == currentState) {
-                    //we've stopped moving, so that means we must have reached a final state
-                    return;
-                }
-                // we've reached this state before, so update the current state and proceed to the next step
-                currentState = stateId;
-                continue;
-            }
-            else {
-                putState(nextStep);
-            }
-            graph.addVertex(nextStep);
-            graph.addEdge(GenericTransition.unlabelled(), getState(currentState), nextStep);
-            currentState = nextStep.getStateId();
-        }
-    }
 
     public void step(int steps) throws KRunExecutionException {
         if (currentState == null) {
@@ -154,7 +125,12 @@ public class ExecutorDebugger implements Debugger {
                     + "If you previously used the search command you must"
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
-        RewriteRelation finalRelation = executor.step(getState(currentState).getRawResult(), steps, true);
+        RewriteRelation finalRelation;
+        if (steps >= 0) {
+            finalRelation = executor.step(getState(currentState).getRawResult(), steps, true);
+        } else {
+            finalRelation = executor.run(getState(currentState).getRawResult(), true);
+        }
         KRunGraph currentGraph = finalRelation.getExecutionGraph().get();
         //merge the new graph into the current graph
         mergeSearchGraph(currentGraph);
@@ -163,7 +139,7 @@ public class ExecutorDebugger implements Debugger {
     }
 
     public void resume() throws KRunExecutionException {
-        steppingLoop(null);
+        step(-1);
     }
 
     public SearchResults stepAll(int steps) throws KRunExecutionException {
