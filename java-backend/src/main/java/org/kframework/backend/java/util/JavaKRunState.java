@@ -40,7 +40,8 @@ public class JavaKRunState extends KRunState{
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof JavaKRunState)) {
-            return false;
+            KRunState genericObj = (KRunState) o;
+            genericObj.getRawResult().equals(this.getRawResult());
         }
         JavaKRunState state2 = (JavaKRunState) o;
         return javaKilTerm.equals(state2.getJavaKilTerm());
