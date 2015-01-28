@@ -16,6 +16,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ImpureFunctionException;
+import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
@@ -389,130 +390,136 @@ public final class KItem extends Term {
             Definition definition = context.definition();
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
 
-            KList kList = (KList) kItem.kList;
+            Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
 
-            if (builtins.isBuiltinKLabel(kLabelConstant)) {
-                try {
-                    Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                    Term result = builtins.invoke(context, kLabelConstant, arguments);
-                    if (result != null) {
-                        return result;
-                    }
-                } catch (ClassCastException e) {
-                // DISABLE EXCEPTION CHECKSTYLE
-                } catch (ImpureFunctionException e) {
-                    // do not do anything further: immediately assume this function is not ready to be evaluated yet.
-                    return kItem;
-                } catch (Throwable t) {
-                // ENABLE EXCEPTION CHECKSTYLE
-                    if (t instanceof Error) {
-                        throw (Error)t;
-                    }
-                    if (t instanceof KExceptionManager.KEMException) {
-                        throw (RuntimeException)t;
-                    }
-                    if (t instanceof RuntimeException) {
-                        kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
-                    } else {
-                        throw new AssertionError("Builtin functions should not throw checked exceptions", t);
-                    }
-                }
-            }
+            try {
+                KList kList = (KList) kItem.kList;
 
-            /* evaluate a sort membership predicate */
-            // TODO(YilongL): maybe we can move sort membership evaluation after
-            // applying user-defined rules to allow the users to provide their
-            // own rules for checking sort membership
-            if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
-                Term checkResult = SortMembership.check(kItem, context.definition());
-                if (checkResult != kItem) {
-                    return checkResult;
-                }
-            }
-
-            /* apply rules for user defined functions */
-            if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
-                Term result = null;
-                Term owiseResult = null;
-
-                for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                        try {
-                        if (rule == RuleAuditing.getAuditingRule()) {
-                            RuleAuditing.beginAudit();
-                        } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                            System.err.println("\nAuditing " + rule + "...\n");
-                        }
-                        /* function rules should be applied by pattern match rather than unification */
-                        Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
-                        if (solution == null) {
-                            continue;
-                        }
-
-                        Term rightHandSide = rule.rightHandSide();
-                        if (!rule.freshVariables().isEmpty()) {
-                            // this opt. only makes sense when using pattern matching
-                            // because after unification variables can end up in the
-                            // constraint rather than in the form of substitution
-
-                            /* rename unbound variables */
-                            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
-                            /* rename rule variables in the rule RHS */
-                            rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                        }
-                        rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
-                                    context, false);
-
-                        if (rule.containsAttribute("owise")) {
-                            /*
-                             * YilongL: consider applying ``owise'' rule only when the
-                             * function is ground. This is fine because 1) it's OK not
-                             * to fully evaluate non-ground function during kompilation;
-                             * and 2) it's better to get stuck rather than to apply the
-                             * wrong ``owise'' rule during execution.
-                             */
-                            if (kItem.isGround()) {
-                                if (owiseResult != null) {
-                                    throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
-                                }
-                                RuleAuditing.succeed(rule);
-                                owiseResult = rightHandSide;
-                            }
-                        } else {
-                            if (tool == Tool.KRUN) {
-                                assert result == null || result.equals(rightHandSide):
-                                    "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
-                            }
-                            RuleAuditing.succeed(rule);
-                            result = rightHandSide;
-                        }
-
-                        /*
-                         * If the function definitions do not need to be deterministic, try them in order
-                         * and apply the first one that matches.
-                         */
-                        if (!javaOptions.deterministicFunctions && result != null) {
+                if (builtins.isBuiltinKLabel(kLabelConstant)) {
+                    try {
+                        Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+                        Term result = builtins.invoke(context, kLabelConstant, arguments);
+                        if (result != null) {
                             return result;
                         }
-                    } finally {
-                        if (RuleAuditing.isAuditBegun()) {
-                            if (RuleAuditing.getAuditingRule() == rule) {
-                                RuleAuditing.endAudit();
-                            }
-                            if (!RuleAuditing.isSuccess()
-                                    && RuleAuditing.getAuditingRule() == rule) {
-                                throw RuleAuditing.fail();
-                            }
+                    } catch (ClassCastException e) {
+                    // DISABLE EXCEPTION CHECKSTYLE
+                    } catch (ImpureFunctionException e) {
+                        // do not do anything further: immediately assume this function is not ready to be evaluated yet.
+                        return kItem;
+                    } catch (Throwable t) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                        if (t instanceof Error) {
+                            throw (Error)t;
+                        }
+                        if (t instanceof KExceptionManager.KEMException) {
+                            throw (RuntimeException)t;
+                        }
+                        if (t instanceof RuntimeException) {
+                            kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
+                        } else {
+                            throw new AssertionError("Builtin functions should not throw checked exceptions", t);
                         }
                     }
                 }
 
-                if (result != null) {
-                    return result;
-                } else if (owiseResult != null) {
-                    return owiseResult;
+                /* evaluate a sort membership predicate */
+                // TODO(YilongL): maybe we can move sort membership evaluation after
+                // applying user-defined rules to allow the users to provide their
+                // own rules for checking sort membership
+                if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
+                    Term checkResult = SortMembership.check(kItem, context.definition());
+                    if (checkResult != kItem) {
+                        return checkResult;
+                    }
                 }
+
+                /* apply rules for user defined functions */
+                if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+                    Term result = null;
+                    Term owiseResult = null;
+
+                    for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                            try {
+                            if (rule == RuleAuditing.getAuditingRule()) {
+                                RuleAuditing.beginAudit();
+                            } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                                System.err.println("\nAuditing " + rule + "...\n");
+                            }
+                            /* function rules should be applied by pattern match rather than unification */
+                            Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
+                            if (solution == null) {
+                                continue;
+                            }
+
+                            Term rightHandSide = rule.rightHandSide();
+                            if (!rule.freshVariables().isEmpty()) {
+                                // this opt. only makes sense when using pattern matching
+                                // because after unification variables can end up in the
+                                // constraint rather than in the form of substitution
+
+                                /* rename unbound variables */
+                                Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
+                                /* rename rule variables in the rule RHS */
+                                rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                            }
+                            rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
+                                        context, false);
+
+                            if (rule.containsAttribute("owise")) {
+                                /*
+                                 * YilongL: consider applying ``owise'' rule only when the
+                                 * function is ground. This is fine because 1) it's OK not
+                                 * to fully evaluate non-ground function during kompilation;
+                                 * and 2) it's better to get stuck rather than to apply the
+                                 * wrong ``owise'' rule during execution.
+                                 */
+                                if (kItem.isGround()) {
+                                    if (owiseResult != null) {
+                                        throw KExceptionManager.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
+                                    }
+                                    RuleAuditing.succeed(rule);
+                                    owiseResult = rightHandSide;
+                                }
+                            } else {
+                                if (tool == Tool.KRUN) {
+                                    assert result == null || result.equals(rightHandSide):
+                                        "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                                }
+                                RuleAuditing.succeed(rule);
+                                result = rightHandSide;
+                            }
+
+                            /*
+                             * If the function definitions do not need to be deterministic, try them in order
+                             * and apply the first one that matches.
+                             */
+                            if (!javaOptions.deterministicFunctions && result != null) {
+                                return result;
+                            }
+                        } finally {
+                            if (RuleAuditing.isAuditBegun()) {
+                                if (RuleAuditing.getAuditingRule() == rule) {
+                                    RuleAuditing.endAudit();
+                                }
+                                if (!RuleAuditing.isSuccess()
+                                        && RuleAuditing.getAuditingRule() == rule) {
+                                    throw RuleAuditing.fail();
+                                }
+                            }
+                        }
+                    }
+
+                    if (result != null) {
+                        return result;
+                    } else if (owiseResult != null) {
+                        return owiseResult;
+                    }
+                }
+                return kItem;
+            } finally {
+                Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
             }
-            return kItem;
         }
     }
 

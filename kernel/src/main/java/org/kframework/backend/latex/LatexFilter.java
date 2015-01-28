@@ -560,7 +560,7 @@ public class LatexFilter extends BackendFilter {
             result.append(", ");
         }
         result.append("\\kattribute{" + StringUtil.latexify(entry.getKey().toString()) + "}");
-        String value = entry.toString();
+        String value = entry.getValue().toString();
         if (!value.isEmpty()) {
             result.append("(" + StringUtil.latexify(value) + ")");
         }
