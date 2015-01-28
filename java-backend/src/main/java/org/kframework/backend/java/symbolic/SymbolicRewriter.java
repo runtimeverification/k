@@ -94,12 +94,10 @@ public class SymbolicRewriter {
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
                     executionGraph.addEdge(javaTransition, initialState, finalState);
+                    initialState = finalState;
                 }
                 constrainedTerm = result;
             } else {
-                if (computeGraph) {
-                    initialState = finalState;
-                }
                 break;
             }
         }
