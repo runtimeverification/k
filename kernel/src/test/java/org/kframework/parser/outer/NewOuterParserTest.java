@@ -25,10 +25,10 @@ public class NewOuterParserTest {
 
     @Test
     public void testKOREOuter() throws Exception {
-        CharSequence theTextToParse = "module FOO endmodule";
+        CharSequence theTextToParse = "module FOO  rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
-        File definitionFile = new File("k-distribution/src/test/resources/convertor-tests/kore.k").getAbsoluteFile();
+        File definitionFile = new File("kernel/src/main/resources/e-kore.k").getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
         System.out.println(kBody);
