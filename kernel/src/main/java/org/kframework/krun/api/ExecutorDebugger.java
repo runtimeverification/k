@@ -139,7 +139,7 @@ public class ExecutorDebugger implements Debugger {
             currentState = prevState.getKey();
         } else {
             currentState = finalState.getStateId();
-        } 
+        }
     }
 
     public void resume() throws KRunExecutionException {
