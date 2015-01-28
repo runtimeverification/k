@@ -134,7 +134,12 @@ public class ExecutorDebugger implements Debugger {
         //merge the new graph into the current graph
         mergeSearchGraph(currentGraph);
         KRunState finalState = finalRelation.getFinalState();
-        currentState = finalState.getStateId();
+        Entry<Integer, KRunState> prevState = containsValue(finalState);
+        if (!(prevState == null)) {
+            currentState = prevState.getKey();
+        } else {
+            currentState = finalState.getStateId();
+        } 
     }
 
     public void resume() throws KRunExecutionException {
