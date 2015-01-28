@@ -53,7 +53,7 @@ case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()
 
   override def copy(att: Attributes): This = Binding(variable, value, att)
 
-  override def transform(t: PartialFunction[K, K]): K = ???
+  def transform(t: K => Option[K]): K = ???
 
   override def find(f: (K) => Boolean): Set[K] = ???
 }

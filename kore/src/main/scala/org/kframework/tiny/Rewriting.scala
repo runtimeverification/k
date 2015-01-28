@@ -19,7 +19,8 @@ class Substitution(self: K) {
 
   private def flattenInjections(term: K): K = term.transform({
     case KApply(l, kl, att) =>
-      KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att)
+      Some(KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att))
+    case _ => None
   })
 
   private def doSubstitution(substituion: Map[KVariable, K]) =

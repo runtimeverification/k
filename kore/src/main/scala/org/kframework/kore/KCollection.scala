@@ -13,9 +13,9 @@ import scala.collection.mutable.{ListBuffer, Builder}
 trait KCollection extends Collection[K] with K {
   type This <: KCollection
 
-  def transform(t: PartialFunction[K, K]): K = {
-    val transformedChildren: K = this map { _.transform(t) }
-    t.lift.apply(transformedChildren).getOrElse(transformedChildren)
+  def transform(t: K => Option[K]): K = {
+    val transformedChildren: K = this map { c => c.transform(t) }
+    t.apply(transformedChildren).getOrElse(transformedChildren)
   }
 
   def find(f: K => Boolean): immutable.Set[K] = {

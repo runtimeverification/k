@@ -3,16 +3,10 @@
 package org.kframework.kore
 
 import org.kframework._
-import collection.JavaConverters._
-import collection.LinearSeq
-import KORE._
-import scala.collection.AbstractIterator
-import scala.collection.IterableLike
-import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable.Builder
-import scala.collection.mutable.ListBuffer
-import org.kframework.tiny._
 import org.kframework.builtin.Sorts
+import org.kframework.tiny._
+
+import scala.collection.mutable.{Builder, ListBuffer}
 
 /* Interfaces */
 
@@ -25,14 +19,14 @@ trait HasAttributes {
 trait K extends HasAttributes with Pattern {
   protected type This <: K
 
-  def transform(t: PartialFunction[K, K]): K
+  def transform(t: K => Option[K]): K
   def find(f: K => Boolean) : Set[K]
   def copy(att: Attributes): This
 }
 
 trait Leaf extends K {
-  def transform(t: PartialFunction[K, K]): K =
-    t.lift.apply(this).getOrElse(this)
+  def transform(t: K => Option[K]): K =
+    t.apply(this).getOrElse(this)
 
   def find(f: K => Boolean) : Set[K] = if (f(this)) Set(this) else Set()
 }
@@ -192,7 +186,7 @@ object KList {
 
   protected val fromList = apply _
 
-  import collection._
+  import scala.collection._
 
   implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
     new generic.CanBuildFrom[This, K, This] {
