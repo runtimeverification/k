@@ -270,9 +270,6 @@ public class PatternMatcher extends AbstractMatcher {
 
         if (matchOnFunctionSymbol) {
             builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
-            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
-            // (used during associative matching) back to builtin representation
-            fSubstitution = fSubstitution.simplify();
             return;
         }
 
@@ -378,6 +375,9 @@ public class PatternMatcher extends AbstractMatcher {
             fSubstitution = fSubstitution.add(new DisjunctiveFormula(conjunctions, termContext));
         } else {
             fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+            if (fSubstitution.isFalse()) {
+                fail(builtinMap, patternBuiltinMap);
+            }
         }
     }
 
@@ -615,6 +615,9 @@ public class PatternMatcher extends AbstractMatcher {
                 fail(cellCollection, otherCellCollection);
             } else if (substitutions.size() == 1) {
                 fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+                if (fSubstitution.isFalse()) {
+                    fail(cellCollection, otherCellCollection);
+                }
             } else {
                 fSubstitution = fSubstitution.add(new DisjunctiveFormula(
                         substitutions,
