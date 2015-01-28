@@ -192,7 +192,7 @@ public class ExecutorDebugger implements Debugger {
      */
     private Entry<Integer, KRunState> containsValue(KRunState state){
         for (Entry<Integer,KRunState> e : states.entrySet() ){
-            if(SemanticEqual.checkEquality(state.getRawResult(), e.getValue().getRawResult()))
+            if(state.equals(e.getValue()))
                 return e ;
         }
         return null;
