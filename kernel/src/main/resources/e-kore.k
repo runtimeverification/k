@@ -89,7 +89,7 @@ module OUTER-KORE
                          | KRequire KRequireList
                                [klabel(#KRequireList), assoc, comm, unit(#emptyKRequireList)]
 
-  syntax KModule       ::= "module" KModuleName KAttributesDeclaration
+  syntax KModule       ::= "module" KModuleName OptionalAttributes
                                     KImportList
                                     KSentenceList
                            "endmodule"
@@ -108,13 +108,13 @@ module OUTER-KORE
                          | KSentence KSentenceList
                                [klabel(#KSentenceList), assoc, comm, unit(#kemptyKSentenceList)]
 
-  syntax KSentence ::= "syntax" KSort KAttributesDeclaration
+  syntax KSentence ::= "syntax" KSort OptionalAttributes
                                [klabel(#KSyntaxSort), hook(org.kframework.kore.outer.SyntaxSort)]
-                     | "syntax" KSort "::=" KProduction KAttributesDeclaration
+                     | "syntax" KSort "::=" KProduction OptionalAttributes
                                [klabel(#KSyntaxProduction), hook(org.kframework.kore.outer.SyntaxProduction)]
-                     | "syntax" "priority"   KPrioritySeq KAttributesDeclaration
+                     | "syntax" "priority"   KPrioritySeq OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
-                     | "syntax" "priorities" KPrioritySeq KAttributesDeclaration
+                     | "syntax" "priorities" KPrioritySeq OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
 
   syntax KPrioritySeq ::= KNeTagSet ">" KPrioritySeq   [klabel(#KPrioritySeq), assoc]
@@ -131,8 +131,9 @@ module OUTER-KORE
                            | "r" KString [hook(org.kframework.kore.outer.RegexTerminal)]
 
   // We use #KAttributes as top KLabel in the K term holding the attributes
-  syntax KAttributesDeclaration ::= ""        [klabel(#NoKAttributesDeclaration)]
-                                  | "[" K "]" // TODO: work this out since we would like to keep the current way of parsing attributes
+  syntax OptionalAttributes ::= KAttributesDeclaration
+                              | "" [klabel(#NoKAttributesDeclaration)]
+  syntax KAttributesDeclaration ::= "[" K "]" // TODO: work this out since we would like to keep the current way of parsing attributes
                                               [klabel(#KAttributesDeclaration), hook(org.kframework.kore.KAttributes)]
   syntax KSentence ::= "configuration" Contents
                                [klabel(#KConfiguration), hook(org.kframework.kore.outer.Configuration)]

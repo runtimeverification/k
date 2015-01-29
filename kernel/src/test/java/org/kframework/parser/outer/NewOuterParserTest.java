@@ -13,6 +13,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.Grammar;
 import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.Parser;
+import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
 
 import java.io.File;
@@ -70,6 +71,7 @@ public class NewOuterParserTest {
 
         TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
         Term cleaned = treeCleanerVisitor.apply(parsed).right().get();
+        cleaned = new PreferAvoidVisitor().apply(cleaned).right().get();
 
         return TreeNodesToKORE.apply(cleaned);
     }
