@@ -1,18 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.kframework.kore.Sort;
-import org.kframework.kore.outer.Module;
-import org.kframework.kore.outer.Production;
-import org.kframework.kore.outer.ProductionItem;
-import org.kframework.kore.outer.RegexTerminal;
-import org.kframework.kore.outer.Terminal;
+import org.kframework.koreimplementation.Sort;
+import org.kframework.definition.Module;
+import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.Terminal;
 import org.kframework.parser.generator.CollectTerminalsVisitor;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.parser.concrete2kore.Rule.*;
@@ -66,8 +63,8 @@ public class KSyntax2GrammarStatesFilter {
                 RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                 pstate.next.add(del);
                 previous = del;
-            } else if (prdItem instanceof org.kframework.kore.outer.NonTerminal) {
-                org.kframework.kore.outer.NonTerminal srt = (org.kframework.kore.outer.NonTerminal) prdItem;
+            } else if (prdItem instanceof org.kframework.definition.NonTerminal) {
+                org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                 NonTerminalState nts = new NonTerminalState(prd.sort() + "-S", nt,
                         grammar.get(srt.sort().name()), false);
                 previous.next.add(nts);

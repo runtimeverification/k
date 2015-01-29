@@ -1,6 +1,6 @@
 package org.kframework
 
-import org.kframework.kore.Sort
+import org.kframework.koreimplementation.Sort
 import java.util.Optional
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))

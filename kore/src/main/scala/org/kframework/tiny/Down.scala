@@ -3,7 +3,7 @@
 package org.kframework.tiny
 
 import org.kframework._
-import kore._
+import koreimplementation._
 import org.kframework.builtin.Sorts
 import scala.util.Try
 import scala.util.Success

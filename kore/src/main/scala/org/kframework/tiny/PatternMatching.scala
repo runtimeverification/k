@@ -2,8 +2,8 @@
 
 package org.kframework.tiny
 
-import org.kframework.kore.KORE._
-import org.kframework.kore._
+import org.kframework.koreimplementation.KORE._
+import org.kframework.koreimplementation._
 import org.kframework.tiny.TrueAndFalse._
 
 import scala.collection.mutable.ListBuffer

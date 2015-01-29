@@ -1,16 +1,14 @@
 package org.kframework.parser.concrete2kore;
 
 import org.junit.Test;
-import org.kframework.kore.outer.SyntaxProduction;
+import org.kframework.definition.SyntaxProduction;
 import org.kframework.parser.*;
 
 import java.util.Optional;
 
-import static org.kframework.kore.outer.Constructors.*;
-import static org.kframework.kore.Constructors.*;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.koreimplementation.Constructors.*;
 import static org.kframework.Collections.*;
-
-import static org.junit.Assert.*;
 
 public class TreeCleanerVisitorTest {
 

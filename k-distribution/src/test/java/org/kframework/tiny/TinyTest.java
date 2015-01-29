@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
-import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.convertors.SDFCompilerTest;
+import org.kframework.koreimplementation.convertors.BaseTest.DefintionWithContext;
+import org.kframework.koreimplementation.convertors.KILtoKORE;
+import org.kframework.koreimplementation.convertors.SDFCompilerTest;
 
 public class TinyTest extends SDFCompilerTest {
     private static final String impMainModule = "IMP";
@@ -17,7 +17,7 @@ public class TinyTest extends SDFCompilerTest {
     @Test public void imp() throws IOException {
         DefintionWithContext defWithContext = parse(impDefinitionFile.getAbsoluteFile(), impMainModule, true);
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
 
         System.out.println(koreDef);
     }
@@ -29,7 +29,7 @@ public class TinyTest extends SDFCompilerTest {
 //                impSimpleDefinitionFile,
 //                mainModule);
 //        KILtoKORE kilToKore = new KILtoKORE(null);
-//        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(d);
+//        org.kframework.definition.Definition koreDef = kilToKore.apply(d);
 //
 //        BubbleParsing bubbleParsing = new BubbleParsing();
 //        Module koreModule = bubbleParsing.parseBubbles(koreDef.getModule(mainModule).get());

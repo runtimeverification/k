@@ -1,9 +1,9 @@
 package org.kframework.tiny
 
-import org.kframework.kore._
+import org.kframework.koreimplementation._
 import org.junit.Test
 import KORE._
-import org.kframework.kore.outer._
+import org.kframework.definition._
 import org.junit.Ignore
 
 class OptimizerTest {

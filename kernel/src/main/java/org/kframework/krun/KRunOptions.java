@@ -148,7 +148,7 @@ public final class KRunOptions {
     public ColorOptions color = new ColorOptions();
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
-            description="How to display krun results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")
+            description="How to display krun results. <mode> is either [pretty|smart|compatible|koreimplementation|raw|binary|none].")
     public OutputModes output = OutputModes.PRETTY;
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {

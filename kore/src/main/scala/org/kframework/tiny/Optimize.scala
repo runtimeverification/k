@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.kframework.kore._
+import org.kframework.koreimplementation._
 import KORE._
 
 object Optimize {

@@ -2,7 +2,7 @@
 
 package org.kframework.parser
 
-import org.kframework.kore.outer.Production
+import org.kframework.definition.Production
 import java.util._
 import java.lang.Iterable
 import collection.JavaConverters._

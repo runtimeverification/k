@@ -1,17 +1,17 @@
 package org.kframework.tiny
 
-import org.kframework._
-import kore._
-import KORE._
 import java.io.File
-import kore.outer._
-import scala.reflect.ClassTag
+
+import org.kframework._
+import org.kframework.definition._
+import org.kframework.koreimplementation.KORE._
+import org.kframework.koreimplementation._
 
 class TestMeta {
-  import org.junit._
 
-  import KToken._
-  import Rewritable._
+  import org.junit._
+  import org.kframework.koreimplementation.KToken._
+  import org.kframework.tiny.Rewritable._
 
   implicit val theory = FreeTheory
 
@@ -26,8 +26,6 @@ class TestMeta {
 
   def assertEquals(x: Any, y: Any) { if (x != y) Assert.assertEquals(x.toString, y.toString) }
 
-  import outer._
-
   val d = Definition(Set(),
     Set(Module("TEST", Set(),
       Set(SyntaxProduction(Sort("Foo"),
@@ -37,9 +35,10 @@ class TestMeta {
     'Set('Module("TEST", 'Set(),
       'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")))))))
 
-  val Down = tiny.Down(Set("org.kframework.kore.outer", "scala.collection.immutable"))
+  val Down = tiny.Down(Set("org.kframework.definition", "scala.collection.immutable"))
 
-  @Ignore @Test def definitionUp() {
+  @Ignore
+  @Test def definitionUp() {
     assertEquals(metad, Up(d))
   }
 

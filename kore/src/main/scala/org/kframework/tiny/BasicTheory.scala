@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.kframework.kore.{UglyHack, K}
+import org.kframework.koreimplementation.{UglyHack, K}
 
 import UglyHack._
 

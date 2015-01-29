@@ -10,16 +10,14 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
-import org.kframework.kore.Attributes;
-import org.kframework.kore.Sort;
-import org.kframework.kore.UninterpretedSort;
-import org.kframework.kore.outer.Production;
-import org.kframework.kore.outer.ProductionItem;
+import org.kframework.koreimplementation.Sort;
+import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
 import org.kframework.parser.*;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.Constructors.*;
-import static org.kframework.kore.outer.Constructors.*;
+import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.definition.Constructors.*;
 
 import org.kframework.parser.concrete2kore.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.Grammar.NonTerminalState;

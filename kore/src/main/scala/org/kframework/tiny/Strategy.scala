@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.kframework.kore.K
+import org.kframework.koreimplementation.K
 
 object Strategy {
   import Rewritable._

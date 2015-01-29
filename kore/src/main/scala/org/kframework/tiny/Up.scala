@@ -3,10 +3,10 @@
 package org.kframework.tiny
 
 import org.kframework._
-import kore._
+import koreimplementation._
 import KORE._
 import scala.Enumeration
-import org.kframework.kore.outer.Associativity
+import org.kframework.definition.Associativity
 import java.lang.invoke.MethodType
 import java.lang.invoke.MethodHandles
 import collection.JavaConverters._
@@ -42,6 +42,6 @@ object Up extends (Any => K) {
   }
 
   def processName(arg: String) = {
-    arg.replace("org.kframework.kore.outer.", "").replace("org.kframework.kore.", "")
+    arg.replace("org.kframework.definition.", "").replace("org.kframework.koreimplementation.", "")
   }
 }

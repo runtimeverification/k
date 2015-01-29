@@ -2,9 +2,9 @@
 
 package org.kframework.builtin
 
-import org.kframework.kore.UninterpretedSort
-import org.kframework.kore.KLabel
-import org.kframework.kore.UninterpretedSort
+import org.kframework.koreimplementation.UninterpretedSort
+import org.kframework.koreimplementation.KLabel
+import org.kframework.koreimplementation.UninterpretedSort
 
 object Sorts {
   val KString = UninterpretedSort("KString")

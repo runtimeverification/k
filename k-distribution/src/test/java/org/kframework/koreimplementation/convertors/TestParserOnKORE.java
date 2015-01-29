@@ -1,0 +1,31 @@
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+
+package org.kframework.koreimplementation.convertors;
+
+import java.io.IOException;
+
+import org.junit.Test;
+import org.kframework.definition.Module;
+
+public class TestParserOnKORE extends BaseTest {
+
+    protected String convert(DefintionWithContext defWithContext) {
+        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
+
+        BubbleParsing bubbleParsing = new BubbleParsing();
+        Module koreModule = bubbleParsing.parseBubbles(koreDef.getModule("TEST").get());
+
+        return koreModule.toString();
+    }
+
+    @Override
+    protected String expectedFilePostfix() {
+        return "-expected.k";
+    }
+
+    @Test public void simpleRuleKORE() throws IOException {
+        outerOnlyTest();
+    }
+
+}

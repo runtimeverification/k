@@ -3,7 +3,7 @@
 package org.kframework.tiny.builtin
 
 import org.kframework.AssocBuilder
-import org.kframework.kore._
+import org.kframework.koreimplementation._
 import org.kframework.tiny.TrueAndFalse._
 import org.kframework.tiny._
 

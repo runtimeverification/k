@@ -4,9 +4,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
-import org.kframework.kore.K;
-import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.outer.Module;
+import org.kframework.koreimplementation.K;
+import org.kframework.koreimplementation.convertors.KILtoKORE;
+import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -28,7 +28,7 @@ public class NewOuterParserTest {
         CharSequence theTextToParse = "module FOO endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
-        File definitionFile = new File("k-distribution/src/test/resources/convertor-tests/kore.k").getAbsoluteFile();
+        File definitionFile = new File("k-distribution/src/test/resources/convertor-tests/koreimplementation.k").getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
         System.out.println(kBody);
@@ -54,7 +54,7 @@ public class NewOuterParserTest {
         def.setMainSyntaxModule(mainModule);
 
         KILtoKORE kilToKore = new KILtoKORE(null);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(def);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(def);
 
         Module kastModule = koreDef.getModule(mainModule).get();
 

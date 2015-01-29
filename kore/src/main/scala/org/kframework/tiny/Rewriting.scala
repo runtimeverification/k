@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.kframework.kore._
+import org.kframework.koreimplementation._
 import builtin.KBoolean._
 import org.kframework.Collection
 import org.kframework.tiny.Strategy.Rule

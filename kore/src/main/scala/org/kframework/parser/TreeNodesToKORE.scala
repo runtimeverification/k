@@ -1,18 +1,18 @@
 package org.kframework.parser
 
 import org.kframework._
-import org.kframework.kore._
-import outer._
-import collection.JavaConverters._
 import org.kframework.builtin.Sorts
+import org.kframework.koreimplementation._
+
+import scala.collection.JavaConverters._
 
 object TreeNodesToKORE {
   def apply(t: Term): K = t match {
     // TODO(Radu): the content of the constant should not be trimmed (see below) but we do this now due to an
     // but related to whitespace in the parser.
     case Constant(s, p, l) => KToken(p.sort, s.trim, locationToAtt(l.get()))
-    case TermCons(items, p, l) => KApply(p.klabel.get, kore.KList(items.asScala map apply), locationToAtt(l.get()))
-    case Ambiguity(items, l) => KApply(KLabel("AMB"), kore.KList(items.asScala map apply), Attributes())
+    case TermCons(items, p, l) => KApply(p.klabel.get, koreimplementation.KList(items.asScala map apply), locationToAtt(l.get()))
+    case Ambiguity(items, l) => KApply(KLabel("AMB"), koreimplementation.KList(items.asScala map apply), Attributes())
   }
 
   def down(t: K): K = t match {
@@ -29,7 +29,7 @@ object TreeNodesToKORE {
     case KApply(KLabel("#KApply"), items, att) =>
       val theKList = items.tail.head match {
         case KApply(KLabel("#KList"), items, att) => items map down _
-        case c: KToken => kore.KList(down(c))
+        case c: KToken => koreimplementation.KList(down(c))
       }
       KApply(
         KLabel(items(0).asInstanceOf[KToken].s),
@@ -45,5 +45,5 @@ object TreeNodesToKORE {
   }
 
   def locationToAtt(l: org.kframework.parser.Location): Attributes =
-    Attributes(kore.Location.apply(l.startLine, l.startColumn, l.endLine, l.endColumn))
+    Attributes(koreimplementation.Location.apply(l.startLine, l.startColumn, l.endLine, l.endColumn))
 }
