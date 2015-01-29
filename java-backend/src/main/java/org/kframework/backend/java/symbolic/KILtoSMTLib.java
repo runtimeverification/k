@@ -136,7 +136,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final boolean skipEqualities;
     private final HashSet<Variable> variables;
 
-    public static String translateConstraint(ConjunctiveFormula constraint) {
+    public static String translateConstraint(SymbolicConstraint constraint) {
         KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.termContext());
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
         return getSortAndFunctionDeclarations(constraint.termContext().definition(), transformer.variables())
@@ -146,8 +146,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     }
 
     public static String translateImplication(
-            ConjunctiveFormula leftHandSide,
-            ConjunctiveFormula rightHandSide,
+            SymbolicConstraint leftHandSide,
+            SymbolicConstraint rightHandSide,
             Set<Variable> rightHandSideOnlyVariables) {
         KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.termContext());
         KILtoSMTLib rightTransformer = new KILtoSMTLib(false, rightHandSide.termContext());
@@ -341,8 +341,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
      * Ignores the substitution of the symbolic constraint.
      */
     @Override
-    public ASTNode transform(ConjunctiveFormula constraint) {
-        assert constraint.disjunctions().isEmpty() : "disjunctions are not supported by SMT translation";
+    public ASTNode transform(SymbolicConstraint constraint) {
         Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
         if (!skipEqualities) {
             constraint.substitution().entrySet().stream()

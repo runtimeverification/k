@@ -17,9 +17,10 @@ import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
 import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
-import org.kframework.backend.java.symbolic.Equality;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint.Equality;
 import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -49,7 +50,7 @@ public class Rule extends JavaSymbolicObject {
     private final ImmutableList<Term> ensures;
     private final ImmutableSet<Variable> freshConstants;
     private final ImmutableSet<Variable> freshVariables;
-    private final ConjunctiveFormula lookups;
+    private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
 
@@ -75,10 +76,6 @@ public class Rule extends JavaSymbolicObject {
      * Instructions for evaluating side condition of rule.
      */
     private final List<ImmutableList<RHSInstruction>> instructionsOfRequires;
-    /**
-     * Instructions for evaluating side condition of rule.
-     */
-    private final List<ImmutableList<RHSInstruction>> instructionsOfLookups;
     /**
      * @see Rule#computeReusableBoundVars()
      */
@@ -111,7 +108,7 @@ public class Rule extends JavaSymbolicObject {
             List<Term> ensures,
             Set<Variable> freshConstants,
             Set<Variable> freshVariables,
-            ConjunctiveFormula lookups,
+            UninterpretedConstraint lookups,
             boolean compiledForFastRewriting,
             Map<CellLabel, Term> lhsOfReadCells,
             Map<CellLabel, Term> rhsOfWriteCells,
@@ -206,6 +203,7 @@ public class Rule extends JavaSymbolicObject {
         this.rhsInstructions = rhsVisitor.getInstructions();
 
         instructionsOfWriteCells = new HashMap<>();
+        instructionsOfRequires = new ArrayList<>();
         if (compiledForFastRewriting) {
             for (Map.Entry<CellLabel, Term> entry :
                 rhsOfWriteCells.entrySet()) {
@@ -217,17 +215,10 @@ public class Rule extends JavaSymbolicObject {
                 }
             }
         }
-        instructionsOfRequires = new ArrayList<>();
         for (Term require : requires) {
             GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
             require.accept(visitor);
             instructionsOfRequires.add(visitor.getInstructions());
-        }
-        instructionsOfLookups = new ArrayList<>();
-        for (Equality equality : lookups.equalities()) {
-            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
-            equality.leftHandSide().accept(visitor);
-            instructionsOfLookups.add(visitor.getInstructions());
         }
 
         boolean modifyCellStructure;
@@ -395,7 +386,7 @@ public class Rule extends JavaSymbolicObject {
         return leftHandSide;
     }
 
-    public ConjunctiveFormula lookups() {
+    public UninterpretedConstraint lookups() {
         return lookups;
     }
 
@@ -425,10 +416,6 @@ public class Rule extends JavaSymbolicObject {
 
     public List<ImmutableList<RHSInstruction>> instructionsOfRequires() {
         return UnmodifiableList.decorate(instructionsOfRequires);
-    }
-
-    public List<ImmutableList<RHSInstruction>> instructionsOfLookups() {
-        return UnmodifiableList.decorate(instructionsOfLookups);
     }
 
     public Multiset<Variable> reusableVariables() {
@@ -516,7 +503,7 @@ public class Rule extends JavaSymbolicObject {
             if (requires == null) {
                 string += " when ";
             } else {
-                string += " " + ConjunctiveFormula.SEPARATOR + " ";
+                string += " " + SymbolicConstraint.SEPARATOR + " ";
             }
             string += lookups;
         }

@@ -2,6 +2,6 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-L:Term |-> cons ( c, cons ( _0:Term, cons ( a, nil ) ) )
-T:Term |-> cons ( a, cons ( _0, cons ( c, nil ) ) )
-X:Term |-> _0
+L:Term |-> cons ( c (  ), cons ( X:Term, cons ( a (  ), nil (  ) ) ) )
+T:Term |-> cons ( a (  ), cons ( X, cons ( c (  ), nil (  ) ) ) )
+X:Term |-> X

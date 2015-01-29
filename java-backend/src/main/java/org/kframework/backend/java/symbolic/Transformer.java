@@ -22,9 +22,7 @@ public interface Transformer {
     public ASTNode transform(BuiltinSet builtinSet);
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
-    public ASTNode transform(ConjunctiveFormula conjunctiveFormula);
     public ASTNode transform(ConstrainedTerm constrainedTerm);
-    public ASTNode transform(DisjunctiveFormula disjunctiveFormula);
     public ASTNode transform(FloatToken floatToken);
     public ASTNode transform(Hole hole);
     public ASTNode transform(IntToken intToken);
@@ -39,9 +37,11 @@ public interface Transformer {
     public ASTNode transform(KSequence kSequence);
     public ASTNode transform(MetaVariable metaVariable);
     public ASTNode transform(Rule rule);
+    public ASTNode transform(SymbolicConstraint symbolicConstraint);
     public ASTNode transform(StringToken stringToken);
     public ASTNode transform(Term node);
     public ASTNode transform(Token token);
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint);
     public ASTNode transform(UninterpretedToken uninterpretedToken);
     public ASTNode transform(Variable variable);
 }

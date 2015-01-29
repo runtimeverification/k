@@ -54,7 +54,7 @@ rule [loop-inv]:
     object(P1) |-> tv(struct listNode *, LP:Pointer => ?LP:Pointer)
     object(P2) |-> tv(struct stackNode *, SP:Pointer => null)
     (treeList(SP)(TS:TreeSeq) list(LP)(A:List)
-  =>
+      =>
     list(?LP)(treeseq2intseq(TS) A))
   ...</heap>
   <out>... .List => rev(treeseq2intseq(TS)) </out>

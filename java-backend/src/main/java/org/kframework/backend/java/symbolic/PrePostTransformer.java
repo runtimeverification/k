@@ -283,27 +283,27 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        ASTNode astNode = conjunctiveFormula.accept(preTransformer);
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        ASTNode astNode = symbolicConstraint.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
             return ((DoneTransforming) astNode).getContents();
         }
-        assert astNode instanceof ConjunctiveFormula : "preTransformer should not modify type";
-        conjunctiveFormula = (ConjunctiveFormula) astNode;
-        conjunctiveFormula = (ConjunctiveFormula) super.transform(conjunctiveFormula);
-        return conjunctiveFormula.accept(postTransformer);
+        assert astNode instanceof SymbolicConstraint : "preTransformer should not modify type";
+        symbolicConstraint = (SymbolicConstraint) astNode;
+        symbolicConstraint = (SymbolicConstraint) super.transform(symbolicConstraint);
+        return symbolicConstraint.accept(postTransformer);
     }
 
     @Override
-    public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
-        ASTNode astNode = disjunctiveFormula.accept(preTransformer);
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        ASTNode astNode = uninterpretedConstraint.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
             return ((DoneTransforming) astNode).getContents();
         }
-        assert astNode instanceof DisjunctiveFormula : "preTransformer should not modify type";
-        disjunctiveFormula = (DisjunctiveFormula) astNode;
-        disjunctiveFormula = (DisjunctiveFormula) super.transform(disjunctiveFormula);
-        return disjunctiveFormula.accept(postTransformer);
+        assert astNode instanceof UninterpretedConstraint : "preTransformer should not modify type";
+        uninterpretedConstraint = (UninterpretedConstraint) astNode;
+        uninterpretedConstraint = (UninterpretedConstraint) super.transform(uninterpretedConstraint);
+        return uninterpretedConstraint.accept(postTransformer);
     }
 
     @Override

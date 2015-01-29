@@ -188,14 +188,13 @@ public class KList extends KCollection {
                 contentsBuilder.addAll(kList.contents);
                 frame = kList.frame;
             } else if (term instanceof Variable) {
+                assert term.sort().equals(Sort.KLIST) || term.kind().equals(Kind.KITEM) || term.kind().equals(Kind.K);
                 if (term.sort().equals(Sort.KLIST)) {
                     frame = (Variable) term;
                 } else {
                     contentsBuilder.add(term);
                 }
-            } else if (term.kind() == Kind.KITEM
-                    || term.kind() == Kind.K
-                    || term.kind == Kind.CELL_COLLECTION) {
+            } else if (term.kind().equals(Kind.KITEM) || term.kind().equals(Kind.K)) {
                 contentsBuilder.add(term);
             } else if (term instanceof KItemProjection) {
                 // TODO(AndreiS): fix KItem projection

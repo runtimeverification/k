@@ -143,13 +143,8 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ConjunctiveFormula node) {
-        visit((Term) node);
-    }
-
-    @Override
-    public void visit(DisjunctiveFormula node) {
-        visit((Term) node);
+    public void visit(SymbolicConstraint node) {
+        visit((JavaSymbolicObject) node);
     }
 
     @Override
@@ -160,6 +155,11 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(Token token) {
         visit((Term) token);
+    }
+
+    @Override
+    public void visit(UninterpretedConstraint uninterpretedConstraint) {
+        visit((JavaSymbolicObject) uninterpretedConstraint);
     }
 
     @Override

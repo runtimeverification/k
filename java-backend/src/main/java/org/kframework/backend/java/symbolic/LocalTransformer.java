@@ -145,13 +145,8 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        return transform((Term) conjunctiveFormula);
-    }
-
-    @Override
-    public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
-        return transform((Term) disjunctiveFormula);
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        return transform((JavaSymbolicObject) symbolicConstraint);
     }
 
     @Override
@@ -167,6 +162,11 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(Token token) {
         return transform((Term) token);
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        return transform((JavaSymbolicObject) uninterpretedConstraint);
     }
 
     @Override

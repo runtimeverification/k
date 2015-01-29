@@ -155,12 +155,7 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
-    public void visit(ConjunctiveFormula node) {
-        visitAll(node);
-    }
-
-    @Override
-    public void visit(DisjunctiveFormula node) {
+    public void visit(SymbolicConstraint node) {
         visitAll(node);
     }
 

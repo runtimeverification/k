@@ -13,7 +13,7 @@ import org.kframework.kil.ASTNode;
  * A {@link org.kframework.backend.java.symbolic.Equality} instance between
  * bottom and anything else is false and makes the entire constraint false.
  *
- * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
+ * @see org.kframework.backend.java.symbolic.SymbolicConstraint
  *
  * @author TraianSF
  */

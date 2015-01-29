@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
@@ -37,7 +38,7 @@ public class UseSMTTest {
     Definition definition;
 
     @Mock
-    SMTOperations constraintOps;
+    SymbolicConstraintOperations constraintOps;
 
 
     @Before
