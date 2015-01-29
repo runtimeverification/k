@@ -10,7 +10,9 @@ import scala.collection.mutable.{Builder, ListBuffer}
 
 /* Interfaces */
 
-sealed trait KORE // marker for KORE final classes added as a result of a discussion with Brandon about sealing
+sealed trait KORE
+
+// marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
 trait HasAttributes {
   def att: Attributes
@@ -20,7 +22,9 @@ trait K extends HasAttributes with Pattern {
   protected type This <: K
 
   def transform(t: K => Option[K]): K
-  def find(f: K => Boolean) : Set[K]
+
+  def find(f: K => Boolean): Set[K]
+
   def copy(att: Attributes): This
 }
 
@@ -28,14 +32,16 @@ trait Leaf extends K {
   def transform(t: K => Option[K]): K =
     t.apply(this).getOrElse(this)
 
-  def find(f: K => Boolean) : Set[K] = if (f(this)) Set(this) else Set()
+  def find(f: K => Boolean): Set[K] = if (f(this)) Set(this) else Set()
 }
 
 trait EmptyAttributes extends K {
   protected type This = EmptyAttributes
+
   def att: Attributes = Attributes()
+
   def copy(att: Attributes): This =
-    if(att != Attributes)
+    if (att != Attributes)
       throw new UnsupportedOperationException("Attributes must be empty.")
     else
       this
@@ -48,7 +54,7 @@ trait KLabel extends KLabelToString {
 }
 
 trait KToken extends KItem with KORE with KTokenToString
-  with KTokenPattern {
+with KTokenPattern {
   val sort: Sort
   val s: String
 }
@@ -62,9 +68,11 @@ class KList(val delegate: List[K])
   type This = KList
 
   override def canEqual(that: Any) = that.isInstanceOf[KList]
+
   def newBuilder(): Builder[K, KList] = KList.newBuilder(att)
 
   def get(i: Int) = delegate.lift(i)
+
   def att = Attributes()
 
   def copy(att: Attributes): KList = this
@@ -74,17 +82,34 @@ class KList(val delegate: List[K])
   def iterable: Iterable[K] = delegate
 }
 
-case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
-  extends KAbstractCollection with Indexed[Int, K]
+trait KApply extends KCollection {
+  def klabel: KLabel
+
+  def klist: KList
+}
+
+object KApply {
+  def apply(klabel: KLabel, klist: KList, att: Attributes = Attributes()) = {
+    KSimpleApply(klabel, klist, att)
+  }
+
+  def unapply(kapply: KApply): Option[(KLabel, KList, Attributes)] = kapply match {
+    case KSimpleApply(klabel, klist, att) => Some((klabel, klist, att))
+    case _ => ???
+  }
+}
+
+case class KSimpleApply(val klabel: KLabel, val klist: KList, val att: Attributes = Attributes())
+  extends KApply with KAbstractCollection with Indexed[Int, K]
   with KApplyPattern with Associative[KList]
   with KApplyToString with KORE {
-  type This = KApply
+  type This = KSimpleApply
 
   protected[kore] def delegate: Iterable[K] = klist.delegate
 
   def get(i: Int) = klist.get(i)
 
-  def newBuilder: Builder[K, KApply] = klist.newBuilder() mapResult { new KApply(klabel, _, att) }
+  def newBuilder: Builder[K, KSimpleApply] = klist.newBuilder() mapResult { new KSimpleApply(klabel, _, att) }
 
   override def canEqual(that: Any) = that match {
     case t: KApply => t.klabel == klabel
@@ -97,20 +122,24 @@ case class KApply(val klabel: KLabel, val klist: KList, val att: Attributes = At
 case class KUninterpretedToken(sort: Sort, s: String, override val att: Attributes = Attributes())
   extends KToken with KTokenToString with KORE with Leaf {
   type This = KToken
+
   def copy(att: Attributes): KToken = new KUninterpretedToken(sort, s, att)
 }
 
 case class ConcreteKLabel(name: String) extends KLabel with KORE {
-  def apply(ks: K*) = new KApply(this, KList(ks))
-  def apply(ks: List[K]) = new KApply(this, KList(ks))
+  def apply(ks: K*) = KApply(this, KList(ks))
+
+  def apply(ks: List[K]) = KApply(this, KList(ks))
 }
 
 case class KSequence(val ks: List[K], val att: Attributes = Attributes())
   extends KAbstractCollection with KSequencePattern with KSequenceToString with KORE {
   type This = KSequence
+
   def delegate = ks
 
   def newBuilder(): Builder[K, KSequence] = KSequence.newBuilder(att)
+
   def copy(att: Attributes): KSequence = new KSequence(ks, att)
 
   def canEqual(that: Any) = that.isInstanceOf[KSequence]
@@ -119,13 +148,16 @@ case class KSequence(val ks: List[K], val att: Attributes = Attributes())
 case class KVariable(name: String, att: Attributes = Attributes())
   extends KItem with KORE with KLabel with KVariablePattern with KVariableToString with Leaf {
   type This = KVariable
+
   def copy(att: Attributes): KVariable = new KVariable(name, att)
 }
 
 case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   extends KAbstractCollection with KORE with KRewritePattern with KRewriteToString {
   type This = KRewrite
+
   def copy(att: Attributes): KRewrite = new KRewrite(left, right, att)
+
   val klist = KList(left, right)
 
   protected[kore] def delegate: Iterable[K] = Seq(left, right)
@@ -136,21 +168,26 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
 }
 
 case class InjectedKLabel(klabel: KLabel) extends KItem
-  with InjectedKLabelPattern with Leaf {
+with InjectedKLabelPattern with Leaf {
   type This = InjectedKLabel
+
   def att() = Attributes()
+
   def copy(att: Attributes) = this
 
   override def toString = "#klabel" + "(" + klabel + ")";
 }
 
 case class InjectedKList(klist: KList, att: Attributes = Attributes()) extends KAbstractCollection
-  with InjectedKListPattern {
+with InjectedKListPattern {
   type This = InjectedKList
+
   def copy(att: Attributes) = InjectedKList(klist, att)
+
   def delegate = klist.delegate
 
   override def toString = "#klist" + "(" + klist + ")";
+
   def newBuilder(): Builder[K, InjectedKList] = InjectedKList.newBuilder(att)
 }
 
@@ -191,6 +228,7 @@ object KList {
   implicit def canBuildFrom: generic.CanBuildFrom[This, K, This] =
     new generic.CanBuildFrom[This, K, This] {
       def apply(): mutable.Builder[K, This] = newBuilder()
+
       def apply(from: This): mutable.Builder[K, This] = from.newBuilder.asInstanceOf[Builder[K, This]]
     }
 }
@@ -205,6 +243,7 @@ object KToken {
   def unapply(t: KToken) = Some((t.sort, t.s, t.att))
 
   implicit def from(i: Int) = apply(Sorts.Int, i.toString)
+
   implicit def from(s: String) = apply(Sorts.KString, s)
 }
 
@@ -224,6 +263,7 @@ object KRewrite {
   def apply(klist: KList, att: Attributes): KRewrite = klist match {
     case KList(left, right) => new KRewrite(left, right, att)
   }
+
   def apply(list: K*): KRewrite = apply(KList(list: _*), Attributes())
 }
 
@@ -233,6 +273,7 @@ object EmptyK {
 
 object KLabel extends ConcreteKLabel("KLabel") {
   def apply(name: String) = ConcreteKLabel(name)
+
   def unapply(klabel: ConcreteKLabel): Option[String] = Some(klabel.name)
 }
 

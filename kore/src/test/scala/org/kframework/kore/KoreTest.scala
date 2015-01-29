@@ -5,7 +5,7 @@ import org.kframework.builtin.Sorts
 class KoreTest {
   import org.junit._
 
-  object TestK extends KApply(KLabel("Test"), KList())
+  object TestK extends KSimpleApply(KLabel("Test"), KList())
 
   import Assert._
 

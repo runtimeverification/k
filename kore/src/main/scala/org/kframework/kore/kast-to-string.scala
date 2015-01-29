@@ -2,11 +2,10 @@
 
 package org.kframework.kore
 
-import org.kframework._
 import org.apache.commons.lang3.StringEscapeUtils
 
 trait KApplyToString {
-  self: KApply =>
+  self: KSimpleApply =>
   override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
 }
 
