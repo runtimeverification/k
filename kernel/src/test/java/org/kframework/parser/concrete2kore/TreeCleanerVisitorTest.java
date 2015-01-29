@@ -3,6 +3,7 @@
 package org.kframework.parser.concrete2kore;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 import org.kframework.definition.SyntaxProduction;
 import org.kframework.parser.*;
 import org.kframework.utils.errorsystem.ParseFailedException;
