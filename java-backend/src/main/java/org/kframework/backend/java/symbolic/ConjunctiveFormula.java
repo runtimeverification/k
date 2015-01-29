@@ -301,9 +301,17 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                     } else if (leftHandSide instanceof Variable
                             && !rightHandSide.variableSet().contains(leftHandSide)) {
                         // eliminate
+                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                (Variable) leftHandSide,
+                                rightHandSide);
+                        if (eliminationSubstitution == null) {
+                            pendingEqualities = pendingEqualities.plus(equality);
+                            continue;
+                        }
+
                         substitution = Substitution.composeAndEvaluate(
                                 substitution,
-                                getSubstitution((Variable) leftHandSide, rightHandSide),
+                                eliminationSubstitution,
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
@@ -312,9 +320,17 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                     } else if (rightHandSide instanceof Variable
                             && !leftHandSide.variableSet().contains(rightHandSide)) {
                         // swap + eliminate
+                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                (Variable) rightHandSide,
+                                leftHandSide);
+                        if (eliminationSubstitution == null) {
+                            pendingEqualities = pendingEqualities.plus(equality);
+                            continue;
+                        }
+
                         substitution = Substitution.composeAndEvaluate(
                                 substitution,
-                                getSubstitution((Variable) rightHandSide, leftHandSide),
+                                eliminationSubstitution,
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
@@ -376,8 +392,6 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                         .plus((Variable) term, freshVariable);
             }
         } else {
-            // TODO(AndreiS): fix missing unification case
-            assert false;
             return null;
         }
     }
