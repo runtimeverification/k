@@ -234,7 +234,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    protected List<Term> getKComponents(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
 

@@ -2,6 +2,5 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-Y:Term |-> _0:Term
-Z:Term |-> cons ( a, _0 )
-
+Y:Term |-> Y:Term
+Z:Term |-> cons ( a (  ), Y )

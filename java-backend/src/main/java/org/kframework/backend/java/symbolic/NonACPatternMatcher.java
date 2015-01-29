@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -45,7 +46,7 @@ public class NonACPatternMatcher {
     /**
      * Represents the substitution after the pattern matching.
      */
-    private Substitution<Variable, Term> substitution;
+    private Map<Variable, Term> substitution;
 
     private final Deque<Pair<Term, Term>> tasks = new ArrayDeque<>();
 
@@ -77,7 +78,7 @@ public class NonACPatternMatcher {
      *            the pattern term
      * @return the substitution if the matching succeeds; otherwise, {@code null}
      */
-    public Substitution<Variable, Term> patternMatch(Term subject, Term pattern) {
+    public Map<Variable, Term> patternMatch(Term subject, Term pattern) {
         /*
          * We make no assumption about whether the subject will be ground in the
          * matching algorithm. As for the pattern, all symbolic terms inside it
@@ -85,7 +86,7 @@ public class NonACPatternMatcher {
          * data-structure lookup/update).
          */
 
-        substitution = Substitution.empty();
+        substitution = Maps.newHashMapWithExpectedSize(32);
         tasks.clear();
         taskBuffer.clear();
         tasks.addFirst(Pair.of(subject, pattern));
@@ -95,7 +96,7 @@ public class NonACPatternMatcher {
             // (used during associative matching) back to builtin representation
             if (termContext.definition().context().krunOptions != null
                     && termContext.definition().context().krunOptions.experimental.prove != null) {
-                substitution = substitution.evaluate(termContext);
+                PatternMatcher.evaluateSubstitution(substitution, termContext);
             }
             return substitution;
         } else {
@@ -224,7 +225,13 @@ public class NonACPatternMatcher {
     }
 
     /**
-     * Binds a variable in the pattern to a subterm of the subject.
+     * Binds a variable in the pattern to a subterm of the subject; calls
+     * {@link NonACPatternMatcher#fail()} when the binding fails.
+     *
+     * @param variable
+     *            the variable
+     * @param term
+     *            the term
      */
     private void addSubstitution(Variable variable, Term term) {
         /* KList is the only possible singleton collection because we enforce
@@ -241,7 +248,7 @@ public class NonACPatternMatcher {
 
         Term subst = substitution.get(variable);
         if (subst == null) {
-            substitution = substitution.plus(variable, term);
+            substitution.put(variable, term);
         } else {
             check(subst.equals(term), variable, subst, term);
         }
@@ -437,7 +444,7 @@ public class NonACPatternMatcher {
     public static Map<Variable, Term> match(Term subject, Rule rule, TermContext context) {
         NonACPatternMatcher matcher = new NonACPatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
-        Substitution<Variable, Term> result = matcher.patternMatch(subject, rule.leftHandSide());
+        Map<Variable, Term> result = matcher.patternMatch(subject, rule.leftHandSide());
         return result != null ? RewriteEngineUtils.evaluateConditions(rule, result, context) : null;
     }
 

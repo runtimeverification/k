@@ -2,13 +2,14 @@
 package org.kframework.backend.java.rewritemachine;
 
 import java.util.List;
+import java.util.Map;
 
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 
 import com.google.common.collect.Lists;
-import org.kframework.backend.java.symbolic.Substitution;
+import com.google.common.collect.Maps;
 
 /**
  * Represents a substitution map plus extra information used by
@@ -23,7 +24,7 @@ class ExtendedSubstitution {
      * Represents the substitution map obtained by matching a pattern against
      * (part of) the subject term.
      */
-    private Substitution<Variable, Term> subst;
+    private Map<Variable, Term> subst;
 
     /**
      * Contains references to the cells whose contents are going to be modified
@@ -33,20 +34,20 @@ class ExtendedSubstitution {
     private List<CellCollection.Cell> writeCells;
 
     ExtendedSubstitution() {
-        subst = Substitution.empty();
+        subst = Maps.newHashMap();
         writeCells = Lists.newArrayList();
     }
 
-    ExtendedSubstitution(Substitution<Variable, Term> subst, List<CellCollection.Cell> writeCells) {
+    ExtendedSubstitution(Map<Variable, Term> subst, List<CellCollection.Cell> writeCells) {
         this.writeCells = writeCells;
         this.setSubst(subst);
     }
 
-    Substitution<Variable, Term> substitution() {
+    Map<Variable, Term> substitution() {
         return subst;
     }
 
-    void setSubst(Substitution<Variable, Term> subst) {
+    void setSubst(Map<Variable, Term> subst) {
         this.subst = subst;
     }
 

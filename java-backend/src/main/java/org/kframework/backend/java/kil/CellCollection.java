@@ -281,7 +281,7 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    protected List<Term> getKComponents(TermContext context) {
         throw new UnsupportedOperationException();
     }
 

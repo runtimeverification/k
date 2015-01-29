@@ -21,9 +21,7 @@ public interface Visitor {
     public void visit(BuiltinSet builtinSet);
     public void visit(CellCollection cellCollection);
     public void visit(Collection collection);
-    public void visit(ConjunctiveFormula node);
     public void visit(ConstrainedTerm constrainedTerm);
-    public void visit(DisjunctiveFormula node);
     public void visit(Hole hole);
     public void visit(IntToken intToken);
     public void visit(KLabelConstant kLabelConstant);
@@ -37,8 +35,10 @@ public interface Visitor {
     public void visit(KSequence kSequence);
     public void visit(MetaVariable metaVariable);
     public void visit(Rule rule);
+    public void visit(SymbolicConstraint node);
     public void visit(Term node);
     public void visit(Token token);
+    public void visit(UninterpretedConstraint uninterpretedConstraint);
     public void visit(UninterpretedToken uninterpretedToken);
     public void visit(Variable variable);
 

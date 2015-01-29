@@ -180,10 +180,6 @@ public class KExceptionManager {
         register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
-    public void registerInternalHiddenWarning(String message, ASTNode node) {
-        register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, null, node.getLocation(), node.getSource());
-    }
-
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
             AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
