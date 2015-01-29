@@ -72,7 +72,7 @@ public abstract class BaseTest extends SDFCompilerTest {
             printWriter.close();
         } else {
             String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile).replaceAll("\r\n","\n");
-            // fixing Windows line endings (git autocrlf=auto generates generates Windows line endings on checkout)
+            // fixing Windows line endings (git autocrlf=auto generates Windows line endings on checkout)
 
             assertEquals(clean(expectedOutput), clean(actualOutput));
         }
