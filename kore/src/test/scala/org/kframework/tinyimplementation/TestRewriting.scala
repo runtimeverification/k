@@ -1,13 +1,13 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.kframework.koreimplementation.KORE._
 import org.kframework.koreimplementation._
-import org.kframework.tiny.TrueAndFalse._
-import org.kframework.tiny.builtin.KInt._
+import org.kframework.tinyimplementation.TrueAndFalse._
+import org.kframework.tinyimplementation.builtin.KInt._
 
 class TestRewriting {
   import org.junit._
-  import org.kframework.tiny.Rewritable._
+  import org.kframework.tinyimplementation.Rewritable._
 
   implicit val theory = FreeTheory
   val X = KVariable("X")

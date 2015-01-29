@@ -1,11 +1,11 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.tiny.builtin
+package org.kframework.tinyimplementation.builtin
 
 import org.kframework.AssocBuilder
 import org.kframework.koreimplementation._
-import org.kframework.tiny.TrueAndFalse._
-import org.kframework.tiny._
+import org.kframework.tinyimplementation.TrueAndFalse._
+import org.kframework.tinyimplementation._
 
 import scala.collection.mutable.{Builder, ListBuffer}
 

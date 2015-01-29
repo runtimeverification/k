@@ -1,4 +1,4 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import scala.reflect.ManifestFactory
 import collection.JavaConverters._

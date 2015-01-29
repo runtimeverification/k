@@ -1,4 +1,4 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 abstract class AbstractReflectiveVisitor {
   import scala.reflect.runtime.universe.MethodMirror

@@ -1,4 +1,4 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.kframework.koreimplementation._
 
@@ -49,7 +49,7 @@ case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()
   override type This = Binding
 }
 
-import org.kframework.tiny.TrueAndFalse._
+import org.kframework.tinyimplementation.TrueAndFalse._
 
 trait Theory {
 

@@ -3,7 +3,7 @@
 package org.kframework.definition
 
 import org.junit.Test
-import org.kframework.tiny.Reflection
+import org.kframework.tinyimplementation.Reflection
 import org.junit.Assert
 import java.lang.reflect.Method
 

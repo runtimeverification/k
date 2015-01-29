@@ -4,7 +4,7 @@ package org.kframework.koreimplementation
 
 import org.kframework._
 import org.kframework.builtin.Sorts
-import org.kframework.tiny._
+import org.kframework.tinyimplementation._
 import scala.collection.JavaConverters._
 
 import scala.collection.mutable.{Builder, ListBuffer}

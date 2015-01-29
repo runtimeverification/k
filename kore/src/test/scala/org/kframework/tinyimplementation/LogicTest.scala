@@ -1,4 +1,4 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.junit.Test
 import org.junit.Assert._

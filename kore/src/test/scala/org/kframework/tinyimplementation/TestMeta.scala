@@ -1,4 +1,4 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import java.io.File
 
@@ -11,7 +11,7 @@ class TestMeta {
 
   import org.junit._
   import org.kframework.koreimplementation.KToken._
-  import org.kframework.tiny.Rewritable._
+  import org.kframework.tinyimplementation.Rewritable._
 
   implicit val theory = FreeTheory
 
@@ -35,7 +35,7 @@ class TestMeta {
     'Set('Module("TEST", 'Set(),
       'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")))))))
 
-  val Down = tiny.Down(Set("org.kframework.definition", "scala.collection.immutable"))
+  val Down = tinyimplementation.Down(Set("org.kframework.definition", "scala.collection.immutable"))
 
   @Ignore
   @Test def definitionUp() {

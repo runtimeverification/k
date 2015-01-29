@@ -1,10 +1,10 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.kframework.koreimplementation._
 import builtin.KBoolean._
 import org.kframework.Collection
-import org.kframework.tiny.Strategy.Rule
-import org.kframework.tiny.TrueAndFalse._
+import org.kframework.tinyimplementation.Strategy.Rule
+import org.kframework.tinyimplementation.TrueAndFalse._
 
 import UglyHack._
 

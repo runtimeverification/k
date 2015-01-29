@@ -1,6 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.junit.Test
 import org.junit.Assert

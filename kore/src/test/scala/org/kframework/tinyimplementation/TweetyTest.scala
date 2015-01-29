@@ -1,4 +1,4 @@
-package org.kframework.tiny.foo
+package org.kframework.tinyimplementation.foo
 
 import net.sf.tweety.logics.pl.sat.Sat4jSolver
 import net.sf.tweety.logics.pl.syntax._

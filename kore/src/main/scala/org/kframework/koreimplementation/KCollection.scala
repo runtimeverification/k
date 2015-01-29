@@ -3,13 +3,13 @@
 package org.kframework.koreimplementation
 
 import org.kframework._
-import org.kframework.tiny.{Theory, Proposition, Reflection}
-import org.kframework.tiny.builtin.KAnd
+import org.kframework.tinyimplementation.{Theory, Proposition, Reflection}
+import org.kframework.tinyimplementation.builtin.KAnd
 
 import collection._
 import JavaConverters._
 import scala.collection.mutable.{ListBuffer, Builder}
-import org.kframework.tiny.Or
+import org.kframework.tinyimplementation.Or
 
 import UglyHack._
 

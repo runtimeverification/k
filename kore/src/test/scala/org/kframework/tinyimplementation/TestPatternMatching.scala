@@ -1,10 +1,10 @@
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.kframework.koreimplementation.KORE._
 import org.kframework.koreimplementation._
-import org.kframework.tiny.TrueAndFalse._
-import org.kframework.tiny.builtin.KBag
-import org.kframework.tiny.builtin.KInt._
+import org.kframework.tinyimplementation.TrueAndFalse._
+import org.kframework.tinyimplementation.builtin.KBag
+import org.kframework.tinyimplementation.builtin.KInt._
 
 class TestPatternMatching {
 

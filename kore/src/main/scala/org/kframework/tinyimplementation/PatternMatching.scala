@@ -1,10 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.tiny
+package org.kframework.tinyimplementation
 
 import org.kframework.koreimplementation.KORE._
 import org.kframework.koreimplementation._
-import org.kframework.tiny.TrueAndFalse._
+import org.kframework.tinyimplementation.TrueAndFalse._
 
 import scala.collection.mutable.ListBuffer
 

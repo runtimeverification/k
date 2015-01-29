@@ -4,10 +4,10 @@ import org.kframework._
 import scala.collection.mutable.SetBuilder
 import scala.collection.mutable.Builder
 import org.kframework.builtin.Sorts
-import org.kframework.tiny.Pattern
-import org.kframework.tiny.Theory
+import org.kframework.tinyimplementation.Pattern
+import org.kframework.tinyimplementation.Theory
 import sun.security.util.Cache.EqualByteArray
-import org.kframework.tiny.Or
+import org.kframework.tinyimplementation.Or
 
 case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
   type This = Attributes

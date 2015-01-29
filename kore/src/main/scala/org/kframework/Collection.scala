@@ -7,7 +7,7 @@ import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.ListBuffer
 import koreimplementation._
-import org.kframework.tiny._
+import org.kframework.tinyimplementation._
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get

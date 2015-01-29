@@ -8,7 +8,7 @@ import collection.JavaConverters._
 import org.kframework._
 import org.kframework.Collector
 import org.kframework.CombinerFromBuilder
-import org.kframework.tiny.builtin
+import org.kframework.tinyimplementation.builtin
 
 /**
  *
