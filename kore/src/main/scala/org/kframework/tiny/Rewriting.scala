@@ -6,6 +6,8 @@ import org.kframework.Collection
 import org.kframework.tiny.Strategy.Rule
 import org.kframework.tiny.TrueAndFalse._
 
+import UglyHack._
+
 object Substitution {
   implicit def apply(self: K): Substitution = new Substitution(self)
 }
@@ -18,7 +20,7 @@ class Substitution(self: K) {
     (doSubstitution _).andThen(flattenInjections)(substituion)
   }
 
-  private def flattenInjections(term: K): K = term.transform({
+  private def flattenInjections(term: K): K = (term: Node).transform({
     case KApply(l, kl, att) =>
       Some(KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att))
     case _ => None

@@ -11,7 +11,9 @@ import JavaConverters._
 import scala.collection.mutable.{ListBuffer, Builder}
 import org.kframework.tiny.Or
 
-trait KCollection extends Collection[K] with K {
+import UglyHack._
+
+trait KCollection extends Collection[K] with Node {
   type This <: KCollection
 
   def transform(t: K => Option[K]): K = {
@@ -26,7 +28,7 @@ trait KCollection extends Collection[K] with K {
   }
 }
 
-trait KProduct extends Product with K {
+trait KProduct extends Product with Node {
   type This <: K
 
   val companion = Reflection.findObject(this.getClass.getCanonicalName)

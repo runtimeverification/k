@@ -5,6 +5,8 @@ import org.kframework.kore._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
+import UglyHack._
+
 trait Proposition extends K {
   def and(p: Proposition)(implicit theory: Theory): Proposition = And(this, p)
 

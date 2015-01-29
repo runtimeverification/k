@@ -1,6 +1,8 @@
 package org.kframework.tiny
 
-import org.kframework.kore.K
+import org.kframework.kore.{UglyHack, K}
+
+import UglyHack._
 
 /**
  * Created by cos on 1/28/15.

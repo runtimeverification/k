@@ -14,21 +14,20 @@ sealed trait KORE
 
 // marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
-trait HasAttributes {
-  def att: Attributes
-}
 
 trait K extends HasAttributes with Pattern {
   protected type This <: K
 
-  def transform(t: K => Option[K]): K
-
-  def find(f: K => Boolean): Set[K]
-
   def copy(att: Attributes): This
 }
 
-trait Leaf extends K {
+trait Node extends K {
+  def transform(t: K => Option[K]): K
+
+  def find(f: K => Boolean): Set[K]
+}
+
+trait Leaf extends Node {
   def transform(t: K => Option[K]): K =
     t.apply(this).getOrElse(this)
 
@@ -291,4 +290,8 @@ object KORE {
   implicit def SymbolToKLabel(s: Symbol) = KLabel(s.name)
 
   implicit def StringToKToken(s: String) = KToken(Sorts.KString, s)
+}
+
+object UglyHack {
+  implicit def toNode(k: K): Node = k.asInstanceOf[Node]
 }
