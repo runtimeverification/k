@@ -17,7 +17,7 @@ trait Pattern {
 
 trait Normalization {
   def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or =
-    theory.normalize((matchAllInternal(k) and sideConditions).asInstanceOf[Or])
+    theory.normalize((matchAllInternal(k) and sideConditions).asInstanceOf[Or]).asInstanceOf[Or]
 
   def matchAllInternal(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or
 }

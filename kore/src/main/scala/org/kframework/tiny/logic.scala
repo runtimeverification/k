@@ -1,9 +1,9 @@
 package org.kframework.tiny
 
 import org.kframework.kore._
-import org.kframework.tiny.TrueAndFalse._
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 trait Proposition extends K {
   def and(p: Proposition)(implicit theory: Theory): Proposition = And(this, p)
@@ -34,28 +34,17 @@ object Equals {
 }
 
 
-case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) extends SimpleCaseClass with Equals {
+case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) extends Equals with KProduct {
   def matchAll(k: K)(implicit rest: Theory): Or = ???
 
   override type This = SimpleEquals
 
-  override def copy(att: Attributes): This = SimpleEquals(left, right, att)
-
-  override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
 }
 
-case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()) extends Equals {
+case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()) extends Equals with KProduct {
   val left = variable
   val right = value
   override type This = Binding
-
-  override def matchAll(k: K, sideConditions: Proposition = True)(implicit rest: Theory): Or = ???
-
-  override def copy(att: Attributes): This = Binding(variable, value, att)
-
-  override def transform(t: PartialFunction[K, K]): K = ???
-
-  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 import org.kframework.tiny.TrueAndFalse._
@@ -69,43 +58,49 @@ trait Theory {
    * If we cannot find an answer (e.g., we have symbolic values), return None
    * So None means the Proposition is satisfiable.
    */
-  def apply(proposition: Proposition): Option[Boolean]
-
-  def normalize(or: Or): Or = {
-    val normalizedConjunctions = or.conjunctions.map(normalize(_))
-
-    if (normalizedConjunctions.contains(True))
-      Or(True)
-    else {
-      val noFalse = normalizedConjunctions.filterNot { _ == False }
-      for (p <- noFalse) {assert(p.isInstanceOf[And]) }
-      Or(noFalse.asInstanceOf[Set[And]])
-    }
+  def apply(proposition: Proposition): Option[Boolean] = normalize(proposition) match {
+    case True => Some(true)
+    case False => Some(false)
+    case _ => None
   }
 
-  def normalize(and: And): Proposition = {
-    //            apply(and) map toProposition getOrElse and
-    val newPredicates: Set[Predicate] =
-      and.predicates
-        .map { p => apply(p) map toProposition getOrElse p }
-        .filterNot { _ == True }
-        .asInstanceOf[Set[Predicate]]
+  def normalize(k: K): K
 
-    if (newPredicates.exists(_ == False) || apply(True) == Some(false))
-      False
-    else
-      And(newPredicates, and.bindings)
-  }
-
-  def normalize(p: Proposition): Proposition = p match {
-    case p: Or => normalize(p)
-    case p: Proposition => normalize(p)
-  }
+  //  def normalize(or: Or): Or = {
+  //    val normalizedConjunctions = or.conjunctions.map(normalize(_))
+  //
+  //    if (normalizedConjunctions.contains(True))
+  //      Or(True)
+  //    else {
+  //      val noFalse = normalizedConjunctions.filterNot { _ == False }
+  //      for (p <- noFalse) {assert(p.isInstanceOf[And]) }
+  //      Or(noFalse.asInstanceOf[Set[And]])
+  //    }
+  //  }
+  //
+  //  def normalize(and: And): Proposition = {
+  //    //            apply(and) map toProposition getOrElse and
+  //    val newPredicates: Set[Predicate] =
+  //      and.predicates
+  //        .map { p => apply(p) map toProposition getOrElse p }
+  //        .filterNot { _ == True }
+  //        .asInstanceOf[Set[Predicate]]
+  //
+  //    if (newPredicates.exists(_ == False) || apply(True) == Some(false))
+  //      False
+  //    else
+  //      And(newPredicates, and.bindings)
+  //  }
+  //
+  //  def normalize(p: Proposition): Proposition = p match {
+  //    case p: Or => normalize(p)
+  //    case p: And => normalize(p)
+  //  }
 
   /**
    * Helper method; Returns true when left == right
    */
-  def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(True)
+  def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(true)
 }
 
 //case class PropositionTheory(p: Proposition) extends Theory {
@@ -149,10 +144,10 @@ object And {
 case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
 
   // invariant: a bound KVariable will not appear in predicates
-  for (p <- predicates;
-       v <- bindings.keys) {
-    assert(p.find(_ == v) == Set())
-  }
+  //  for (p <- predicates;
+  //       v <- bindings.keys) {
+  //    assert(p.find(_ == v) == Set(), this.toString)
+  //  }
 
   def andOption(that: And): Option[And] = {
     def clashingBindings(v: KVariable): Boolean =
@@ -185,13 +180,19 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Att
 
   override type This = And
 
-  override def delegate: Iterable[K] = predicates ++ bindings.keys ++ bindings.values
+  override def delegate: Iterable[K] = predicates ++ (bindings map { case (k, v) => Binding(k, v) })
 
   override def copy(att: Attributes): This = ???
 
   override def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 
-  override def newBuilder(): mutable.Builder[K, This] = ???
+  override def newBuilder(): mutable.Builder[K, This] = ListBuffer() mapResult {
+    l =>
+      val predicates: Set[Predicate] = l collect { case e: Predicate => e } toSet
+      val bindings: Map[KVariable, K] = l collect { case e: Binding => (e.variable, e.value) } toMap
+
+      And(predicates, bindings, att)
+  }
 }
 
 case class Or(conjunctions: Set[And], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
@@ -216,11 +217,11 @@ case class Or(conjunctions: Set[And], att: Attributes = Attributes()) extends KA
 
   override def delegate: Iterable[K] = conjunctions
 
-  override def copy(att: Attributes): This = ???
+  override def copy(att: Attributes): This = Or(conjunctions, att)
 
-  override def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
+  override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
 
-  override def newBuilder(): mutable.Builder[K, This] = ???
+  override def newBuilder(): mutable.Builder[K, This] = ListBuffer() mapResult { l => Or(l.toSet.asInstanceOf[Set[And]], att) }
 }
 
 object Or {
@@ -238,16 +239,10 @@ object Or {
   def unapplySeq(or: Or): Option[Seq[And]] = Some(or.conjunctions.toSeq)
 }
 
-object FreeTheory extends Theory {
-  /**
-   * Tells whether the proposition is valid in this theory.
-   * If we cannot find an answer (e.g., we have symbolic values), return None
-   */
-  override def apply(proposition: Proposition): Option[Boolean] = proposition match {
-    case Equals(left, right, _) => Some(left == right)
-    case _ => None
-  }
-}
+object FreeTheory extends BasicTheory({
+  case Equals(left, right, _) if left == right => Some(True)
+  case _ => None
+})
 
 object TrueAndFalse {
   val True = new And(Set(), Map())

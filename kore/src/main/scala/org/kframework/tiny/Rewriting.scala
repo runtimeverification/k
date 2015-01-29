@@ -11,6 +11,7 @@ object Substitution {
 }
 
 class Substitution(self: K) {
+
   import Substitution._
 
   def transform(substituion: Map[KVariable, K]): K = {
@@ -19,14 +20,15 @@ class Substitution(self: K) {
 
   private def flattenInjections(term: K): K = term.transform({
     case KApply(l, kl, att) =>
-      KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att)
+      Some(KApply(l, InjectedKList.flattenKList(kl) map flattenInjections _, att))
+    case _ => None
   })
 
   private def doSubstitution(substituion: Map[KVariable, K]) =
     self match {
-      case a @ Anywhere(p, _) => substituion(a.TOPVariable).transform(substituion + (a.HOLEVariable -> p))
+      case a@Anywhere(p, _) => substituion(a.TOPVariable).transform(substituion + (a.HOLEVariable -> p))
       case v: KVariable => substituion(v).transform(substituion)
-      case kapp @ KApply(v: KVariable, klist, _) if substituion.contains(v) =>
+      case kapp@KApply(v: KVariable, klist, _) if substituion.contains(v) =>
         val newChildren = klist map { x: K => x.transform(substituion).asInstanceOf[K] }
         KApply(substituion(v).asInstanceOf[MetaKLabel].klabel, newChildren)
       case c: Collection[_] =>
@@ -51,6 +53,7 @@ object RewriteToTop {
 }
 
 object Rule {
+
   import RewriteToTop._
 
   def apply(termWithRewrite: K, sideConditions: Proposition = True)(implicit theory: Theory = FreeTheory): Rule = {
@@ -65,17 +68,19 @@ object Rule {
 }
 
 case class Rewritable(self: K) {
+
   import RewriteToTop._
   import Anywhere._
   import Substitution._
+
   /**
    * search using the rewrite rule in K
    */
-//  private def search(rules: Set[KRewrite])(implicit theory: Theory): Set[K] = priority(rules) flatMap searchFor
+  //  private def search(rules: Set[KRewrite])(implicit theory: Theory): Set[K] = priority(rules) flatMap searchFor
 
   private def priority(rules: Set[KRewrite]): Set[KRewrite] = self match {
     case KApply(KLabel(v), _, _) => rules collect {
-      case r @ KRewrite(KApply(v1, _, _), _, _) if v == v1 => r
+      case r@KRewrite(KApply(v1, _, _), _, _) if v == v1 => r
     }
     case _ => rules
   }

@@ -3,25 +3,56 @@
 package org.kframework.kore
 
 import org.kframework._
-import org.kframework.tiny.Reflection
+import org.kframework.tiny.{Theory, Proposition, Reflection}
 import org.kframework.tiny.builtin.KAnd
 
 import collection._
 import JavaConverters._
 import scala.collection.mutable.{ListBuffer, Builder}
+import org.kframework.tiny.Or
 
 trait KCollection extends Collection[K] with K {
   type This <: KCollection
 
-  def transform(t: PartialFunction[K, K]): K = {
+  def transform(t: K => Option[K]): K = {
     val transformedChildren: K = this map { _.transform(t) }
-    t.lift.apply(transformedChildren).getOrElse(transformedChildren)
+    t.apply(transformedChildren).getOrElse(transformedChildren)
   }
 
   def find(f: K => Boolean): immutable.Set[K] = {
     val fromChildren = (this.iterable flatMap { _.find(f) }).toSet
 
     fromChildren | (if (f(this)) Set(this) else Set())
+  }
+}
+
+trait KProduct extends Product with K {
+  type This <: K
+
+  val companion = Reflection.findObject(this.getClass.getCanonicalName)
+
+  val children: Iterator[K] = productIterator collect { case x: K => x }
+
+  override def copy(att: Attributes): This = {
+    val children = productIterator map { case x: K => x; case att: Attributes => att }
+
+    Reflection.invokeMethod(companion, "apply", Seq(children.toSeq)).asInstanceOf[This]
+  }
+
+  override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
+
+  override def transform(t: (K) => Option[K]): K = {
+    val newChildren = productIterator map { case k: K => t(k).getOrElse(k); case att => att }
+
+    t(Reflection.invokeMethod(companion, "apply", Seq(newChildren.toSeq)).asInstanceOf[This]).getOrElse(this)
+  }
+
+  override def find(f: (K) => Boolean): immutable.Set[K] = {
+    val matchingChildren = (children flatMap { _.find(f) }).toSet
+    if (f(this))
+      matchingChildren + this
+    else
+      matchingChildren
   }
 }
 
@@ -40,20 +71,8 @@ trait KAbstractCollection extends KCollection {
   }
 }
 
-trait WithDelegation extends KCollection {
-  def newBuilder(): Builder[K, This] = ListBuffer() mapResult { l => copy(att) }
-}
-
 trait IsProduct extends Product {
   val delegate: Iterable[K] = productIterator.collect({ case k: K => k }).toIterable
-}
-
-trait SimpleCaseClass extends KAbstractCollection with WithDelegation with IsProduct {
-  val companion = Reflection.findObject(this.getClass.getCanonicalName)
-
-  //  override def copy(children: Iterator[K], att: Attributes): This = {
-  //    Reflection.invokeMethod(companion, "apply", Seq(children.toSeq :+ att)).asInstanceOf[This]
-  //  }
 }
 
 /**
