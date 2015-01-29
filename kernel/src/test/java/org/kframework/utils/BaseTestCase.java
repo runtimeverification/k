@@ -4,8 +4,10 @@ package org.kframework.utils;
 import java.io.File;
 import java.util.Map;
 
+import com.google.inject.multibindings.MapBinder;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.kframework.backend.Backend;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -82,6 +84,8 @@ public abstract class BaseTestCase {
             bind(TTYInfo.class).toInstance(new TTYInfo(true, true, true));
             bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));
             bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Environment.class).toInstance(System.getenv());
+            MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(binder(), String.class, Backend.class);
+            mapBinder.addBinding("test").to(TestBackend.class);
         }
 
     }

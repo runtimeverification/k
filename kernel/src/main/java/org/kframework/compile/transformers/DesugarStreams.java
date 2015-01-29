@@ -68,7 +68,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
                     "Make sure you give the correct stream names: " + channels.toString(),
                     this, node);
         }
-        DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+        DataStructureSort myList = context.getDefaultListDataStructureSort();
         Term newItems = DataStructureSort.listOf(context, items.toArray(new Term[] {}));
         if (addAtBeginning != null) {
             newItems = KApp.of(KLabelConstant.of(myList.constructorLabel()), addAtBeginning, newItems);
@@ -80,7 +80,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     }
 
     private Term newListItem(Term element) {
-        DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+        DataStructureSort myList = context.getDefaultListDataStructureSort();
         return KApp.of(KLabelConstant.of(myList.elementLabel()), element);
     }
 

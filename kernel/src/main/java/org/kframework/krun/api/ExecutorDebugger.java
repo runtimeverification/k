@@ -74,21 +74,11 @@ public class ExecutorDebugger implements Debugger {
         } catch (CompilerStepDone e) {
             e.printStackTrace();
         }
-        KRunState initialState = new GenericKRunState(initialConfiguration, counter);
-        graph = new KRunGraph();
-        graph.addVertex(initialState);
-        states = new DualHashBidiMap<Integer, KRunState>();
-        putState(initialState);
         KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
-        //reduce may return same node as initial node
-        //so we add it just if it is different from the initial node
-        if(putState(reduced)){
-            graph.addVertex(reduced);
-            graph.addEdge(GenericTransition.reduce(), initialState, reduced);
-            currentState = reduced.getStateId();
-        }else {
-            currentState = initialState.getStateId();
-        }
+        graph = new KRunGraph();
+        states = new DualHashBidiMap<Integer, KRunState>();
+        putState(reduced);
+        currentState = reduced.getStateId();
     }
 
     /**
@@ -127,42 +117,33 @@ public class ExecutorDebugger implements Debugger {
         return state;
     }
 
-    private void steppingLoop(Integer steps) throws KRunExecutionException {
+
+    public void step(int steps) throws KRunExecutionException {
         if (currentState == null) {
             throw new IllegalStateException("Cannot step without a current state to step from. "
                     + "If you previously used the search command you must"
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
-        for (int i = 0; steps == null || i < steps; i++) {
-            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1, false).getFinalState();
-            Entry<Integer, KRunState> prevValue = containsValue(nextStep);
-            if (prevValue!=null) {
-                nextStep = prevValue.getValue();
-
-                int stateId = prevValue.getKey();
-                if (stateId == currentState) {
-                    //we've stopped moving, so that means we must have reached a final state
-                    return;
-                }
-                // we've reached this state before, so update the current state and proceed to the next step
-                currentState = stateId;
-                continue;
-            }
-            else {
-                putState(nextStep);
-            }
-            graph.addVertex(nextStep);
-            graph.addEdge(GenericTransition.unlabelled(), getState(currentState), nextStep);
-            currentState = nextStep.getStateId();
+        RewriteRelation finalRelation;
+        if (steps >= 0) {
+            finalRelation = executor.step(getState(currentState).getRawResult(), steps, true);
+        } else {
+            finalRelation = executor.run(getState(currentState).getRawResult(), true);
+        }
+        KRunGraph currentGraph = finalRelation.getExecutionGraph().get();
+        //merge the new graph into the current graph
+        mergeSearchGraph(currentGraph);
+        KRunState finalState = finalRelation.getFinalState();
+        Entry<Integer, KRunState> prevState = containsValue(finalState);
+        if (!(prevState == null)) {
+            currentState = prevState.getKey();
+        } else {
+            currentState = finalState.getStateId();
         }
     }
 
-    public void step(int steps) throws KRunExecutionException {
-        steppingLoop(steps);
-    }
-
     public void resume() throws KRunExecutionException {
-        steppingLoop(null);
+        step(-1);
     }
 
     public SearchResults stepAll(int steps) throws KRunExecutionException {
@@ -215,7 +196,7 @@ public class ExecutorDebugger implements Debugger {
      */
     private Entry<Integer, KRunState> containsValue(KRunState state){
         for (Entry<Integer,KRunState> e : states.entrySet() ){
-            if(SemanticEqual.checkEquality(state.getRawResult(), e.getValue().getRawResult()))
+            if(state.equals(e.getValue()))
                 return e ;
         }
         return null;
