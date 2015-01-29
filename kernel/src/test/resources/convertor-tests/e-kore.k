@@ -44,7 +44,7 @@ endmodule
 module KSEQ-SYMBOLIC
   imports KSEQ
   syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)"
-                           [hook(org.kframework.kore.KVariable)]
+                           [token, hook(org.kframework.kore.KVariable)]
   syntax KItem     ::= KVariable
   syntax KLabel    ::= KVariable
 endmodule
