@@ -17,7 +17,7 @@ trait KCollection extends Collection[K] with Node {
   type This <: KCollection
 
   def transform(t: K => Option[K]): K = {
-    val transformedChildren: K = this map { _.transform(t) }
+    val transformedChildren: K = this map { c => c.transform(t) }
     t.apply(transformedChildren).getOrElse(transformedChildren)
   }
 

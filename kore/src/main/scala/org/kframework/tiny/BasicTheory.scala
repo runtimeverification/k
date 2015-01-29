@@ -13,6 +13,7 @@ class BasicTheory(reducer: K => Option[K]) extends Theory {
    * If we cannot find an answer (e.g., we have symbolic values), return None
    * So None means the Proposition is satisfiable.
    */
+  override def apply(proposition: Proposition): Option[Boolean] = {
   def normalize(k: K): K = {
     k.transform(reducer)
   }

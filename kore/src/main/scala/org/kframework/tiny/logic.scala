@@ -105,23 +105,34 @@ trait Theory {
   def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(true)
 }
 
-//case class PropositionTheory(p: Proposition) extends Theory {
-//  def apply(proposition: Proposition): Option[Boolean] = (proposition and p) match {
-//    case True => Some(true)
-//    case False => Some(false)
-//    case sum => FreeTheory.apply(sum)
-//  }
-//}
+case class PropositionTheory(p: Proposition) extends Theory {
+  def apply(entailed: Proposition): Option[Boolean] =
+    FreeTheory.normalize((entailed and p) or Not(p)) match {
+    case True => Some(true)
+    case False => Some(false)
+    case sum => FreeTheory.apply(sum)
+  }
+}
+
+object Not {
+  def apply(proposition: Proposition)(implicit theory: Theory): Proposition = proposition match {
+    case or: Or => And(or.conjunctions map { Not(_) } toSeq: _*)
+    case and: And => Or(and.predicates map { Not(_) } toSeq: _*)
+    case p: Predicate => new Not(p)
+  }
+}
+
+case class Not(predicate: Predicate, att: Attributes = Attributes()) extends Predicate with SimpleCaseClass {
+  override type This = Not
+
+  override def copy(att: Attributes): This = Not(predicate, att)
+
+  override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
+}
 
 object And {
   def apply(propositions: Proposition*)(implicit theory: Theory): Proposition =
     propositions.fold(True: Proposition) {
-      case (True, Binding(k, v, _)) => new And(Set(), Map(k -> v))
-      case (True, p: Predicate) => new And(Set(p), Map())
-      case (sum: Proposition, True) => sum
-      case (sum: Proposition, False) => False
-      case (False, p: Proposition) => False
-
       case (sum: And, p: And) => sum andOption p getOrElse False
       case (sum: And, p: Or) =>
         Or((for (m1 <- p.conjunctions) yield {
@@ -151,9 +162,9 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Att
   //    assert(p.find(_ == v) == Set(), this.toString)
   //  }
 
-  def andOption(that: And): Option[And] = {
+  def andOption(that: And)(implicit theory: Theory): Option[And] = {
     def clashingBindings(v: KVariable): Boolean =
-      bindings(v) != that.bindings(v)
+      !theory(bindings(v), that.bindings(v))
 
     //  if variables are bound to distinct terms, m1 and m2 is false (none)
     if ((bindings.keys.toSet & that.bindings.keys.toSet).exists(clashingBindings)) {
