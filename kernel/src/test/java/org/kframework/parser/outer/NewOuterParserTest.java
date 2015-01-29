@@ -74,6 +74,7 @@ public class NewOuterParserTest {
 
         TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
         Term cleaned = treeCleanerVisitor.apply(parsed).right().get();
+        cleaned = new PreferAvoidVisitor().apply(parsed).right().get();
 
         return TreeNodesToKORE.apply(cleaned);
     }
