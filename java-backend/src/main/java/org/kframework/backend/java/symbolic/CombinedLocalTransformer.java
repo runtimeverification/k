@@ -154,7 +154,12 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(SymbolicConstraint node) {
+    public ASTNode transform(ConjunctiveFormula node) {
+        return transformAll(node);
+    }
+
+    @Override
+    public ASTNode transform(DisjunctiveFormula node) {
         return transformAll(node);
     }
 

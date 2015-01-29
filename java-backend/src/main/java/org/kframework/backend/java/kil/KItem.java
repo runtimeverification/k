@@ -10,8 +10,6 @@ import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.RuleAuditing;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -28,7 +26,6 @@ import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +52,7 @@ import com.google.inject.Inject;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public final class KItem extends Term {
+public class KItem extends Term {
 
     private final Term kLabel;
     private final Term kList;
@@ -276,7 +273,8 @@ public final class KItem extends Term {
 
     public static class KItemOperations {
 
-        private final Tool tool;
+        // TODO(AndreiS): make private again
+        public final Tool tool;
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
         private final BuiltinFunction builtins;
@@ -318,7 +316,7 @@ public final class KItem extends Term {
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
-                    if (options.warnings.includesExceptionType(ExceptionType.WARNING) && tool != Tool.KOMPILE) {
+                    if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && tool != Tool.KOMPILE) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Unable to resolve function symbol:\n\t\t");
                         sb.append(result);
@@ -331,7 +329,7 @@ public final class KItem extends Term {
                                 sb.append('\n');
                             }
                         }
-                        kem.registerCriticalWarning(sb.toString(), kItem);
+                        kem.registerInternalHiddenWarning(sb.toString(), kItem);
                     }
                     if (RuleAuditing.isAuditBegun()) {
                         System.err.println("Function failed to evaluate: returned " + result);
@@ -683,75 +681,6 @@ public final class KItem extends Term {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
-    }
-
-    public Term expandPattern(SymbolicConstraint constraint, boolean narrowing) {
-        if (constraint == null) {
-            return this;
-        }
-        TermContext context = constraint.termContext();
-
-        if (!(kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList)) {
-            return this;
-        }
-        KLabelConstant kLabel = (KLabelConstant) kLabel();
-        KList kList = (KList) kList();
-
-        List<ConstrainedTerm> results = new ArrayList<>();
-        Term inputKList = KList.concatenate(getPatternInput());
-        Term outputKList = KList.concatenate(getPatternOutput());
-        for (Rule rule : context.definition().patternRules().get(kLabel)) {
-            Term ruleInputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternInput());
-            Term ruleOutputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternOutput());
-            SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
-            unificationConstraint.add(inputKList, ruleInputKList);
-            unificationConstraint.simplify();
-            // TODO(AndreiS): there is only one solution here, so no list of constraints
-            if (unificationConstraint.isFalse()) {
-                continue;
-            }
-
-            if (narrowing) {
-                SymbolicConstraint globalConstraint = SymbolicConstraint.simplifiedConstraintFrom(context,
-                                constraint.equalities(),
-                                unificationConstraint,
-                                rule.requires());
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
-                    continue;
-                }
-            } else {
-                Set<Variable> existVariables = ruleInputKList.variableSet();
-                if (!unificationConstraint.isMatching(existVariables)) {
-                    continue;
-                }
-
-                SymbolicConstraint requires = SymbolicConstraint
-                        .simplifiedConstraintFrom(context, rule.requires(), unificationConstraint);
-                // this should be guaranteed by the above unificationConstraint.isMatching
-                assert requires.substitution().keySet().containsAll(existVariables);
-                if (requires.isFalse() || !constraint.implies(requires, existVariables)) {
-                    continue;
-                }
-            }
-
-            unificationConstraint.add(outputKList, ruleOutputKList);
-            unificationConstraint.addAllThenSimplify(rule.ensures());
-            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
-                results.add(SymbolicRewriter.buildResult(
-                        rule,
-                        unificationConstraint));
-            }
-        }
-
-        if (results.size() == 1) {
-            /* TODO(YilongL): this seems problematic since it modifies the
-             * outside constraint while SymbolicConstraint#expandPatterns is
-             * still traversing it */
-            constraint.addAll(results.get(0).constraint());
-            return results.get(0).term().expandPatterns(constraint, narrowing);
-        } else {
-            return this;
-        }
     }
 
     public List<Term> getPatternInput() {
