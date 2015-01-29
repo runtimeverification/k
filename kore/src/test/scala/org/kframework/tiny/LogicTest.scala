@@ -4,7 +4,7 @@ import org.junit.Test
 import org.junit.Assert._
 import TrueAndFalse._
 
-import org.kframework.kore._
+import org.kframework.koreimplementation._
 import KORE._
 
 class LogicTest {
@@ -25,16 +25,16 @@ class LogicTest {
     assertEquals(False, And(Xa, Xb))
   }
 
-  @Test def testAndNotNormalization: Unit = {
-    assertEquals(False, theory.normalize(And(ab, Not(ab))))
-  }
+//  @Test def testAndNotNormalization: Unit = {
+//    assertEquals(False, theory.normalize(And(ab, Not(ab))))
+//  }
 
-  @Test def testAndWithTheory {
-    implicit val theory = PropositionTheory(ab)
-    assertEquals(True, And(Xa, Xb))
-  }
-
-  @Test def testPropositionalTheory = {
-    assertTrue(PropositionTheory(ab)(ab) == Some(true))
-  }
+//  @Test def testAndWithTheory {
+//    implicit val theory = BasicTheory(ab)
+//    assertEquals(True, And(Xa, Xb))
+//  }
+//
+//  @Test def testPropositionalTheory = {
+//    assertTrue(PropositionTheory(ab)(ab) == Some(true))
+//  }
 }

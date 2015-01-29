@@ -132,7 +132,7 @@ class TestRewriting {
       'foo('bar('foo(0))).searchFor(Anywhere(KRewrite('foo(X), X))))
   }
 
-  @Test def testTwoAnywheres {
+  @Test @Ignore def testTwoAnywheres {
     val o = 'foo('foo('foo('foo())))
     val inner = Anywhere('foo(KRewrite('foo(X), X)), "inner")
     val outer = Anywhere('foo(inner), "outer")

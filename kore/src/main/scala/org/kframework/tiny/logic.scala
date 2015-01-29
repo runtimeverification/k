@@ -23,7 +23,7 @@ trait Equals extends Proposition with Predicate {
 
 object Equals {
   def apply(left: K, right: K, att: Attributes = Attributes()): Equals = (left, right) match {
-    // case (left: KVariable, right: KVariable) => throw new UnsupportedOperationException("We do not support direct equality of variables yet.")
+    case (left: KVariable, right: KVariable) => throw new UnsupportedOperationException("We do not support direct equality of variables yet.")
     case (left: KVariable, right) if right.find(x => x.isInstanceOf[KVariable]) == Set() => Binding(left, right, att)
     case (left, right: KVariable) if !left.isInstanceOf[KVariable] => apply(left, right, att)
     case (left, right) => SimpleEquals(right, left, att)
@@ -105,14 +105,14 @@ trait Theory {
   def apply(left: K, right: K): Boolean = apply(Equals(left, right)) == Some(true)
 }
 
-case class PropositionTheory(p: Proposition) extends Theory {
-  def apply(entailed: Proposition): Option[Boolean] =
-    FreeTheory.normalize((entailed and p) or Not(p)) match {
-    case True => Some(true)
-    case False => Some(false)
-    case sum => FreeTheory.apply(sum)
-  }
-}
+//case class PropositionTheory(p: Proposition) extends Theory {
+//  def apply(entailed: Proposition): Option[Boolean] =
+//    FreeTheory.normalize((entailed and p) or Not(p)) match {
+//      case True => Some(true)
+//      case False => Some(false)
+//      case sum => FreeTheory(sum.asInstanceOf[Proposition])
+//    }
+//}
 
 object Not {
   def apply(proposition: Proposition)(implicit theory: Theory): Proposition = proposition match {
@@ -122,12 +122,16 @@ object Not {
   }
 }
 
-case class Not(predicate: Predicate, att: Attributes = Attributes()) extends Predicate with SimpleCaseClass {
+case class Not(predicate: Predicate, att: Attributes = Attributes()) extends Predicate with Node {
   override type This = Not
 
   override def copy(att: Attributes): This = Not(predicate, att)
 
   override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
+
+  override def transform(t: (K) => Option[K]): K = ???
+
+  override def find(f: (K) => Boolean): Set[K] = ???
 }
 
 object And {
