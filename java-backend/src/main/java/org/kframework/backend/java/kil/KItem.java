@@ -328,7 +328,7 @@ public class KItem extends Term {
                                 sb.append('\n');
                             }
                         }
-                        kem.registerCriticalWarning(sb.toString(), kItem);
+                        kem.registerInternalHiddenWarning(sb.toString(), kItem);
                     }
                     if (RuleAuditing.isAuditBegun()) {
                         System.err.println("Function failed to evaluate: returned " + result);

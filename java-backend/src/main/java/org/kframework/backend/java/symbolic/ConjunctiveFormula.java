@@ -279,7 +279,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                     // delete
                 } else if (equality.truthValue() == TruthValue.FALSE) {
                     // conflict
-                    return falsify(substitution, equalities, disjunctions);
+                    return falsify(substitution, equalities, disjunctions, equality);
                 } else {
                     if (equality.isSimplifiableByCurrentAlgorithm()) {
                         // (decompose + conflict)*
@@ -288,7 +288,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                                 partialSimplification,
                                 context);
                         if (!unifier.symbolicUnify(leftHandSide, rightHandSide)) {
-                            return falsify(substitution, equalities, disjunctions);
+                            return falsify(substitution, equalities, disjunctions, equality);
                         }
                         // TODO(AndreiS): fix this in a general way
                         if (unifier.constraint().equalities.contains(equality)) {
@@ -307,7 +307,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
-                            return falsify(substitution, equalities, disjunctions);
+                            return falsify(substitution, equalities, disjunctions, equality);
                         }
                     } else if (rightHandSide instanceof Variable
                             && !leftHandSide.variableSet().contains(rightHandSide)) {
@@ -318,18 +318,18 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                                 context);
                         change = true;
                         if (substitution.isFalse(context)) {
-                            return falsify(substitution, equalities, disjunctions);
+                            return falsify(substitution, equalities, disjunctions, equality);
                         }
                     } else if (leftHandSide instanceof Variable
                             && rightHandSide.isNormal()
                             && rightHandSide.variableSet().contains(leftHandSide)) {
                         // occurs
-                        return falsify(substitution, equalities, disjunctions);
+                        return falsify(substitution, equalities, disjunctions, equality);
                     } else if (rightHandSide instanceof Variable
                             && leftHandSide.isNormal()
                             && leftHandSide.variableSet().contains(rightHandSide)) {
                         // swap + occurs
-                        return falsify(substitution, equalities, disjunctions);
+                        return falsify(substitution, equalities, disjunctions, equality);
                     } else {
                         // unsimplified equation
                         pendingEqualities = pendingEqualities.plus(equality);
@@ -345,7 +345,12 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
     private ConjunctiveFormula falsify(
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
-            PersistentUniqueList<DisjunctiveFormula> disjunctions) {
+            PersistentUniqueList<DisjunctiveFormula> disjunctions,
+            Equality equality) {
+        if (RuleAuditing.isAuditBegun()) {
+            System.err.println("Unification failure: " + equality.leftHandSide()
+                    + " does not unify with " + equality.rightHandSide());
+        }
         return new ConjunctiveFormula(
                 substitution,
                 equalities,
