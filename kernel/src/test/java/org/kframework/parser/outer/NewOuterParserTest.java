@@ -15,6 +15,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.Grammar;
 import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.Parser;
+import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
 
 import java.io.File;
@@ -27,11 +28,11 @@ public class NewOuterParserTest {
 
     @Test
     public void testKOREOuter() throws Exception {
-        CharSequence theTextToParse = "module FOO endmodule";
+        CharSequence theTextToParse = "module FOO  rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
         File definitionFile = new File(NewOuterParserTest.class.getResource
-                ("/convertor-tests/kore.k").toURI()).getAbsoluteFile();
+                ("/convertor-tests/e-kore.k").toURI()).getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
         System.out.println(kBody);
