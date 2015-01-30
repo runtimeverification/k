@@ -6,7 +6,6 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -15,13 +14,11 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -56,7 +53,7 @@ public class ExecutorDebugger implements Debugger {
     private final KRunState.Counter counter;
     private final Definition definition;
 
-    private Map<org.apache.commons.lang3.tuple.Pair<Location, Source>, ModuleItem> ruleMap;
+    private Map<String, ModuleItem> ruleMap;
 
     @Inject
     public ExecutorDebugger(
@@ -107,9 +104,8 @@ public class ExecutorDebugger implements Debugger {
             if (item instanceof Module) {
                 // Get the rules from the module and add to store
                 for (ModuleItem moduleItem : ((Module) item).getItems()) {
-                    org.apache.commons.lang3.tuple.Pair<Location, Source> locPair = new ImmutablePair<>(
-                            moduleItem.getLocation(), moduleItem.getSource());
-                    ruleMap.put(locPair, moduleItem);
+                    String key = moduleItem.getSource().toString() + moduleItem.getLocation().toString();
+                    ruleMap.put(key, moduleItem);
                 }
             }
         }
