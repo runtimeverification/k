@@ -140,18 +140,18 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
-        return proceed(symbolicConstraint) ? super.transform(symbolicConstraint) : symbolicConstraint;
+    public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
+        return proceed(conjunctiveFormula) ? super.transform(conjunctiveFormula) : conjunctiveFormula;
+    }
+
+    @Override
+    public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
+        return proceed(disjunctiveFormula) ? super.transform(disjunctiveFormula) : disjunctiveFormula;
     }
 
     @Override
     public ASTNode transform(StringToken stringToken) {
         return stringToken;
-    }
-
-    @Override
-    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
-        return proceed(uninterpretedConstraint) ? super.transform(uninterpretedConstraint) : uninterpretedConstraint;
     }
 
     @Override

@@ -2,6 +2,6 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-A:Term |-> C:Term
-B:Term |-> B:Term
-C:Term |-> C
+A:Term |-> _0:Term
+B:Term |-> _1:Term
+C:Term |-> _0

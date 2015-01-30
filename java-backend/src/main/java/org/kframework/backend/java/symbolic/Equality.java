@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
@@ -25,17 +26,18 @@ import org.kframework.backend.java.util.Utils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.kframework.kil.MapBuiltin;
 
 /**
  * An equality between two canonicalized terms.
  */
-public class Equality {
+public class Equality implements Serializable {
 
     public static final String SEPARATOR = " =? ";
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private final TermContext context;
+    private transient final TermContext context;
 
     private TruthValue truthValue = null;
 
@@ -108,58 +110,15 @@ public class Equality {
         return truthValue;
     }
 
-    private boolean isTrue() {
+    public boolean isTrue() {
         return !(leftHandSide instanceof Bottom)
-                && !(rightHandSide instanceof Bottom)
-                && leftHandSide.equals(rightHandSide);
+            && !(rightHandSide instanceof Bottom)
+            && leftHandSide.hashCode() == rightHandSide.hashCode()
+            && leftHandSide.equals(rightHandSide);
     }
 
     private boolean isFalse() {
         return context.global().equalityOps.isFalse(this);
-    }
-
-    /**
-     * Returns an {@code Equality} obtained by applying the {@code substitution} on
-     * {@code this} equality.
-     *
-     * @param substitution
-     *            the specified substitution map
-     */
-    public Equality substitute(Map<Variable, ? extends Term> substitution) {
-        Term returnLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-        Term returnRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
-    }
-
-    /**
-     * Returns an {@code Equality} obtained by applying the {@code substitution} on
-     * {@code this} equality and then evaluating pending functions.
-     *
-     * @param substitution
-     *            the specified substitution map
-     */
-    public Equality substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
-        Term returnLeftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-        Term returnRightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
-    }
-
-    public Equality expandPatterns(SymbolicConstraint constraint, boolean narrowing) {
-        Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrowing);
-        Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrowing);
-        if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
-            return new Equality(returnLeftHandSide, returnRightHandSide, context);
-        } else {
-            return this;
-        }
     }
 
     /**
@@ -168,9 +127,19 @@ public class Equality {
      */
     public boolean isSimplifiableByCurrentAlgorithm() {
         return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
-                && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap)
+                && (!(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap))
                 && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList)
-                && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet);
+                && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet)
+                || BuiltinMap.isMapUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
+                || BuiltinSet.isSetUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
+                || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
+    }
+
+    public KItem toK(TermContext context) {
+        return KItem.of(
+                KLabelConstant.of("'_==K_", context.definition().context()),
+                KList.concatenate(leftHandSide, rightHandSide),
+                context);
     }
 
     @Override

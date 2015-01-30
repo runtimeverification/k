@@ -27,15 +27,15 @@ import org.kframework.kil.loader.Context;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
@@ -52,8 +52,6 @@ public class PatternMatcher extends AbstractMatcher {
     /**
      * Represents the substitution after the pattern matching.
      */
-    private Map<Variable, Term> fSubstitution;
-
     /**
      * Represents a conjunction of multiple collections of substitutions; each
      * collection is a disjunction of substitutions created by some AC-matching
@@ -75,7 +73,7 @@ public class PatternMatcher extends AbstractMatcher {
      *   And ``S = s'' is stored in {@link PatternMatcher#fSubstitution}.
      * </pre>
      */
-    private final Collection<Collection<Map<Variable, Term>>> multiSubstitutions;
+    private ConjunctiveFormula fSubstitution;
 
     /**
      * Records whether the pattern matcher is currently traversing under a
@@ -87,12 +85,17 @@ public class PatternMatcher extends AbstractMatcher {
 
     private final TermContext termContext;
 
-    public Map<Variable, Term> substitution() {
-        return Collections.unmodifiableMap(fSubstitution);
+    public Substitution<Variable, Term> substitution() {
+        assert fSubstitution.isSubstitution();
+        return fSubstitution.substitution();
     }
 
-    public Collection<Collection<Map<Variable, Term>>> multiSubstitutions() {
-        return Collections.unmodifiableCollection(multiSubstitutions);
+    public List<Substitution<Variable, Term>> substitutions() {
+        return fSubstitution.getDisjunctiveNormalForm().conjunctions().stream()
+                .map(ConjunctiveFormula::simplify)
+                .filter(c -> !c.isFalse())
+                .map(ConjunctiveFormula::substitution)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -134,23 +137,21 @@ public class PatternMatcher extends AbstractMatcher {
      *         rule (each instantiation is represented as a substitution mapping
      *         variables in the pattern to sub-terms in the subject)
      */
-    public static List<Map<Variable, Term>> match(Term subject, Rule rule, TermContext context) {
+    public static List<Substitution<Variable, Term>> match(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
         if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
         }
 
-        return RewriteEngineUtils.evaluateConditions(rule,
-                    RewriteEngineUtils.getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions),
-                    context);
+        List<Substitution<Variable, Term>> substitutions = matcher.substitutions();
+        return RewriteEngineUtils.evaluateConditions(rule, substitutions, context);
     }
 
     public PatternMatcher(boolean isLemma, TermContext context) {
         this.matchOnFunctionSymbol = isLemma;
         this.termContext = context;
-        this.fSubstitution = Maps.newHashMap();
-        this.multiSubstitutions = Lists.newArrayList();
+        this.fSubstitution = ConjunctiveFormula.of(context);
     }
 
     /**
@@ -248,30 +249,12 @@ public class PatternMatcher extends AbstractMatcher {
             fail(variable, term);
         }
 
-        Term subst = fSubstitution.get(variable);
-        if (subst == null) {
-            fSubstitution.put(variable, term);
-        } else if (!subst.equals(term)) {
-            // TODO(AndreiS): the check below is to strong, as the substitution may not be normalized
-            // variable = A, term = C, fSubstitution = { A |-> B, B |-> C}
-            fail(subst, term);
+        ConjunctiveFormula newSubstitution = fSubstitution.add(variable, term).simplify();
+        if (newSubstitution.isFalse()) {
+            fail(fSubstitution.substitution().get(variable), term);
         }
-    }
 
-    /**
-     * Binds multiple variables in the pattern to an equal number of subterms of
-     * the subject respectively; calls {@link PatternMatcher#fail(Term, Term)}
-     * when the binding fails.
-     *
-     * @param variable
-     *            the variable
-     * @param data.term
-     *            the term
-     */
-    private void addSubstitution(Map<Variable, Term> substitution) {
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            addSubstitution(entry.getKey(), entry.getValue());
-        }
+        fSubstitution = newSubstitution;
     }
 
     @Override
@@ -287,9 +270,6 @@ public class PatternMatcher extends AbstractMatcher {
 
         if (matchOnFunctionSymbol) {
             builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
-            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
-            // (used during associative matching) back to builtin representation
-            evaluateSubstitution(fSubstitution, termContext);
             return;
         }
 
@@ -328,23 +308,24 @@ public class PatternMatcher extends AbstractMatcher {
 
         // TODO(AndreiS): implement AC matching/unification
         /* stash the existing substitution */
-        Map<Variable, Term> stashedSubstitution = fSubstitution;
+        ConjunctiveFormula stashedSubstitution = fSubstitution;
 
         Set<PartialSubstitution> partialSubstitutions = new HashSet<>();
         partialSubstitutions.add(new PartialSubstitution(
                 ImmutableSet.<Term>of(),
-                ImmutableMap.<Variable, Term>of()));
+                Substitution.empty()));
 
         /* match each entry from the pattern */
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
-                fSubstitution = new HashMap<>();
+                fSubstitution = ConjunctiveFormula.of(termContext);
                 if (patternMatch(entry.getKey(), patternEntry.getKey())
                         && patternMatch(entry.getValue(), patternEntry.getValue())) {
+                    assert fSubstitution.isSubstitution();
                     stepSubstitutions.add(new PartialSubstitution(
                             ImmutableSet.of(entry.getKey()),
-                            ImmutableMap.copyOf(fSubstitution)));
+                            fSubstitution.substitution()));
                 }
                 fSubstitution = null;
             }
@@ -355,12 +336,13 @@ public class PatternMatcher extends AbstractMatcher {
         for (KItem patternKItem : patternBuiltinMap.collectionPatterns()) {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (KItem kItem : builtinMap.collectionPatterns()) {
-                fSubstitution = new HashMap<>();
+                fSubstitution = ConjunctiveFormula.of(termContext);
                 if (kItem.kLabel().equals(patternKItem.kLabel())) {
                     if (patternMatch(kItem.kList(), patternKItem.kList())) {
+                        assert fSubstitution.isSubstitution();
                         stepSubstitutions.add(new PartialSubstitution(
                                 ImmutableSet.<Term>of(kItem),
-                                ImmutableMap.copyOf(fSubstitution)));
+                                fSubstitution.substitution()));
                     }
                 }
                 fSubstitution = null;
@@ -375,22 +357,31 @@ public class PatternMatcher extends AbstractMatcher {
             this.fail(builtinMap, patternBuiltinMap);
         }
 
-        List<Map<Variable, Term>> substitutions = new ArrayList<>();
+        List<Substitution<Variable, Term>> substitutions = Lists.newArrayList();
         for (PartialSubstitution ps : partialSubstitutions) {
-            Map<Variable, Term> substitution = addFrameMatching(builtinMap, patternBuiltinMap, ps);
+            Substitution<Variable, Term> substitution = addFrameMatching(
+                    builtinMap,
+                    patternBuiltinMap,
+                    ps);
             if (substitution != null) {
                 substitutions.add(substitution);
             }
         }
 
         if (substitutions.size() != 1) {
-            multiSubstitutions.add(substitutions);
+            List<ConjunctiveFormula> conjunctions = substitutions.stream()
+                    .map(s -> ConjunctiveFormula.of(s, termContext))
+                    .collect(Collectors.toList());
+            fSubstitution = fSubstitution.add(new DisjunctiveFormula(conjunctions, termContext));
         } else {
-            addSubstitution(substitutions.iterator().next());
+            fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+            if (fSubstitution.isFalse()) {
+                fail(builtinMap, patternBuiltinMap);
+            }
         }
     }
 
-    private static Map<Variable, Term> addFrameMatching(
+    private static Substitution<Variable, Term> addFrameMatching(
             BuiltinMap builtinMap,
             BuiltinMap patternBuiltinMap,
             PartialSubstitution ps) {
@@ -412,10 +403,7 @@ public class PatternMatcher extends AbstractMatcher {
                 }
             }
 
-            return ImmutableMap.<Variable, Term>builder()
-                    .putAll(ps.substitution)
-                    .put(frame, builder.build())
-                    .build();
+            return ps.substitution.plus(frame, builder.build());
         } else {
             return ps.substitution;
         }
@@ -423,9 +411,9 @@ public class PatternMatcher extends AbstractMatcher {
 
     private static class PartialSubstitution {
         public final ImmutableSet<Term> matched;
-        public final ImmutableMap<Variable, Term> substitution;
+        public final Substitution<Variable, Term> substitution;
 
-        public PartialSubstitution(ImmutableSet<Term> matched, ImmutableMap<Variable, Term> substitution) {
+        public PartialSubstitution(ImmutableSet<Term> matched, Substitution<Variable, Term> substitution) {
             this.matched = matched;
             this.substitution = substitution;
         }
@@ -448,10 +436,7 @@ public class PatternMatcher extends AbstractMatcher {
                                     .addAll(ps1.matched)
                                     .addAll(ps2.matched)
                                     .build(),
-                            ImmutableMap.<Variable, Term>builder()
-                                    .putAll(ps1.substitution)
-                                    .putAll(mapDifference.entriesOnlyOnRight())
-                                    .build()));
+                            ps1.substitution.plusAll(mapDifference.entriesOnlyOnRight())));
                 }
             }
         }
@@ -590,18 +575,17 @@ public class PatternMatcher extends AbstractMatcher {
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
             // temporarily store the current substitution at a safe place before
             // starting to search for multiple substitutions
-            Map<Variable, Term> mainSubstitution = fSubstitution;
-            isStarNested = true;
-
+            ConjunctiveFormula mainSubstitution = fSubstitution;
             // {@code substitutions} represents all possible substitutions by
             // matching these two cell collections
-            Collection<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
+            List<ConjunctiveFormula> substitutions = Lists.newArrayList();
+            isStarNested = true;
 
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             // start searching for all possible unifiers
             do {
                 // clear the substitution before each attempt of matching
-                fSubstitution = new HashMap<Variable, Term>();
+                fSubstitution = ConjunctiveFormula.of(termContext);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
@@ -640,12 +624,15 @@ public class PatternMatcher extends AbstractMatcher {
 
             if (substitutions.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
-            }
-
-            if (substitutions.size() == 1) {
-                addSubstitution(substitutions.iterator().next());
+            } else if (substitutions.size() == 1) {
+                fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+                if (fSubstitution.isFalse()) {
+                    fail(cellCollection, otherCellCollection);
+                }
             } else {
-                multiSubstitutions.add(substitutions);
+                fSubstitution = fSubstitution.add(new DisjunctiveFormula(
+                        substitutions,
+                        termContext));
             }
         }
     }
