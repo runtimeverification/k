@@ -26,7 +26,7 @@ public interface LtlModelChecker {
 
     /**
     Perform LTL model-checking of a term according to a particular LTL formula
-    @param formula The K term expressing the LTL formula to check
+    @param formula A {@link java.lang.String} expressing the LTL formula to check
     @param cfg The initial configuration whose transitions should be model-checked
     @exception KRunExecutionException Thrown if the backend fails to successfully model-check
     the term
