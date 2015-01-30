@@ -10,6 +10,7 @@ import collection._
 import JavaConverters._
 import scala.collection.mutable.{ListBuffer, Builder}
 import org.kframework.tinyimplementation.Or
+import org.kframework.attributes._
 
 import UglyHack._
 

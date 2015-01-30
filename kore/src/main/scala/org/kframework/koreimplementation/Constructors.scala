@@ -11,6 +11,7 @@ import org.kframework._
 import org.kframework.Collector
 import org.kframework.CombinerFromBuilder
 import org.kframework.tinyimplementation.builtin
+import org.kframework.attributes
 
 /**
  *
@@ -22,8 +23,8 @@ import org.kframework.tinyimplementation.builtin
  */
 
 object Constructors {
-  def Attributes(ks: Set[K]) = Attributes(ks)
-  @annotation.varargs def Attributes(ks: K*) = Attributes(ks: _*)
+  def Attributes(ks: Set[K]) = attributes.Attributes(ks)
+  @annotation.varargs def Attributes(ks: K*) = attributes.Attributes(ks: _*)
 
   //  @annotation.varargs def KBag(ks: K*) = koreimplementation.KBag(ks)
 
@@ -39,14 +40,14 @@ object Constructors {
 
   def KList(ks: java.lang.Iterable[K]): KList = KList(ks.asScala.toSeq: _*)
 
-  def KApply(klabel: KLabel, klist: KList, att: Attributes) = koreimplementation.KApply(klabel, klist, att)
+  def KApply(klabel: KLabel, klist: KList, att: attributes.Attributes) = koreimplementation.KApply(klabel, klist, att)
 
   def KApply(klabel: KLabel, klist: KList) = koreimplementation.KApply(klabel, klist, Attributes())
 
-  def KToken(sort: Sort, string: String, att: Attributes) = koreimplementation.KToken(sort, string, att)
+  def KToken(sort: Sort, string: String, att: attributes.Attributes) = koreimplementation.KToken(sort, string, att)
   def KToken(sort: Sort, string: String) = koreimplementation.KToken(sort, string, Attributes())
 
-  def KVariable(name: String, att: Attributes) = koreimplementation.KVariable(name, att)
+  def KVariable(name: String, att: attributes.Attributes) = koreimplementation.KVariable(name, att)
 
   def KVariable(name: String) = {
     koreimplementation.KVariable(name, Attributes())
@@ -61,7 +62,7 @@ object Constructors {
 
   def KRewrite(left: K, right: K) = koreimplementation.KRewrite(left, right, Attributes())
 
-  def KRewrite(left: K, right: K, att: Attributes) = koreimplementation.KRewrite(left, right, att)
+  def KRewrite(left: K, right: K, att: attributes.Attributes) = koreimplementation.KRewrite(left, right, att)
 
   //  def KInt(n: Int) = koreimplementation.KInt(n)
 

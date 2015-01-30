@@ -1,6 +1,8 @@
 package org.kframework.attributes
 
+import org.kframework.builtin.Sorts
 import org.kframework.kore._
+import org.kframework.kore.{ADTConstructors => cons}
 
 case class Attributes(att: Set[K]) extends AttributesToString {
   def getK(key: String): Option[K] = att.find {
@@ -10,6 +12,19 @@ case class Attributes(att: Set[K]) extends AttributesToString {
     case t: KToken => t.s.asInstanceOf[T]
     case _ => ???
   }
+  def contains(label: String): Boolean = (att find {
+    case KApply(KLabel(`label`), _) => true
+    case _ => false
+  }) != None
+
+  def +(k: K): Attributes = new Attributes(att + k)
+  def +(k: String): Attributes = add(cons.KApply(cons.KLabel(k), cons.KList(), Attributes()))
+  def +(kv: (String, String)): Attributes = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2, Attributes())), Attributes()))
+
+  // nice methods for Java
+  def add(k: K): Attributes = this + k
+  def add(k: String): Attributes = this + k
+  def add(key: String, value: String): Attributes = this + (key -> value)
 }
 
 trait KeyWithType

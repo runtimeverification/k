@@ -4,6 +4,7 @@ import org.kframework.koreimplementation._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import org.kframework.attributes._
 
 import UglyHack._
 

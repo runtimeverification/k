@@ -7,6 +7,7 @@ import attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.tinyimplementation._
 import scala.collection.JavaConverters._
+import org.kframework.kore.Sort
 
 import scala.collection.mutable.{Builder, ListBuffer}
 

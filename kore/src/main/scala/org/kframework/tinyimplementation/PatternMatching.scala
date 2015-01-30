@@ -5,6 +5,7 @@ package org.kframework.tinyimplementation
 import org.kframework.koreimplementation.KORE._
 import org.kframework.koreimplementation._
 import org.kframework.tinyimplementation.TrueAndFalse._
+import org.kframework.attributes._
 
 import scala.collection.mutable.ListBuffer
 

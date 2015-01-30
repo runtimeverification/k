@@ -7,6 +7,7 @@ import koreimplementation._
 import org.kframework.builtin.Sorts
 import scala.util.Try
 import scala.util.Success
+import org.kframework.attributes._
 
 case class Down(imports: Set[String]) extends (K => Any) {
   import Sorts.KString
@@ -17,8 +18,8 @@ case class Down(imports: Set[String]) extends (K => Any) {
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
     case KApply(KLabel("Sort"), KList(KToken(Sorts.KString, s, _)), _) => Sort(s)
-    case KApply(KLabel(l), ks, att) if att.contains(Attributes.classFromUp) =>
-      val classNameRecoveredFromUp = att.getString(Attributes.classFromUp).get
+    case KApply(KLabel(l), ks, att) if att.contains(ClassFromUp) =>
+      val classNameRecoveredFromUp = att.get[String](ClassFromUp).get
       Reflection.construct(classNameRecoveredFromUp, ks map { apply _ })
 
     case KApply(KLabel(l), ks, att) =>

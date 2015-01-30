@@ -2,11 +2,7 @@
 
 package org.kframework.koreimplementation
 
-import org.kframework.kore
-
-trait Sort extends kore.Sort with SortToString {
-  def name: String
-}
+import org.kframework.kore._
 
 object Sort {
   def apply(s: String) = UninterpretedSort(s)
