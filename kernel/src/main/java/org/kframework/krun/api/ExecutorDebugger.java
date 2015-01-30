@@ -6,16 +6,22 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.Location;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -31,6 +37,8 @@ import org.kframework.parser.TermLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Concrete;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class ExecutorDebugger implements Debugger {
@@ -48,6 +56,8 @@ public class ExecutorDebugger implements Debugger {
     private final KRunState.Counter counter;
     private final Definition definition;
 
+    private Map<org.apache.commons.lang3.tuple.Pair<Location, Source>, ModuleItem> ruleMap;
+
     @Inject
     public ExecutorDebugger(
             Executor executor,
@@ -62,6 +72,7 @@ public class ExecutorDebugger implements Debugger {
         this.kem = kem;
         this.counter = counter;
         this.definition = definition;
+        this.ruleMap = new HashMap<>();
     }
 
     @Override
@@ -84,6 +95,24 @@ public class ExecutorDebugger implements Debugger {
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(reduced);
         currentState = reduced.getStateId();
+        populateRuleMap();
+    }
+
+    /**
+     * Populates the rule map to contain the
+     * Location information from the definition
+     */
+    private void populateRuleMap() {
+        for (DefinitionItem item : definition.getItems()) {
+            if (item instanceof Module) {
+                // Get the rules from the module and add to store
+                for (ModuleItem moduleItem : ((Module) item).getItems()) {
+                    org.apache.commons.lang3.tuple.Pair<Location, Source> locPair = new ImmutablePair<>(
+                            moduleItem.getLocation(), moduleItem.getSource());
+                    ruleMap.put(locPair, moduleItem);
+                }
+            }
+        }
     }
 
     /**
