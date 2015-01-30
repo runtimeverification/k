@@ -139,7 +139,7 @@ public class PatternMatchRewriter {
      * This method is extracted to simplify the profiling script.
      * </p>
      */
-    private final List<Map<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
+    private final List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
         return PatternMatcher.match(subject, rule, termContext);
     }
 
@@ -301,9 +301,14 @@ public class PatternMatchRewriter {
         return result;
     }
 
-    private boolean addSearchResult(List<Map<Variable, Term>> searchResults, Term term, Rule pattern, TermContext termContext, int bound) {
-        List<Map<Variable, Term>> discoveredSearchResults = PatternMatcher.match(term, pattern, termContext);
-        for (Map<Variable, Term> searchResult : discoveredSearchResults) {
+    private boolean addSearchResult(
+            List<Substitution<Variable, Term>> searchResults,
+            Term term,
+            Rule pattern,
+            TermContext termContext,
+            int bound) {
+        List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(term, pattern, termContext);
+        for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
             searchResults.add(searchResult);
             if (searchResults.size() == bound) {
                 return true;
@@ -312,7 +317,7 @@ public class PatternMatchRewriter {
         return false;
     }
 
-    public List<Map<Variable,Term>> search(
+    public List<Substitution<Variable,Term>> search(
             Term initialTerm,
             Term targetTerm,
             List<Rule> rules,
@@ -323,7 +328,7 @@ public class PatternMatchRewriter {
             TermContext termContext) {
         stopwatch.start();
 
-        List<Map<Variable,Term>> searchResults = new ArrayList<Map<Variable,Term>>();
+        List<Substitution<Variable,Term>> searchResults = new ArrayList<>();
         Set<Term> visited = new HashSet<Term>();
 
         // If depth is 0 then we are just trying to match the pattern.

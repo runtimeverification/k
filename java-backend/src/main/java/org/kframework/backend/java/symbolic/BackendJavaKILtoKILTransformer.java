@@ -352,7 +352,12 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+    public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
+        throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
         throw new UnsupportedOperationException("Not implemented, yet");
     }
 
@@ -364,11 +369,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(Term node) {
         throw new UnsupportedOperationException("This method should never be called");
-    }
-
-    @Override
-    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
-        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
