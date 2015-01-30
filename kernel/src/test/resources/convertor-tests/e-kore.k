@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2015 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
 module BASIC-K
