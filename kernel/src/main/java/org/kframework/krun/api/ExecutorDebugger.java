@@ -10,6 +10,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rule;
@@ -28,6 +29,7 @@ import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.parser.TermLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.Concrete;
 
 import java.util.Map.Entry;
 
@@ -44,6 +46,7 @@ public class ExecutorDebugger implements Debugger {
     private final TermLoader loader;
     private final KExceptionManager kem;
     private final KRunState.Counter counter;
+    private final Definition definition;
 
     @Inject
     public ExecutorDebugger(
@@ -51,12 +54,14 @@ public class ExecutorDebugger implements Debugger {
             Context context,
             TermLoader loader,
             KExceptionManager kem,
-            KRunState.Counter counter) throws KRunExecutionException {
+            KRunState.Counter counter,
+            @Concrete Definition definition) throws KRunExecutionException {
         this.context = context;
         this.executor = executor;
         this.loader = loader;
         this.kem = kem;
         this.counter = counter;
+        this.definition = definition;
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.file.WorkingDir;
+import org.kframework.utils.inject.Concrete;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -72,6 +73,7 @@ public abstract class BaseTestCase {
             bind(Context.class).toInstance(context);
             bind(Definition.class).toInstance(definition);
             bind(Configuration.class).toInstance(configuration);
+            bind(Definition.class).annotatedWith(Concrete.class).toInstance(definition);
         }
 
     }
