@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
+import com.beust.jcommander.StringKey;
 import com.google.inject.Inject;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
@@ -103,9 +104,12 @@ public class ExecutorDebugger implements Debugger {
         for (DefinitionItem item : definition.getItems()) {
             if (item instanceof Module) {
                 // Get the rules from the module and add to store
+
                 for (ModuleItem moduleItem : ((Module) item).getItems()) {
-                    String key = moduleItem.getSource().toString() + moduleItem.getLocation().toString();
-                    ruleMap.put(key, moduleItem);
+                    if (moduleItem.getSource() != null && moduleItem.getLocation() != null) {
+                        String key = moduleItem.getSource().toString() + moduleItem.getLocation().toString();
+                        ruleMap.put(key, moduleItem);
+                    }
                 }
             }
         }
