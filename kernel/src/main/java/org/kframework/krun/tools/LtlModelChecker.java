@@ -35,7 +35,7 @@ public interface LtlModelChecker {
     @return An object containing both metadata about krun's execution, and a graph containing
     the LTL counterexample if model-checking failed (null if it succeeded)
     */
-    public abstract KRunProofResult<KRunGraph> modelCheck(Term formula, Term cfg) throws KRunExecutionException;
+    public abstract KRunProofResult<KRunGraph> modelCheck(String formula, Term cfg) throws KRunExecutionException;
 
     public static class Tool implements Transformation<Void, KRunResult> {
 
@@ -44,7 +44,6 @@ public interface LtlModelChecker {
         private final Context context;
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
-        private final ProgramLoader loader;
         private final FileUtil files;
 
         @Inject
@@ -54,14 +53,12 @@ public interface LtlModelChecker {
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
-                ProgramLoader loader,
                 @Main FileUtil files) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
             this.sw = sw;
             this.modelChecker = modelChecker;
-            this.loader = loader;
             this.files = files;
         }
 
@@ -69,10 +66,8 @@ public interface LtlModelChecker {
         public KRunProofResult<KRunGraph> run(Void v, Attributes a) {
             a.add(Context.class, context);
             try {
-                Term formula = (Term) loader.loadPgmAst(ltlmc(), Sources.fromCommandLine("parameters"),
-                        Sort.of("LtlFormula"), context);
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
-                                formula,
+                                ltlmc(),
                                 initialConfiguration.get());
                 sw.printIntermediate("Model checking total");
                 return result;
