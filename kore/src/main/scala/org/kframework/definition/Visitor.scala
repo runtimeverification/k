@@ -2,9 +2,10 @@
 
 package org.kframework.definition
 
-import org.kframework.koreimplementation.K
+import org.kframework.kore.K
 
 trait Transformer extends Function1[Definition, Definition] {
+
   import org.kframework.definition;
 
   def apply(d: Definition): Definition = definition.Definition(d.requires map apply, d.modules map apply)
@@ -18,7 +19,7 @@ trait Transformer extends Function1[Definition, Definition] {
     case sp: SyntaxPriority => apply(sp)
     case sa: SyntaxAssociativity => apply(sa)
     case ss: SyntaxSort => apply(ss)
-    case sp: SyntaxProduction => apply(sp)
+    case sp: Production => apply(sp)
   }
   def apply(c: Context): Context = definition.Context(apply(c.body), apply(c.requires), c.att)
   def apply(i: Import): Import
@@ -27,7 +28,7 @@ trait Transformer extends Function1[Definition, Definition] {
   def apply(s: SyntaxPriority): SyntaxPriority
   def apply(s: SyntaxAssociativity): SyntaxAssociativity
   def apply(s: SyntaxSort): SyntaxSort
-  def apply(s: SyntaxProduction): SyntaxProduction
+  def apply(s: Production): Production
   def apply(n: NonTerminal): NonTerminal
   def apply(r: Terminal): Terminal
   def apply(r: RegexTerminal): RegexTerminal

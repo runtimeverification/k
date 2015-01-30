@@ -3,7 +3,8 @@
 package org.kframework.definition
 
 import org.kframework.definition
-import org.kframework.koreimplementation._
+import org.kframework.kore._
+import org.kframework.attributes._
 
 /**
  *
@@ -24,8 +25,8 @@ object Constructors {
   def SyntaxSort(sort: Sort) = definition.SyntaxSort(sort)
   def SyntaxSort(sort: Sort, att: Attributes) = definition.SyntaxSort(sort, att)
 
-  def SyntaxProduction(sort: Sort, items: Seq[ProductionItem]) = definition.SyntaxProduction(sort, items)
-  def SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes) = definition.SyntaxProduction(sort, items, att)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes) = definition.Production(klabel, sort, items, att)
 
   def Terminal(s: String) = definition.Terminal(s)
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort)

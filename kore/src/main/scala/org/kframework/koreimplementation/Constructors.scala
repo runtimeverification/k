@@ -1,6 +1,8 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation;
+package org.kframework.koreimplementation
+
+;
 
 import java.util.List
 import scala.collection.Seq
@@ -20,12 +22,12 @@ import org.kframework.tinyimplementation.builtin
  */
 
 object Constructors {
-  def Attributes(ks: Set[K]) = koreimplementation.Attributes(ks)
-  @annotation.varargs def Attributes(ks: K*) = koreimplementation.Attributes(ks: _*)
+  def Attributes(ks: Set[K]) = Attributes(ks)
+  @annotation.varargs def Attributes(ks: K*) = Attributes(ks: _*)
 
   //  @annotation.varargs def KBag(ks: K*) = koreimplementation.KBag(ks)
 
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = koreimplementation.Location(startLine, startColumn, endLine, endColumn)
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = Location(startLine, startColumn, endLine, endColumn)
 
   //  def KBag(ks: KList) = koreimplementation.KBag(ks);
 

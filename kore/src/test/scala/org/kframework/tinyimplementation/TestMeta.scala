@@ -28,12 +28,12 @@ class TestMeta {
 
   val d = Definition(Set(),
     Set(Module("TEST", Set(),
-      Set(SyntaxProduction(Sort("Foo"),
+      Set(Production(Sort("Foo"),
         List(Terminal("Bar")))))))
 
   val metad = 'Definition('Set(),
     'Set('Module("TEST", 'Set(),
-      'Set('SyntaxProduction('Sort("Foo"), 'List('Terminal("Bar")))))))
+      'Set('Production('Sort("Foo"), 'List('Terminal("Bar")))))))
 
   val Down = tinyimplementation.Down(Set("org.kframework.definition", "scala.collection.immutable"))
 

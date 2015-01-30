@@ -2,19 +2,17 @@
 
 package org.kframework.definition
 
-import org.kframework.koreimplementation
-import org.kframework.koreimplementation.Sort
-import scala.util.matching.Regex
-import org.kframework.koreimplementation.Attributes
 import org.kframework.POSet
-import org.kframework.koreimplementation.KLabel
-import org.kframework.koreimplementation.KToken
-import org.kframework.koreimplementation.KList
+import org.kframework.kore._
+import org.kframework.attributes._
 
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
   extends AssertionError(nonTerminals.toString)
+
+case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
+  extends AssertionError(ps.toString)
 
 //object NonTerminalsWithUndefinedSortException {
 //  def apply(nonTerminals: Set[NonTerminal]) =
@@ -36,12 +34,33 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
+  val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  val definedSorts: Set[Sort] = productions collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
+  val productionsFor: Map[KLabel, Set[Production]] = productions.groupBy(_.klabel) map {
+    case (l, ps) => (l, ps)
+  }
+
+  // Check that productions with the same #klabel have identical attributes
+  productionsFor.foreach {
+    case (l, ps) => if (ps.groupBy(_.att).size != 1) throw DivergingAttributesForTheSameKLabel(ps)
+  }
+
+  val attributesFor: Map[KLabel, Attributes] = productionsFor mapValues { _.head.att }
+
+  val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
+    productionsFor mapValues {
+      ps: Set[Production] =>
+        ps.map {
+          p: Production =>
+            val params: Seq[Sort] = p.items collect { case NonTerminal(sort) => sort }
+            (params, p.sort)
+        }
+    }
+
+  val definedSorts: Set[Sort] = productions map { _.sort }
 
   private lazy val subsortRelations = sentences flatMap {
-    case SyntaxProduction(endSort, items, _) =>
+    case Production(_, endSort, items, _) =>
       items collect { case NonTerminal(startSort) => (startSort, endSort) }
     case _ => Set()
   }
@@ -50,7 +69,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
-    case SyntaxProduction(_, items, _) =>
+    case Production(_, _, items, _) =>
       items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
     case _ => Set()
   }
@@ -58,30 +77,24 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
 }
+
 // hooked but different from core, Import is a sentence here
 
-trait Sentence { // marker
+trait Sentence {
+  // marker
   val att: Attributes
 }
 
 // deprecated
-case class Context(
-  body: koreimplementation.K,
-  requires: koreimplementation.K,
-  att: Attributes = Attributes()) extends Sentence with OuterKORE with ContextToString
+case class Context(body: K, requires: K, att: Attributes = Attributes()) extends Sentence with OuterKORE with ContextToString
 
-case class Rule(
-  body: koreimplementation.K,
-  requires: koreimplementation.K,
-  ensures: koreimplementation.K,
-  att: Attributes) extends Sentence
-  with RuleToString with OuterKORE
+case class Rule(body: K, requires: K, ensures: K, att: Attributes) extends Sentence with RuleToString with OuterKORE
 
-case class ModuleComment(comment: String, att: Attributes = Attributes())
-  extends Sentence with OuterKORE
+case class ModuleComment(comment: String, att: Attributes = Attributes()) extends Sentence with OuterKORE
 
-case class Import(moduleName: String, att: Attributes = Attributes())
-  extends Sentence with ImportToString with OuterKORE // hooked
+case class Import(moduleName: String, att: Attributes = Attributes()) extends Sentence with ImportToString with OuterKORE
+
+// hooked
 
 // syntax declarations
 
@@ -101,35 +114,41 @@ case class SyntaxAssociativity(
 
 case class Tag(name: String) extends TagToString with OuterKORE
 
-trait Production {
-  def sort: Sort
-  def att: Attributes
-  def items: Seq[ProductionItem]
-  def klabel: Option[KLabel] =
-    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
-}
+//trait Production {
+//  def sort: Sort
+//  def att: Attributes
+//  def items: Seq[ProductionItem]
+//  def klabel: Option[KLabel] =
+//    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
+//}
 
 object Production {
   val kLabelAttribute = "klabel"
 }
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString with OuterKORE with Production {
+with SyntaxSortToString with OuterKORE {
   def items = Seq()
 }
 
-case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
-  extends Sentence with SyntaxProductionToString with Production // hooked but problematic, see kast-core.k
+case class Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
+  extends Sentence with ProductionToString
 
-sealed trait ProductionItem extends OuterKORE // marker
+// hooked but problematic, see kast-core.k
+
+sealed trait ProductionItem extends OuterKORE
+
+// marker
 
 case class NonTerminal(sort: Sort) extends ProductionItem
-  with NonTerminalToString
+with NonTerminalToString
+
 case class RegexTerminal(regex: String) extends ProductionItem with RegexTerminalToString
+
 case class Terminal(value: String) extends ProductionItem // hooked
-  with TerminalToString
+with TerminalToString
 
 /* Helper constructors */
 object NonTerminal {
-  def apply(sort: String): NonTerminal = NonTerminal(Sort(sort))
+  def apply(sort: String): NonTerminal = NonTerminal(ADT.Sort(sort))
 }

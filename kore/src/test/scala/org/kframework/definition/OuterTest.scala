@@ -20,13 +20,13 @@ class OuterTest {
   @Test def testCorrect {
 
     val dCorrect = Module("TEST", Set(testSyntaxModule), Set(
-      SyntaxProduction(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
+      Production(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
   }
 
   @Test def testIncorrect {
     try {
       Module("TEST", Set(testSyntaxModule), Set(
-        SyntaxProduction(Sort("Int"), Seq(NonTerminal(Sort("Exp"))))))
+        Production(Sort("Int"), Seq(NonTerminal(Sort("Exp"))))))
 
       Assert.fail("Should have failed.")
     } catch {
@@ -37,7 +37,7 @@ class OuterTest {
   @Test def testIncorrect1 {
     try {
       val testSyntaxModule = Module("TEST-SYNTAX", Set(), Set(
-        SyntaxProduction(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
+        Production(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
 
       Module("TEST", Set(testSyntaxModule), Set(SyntaxSort(Sort("Int"))))
 
@@ -49,7 +49,7 @@ class OuterTest {
 
   @Test def testSortLattice {
     val d = Module("TEST", Set(testSyntaxModule), Set(
-      SyntaxProduction(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
+      Production(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))
 
     println(d.subsorts)
   }
@@ -65,7 +65,7 @@ class OuterTest {
     val d = Definition(Set(), Set(
       Module("TEST", Set(testSyntaxModule), Set(
         Import("TEST-SYNTAX"),
-        SyntaxProduction(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))))
+        Production(Sort("Exp"), Seq(NonTerminal(Sort("Int"))))))))
 
     object myVisitor extends AbstractVisitor {
       val mentionedSorts = collection.mutable.Set[Sort]()

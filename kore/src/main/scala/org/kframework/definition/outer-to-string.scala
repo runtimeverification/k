@@ -21,8 +21,8 @@ trait RuleToString {
   override def toString = Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
-trait SyntaxProductionToString {
-  self: SyntaxProduction =>
+trait ProductionToString {
+  self: Production =>
   override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.postfixString
 }
 

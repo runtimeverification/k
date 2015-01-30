@@ -9,7 +9,7 @@ import org.junit.Ignore
 class OptimizerTest {
   val d = Definition(Set(),
     Set(Module("TEST", Set(),
-      Set(SyntaxProduction(Sort("Foo"),
+      Set(Production(Sort("Foo"),
         List(Terminal("Bar")))))))
 
   @Test

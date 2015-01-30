@@ -3,6 +3,7 @@
 package org.kframework.koreimplementation
 
 import org.kframework._
+import attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.tinyimplementation._
 import scala.collection.JavaConverters._
@@ -16,7 +17,7 @@ sealed trait KORE
 // marker for KORE final classes added as a result of a discussion with Brandon about sealing
 
 
-trait K extends kore.K with HasAttributes with Pattern {
+trait K extends kore.K with Pattern {
   protected type This <: K
 
   def copy(att: Attributes): This

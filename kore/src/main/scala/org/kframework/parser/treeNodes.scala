@@ -2,6 +2,7 @@
 
 package org.kframework.parser
 
+import org.kframework.attributes.Location
 import org.kframework.definition.Production
 import java.util._
 import java.lang.Iterable
@@ -36,7 +37,7 @@ case class TermCons(items: List[Term], production: Production, location: Optiona
     items.clear(); items.addAll(newChildren);
     this
   }
-  override def toString() = production.klabel.getOrElse("NOKLABEL") + "(" + (items.asScala mkString ",") + ")"
+  override def toString() = production.klabel + "(" + (items.asScala mkString ",") + ")"
 }
 
 case class Ambiguity(items: Set[Term], location: Optional[Location])
@@ -74,5 +75,3 @@ object Ambiguity {
   def apply(items: List[Term]): Ambiguity = new Ambiguity(new HashSet(items), Optional.empty())
   @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
 }
-
-case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int)
