@@ -57,7 +57,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
         }
     }
 
-  val definedSorts: Set[Sort] = productions map { _.sort }
+  val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
+
+  val definedSorts: Set[Sort] = (productions map { _.sort }) ++ (sortDeclarations map { _.sort })
 
   private lazy val subsortRelations = sentences flatMap {
     case Production(endSort, items, _) =>

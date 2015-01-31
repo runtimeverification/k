@@ -203,9 +203,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     private org.kframework.attributes.Attributes attributesFromLocation(Location location) {
-        if (location != null)
-            return org.kframework.attributes.Attributes.apply(Set(Up.apply(location)));
-        else
+        if (location != null) {
+            org.kframework.attributes.Location koreLocation = org.kframework.attributes.Location.apply(location.lineStart, location.columnStart, location.lineEnd, location.columnEnd);
+            return org.kframework.attributes.Attributes.apply(Set(Up.apply(koreLocation)));
+        } else
             return Attributes();
     }
 }

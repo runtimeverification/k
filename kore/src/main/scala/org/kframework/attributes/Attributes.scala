@@ -9,6 +9,7 @@ import collection.JavaConverters._
 case class Attributes(att: Set[K]) extends AttributesToString {
   def getK(key: String): Option[K] = att.find {
     case t@KApply(KLabel(`key`), v) => true
+    case _ => false
   }
   def get[T](key: String): Option[T] = getK(key) map {
     case t: KToken => t.s.asInstanceOf[T]
@@ -21,10 +22,11 @@ case class Attributes(att: Set[K]) extends AttributesToString {
       case None => java.util.Optional.empty[T]()
     }
 
-  def contains(label: String): Boolean = (att find {
-    case KApply(KLabel(`label`), _) => true
-    case _ => false
-  }) != None
+  def contains(label: String): Boolean =
+    att exists {
+      case KApply(KLabel(`label`), _) => true
+      case z => false
+    }
 
   def +(k: K): Attributes = new Attributes(att + k)
   def +(k: String): Attributes = add(cons.KApply(cons.KLabel(k), cons.KList(), Attributes()))
