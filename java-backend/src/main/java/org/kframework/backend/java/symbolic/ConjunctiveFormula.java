@@ -9,7 +9,7 @@ import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.InternalRepresentationToK;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -43,7 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements InternalRepresentationToK {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     public static final String SEPARATOR = " /\\ ";
 
@@ -604,7 +604,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                 Stream.concat(
                         substitution.equalities(context).stream().map(e -> e.toK(context)),
                         equalities.stream().map(e -> e.toK(context))),
-                disjunctions.stream().map(d -> d.toK(context)));
+                disjunctions.stream().map(d -> d.toKore(context)));
         return stream.collect(Collectors.toList());
     }
 
@@ -644,7 +644,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
 
     @Override
     public String toString() {
-        return toK(context).toString();
+        return toKore(context).toString();
     }
 
     @Override

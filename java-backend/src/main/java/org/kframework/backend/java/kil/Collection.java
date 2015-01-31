@@ -12,7 +12,7 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public abstract class Collection extends Term implements InternalRepresentationToK {
+public abstract class Collection extends Term implements CollectionInternalRepresentation {
 
     /**
      * Represents the rest part of this {@code Collection} which is not

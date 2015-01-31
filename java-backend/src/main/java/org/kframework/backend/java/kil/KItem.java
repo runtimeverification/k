@@ -51,7 +51,7 @@ import com.google.inject.Inject;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term {
+public class KItem extends Term implements KItemRepresentation {
 
     private final Term kLabel;
     private final Term kList;
@@ -268,6 +268,21 @@ public class KItem extends Term {
 
     public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
         return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+    }
+
+    @Override
+    public Term toKore(TermContext context) {
+        return this;
+    }
+
+    @Override
+    public Term kLabel(TermContext context) {
+        return kLabel;
+    }
+
+    @Override
+    public Term kList(TermContext context) {
+        return kList;
     }
 
     public static class KItemOperations {

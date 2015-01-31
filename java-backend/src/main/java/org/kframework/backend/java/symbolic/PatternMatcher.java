@@ -269,7 +269,7 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (matchOnFunctionSymbol) {
-            builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
+            builtinList.toKore(termContext).accept(this, ((BuiltinList) pattern).toKore(termContext));
             return;
         }
 
