@@ -28,13 +28,13 @@ public interface DataStructures {
         KLabelConstant klabel;
         KList kList;
         if (base.sort().equals(Sort.LIST)) {
-            klabel = KLabelConstant.of(LIST_GET, context.definition().context());
+            klabel = KLabelConstant.of(LIST_GET, context.definition());
             kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.MAP)) {
-            klabel = KLabelConstant.of(MAP_LOOKUP, context.definition().context());
+            klabel = KLabelConstant.of(MAP_LOOKUP, context.definition());
             kList = (KList) KList.concatenate(base, key);
         } else if (base.sort().equals(Sort.SET)) {
-            klabel = KLabelConstant.of(SET_MEMBERSHIP, context.definition().context());
+            klabel = KLabelConstant.of(SET_MEMBERSHIP, context.definition());
             kList = (KList) KList.concatenate(key, base);
         } else {
             assert false : "unimplemented missing case";
@@ -87,9 +87,9 @@ public interface DataStructures {
     static KItem choice(Term base, TermContext context) {
         KLabelConstant klabel;
         if (base.sort().equals(Sort.MAP)) {
-            klabel = KLabelConstant.of(MAP_CHOICE, context.definition().context());
+            klabel = KLabelConstant.of(MAP_CHOICE, context.definition());
         } else if (base.sort().equals(Sort.SET)) {
-            klabel = KLabelConstant.of(SET_CHOICE, context.definition().context());
+            klabel = KLabelConstant.of(SET_CHOICE, context.definition());
         } else {
             assert false : "unimplemented missing case";
             return null;
@@ -103,7 +103,7 @@ public interface DataStructures {
         }
 
         return KItem.of(
-                KLabelConstant.of(LIST_RANGE, context.definition().context()),
+                KLabelConstant.of(LIST_RANGE, context.definition()),
                 KList.concatenate(base, IntToken.of(removeLeft), IntToken.of(removeRight)),
                 context, base.getSource(), base.getLocation());
     }
@@ -116,7 +116,7 @@ public interface DataStructures {
         BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(removeSet);
         return KItem.of(
-                KLabelConstant.of(MAP_REMOVE_ALL, context.definition().context()),
+                KLabelConstant.of(MAP_REMOVE_ALL, context.definition()),
                 KList.concatenate(base, builder.build()),
                 context, base.getSource(), base.getLocation());
     }
@@ -129,7 +129,7 @@ public interface DataStructures {
         BuiltinMap.Builder builder = new BuiltinMap.Builder(context);
         builder.putAll(updateMap);
         return KItem.of(
-                KLabelConstant.of(MAP_UPDATE, context.definition().context()),
+                KLabelConstant.of(MAP_UPDATE, context.definition()),
                 KList.concatenate(base, builder.build()),
                 context, base.getSource(), base.getLocation());
     }
@@ -142,7 +142,7 @@ public interface DataStructures {
         BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(removeSet);
         return KItem.of(
-                KLabelConstant.of(SET_REMOVE_ALL, context.definition().context()),
+                KLabelConstant.of(SET_REMOVE_ALL, context.definition()),
                 KList.concatenate(base, builder.build()),
                 context, base.getSource(), base.getLocation());
     }

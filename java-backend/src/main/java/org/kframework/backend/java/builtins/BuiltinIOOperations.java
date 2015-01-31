@@ -37,7 +37,6 @@ public class BuiltinIOOperations {
 
     private final Definition def;
     private final FileSystem fs;
-    private final Context context;
     private final ConfigurationCreationOptions ccOptions;
     private final Provider<KILtoBackendJavaKILTransformer> kilTransformerProvider;
     private final ProgramLoader programLoader;
@@ -54,7 +53,6 @@ public class BuiltinIOOperations {
             RunProcess rp) {
         this.def = def;
         this.fs = fs;
-        this.context = context;
         this.ccOptions = ccOptions;
         this.kilTransformerProvider = kilTransformerProvider;
         this.programLoader = programLoader;
@@ -140,11 +138,15 @@ public class BuiltinIOOperations {
 
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
-            org.kframework.kil.Term kast = rp.runParser(
-                    ccOptions.parser(context),
-                    term1.stringValue(), true, Sort.of(term2.stringValue()), context);
-            Term term = kilTransformerProvider.get().transformAndEval(kast);
-            return term;
+            return null;
+//            org.kframework.kil.Term kast = rp.runParser(
+//                    ccOptions.parser(context),
+//                    term1.stringValue(),
+//                    true,
+//                    Sort.of(term2.stringValue()),
+//                    context);
+//            Term term = kilTransformerProvider.get().transformAndEval(kast);
+//            return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);
         }
@@ -160,7 +162,7 @@ public class BuiltinIOOperations {
         //for (String c : args) { System.out.println(c); }
         ProcessOutput output = rp.execute(environment, args);
 
-        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", context);
+        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", def);
         /*
         String klabelString = "'#systemResult(_,_,_)";
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
@@ -174,7 +176,7 @@ public class BuiltinIOOperations {
 
     private KItem processIOException(String errno, Term klist, TermContext termContext) {
         String klabelString = "'#" + errno;
-        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
+        KLabelConstant klabel = KLabelConstant.of(klabelString, def);
         assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return KItem.of(klabel, klist, termContext);
     }

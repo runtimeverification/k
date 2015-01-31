@@ -462,8 +462,6 @@ public class PatternMatcher extends AbstractMatcher {
         }
         CellCollection otherCellCollection = (CellCollection) pattern;
 
-        Context context = termContext.definition().context();
-
         if (cellCollection.hasFrame()) {
         // TODO(dwightguth): put this assertion back in once this class is constructed by
         // the injector
@@ -497,7 +495,9 @@ public class PatternMatcher extends AbstractMatcher {
 
             if (frame != null) {
                 if (otherFrame != null && numOfOtherDiffCellLabels == 0) {
-                    addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
+                    addSubstitution(
+                            otherFrame,
+                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
                 } else {
                     fail(cellCollection, otherCellCollection);
                 }
@@ -510,7 +510,9 @@ public class PatternMatcher extends AbstractMatcher {
                         fail(cellCollection, otherCellCollection);
                     }
                 } else {
-                    addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
+                    addSubstitution(
+                            otherFrame,
+                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
                 }
             }
         }
@@ -527,7 +529,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!termContext.definition().context().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (!termContext.definition().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     match(cellCollection.get(cellLabel).iterator().next().content(),
@@ -586,7 +588,7 @@ public class PatternMatcher extends AbstractMatcher {
                     continue;
                 }
 
-                CellCollection.Builder builder = CellCollection.builder(termContext.definition().context());
+                CellCollection.Builder builder = CellCollection.builder(termContext.definition());
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.isSelected(i)) {
                         builder.add(cells[i]);

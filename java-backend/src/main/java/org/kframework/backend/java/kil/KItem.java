@@ -78,7 +78,7 @@ public class KItem extends Term implements KItemRepresentation {
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator(termContext.definition().context());
+                return kLabelConstant.getListTerminator(termContext.definition());
             }
         }
 
@@ -206,7 +206,7 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     Sort childSort = term.sort();
-                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
+                    if (!definition.subsorts().isSubsortedEq(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()))) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -215,7 +215,7 @@ public class KItem extends Term implements KItemRepresentation {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
+                                && definition.subsorts().hasCommonSubsort(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()));
                     }
                     idx++;
                 }

@@ -164,13 +164,12 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
     @Override
     public List<Term> getKComponents(TermContext context) {
-        DataStructureSort sort = context.definition().context().dataStructureSortOf(
-                sort().toFrontEnd());
+        DataStructureSort sort = context.definition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
         elements.stream().forEach(element ->
                 components.add(KItem.of(
-                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                        KLabelConstant.of(sort.elementLabel(), context.definition()),
                         KList.singleton(element),
                         context, element.getSource(), element.getLocation())));
 

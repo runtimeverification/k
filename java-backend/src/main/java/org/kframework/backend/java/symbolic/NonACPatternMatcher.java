@@ -93,8 +93,8 @@ public class NonACPatternMatcher {
         if (match()) {
             // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
             // (used during associative matching) back to builtin representation
-            if (termContext.definition().context().krunOptions != null
-                    && termContext.definition().context().krunOptions.experimental.prove != null) {
+            if (termContext.definition().kRunOptions() != null
+                    && termContext.definition().kRunOptions().experimental.prove != null) {
                 substitution = substitution.evaluate(termContext);
             }
             return substitution;
@@ -248,8 +248,6 @@ public class NonACPatternMatcher {
     }
 
     private void match(CellCollection cellCollection, CellCollection otherCellCollection) {
-        Context context = termContext.definition().context();
-
         Set<CellLabel> unifiableCellLabels = Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet());
         check(otherCellCollection.labelSet().size() == unifiableCellLabels.size(),
                 cellCollection, otherCellCollection);
@@ -268,10 +266,14 @@ public class NonACPatternMatcher {
                 return;
             }
 
-            addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
+            addSubstitution(
+                    otherFrame,
+                    cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
         } else {
             if (otherFrame != null) {
-                addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
+                addSubstitution(
+                        otherFrame,
+                        cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
             } else {
                 check(numOfDiffCellLabels == 0, cellCollection, otherCellCollection);
                 if (failed) {

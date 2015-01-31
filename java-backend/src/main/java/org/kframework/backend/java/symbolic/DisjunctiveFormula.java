@@ -66,7 +66,7 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel(TermContext context) {
-        return KLabelConstant.of("'_orBool_", context.definition().context());
+        return KLabelConstant.of("'_orBool_", context.definition());
     }
 
     @Override

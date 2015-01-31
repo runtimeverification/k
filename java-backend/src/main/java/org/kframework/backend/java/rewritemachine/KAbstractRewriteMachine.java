@@ -219,7 +219,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder4.build());
                     break;
                 case CELL_COLLECTION:
-                    CellCollection.Builder builder5 = CellCollection.builder(context.definition().context());
+                    CellCollection.Builder builder5 = CellCollection.builder(context.definition());
                     for (CellLabel cellLabel : constructor.cellLabels()) {
                         builder5.add(new Cell(cellLabel, stack.pop()));
                     }

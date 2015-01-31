@@ -48,7 +48,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean changed = false;
-        CellCollection.Builder builder = CellCollection.builder(context.definition().context());
+        CellCollection.Builder builder = CellCollection.builder(context.definition());
         for (CellCollection.Cell cell : cellCollection.cells().values()) {
             Term transformedContent = (Term) cell.content().accept(this);
             builder.put(cell.cellLabel(), transformedContent);

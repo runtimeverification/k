@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.kframework.backend.java.builtins.BoolToken;
@@ -59,6 +60,8 @@ public class SymbolicRewriter {
     private boolean transition;
     private RuleIndex ruleIndex;
     private KRunState.Counter counter;
+    public static Stopwatch isw = Stopwatch.createUnstarted();
+    public static Stopwatch rsw = Stopwatch.createUnstarted();
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -74,9 +77,8 @@ public class SymbolicRewriter {
         return executionGraph;
     }
 
-    public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
         stopwatch.start();
-        Context context = definition.context();
         KRunState initialState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
@@ -105,7 +107,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        if (definition.context().krunOptions.experimental.statistics) {
+        if (definition.kRunOptions().experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
@@ -185,8 +187,8 @@ public class SymbolicRewriter {
                             results.add(result);
                             appliedRules.add(rule);
                             substitutions.add(unificationConstraint.substitution());
-                            Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
-                            Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
+                            Coverage.print(definition.kRunOptions().experimental.coverage, subject);
+                            Coverage.print(definition.kRunOptions().experimental.coverage, rule);
                             if (results.size() == successorBound) {
                                 return;
                             }
@@ -428,7 +430,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        if (definition.context().krunOptions.experimental.statistics) {
+        if (definition.kRunOptions().experimental.statistics) {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
@@ -439,6 +441,7 @@ public class SymbolicRewriter {
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> rules) {
+        ConjunctiveFormula.cfsw.reset();
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -453,9 +456,12 @@ public class SymbolicRewriter {
             step++;
 //            System.err.println("step #" + step);
             for (ConstrainedTerm term : queue) {
+                isw.start();
                 if (term.implies(targetTerm)) {
+                    isw.stop();
                     continue;
                 }
+                isw.stop();
 
                 // TODO(YilongL): the `get(0)` seems hacky
                 Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
@@ -546,6 +552,9 @@ public class SymbolicRewriter {
              */
         }
 
+        System.err.println("=== " + ConjunctiveFormula.cfsw.elapsed(TimeUnit.MILLISECONDS));
+        System.err.println("*** " + isw.elapsed(TimeUnit.MILLISECONDS));
+        System.err.println(">>> " + rsw.elapsed(TimeUnit.MILLISECONDS));
         return proofResults;
     }
 

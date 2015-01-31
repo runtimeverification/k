@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -532,7 +533,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
         int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
-        Context context = termContext.definition().context();
+        Definition definition = termContext.definition();
 
         /*
          * CASE 1: cellCollection has no explicitly specified starred-cell;
@@ -551,8 +552,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             if (frame != null && otherFrame != null && (numOfDiffCellLabels > 0) && (numOfOtherDiffCellLabels > 0)) {
                 Variable variable = Variable.getAnonVariable(Sort.BAG);
-                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, context));
-                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, context), otherFrame);
+                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, definition));
+                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, definition), otherFrame);
             } else if (frame == null && (numOfOtherDiffCellLabels > 0)
                     || otherFrame == null && (numOfDiffCellLabels > 0)) {
                 fail(cellCollection, otherCellCollection);
@@ -562,8 +563,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 }
             } else {
                 add(
-                        CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, context),
-                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, context));
+                        CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, definition),
+                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, definition));
             }
         }
         /* Case 2: both cell collections have explicitly specified starred-cells */
@@ -589,7 +590,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (!definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next().content(),
@@ -637,7 +638,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                CellCollection.Builder builder = CellCollection.builder(context);
+                CellCollection.Builder builder = CellCollection.builder(definition);
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.isSelected(i)) {
                         builder.add(cells[i]);

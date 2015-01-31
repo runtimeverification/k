@@ -84,16 +84,16 @@ public abstract class Collection extends Term implements CollectionInternalRepre
     @Override
     public KLabel constructorLabel(TermContext context) {
         return KLabelConstant.of(
-                context.definition().context().dataStructureSortOf(sort().toFrontEnd()).constructorLabel(),
-                context.definition().context());
+                context.definition().dataStructureSortOf(sort()).constructorLabel(),
+                context.definition());
     }
 
     @Override
     public KItem unit(TermContext context) {
         return KItem.of(
                 KLabelConstant.of(
-                        context.definition().context().dataStructureSortOf(sort().toFrontEnd()).unitLabel(),
-                        context.definition().context()),
+                        context.definition().dataStructureSortOf(sort()).unitLabel(),
+                        context.definition()),
                 KList.EMPTY,
                 context);
     }

@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.base.Stopwatch;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -46,6 +47,8 @@ import org.apache.commons.lang3.tuple.Pair;
 public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     public static final String SEPARATOR = " /\\ ";
+    public static final Stopwatch cfsw = Stopwatch.createUnstarted();
+    private boolean nested;
 
     public static ConjunctiveFormula of(TermContext context) {
         return new ConjunctiveFormula(
@@ -262,6 +265,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      */
     public ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification) {
         assert !isFalse();
+        nested = cfsw.isRunning();
+        if (!nested) {
+            cfsw.start();
+        }
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
@@ -355,6 +362,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             equalities = pendingEqualities;
         } while (change);
 
+        if (!nested) {
+            cfsw.stop();
+        }
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
     }
 
@@ -363,6 +373,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             Equality equality) {
+        if (!nested) {
+            cfsw.stop();
+        }
         if (RuleAuditing.isAuditBegun()) {
             System.err.println("Unification failure: " + equality.leftHandSide()
                     + " does not unify with " + equality.rightHandSide());
@@ -481,7 +494,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (context.definition().context().globalOptions.debug) {
+            if (context.definition().globalOptions().debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
@@ -489,7 +502,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -501,7 +514,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Split on " + condition);
                 }
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
@@ -510,12 +523,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (!impliesSMT(left,right, rightOnlyVariables)) {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Proved!");
                 }
             }
@@ -610,7 +623,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel(TermContext context) {
-        return KLabelConstant.of("'_andBool_", context.definition().context());
+        return KLabelConstant.of("'_andBool_", context.definition());
     }
 
     @Override
