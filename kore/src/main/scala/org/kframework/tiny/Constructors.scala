@@ -8,6 +8,8 @@ import scala.collection.JavaConverters._
 
 class Constructors(module: definition.Module) extends kore.Constructors {
 
+  implicit val theory = FreeTheory
+
   override def KLabel(name: String): Label[KApp] = {
     val att = module.attributesFor(basic.KLabel(name))
     if (att.contains("assoc"))

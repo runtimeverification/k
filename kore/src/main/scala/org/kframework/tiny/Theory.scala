@@ -1,7 +1,5 @@
 package org.kframework.tiny
 
-import org.kframework.koreimplementation.K
-
 
 trait Theory {
   /**
@@ -16,4 +14,8 @@ trait Theory {
   }
 
   def normalize(k: Proposition): K
+}
+
+object FreeTheory extends Theory {
+  override def normalize(k: Proposition): K = ???
 }

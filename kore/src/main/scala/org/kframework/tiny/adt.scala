@@ -45,13 +45,14 @@ trait ProductOfKs extends KCollection with Product {
 
 // Classes
 
-case class KVar(name: String, att: Att = Att()) extends kore.KVariable
+case class KVar(name: String, att: Att = Att()) extends kore.KVariable with K with SelfLabel[KVar] {
+  override type This = KVar
+  override def copy(att: Att): This = KVar(name, att)
+}
 
-case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with Label[KTok] {
-  type This = KTok
-  def label: Label[KTok] = this
+case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with SelfLabel[KTok] {
+  override type This = KTok
   def name: String = s + ":" + sort
-  def apply(l: Seq[K], att: Att): This = { assert(l.size == 0); KTok(sort, s, att) }
   def copy(att: Att): This = KTok(sort, s, att)
 }
 
@@ -75,10 +76,11 @@ case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewri
 
 case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel
 
-// Labels
+// Label traits
 
 trait Label[+This <: K] extends kore.KLabel {
   def apply(l: Seq[K], att: Att): This
+  def apply(l: K*): This = apply(l, Att())
   def att: Att
 }
 
@@ -90,6 +92,15 @@ trait KCollectionLabel[This <: K] extends Label[This] {
     b.result()
   }
 }
+
+trait SelfLabel[Self <: K] extends Label[Self] {
+  self: K =>
+  type This = Self
+  def label = this
+  def apply(l: Seq[K], att: Att) = { assert(l.size == 0); copy(att) }
+}
+
+// Labels
 
 object KRewrite extends KCollectionLabel[KRewrite] {
   def newBuilder(att: Att): mutable.Builder[K, KRewrite] =
@@ -109,8 +120,8 @@ case class AssocKAppLabel(name: String, att: Att) extends KCollectionLabel[Assoc
 }
 
 object KSeq extends KCollectionLabel[KSeq] {
+  /* required */
   val name = "~>"
   val att = Att()
-
   def newBuilder(att: Att): mutable.Builder[K, KSeq] = new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new KSeq(_, att) }
 }
