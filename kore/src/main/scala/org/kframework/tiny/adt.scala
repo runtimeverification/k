@@ -119,9 +119,12 @@ case class AssocKAppLabel(name: String, att: Att) extends KCollectionLabel[Assoc
     new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new AssocKApp(this, _, att) }
 }
 
-object KSeq extends KCollectionLabel[KSeq] {
-  /* required */
-  val name = "~>"
+object KSeq extends {
+  val name = "~>";
   val att = Att()
-  def newBuilder(att: Att): mutable.Builder[K, KSeq] = new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new KSeq(_, att) }
+} with KCollectionLabel[KSeq] {
+  /* required */
+  def newBuilder(att: Att): mutable.Builder[K, KSeq] = new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult {
+    new KSeq(_, att)
+  }
 }
