@@ -4,7 +4,7 @@ import net.sf.tweety.logics.pl.{syntax => tw}
 
 trait Formula
 
-trait Proposition extends Formula {
+trait Proposition extends Formula with K {
   def estimate(sideConditions: Formula): Int
   def step: Or
 }

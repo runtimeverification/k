@@ -7,13 +7,15 @@ import org.kframework.kore.Unapply._
 import collection.JavaConverters._
 
 case class Att(att: Set[K]) extends AttributesToString {
-  def getK(key: String): Option[K] = att.find {
-    case t@KApply(KLabel(`key`), v) => true
-    case _ => false
+  def getK(key: String): Option[K] = {
+    att.collectFirst({
+      case t@KApply(KLabel(`key`), List(v)) => v
+    })
   }
+
   def get[T](key: String): Option[T] = getK(key) map {
     case t: KToken => t.s.asInstanceOf[T]
-    case _ => ???
+    case x => println(x); ???
   }
 
   def getOptional[T](label: String): java.util.Optional[T] =
@@ -30,7 +32,8 @@ case class Att(att: Set[K]) extends AttributesToString {
 
   def +(k: K): Att = new Att(att + k)
   def +(k: String): Att = add(cons.KApply(cons.KLabel(k), cons.KList(), Att()))
-  def +(kv: (String, String)): Att = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2, Att())), Att()))
+  def +(kv: (String, String)): Att = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2,
+    Att())), Att()))
   def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
@@ -63,5 +66,6 @@ trait AttributesToString {
     if (filteredAtt.isEmpty) "" else (" " + toString())
   }
 
-  lazy val filteredAtt: Set[K] = att filter { case KApply(KLabel("productionID"), _) => false; case _ => true } // TODO: remove along with KIL to KORE to KIL convertors
+  lazy val filteredAtt: Set[K] = att filter { case KApply(KLabel("productionID"), _) => false; case _ => true } //
+  // TODO: remove along with KIL to KORE to KIL convertors
 }

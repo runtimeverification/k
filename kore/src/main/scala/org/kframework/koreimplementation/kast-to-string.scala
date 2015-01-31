@@ -3,14 +3,16 @@
 package org.kframework.koreimplementation
 
 import org.apache.commons.lang3.StringEscapeUtils
+import org.kframework.kore
+import collection.JavaConverters._
 
 trait KApplyToString {
-  self: KSimpleApply =>
-  override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
+  self: kore.KApply =>
+  override def toString() = klabel.toString + "(" + klist.items.asScala.mkString(",") + ")" + att.postfixString
 }
 
 trait KTokenToString {
-  self: KToken =>
+  self: kore.KToken =>
   override def toString = "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")" + att.postfixString
 }
 

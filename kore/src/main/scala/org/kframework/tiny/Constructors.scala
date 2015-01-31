@@ -20,11 +20,11 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): KApp = {
     val x: Label[KApp] = convert(klabel)
-    x(klist.items.asScala.toSeq map convert, att)
+    x(klist.items.asScala.toSeq map convert, att).asInstanceOf[KApp]
   }
 
   override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): KSeq =
-    KSeq(items.asScala.toSeq map convert, att)
+    KSeq(items.asScala.toSeq map convert, att).asInstanceOf[KSeq]
 
   override def KVariable(name: String, att: Att): KVar = KVar(name, att)
 

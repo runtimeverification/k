@@ -12,4 +12,5 @@ object Sort {
 
 case class UninterpretedSort(name: String) extends Sort {
   def apply(s: String) = KUninterpretedToken(this, s)
+  override def toString = name
 }

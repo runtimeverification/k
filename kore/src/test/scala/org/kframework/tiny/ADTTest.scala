@@ -5,6 +5,8 @@ import org.junit.Assert._
 import org.kframework.attributes.Att
 
 class ADTTest {
+  implicit val t = FreeTheory
+
   val X = KVar("X")
   val KInt = Sort("Int")
   val one = KTok(KInt, "1")

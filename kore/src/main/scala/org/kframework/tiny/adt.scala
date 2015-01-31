@@ -48,7 +48,7 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with K wi
   override def copy(att: Att): This = KVar(name, att)
 }
 
-case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with SelfLabel[KTok] {
+case class KTok private(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with SelfLabel[KTok] {
   override type This = KTok
   def name: String = s + ":" + sort
   def copy(att: Att): This = KTok(sort, s, att)
@@ -77,14 +77,17 @@ case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedK
 // Label traits
 
 trait Label[+This <: K] extends kore.KLabel {
-  def apply(l: Seq[K], att: Att): This
-  def apply(l: K*): This = apply(l, Att())
+  def apply(l: Seq[K], att: Att)(implicit t: Theory): K =
+    t.normalize(construct(l, att))
+
+  def construct(l: Seq[K], att: Att): This
+  def apply(l: K*)(implicit t: Theory): K = apply(l, Att())
   def att: Att
 }
 
 trait KCollectionLabel[This <: K] extends Label[This] {
   def newBuilder(att: Att): mutable.Builder[K, This]
-  def apply(l: Seq[K], att: Att): This = {
+  def construct(l: Seq[K], att: Att): This = {
     val b = newBuilder(att)
     l foreach b.+=
     b.result()
@@ -96,7 +99,7 @@ trait SelfLabel[Self <: K] extends Label[Self] {
   type This = Self
   def label = this
   def copy(att: Att): This
-  def apply(l: Seq[K], att: Att) = { assert(l.size == 0); copy(att) }
+  def construct(l: Seq[K], att: Att) = { assert(l.size == 0); copy(att) }
 }
 
 // Labels

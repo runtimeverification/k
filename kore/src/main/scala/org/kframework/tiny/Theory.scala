@@ -13,9 +13,11 @@ trait Theory {
     case _ => None
   }
 
-  def normalize(k: Proposition): K
+  def normalize(k: K): K
 }
 
 object FreeTheory extends Theory {
-  override def normalize(k: Proposition): K = ???
+  override def normalize(k: K): K = {
+    println(k); k
+  }
 }

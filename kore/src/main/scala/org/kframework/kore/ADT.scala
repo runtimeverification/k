@@ -2,13 +2,17 @@ package org.kframework.kore
 
 import org.kframework.kore
 import org.kframework.attributes._
+import org.kframework.koreimplementation.{KApplyToString, KTokenToString}
 import collection.JavaConverters._
 
 object ADT {
 
-  case class KLabel(name: String) extends kore.KLabel
+  case class KLabel(name: String) extends kore.KLabel {
+    override def toString = name
+  }
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
+    with KApplyToString
 
   case class KSequence(elements: List[K], att: Att = Att()) extends kore.KSequence {
     def items: java.util.List[K] = elements.asJava
@@ -20,7 +24,7 @@ object ADT {
     override def toString = name
   }
 
-  case class KToken(sort: kore.Sort, s: String, att: Att = Att()) extends kore.KToken
+  case class KToken(sort: kore.Sort, s: String, att: Att = Att()) extends kore.KToken with KTokenToString
 
   case class KList(elements: List[K]) extends kore.KList {
     def items: java.util.List[K] = elements.asJava
