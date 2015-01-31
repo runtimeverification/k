@@ -21,7 +21,7 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 //}
 
 
-case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
+case class Definition(requires: Set[Require], modules: Set[Module], att: Att = Att())
   extends DefinitionToString with OuterKORE {
 
   def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
@@ -29,7 +29,7 @@ case class Definition(requires: Set[Require], modules: Set[Module], att: Attribu
 
 case class Require(file: java.io.File) extends OuterKORE
 
-case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Attributes = Attributes())
+case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
@@ -45,7 +45,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     case (l, ps) => if (ps.groupBy(_.att).size != 1) throw DivergingAttributesForTheSameKLabel(ps)
   }
 
-  val attributesFor: Map[KLabel, Attributes] = productionsFor mapValues { _.head.att }
+  val attributesFor: Map[KLabel, Att] = productionsFor mapValues { _.head.att }
 
   val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
@@ -84,23 +84,23 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
 trait Sentence {
   // marker
-  val att: Attributes
+  val att: Att
 }
 
 // deprecated
-case class Context(body: K, requires: K, att: Attributes = Attributes()) extends Sentence with OuterKORE with ContextToString
+case class Context(body: K, requires: K, att: Att = Att()) extends Sentence with OuterKORE with ContextToString
 
-case class Rule(body: K, requires: K, ensures: K, att: Attributes) extends Sentence with RuleToString with OuterKORE
+case class Rule(body: K, requires: K, ensures: K, att: Att) extends Sentence with RuleToString with OuterKORE
 
-case class ModuleComment(comment: String, att: Attributes = Attributes()) extends Sentence with OuterKORE
+case class ModuleComment(comment: String, att: Att = Att()) extends Sentence with OuterKORE
 
-case class Import(moduleName: String, att: Attributes = Attributes()) extends Sentence with ImportToString with OuterKORE
+case class Import(moduleName: String, att: Att = Att()) extends Sentence with ImportToString with OuterKORE
 
 // hooked
 
 // syntax declarations
 
-case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Attributes = Attributes())
+case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att())
   extends Sentence with SyntaxPriorityToString with OuterKORE
 
 object Associativity extends Enumeration {
@@ -111,31 +111,31 @@ object Associativity extends Enumeration {
 case class SyntaxAssociativity(
   assoc: Associativity.Value,
   tags: collection.immutable.Set[Tag],
-  att: Attributes = Attributes())
+  att: Att = Att())
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
 case class Tag(name: String) extends TagToString with OuterKORE
 
 //trait Production {
 //  def sort: Sort
-//  def att: Attributes
+//  def att: Att
 //  def items: Seq[ProductionItem]
 //  def klabel: Option[KLabel] =
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
 //}
 
-case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
+case class SyntaxSort(sort: Sort, att: Att = Att()) extends Sentence
 with SyntaxSortToString with OuterKORE {
   def items = Seq()
 }
 
-case class Production(sort: Sort, items: Seq[ProductionItem], att: Attributes)
+case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
   def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.ADTConstructors.KLabel(_) }
 }
 
 object Production {
-  def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes()): Production = {
+  def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Att = Att()): Production = {
     Production(sort, items, att + ("#klabel" -> klabel.name))
   }
   val kLabelAttribute = "klabel"

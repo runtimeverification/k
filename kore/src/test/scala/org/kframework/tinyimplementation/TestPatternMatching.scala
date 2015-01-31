@@ -210,7 +210,7 @@ class TestPatternMatching {
 
   @Test def testKVariableMatchingKLabel() {
     val foo = 'foo()
-    val pattern = KApply(X, Seq(), Attributes())
+    val pattern = KApply(X, Seq(), Att())
     assertEquals(Some(And(X -> MetaKLabel('foo))), pattern.matchOne(foo))
   }
 

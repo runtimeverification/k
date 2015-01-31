@@ -12,8 +12,8 @@ import scala.collection.JavaConverters._
 object Up extends (Any => K) {
 
   implicit def symbolWithKApply(s: Symbol) = new {
-    def apply(ks: K*): KApply = apply(ks.toList, Attributes())
-    def apply(l: List[K], att: Attributes = Attributes()): KApply = {
+    def apply(ks: K*): KApply = apply(ks.toList, Att())
+    def apply(l: List[K], att: Att = Att()): KApply = {
       cons.KApply(cons.KLabel(s.name), cons.KList(l.asJava), att)
     }
   }
@@ -24,24 +24,24 @@ object Up extends (Any => K) {
       case o: Set[_] => 'Set(o map apply toList)
 
       // Primitives
-      case o: Int => cons.KToken(Sorts.Int, o.toString, Attributes())
-      case o: String => cons.KToken(Sorts.KString, o.toString, Attributes())
-      case o: Boolean => cons.KToken(cons.Sort("Boolean"), o.toString, Attributes())
+      case o: Int => cons.KToken(Sorts.Int, o.toString, Att())
+      case o: String => cons.KToken(Sorts.KString, o.toString, Att())
+      case o: Boolean => cons.KToken(cons.Sort("Boolean"), o.toString, Att())
 
-      case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Attributes())
-      case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Attributes())
+      case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
+      case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())
 
       // Already K
       case o: K => o
 
-      case o: Sort => 'Sort(cons.KToken(Sorts.KString, o.name, Attributes()))
+      case o: Sort => 'Sort(cons.KToken(Sorts.KString, o.name, Att()))
 
       // Fallback to reflection
       case o: Product =>
         val elements = o.productIterator.toList
         val klist = cons.KList(elements map apply asJava)
         cons.KApply(cons.KLabel(processName(o.getClass().getName)), klist,
-          Attributes() +(ClassFromUp.toString(), o.getClass().getName()))
+          Att() +(ClassFromUp.toString(), o.getClass().getName()))
     }
   }
 

@@ -2,10 +2,8 @@
 
 package org.kframework.koreimplementation
 
-;
-
 import org.kframework._
-import org.kframework.attributes.Attributes
+import org.kframework.attributes.Att
 import org.kframework.kore.Sort
 
 import scala.collection.JavaConverters._
@@ -20,8 +18,8 @@ import scala.collection.JavaConverters._
  */
 
 object Constructors extends kore.Constructors {
-  def Attributes(ks: Set[K]) = attributes.Attributes(ks.toSeq: _*)
-  @annotation.varargs def Attributes(ks: K*) = attributes.Attributes(ks: _*)
+  def Attributes(ks: Set[K]) = attributes.Att(ks.toSeq: _*)
+  @annotation.varargs def Attributes(ks: K*) = attributes.Att(ks: _*)
 
   //  @annotation.varargs def KBag(ks: K*) = koreimplementation.KBag(ks)
 
@@ -40,20 +38,20 @@ object Constructors extends kore.Constructors {
     koreimplementation.KList(ks.asScala.map(convert))
 
 
-  def KApply(klabel: KLabel, klist: KList, att: attributes.Attributes) = koreimplementation.KApply(klabel, klist, att)
+  def KApply(klabel: KLabel, klist: KList, att: attributes.Att) = koreimplementation.KApply(klabel, klist, att)
 
   def KApply(klabel: KLabel, klist: KList) = koreimplementation.KApply(klabel, klist, Attributes())
 
-  def KToken(sort: Sort, string: String, att: attributes.Attributes) = koreimplementation.KToken(sort, string, att)
+  def KToken(sort: Sort, string: String, att: attributes.Att) = koreimplementation.KToken(sort, string, att)
   def KToken(sort: Sort, string: String) = koreimplementation.KToken(sort, string, Attributes())
 
-  def KVariable(name: String, att: attributes.Attributes) = koreimplementation.KVariable(name, att)
+  def KVariable(name: String, att: attributes.Att) = koreimplementation.KVariable(name, att)
 
   def KVariable(name: String) = {
     koreimplementation.KVariable(name, Attributes())
   }
 
-  def InjectedKLabel(l: kore.KLabel, att: Attributes) = koreimplementation.InjectedKLabel(convert(l))
+  def InjectedKLabel(l: kore.KLabel, att: Att) = koreimplementation.InjectedKLabel(convert(l))
 
   def InjectedKList(l: KList) = koreimplementation.InjectedKList(l)
 
@@ -63,7 +61,7 @@ object Constructors extends kore.Constructors {
 
   def KRewrite(left: K, right: K) = koreimplementation.KRewrite(left, right, Attributes())
 
-  def KRewrite(left: K, right: K, att: attributes.Attributes) = koreimplementation.KRewrite(left, right, att)
+  def KRewrite(left: K, right: K, att: attributes.Att) = koreimplementation.KRewrite(left, right, att)
 
   //  def KInt(n: Int) = koreimplementation.KInt(n)
 
@@ -76,9 +74,9 @@ object Constructors extends kore.Constructors {
     Collector(() => new CombinerFromBuilder(koreimplementation.KSequence.newBuilder()))
 
 
-  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Attributes): kore.KApply = ???
-  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Attributes): kore.KSequence = ???
-  override def KRewrite(left: kore.K, right: kore.K, att: Attributes): kore.KRewrite = ???
+  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): kore.KApply = ???
+  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): kore.KSequence = ???
+  override def KRewrite(left: kore.K, right: kore.K, att: Att): kore.KRewrite = ???
 
   def convert(klist: kore.KList): koreimplementation.KList = klist match {
     case l: koreimplementation.KList => l

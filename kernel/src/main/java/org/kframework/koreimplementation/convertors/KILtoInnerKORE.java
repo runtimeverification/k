@@ -65,7 +65,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 Attributes(cellMarker));
         // } else {
         // return KApply(KLabel(body.getLabel()), KList(x),
-        // Attributes(cellMarker));
+        // Att(cellMarker));
         // }
     }
 
@@ -90,7 +90,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(TermCons cons) {
-        org.kframework.attributes.Attributes att = attributesFor(cons);
+        org.kframework.attributes.Att att = attributesFor(cons);
         return KApply(KLabel(cons.getProduction().getKLabel()), KList(apply(cons.getContents())),
                 att);
     }
@@ -139,13 +139,13 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return (KList) kList.getContents().stream().map(this).collect(toKList());
     }
 
-    private org.kframework.attributes.Attributes attributesFor(TermCons cons) {
+    private org.kframework.attributes.Att attributesFor(TermCons cons) {
         String uniqueishID = "" + System.identityHashCode(cons.getProduction());
-        org.kframework.attributes.Attributes att = sortAttributes(cons).add(PRODUCTION_ID, uniqueishID);
+        org.kframework.attributes.Att att = sortAttributes(cons).add(PRODUCTION_ID, uniqueishID);
         return att;
     }
 
-    private org.kframework.attributes.Attributes sortAttributes(Term cons) {
+    private org.kframework.attributes.Att sortAttributes(Term cons) {
 
         return convertAttributes(cons).addAll(
                 Attributes(KApply(KLabel("sort"),
@@ -184,7 +184,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return KSequence();
     }
 
-    public org.kframework.attributes.Attributes convertAttributes(ASTNode t) {
+    public org.kframework.attributes.Att convertAttributes(ASTNode t) {
         Attributes attributes = t.getAttributes();
 
         Set<K> attributesSet = attributes
@@ -202,10 +202,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 .addAll(attributesFromLocation(t.getLocation()));
     }
 
-    private org.kframework.attributes.Attributes attributesFromLocation(Location location) {
+    private org.kframework.attributes.Att attributesFromLocation(Location location) {
         if (location != null) {
             org.kframework.attributes.Location koreLocation = org.kframework.attributes.Location.apply(location.lineStart, location.columnStart, location.lineEnd, location.columnEnd);
-            return org.kframework.attributes.Attributes.apply(Set(Up.apply(koreLocation)));
+            return org.kframework.attributes.Att.apply(Set(Up.apply(koreLocation)));
         } else
             return Attributes();
     }

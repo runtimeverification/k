@@ -3,7 +3,7 @@ package org.kframework.tiny
 import org.kframework.{kore, _}
 
 import scala.collection.JavaConverters._
-import org.kframework.attributes.Attributes
+import org.kframework.attributes.Att
 
 trait K extends kore.K
 
@@ -23,4 +23,4 @@ trait KApply extends kore.KApply with KCollection {
   override def stream = super[KCollection].stream
 }
 
-case class KVariable(name: String, att: Attributes = Attributes()) extends kore.KVariable
+case class KVariable(name: String, att: Att = Att()) extends kore.KVariable

@@ -6,7 +6,7 @@ import org.kframework.kore.{ADTConstructors => cons}
 import org.kframework.kore.Unapply._
 import collection.JavaConverters._
 
-case class Attributes(att: Set[K]) extends AttributesToString {
+case class Att(att: Set[K]) extends AttributesToString {
   def getK(key: String): Option[K] = att.find {
     case t@KApply(KLabel(`key`), v) => true
     case _ => false
@@ -28,28 +28,28 @@ case class Attributes(att: Set[K]) extends AttributesToString {
       case z => false
     }
 
-  def +(k: K): Attributes = new Attributes(att + k)
-  def +(k: String): Attributes = add(cons.KApply(cons.KLabel(k), cons.KList(), Attributes()))
-  def +(kv: (String, String)): Attributes = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2, Attributes())), Attributes()))
-  def ++(that: Attributes) = new Attributes(att ++ that.att)
+  def +(k: K): Att = new Att(att + k)
+  def +(k: String): Att = add(cons.KApply(cons.KLabel(k), cons.KList(), Att()))
+  def +(kv: (String, String)): Att = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2, Att())), Att()))
+  def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
-  def add(k: K): Attributes = this + k
-  def add(k: String): Attributes = this + k
-  def add(key: String, value: String): Attributes = this + (key -> value)
+  def add(k: K): Att = this + k
+  def add(k: String): Att = this + k
+  def add(key: String, value: String): Att = this + (key -> value)
 
   def stream = att.asJava.stream
-  def addAll(that: Attributes) = this ++ that
+  def addAll(that: Att) = this ++ that
 }
 
 trait KeyWithType
 
-object Attributes {
-  def apply(atts: K*): Attributes = Attributes(atts.toSet)
+object Att {
+  def apply(atts: K*): Att = Att(atts.toSet)
 }
 
 trait AttributesToString {
-  self: Attributes =>
+  self: Att =>
 
   override def toString() =
     "[" +

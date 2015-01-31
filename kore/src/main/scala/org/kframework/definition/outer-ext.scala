@@ -6,7 +6,7 @@ import org.kframework.kore._
 import org.kframework.attributes._
 import org.kframework.kore.{ADTConstructors => con}
 
-case class Configuration(body: K, ensures: K, att: Attributes = Attributes()) extends Sentence with OuterKORE {
+case class Configuration(body: K, ensures: K, att: Att = Att()) extends Sentence with OuterKORE {
 
   //  override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
@@ -41,7 +41,7 @@ case class Configuration(body: K, ensures: K, att: Attributes = Attributes()) ex
 }
 
 object Configuration {
-  val cellMarker = con.KApply(con.KLabel("cell"), con.KList(), Attributes());
+  val cellMarker = con.KApply(con.KLabel("cell"), con.KList(), Att());
 }
 
-case class Bubble(sentenceType: String, contents: String, att: Attributes = Attributes()) extends Sentence
+case class Bubble(sentenceType: String, contents: String, att: Att = Att()) extends Sentence

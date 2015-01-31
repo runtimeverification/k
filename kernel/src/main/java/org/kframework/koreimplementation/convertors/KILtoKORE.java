@@ -32,7 +32,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.attributes.Attributes;
+import org.kframework.attributes.Att;
 import org.kframework.definition.*;
 
 import scala.Enumeration.Value;
@@ -225,7 +225,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         }
                     }
 
-                    org.kframework.attributes.Attributes attrs = inner.convertAttributes(p);
+                    org.kframework.attributes.Att attrs = inner.convertAttributes(p);
 
                     org.kframework.definition.Production prod = Production(
                             sort,
@@ -252,14 +252,14 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Attributes attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Att attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.definition.Production prod1, prod2, prod3;
 
         String kilProductionId = "" + System.identityHashCode(p);
 
         // lst ::= lst sep lst
-        Attributes attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
                 kilProductionId);
         prod1 = Production(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),

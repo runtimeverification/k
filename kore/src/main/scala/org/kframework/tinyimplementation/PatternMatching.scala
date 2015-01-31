@@ -64,9 +64,9 @@ trait KListPattern {
 case class MetaKLabel(klabel: KLabel) extends KItem with Leaf {
   type This = MetaKLabel
 
-  def copy(att: Attributes) = this
+  def copy(att: Att) = this
 
-  def att = Attributes()
+  def att = Att()
 
   def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 }
@@ -116,7 +116,7 @@ trait KSequencePattern extends Pattern with Normalization {
       case s: KSequence =>
         ks.matchAll(s.ks) endomap {
           case m: And => m mapValues {
-            case InjectedKList(l, _) => KSequence(l.delegate, Attributes())
+            case InjectedKList(l, _) => KSequence(l.delegate, Att())
             case k => k
           }
         }
@@ -132,9 +132,9 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
 
   def delegate = List(pattern)
 
-  def att = Attributes()
+  def att = Att()
 
-  def copy(att: Attributes) = Anywhere(pattern, name)
+  def copy(att: Att) = Anywhere(pattern, name)
 
   def newBuilder = ListBuffer() mapResult {
     case List(x) => Anywhere(x)

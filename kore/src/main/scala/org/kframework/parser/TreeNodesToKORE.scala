@@ -17,7 +17,7 @@ object TreeNodesToKORE {
     // but related to whitespace in the parser.
     case Constant(s, p, l) => KToken(p.sort, s.trim, locationToAtt(l.get()))
     case TermCons(items, p, l) => KApply(p.klabel.get, KList(items.asScala map apply asJava), locationToAtt(l.get()))
-    case Ambiguity(items, l) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Attributes())
+    case Ambiguity(items, l) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
   }
 
   def down(t: K): K = t match {
@@ -52,6 +52,6 @@ object TreeNodesToKORE {
     case t@KApply(l, items) => KApply(l, KList((items map down _).asJava), t.att)
   }
 
-  def locationToAtt(l: Location): Attributes =
-    Attributes(ObjectToKORE(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))
+  def locationToAtt(l: Location): Att =
+    Att(ObjectToKORE(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))
 }

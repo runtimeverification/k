@@ -520,7 +520,7 @@ public class SymbolicRewriter {
                             Collections.<Variable>emptyList(),
                             new SymbolicConstraint(definition).substitute(freshSubstitution, definition),
                             IndexingPair.getIndexingPair(term.term()),
-                            new Attributes()));
+                            new Att()));
                      */
                 }
 

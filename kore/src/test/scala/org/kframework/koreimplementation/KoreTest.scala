@@ -27,16 +27,16 @@ class KoreTest {
   }
 
   @Test def testKSequenceMapRetainsAttributes {
-    val x = KSequence(TestK, TestK) copy Attributes(TestK)
+    val x = KSequence(TestK, TestK) copy Att(TestK)
     val t: KSequence = x map { t: K => t }
-    assertEquals(Attributes(TestK), t.att)
+    assertEquals(Att(TestK), t.att)
     assertEquals(x, t)
   }
 
   @Test def testKApply {
-    val x = KApply(KLabel("foo"), Seq(TestK)) copy Attributes(TestK)
+    val x = KApply(KLabel("foo"), Seq(TestK)) copy Att(TestK)
     val t: KApply = x map { t: K => t }
-    assertEquals(Attributes(TestK), t.att)
+    assertEquals(Att(TestK), t.att)
     assertEquals(x, t)
   }
 
@@ -53,17 +53,17 @@ class KoreTest {
   }
 
   @Test def testKRewrite {
-    val x = KRewrite(TestK, TestK) copy Attributes(TestK)
-    val y = KRewrite(TestK, TestK) copy Attributes(TestK)
+    val x = KRewrite(TestK, TestK) copy Att(TestK)
+    val y = KRewrite(TestK, TestK) copy Att(TestK)
     assertEquals(x, y)
   }
 
   @Test def testKApplyEquals {
-    assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KApply(KLabel("bar"), KList(), Attributes()))
-    assertNotEquals(KApply(KLabel("foo"), KList(), Attributes()), KList())
-    assertNotEquals(KList(), KApply(KLabel("foo"), KList(), Attributes()))
-    assertNotEquals(KList(KToken(Sorts.Int, "5")), KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Attributes()))
-    assertNotEquals(KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Attributes()), KList(KToken(Sorts.Int, "5")))
+    assertNotEquals(KApply(KLabel("foo"), KList(), Att()), KApply(KLabel("bar"), KList(), Att()))
+    assertNotEquals(KApply(KLabel("foo"), KList(), Att()), KList())
+    assertNotEquals(KList(), KApply(KLabel("foo"), KList(), Att()))
+    assertNotEquals(KList(KToken(Sorts.Int, "5")), KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Att()))
+    assertNotEquals(KApply(KLabel("foo"), KList(KToken(Sorts.Int, "5")), Att()), KList(KToken(Sorts.Int, "5")))
   }
 
   @Test def testKSequenceEquals {
@@ -72,9 +72,9 @@ class KoreTest {
   }
 
   @Test def testAttributes {
-    assertEquals("[]", Attributes().toString())
-    assertEquals("", Attributes().postfixString)
-    assertEquals(" [X]", Attributes(KVariable("X")).postfixString)
+    assertEquals("[]", Att().toString())
+    assertEquals("", Att().postfixString)
+    assertEquals(" [X]", Att(KVariable("X")).postfixString)
   }
 
 }

@@ -1,7 +1,7 @@
 package org.kframework.koreimplementation
 
-//case class Attributes(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
-//  type This = Attributes
+//case class Att(att: Set[K] = Set()) extends Collection[K] with Indexed[String, KList] with AttributesToString {
+//  type This = Att
 //
 //  def contains(label: String): Boolean = (att find {
 //    case KApply(KLabel(`label`), _, _) => true
@@ -22,34 +22,34 @@ package org.kframework.koreimplementation
 //      case None => java.util.Optional.empty[String]()
 //    }
 //
-//  def addAll(that: Attributes) = this ++ that
+//  def addAll(that: Att) = this ++ that
 //
 //  def foreach(f: K => Unit): Unit = att foreach f
 //
 //  def iterable: Iterable[K] = att
 //
-//  def newBuilder: Builder[K, Attributes] = new SetBuilder[K, Set[K]](Set()) mapResult { new Attributes(_) }
+//  def newBuilder: Builder[K, Att] = new SetBuilder[K, Set[K]](Set()) mapResult { new Att(_) }
 //
-//  def +(k: K): Attributes = new Attributes(att + k)
-//  def +(k: String): Attributes = add(KApply(KLabel(k), KList()))
-//  def +(kv: (String, String)): Attributes = add(KApply(KLabel(kv._1), KList(KToken(Sorts.KString, kv._2))))
+//  def +(k: K): Att = new Att(att + k)
+//  def +(k: String): Att = add(KApply(KLabel(k), KList()))
+//  def +(kv: (String, String)): Att = add(KApply(KLabel(kv._1), KList(KToken(Sorts.KString, kv._2))))
 //
-//  def ++(that: Attributes) = new Attributes(att ++ that.att)
+//  def ++(that: Att) = new Att(att ++ that.att)
 //
 //  // nice methods for Java
-//  def add(k: K): Attributes = this + k
-//  def add(k: String): Attributes = this + k
-//  def add(key: String, value: String): Attributes = this + (key -> value)
+//  def add(k: K): Att = this + k
+//  def add(k: String): Att = this + k
+//  def add(key: String, value: String): Att = this + (key -> value)
 //
 //  def matchAll(k: K)(implicit disj: Theory): Or = {
 //    ???
 //  }
 //
-//  override def equals(that: Any) = that.isInstanceOf[Attributes]
+//  override def equals(that: Any) = that.isInstanceOf[Att]
 //}
 //
-//object Attributes {
-//  def apply(ks: K*) = new Attributes(ks.toSet)
+//object Att {
+//  def apply(ks: K*) = new Att(ks.toSet)
 //
 //  val classFromUp = "classType"
 //}
@@ -69,7 +69,7 @@ package org.kframework.koreimplementation
 //}
 //
 //trait AttributesToString {
-//  self: Attributes =>
+//  self: Att =>
 //
 //  override def toString() =
 //    "[" +

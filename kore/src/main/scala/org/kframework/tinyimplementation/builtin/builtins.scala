@@ -11,10 +11,10 @@ import org.kframework.tinyimplementation._
 
 import scala.collection.mutable.{Builder, ListBuffer}
 
-case class KEquals(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+case class KEquals(left: K, right: K, att: Att = Att()) extends KAbstractCollection with Proposition {
   type This = KEquals
 
-  def copy(att: Attributes): KEquals = KEquals(left, right, att)
+  def copy(att: Att): KEquals = KEquals(left, right, att)
 
   def delegate = List(left, right)
 
@@ -29,10 +29,10 @@ object KEquals {
   def newBuilder(): Builder[K, KEquals] = ListBuffer() mapResult { case List(x, y) => KEquals(x, y) }
 }
 
-case class KOr(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+case class KOr(left: K, right: K, att: Att = Att()) extends KAbstractCollection with Proposition {
   type This = KOr
 
-  def copy(att: Attributes): KOr = KOr(left, right, att)
+  def copy(att: Att): KOr = KOr(left, right, att)
 
   def delegate = List(left, right)
 
@@ -47,10 +47,10 @@ object KOr {
   def newBuilder(): Builder[K, KOr] = ListBuffer() mapResult { case List(x, y) => KOr(x, y) }
 }
 
-case class KAnd(left: K, right: K, att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+case class KAnd(left: K, right: K, att: Att = Att()) extends KAbstractCollection with Proposition {
   type This = KAnd
 
-  def copy(att: Attributes): KAnd = KAnd(left, right, att)
+  def copy(att: Att): KAnd = KAnd(left, right, att)
 
   def delegate = List(left, right)
 
@@ -65,13 +65,13 @@ object KAnd {
   def newBuilder(): Builder[K, KAnd] = ListBuffer() mapResult { case List(x, y) => KAnd(x, y) }
 }
 
-case class KBoolean(v: Boolean, att: Attributes = Attributes())
+case class KBoolean(v: Boolean, att: Att = Att())
   extends KToken with Proposition with Leaf {
   type This = KBoolean
   val sort = KBoolean
   val s: String = v.toString
 
-  def copy(att: Attributes) = KBoolean(v, att)
+  def copy(att: Att) = KBoolean(v, att)
 }
 
 object KBoolean extends Sort with KLabel {
@@ -80,12 +80,12 @@ object KBoolean extends Sort with KLabel {
   val name: String = "Boolean"
 }
 
-case class KInt(n: Int, att: Attributes = Attributes()) extends KToken with Leaf {
+case class KInt(n: Int, att: Att = Att()) extends KToken with Leaf {
   type This = KInt
   val sort = KInt
   val s: String = n.toString
 
-  def copy(att: Attributes) = KInt(n, att)
+  def copy(att: Att) = KInt(n, att)
 }
 
 object KInt extends Sort with KLabel {
@@ -95,10 +95,10 @@ object KInt extends Sort with KLabel {
 }
 
 //
-//case class KString(s: String, att: Attributes = Attributes()) extends KToken {
+//case class KString(s: String, att: Att = Att()) extends KToken {
 //  type This = KString
 //  val sort = KString
-//  def copy(att: Attributes) = KString(s, att)
+//  def copy(att: Att) = KString(s, att)
 //}
 //
 //object KString extends Sort with KLabel {
@@ -107,12 +107,12 @@ object KInt extends Sort with KLabel {
 //  val name: String = "Int"
 //}
 //
-case class KBag(klabel: KLabel, val klist: KList, att: Attributes = Attributes()) extends KAbstractCollection {
+case class KBag(klabel: KLabel, val klist: KList, att: Att = Att()) extends KAbstractCollection {
   type This = KBag
 
   def canEqual(that: Any) = that.isInstanceOf[KBag]
 
-  def copy(att: Attributes): KBag = this
+  def copy(att: Att): KBag = this
 
   def newBuilder: Builder[K, KBag] = new AssocBuilder[K, List[K], KBag](ListBuffer()) mapResult { new KBag(klabel, _, att) }
 
@@ -161,8 +161,8 @@ Given an item 'foo(1, 2, 3, 4), there are several ways to match it:
 //  type This = KSet
 //
 //  def canEqual(that: Any) = that.isInstanceOf[KSet]
-//  def att = Attributes()
-//  def copy(att: Attributes): KSet = this
+//  def att = Att()
+//  def copy(att: Att): KSet = this
 //  def matchAll(pattern: K, condition: K = KBoolean(true))(implicit rest: Disjunction = EqualsEquivalence): Set[Map[KVariable, K]] = ???
 //
 //  val delegate = content

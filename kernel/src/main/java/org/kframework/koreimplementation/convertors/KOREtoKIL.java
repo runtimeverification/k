@@ -2,7 +2,7 @@
 
 package org.kframework.koreimplementation.convertors;
 
-import org.kframework.attributes.Attributes;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.kil.Attribute;
@@ -411,9 +411,9 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         return org.kframework.kil.Sort.of(sort.name());
     }
 
-    public org.kframework.kil.Attributes convertAttributes(Attributes koreAttributes) {
+    public org.kframework.kil.Attributes convertAttributes(Att koreAtt) {
         org.kframework.kil.Attributes kilAttributes = new org.kframework.kil.Attributes();
-        koreAttributes.stream().forEach(a -> {
+        koreAtt.stream().forEach(a -> {
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();

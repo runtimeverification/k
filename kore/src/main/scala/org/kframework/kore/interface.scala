@@ -3,7 +3,7 @@ package org.kframework.kore
 import org.kframework.attributes._
 
 trait K {
-  def att: Attributes
+  def att: Att
 }
 
 trait KItem extends K

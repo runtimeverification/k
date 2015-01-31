@@ -36,8 +36,8 @@ trait KProduct extends Product with Node {
 
   val children: Iterator[K] = productIterator collect { case x: K => x }
 
-  override def copy(att: Attributes): This = {
-    val children = productIterator map { case x: K => x; case att: Attributes => att }
+  override def copy(att: Att): This = {
+    val children = productIterator map { case x: K => x; case att: Att => att }
 
     Reflection.invokeMethod(companion, "apply", Seq(children.toSeq)).asInstanceOf[This]
   }
@@ -85,7 +85,7 @@ trait CanBuildKCollection {
 
   def apply(l: K*): This = (canBuildFrom.apply() ++= l).result
 
-  def newBuilder(att: Attributes = Attributes()): Builder[K, This]
+  def newBuilder(att: Att = Att()): Builder[K, This]
 
   protected val fromList = apply _
 

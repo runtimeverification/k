@@ -18,7 +18,7 @@
 //  @Test def simple() {
 //    assertEquals(1: K, Up(1))
 //    assertEquals('List(1, 2, 3), Up(List[Int](1, 2, 3)))
-//    assertEquals('Definition('Set('Require(KToken(Sort("File"), "foo.k"))), 'Set(), 'Attributes('Set())),
+//    assertEquals('Definition('Set('Require(KToken(Sort("File"), "foo.k"))), 'Set(), 'Att('Set())),
 //      Up(Definition(Set(Require(new File("foo.k"))), Set())))
 //
 //    //    assertEquals('Foo(5), Meta(Foo(5)))

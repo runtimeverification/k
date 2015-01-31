@@ -19,16 +19,16 @@ object Constructors {
     definition.Definition(requires, modules)
 
   def Require(file: java.io.File) = definition.Require(file)
-  def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: Attributes) =
+  def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: Att) =
     definition.Module(name, imports, sentences, att)
 
   def SyntaxSort(sort: Sort) = definition.SyntaxSort(sort)
-  def SyntaxSort(sort: Sort, att: Attributes) = definition.SyntaxSort(sort, att)
+  def SyntaxSort(sort: Sort, att: Att) = definition.SyntaxSort(sort, att)
 
-  def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Attributes())
-  def Production(sort: Sort, items: Seq[ProductionItem], att: Attributes) = definition.Production(sort, items, att)
+  def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Att())
+  def Production(sort: Sort, items: Seq[ProductionItem], att: Att) = definition.Production(sort, items, att)
   def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
-  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes) = definition.Production(klabel, sort, items, att)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Att) = definition.Production(klabel, sort, items, att)
 
   def Terminal(s: String) = definition.Terminal(s)
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort)
@@ -37,23 +37,23 @@ object Constructors {
   def Tag(s: String) = definition.Tag(s)
 
   def SyntaxPriority(priorities: Seq[Set[Tag]]) = definition.SyntaxPriority(priorities)
-  def SyntaxPriority(priorities: Seq[Set[Tag]], att: Attributes) = definition.SyntaxPriority(priorities, att)
+  def SyntaxPriority(priorities: Seq[Set[Tag]], att: Att) = definition.SyntaxPriority(priorities, att)
 
   def SyntaxAssociativity(assoc: definition.Associativity.Value, tags: Set[Tag]) = definition.SyntaxAssociativity(assoc, tags)
-  def SyntaxAssociativity(assoc: definition.Associativity.Value, tags: Set[Tag], att: Attributes) = definition.SyntaxAssociativity(assoc, tags, att)
+  def SyntaxAssociativity(assoc: definition.Associativity.Value, tags: Set[Tag], att: Att) = definition.SyntaxAssociativity(assoc, tags, att)
 
   def Context(content: K, requires: K) = definition.Context(content, requires)
-  def Context(content: K, requires: K, att: Attributes) = definition.Context(content, requires, att)
+  def Context(content: K, requires: K, att: Att) = definition.Context(content, requires, att)
 
-  def Rule(body: K, requires: K, ensures: K, att: Attributes) = definition.Rule(body, requires, ensures, att)
-  def Rule(body: K, requires: K, ensures: K) = definition.Rule(body, requires, ensures, Attributes())
+  def Rule(body: K, requires: K, ensures: K, att: Att) = definition.Rule(body, requires, ensures, att)
+  def Rule(body: K, requires: K, ensures: K) = definition.Rule(body, requires, ensures, Att())
 
-  def Bubble(sentenceType: String, content: String, att: Attributes) =
+  def Bubble(sentenceType: String, content: String, att: Att) =
     definition.Bubble(sentenceType, content, att)
 
   def Associativity = definition.Associativity;
 
   // EXTRA
 
-  def Configuration(body: K, ensures: K, att: Attributes) = definition.Configuration(body, ensures, att)
+  def Configuration(body: K, ensures: K, att: Att) = definition.Configuration(body, ensures, att)
 }

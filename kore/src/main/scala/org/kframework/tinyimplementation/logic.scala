@@ -23,28 +23,28 @@ trait Equals extends Proposition with Predicate {
 }
 
 object Equals {
-  def apply(left: K, right: K, att: Attributes = Attributes()): Equals = (left, right) match {
+  def apply(left: K, right: K, att: Att = Att()): Equals = (left, right) match {
     case (left: KVariable, right: KVariable) => throw new UnsupportedOperationException("We do not support direct equality of variables yet.")
     case (left: KVariable, right) if right.find(x => x.isInstanceOf[KVariable]) == Set() => Binding(left, right, att)
     case (left, right: KVariable) if !left.isInstanceOf[KVariable] => apply(left, right, att)
     case (left, right) => SimpleEquals(right, left, att)
   }
 
-  def unapply(e: Equals): Option[(K, K, Attributes)] = e match {
+  def unapply(e: Equals): Option[(K, K, Att)] = e match {
     case Binding(left, right, att) => Some(left, right, att)
     case SimpleEquals(left, right, att) => Some(left, right, att)
   }
 }
 
 
-case class SimpleEquals(left: K, right: K, att: Attributes = Attributes()) extends Equals with KProduct {
+case class SimpleEquals(left: K, right: K, att: Att = Att()) extends Equals with KProduct {
   def matchAll(k: K)(implicit rest: Theory): Or = ???
 
   override type This = SimpleEquals
 
 }
 
-case class Binding(variable: KVariable, value: K, att: Attributes = Attributes()) extends Equals with KProduct {
+case class Binding(variable: KVariable, value: K, att: Att = Att()) extends Equals with KProduct {
   val left = variable
   val right = value
   override type This = Binding
@@ -123,10 +123,10 @@ object Not {
   }
 }
 
-case class Not(predicate: Predicate, att: Attributes = Attributes()) extends Predicate with Node {
+case class Not(predicate: Predicate, att: Att = Att()) extends Predicate with Node {
   override type This = Not
 
-  override def copy(att: Attributes): This = Not(predicate, att)
+  override def copy(att: Att): This = Not(predicate, att)
 
   override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
 
@@ -159,7 +159,7 @@ object And {
     Some(and.predicates.toSeq ++ (and.bindings map { case (k, v) => Binding(k, v) }))
 }
 
-case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Att = Att()) extends KAbstractCollection with Proposition {
 
   // invariant: a bound KVariable will not appear in predicates
   //  for (p <- predicates;
@@ -200,7 +200,7 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Att
 
   override def delegate: Iterable[K] = predicates ++ (bindings map { case (k, v) => Binding(k, v) })
 
-  override def copy(att: Attributes): This = ???
+  override def copy(att: Att): This = ???
 
   override def matchAll(k: K, sideConditions: Proposition = True)(implicit theory: Theory): Or = ???
 
@@ -213,7 +213,7 @@ case class And(predicates: Set[Predicate], bindings: Map[KVariable, K], att: Att
   }
 }
 
-case class Or(conjunctions: Set[And], att: Attributes = Attributes()) extends KAbstractCollection with Proposition {
+case class Or(conjunctions: Set[And], att: Att = Att()) extends KAbstractCollection with Proposition {
   def or(other: Or)(implicit theory: Theory): Or = Or(this, other)
 
 
@@ -235,7 +235,7 @@ case class Or(conjunctions: Set[And], att: Attributes = Attributes()) extends KA
 
   override def delegate: Iterable[K] = conjunctions
 
-  override def copy(att: Attributes): This = Or(conjunctions, att)
+  override def copy(att: Att): This = Or(conjunctions, att)
 
   override def matchAll(k: K, sideConditions: Proposition)(implicit theory: Theory): Or = ???
 

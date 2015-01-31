@@ -92,7 +92,7 @@ class TestRewriting {
 
   @Test
   def testKLabelMatch() {
-    assertEquals(Set('foo(4)), 'foo(4, 4).searchFor(KRewrite(KApply(X, KList(4, 4)), KApply(X, KList(4)), Attributes())))
+    assertEquals(Set('foo(4)), 'foo(4, 4).searchFor(KRewrite(KApply(X, KList(4, 4)), KApply(X, KList(4)), Att())))
   }
 
   @Test
