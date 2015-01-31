@@ -44,20 +44,20 @@ trait KApp extends kore.KApply with KCollection {
 
 case class KVar(name: String, att: Att = Att()) extends kore.KVariable
 
-case class KToken(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with Label[KToken] {
-  override type This = KToken
-  override def label: Label[KToken] = this
+case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with Label[KTok] {
+  override type This = KTok
+  override def label: Label[KTok] = this
   override def name: String = s + ":" + sort
-  def apply(l: Seq[K], att: Att): This = { assert(l.size == 0); KToken(sort, s, att) }
-  override def copy(att: Att): This = KToken(sort, s, att)
+  def apply(l: Seq[K], att: Att): This = { assert(l.size == 0); KTok(sort, s, att) }
+  override def copy(att: Att): This = KTok(sort, s, att)
 }
 
-class RegularKApply(val label: RegularKApplyLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
-  override type This = RegularKApply
+class RegularKApp(val label: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
+  override type This = RegularKApp
 }
 
-class AssocKApply(val label: AssocKApplyLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
-  override type This = AssocKApply
+class AssocKApp(val label: AssocKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
+  override type This = AssocKApp
 }
 
 class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KCollection {
@@ -86,14 +86,14 @@ trait KCollectionLabel[This <: K] extends Label[This] {
   }
 }
 
-case class RegularKApplyLabel(name: String, att: Att) extends KCollectionLabel[RegularKApply] {
-  def newBuilder(att: Att): mutable.Builder[K, RegularKApply] =
-    ListBuffer() mapResult { new RegularKApply(this, _, att) }
+case class RegularKAppLabel(name: String, att: Att) extends KCollectionLabel[RegularKApp] {
+  def newBuilder(att: Att): mutable.Builder[K, RegularKApp] =
+    ListBuffer() mapResult { new RegularKApp(this, _, att) }
 }
 
-case class AssocKApplyLabel(name: String, att: Att) extends KCollectionLabel[AssocKApply] {
-  def newBuilder(att: Att): mutable.Builder[K, AssocKApply] =
-    new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new AssocKApply(this, _, att) }
+case class AssocKAppLabel(name: String, att: Att) extends KCollectionLabel[AssocKApp] {
+  def newBuilder(att: Att): mutable.Builder[K, AssocKApp] =
+    new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new AssocKApp(this, _, att) }
 }
 
 object KSeq extends KCollectionLabel[KSeq] {
