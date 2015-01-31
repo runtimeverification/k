@@ -27,6 +27,14 @@ object Unapply {
     def unapply(kseq: KSequence): Option[Seq[K]] = Some(kseq.items.asScala.toSeq)
   }
 
+  object KRewrite {
+    def unapply(krw: KRewrite): Option[(K, K)] = Some(krw.left, krw.right)
+  }
+
+  object KVariable {
+    def unapply(v: KVariable): Option[String] = Some(v.name)
+  }
+
   object KList {
 
     import scala.collection.JavaConverters._
