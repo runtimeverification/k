@@ -4,7 +4,6 @@ package org.kframework.parser.concrete2kore;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.kframework.definition.SyntaxProduction;
 import org.kframework.parser.*;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.util.Either;
@@ -20,11 +19,11 @@ import static org.kframework.Collections.*;
 public class TreeCleanerVisitorTest {
 
     TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
-    SyntaxProduction fooProduction = SyntaxProduction(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
+    org.kframework.definition.Production fooProduction = Production(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
     Constant foo = Constant.apply("foo", fooProduction, Optional.empty());
     Constant bar = Constant.apply("bar", fooProduction, Optional.empty());
 
-    SyntaxProduction noKLabelProduction = SyntaxProduction(Sort("NoKLabelProd"), Seq(NonTerminal(Sort("Foo")), NonTerminal(Sort("Foo"))));
+    org.kframework.definition.Production noKLabelProduction = Production(Sort("NoKLabelProd"), Seq(NonTerminal(Sort("Foo")), NonTerminal(Sort("Foo"))));
 
     @Test
     public void testConstant() throws Exception {

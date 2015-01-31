@@ -78,13 +78,17 @@ KListToString with KORE {
 
   def iterable: Iterable[K] = delegate
 
-  def items: java.lang.Iterable[kore.K] = iterable.asJava.asInstanceOf[java.lang.Iterable[kore.K]]
+  def items: java.util.List[kore.K] = iterable.toList.asJava.asInstanceOf[java.util.List[kore.K]]
+
+  override def size = items.size
 }
 
 trait KApply extends kore.KApply with KCollection {
   def klabel: KLabel
 
   def klist: KList
+
+  override def size = klist.size
 }
 
 object KApply {
@@ -143,9 +147,9 @@ case class KSequence(val ks: List[K], val att: Attributes = Attributes())
 
   def canEqual(that: Any) = that.isInstanceOf[KSequence]
 
-  override def left: K = ks.head
+  override def size = items.size
 
-  override def right: K = KSequence(ks.tail, att)
+  def items: java.util.List[kore.K] = delegate.asJava.asInstanceOf[java.util.List[kore.K]]
 }
 
 case class KVariable(name: String, att: Attributes = Attributes())
@@ -170,7 +174,7 @@ case class KRewrite(left: K, right: K, att: Attributes = Attributes())
   }
 }
 
-case class InjectedKLabel(klabel: KLabel) extends KItem with InjectedKLabelPattern with Leaf {
+case class InjectedKLabel(klabel: KLabel) extends KItem with InjectedKLabelPattern with Leaf with kore.InjectedKLabel {
   type This = InjectedKLabel
 
   def att() = Attributes()

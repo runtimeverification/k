@@ -2,18 +2,21 @@
 
 package org.kframework.tinyimplementation
 
-import org.kframework._
-import scala.Enumeration
-import org.kframework.definition.Associativity
-import java.lang.invoke.MethodType
-import java.lang.invoke.MethodHandles
-import collection.JavaConverters._
-import org.kframework.builtin.Sorts
 import org.kframework.attributes._
-import org.kframework.kore._
-import org.kframework.kore.{ADTConstructors => cons}
+import org.kframework.builtin.Sorts
+import org.kframework.definition.Associativity
+import org.kframework.kore.{ADTConstructors => cons, _}
+
+import scala.collection.JavaConverters._
 
 object Up extends (Any => K) {
+
+  implicit def symbolWithKApply(s: Symbol) = new {
+    def apply(ks: K*): KApply = apply(ks.toList, Attributes())
+    def apply(l: List[K], att: Attributes = Attributes()): KApply = {
+      cons.KApply(cons.KLabel(s.name), cons.KList(l.asJava), att)
+    }
+  }
 
   def apply(o: Any): K = {
     o match {
@@ -23,10 +26,10 @@ object Up extends (Any => K) {
       // Primitives
       case o: Int => cons.KToken(Sorts.Int, o.toString, Attributes())
       case o: String => cons.KToken(Sorts.KString, o.toString, Attributes())
-      case o: Boolean => KToken(Sort("Boolean"), o.toString)
+      case o: Boolean => cons.KToken(cons.Sort("Boolean"), o.toString, Attributes())
 
-      case o: Associativity.Value => KToken(Sort("Associativity"), o.toString)
-      case o: java.io.File => KToken(Sort("File"), o.toString)
+      case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Attributes())
+      case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Attributes())
 
       // Already K
       case o: K => o
@@ -36,8 +39,8 @@ object Up extends (Any => K) {
       // Fallback to reflection
       case o: Product =>
         val elements = o.productIterator.toList
-        val klist = elements map apply
-        KApply(KLabel(processName(o.getClass().getName)), klist,
+        val klist = cons.KList(elements map apply asJava)
+        cons.KApply(cons.KLabel(processName(o.getClass().getName)), klist,
           Attributes() +(ClassFromUp.toString(), o.getClass().getName()))
     }
   }

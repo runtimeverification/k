@@ -2,12 +2,8 @@
 
 package org.kframework
 
-import scala.collection.mutable.Builder
-import collection.JavaConverters._
-import java.util.stream.StreamSupport
-import scala.collection.mutable.ListBuffer
-import koreimplementation._
-import org.kframework.tinyimplementation._
+import scala.collection.JavaConverters._
+import scala.collection.mutable.{Builder, ListBuffer}
 
 trait Indexed[I, T] {
   def apply(i: I): T = get(i).get
@@ -36,7 +32,7 @@ trait Collection[T] {
 
   def iterator: Iterator[T] = iterable.iterator
   def list: java.util.List[T] = iterable.toList.asJava
-  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
+//  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
 
   def isEmpty: Boolean = size == 0
   def size: Int = { var s = 0; foreach { x => s += 1 }; s }

@@ -3,10 +3,11 @@
 package org.kframework.tinyimplementation.builtin
 
 import org.kframework.AssocBuilder
+import org.kframework.attributes._
+import org.kframework.kore.Sort
 import org.kframework.koreimplementation._
 import org.kframework.tinyimplementation.TrueAndFalse._
 import org.kframework.tinyimplementation._
-import org.kframework.attributes._
 
 import scala.collection.mutable.{Builder, ListBuffer}
 

@@ -5,6 +5,7 @@ import org.kframework.koreimplementation._
 import org.kframework.tinyimplementation.TrueAndFalse._
 import org.kframework.tinyimplementation.builtin.KBag
 import org.kframework.tinyimplementation.builtin.KInt._
+import org.kframework.attributes._
 
 class TestPatternMatching {
 

@@ -16,7 +16,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
-import org.kframework.koreimplementation.K;
+import org.kframework.kore.K;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;

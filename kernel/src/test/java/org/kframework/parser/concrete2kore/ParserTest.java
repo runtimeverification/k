@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
-import org.kframework.koreimplementation.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.parser.*;
@@ -726,7 +726,7 @@ public class ParserTest {
         PrimitiveState minus = new RegExState("Minus-State", expNt, Pattern.compile("-", Pattern.LITERAL), null);
         RuleState deleteToken = new RuleState("Minus-Delete", expNt, new DeleteRule(1, true));
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
-        Production p1 = SyntaxProduction(EXP_SORT, Seq(Terminal("-"), NonTerminal(EXP_SORT)), Attributes().add("klabel", "'-_"));
+        Production p1 = Production(EXP_SORT, Seq(Terminal("-"), NonTerminal(EXP_SORT)), Attributes().add("klabel", "'-_"));
         RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1));
         expNt.entryState.next.add(minus);
         minus.next.add(deleteToken);
@@ -742,7 +742,7 @@ public class ParserTest {
          */
         NonTerminal expsNt = new NonTerminal("Exps");
         NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt, false);
-        Production p2 = SyntaxProduction(Sort("Exps"), Seq(NonTerminal(EXP_SORT)), Attributes().add("klabel", "'_,_"));
+        Production p2 = Production(Sort("Exps"), Seq(NonTerminal(EXP_SORT)), Attributes().add("klabel", "'_,_"));
         PrimitiveState separator = new RegExState("Sep-State", expsNt, Pattern.compile(",", Pattern.LITERAL), null);
         RuleState deleteToken2 = new RuleState("Separator-Delete", expsNt, new DeleteRule(1, true));
         RuleState labelList = new RuleState("RuleStateExps", expsNt, new WrapLabelRule(p2));
@@ -779,7 +779,7 @@ public class ParserTest {
     }
 
     public static Production prod(Sort sort, ProductionItem... pi) {
-        return SyntaxProduction(sort, immutable(Arrays.<ProductionItem>asList(pi)));
+        return Production(sort, immutable(Arrays.<ProductionItem>asList(pi)));
     }
 
     public static TermCons kapp(String label, Term ... terms) {

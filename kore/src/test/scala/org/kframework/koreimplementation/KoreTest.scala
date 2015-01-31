@@ -1,6 +1,7 @@
 package org.kframework.koreimplementation
 
 import org.kframework.builtin.Sorts
+import org.kframework.attributes._
 
 class KoreTest {
   import org.junit._

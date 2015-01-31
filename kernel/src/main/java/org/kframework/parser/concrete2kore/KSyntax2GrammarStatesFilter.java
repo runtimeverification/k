@@ -4,7 +4,7 @@ package org.kframework.parser.concrete2kore;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.kframework.koreimplementation.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;

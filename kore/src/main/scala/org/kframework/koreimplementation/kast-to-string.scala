@@ -9,11 +9,6 @@ trait KApplyToString {
   override def toString() = klabel.toString + "(" + mkString(",") + ")" + att.postfixString
 }
 
-trait SortToString {
-  self: Sort =>
-  override def toString = name
-}
-
 trait KTokenToString {
   self: KToken =>
   override def toString = "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")" + att.postfixString

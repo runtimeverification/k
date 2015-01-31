@@ -32,7 +32,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.koreimplementation.Attributes;
+import org.kframework.attributes.Attributes;
 import org.kframework.definition.*;
 
 import scala.Enumeration.Value;
@@ -179,7 +179,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
 
-        org.kframework.koreimplementation.Sort sort = apply(s.getDeclaredSort().getSort());
+        org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getSort());
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
@@ -225,9 +225,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                         }
                     }
 
-                    org.kframework.koreimplementation.Attributes attrs = inner.convertAttributes(p);
+                    org.kframework.attributes.Attributes attrs = inner.convertAttributes(p);
 
-                    org.kframework.definition.SyntaxProduction prod = SyntaxProduction(
+                    org.kframework.definition.Production prod = Production(
                             sort,
                             immutable(items),
                             attrs.add(KILtoInnerKORE.PRODUCTION_ID,
@@ -241,10 +241,10 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-            org.kframework.koreimplementation.Sort sort, Production p, UserList userList) {
+            org.kframework.kore.Sort sort, Production p, UserList userList) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
-        org.kframework.koreimplementation.Sort elementSort = apply(userList.getSort());
+        org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
         // TODO: we're splitting one syntax declaration into three, where to put
         // attributes
@@ -252,24 +252,24 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.koreimplementation.Attributes attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Attributes attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
-        org.kframework.definition.SyntaxProduction prod1, prod2, prod3;
+        org.kframework.definition.Production prod1, prod2, prod3;
 
         String kilProductionId = "" + System.identityHashCode(p);
 
         // lst ::= lst sep lst
         Attributes attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
                 kilProductionId);
-        prod1 = SyntaxProduction(sort,
+        prod1 = Production(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                 attrsWithKilProductionId);
 
         // lst ::= elem
-        prod2 = SyntaxProduction(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
 
         // lst ::= .UserList
-        prod3 = SyntaxProduction(sort, Seq(Terminal("." + sort.toString())),
+        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
                 attrsWithKilProductionId);
 
         res.add(prod1);
@@ -279,7 +279,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         }
     }
 
-    public org.kframework.koreimplementation.Sort apply(org.kframework.kil.Sort sort) {
+    public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
         return Sort(sort.getName());
     }
 }

@@ -4,14 +4,11 @@ package org.kframework.koreimplementation
 
 ;
 
-import java.util.List
-import scala.collection.Seq
-import collection.JavaConverters._
 import org.kframework._
-import org.kframework.Collector
-import org.kframework.CombinerFromBuilder
-import org.kframework.tinyimplementation.builtin
-import org.kframework.attributes
+import org.kframework.attributes.Attributes
+import org.kframework.kore.Sort
+
+import scala.collection.JavaConverters._
 
 /**
  *
@@ -22,13 +19,13 @@ import org.kframework.attributes
  *
  */
 
-object Constructors {
-  def Attributes(ks: Set[K]) = attributes.Attributes(ks)
+object Constructors extends kore.Constructors {
+  def Attributes(ks: Set[K]) = attributes.Attributes(ks.toSeq: _*)
   @annotation.varargs def Attributes(ks: K*) = attributes.Attributes(ks: _*)
 
   //  @annotation.varargs def KBag(ks: K*) = koreimplementation.KBag(ks)
 
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = Location(startLine, startColumn, endLine, endColumn)
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine, startColumn, endLine, endColumn)
 
   //  def KBag(ks: KList) = koreimplementation.KBag(ks);
 
@@ -38,7 +35,10 @@ object Constructors {
 
   @annotation.varargs def KList(ks: K*): KList = koreimplementation.KList(ks)
 
-  def KList(ks: java.lang.Iterable[K]): KList = KList(ks.asScala.toSeq: _*)
+  //  def KList(ks: java.lang.Iterable[K]): KList =
+  override def KList[KK <: kore.K](ks: java.util.List[KK]): koreimplementation.KList =
+    koreimplementation.KList(ks.asScala.map(convert))
+
 
   def KApply(klabel: KLabel, klist: KList, att: attributes.Attributes) = koreimplementation.KApply(klabel, klist, att)
 
@@ -53,7 +53,8 @@ object Constructors {
     koreimplementation.KVariable(name, Attributes())
   }
 
-  def InjectedKLabel(l: KLabel) = koreimplementation.InjectedKLabel(l)
+  def InjectedKLabel(l: kore.KLabel, att: Attributes) = koreimplementation.InjectedKLabel(convert(l))
+
   def InjectedKList(l: KList) = koreimplementation.InjectedKList(l)
 
   @annotation.varargs def KSequence(ks: K*) = koreimplementation.KSequence(ks: _*)
@@ -66,11 +67,34 @@ object Constructors {
 
   //  def KInt(n: Int) = koreimplementation.KInt(n)
 
-  def stream(c: KCollection) = org.kframework.Collections.stream(c);
+//  def stream(c: KCollection) = org.kframework.Collections.stream(c);
 
   def toKList: Collector[K, KList] =
     Collector(() => new CombinerFromBuilder(koreimplementation.KList.newBuilder()))
 
   def toKSequence: Collector[K, KSequence] =
     Collector(() => new CombinerFromBuilder(koreimplementation.KSequence.newBuilder()))
+
+
+  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Attributes): kore.KApply = ???
+  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Attributes): kore.KSequence = ???
+  override def KRewrite(left: kore.K, right: kore.K, att: Attributes): kore.KRewrite = ???
+
+  def convert(klist: kore.KList): koreimplementation.KList = klist match {
+    case l: koreimplementation.KList => l
+    case l => koreimplementation.KList(l.items.asScala.map(convert))
+  }
+
+  def convert(label: kore.KLabel): koreimplementation.KLabel = label match {
+    case l: koreimplementation.KLabel => l
+    case l => KLabel(l.name)
+  }
+
+  def convert(k: kore.K): koreimplementation.K = k match {
+    case k: koreimplementation.K => k
+    case k => k match {
+      case t@kore.Unapply.KApply(label, klist) => KApply(convert(label), KList(klist.asJava), t.att)
+      case t@kore.Unapply.KToken(sort, s) => KToken(sort, s, t.att)
+    }
+  }
 }

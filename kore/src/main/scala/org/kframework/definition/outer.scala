@@ -36,7 +36,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  val productionsFor: Map[KLabel, Set[Production]] = productions.groupBy(_.klabel) map {
+  val productionsFor: Map[KLabel, Set[Production]] = productions.collect({ case p if p.klabel != None => p }).groupBy(_.klabel.get) map {
     case (l, ps) => (l, ps)
   }
 
@@ -60,7 +60,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val definedSorts: Set[Sort] = productions map { _.sort }
 
   private lazy val subsortRelations = sentences flatMap {
-    case Production(_, endSort, items, _) =>
+    case Production(endSort, items, _) =>
       items collect { case NonTerminal(startSort) => (startSort, endSort) }
     case _ => Set()
   }
@@ -69,7 +69,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
-    case Production(_, _, items, _) =>
+    case Production(_, items, _) =>
       items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
     case _ => Set()
   }
@@ -122,17 +122,22 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
 //}
 
-object Production {
-  val kLabelAttribute = "klabel"
-}
-
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
 with SyntaxSortToString with OuterKORE {
   def items = Seq()
 }
 
-case class Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
-  extends Sentence with ProductionToString
+case class Production(sort: Sort, items: Seq[ProductionItem], att: Attributes)
+  extends Sentence with ProductionToString {
+  def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.ADTConstructors.KLabel(_) }
+}
+
+object Production {
+  def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes()): Production = {
+    Production(sort, items, att + ("#klabel" -> klabel.name))
+  }
+  val kLabelAttribute = "klabel"
+}
 
 // hooked but problematic, see kast-core.k
 
