@@ -183,7 +183,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private static String getSortAndFunctionDeclarations(Definition definition, Set<Variable> variables) {
         Set<Sort> sorts = new HashSet<>();
         List<Production> functions = new ArrayList<>();
-        for (Production production : definition.context().productions) {
+        for (Production production : definition.productions()) {
             String smtlib = production.getAttribute(Attribute.SMTLIB_KEY);
             if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(production);
@@ -480,7 +480,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
-        return builtinList.toK(context).accept(this);
+        return builtinList.toKore(context).accept(this);
     }
 
     @Override

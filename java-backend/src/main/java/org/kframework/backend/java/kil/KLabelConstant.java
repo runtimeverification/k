@@ -60,7 +60,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     private final boolean isListLabel;
 
-    private KLabelConstant(String label, ImmutableSet<Production> productions, Context context) {
+    private KLabelConstant(String label, ImmutableSet<Production> productions, Definition definition) {
         this.label = label;
         this.productions = productions;
 
@@ -117,16 +117,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isPattern = isPattern;
         this.smtlib = smtlib;
 
-        this.isListLabel = !context.listKLabels.get(label).isEmpty();
-    }
-
-    private KItem buildListTerminator(Context context) {
-        if (!context.listKLabels.get(label).isEmpty()) {
-            Production production = context.listKLabels.get(label).iterator().next();
-            String separator = production.getListDecl().getSeparator();
-            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
-        }
-        return null;
+        this.isListLabel = !definition.listLabelsOf(label).isEmpty();
     }
 
     /**
@@ -137,10 +128,10 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, Context context) {
-        ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
+    public static KLabelConstant of(String label, Definition definition) {
+        ImmutableSet<Production> productions = ImmutableSet.copyOf(definition.productionsOf(label));
         MapCache<String, KLabelConstant> trie = cache.get(productions, () -> new MapCache<>(new PatriciaTrie<>()));
-        return trie.get(label, () -> new KLabelConstant(label, productions, context));
+        return trie.get(label, () -> new KLabelConstant(label, productions, definition));
     }
 
     /**
@@ -199,8 +190,13 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * Returns the associated list terminator if this {@code KLabelConstant} is
      * a list label; otherwise, {@code null}.
      */
-    public KItem getListTerminator(Context context) {
-        return buildListTerminator(context);
+    public KItem getListTerminator(Definition definition) {
+        if (!definition.listLabelsOf(label).isEmpty()) {
+            Production production = definition.listLabelsOf(label).iterator().next();
+            String separator = production.getListDecl().getSeparator();
+            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
+        }
+        return null;
     }
 
     public String label() {

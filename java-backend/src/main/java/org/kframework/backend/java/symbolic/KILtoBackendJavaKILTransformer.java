@@ -286,7 +286,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _void)  {
-        BuiltinList.Builder builder = BuiltinList.builder();
+        BuiltinList.Builder builder = BuiltinList.builder(TermContext.of(globalContext));
         for (org.kframework.kil.Term element : node.elementsLeft()) {
             builder.addItem((Term) this.visitNode(element));
         }
@@ -301,7 +301,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.SetBuiltin node, Void _void)  {
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(TermContext.of(globalContext));
         for (org.kframework.kil.Term element : node.elements()) {
             builder.add((Term) this.visitNode(element));
         }
@@ -313,7 +313,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.MapBuiltin node, Void _void)  {
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(TermContext.of(globalContext));
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
             builder.put(

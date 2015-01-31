@@ -4,13 +4,14 @@ package org.kframework.backend.java.kil;
 import java.util.List;
 
 
-public interface InternalRepresentationToK {
+public interface CollectionInternalRepresentation extends KItemRepresentation {
     /**
-     * Returns a KORE (KLabel/KList) representation of this backend object.
+     * Returns a KORE (KLabel/KList) representation of this collection object.
      * The returned representation is not unique (due to associativity/commutativity).
      * {@link Term#evaluate} is the inverse operation.
      */
-    public default Term toK(TermContext context) {
+    @Override
+    public default Term toKore(TermContext context) {
         List<Term> components = getKComponents(context);
 
         if (components.isEmpty()) {

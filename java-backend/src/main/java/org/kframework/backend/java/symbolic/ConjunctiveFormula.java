@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.base.Stopwatch;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -9,7 +10,7 @@ import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.InternalRepresentationToK;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -43,9 +44,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements InternalRepresentationToK {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     public static final String SEPARATOR = " /\\ ";
+    public static final Stopwatch cfsw = Stopwatch.createUnstarted();
+    private boolean nested;
 
     public static ConjunctiveFormula of(TermContext context) {
         return new ConjunctiveFormula(
@@ -262,6 +265,10 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
      */
     public ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification) {
         assert !isFalse();
+        nested = cfsw.isRunning();
+        if (!nested) {
+            cfsw.start();
+        }
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
@@ -355,6 +362,9 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
             equalities = pendingEqualities;
         } while (change);
 
+        if (!nested) {
+            cfsw.stop();
+        }
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
     }
 
@@ -363,6 +373,9 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             Equality equality) {
+        if (!nested) {
+            cfsw.stop();
+        }
         if (RuleAuditing.isAuditBegun()) {
             System.err.println("Unification failure: " + equality.leftHandSide()
                     + " does not unify with " + equality.rightHandSide());
@@ -481,7 +494,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                 continue;
             }
 
-            if (context.definition().context().globalOptions.debug) {
+            if (context.definition().globalOptions().debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
@@ -489,7 +502,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -501,7 +514,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Split on " + condition);
                 }
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
@@ -510,12 +523,12 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
             }
 
             if (!impliesSMT(left,right, rightOnlyVariables)) {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.definition().context().globalOptions.debug) {
+                if (context.definition().globalOptions().debug) {
                     System.err.println("Proved!");
                 }
             }
@@ -604,13 +617,13 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
                 Stream.concat(
                         substitution.equalities(context).stream().map(e -> e.toK(context)),
                         equalities.stream().map(e -> e.toK(context))),
-                disjunctions.stream().map(d -> d.toK(context)));
+                disjunctions.stream().map(d -> d.toKore(context)));
         return stream.collect(Collectors.toList());
     }
 
     @Override
     public KLabel constructorLabel(TermContext context) {
-        return KLabelConstant.of("'_andBool_", context.definition().context());
+        return KLabelConstant.of("'_andBool_", context.definition());
     }
 
     @Override
@@ -644,7 +657,7 @@ public class ConjunctiveFormula extends Term implements InternalRepresentationTo
 
     @Override
     public String toString() {
-        return toK(context).toString();
+        return toKore(context).toString();
     }
 
     @Override

@@ -52,7 +52,6 @@ public class SMTOperations {
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
-        assert left.termContext().definition().context() == right.termContext().definition().context();
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
                 return z3.checkQuery(

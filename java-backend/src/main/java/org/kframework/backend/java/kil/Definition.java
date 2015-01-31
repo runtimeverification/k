@@ -1,14 +1,20 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.SetMultimap;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.KRunOptions;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
@@ -23,6 +29,7 @@ import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 
@@ -34,6 +41,39 @@ import com.google.inject.Inject;
  */
 public class Definition extends JavaSymbolicObject {
 
+    private static class DefinitionData {
+        public final Subsorts subsorts;
+        public final Set<Sort> builtinSorts;
+        public final Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts;
+        public final SetMultimap<String, Production> productions;
+        public final SetMultimap<String, Production> listKLabels;
+        public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
+        public final ConfigurationStructureMap configurationStructureMap;
+        public final GlobalOptions globalOptions;
+        public final KRunOptions kRunOptions;
+
+        private DefinitionData(
+                Subsorts subsorts,
+                Set<Sort> builtinSorts,
+                Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts,
+                SetMultimap<String, Production> productions,
+                SetMultimap<String, Production> listKLabels,
+                Map<org.kframework.kil.Sort, String> freshFunctionNames,
+                ConfigurationStructureMap configurationStructureMap,
+                GlobalOptions globalOptions,
+                KRunOptions kRunOptions) {
+            this.subsorts = subsorts;
+            this.builtinSorts = builtinSorts;
+            this.dataStructureSorts = dataStructureSorts;
+            this.productions = productions;
+            this.listKLabels = listKLabels;
+            this.freshFunctionNames = freshFunctionNames;
+            this.configurationStructureMap = configurationStructureMap;
+            this.globalOptions = globalOptions;
+            this.kRunOptions = kRunOptions;
+        }
+    }
+
     public static final Set<Sort> TOKEN_SORTS = ImmutableSet.of(
             Sort.BOOL,
             Sort.INT,
@@ -44,20 +84,21 @@ public class Definition extends JavaSymbolicObject {
             Sort.SET,
             Sort.MAP);
 
-    private final List<Rule> rules;
-    private final List<Rule> macros;
+    private final List<Rule> rules = Lists.newArrayList();
+    private final List<Rule> macros = Lists.newArrayList();
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final List<Rule> patternFoldingRules = new ArrayList<>();
+
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
-    private transient Context context;
+
+    private final transient DefinitionData definitionData;
+
     private transient KExceptionManager kem;
-    private final Subsorts subsorts;
-    private final Set<Sort> tokenSorts;
-    private final Set<Sort> builtinSorts;
+
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
 
@@ -65,22 +106,36 @@ public class Definition extends JavaSymbolicObject {
 
     @Inject
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
-        this.context = context;
         this.indexingData = indexingData;
         this.kem = kem;
-        rules = new ArrayList<>();
-        macros = new ArrayList<>();
         kLabels = new HashSet<>();
         frozenKLabels = new HashSet<>();
 
-        subsorts = new Subsorts(context);
-        tokenSorts = Sort.of(context.getTokenSorts());
-
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
-        builder.addAll(tokenSorts); // [Bool, Int, Float, Char, String, List, Set, Map]
-        builder.addAll(TOKEN_SORTS); // e.g., [#String, #Int, Id, #Float]
-        builtinSorts = builder.build();
+        builder.addAll(Sort.of(context.getTokenSorts())); // e.g., [#String, #Int, Id, #Float]
+        builder.addAll(TOKEN_SORTS); // [Bool, Int, Float, Char, String, List, Set, Map]
+
+        definitionData = new DefinitionData(
+                new Subsorts(context),
+                builder.build(),
+                context.getDataStructureSorts(),
+                context.klabels,
+                context.listKLabels,
+                context.freshFunctionNames,
+                context.getConfigurationStructureMap(),
+                context.globalOptions,
+                context.krunOptions);
+    }
+
+    @Inject
+    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
+        this.indexingData = indexingData;
+        this.kem = kem;
+        kLabels = new HashSet<>();
+        frozenKLabels = new HashSet<>();
+
+        this.definitionData = definitionData;
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -140,32 +195,18 @@ public class Definition extends JavaSymbolicObject {
      * in building index;
      */
     public Set<Sort> builtinSorts() {
-        return builtinSorts;
-    }
-
-    /**
-     * @see Context#getTokenSorts()
-     */
-    public Set<Sort> tokenSorts() {
-        // TODO(YilongL): delegate to context.getTokenSorts() once all String representation of sorts are eliminated
-        // return context.getTokenSorts();
-        return tokenSorts;
+        return definitionData.builtinSorts;
     }
 
     public Set<Sort> allSorts() {
-        return subsorts.allSorts();
+        return definitionData.subsorts.allSorts();
     }
 
     public Subsorts subsorts() {
-        return subsorts;
-    }
-
-    public Context context() {
-        return context;
+        return definitionData.subsorts;
     }
 
     public void setContext(Context context) {
-        this.context = context;
     }
 
     public void setKem(KExceptionManager kem) {
@@ -236,4 +277,42 @@ public class Definition extends JavaSymbolicObject {
     public Map<KItem.CacheTableColKey, KItem.CacheTableValue> getSortCacheTable() {
         return sortCacheTable;
     }
+
+    // added from context
+    public Set<Production> productionsOf(String label) {
+        return definitionData.productions.get(label);
+    }
+
+    public Collection<Production> productions() {
+        return definitionData.productions.values();
+    }
+
+    public Set<Production> listLabelsOf(String label) {
+        return definitionData.listKLabels.get(label);
+    }
+
+    public ConfigurationStructureMap getConfigurationStructureMap() {
+        return definitionData.configurationStructureMap;
+    }
+
+    public DataStructureSort dataStructureSortOf(Sort sort) {
+        return definitionData.dataStructureSorts.get(sort.toFrontEnd());
+    }
+
+    public GlobalOptions globalOptions() {
+        return definitionData.globalOptions;
+    }
+
+    public KRunOptions kRunOptions() {
+        return definitionData.kRunOptions;
+    }
+
+    public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
+        return definitionData.freshFunctionNames;
+    }
+
+    public DefinitionData definitionData() {
+        return definitionData;
+    }
+
 }

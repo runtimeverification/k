@@ -48,7 +48,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean changed = false;
-        CellCollection.Builder builder = CellCollection.builder(context.definition().context());
+        CellCollection.Builder builder = CellCollection.builder(context.definition());
         for (CellCollection.Cell cell : cellCollection.cells().values()) {
             Term transformedContent = (Term) cell.content().accept(this);
             builder.put(cell.cellLabel(), transformedContent);
@@ -230,7 +230,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
-        BuiltinList.Builder builder = BuiltinList.builder();
+        BuiltinList.Builder builder = BuiltinList.builder(context);
         for (Term term : builtinList.elementsLeft()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
@@ -252,7 +252,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         boolean changed = false;
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(context);
 
         for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
@@ -296,7 +296,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         for(Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);

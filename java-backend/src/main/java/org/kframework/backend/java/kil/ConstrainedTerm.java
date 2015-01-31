@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.PatternExpander;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -196,15 +197,19 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             if (!candidate.isMatching(constrainedTerm.variableSet())) {
+                SymbolicRewriter.rsw.start();
                 if (solution.isFalse() || solution.checkUnsat()) {
+                    SymbolicRewriter.rsw.stop();
                     continue;
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion
                 solution = solution.expandPatterns(true).simplify();
                 if (solution.isFalse() || solution.checkUnsat()) {
+                    SymbolicRewriter.rsw.stop();
                     continue;
                 }
+                SymbolicRewriter.rsw.stop();
             }
 
             assert solution.disjunctions().isEmpty();

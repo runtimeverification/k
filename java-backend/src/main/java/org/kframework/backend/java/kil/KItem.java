@@ -52,7 +52,7 @@ import com.google.inject.Inject;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term {
+public class KItem extends Term implements KItemRepresentation {
 
     private final Term kLabel;
     private final Term kList;
@@ -79,7 +79,7 @@ public class KItem extends Term {
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator(termContext.definition().context());
+                return kLabelConstant.getListTerminator(termContext.definition());
             }
         }
 
@@ -207,7 +207,7 @@ public class KItem extends Term {
                     }
 
                     Sort childSort = term.sort();
-                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
+                    if (!definition.subsorts().isSubsortedEq(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()))) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -216,7 +216,7 @@ public class KItem extends Term {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
+                                && definition.subsorts().hasCommonSubsort(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()));
                     }
                     idx++;
                 }
@@ -269,6 +269,21 @@ public class KItem extends Term {
 
     public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
         return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+    }
+
+    @Override
+    public Term toKore(TermContext context) {
+        return this;
+    }
+
+    @Override
+    public Term kLabel(TermContext context) {
+        return kLabel;
+    }
+
+    @Override
+    public Term kList(TermContext context) {
+        return kList;
     }
 
     public static class KItemOperations {
