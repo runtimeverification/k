@@ -19,6 +19,8 @@ class ADTTest {
     assertEquals(X, KVar("X"))
     assertEquals(seqX2, KSeq(X, two))
     assertNotEquals(seqX2, KSeq(X, X, two))
+    assertEquals(KSeq(X, X, two), KSeq(X, KSeq(X, two)))
+    assertEquals(KSeq(X, X, two), KSeq(KSeq(X, X), two))
     assertEquals(foo, RegularKAppLabel("foo", Att())())
     assertNotEquals(foo, RegularKAppLabel("foo foo", Att())())
     assertNotEquals(foo, RegularKAppLabel("foo", Att())(X))

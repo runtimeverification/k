@@ -14,7 +14,6 @@ trait K extends kore.K {
 
   def label: Label[This]
   def att: Att
-  def copy(att: Att): This
   def canEqual(that: Any) = that match {
     case that: K => label == that.label && att == that.att
     case _ => false
@@ -24,7 +23,6 @@ trait K extends kore.K {
 trait KCollection extends kore.KCollection with Collection[K] with K {
   type This <: KCollection
   override def size = super[Collection].size
-  def copy(att: Att) = label.apply(iterable.toSeq, att)
   def iterable: Iterable[K] = children
   def children: Iterable[K]
   def label: KCollectionLabel[This]
@@ -97,6 +95,7 @@ trait SelfLabel[Self <: K] extends Label[Self] {
   self: K =>
   type This = Self
   def label = this
+  def copy(att: Att): This
   def apply(l: Seq[K], att: Att) = { assert(l.size == 0); copy(att) }
 }
 
