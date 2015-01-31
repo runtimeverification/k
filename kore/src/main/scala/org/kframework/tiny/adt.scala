@@ -65,12 +65,12 @@ class AssocKApp(val label: AssocKAppLabel, val children: Seq[K], val att: Att = 
 
 class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KCollection {
   type This = KSeq
-  def label: KSeq.type = KSeq
+  def label = KSeq
 }
 
 case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewrite with ProductOfKs {
   type This = KRewrite
-  def label: KCollectionLabel[This] = KRewrite
+  def label = KRewrite
 }
 
 case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel
@@ -94,8 +94,8 @@ trait KCollectionLabel[This <: K] extends Label[This] {
 object KRewrite extends KCollectionLabel[KRewrite] {
   def newBuilder(att: Att): mutable.Builder[K, KRewrite] =
     ListBuffer() mapResult { case List(left, right) => new KRewrite(left, right, att) }
-  def att: Att = Att()
-  def name: String = "=>"
+  val att = Att()
+  val name = "=>"
 }
 
 case class RegularKAppLabel(name: String, att: Att) extends KCollectionLabel[RegularKApp] {
@@ -109,7 +109,8 @@ case class AssocKAppLabel(name: String, att: Att) extends KCollectionLabel[Assoc
 }
 
 object KSeq extends KCollectionLabel[KSeq] {
-  def att: Att = Att()
-  def name: String = "~>"
+  val name = "~>"
+  val att = Att()
+
   def newBuilder(att: Att): mutable.Builder[K, KSeq] = new AssocBuilder[K, List[K], KSeq](ListBuffer()).mapResult { new KSeq(_, att) }
 }
