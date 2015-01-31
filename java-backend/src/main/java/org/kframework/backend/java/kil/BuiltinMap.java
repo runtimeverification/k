@@ -31,7 +31,6 @@ import com.google.common.collect.Lists;
  */
 public class BuiltinMap extends AssociativeCommutativeCollection {
 
-    public static final BuiltinMap EMPTY_MAP = (BuiltinMap) builder().build();
     private final UnmodifiableMap<Term, Term> entries;
 
     /**
@@ -41,19 +40,20 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             UnmodifiableMap<Term, Term> entries,
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
-            ImmutableMultiset<Variable> collectionVariables) {
-        super(collectionPatterns, collectionFunctions, collectionVariables);
+            ImmutableMultiset<Variable> collectionVariables,
+            TermContext context) {
+        super(collectionPatterns, collectionFunctions, collectionVariables, context);
         this.entries = entries;
     }
 
-    public static Term concatenate(Term... maps) {
-        Builder builder = new Builder();
+    public static Term concatenate(TermContext context, Term... maps) {
+        Builder builder = new Builder(context);
         builder.concatenate(maps);
         return builder.build();
     }
 
-    public static Term concatenate(Collection<Term> maps) {
-        Builder builder = new Builder();
+    public static Term concatenate(TermContext context, Collection<Term> maps) {
+        Builder builder = new Builder(context);
         builder.concatenate(maps);
         return builder.build();
     }
@@ -195,8 +195,8 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return components;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(TermContext context) {
+        return new Builder(context);
     }
 
     public static class Builder {
@@ -205,6 +205,11 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
         private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
         private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final TermContext context;
+
+        public Builder(TermContext context) {
+            this.context = context;
+        }
 
         public void put(Term key, Term value) {
             entries.put(key, value);
@@ -292,7 +297,8 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                     (UnmodifiableMap<Term, Term>) UnmodifiableMap.unmodifiableMap(entries),
                     patternsBuilder.build(),
                     functionsBuilder.build(),
-                    variablesBuilder.build());
+                    variablesBuilder.build(),
+                    context);
             return builtinMap.baseTerms().size() == 1 && builtinMap.concreteSize() == 0 ?
                     builtinMap.baseTerms().iterator().next() : builtinMap;
         }

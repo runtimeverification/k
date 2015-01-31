@@ -129,7 +129,7 @@ public class CellCollection extends Collection {
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             boolean hasMultiplicityCell) {
-        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
+        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;

@@ -113,7 +113,7 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(removeSet);
         return KItem.of(
                 KLabelConstant.of(MAP_REMOVE_ALL, context.definition().context()),
@@ -126,7 +126,7 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinMap.Builder builder = new BuiltinMap.Builder();
+        BuiltinMap.Builder builder = new BuiltinMap.Builder(context);
         builder.putAll(updateMap);
         return KItem.of(
                 KLabelConstant.of(MAP_UPDATE, context.definition().context()),
@@ -139,7 +139,7 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(removeSet);
         return KItem.of(
                 KLabelConstant.of(SET_REMOVE_ALL, context.definition().context()),

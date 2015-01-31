@@ -362,7 +362,8 @@ public class PatternMatcher extends AbstractMatcher {
             Substitution<Variable, Term> substitution = addFrameMatching(
                     builtinMap,
                     patternBuiltinMap,
-                    ps);
+                    ps,
+                    termContext);
             if (substitution != null) {
                 substitutions.add(substitution);
             }
@@ -384,14 +385,15 @@ public class PatternMatcher extends AbstractMatcher {
     private static Substitution<Variable, Term> addFrameMatching(
             BuiltinMap builtinMap,
             BuiltinMap patternBuiltinMap,
-            PartialSubstitution ps) {
+            PartialSubstitution ps,
+            TermContext context) {
         if (!patternBuiltinMap.collectionVariables().isEmpty()) {
             Variable frame = patternBuiltinMap.collectionVariables().iterator().next();
             if (ps.substitution.containsKey(frame)) {
                 return null;
             }
 
-            BuiltinMap.Builder builder = BuiltinMap.builder();
+            BuiltinMap.Builder builder = BuiltinMap.builder(context);
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
                 if (!ps.matched.contains(entry.getKey())) {
                     builder.put(entry.getKey(), entry.getValue());

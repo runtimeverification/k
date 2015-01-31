@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
  */
 public class BuiltinList extends Collection {
 
-    public static final BuiltinList EMPTY_LIST = (BuiltinList) builder().build();
+    public static final BuiltinList EMPTY_LIST = (BuiltinList) builder(null).build();
 
     private static enum BaseTermType {
         VARIABLE, FUNCTION, PATTERN, LIST;
@@ -49,9 +49,9 @@ public class BuiltinList extends Collection {
             ImmutableList<Term> baseTerms,
             ImmutableList<Term> elementsRight,
             ImmutableList<BaseTermType> baseTermTypes,
-            ImmutableList<Variable> listVariables
-            ) {
-        super(computeFrame(baseTerms), Kind.KITEM);
+            ImmutableList<Variable> listVariables,
+            TermContext context) {
+        super(computeFrame(baseTerms), Kind.KITEM, context);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
@@ -67,12 +67,17 @@ public class BuiltinList extends Collection {
         }
     }
 
-    private BuiltinList(ImmutableList<Term> elementsLeft) {
-        this(elementsLeft, ImmutableList.<Term>of(), ImmutableList.<Term>of(), ImmutableList.<BaseTermType>of(), ImmutableList.<Variable>of());
+    private BuiltinList(ImmutableList<Term> elementsLeft, TermContext context) {
+        this(elementsLeft,
+             ImmutableList.<Term>of(),
+             ImmutableList.<Term>of(),
+             ImmutableList.<BaseTermType>of(),
+             ImmutableList.<Variable>of(),
+             context);
     }
 
-    public static Term concatenate(Term... lists) {
-        Builder builder = new Builder();
+    public static Term concatenate(TermContext context, Term... lists) {
+        Builder builder = new Builder(context);
         builder.concatenate(lists);
         return builder.build();
     }
@@ -258,8 +263,8 @@ public class BuiltinList extends Collection {
         return components;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(TermContext context) {
+        return new Builder(context);
     }
 
     public static class BaseTerm {
@@ -352,6 +357,11 @@ public class BuiltinList extends Collection {
         private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<Variable> listVariablesBuilder = new ImmutableList.Builder<>();
+        private final TermContext context;
+
+        public Builder(TermContext context) {
+            this.context = context;
+        }
 
         /**
          * Appends the specified term as a list item, namely
@@ -429,7 +439,9 @@ public class BuiltinList extends Collection {
             } else if (status == BuilderStatus.BASE_TERMS) {
                 if (!(term instanceof BuiltinList)) {
                     if (!pendingElements.isEmpty()) {
-                        addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                        addConcatTerm(new BuiltinList(
+                                ImmutableList.copyOf(pendingElements),
+                                context));
                         pendingElements.clear();
                     }
                     addConcatTerm(term);
@@ -440,7 +452,9 @@ public class BuiltinList extends Collection {
                     } else {
                         pendingElements.addAll(list.elementsLeft);
                         if (!pendingElements.isEmpty()) {
-                            addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                            addConcatTerm(new BuiltinList(
+                                    ImmutableList.copyOf(pendingElements),
+                                    context));
                             pendingElements.clear();
                         }
                         addConcatTerms(list.baseTerms);
@@ -483,7 +497,8 @@ public class BuiltinList extends Collection {
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build(),
-                    listVariablesBuilder.build());
+                    listVariablesBuilder.build(),
+                    context);
             return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
                    builtinList.baseTerms().get(0) :
                    builtinList;

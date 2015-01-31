@@ -33,7 +33,8 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
             ImmutableSet.<Term>of(),
             ImmutableMultiset.<KItem>of(),
             ImmutableMultiset.<Term>of(),
-            ImmutableMultiset.<Variable>of());
+            ImmutableMultiset.<Variable>of(),
+            null);
 
     private final ImmutableSet<Term> elements;
 
@@ -41,13 +42,14 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
             ImmutableSet<Term> elements,
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
-            ImmutableMultiset<Variable> collectionVariables) {
-        super(collectionPatterns, collectionFunctions, collectionVariables);
+            ImmutableMultiset<Variable> collectionVariables,
+            TermContext context) {
+        super(collectionPatterns, collectionFunctions, collectionVariables, context);
         this.elements = elements;
     }
 
-    public static Term concatenate(Term... sets) {
-        Builder builder = new Builder();
+    public static Term concatenate(TermContext context, Term... sets) {
+        Builder builder = new Builder(context);
         builder.concatenate(sets);
         return builder.build();
     }
@@ -183,8 +185,8 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         return components;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(TermContext context) {
+        return new Builder(context);
     }
 
     public static class Builder {
@@ -193,6 +195,11 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
         private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
         private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final TermContext context;
+
+        public Builder(TermContext context) {
+            this.context = context;
+        }
 
         public boolean add(Term element) {
             return elements.add(element);
@@ -241,7 +248,8 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     ImmutableSet.copyOf(elements),
                     patternsBuilder.build(),
                     functionsBuilder.build(),
-                    variablesBuilder.build());
+                    variablesBuilder.build(),
+                    context);
             return builtinSet.baseTerms().size() == 1 && builtinSet.concreteSize() == 0 ?
                     builtinSet.baseTerms().iterator().next() :
                     builtinSet;

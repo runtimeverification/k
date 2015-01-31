@@ -227,13 +227,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(list, otherList);
         }
 
-        BuiltinList.Builder builder = BuiltinList.builder();
+        BuiltinList.Builder builder = BuiltinList.builder(termContext);
         builder.addItems(remainingElementsLeft);
         builder.concatenate(remainingBaseTerms);
         builder.addItems(remainingElementsRight);
         Term remainingList = builder.build();
 
-        BuiltinList.Builder otherBuilder = BuiltinList.builder();
+        BuiltinList.Builder otherBuilder = BuiltinList.builder(termContext);
         otherBuilder.addItems(otherRemainingElementsLeft);
         otherBuilder.concatenate(otherRemainingBaseTerms);
         otherBuilder.addItems(otherRemainingElementsRight);
@@ -307,13 +307,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(set, otherSet);
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(termContext);
         builder.addAll(remainingElements);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingSet = builder.build();
 
-        BuiltinSet.Builder otherBuilder = BuiltinSet.builder();
+        BuiltinSet.Builder otherBuilder = BuiltinSet.builder(termContext);
         otherBuilder.addAll(otherRemainingElements);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
@@ -447,19 +447,20 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(map, otherMap);
         }
 
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
         builder.putAll(remainingEntries);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingMap = builder.build();
 
-        BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
+        BuiltinMap.Builder otherBuilder = BuiltinMap.builder(termContext);
         otherBuilder.putAll(otherRemainingEntries);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
         Term otherRemainingMap = otherBuilder.build();
 
-        if (!remainingMap.equals(BuiltinMap.EMPTY_MAP) || !otherRemainingMap.equals(BuiltinMap.EMPTY_MAP)) {
+        if (!(remainingMap instanceof BuiltinMap && ((BuiltinMap) remainingMap).isEmpty())
+                || !(otherRemainingMap instanceof BuiltinMap && ((BuiltinMap) otherRemainingMap).isEmpty())) {
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable || partialSimpl) {
                 // map equality resolved or partial simplification enabled
                 add(remainingMap, otherRemainingMap);

@@ -52,7 +52,7 @@ public class UseSMTTest {
     @Test
     public void testGetModel() {
         System.err.println(System.getProperty("java.library.path"));
-        BuiltinMap.Builder builder = new BuiltinMap.Builder();
+        BuiltinMap.Builder builder = new BuiltinMap.Builder(tc);
         SMTOptions options = new SMTOptions();
         options.smt = SMTSolver.Z3;
         assertEquals(builder.build(), new UseSMT(options).checkSat(BoolToken.TRUE, tc));

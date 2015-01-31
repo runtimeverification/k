@@ -136,7 +136,7 @@ public class Rule extends JavaSymbolicObject {
                 || oldRule.containsAttribute(Constants.STDOUT)
                 || oldRule.containsAttribute(Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
-            BuiltinList.Builder streamListBuilder = BuiltinList.builder();
+            BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
             for (Equality eq : lookups.equalities()) {
                 streamListBuilder.addItem(eq.rightHandSide());
             }

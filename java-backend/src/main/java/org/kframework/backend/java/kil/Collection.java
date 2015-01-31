@@ -21,18 +21,16 @@ public abstract class Collection extends Term implements CollectionInternalRepre
      */
     protected final Variable frame;
 
+    protected final TermContext context;
+
     /**
      * Creates an instance of class {@code Collection} given its kind and a
      * frame variable. If the given frame is non-null, the kind of the frame
      * must be equal to the kind of the instance.
-     *
-     * @param frame
-     *            the frame variable
-     * @param kind
-     *            the kind
      */
-    protected Collection(Variable frame, Kind kind) {
+    protected Collection(Variable frame, Kind kind, TermContext context) {
         super(kind);
+        this.context = context;
 
         assert frame == null || frame.kind() == kind
                 : "unexpected kind " + frame.kind() + " for frame variable " + frame.name()
