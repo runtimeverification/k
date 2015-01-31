@@ -48,7 +48,7 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with K wi
   override def copy(att: Att): This = KVar(name, att)
 }
 
-case class KTok private(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with SelfLabel[KTok] {
+case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken with K with SelfLabel[KTok] {
   override type This = KTok
   def name: String = s + ":" + sort
   def copy(att: Att): This = KTok(sort, s, att)
