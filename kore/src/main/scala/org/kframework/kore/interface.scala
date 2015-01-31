@@ -10,15 +10,27 @@ trait KItem extends K
 
 trait KLabel {
   def name: String
+  override def equals(other: Any) = other match {
+    case l: KLabel => name == l.name
+    case _ => false
+  }
 }
 
 trait KToken extends KItem {
   def sort: Sort
   def s: String
+  override def equals(other: Any) = other match {
+    case other: KToken => sort == other.sort && s == other.s
+    case _ => false
+  }
 }
 
 trait Sort {
   def name: String
+  override def equals(other: Any) = other match {
+    case other: Sort => name == other.name
+    case _ => false
+  }
 }
 
 trait KCollection {
@@ -33,9 +45,7 @@ trait KApply extends KItem {
   def klabel: KLabel
   def klist: KList
 
-  def items = klist.items
   def stream: java.util.stream.Stream[K] = klist.stream
-  def size = items.size
 }
 
 trait KSequence extends KCollection

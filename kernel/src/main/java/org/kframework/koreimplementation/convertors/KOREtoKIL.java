@@ -445,7 +445,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             KLabel confLabel = kApply.klabel();
             org.kframework.kil.Cell kilCell = new org.kframework.kil.Cell();
             kilCell.setLabel(confLabel.name());
-            List<K> args = kApply.items();
+            List<K> args = kApply.klist().items();
             if (args.size() == 1) {
                 kilCell.setContents(convertK(args.get(0)));
             } else {
@@ -470,13 +470,13 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKApply(kApply);
         } else if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
             KApply kBag = (KApply) k;
-            List<K> bagItems = kBag.items();
+            List<K> bagItems = kBag.klist().items();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
             for (K bagItem : bagItems) {
                 if (k instanceof KApply && ((KApply) k).klabel() == Labels.KBag()) {
                     KApply item = (KApply) bagItem;
-                    List<K> kbagItems = item.items();
+                    List<K> kbagItems = item.klist().items();
                     kilBagItems.addAll(kbagItems.stream().map(this::convertK)
                             .collect(Collectors.toList()));
                 } else {
@@ -559,7 +559,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
 
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
-        List<K> contents = kApply.items();
+        List<K> contents = kApply.klist().items();
         if (label == Labels.Hole()) {
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));

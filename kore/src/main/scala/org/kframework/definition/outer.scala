@@ -3,7 +3,9 @@
 package org.kframework.definition
 
 import org.kframework.POSet
-import org.kframework.kore._
+import org.kframework.kore.KLabel
+import org.kframework.kore.Sort
+import org.kframework.kore.K
 import org.kframework.attributes._
 
 trait OuterKORE
@@ -19,7 +21,6 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 //    new NonTerminalsWithUndefinedSortException(nonTerminals.toString, nonTerminals)
 //
 //}
-
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Att = Att())
   extends DefinitionToString with OuterKORE {
@@ -154,8 +155,3 @@ case class RegexTerminal(regex: String) extends ProductionItem with RegexTermina
 
 case class Terminal(value: String) extends ProductionItem // hooked
 with TerminalToString
-
-/* Helper constructors */
-object NonTerminal {
-  def apply(sort: String): NonTerminal = NonTerminal(ADT.Sort(sort))
-}
