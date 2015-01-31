@@ -1,8 +1,9 @@
 package org.kframework.tiny
 
-import org.kframework.kore
-import org.kframework.attributes._
+import org.kframework.{kore, _}
+
 import scala.collection.JavaConverters._
+import org.kframework.attributes.Attributes
 
 trait K extends kore.K
 
@@ -11,13 +12,15 @@ trait K extends kore.K
  */
 case class KLabel(name: String) extends kore.KLabel
 
-trait KCollection extends kore.KCollection {
-  val items: java.util.List[kore.K]
+trait KCollection extends kore.KCollection with Collection[K] {
+  override def size = super[Collection].size
 }
 
-trait KApply extends kore.KApply with K {
+trait KApply extends kore.KApply with KCollection {
   def children: List[K]
   def klist = kore.ADTConstructors.KList(children.asInstanceOf[List[kore.K]].asJava)
+  override val size = super[KCollection].size
+  override def stream = super[KCollection].stream
 }
 
-case class RegularTerm(klabel: KLabel, children: List[K], att: Attributes) extends KApply
+case class KVariable(name: String, att: Attributes = Attributes()) extends kore.KVariable
