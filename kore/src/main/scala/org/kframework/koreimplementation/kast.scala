@@ -74,8 +74,6 @@ KListToString with KORE {
 
   def copy(att: Attributes): KList = this
 
-  def foreach(f: K => Unit): Unit = delegate foreach f
-
   def iterable: Iterable[K] = delegate
 
   def items: java.util.List[kore.K] = iterable.toList.asJava.asInstanceOf[java.util.List[kore.K]]

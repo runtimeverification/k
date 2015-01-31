@@ -64,8 +64,6 @@ trait KAbstractCollection extends KCollection {
 
   protected[koreimplementation] def delegate: Iterable[K]
 
-  def foreach(f: K => Unit) = delegate.foreach(f)
-
   def iterable = delegate
 
   override def hashCode() = {

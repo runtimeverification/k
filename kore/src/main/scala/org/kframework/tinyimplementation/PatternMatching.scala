@@ -168,7 +168,5 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
     localSolution or childrenSolutions
   }
 
-  def foreach(f: K => Unit): Unit = delegate foreach f
-
   def iterable: Iterable[K] = delegate
 }

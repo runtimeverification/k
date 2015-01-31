@@ -2,7 +2,6 @@
 
 package org.kframework
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable.{Builder, ListBuffer}
 
 trait Indexed[I, T] {
@@ -11,17 +10,22 @@ trait Indexed[I, T] {
 }
 
 trait Collection[T] {
+
+  // Fundamental:
+
   type This <: Collection[T]
 
   def newBuilder(): Builder[T, This]
 
   def canEqual(that: Any): Boolean
 
-  def foreach(f: T => Unit)
+  def iterable: Iterable[T]
+
+  // Helpers:
+
+  def foreach(f: T => Unit) = iterable foreach f
 
   def mkString(separator: String): String = iterable.mkString(separator)
-
-  def iterable: Iterable[T]
 
   override def equals(that: Any) = {
     canEqual(that) && (that match {
@@ -31,13 +35,12 @@ trait Collection[T] {
   }
 
   def iterator: Iterator[T] = iterable.iterator
-  def list: java.util.List[T] = iterable.toList.asJava
-//  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
+  //  def stream: java.util.stream.Stream[T] = StreamSupport.stream(iterable.asJava.spliterator(), false)
 
   def isEmpty: Boolean = size == 0
-  def size: Int = { var s = 0; foreach { x => s += 1 }; s }
+  def size: Int = iterable.size
 
-  def head: T = iterator.toList.head
+  def head: T = iterable.head
 
   def tail: Collection[T] = {
     val builder = newBuilder();
