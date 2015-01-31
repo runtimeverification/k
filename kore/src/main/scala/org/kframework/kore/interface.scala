@@ -44,8 +44,6 @@ trait KList extends KCollection
 trait KApply extends KItem {
   def klabel: KLabel
   def klist: KList
-
-  def stream: java.util.stream.Stream[K] = klist.stream
 }
 
 trait KSequence extends KCollection

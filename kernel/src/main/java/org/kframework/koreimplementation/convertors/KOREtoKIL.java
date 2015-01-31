@@ -566,7 +566,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         } else {
             boolean kilProductionIdP = !kApply.att().getOptional(KILtoInnerKORE.PRODUCTION_ID)
                     .isPresent();
-            List<K> args = kApply.stream().collect(Collectors.toList());
+            List<K> args = kApply.klist().stream().collect(Collectors.toList());
             List<org.kframework.kil.Term> kilTerms = args.stream().map(this::convertK)
                     .collect(Collectors.toList());
 

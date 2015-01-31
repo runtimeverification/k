@@ -35,9 +35,12 @@ trait KCollection extends kore.KCollection with Collection[K] with K {
 trait KApp extends kore.KApply with KCollection {
   def children: Seq[K]
   def klist = kore.ADTConstructors.KList(children.asInstanceOf[List[kore.K]].asJava)
-  override val size = super[KCollection].size
-  override def stream = super[KCollection].stream
   val klabel = label
+}
+
+trait ProductOfKs extends KCollection with Product {
+  type This <: ProductOfKs
+  val children = productIterator collect { case k: K => k } toIterable
 }
 
 // Classes
@@ -65,17 +68,19 @@ class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence wi
   override def label: KSeq.type = KSeq
 }
 
+case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewrite with ProductOfKs {
+  override type This = KRewrite
+  override def label: KCollectionLabel[This] = KRewrite
+}
+
+case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel
+
 // Labels
 
 trait Label[+This <: K] extends kore.KLabel {
   def apply(l: Seq[K], att: Att): This
   def att: Att
 }
-
-//trait CompanionLabel extends Label {
-//  def name = this.getClass.getCanonicalName
-//  def att = Att()
-//}
 
 trait KCollectionLabel[This <: K] extends Label[This] {
   def newBuilder(att: Att): mutable.Builder[K, This]
@@ -84,6 +89,13 @@ trait KCollectionLabel[This <: K] extends Label[This] {
     l foreach b.+=
     b.result()
   }
+}
+
+object KRewrite extends KCollectionLabel[KRewrite] {
+  override def newBuilder(att: Att): mutable.Builder[K, KRewrite] =
+    ListBuffer() mapResult { case List(left, right) => new KRewrite(left, right, att) }
+  override def att: Att = Att()
+  override def name: String = "=>"
 }
 
 case class RegularKAppLabel(name: String, att: Att) extends KCollectionLabel[RegularKApp] {
