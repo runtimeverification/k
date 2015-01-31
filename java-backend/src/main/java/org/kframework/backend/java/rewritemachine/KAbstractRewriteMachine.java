@@ -29,12 +29,12 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
+import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -89,7 +89,7 @@ public class KAbstractRewriteMachine {
             /* take the first match that also satisfies the side-condition as solution */
             ExtendedSubstitution solution = null;
             for (ExtendedSubstitution extSubst : normalizedExtSubsts) {
-                Map<Variable, Term> updatedSubst = RewriteEngineUtils.
+                Substitution<Variable, Term> updatedSubst = RewriteEngineUtils.
                         evaluateConditions(rule, extSubst.substitution(), context);
                 if (updatedSubst != null) {
                     /* update the substitution according to the result of evaluation */
@@ -274,7 +274,7 @@ public class KAbstractRewriteMachine {
             if (subst == null) {
                 success = false;
             } else {
-                Map<Variable, Term> composedSubst = RewriteEngineUtils.composeSubstitution(fExtSubst.substitution(), subst);
+                Substitution<Variable, Term> composedSubst = fExtSubst.substitution().plusAll(subst);
                 if (composedSubst == null) {
                     success = false;
                 } else {
@@ -385,7 +385,7 @@ public class KAbstractRewriteMachine {
     }
 
     /**
-     * Similar to {@link RewriteEngineUtils#getMultiSubstitutions(Map, Collection)}
+     * Similar to {@link org.kframework.backend.java.symbolic.ConjunctiveFormula#getDisjunctiveNormalForm}
      * except that this method operates on {@code ExtendedSubstitution}.
      */
     private static List<ExtendedSubstitution> getCNFExtendedSubstitutions(
@@ -398,8 +398,8 @@ public class KAbstractRewriteMachine {
 
             if (multiExtSubsts.size() == 1) {
                 for (ExtendedSubstitution extSubst : multiExtSubsts.get(0)) {
-                    Map<Variable, Term> composedSubst = RewriteEngineUtils
-                            .composeSubstitution(fSubst.substitution(), extSubst.substitution());
+                    Substitution<Variable, Term> composedSubst =
+                            fSubst.substitution().plusAll(extSubst.substitution());
                     if (composedSubst != null) {
                         result.add(new ExtendedSubstitution(
                                 composedSubst,
@@ -409,12 +409,9 @@ public class KAbstractRewriteMachine {
             } else {
                 for (ExtendedSubstitution subst1 : multiExtSubsts.get(0)) {
                     for (ExtendedSubstitution subst2 : multiExtSubsts.get(1)) {
-                        Map<Variable, Term> composedSubst = RewriteEngineUtils
-                                .composeSubstitution(
-                                        fSubst.substitution(),
-                                        subst1.substitution(),
-                                        subst2.substitution());
-
+                        Substitution<Variable, Term> composedSubst = fSubst.substitution()
+                                .plusAll(subst1.substitution())
+                                .plusAll(subst2.substitution());
                         if (composedSubst != null) {
                             result.add(new ExtendedSubstitution(
                                     composedSubst,
@@ -429,7 +426,7 @@ public class KAbstractRewriteMachine {
             }
         } else {
             result.add(new ExtendedSubstitution(
-                    Maps.newHashMap(fSubst.substitution()),
+                    fSubst.substitution(),
                     Lists.newArrayList(fSubst.writeCells())));
         }
 

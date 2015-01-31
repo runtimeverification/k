@@ -68,8 +68,8 @@ public class MacroExpander extends CopyOnWriteTransformer {
         for (Term conditionItem : rule.ensures()) {
             processedEnsures.add(processTerm(conditionItem));
         }
-        UninterpretedConstraint processedLookups
-            = (UninterpretedConstraint) expandMacro(rule.lookups());
+        ConjunctiveFormula processedLookups
+            = (ConjunctiveFormula) processTerm(rule.lookups());
 
         Map<CellLabel, Term> processedLhsOfReadCell = null;
         Map<CellLabel, Term> processedRhsOfWriteCell = null;
