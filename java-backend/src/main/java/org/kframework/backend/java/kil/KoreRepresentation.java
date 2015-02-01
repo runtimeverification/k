@@ -6,5 +6,5 @@ public interface KoreRepresentation {
     /**
      * Returns a KORE (KLabel/KList) representation of this backend object.
      */
-    public Term toKore(TermContext context);
+    public Term toKore();
 }

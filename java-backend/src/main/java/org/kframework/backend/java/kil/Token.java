@@ -72,7 +72,7 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
     }
 
     @Override
-    public Token toKore(TermContext context) {
+    public Token toKore() {
         return this;
     }
 

@@ -239,7 +239,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         DataStructureSort sort = context.definition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
@@ -252,7 +252,7 @@ public class BuiltinList extends Collection {
         elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
             if (term instanceof BuiltinList) {
-                components.addAll(((BuiltinList) term).getKComponents(context));
+                components.addAll(((BuiltinList) term).getKComponents());
             } else {
                 components.add(term);
             }
