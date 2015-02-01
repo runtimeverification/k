@@ -163,7 +163,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         DataStructureSort sort = context.definition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
@@ -175,7 +175,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinSet) {
-                components.addAll(((BuiltinSet) term).getKComponents(context));
+                components.addAll(((BuiltinSet) term).getKComponents());
             } else {
                 components.add(term);
             }

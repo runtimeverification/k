@@ -173,7 +173,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         DataStructureSort sort = context.definition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
@@ -185,7 +185,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinMap) {
-                components.addAll(((BuiltinMap) term).getKComponents(context));
+                components.addAll(((BuiltinMap) term).getKComponents());
             } else {
                 components.add(term);
             }

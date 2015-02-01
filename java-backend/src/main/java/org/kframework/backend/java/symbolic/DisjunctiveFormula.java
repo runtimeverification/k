@@ -60,17 +60,22 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
-        return conjunctions.stream().map(c -> c.toKore(context)).collect(Collectors.toList());
+    public Term toKore() {
+        return toKore(context);
     }
 
     @Override
-    public KLabel constructorLabel(TermContext context) {
+    public List<Term> getKComponents() {
+        return conjunctions.stream().map(ConjunctiveFormula::toKore).collect(Collectors.toList());
+    }
+
+    @Override
+    public KLabel constructorLabel() {
         return KLabelConstant.of("'_orBool_", context.definition());
     }
 
     @Override
-    public Token unit(TermContext context) {
+    public Token unit() {
         return BoolToken.FALSE;
     }
 
@@ -95,7 +100,7 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public String toString() {
-        return toKore(context).toString();
+        return toKore().toString();
     }
 
     @Override

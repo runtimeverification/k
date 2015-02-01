@@ -271,18 +271,8 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     @Override
-    public Term toKore(TermContext context) {
+    public Term toKore() {
         return this;
-    }
-
-    @Override
-    public Term kLabel(TermContext context) {
-        return kLabel;
-    }
-
-    @Override
-    public Term kList(TermContext context) {
-        return kList;
     }
 
     public static class KItemOperations {
@@ -602,10 +592,12 @@ public class KItem extends Term implements KItemRepresentation {
         return this;
     }
 
+    @Override
     public Term kLabel() {
         return kLabel;
     }
 
+    @Override
     public Term kList() {
         return kList;
     }
