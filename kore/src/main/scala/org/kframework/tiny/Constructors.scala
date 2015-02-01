@@ -1,7 +1,7 @@
 package org.kframework.tiny
 
 import org.kframework.attributes._
-import org.kframework.kore.{ADTConstructors => basic, InjectedKLabel, Unapply}
+import org.kframework.kore.{ADTConstructors => basic, K, InjectedKLabel, Unapply}
 import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
@@ -32,7 +32,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   override def KToken(sort: kore.Sort, s: String, att: Att): kore.KToken = KTok(sort, s)
 
-  override def KRewrite(left: kore.K, right: kore.K, att: Att): kore.KRewrite = tiny.KRewrite(convert(left), convert(right), att)
+  override def KRewrite(left: kore.K, right: kore.K, att: Att): kore.KRewrite = tiny.KRewrite(convert(left), convert
+    (right), att)
 
   override def KList[KK <: kore.K](items: java.util.List[KK]): kore.KList = basic.KList(items)
 

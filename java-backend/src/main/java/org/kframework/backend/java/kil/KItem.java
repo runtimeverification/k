@@ -18,6 +18,7 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
+import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;

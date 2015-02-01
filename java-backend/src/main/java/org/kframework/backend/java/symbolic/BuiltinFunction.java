@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -51,7 +52,7 @@ public class BuiltinFunction {
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
     @Inject
-    public BuiltinFunction(Context context, @Builtins Map<String, Provider<MethodHandle>> hookProvider, KExceptionManager kem, Tool tool) {
+    public BuiltinFunction(Definition definition, @Builtins Map<String, Provider<MethodHandle>> hookProvider, KExceptionManager kem, Tool tool) {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType hookType = MethodType.methodType(Term.class, Object[].class);
         MethodHandle throwImpureExceptionHandle;
@@ -61,8 +62,9 @@ public class BuiltinFunction {
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw KExceptionManager.internalError("Failed to load partial evaluation hook implementation", e);
         }
-        for (String label : context.klabels.keySet()) {
-            for (Production production : context.productionsOf(label)) {
+        for (KLabelConstant klabel : definition.kLabels()) {
+            String label = klabel.label();
+            for (Production production : definition.productionsOf(label)) {
                 if (production.getKLabel().equals(label) // make sure the label is a Klabel
                         && production.containsAttribute(Attribute.HOOK_KEY)) {
                     String hookAttribute = production.getAttribute(Attribute.HOOK_KEY);
@@ -72,7 +74,7 @@ public class BuiltinFunction {
                      * in nature (is related to I/O or to meta properties).
                      * */
                     if (tool == Tool.KOMPILE && production.containsAttribute(Attribute.IMPURE_KEY)) {
-                        table.put(KLabelConstant.of(label, context), throwImpureExceptionHandle);
+                        table.put(KLabelConstant.of(label, definition), throwImpureExceptionHandle);
                         continue;
                     }
 
@@ -84,7 +86,7 @@ public class BuiltinFunction {
                         continue;
                     }
 
-                    table.put(KLabelConstant.of(label, context), hookProvider.get(hookAttribute).get());
+                    table.put(KLabelConstant.of(label, definition), hookProvider.get(hookAttribute).get());
                 }
             }
         }

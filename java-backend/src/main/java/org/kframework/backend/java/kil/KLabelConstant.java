@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
  *
  * @author AndreiS
  */
-public class KLabelConstant extends KLabel implements MaximalSharing {
+public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
     /* KLabelConstant cache */
     private static final MapCache<ImmutableSet<Production>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
@@ -208,6 +208,11 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     public List<Production> productions() {
         return ImmutableList.copyOf(productions);
+    }
+
+    @Override
+    public String name() {
+        return label;
     }
 
     @Override

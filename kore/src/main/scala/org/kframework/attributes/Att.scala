@@ -48,7 +48,7 @@ case class Att(att: Set[K]) extends AttributesToString {
 trait KeyWithType
 
 object Att {
-  def apply(atts: K*): Att = Att(atts.toSet)
+  @annotation.varargs def apply(atts: K*): Att = Att(atts.toSet)
 }
 
 trait AttributesToString {
