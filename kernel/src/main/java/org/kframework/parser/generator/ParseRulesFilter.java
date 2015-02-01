@@ -64,7 +64,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             Sentence st;
 
             String parsed = null;
-            if (ss.containsAttribute("kore")) {
+            if (ss.containsAttribute("koreimplementation")) {
 
                 long koreStartTime = System.currentTimeMillis();
                 parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));

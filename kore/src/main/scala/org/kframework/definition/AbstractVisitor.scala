@@ -1,0 +1,5 @@
+package org.kframework.definition
+
+import org.kframework.tinyimplementation.AbstractReflectiveVisitor
+
+class AbstractVisitor extends AbstractReflectiveVisitor

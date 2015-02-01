@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * class for AST Attributes.
+ * class for AST Att.
  * This is used to represent a collection of attributes on a node,
  * which may contain both attributes in the K source
  * written by a user, and metadata like location added by kompile.

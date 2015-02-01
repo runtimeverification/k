@@ -32,7 +32,9 @@ import org.kframework.kil.Hole;
 import org.kframework.kil.Import;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KLabelInjection;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.ListBuiltin;
@@ -865,6 +867,18 @@ public class Unparser implements Comparator<ASTNode> {
             for (Term t : node.baseTerms()) {
                 term(t);
             }
+            return null;
+        }
+
+        @Override
+        public Void visit(KItemProjection node, Void p) throws RuntimeException {
+            term(node.getTerm());
+            return null;
+        }
+
+        @Override
+        public Void visit(KLabelInjection node, Void p) throws RuntimeException {
+            term(node.getTerm());
             return null;
         }
     }

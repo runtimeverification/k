@@ -1,6 +1,6 @@
 package org.kframework.builtin
 
-import org.kframework.kore.KLabel
+import org.kframework.koreimplementation.KLabel
 
 object Labels {
   val Hole = KLabel("HOLE")

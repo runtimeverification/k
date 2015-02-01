@@ -48,7 +48,7 @@ public class Constants {
     public static final String NAME = "name";
     public static final String PREDICATE = "predicate";
     public static final String NON_ASSOC = "non-assoc";
-    // Attributes constants
+    // Att constants
     public static final String VALUE_value_ATTR = "value";
     public static final String LOC_loc_ATTR = "loc";
     public static final String TYPE_type_ATTR = "type";

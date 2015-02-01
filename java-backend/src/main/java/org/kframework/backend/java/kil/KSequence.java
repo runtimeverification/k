@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KSequence extends KCollection {
+public class KSequence extends KCollection implements org.kframework.kore.KSequence {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;

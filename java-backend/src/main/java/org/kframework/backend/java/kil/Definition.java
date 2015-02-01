@@ -128,6 +128,27 @@ public class Definition extends JavaSymbolicObject {
                 context.krunOptions);
     }
 
+//    public Definition(org.kframework.definition.Module m) {
+//        kLabels = new HashSet<>();
+//        frozenKLabels = new HashSet<>();
+//
+//        ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
+//        // TODO(YilongL): this is confusing; give a better name to tokenSorts
+//        builder.addAll(Sort.of(context.getTokenSorts())); // e.g., [#String, #Int, Id, #Float]
+//        builder.addAll(TOKEN_SORTS); // [Bool, Int, Float, Char, String, List, Set, Map]
+//
+//        definitionData = new DefinitionData(
+//                new Subsorts(context),
+//                builder.build(),
+//                context.getDataStructureSorts(),
+//                context.klabels,
+//                context.listKLabels,
+//                context.freshFunctionNames,
+//                context.getConfigurationStructureMap(),
+//                context.globalOptions,
+//                context.krunOptions);
+//    }
+
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
         this.indexingData = indexingData;

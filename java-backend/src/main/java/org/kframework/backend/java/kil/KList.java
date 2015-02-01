@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -10,6 +11,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableList;
+import org.kframework.kore.K;
 
 
 /**
@@ -27,7 +29,7 @@ import com.google.common.collect.ImmutableList;
  *
  * @author AndreiS
  */
-public class KList extends KCollection {
+public class KList extends KCollection implements org.kframework.kore.KList {
 
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;

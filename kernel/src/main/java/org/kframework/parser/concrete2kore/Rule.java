@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.kframework.kore.outer.Production;
+import org.kframework.attributes.Location;
+import org.kframework.definition.Production;
 import org.kframework.parser.*;
 
 /**

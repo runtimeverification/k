@@ -96,12 +96,10 @@ public class SymbolicRewriter {
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
                     executionGraph.addEdge(javaTransition, initialState, finalState);
+                    initialState = finalState;
                 }
                 constrainedTerm = result;
             } else {
-                if (computeGraph) {
-                    initialState = finalState;
-                }
                 break;
             }
         }
@@ -519,7 +517,7 @@ public class SymbolicRewriter {
                             Collections.<Variable>emptyList(),
                             new SymbolicConstraint(definition).substitute(freshSubstitution, definition),
                             IndexingPair.getIndexingPair(term.term()),
-                            new Attributes()));
+                            new Att()));
                      */
                 }
 
