@@ -179,7 +179,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KLabelConstant node, Void _void)  {
-        return KLabelConstant.of(node.getLabel(), context);
+        return KLabelConstant.of(node.getLabel(), globalContext.getDefinition());
     }
 
     @Override
@@ -265,7 +265,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         return CellCollection.singleton(
                 CellLabel.of(node.getLabel()),
                 (Term) this.visitNode(node.getContents()),
-                context);
+                globalContext.getDefinition());
     }
 
     @Override
@@ -273,7 +273,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents, node.getContents());
 
-        CellCollection.Builder builder = CellCollection.builder(context);
+        CellCollection.Builder builder = CellCollection.builder(globalContext.getDefinition());
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
                 continue;
@@ -550,14 +550,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         for (String kLabelName : singletonModule.getModuleKLabels()) {
-            definition.addKLabel(KLabelConstant.of(kLabelName, context));
+            definition.addKLabel(KLabelConstant.of(kLabelName, globalContext.getDefinition()));
         }
 
         /* collect the productions which have the attributes strict and seqstrict */
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabelOfKItem(), context));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabelOfKItem(), globalContext.getDefinition()));
         }
 
         return definition;
