@@ -29,7 +29,8 @@ public class NewOuterParserTest {
         CharSequence theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
-        File definitionFile = new File("kernel/src/main/resources/e-kore.k").getAbsoluteFile();
+        File definitionFile = new File(NewOuterParserTest.class.getResource
+                ("/e-kore.k").toURI()).getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
         System.out.println(kBody);
