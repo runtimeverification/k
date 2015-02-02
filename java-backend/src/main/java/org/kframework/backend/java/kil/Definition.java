@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.SetMultimap;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -10,6 +9,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
@@ -28,9 +28,13 @@ import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 
 
@@ -45,7 +49,8 @@ public class Definition extends JavaSymbolicObject {
         public final Subsorts subsorts;
         public final Set<Sort> builtinSorts;
         public final Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts;
-        public final SetMultimap<String, Production> productions;
+        public final SetMultimap<String, SortSignature> signatures;
+        public final ImmutableMap<String, Attributes> kLabelAttributes;
         public final SetMultimap<String, Production> listKLabels;
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
         public final ConfigurationStructureMap configurationStructureMap;
@@ -56,7 +61,8 @@ public class Definition extends JavaSymbolicObject {
                 Subsorts subsorts,
                 Set<Sort> builtinSorts,
                 Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts,
-                SetMultimap<String, Production> productions,
+                SetMultimap<String, SortSignature> signatures,
+                ImmutableMap<String, Attributes> kLabelAttributes,
                 SetMultimap<String, Production> listKLabels,
                 Map<org.kframework.kil.Sort, String> freshFunctionNames,
                 ConfigurationStructureMap configurationStructureMap,
@@ -65,7 +71,8 @@ public class Definition extends JavaSymbolicObject {
             this.subsorts = subsorts;
             this.builtinSorts = builtinSorts;
             this.dataStructureSorts = dataStructureSorts;
-            this.productions = productions;
+            this.signatures = signatures;
+            this.kLabelAttributes = kLabelAttributes;
             this.listKLabels = listKLabels;
             this.freshFunctionNames = freshFunctionNames;
             this.configurationStructureMap = configurationStructureMap;
@@ -116,17 +123,68 @@ public class Definition extends JavaSymbolicObject {
         builder.addAll(Sort.of(context.getTokenSorts())); // e.g., [#String, #Int, Id, #Float]
         builder.addAll(TOKEN_SORTS); // [Bool, Int, Float, Char, String, List, Set, Map]
 
+        ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
+        for (Map.Entry<String, Production> entry : context.klabels.entries()) {
+            ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
+            for (int i = 0; i < entry.getValue().getArity(); ++i) {
+                sortsBuilder.add(Sort.of(entry.getValue().getChildSort(i)));
+            }
+            signaturesBuilder.put(
+                    entry.getKey(),
+                    new SortSignature(sortsBuilder.build(), Sort.of(entry.getValue().getSort())));
+        }
+
+        ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
+        context.klabels.entries().forEach(e -> attributesBuilder.put(e.getKey(), e.getValue().getAttributes()));
+        for (Map.Entry<String, Collection<Production>> entry : context.klabels.asMap().entrySet()) {
+            Attributes attributes;
+            if (!entry.getValue().isEmpty()) {
+                attributes = entry.getValue().iterator().next().getAttributes();
+                for (Production production : entry.getValue()) {
+                    assert production.getAttributes().equals(attributes) :
+                            "mismatch attributes:\n" + entry.getValue().iterator().next()
+                            + "\nand\n" + production;
+                }
+            } else {
+                attributes = new Attributes();
+            }
+            attributesBuilder.put(entry.getKey(), attributes);
+        }
+
         definitionData = new DefinitionData(
                 new Subsorts(context),
                 builder.build(),
                 context.getDataStructureSorts(),
-                context.klabels,
+                signaturesBuilder.build(),
+                attributesBuilder.build(),
                 context.listKLabels,
                 context.freshFunctionNames,
                 context.getConfigurationStructureMap(),
                 context.globalOptions,
                 context.krunOptions);
     }
+
+//    public Definition(org.kframework.definition.Module m) {
+//        kLabels = new HashSet<>();
+//        frozenKLabels = new HashSet<>();
+//        definitionData = new DefinitionData(
+//                new Subsorts(context),
+//                ImmutableSet.builder()
+//                        .addAll(TOKEN_SORTS)
+//                        .add(Sort.of("#Int"))
+//                        .add(Sort.of("#String"))
+//                        .add(Sort.of("#Id"))
+//                        .build(),
+//                null,
+//                context.klabels,
+//                null,
+//                null,
+//                null,
+//                context.globalOptions,
+//                context.krunOptions);
+//        this.indexingData = null;
+//        this.kem = null;
+//    }
 
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
@@ -279,12 +337,16 @@ public class Definition extends JavaSymbolicObject {
     }
 
     // added from context
-    public Set<Production> productionsOf(String label) {
-        return definitionData.productions.get(label);
+    public Set<SortSignature> signaturesOf(String label) {
+        return definitionData.signatures.get(label);
     }
 
-    public Collection<Production> productions() {
-        return definitionData.productions.values();
+    public Map<String, Attributes> kLabelAttributes() {
+        return definitionData.kLabelAttributes;
+    }
+
+    public Attributes kLabelAttributesOf(String label) {
+        return definitionData.kLabelAttributes.get(label);
     }
 
     public Set<Production> listLabelsOf(String label) {

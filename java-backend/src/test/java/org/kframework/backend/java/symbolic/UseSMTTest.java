@@ -4,7 +4,6 @@ package org.kframework.backend.java.symbolic;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -17,8 +16,6 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 import org.mockito.Mock;
@@ -43,7 +40,7 @@ public class UseSMTTest {
     public void setUp() {
         when(tc.definition()).thenReturn(definition);
         when(definition.functionRules()).thenReturn(HashMultimap.<KLabelConstant, Rule>create());
-        when(definition.productions()).thenReturn(new ArrayList<>());
+        when(definition.kLabels()).thenReturn(new HashSet<>());
         when(tc.global()).thenReturn(new GlobalContext(null, null, null, constraintOps, null));
     }
 
