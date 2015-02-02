@@ -18,32 +18,33 @@ trait K extends kore.K {
     case that: K => label == that.label && att == that.att
     case _ => false
   }
-  def matcher(right: K): Matcher
+  def matcher(right: K): Matcher = ???
 }
 
-trait KCollection extends kore.KCollection with Collection[K] with K {
-  type This <: KCollection
-  override def size = super[Collection].size
-  def iterable: Iterable[K] = children
+object KApp {
+  def unapply(k: KApp): Option[(Label[_ <: K], Seq[K], Att)] = Some(k.klabel, k.children.toSeq, k.att)
+}
+
+trait KApp extends K {
+  def size: Int
   def children: Iterable[K]
-  def label: KCollectionLabel[This]
-  def newBuilder(): mutable.Builder[K, This] = label.newBuilder(att)
-  def items: java.util.List[kore.K] = iterable.toList.asInstanceOf[List[kore.K]].asJava
-}
-
-trait KApp extends kore.KApply with KCollection {
-  def children: Seq[K]
+  def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
   def klist = kore.ADTConstructors.KList(children.asInstanceOf[List[kore.K]].asJava)
   val klabel = label
 }
 
-object KApp {
-  def unapply(k: KApp): Option[(Label[_ <: K], Seq[K], Att)] = Some(k.klabel, k.children, k.att)
+trait KCollection extends kore.KCollection with KApp with Collection[K] {
+  type This <: KCollection
+  override def size = super[Collection].size
+  def iterable: Iterable[K] = children
+  def label: KCollectionLabel[This]
+  def newBuilder(): mutable.Builder[K, This] = label.newBuilder(att)
 }
 
-trait ProductOfKs extends KCollection with Product {
+trait ProductOfKs extends KApp with Product {
   type This <: ProductOfKs
   val children = productIterator collect { case k: K => k } toIterable
+  val size = productArity
 }
 
 // Classes
@@ -59,11 +60,11 @@ case class KTok(sort: Sort, s: String, att: Att = Att()) extends kore.KToken wit
   def copy(att: Att): This = KTok(sort, s, att)
 }
 
-class RegularKApp(val label: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
+class RegularKApp(val label: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KCollection {
   type This = RegularKApp
 }
 
-class AssocKApp(val label: AssocKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp {
+class AssocKApp(val label: AssocKAppLabel, val children: Seq[K], val att: Att = Att()) extends KCollection {
   type This = AssocKApp
 }
 
@@ -77,7 +78,9 @@ case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewri
   def label = KRewrite
 }
 
-case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel with K
+case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel with K {
+  val label = klabel
+}
 
 // Label traits
 
@@ -109,11 +112,14 @@ trait SelfLabel[Self <: K] extends Label[Self] {
 
 // Labels
 
-object KRewrite extends KCollectionLabel[KRewrite] {
-  def newBuilder(att: Att): mutable.Builder[K, KRewrite] =
-    ListBuffer() mapResult { case List(left, right) => new KRewrite(left, right, att) }
+object KRewrite extends Label[KRewrite] {
   val att = Att()
   val name = "=>"
+  def construct(l: Seq[K], att: Att): KRewrite =
+    l match {
+      case List(left, right) => new KRewrite(left, right, att)
+    }
+
 }
 
 case class RegularKAppLabel(name: String, att: Att) extends KCollectionLabel[RegularKApp] {
