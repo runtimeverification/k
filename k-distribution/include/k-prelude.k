@@ -36,26 +36,6 @@ module K-RESULT
     syntax KItem ::= KResult
     syntax Bool ::= isKResult(KItem) [function,klabel(isKResult)]
 
-    //op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
-
-endmodule
-
-module K-WRAPPERS-LABELS
-    imports K-TECHNIQUE
-
-    //syntax KLabel ::= "KLabel2KLabel" KLabel
-                    //| "CellLabel2KLabel" CellLabel
-                    //| "KList2KLabel" KList
-                    //| "Bag2KLabel" Bag
-                    //| "Set2KLabel" Set
-                    //| "List2KLabel" List
-                    //| "Map2KLabel" Map
-                    //| "wrap-with"
-
-
-
-  //rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
-
 endmodule
 
 module K-DESTRUCTORS
@@ -65,19 +45,7 @@ module K-DESTRUCTORS
 
 endmodule
 
-module K-WRAPPERS
-    imports K-TECHNIQUE
-// not used anymore
-//    syntax K ::= KLabel2K (KLabel)        [klabel('KLabel2K_)]
-//               | Celllabel2K (CellLabel)[klabel('Celllabel2K_)]
-//               | KList2K (KList)        [klabel('KList2K_)]
-//               | Set2K (Set)            [klabel('Set2K_)]
-//               | Bag2K (Bag)            [klabel('Bag2K_)]
-//               | List2K (List)            [klabel('List2K_)]
-//               | Map2K (Map)            [klabel('Map2K_)]
-endmodule
-
-module K-FREZERS
+module K-FREEZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
 
@@ -101,20 +69,21 @@ module K-TOKENS
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate, hook(#PREDICATE:isBuiltin)]
 endmodule
 
+module K-REFLECTION
+  imports K-TECHNIQUE
+
+  syntax Bag ::= "#configuration" [function, impure, hook(MetaK:#configuration)]
+
+endmodule
+
 module K
   imports K-TECHNIQUE
   imports DEFAULT-CONFIGURATION
-  imports K-WRAPPERS
-  imports K-WRAPPERS-LABELS
   imports K-RESULT             // to express results syntactically
-  // imports K-RULES              // to write k rules with in-place rewriting
-  //imports K-EVAL
-  // imports K-CONTEXTS
   imports K-DESTRUCTORS           // defines getKLabel and getKList for K
-  //imports K-EXTRAS                // defines a KLabel substitution
-  imports K-FREZERS
+  imports K-FREEZERS
   imports K-LISTK-EXTRAS
   imports K-TOKENS
-  //imports K-LATEX
+  imports K-REFLECTION
 endmodule
 
