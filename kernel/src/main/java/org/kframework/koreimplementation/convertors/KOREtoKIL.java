@@ -489,7 +489,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKVariable((KVariable) k);
         } else if (k instanceof KToken) {
             return convertKToken((KToken) k);
-        } else if (k instanceof KApply && ((KApply) k).klabel() == Constructors.injectedKListLabel()) {
+        } else if (k instanceof KApply && ((KApply) k).klabel() == KLabel(Constructors.injectedKListLabel())) {
             return convertKList(((KApply) k).klist());
 //        } else if (k instanceof KRewrite) {
 //

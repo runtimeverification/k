@@ -9,11 +9,15 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
-// Traits
+//////////////////
+//   TRAITS
+//////////////////
 
 trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher = ???
+  def normalize(implicit theory: Theory) = theory.normalize(this)
+  def deepNormalize(implicit theory: Theory) = theory.deepNormalize(this)
 }
 
 object KApp {
@@ -50,12 +54,12 @@ trait KLeaf extends K {
 /**
  * KApp with a collection of children which are usually defined using an associative operator.
  */
-trait KCollection extends KApp {
-  def klabel: KCollectionLabel
+trait KAssocApp extends KApp {
+  def klabel: KAssocAppLabel
 
   def head: K = children.head
-  def tail: KCollection = klabel.construct(children.tail, att)
-  def map(f: K => K): KCollection = klabel.construct(children.map(f), att)
+  def tail: KAssocApp = klabel.construct(children.tail, att)
+  def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
 }
 
 /**
@@ -71,7 +75,13 @@ trait KProduct extends KApp with Product {
  */
 trait KTok extends kore.KToken with KLeaf
 
-// Classes
+trait EmptyAtt {
+  def att = Att()
+}
+
+///////////////////
+//   CLASSES
+///////////////////
 
 case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLeaf {
   def copy(att: Att): KVar = KVar(name, att)
@@ -83,9 +93,9 @@ case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
 
 class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp
 
-class AssocKApp(val klabel: AssocKAppLabel, val children: Seq[K], val att: Att = Att()) extends KCollection
+class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], val att: Att = Att()) extends KAssocApp
 
-class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KCollection {
+class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KAssocApp {
   def klabel = KSeq
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 }
@@ -104,7 +114,9 @@ object InjectedLabel {
   val sort = ADT.Sort("InjectedKLabel")
 }
 
-// Label traits
+/////////////////////
+//   LABEL TRAITS
+/////////////////////
 
 trait Label extends kore.KLabel {
   def apply(l: Seq[K], att: Att)(implicit t: Theory): K =
@@ -115,12 +127,20 @@ trait Label extends kore.KLabel {
   def att: Att
 }
 
-
-trait KCollectionLabel extends Label {
-  def construct(l: Iterable[K], att: Att): KCollection
+trait KAssocAppLabel extends Label {
+  def construct(l: Iterable[K], att: Att): KAssocApp = {
+    val b = newBuilder(att)
+    l foreach b.+=
+    b.result()
+  }
+  def newBuilder[AssocIn <: {def iterator : Iterator[K]} : ClassTag](att: Att): mutable.Builder[K, KAssocApp] =
+    new KAppAssocBuilder(ListBuffer[K](), this).mapResult { constructFromFlattened(_, att) }
+  def constructFromFlattened(l: Seq[K], att: Att): KAssocApp
 }
 
-// Labels
+///////////////
+//   LABELS
+///////////////
 
 object KRewrite extends Label {
   val att = Att()
@@ -135,29 +155,14 @@ case class RegularKAppLabel(name: String, att: Att) extends Label {
   override def construct(l: Iterable[K], att: Att): RegularKApp = new RegularKApp(this, l.toSeq, att)
 }
 
-trait AssocKAppLabel extends KCollectionLabel {
-  def construct(l: Iterable[K], att: Att): KCollection = {
-    val b = newBuilder(att)
-    l foreach b.+=
-    b.result()
-  }
-  def newBuilder[AssocIn <: {def iterator : Iterator[K]} : ClassTag](att: Att): mutable.Builder[K, KCollection] =
-    new AssocBuilder[K, List[K], AssocIn](ListBuffer()).mapResult { constructFromFlattened(_, att) }
-  def constructFromFlattened(l: Seq[K], att: Att): KCollection
-}
-
-object AssocKAppLabel {
-  def apply(nameP: String, attP: Att) = new AssocKAppLabel {
-    val name = nameP;
-    val att = attP
-    override def constructFromFlattened(l: Seq[K], att: Att): KCollection = new AssocKApp(this, l, att)
-  }
+case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel {
+  override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new RegularKAssocApp(this, l, att)
 }
 
 object KSeq extends {
   val name = "~>";
   val att = Att()
-} with AssocKAppLabel {
+} with KAssocAppLabel {
   /* required */
-  override def constructFromFlattened(l: Seq[K], att: Att): KCollection = new KSeq(l, att)
+  override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new KSeq(l, att)
 }

@@ -13,7 +13,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   override def KLabel(name: String): Label = {
     val att = module.attributesFor(basic.KLabel(name))
     if (att.contains("assoc"))
-      AssocKAppLabel(name, att)
+      RegularKAssocAppLabel(name, att)
     else
       RegularKAppLabel(name, att)
   }

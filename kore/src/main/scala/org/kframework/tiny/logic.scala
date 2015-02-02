@@ -3,14 +3,12 @@ package org.kframework.tiny
 import net.sf.tweety.logics.pl.{syntax => tw}
 import org.kframework.attributes.Att
 
-
-object Or extends AssocKAppLabel {
-  override def constructFromFlattened(l: Seq[K], att: Att): KCollection = new Or(l.toSet, att)
-  override def att: Att = Att()
+object Or extends KAssocAppLabel with EmptyAtt {
+  override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
   override def name: String = "Or"
 }
 
-case class Or(children: Set[K], att: Att) extends KCollection {
+case class Or(children: Set[K], att: Att) extends KAssocApp {
   /** Estimate the time it takes to solve (up to available data) one of the child formulas  */
   def estimate(implicit t: Theory): Int = ???
 
@@ -18,16 +16,15 @@ case class Or(children: Set[K], att: Att) extends KCollection {
   def step(implicit t: Theory): Or = ???
 
   // Implementing K
-  def klabel: KCollectionLabel = Or
+  def klabel: KAssocAppLabel = Or
 }
 
-object And extends AssocKAppLabel {
-  override def constructFromFlattened(l: Seq[K], att: Att): KCollection = new And(l.toSet, att)
-  override def att: Att = Att()
+object And extends KAssocAppLabel with EmptyAtt {
+  override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new And(l.toSet, att)
   override def name: String = "And"
 }
 
-case class And(children: Set[K], att: Att) extends KCollection {
+case class And(children: Set[K], att: Att) extends KAssocApp {
   /** Estimate the time it takes to solve one variable in one formula */
   def estimate(implicit t: Theory): Int = ???
 
