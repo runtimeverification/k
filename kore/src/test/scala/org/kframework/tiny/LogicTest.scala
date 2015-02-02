@@ -8,7 +8,6 @@ class LogicTest {
     val f = new tw.Disjunction()
     val x: tw.PropositionalFormula = new tw.Disjunction(new tw.Proposition("a"), f)
 
-    case class TWProposition(p: Proposition) extends tw.Proposition(p.toString)
     val n = new tw.Conjunction()
 
     println(x.toDnf)

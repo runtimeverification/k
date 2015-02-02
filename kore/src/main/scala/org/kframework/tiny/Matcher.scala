@@ -2,17 +2,21 @@ package org.kframework.tiny
 
 import org.kframework.attributes.Att
 
-case class Matcher(a: K, b: K) extends Formula {
+case class Matcher(a: K, b: K) extends KProduct {
   /** Estimate the time it takes to solve one variable */
   def estimate(implicit t: Theory): Int = ???
   /** Solve one variable */
   def step(implicit t: Theory): Or = ???
 
 
+  override def att: Att = Att()
+  override def klabel: Label = Matcher
+}
 
-  override type This = this.type
-  override def att: Att = ???
-  override def label: Label[This] = ???
+object Matcher extends Label {
+  override def construct(l: Iterable[K], att: Att): Matcher = l match {case Seq(a, b) => Matcher(a, b) }
+  val att: Att = Att()
+  val name: String = "Matcher"
 }
 
 //case class KAppPattern {

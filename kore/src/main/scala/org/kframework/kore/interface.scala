@@ -36,10 +36,11 @@ trait Sort {
 trait KCollection {
   def items: java.util.List[K]
   def stream: java.util.stream.Stream[K] = items.stream()
-  def size = items.size
 }
 
-trait KList extends KCollection
+trait KList extends KCollection {
+  def size: Int = items.size
+}
 
 trait KApply extends KItem {
   def klabel: KLabel
