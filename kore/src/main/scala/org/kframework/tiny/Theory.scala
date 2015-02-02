@@ -7,7 +7,7 @@ trait Theory {
    * If we cannot find an answer (e.g., we have symbolic values), return None
    * So None means the Proposition is satisfiable.
    */
-  def apply(proposition: Proposition): Option[Boolean] = normalize(proposition) match {
+  def apply(f: Formula): Option[Boolean] = f match {
     case True => Some(true)
     case False => Some(false)
     case _ => None

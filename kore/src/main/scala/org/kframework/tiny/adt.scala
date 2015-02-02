@@ -18,6 +18,7 @@ trait K extends kore.K {
     case that: K => label == that.label && att == that.att
     case _ => false
   }
+  def matcher(right: K): Matcher
 }
 
 trait KCollection extends kore.KCollection with Collection[K] with K {
@@ -34,6 +35,10 @@ trait KApp extends kore.KApply with KCollection {
   def children: Seq[K]
   def klist = kore.ADTConstructors.KList(children.asInstanceOf[List[kore.K]].asJava)
   val klabel = label
+}
+
+object KApp {
+  def unapply(k: KApp): Option[(Label[_ <: K], Seq[K], Att)] = Some(k.klabel, k.children, k.att)
 }
 
 trait ProductOfKs extends KCollection with Product {
@@ -72,7 +77,7 @@ case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewri
   def label = KRewrite
 }
 
-case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel
+case class InjectedLabel(klabel: Label[_ <: K], att: Att) extends kore.InjectedKLabel with K
 
 // Label traits
 
