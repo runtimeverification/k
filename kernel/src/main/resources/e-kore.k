@@ -72,12 +72,28 @@ module BUBBLE
 
 endmodule
 
+module ATTRIBUTES
+  imports BASIC-K
+  syntax KEY        ::= r"[a-z][A-Za-z\\-0-9]*" [token]
+  syntax TAGList    ::= TAGCONTENT              [token]
+  syntax TAGCONTENT ::= TC TAGCONTENT           [klabel(#TAGCONTENTList)] // dummy klabel
+                      | TC                      [klabel(#TAGCONTENTTC)]   // dummy klabel
+					  | ""                      [klabel(#NOTAGCONTENT)]   // dummy klabel
+  syntax TC ::= r"[^\\n\\r\\(\\)\\\"]+"         [klabel('TC)]             // dummy klabel
+              | "(" TAGCONTENT ")"
+
+  syntax Attr ::= KEY                 [klabel(#TagSimple)]
+                | KEY "(" TAGList ")" [klabel(#TagContent)]
+			    | KEY "(" KString ")" [klabel(#TagString)]
+endmodule
+
 // To be used for first-level parsing/pretty-printing of global KORE
 // definitions, where the K terms are put in bubbles.  A similar, but
 // larger OUTER module can be defined for arbitrary K definitions.
 module OUTER-KORE
   imports BASIC-K
   imports BUBBLE
+  imports ATTRIBUTES
 
   syntax KDefinition   ::= KRequireList KModuleList
                                [klabel(#KDefinition), hook(org.kframework.kore.outer.Definition)]
@@ -133,8 +149,10 @@ module OUTER-KORE
   // We use #KAttributes as top KLabel in the K term holding the attributes
   syntax OptionalAttributes ::= KAttributesDeclaration
                               | "" [klabel(#NoKAttributesDeclaration)]
-  syntax KAttributesDeclaration ::= "[" K "]" // TODO: work this out since we would like to keep the current way of parsing attributes
-                                              [klabel(#KAttributesDeclaration), hook(org.kframework.kore.KAttributes)]
+  syntax KAttributesDeclaration ::= "[" AttrList "]" [klabel(#KAttributesDeclaration), hook(org.kframework.kore.KAttributes)]
+  syntax AttrList ::= Attr "," AttrList [klabel(#KAttributesList)]
+                    | Attr
+
   syntax KSentence ::= "configuration" Contents
                                [klabel(#KConfiguration), hook(org.kframework.kore.outer.Configuration)]
                      | "rule"    Contents
