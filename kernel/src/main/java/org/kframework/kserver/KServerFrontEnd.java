@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.martiansoftware.nailgun.NGContext;
 import com.martiansoftware.nailgun.NGServer;
 import com.martiansoftware.nailgun.ThreadLocalPrintStream;
 
@@ -53,6 +54,7 @@ public class KServerFrontEnd extends FrontEnd {
     }
 
     private static KServerFrontEnd instance;
+    private static Thread threadInstance;
     private static final ImmutableList<String> tools = ImmutableList.of("-kompile", "-krun", "-kast", "-kdoc", "-ktest");
 
     private final KServerOptions options;
@@ -66,6 +68,7 @@ public class KServerFrontEnd extends FrontEnd {
         NGServer server = new NGServer(InetAddress.getLoopbackAddress(), options.port);
         Thread t = new Thread(server);
         instance = this;
+        threadInstance = t;
         t.start();
 
         int runningPort = server.getPort();
@@ -82,7 +85,7 @@ public class KServerFrontEnd extends FrontEnd {
             return 0;
         } catch (InterruptedException e) {
             //application is about to die
-            return 1;
+            return 0;
         }
     }
 
@@ -120,5 +123,10 @@ public class KServerFrontEnd extends FrontEnd {
         } finally {
             requestScope.exit();
         }
+    }
+
+    public static void nailMain(NGContext context) {
+        System.setSecurityManager(null);
+        context.getNGServer().shutdown(true);
     }
 }
