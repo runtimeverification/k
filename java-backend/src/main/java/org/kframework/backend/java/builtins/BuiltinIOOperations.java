@@ -131,8 +131,8 @@ public class BuiltinIOOperations {
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
             org.kframework.kil.Term kast = rp.runParser(
-                    ccOptions.parser(context),
-                    term1.stringValue(), true, Sort.of(term2.stringValue()), context);
+                    ccOptions.parser(def.context()),
+                    term1.stringValue(), true, Sort.of(term2.stringValue()), def.context());
             Term term = kilTransformer.transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {
