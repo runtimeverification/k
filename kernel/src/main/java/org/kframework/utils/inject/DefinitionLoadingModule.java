@@ -30,7 +30,7 @@ public class DefinitionLoadingModule extends AbstractModule {
     protected void configure() {
     }
 
-    @Provides @DefinitionScoped
+    @Provides @RequestScoped
     Context context(
             BinaryLoader loader,
             DefinitionLoadingOptions options,
@@ -47,7 +47,7 @@ public class DefinitionLoadingModule extends AbstractModule {
         return context;
     }
 
-    @Provides @DefinitionScoped
+    @Provides @RequestScoped
     Definition definition(Tool tool, BinaryLoader loader, FileUtil files) {
         if (tool == Tool.KDOC) {
             return loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
