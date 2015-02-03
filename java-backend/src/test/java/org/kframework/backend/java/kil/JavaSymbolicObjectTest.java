@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.kframework.kil.Attributes;
 import org.kframework.utils.BaseTestCase;
 
 import com.google.common.collect.Sets;
@@ -20,7 +21,8 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
 
     @Before
     public void setUp() {
-        when(definition.productionsOf("foo")).thenReturn(Collections.emptySet());
+        when(definition.signaturesOf("foo")).thenReturn(Collections.emptySet());
+        when(definition.kLabelAttributesOf("foo")).thenReturn(new Attributes());
     }
 
     @Test

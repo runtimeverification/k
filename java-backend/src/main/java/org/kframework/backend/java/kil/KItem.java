@@ -195,11 +195,11 @@ public class KItem extends Term implements KItemRepresentation {
             }
         }
 
-        for (Production production : kLabelConstant.productions()) {
+        for (SortSignature signature : kLabelConstant.signatures()) {
             boolean mustMatch = true;
             boolean mayMatch = true;
 
-            if (kList.concreteSize() == production.getArity()) {
+            if (kList.concreteSize() == signature.parameters().size()) {
                 /* check if the production can match this KItem */
                 int idx = 0;
                 for (Term term : kList) {
@@ -208,7 +208,7 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     Sort childSort = term.sort();
-                    if (!definition.subsorts().isSubsortedEq(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()))) {
+                    if (!definition.subsorts().isSubsortedEq(signature.parameters().get(idx), childSort)) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -217,7 +217,7 @@ public class KItem extends Term implements KItemRepresentation {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.subsorts().hasCommonSubsort(Sort.of(production.getChildSort(idx)), Sort.of(childSort.toFrontEnd()));
+                                && definition.subsorts().hasCommonSubsort(signature.parameters().get(idx), childSort);
                     }
                     idx++;
                 }
@@ -226,9 +226,9 @@ public class KItem extends Term implements KItemRepresentation {
             }
 
             if (mustMatch) {
-                sorts.add(Sort.of(production.getSort()));
+                sorts.add(signature.result());
             } else if (mayMatch) {
-                possibleSorts.add(Sort.of(production.getSort()));
+                possibleSorts.add(signature.result());
             }
         }
 
@@ -693,15 +693,13 @@ public class KItem extends Term implements KItemRepresentation {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(
-                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(
-                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 
