@@ -9,7 +9,6 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -25,6 +24,7 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 /**
  * Utility class that handles the builtin (hooked) operations and their Java
@@ -32,6 +32,7 @@ import com.google.inject.Provider;
  *
  * @author AndreiS
  */
+@Singleton
 public class BuiltinFunction {
 
     /**

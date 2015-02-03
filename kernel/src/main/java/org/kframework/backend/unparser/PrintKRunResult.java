@@ -50,7 +50,7 @@ public class PrintKRunResult implements Transformation<KRunResult, InputStream> 
             return searchResultsPrinter.run((SearchResults)result, a);
         } else if (result instanceof KRunGraph) {
             return graphPrinter.run((KRunGraph)result, a);
-        } else if (result instanceof KRunProofResult && ((KRunProofResult) result).isProven()) {
+        } else if (result instanceof KRunProofResult && (!((KRunProofResult) result).isProven())) {
             return print(((KRunProofResult) result).getResult(), a);
         } else if (result instanceof Set) {
             int i = 1;
