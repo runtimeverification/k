@@ -36,9 +36,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
+  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p }
 
-  val definedSorts: Set[Sort] = productions collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
+  val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
   private lazy val subsortRelations = sentences flatMap {
     case SyntaxProduction(endSort, items, _) =>
@@ -114,8 +114,7 @@ object Production {
 }
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString with OuterKORE with Production {
-  def items = Seq()
+  with SyntaxSortToString with OuterKORE {
 }
 
 case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())

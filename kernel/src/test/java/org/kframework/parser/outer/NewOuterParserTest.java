@@ -1,3 +1,5 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+
 package org.kframework.parser.outer;
 
 import org.apache.commons.io.FileUtils;
@@ -72,7 +74,7 @@ public class NewOuterParserTest {
 
         TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
         Term cleaned = treeCleanerVisitor.apply(parsed).right().get();
-        cleaned = new PreferAvoidVisitor().apply(cleaned).right().get();
+        cleaned = new PreferAvoidVisitor().apply(parsed).right().get();
 
         return TreeNodesToKORE.apply(cleaned);
     }
