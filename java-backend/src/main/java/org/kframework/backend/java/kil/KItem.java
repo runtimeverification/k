@@ -89,7 +89,7 @@ public class KItem extends Term implements KItemRepresentation {
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
 
-    KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+    public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
     }
 

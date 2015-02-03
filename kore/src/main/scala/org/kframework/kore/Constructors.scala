@@ -13,7 +13,7 @@ trait Constructors {
   def KRewrite(left: K, right: K, att: Att): KRewrite
   def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel
 
-  val injectedKListLabel = KLabel("INJECTED-KLIST")
+  lazy val injectedKListLabel = KLabel("INJECTED-KLIST")
 }
 
 abstract class AbstractConstructors extends Constructors

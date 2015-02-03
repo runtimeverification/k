@@ -1,18 +1,22 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.kore.KRewrite;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -37,6 +41,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
+import scala.collection.JavaConversions;
 
 
 /**
@@ -137,7 +142,6 @@ public class Definition extends JavaSymbolicObject {
         }
 
         ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
-        context.klabels.entries().forEach(e -> attributesBuilder.put(e.getKey(), e.getValue().getAttributes()));
         for (Map.Entry<String, Collection<Production>> entry : context.klabels.asMap().entrySet()) {
             Attributes attributes;
             if (!entry.getValue().isEmpty()) {
@@ -167,27 +171,77 @@ public class Definition extends JavaSymbolicObject {
         this.context = context;
     }
 
-//    public Definition(org.kframework.definition.Module m) {
-//        kLabels = new HashSet<>();
-//        frozenKLabels = new HashSet<>();
-//        definitionData = new DefinitionData(
-//                new Subsorts(context),
-//                ImmutableSet.builder()
-//                        .addAll(TOKEN_SORTS)
-//                        .add(Sort.of("#Int"))
-//                        .add(Sort.of("#String"))
-//                        .add(Sort.of("#Id"))
-//                        .build(),
-//                null,
-//                context.klabels,
-//                null,
-//                null,
-//                null,
-//                context.globalOptions,
-//                context.krunOptions);
-//        this.indexingData = null;
-//        this.kem = null;
-//    }
+    public Definition(org.kframework.definition.Module module) {
+        kLabels = new HashSet<>();
+        frozenKLabels = new HashSet<>();
+
+        ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
+        JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
+            JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
+                ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
+                JavaConversions.seqAsJavaList(p._1()).stream()
+                        .map(s -> Sort.of(s.name()))
+                        .forEach(sortsBuilder::add);
+                signaturesBuilder.put(
+                        e.getKey().name(),
+                        new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
+            });
+        });
+
+        ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
+        //JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
+        //    attributesBuilder.put(e.getKey().name(), new Attributes());
+        //});
+        JavaConversions.setAsJavaSet(module.labelsToProductions().keySet()).stream().forEach(l -> {
+            attributesBuilder.put(l.name(), new Attributes());
+        });
+
+        definitionData = new DefinitionData(
+                new Subsorts(module),
+                ImmutableSet.<Sort>builder()
+                        .addAll(TOKEN_SORTS)
+                        .add(Sort.of("#Int"))
+                        .add(Sort.of("#String"))
+                        .add(Sort.of("#Id"))
+                        .build(),
+                null,
+                signaturesBuilder.build(),
+                attributesBuilder.build(),
+                ImmutableSetMultimap.<String, Production>builder().build(),
+                null,
+                null,
+                new GlobalOptions(),
+                new KRunOptions());
+        context = null;
+
+        this.indexingData = new IndexingTable.Data();
+        this.kem = null;
+    }
+
+    public void addKoreRules(Module module, TermContext termContext) {
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(termContext);
+        JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
+            if (s instanceof org.kframework.definition.Rule) {
+                org.kframework.definition.Rule rule = (org.kframework.definition.Rule) s;
+                addRule(new Rule(
+                        "",
+                        transformer.convert(((KRewrite) rule.body()).left()),
+                        transformer.convert(((KRewrite) rule.body()).right()),
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        Collections.emptySet(),
+                        Collections.emptySet(),
+                        ConjunctiveFormula.of(termContext),
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new org.kframework.kil.Rule(),
+                        termContext));
+            }
+        });
+    }
 
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {

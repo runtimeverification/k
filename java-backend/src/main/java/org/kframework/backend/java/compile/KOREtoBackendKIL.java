@@ -1,9 +1,17 @@
 package org.kframework.backend.java.compile;
 
 import org.kframework.attributes.Att;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 
@@ -14,7 +22,6 @@ import java.util.stream.Collectors;
  * KORE to backend KIL
  */
 public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
-
 
     private final TermContext context;
 
@@ -34,7 +41,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
 
     @Override
     public <KK extends org.kframework.kore.K> KList KList(List<KK> items) {
-        return (KList) KList.concatenate(items.stream().map(this::convert).collect(Collectors.toList()));
+        return (KList) KCollection.upKind(
+                KList.concatenate(items.stream().map(this::convert).collect(Collectors.toList())),
+                Kind.KLIST);
     }
 
     @Override
@@ -55,7 +64,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
     public <KK extends org.kframework.kore.K> KSequence KSequence(List<KK> items, Att att) {
         KSequence.Builder builder = KSequence.builder();
         items.stream().map(this::convert).forEach(builder::concatenate);
-        return (KSequence) builder.build();
+        return (KSequence) KCollection.upKind(builder.build(), Kind.K);
     }
 
     @Override
@@ -82,7 +91,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
         else if (k instanceof org.kframework.kore.KApply)
             return KApply1(((KApply) k).klabel(), ((KApply) k).klist(), k.att());
         else if (k instanceof org.kframework.kore.KSequence)
-            return KSequence(((KSequence) k).items(), k.att());
+            return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
         else if (k instanceof org.kframework.kore.KVariable)
             return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
 //        else if (k instanceof org.kframework.kore.InjectedKLabel)
