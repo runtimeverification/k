@@ -143,6 +143,9 @@ public class Definition extends JavaSymbolicObject {
             if (!entry.getValue().isEmpty()) {
                 attributes = entry.getValue().iterator().next().getAttributes();
                 for (Production production : entry.getValue()) {
+                    if (production.isLexical()) {
+                        continue;
+                    }
                     assert production.getAttributes().equals(attributes) :
                             "mismatch attributes:\n" + entry.getValue().iterator().next()
                             + "\nand\n" + production;
