@@ -17,6 +17,7 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +46,7 @@ import com.google.inject.Inject;
  */
 public class Definition extends JavaSymbolicObject {
 
-    private static class DefinitionData {
+    private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
         public final Set<Sort> builtinSorts;
         public final Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts;
@@ -102,7 +103,8 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
 
-    private final transient DefinitionData definitionData;
+    private final DefinitionData definitionData;
+    private final transient Context context;
 
     private transient KExceptionManager kem;
 
@@ -162,6 +164,7 @@ public class Definition extends JavaSymbolicObject {
                 context.getConfigurationStructureMap(),
                 context.globalOptions,
                 context.krunOptions);
+        this.context = context;
     }
 
 //    public Definition(org.kframework.definition.Module m) {
@@ -194,6 +197,7 @@ public class Definition extends JavaSymbolicObject {
         frozenKLabels = new HashSet<>();
 
         this.definitionData = definitionData;
+        this.context = null;
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -375,6 +379,10 @@ public class Definition extends JavaSymbolicObject {
 
     public DefinitionData definitionData() {
         return definitionData;
+    }
+
+    public Context context() {
+        return context;
     }
 
 }

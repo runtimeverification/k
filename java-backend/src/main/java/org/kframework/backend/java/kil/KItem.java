@@ -35,6 +35,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 
 /**
@@ -279,11 +280,10 @@ public class KItem extends Term implements KItemRepresentation {
 
     public static class KItemOperations {
 
-        // TODO(AndreiS): make private again
-        public final Tool tool;
+        private final Tool tool;
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
-        private final BuiltinFunction builtins;
+        private final Provider<BuiltinFunction> builtins;
         private final GlobalOptions options;
 
         @Inject
@@ -291,7 +291,7 @@ public class KItem extends Term implements KItemRepresentation {
                 Tool tool,
                 JavaExecutionOptions javaOptions,
                 KExceptionManager kem,
-                BuiltinFunction builtins,
+                Provider<BuiltinFunction> builtins,
                 GlobalOptions options) {
             this.tool = tool;
             this.javaOptions = javaOptions;
@@ -367,7 +367,7 @@ public class KItem extends Term implements KItemRepresentation {
 
             if (kLabelConstant.isSortPredicate()
                     || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                    || builtins.isBuiltinKLabel(kLabelConstant)) {
+                    || builtins.get().isBuiltinKLabel(kLabelConstant)) {
                 kItem.evaluable = true;
             }
             return kItem.evaluable;
@@ -399,10 +399,10 @@ public class KItem extends Term implements KItemRepresentation {
             try {
                 KList kList = (KList) kItem.kList;
 
-                if (builtins.isBuiltinKLabel(kLabelConstant)) {
+                if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                        Term result = builtins.invoke(context, kLabelConstant, arguments);
+                        Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null) {
                             return result;
                         }

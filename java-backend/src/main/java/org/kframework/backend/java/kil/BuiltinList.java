@@ -29,8 +29,6 @@ import com.google.common.collect.Lists;
  */
 public class BuiltinList extends Collection {
 
-    public static final BuiltinList EMPTY_LIST = (BuiltinList) builder(null).build();
-
     private static enum BaseTermType {
         VARIABLE, FUNCTION, PATTERN, LIST;
     }

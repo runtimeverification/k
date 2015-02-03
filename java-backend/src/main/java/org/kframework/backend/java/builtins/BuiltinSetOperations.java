@@ -29,7 +29,7 @@ public class BuiltinSetOperations {
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinSet.EMPTY_SET;
+        return BuiltinSet.builder(context).build();
     }
 
     public static Term element(Term element, TermContext context) {

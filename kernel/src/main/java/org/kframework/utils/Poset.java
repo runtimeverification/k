@@ -20,8 +20,8 @@ public class Poset<T> implements Serializable {
 
     private boolean cacheEnabled = false;
 
-    private java.util.Set<Tuple<T>> relations = new HashSet<>();
-    private java.util.Set<T> elements = new HashSet<>();
+    private final java.util.Set<Tuple<T>> relations = new HashSet<>();
+    private final java.util.Set<T> elements = new HashSet<>();
 
     public static <T> Poset<T> create() {
         return new Poset<T>();
@@ -99,7 +99,7 @@ public class Poset<T> implements Serializable {
         public Table<T, T, Set<T>> cache;
     }
 
-    private BoundType lowerBound = new BoundType() {
+    private final BoundType lowerBound = new BoundType() {
 
         @Override
         public boolean isInRelation(T first, T second) {
@@ -107,7 +107,7 @@ public class Poset<T> implements Serializable {
         }
     };
 
-    private BoundType upperBound = new BoundType() {
+    private final BoundType upperBound = new BoundType() {
 
         @Override
         public boolean isInRelation(T first, T second) {
@@ -290,7 +290,7 @@ public class Poset<T> implements Serializable {
     }
 
     private static final class Tuple<T> implements Serializable {
-        private T big, small;
+        private final T big, small;
 
         public Tuple(T big, T small) {
             Preconditions.checkNotNull(big);

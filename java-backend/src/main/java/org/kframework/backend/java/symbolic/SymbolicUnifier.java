@@ -240,7 +240,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         otherBuilder.addItems(otherRemainingElementsRight);
         Term otherRemainingList = otherBuilder.build();
 
-        if (!remainingList.equals(BuiltinList.EMPTY_LIST) || !otherRemainingList.equals(BuiltinList.EMPTY_LIST)) {
+        if (!(remainingList instanceof BuiltinList && ((BuiltinList) remainingList).isEmpty())
+                || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
             if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
                 add(remainingList, otherRemainingList);
             } else {
@@ -320,7 +321,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
         Term otherRemainingSet = otherBuilder.build();
 
-        if (!remainingSet.equals(BuiltinSet.EMPTY_SET) || !otherRemainingSet.equals(BuiltinSet.EMPTY_SET)) {
+        if (!(remainingSet instanceof BuiltinSet && ((BuiltinSet) remainingSet).isEmpty())
+                || !(otherRemainingSet instanceof BuiltinSet && ((BuiltinSet) otherRemainingSet).isEmpty())) {
             if (remainingSet instanceof Variable || otherRemainingSet instanceof Variable || partialSimpl) {
                 // set equality resolved or partial simplification enabled
                 add(remainingSet, otherRemainingSet);

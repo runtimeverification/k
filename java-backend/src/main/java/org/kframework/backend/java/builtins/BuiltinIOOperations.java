@@ -11,7 +11,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
@@ -20,10 +19,6 @@ import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-
-import org.kframework.parser.ProgramLoader;
-
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.util.Map;
@@ -38,8 +33,7 @@ public class BuiltinIOOperations {
     private final Definition def;
     private final FileSystem fs;
     private final ConfigurationCreationOptions ccOptions;
-    private final Provider<KILtoBackendJavaKILTransformer> kilTransformerProvider;
-    private final ProgramLoader programLoader;
+    private final KILtoBackendJavaKILTransformer kilTransformer;
     private final RunProcess rp;
 
     @Inject
@@ -48,14 +42,12 @@ public class BuiltinIOOperations {
             FileSystem fs,
             Context context,
             ConfigurationCreationOptions ccOptions,
-            Provider<KILtoBackendJavaKILTransformer> kilTransformerProvider,
-            ProgramLoader programLoader,
+            KILtoBackendJavaKILTransformer kilTransformer,
             RunProcess rp) {
         this.def = def;
         this.fs = fs;
         this.ccOptions = ccOptions;
-        this.kilTransformerProvider = kilTransformerProvider;
-        this.programLoader = programLoader;
+        this.kilTransformer = kilTransformer;
         this.rp = rp;
     }
 
@@ -138,15 +130,11 @@ public class BuiltinIOOperations {
 
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
-            return null;
-//            org.kframework.kil.Term kast = rp.runParser(
-//                    ccOptions.parser(context),
-//                    term1.stringValue(),
-//                    true,
-//                    Sort.of(term2.stringValue()),
-//                    context);
-//            Term term = kilTransformerProvider.get().transformAndEval(kast);
-//            return term;
+            org.kframework.kil.Term kast = rp.runParser(
+                    ccOptions.parser(def.context()),
+                    term1.stringValue(), true, Sort.of(term2.stringValue()), def.context());
+            Term term = kilTransformer.transformAndEval(kast);
+            return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);
         }
