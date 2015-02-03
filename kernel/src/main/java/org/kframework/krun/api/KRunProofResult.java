@@ -14,6 +14,10 @@ public class KRunProofResult<T> implements KRunResult {
         return proven;
     }
 
+    public T getResult() {
+        return result;
+    }
+
     @Override
     public String toString() {
         if (proven) {

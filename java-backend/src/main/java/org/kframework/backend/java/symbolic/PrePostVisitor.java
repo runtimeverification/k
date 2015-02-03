@@ -166,20 +166,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(UninterpretedConstraint uninterpretedConstraint) {
-        preVisitor.resetProceed();
-        uninterpretedConstraint.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-
-        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
-            equality.leftHandSide().accept(this);
-            equality.rightHandSide().accept(this);
-        }
-
-        uninterpretedConstraint.accept(postVisitor);
-    }
-
-    @Override
     public void visit(UninterpretedToken uninterpretedToken) {
         preVisitor.resetProceed();
         uninterpretedToken.accept(preVisitor);
@@ -268,7 +254,7 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(SymbolicConstraint node) {
+    public void visit(ConjunctiveFormula node) {
         preVisitor.resetProceed();
         node.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
@@ -279,6 +265,20 @@ public class PrePostVisitor implements Visitor {
         for (Equality equality : node.equalities()) {
             equality.leftHandSide().accept(this);
             equality.rightHandSide().accept(this);
+        }
+        for (DisjunctiveFormula disjunctiveFormula : node.disjunctions()) {
+            disjunctiveFormula.accept(this);
+        }
+        node.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(DisjunctiveFormula node) {
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        for (ConjunctiveFormula conjunctiveFormula : node.conjunctions()) {
+            conjunctiveFormula.accept(this);
         }
         node.accept(postVisitor);
     }

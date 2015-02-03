@@ -105,7 +105,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    protected List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents(TermContext context) {
         throw new UnsupportedOperationException();
     }
 

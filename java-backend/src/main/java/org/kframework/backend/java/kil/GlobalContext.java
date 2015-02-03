@@ -5,7 +5,7 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
+import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.inject.RequestScoped;
 
@@ -19,7 +19,7 @@ public class GlobalContext {
     @Deprecated
     public final EqualityOperations equalityOps;
     @Deprecated
-    public final SymbolicConstraintOperations constraintOps;
+    public final SMTOperations constraintOps;
     @Deprecated
     public final KItemOperations kItemOps;
 
@@ -28,7 +28,7 @@ public class GlobalContext {
             FileSystem fs,
             BuiltinFunction builtins,
             EqualityOperations equalityOps,
-            SymbolicConstraintOperations constraintOps,
+            SMTOperations constraintOps,
             KItemOperations kItemOps) {
         this.fs = fs;
         this.builtins = builtins;
