@@ -1,8 +1,10 @@
 package org.kframework
 
+import org.kframework.attributes.Att
+
 package object tiny {
   type Sort = kore.Sort
 
-  val True = And()(FreeTheory)
-  val False = Or()(FreeTheory)
+  lazy val True = new And(Set(), Att())
+  lazy val False = new Or(Set(), Att())
 }

@@ -7,7 +7,6 @@ import org.kframework.kore.ADT
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.reflect.ClassTag
 
 //////////////////
 //   TRAITS
@@ -16,8 +15,7 @@ import scala.reflect.ClassTag
 trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher = ???
-  def normalize(implicit theory: Theory) = theory.normalize(this)
-  def deepNormalize(implicit theory: Theory) = theory.deepNormalize(this)
+  def normalize(implicit theory: Theory): K = this
 }
 
 object KApp {
@@ -34,7 +32,7 @@ trait KApp extends kore.KApply with K {
 
   def klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
-  def klist = kore.ADTConstructors.KList(children.asInstanceOf[List[kore.K]].asJava)
+  def klist = kore.ADTConstructors.KList(children.asInstanceOf[Iterable[kore.K]].toSeq.asJava)
 
   override def equals(that: Any) = {
     (that match {
@@ -62,10 +60,14 @@ trait KAssocApp extends KApp {
   def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
 }
 
+trait KRegularApp extends KApp {
+  def klabel: KRegularAppLabel
+}
+
 /**
  * KApp with fixed arity. It is defined using a non-associative operator.
  */
-trait KProduct extends KApp with Product {
+trait KProduct extends KRegularApp with Product {
   val children = productIterator collect { case k: K => k } toIterable
 }
 
@@ -85,13 +87,14 @@ trait EmptyAtt {
 
 case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLeaf {
   def copy(att: Att): KVar = KVar(name, att)
+  override def matcher(right: K): Matcher = KVarMatcher(this, right)
 }
 
 case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
   def copy(att: Att): RegularKTok = RegularKTok(sort, s, att)
 }
 
-class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KApp
+class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KRegularApp
 
 class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], val att: Att = Att()) extends KAssocApp
 
@@ -119,12 +122,28 @@ object InjectedLabel {
 /////////////////////
 
 trait Label extends kore.KLabel {
-  def apply(l: Seq[K], att: Att)(implicit t: Theory): K =
-    t.normalize(construct(l, att))
+  def apply(l: Seq[K], att: Att)(implicit theory: Theory): K =
+    construct(l, att).normalize
 
   def construct(l: Iterable[K], att: Att): KApp
-  def apply(l: K*)(implicit t: Theory): K = apply(l, Att())
+  def apply(l: K*)(implicit theory: Theory): K = apply(l, Att())
   def att: Att
+}
+
+trait KRegularAppLabel extends Label {
+
+}
+
+trait KProduct1Label extends KRegularAppLabel {
+  def apply(k: K, att: Att): KProduct
+  def construct(l: Iterable[K], att: Att): KProduct =
+    l match {case List(k) => apply(k, att) }
+}
+
+trait KProduct2Label extends KRegularAppLabel {
+  def apply(k1: K, k2: K, att: Att): KProduct
+  def construct(l: Iterable[K], att: Att): KProduct =
+    l match {case Seq(k1, k2) => apply(k1, k2, att) }
 }
 
 trait KAssocAppLabel extends Label {
@@ -133,16 +152,17 @@ trait KAssocAppLabel extends Label {
     l foreach b.+=
     b.result()
   }
-  def newBuilder[AssocIn <: {def iterator : Iterator[K]} : ClassTag](att: Att): mutable.Builder[K, KAssocApp] =
+  def newBuilder(att: Att): mutable.Builder[K, KAssocApp] =
     new KAppAssocBuilder(ListBuffer[K](), this).mapResult { constructFromFlattened(_, att) }
   def constructFromFlattened(l: Seq[K], att: Att): KAssocApp
 }
+
 
 ///////////////
 //   LABELS
 ///////////////
 
-object KRewrite extends Label {
+object KRewrite extends KRegularAppLabel {
   val att = Att()
   val name = "=>"
   def construct(l: Iterable[K], att: Att): KRewrite =
@@ -151,7 +171,7 @@ object KRewrite extends Label {
     }
 }
 
-case class RegularKAppLabel(name: String, att: Att) extends Label {
+case class RegularKAppLabel(name: String, att: Att) extends KRegularAppLabel {
   override def construct(l: Iterable[K], att: Att): RegularKApp = new RegularKApp(this, l.toSeq, att)
 }
 

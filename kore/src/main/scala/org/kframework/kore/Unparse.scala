@@ -4,11 +4,11 @@ import Unapply._
 import org.apache.commons.lang3.StringEscapeUtils
 
 object Unparse {
-  def apply(k: K) = k match {
+  def apply(k: K): String = k match {
     case KToken(sort, s) => "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")"
-    case KSequence(l) => if (l.isEmpty) ".K" else l.mkString("~>")
-    case KApply(klabel, list) => klabel.toString + "(" + list.mkString(",") + ")"
-    case KRewrite(left, right) => left + "=>" + right
+    case KSequence(l) => if (l.isEmpty) ".K" else l.map(apply).mkString("~>")
+    case KRewrite(left, right) => apply(left) + "=>" + apply(right)
+    case KApply(klabel, list) => klabel.name + "(" + list.map(apply).mkString(",") + ")"
     case KVariable(name) => name
   }
 }

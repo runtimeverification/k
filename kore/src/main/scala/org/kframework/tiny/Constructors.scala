@@ -47,4 +47,20 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     case k: K => k
     case t@Unapply.KApply(label, list) => KApply(label, KList(list.asJava), t.att)
   }
+
+  import Builtins._
+
+  implicit def stringToToken(s: String) = KToken(String, s, Att())
+  implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
+  implicit def intToToken(n: Int): K = KToken(Int, n.toString, Att())
+
+  implicit class KWithSeq(k: K) {
+    def ~>(other: K) = KSeq(Seq(k, other), Att())
+    def ==>(other: K) = KRewrite(k, other, Att())
+  }
+
+  implicit class KVarWithArrow(k: KVar) {
+    def ->(other: K) = Binding(k, other)
+  }
+
 }
