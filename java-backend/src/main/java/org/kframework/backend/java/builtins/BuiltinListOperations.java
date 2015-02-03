@@ -28,7 +28,7 @@ public class BuiltinListOperations {
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinList.EMPTY_LIST;
+        return BuiltinList.builder(context).build();
     }
 
     public static Term element(Term element, TermContext context) {

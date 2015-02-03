@@ -29,13 +29,6 @@ import com.google.common.collect.Lists;
  */
 public class BuiltinSet extends AssociativeCommutativeCollection {
 
-    public static final BuiltinSet EMPTY_SET = new BuiltinSet(
-            ImmutableSet.<Term>of(),
-            ImmutableMultiset.<KItem>of(),
-            ImmutableMultiset.<Term>of(),
-            ImmutableMultiset.<Variable>of(),
-            null);
-
     private final ImmutableSet<Term> elements;
 
     private BuiltinSet(
