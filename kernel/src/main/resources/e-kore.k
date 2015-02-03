@@ -126,11 +126,17 @@ module OUTER-KORE
 
   syntax KSentence ::= "syntax" KSort OptionalAttributes
                                [klabel(#KSyntaxSort), hook(org.kframework.kore.outer.SyntaxSort)]
-                     | "syntax" KSort "::=" KProduction OptionalAttributes
+                     | "syntax" KSort "::=" PrioritySeqBlock
                                [klabel(#KSyntaxProduction), hook(org.kframework.kore.outer.SyntaxProduction)]
                      | "syntax" "priority"   KPrioritySeq OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
                      | "syntax" "priorities" KPrioritySeq OptionalAttributes
+                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                     | "syntax" "left" KNeTagSet OptionalAttributes
+                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                     | "syntax" "right" KNeTagSet OptionalAttributes
+                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                     | "syntax" "non-assoc" KNeTagSet OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
 
   syntax KPrioritySeq ::= KNeTagSet ">" KPrioritySeq   [klabel(#KPrioritySeq), assoc]
@@ -139,13 +145,30 @@ module OUTER-KORE
                         | Tag                          [klabel(#KTagSet)]
   syntax Tag ::= KLabel
 
-  syntax KProduction ::= ""    [klabel(#emptyKProduction), onlyLabel]
+  syntax KProduction ::= KProductionItem
                        | KProductionItem KProduction
                                [klabel(#KProduction), assoc, unit(#emptyKProduction)]
   syntax KProductionItem ::= KSort       [hook(org.kframework.kore.outer.NonTerminal)]
                            | KString     [hook(org.kframework.kore.outer.Terminal)]
                            | "r" KString [hook(org.kframework.kore.outer.RegexTerminal)]
-
+						   | "Token" "{" TokenContent "}" [klabel(#KPIToken)]
+						   | "Lexer" "{" TokenContent "}" [klabel(#KPIToken)]
+						   | "NeList" "{" KSort "," KString "}" [klabel(#NeList)]
+						   |   "List" "{" KSort "," KString "}" [klabel(#List)]
+  syntax TokenContent ::= r"[^\\n\\r}]" [token]
+  syntax PrioritySeqBlock ::= ProdBlock ">" AssocAttribute PrioritySeqBlock [klabel(#PrioritySeqBlock)]
+                            | ProdBlock
+  syntax AssocAttribute ::= ""           [klabel(#NoAttribute)]
+                          | "left:"      [klabel(#LeftAttribute)]
+                          | "right:"     [klabel(#RightAttribute)]
+                          | "non-assoc:" [klabel(#NonAssocAttribute)]
+  syntax ProdBlock ::= KProductionWAttr "|" ProdBlock [klabel(#ProdBlock)]
+                     | KProductionWAttr
+  syntax KProductionWAttr ::= KProduction OptionalAttributes [klabel(#KProductionWAttr)]
+                            | KLabel "(" KSortList ")" OptionalAttributes [klabel(#KFuncProductionWAttr)]
+							|        "(" KSortList ")" OptionalAttributes [klabel(#KTupleProductionWAttr)]
+  syntax KSortList ::= KSort "," KSortList [klabel(#KSortList)]
+                     | KSort
   // We use #KAttributes as top KLabel in the K term holding the attributes
   syntax OptionalAttributes ::= KAttributesDeclaration
                               | "" [klabel(#NoKAttributesDeclaration)]
