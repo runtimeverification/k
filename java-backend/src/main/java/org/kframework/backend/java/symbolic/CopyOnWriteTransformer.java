@@ -399,7 +399,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        if (context.global().kItemOps.tool != Tool.KOMPILE) {
+        if (context.global().tool != Tool.KOMPILE) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
         }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
