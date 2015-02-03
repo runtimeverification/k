@@ -46,7 +46,7 @@ public class UseSMTTest {
         when(tc.definition().context()).thenReturn(context);
         when(definition.functionRules()).thenReturn(HashMultimap.<KLabelConstant, Rule>create());
         context.productions = new HashSet<>();
-        when(tc.global()).thenReturn(new GlobalContext(null, null, null, constraintOps, null));
+        when(tc.global()).thenReturn(new GlobalContext(null, null, constraintOps, null, null));
     }
 
     @Test
