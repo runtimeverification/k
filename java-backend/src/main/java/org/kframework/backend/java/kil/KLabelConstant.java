@@ -3,6 +3,9 @@ package org.kframework.backend.java.kil;
 
 import java.util.Set;
 
+import com.google.common.collect.Multimap;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.name.Names;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -12,8 +15,6 @@ import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
-
-import com.google.common.collect.Multimap;
 
 
 /**
@@ -96,9 +97,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     public static KLabelConstant of(String label, Definition definition) {
         return cache.get(definition.signaturesOf(label), () -> new MapCache<>(new PatriciaTrie<>()))
                 .get(label, () -> new KLabelConstant(
-                                label,
-                                definition.signaturesOf(label),
-                                definition.kLabelAttributesOf(label)));
+                        label,
+                        definition.signaturesOf(label),
+                        definition.kLabelAttributesOf(label)));
     }
 
     /**
@@ -223,12 +224,35 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     }
 
     /**
-     * Searches for and retieves (if found) a binder map for this label
+     * Searches for and retrieves (if found) a binder map for this label
      * See {@link org.kframework.kil.Production#getBinderMap()}
      *
      * @return the binder map for this label (or {@code null} if no binder map was defined.
      */
     public Multimap<Integer, Integer> getBinderMap() {
-        throw new UnsupportedOperationException();
+        if (isBinder()) {
+            return productionAttributes.getAttr(Attribute.Key.get(
+                    new TypeToken<Multimap<Integer, Integer>>() {},
+                    Names.named("binder")));
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * Searches for and retrieves (if found) a meta binder map for this label
+     * See {@link org.kframework.kil.Production#getBinderMap()}
+     *
+     * @return the binder map for this label (or {@code null} if no meta binder map was defined.
+     */
+    public Multimap<Integer, Integer> getMetaBinderMap() {
+        if (isMetaBinder()) {
+            return productionAttributes.getAttr(Attribute.Key.get(
+                    new TypeToken<Multimap<Integer, Integer>>() {},
+                    Names.named("metabinder")));
+        } else {
+            return null;
+        }
+    }
+
 }

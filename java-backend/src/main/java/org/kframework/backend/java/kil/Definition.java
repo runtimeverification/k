@@ -37,6 +37,8 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.name.Names;
 import com.google.inject.Inject;
 
 
@@ -144,6 +146,20 @@ public class Definition extends JavaSymbolicObject {
             final Attributes attributes = new Attributes();
             entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {
                 attributes.putAll(p.getAttributes());
+                if (p.containsAttribute("binder")) {
+                    attributes.add(new Attribute<>(
+                            Attribute.Key.get(
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    Names.named("binder")),
+                            p.getBinderMap()));
+                }
+                if (p.containsAttribute("metabinder")) {
+                    attributes.add(new Attribute<>(
+                            Attribute.Key.get(
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    Names.named("metabinder")),
+                            p.getBinderMap()));
+                }
             });
             // TODO(AndreiS): fix the definitions to pass this assertion
             //entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {

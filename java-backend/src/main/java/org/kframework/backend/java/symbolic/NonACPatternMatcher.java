@@ -306,7 +306,7 @@ public class NonACPatternMatcher {
             if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
-                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getMetaBinderMap();
                 List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
