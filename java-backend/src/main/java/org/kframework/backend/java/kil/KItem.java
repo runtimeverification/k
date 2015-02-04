@@ -685,13 +685,13 @@ public class KItem extends Term implements KItemRepresentation {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 
