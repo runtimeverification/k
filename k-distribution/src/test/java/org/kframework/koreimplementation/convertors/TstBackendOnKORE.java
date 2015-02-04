@@ -11,6 +11,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.definition.Module;
@@ -31,13 +32,13 @@ public class TstBackendOnKORE extends BaseTest {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
         Module module = kilToKore.apply(defWithContext.definition).getModule("TEST").get();
 
-        Definition definition = new Definition(module);
+        Definition definition = new Definition(module, null);
         TermContext termContext = TermContext.of(new GlobalContext(
                 null,
-                null,
+                new Equality.EqualityOperations(() -> definition, new JavaExecutionOptions()),
                 null,
                 new KItem.KItemOperations(Tool.KRUN, new JavaExecutionOptions(), null, null, new GlobalOptions()),
-                null));
+                Tool.KRUN));
         termContext.global().setDefinition(definition);
         definition.addKoreRules(module, termContext);
         definition.setIndex(new IndexingTable(() -> definition, new IndexingTable.Data()));
@@ -45,8 +46,8 @@ public class TstBackendOnKORE extends BaseTest {
         return rewriter.rewrite(
                 new ConstrainedTerm(
                         new KItem(
-                                KLabelConstant.of("'notBool_", definition),
-                                KList.singleton(BoolToken.TRUE),
+                                KLabelConstant.of("'a", definition),
+                                KList.builder().build(),
                                 Sort.BOOL,
                                 false),
                         termContext),
@@ -54,6 +55,18 @@ public class TstBackendOnKORE extends BaseTest {
                 -1,
                 false)
                 .toString();
+//        return rewriter.rewrite(
+//                new ConstrainedTerm(
+//                        new KItem(
+//                                KLabelConstant.of("'notBool_", definition),
+//                                KList.singleton(BoolToken.TRUE),
+//                                Sort.BOOL,
+//                                false),
+//                        termContext),
+//                null,
+//                -1,
+//                false)
+//                .toString();
 
     }
 

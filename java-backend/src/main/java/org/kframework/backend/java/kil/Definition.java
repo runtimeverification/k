@@ -106,7 +106,6 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> patternFoldingRules = new ArrayList<>();
 
     private final Set<KLabelConstant> kLabels;
-    private final Set<KLabelConstant> frozenKLabels;
 
     private final DefinitionData definitionData;
     private final transient Context context;
@@ -120,10 +119,9 @@ public class Definition extends JavaSymbolicObject {
 
     @Inject
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
-        this.indexingData = indexingData;
-        this.kem = kem;
         kLabels = new HashSet<>();
-        frozenKLabels = new HashSet<>();
+        this.kem = kem;
+        this.indexingData = indexingData;
 
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
@@ -171,9 +169,9 @@ public class Definition extends JavaSymbolicObject {
         this.context = context;
     }
 
-    public Definition(org.kframework.definition.Module module) {
+    public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
         kLabels = new HashSet<>();
-        frozenKLabels = new HashSet<>();
+        this.kem = kem;
 
         ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
         JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
@@ -189,9 +187,9 @@ public class Definition extends JavaSymbolicObject {
         });
 
         ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
-        //JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
-        //    attributesBuilder.put(e.getKey().name(), new Attributes());
-        //});
+        JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
+            attributesBuilder.put(e.getKey().name(), new Attributes());
+        });
         JavaConversions.setAsJavaSet(module.labelsToProductions().keySet()).stream().forEach(l -> {
             attributesBuilder.put(l.name(), new Attributes());
         });
@@ -215,7 +213,6 @@ public class Definition extends JavaSymbolicObject {
         context = null;
 
         this.indexingData = new IndexingTable.Data();
-        this.kem = null;
     }
 
     public void addKoreRules(Module module, TermContext termContext) {
@@ -245,23 +242,12 @@ public class Definition extends JavaSymbolicObject {
 
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
-        this.indexingData = indexingData;
-        this.kem = kem;
         kLabels = new HashSet<>();
-        frozenKLabels = new HashSet<>();
+        this.kem = kem;
+        this.indexingData = indexingData;
 
         this.definitionData = definitionData;
         this.context = null;
-    }
-
-    public void addFrozenKLabel(KLabelConstant frozenKLabel) {
-        frozenKLabels.add(frozenKLabel);
-    }
-
-    public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
-        for (KLabelConstant frozenKLabel : frozenKLabels) {
-            this.frozenKLabels.add(frozenKLabel);
-        }
     }
 
     public void addKLabel(KLabelConstant kLabel) {
@@ -350,10 +336,6 @@ public class Definition extends JavaSymbolicObject {
 
     public List<Rule> patternFoldingRules() {
         return patternFoldingRules;
-    }
-
-    public Set<KLabelConstant> frozenKLabels() {
-        return frozenKLabels;
     }
 
     public Set<KLabelConstant> kLabels() {

@@ -2,9 +2,12 @@ module TEST
 //  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
 //  syntax Int ::= #Int
 //  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*} [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
-  syntax #Bool ::= Token{"true"}
-  syntax #Bool ::= Token{"false"}
-  syntax Bool ::= #Bool
+//  syntax #Bool ::= Token{"true"}
+//  syntax #Bool ::= Token{"false"}
+//  syntax Bool ::= #Bool
+    syntax Foo ::= "a" [klabel('a)]
+    syntax Foo ::= "b" [klabel('b)]
+    rule a => b
 //  syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
 //                     [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]")]
 //  syntax String ::= #String

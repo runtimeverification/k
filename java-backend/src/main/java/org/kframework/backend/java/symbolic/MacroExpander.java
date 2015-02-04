@@ -40,7 +40,6 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 kem,
                 definition.indexingData);
         processedDefinition.addKLabelCollection(definition.kLabels());
-        processedDefinition.addFrozenKLabelCollection(definition.frozenKLabels());
         for (Rule rule : definition.rules()) {
             processedDefinition.addRule(processRule(rule));
         }
