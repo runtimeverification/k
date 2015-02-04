@@ -4,6 +4,7 @@ package org.kframework.backend.unparser;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
@@ -33,37 +34,29 @@ public class PrintTransition implements Transformation<Transition, String> {
     private Map<Pair<Source, Location>, ModuleItem> ruleStore;
 
     @Inject
-    public PrintTransition(@Concrete Definition definition) {
-        this.definition = definition;
-        this.ruleStore = new HashMap<>();
-        populateRuleStore();
+    public PrintTransition() {
     }
 
     public PrintTransition(
             Transformation<ASTNode, String> astNodePrinter,
-            Transformation<KRunState, String> statePrinter,
-            @Concrete Definition definition) {
+            Transformation<KRunState, String> statePrinter) {
         this.astNodePrinter = astNodePrinter;
         this.statePrinter = statePrinter;
-        this.definition = definition;
         this.ruleStore = new HashMap<>();
-        populateRuleStore();
     }
 
     /**
      * Populates a map containing the unparsed rules, for pretty printing.
      */
     private void populateRuleStore() {
-        definition.getItems().stream().forEach((item) -> {
-            if (item instanceof Module) {
-                ((Module) item).getItems().stream().forEach((moduleItem) -> {
-                    Source src = moduleItem.getSource();
-                    Location location = moduleItem.getLocation();
-                    if (src != null && location != null) {
-                        ruleStore.put(new MutablePair<>(src, location), moduleItem);
-                    }
-                });
-            }
+        definition.getItems().stream().filter((item) -> item instanceof Module).forEach((item) -> {
+            ((Module) item).getItems().stream().forEach((moduleItem) -> {
+                Source src = moduleItem.getSource();
+                Location location = moduleItem.getLocation();
+                if (src != null && location != null) {
+                    ruleStore.put(new MutablePair<>(src, location), moduleItem);
+                }
+            });
         });
     }
 
@@ -74,6 +67,10 @@ public class PrintTransition implements Transformation<Transition, String> {
         StringBuilder sb = new StringBuilder();
         boolean verbose = a.typeSafeGet(Boolean.class, PRINT_VERBOSE_GRAPH);
         KRunGraph graph = a.typeSafeGet(KRunGraph.class);
+        if (!(definition != null)) {
+            definition = a.typeSafeGet(Attribute.Key.get(Definition.class));
+            populateRuleStore();
+        }
         if (trans.getType() == TransitionType.RULE) {
             if (verbose) {
                 sb.append(astNodePrinter.run(trans.getRule(), a));
