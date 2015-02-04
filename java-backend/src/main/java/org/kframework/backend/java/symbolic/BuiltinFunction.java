@@ -71,7 +71,7 @@ public class BuiltinFunction {
                  * exclude hook from evaluation during compilation if the hook is dynamic
                  * in nature (is related to I/O or to meta properties).
                  * */
-                if (tool == Tool.KOMPILE && entry.getValue().containsAttribute(Attribute.IMPURE_KEY)) {
+                if (tool == Tool.KOMPILE && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
                     table.put(KLabelConstant.of(entry.getKey(), definition), throwImpureExceptionHandle);
                     continue;
                 }

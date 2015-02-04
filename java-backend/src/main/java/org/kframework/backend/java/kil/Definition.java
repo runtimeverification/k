@@ -55,8 +55,8 @@ public class Definition extends JavaSymbolicObject {
         public final ImmutableMap<String, Attributes> kLabelAttributes;
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
         public final ConfigurationStructureMap configurationStructureMap;
-        public final transient GlobalOptions globalOptions;
-        public final transient KRunOptions kRunOptions;
+        public transient GlobalOptions globalOptions;
+        public transient KRunOptions kRunOptions;
 
         private DefinitionData(
                 Subsorts subsorts,
@@ -102,7 +102,7 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> frozenKLabels;
 
     private final DefinitionData definitionData;
-    private final transient Context context;
+    private transient Context context;
 
     private transient KExceptionManager kem;
 
@@ -269,7 +269,28 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.subsorts;
     }
 
+    public Context context() {
+        return context;
+    }
+
     public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public GlobalOptions globalOptions() {
+        return definitionData.globalOptions;
+    }
+
+    public void setGlobalOptions(GlobalOptions globalOptions) {
+        this.definitionData.globalOptions = globalOptions;
+    }
+
+    public KRunOptions kRunOptions() {
+        return definitionData.kRunOptions;
+    }
+
+    public void setKRunOptions(KRunOptions kRunOptions) {
+        this.definitionData.kRunOptions = kRunOptions;
     }
 
     public void setKem(KExceptionManager kem) {
@@ -362,24 +383,12 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.dataStructureSorts.get(sort.toFrontEnd());
     }
 
-    public GlobalOptions globalOptions() {
-        return definitionData.globalOptions;
-    }
-
-    public KRunOptions kRunOptions() {
-        return definitionData.kRunOptions;
-    }
-
     public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 
     public DefinitionData definitionData() {
         return definitionData;
-    }
-
-    public Context context() {
-        return context;
     }
 
 }
