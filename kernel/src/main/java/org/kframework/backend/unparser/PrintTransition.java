@@ -1,31 +1,70 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Location;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.transformation.Transformation;
+import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.InjectGeneric;
 
 import com.google.inject.Inject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrintTransition implements Transformation<Transition, String> {
 
     @InjectGeneric private Transformation<ASTNode, String> astNodePrinter;
     @InjectGeneric private Transformation<KRunState, String> statePrinter;
+    private Definition definition;
+    private Map<Pair<Source, Location>, ModuleItem> ruleStore;
 
     @Inject
-    public PrintTransition() {}
+    public PrintTransition(@Concrete Definition definition) {
+        this.definition = definition;
+        this.ruleStore = new HashMap<>();
+        populateRuleStore();
+    }
 
     public PrintTransition(
             Transformation<ASTNode, String> astNodePrinter,
-            Transformation<KRunState, String> statePrinter) {
+            Transformation<KRunState, String> statePrinter,
+            @Concrete Definition definition) {
         this.astNodePrinter = astNodePrinter;
         this.statePrinter = statePrinter;
+        this.definition = definition;
+        this.ruleStore = new HashMap<>();
+        populateRuleStore();
+    }
+
+    /**
+     * Populates a map containing the unparsed rules, for pretty printing.
+     */
+    private void populateRuleStore() {
+        definition.getItems().stream().forEach((item) -> {
+            if (item instanceof Module) {
+                ((Module) item).getItems().stream().forEach((moduleItem) -> {
+                    Source src = moduleItem.getSource();
+                    Location location = moduleItem.getLocation();
+                    if (src != null && location != null) {
+                        ruleStore.put(new MutablePair<>(src, location), moduleItem);
+                    }
+                });
+            }
+        });
     }
 
     public static final String PRINT_VERBOSE_GRAPH = "printVerboseGraph";

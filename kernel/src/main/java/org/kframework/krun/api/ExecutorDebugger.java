@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import com.beust.jcommander.StringKey;
 import com.google.inject.Inject;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
@@ -11,12 +10,8 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
@@ -33,10 +28,7 @@ import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.parser.TermLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.inject.Concrete;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 public class ExecutorDebugger implements Debugger {
@@ -52,9 +44,6 @@ public class ExecutorDebugger implements Debugger {
     private final TermLoader loader;
     private final KExceptionManager kem;
     private final KRunState.Counter counter;
-    private final Definition definition;
-
-    private Map<String, ModuleItem> ruleMap;
 
     @Inject
     public ExecutorDebugger(
@@ -62,15 +51,12 @@ public class ExecutorDebugger implements Debugger {
             Context context,
             TermLoader loader,
             KExceptionManager kem,
-            KRunState.Counter counter,
-            @Concrete Definition definition) throws KRunExecutionException {
+            KRunState.Counter counter) throws KRunExecutionException {
         this.context = context;
         this.executor = executor;
         this.loader = loader;
         this.kem = kem;
         this.counter = counter;
-        this.definition = definition;
-        this.ruleMap = new HashMap<>();
     }
 
     @Override
@@ -93,25 +79,6 @@ public class ExecutorDebugger implements Debugger {
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(reduced);
         currentState = reduced.getStateId();
-        populateRuleMap();
-    }
-
-    /**
-     * Populates the rule map to contain the
-     * Location information from the definition
-     */
-    private void populateRuleMap() {
-        for (DefinitionItem item : definition.getItems()) {
-            if (item instanceof Module) {
-                // Get the rules from the module and add to store
-                for (ModuleItem moduleItem : ((Module) item).getItems()) {
-                    if (moduleItem.getSource() != null && moduleItem.getLocation() != null) {
-                        String key = moduleItem.getSource().toString() + moduleItem.getLocation().toString();
-                        ruleMap.put(key, moduleItem);
-                    }
-                }
-            }
-        }
     }
 
     /**
