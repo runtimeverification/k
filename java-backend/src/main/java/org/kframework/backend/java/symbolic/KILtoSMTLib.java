@@ -185,7 +185,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         Set<Sort> sorts = new HashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
-            String smtlib = kLabel.getAttribute(Attribute.SMTLIB_KEY);
+            String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
             if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(kLabel);
                 assert kLabel.signatures().size() == 1;
@@ -214,7 +214,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
         for (KLabelConstant kLabel : functions) {
             sb.append("(declare-fun ");
-            sb.append(kLabel.getAttribute(Attribute.SMTLIB_KEY));
+            sb.append(kLabel.getAttr(Attribute.SMTLIB_KEY));
             sb.append(" (");
             List<String> childrenSorts = new ArrayList<>();
             for (Sort sort : kLabel.signatures().iterator().next().parameters()) {
