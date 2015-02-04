@@ -18,6 +18,7 @@ import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.Spec;
@@ -94,7 +95,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            exposeBindings(definitionSpecificModules, Spec.class);
+            exposeBindings(definitionSpecificModules, Spec.class, Annotations::spec);
             bind(Simulator.class).annotatedWith(Main.class).to(Simulator.class);
             expose(Simulator.class).annotatedWith(Main.class);
         }
