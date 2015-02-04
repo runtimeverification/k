@@ -55,12 +55,6 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
 
     private final Sort predicateSort;
 
-    /**
-     * Specifies if this {@code KLabelConstant} is a list label,
-     * e.g. {@code '.List{"'_,_"}}.
-     */
-    private final boolean isListLabel;
-
     private KLabelConstant(String label, Set<SortSignature> signatures, Attributes attributes, Definition definition) {
         this.label = label;
         this.signatures = signatures;
@@ -73,10 +67,11 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         String smtlib = null;
         if (!label.startsWith("is")) {
             predicateSort = null;
-            isFunction = attributes.containsAttribute(Attribute.FUNCTION.getKey())
-                    || attributes.containsAttribute(Attribute.PREDICATE.getKey());
-            isPattern = attributes.containsAttribute(Attribute.PATTERN_KEY);
-            smtlib = attributes.getAttribute(Attribute.SMTLIB_KEY);
+            isFunction = attributes.containsKey(Attribute.FUNCTION.getKey())
+                    || attributes.containsKey(Attribute.PREDICATE.getKey());
+            isPattern = attributes.containsKey(Attribute.keyOf(Attribute.PATTERN_KEY));
+            Attribute<?> smtlibAttribute = attributes.get(Attribute.keyOf(Attribute.SMTLIB_KEY));
+            smtlib = smtlibAttribute != null ? (String) smtlibAttribute.getValue() : null;
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
@@ -86,8 +81,6 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isFunction = isFunction;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
-
-        this.isListLabel = !definition.listLabelsOf(label).isEmpty();
     }
 
     /**
@@ -149,23 +142,6 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     public Sort getPredicateSort() {
         assert isSortPredicate();
         return predicateSort;
-    }
-
-    public boolean isListLabel() {
-        return isListLabel;
-    }
-
-    /**
-     * Returns the associated list terminator if this {@code KLabelConstant} is
-     * a list label; otherwise, {@code null}.
-     */
-    public KItem getListTerminator(Definition definition) {
-        if (!definition.listLabelsOf(label).isEmpty()) {
-            Production production = definition.listLabelsOf(label).iterator().next();
-            String separator = production.getListDecl().getSeparator();
-            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
-        }
-        return null;
     }
 
     public String label() {

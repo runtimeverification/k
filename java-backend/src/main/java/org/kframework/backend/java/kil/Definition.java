@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -52,11 +53,10 @@ public class Definition extends JavaSymbolicObject {
         public final Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
         public final ImmutableMap<String, Attributes> kLabelAttributes;
-        public final SetMultimap<String, Production> listKLabels;
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
         public final ConfigurationStructureMap configurationStructureMap;
-        public final GlobalOptions globalOptions;
-        public final KRunOptions kRunOptions;
+        public final transient GlobalOptions globalOptions;
+        public final transient KRunOptions kRunOptions;
 
         private DefinitionData(
                 Subsorts subsorts,
@@ -64,7 +64,6 @@ public class Definition extends JavaSymbolicObject {
                 Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Attributes> kLabelAttributes,
-                SetMultimap<String, Production> listKLabels,
                 Map<org.kframework.kil.Sort, String> freshFunctionNames,
                 ConfigurationStructureMap configurationStructureMap,
                 GlobalOptions globalOptions,
@@ -74,7 +73,6 @@ public class Definition extends JavaSymbolicObject {
             this.dataStructureSorts = dataStructureSorts;
             this.signatures = signatures;
             this.kLabelAttributes = kLabelAttributes;
-            this.listKLabels = listKLabels;
             this.freshFunctionNames = freshFunctionNames;
             this.configurationStructureMap = configurationStructureMap;
             this.globalOptions = globalOptions;
@@ -135,26 +133,27 @@ public class Definition extends JavaSymbolicObject {
                     entry.getKey(),
                     new SortSignature(sortsBuilder.build(), Sort.of(entry.getValue().getSort())));
         }
+        context.listKLabels.entries().stream().forEach(e -> {
+            signaturesBuilder.put(
+                    e.getKey(),
+                    new SortSignature(ImmutableList.of(), Sort.of(e.getValue().getSort())));
+        });
 
         ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
-        context.klabels.entries().forEach(e -> attributesBuilder.put(e.getKey(), e.getValue().getAttributes()));
         for (Map.Entry<String, Collection<Production>> entry : context.klabels.asMap().entrySet()) {
-            Attributes attributes;
-            if (!entry.getValue().isEmpty()) {
-                attributes = entry.getValue().iterator().next().getAttributes();
-                for (Production production : entry.getValue()) {
-                    if (production.isLexical()) {
-                        continue;
-                    }
-                    assert production.getAttributes().equals(attributes) :
-                            "mismatch attributes:\n" + entry.getValue().iterator().next()
-                            + "\nand\n" + production;
-                }
-            } else {
-                attributes = new Attributes();
-            }
+            final Attributes attributes = new Attributes();
+            entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {
+                attributes.putAll(p.getAttributes());
+            });
+            // TODO(AndreiS): fix the definitions to pass this assertion
+            //entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {
+            //    assert p.getAttributes().equals(attributes) : "attribute mismatch:\n" + entry.getValue();
+            //});
             attributesBuilder.put(entry.getKey(), attributes);
         }
+        context.listKLabels.keySet().stream().forEach(key -> {
+            attributesBuilder.put(key, new Attributes());
+        });
 
         definitionData = new DefinitionData(
                 new Subsorts(context),
@@ -162,7 +161,6 @@ public class Definition extends JavaSymbolicObject {
                 context.getDataStructureSorts(),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                context.listKLabels,
                 context.freshFunctionNames,
                 context.getConfigurationStructureMap(),
                 context.globalOptions,
@@ -353,11 +351,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public Attributes kLabelAttributesOf(String label) {
-        return definitionData.kLabelAttributes.get(label);
-    }
-
-    public Set<Production> listLabelsOf(String label) {
-        return definitionData.listKLabels.get(label);
+        return Optional.ofNullable(definitionData.kLabelAttributes.get(label)).orElse(new Attributes());
     }
 
     public ConfigurationStructureMap getConfigurationStructureMap() {

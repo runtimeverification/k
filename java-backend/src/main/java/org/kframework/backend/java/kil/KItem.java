@@ -77,13 +77,6 @@ public class KItem extends Term implements KItemRepresentation {
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
 
-        if (kLabel instanceof KLabelConstant) {
-            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator(termContext.definition());
-            }
-        }
-
         // TODO(yilongli): break the dependency on the Tool object
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
