@@ -65,7 +65,7 @@ endmodule
 
 module BUBBLE
 
-  syntax Bubble ::= BubbleItem Bubble [token]
+  syntax Bubble ::= Bubble BubbleItem [token]
                   | BubbleItem        [token]
   syntax BubbleItem ::= r"((?!rule|syntax|endmodule|configuration|context)\\S+)" [token]
                          // the proper way to reject would be: reject("rule|syntax|endmodule|configuration|context")
@@ -76,7 +76,7 @@ module ATTRIBUTES
   imports BASIC-K
   syntax KEY        ::= r"[a-z][A-Za-z\\-0-9]*" [token]
   syntax TAGList    ::= TAGCONTENT              [token]
-  syntax TAGCONTENT ::= TC TAGCONTENT           [klabel(#TAGCONTENTList)] // dummy klabel
+  syntax TAGCONTENT ::= TAGCONTENT TC           [klabel(#TAGCONTENTList)] // dummy klabel
                       | TC                      [klabel(#TAGCONTENTTC)]   // dummy klabel
 					  | ""                      [klabel(#NOTAGCONTENT)]   // dummy klabel
   syntax TC ::= r"[^\\n\\r\\(\\)\\\"]+"         [klabel('TC)]             // dummy klabel
@@ -102,7 +102,7 @@ module OUTER-KORE
                                [klabel(#KRequire), hook(org.kframework.kore.outer.Require)]
 
   syntax KRequireList  ::= ""  [klabel(#emptyKRequireList), onlyLabel]
-                         | KRequire KRequireList
+                         | KRequireList KRequire
                                [klabel(#KRequireList), assoc, comm, unit(#emptyKRequireList)]
 
   syntax KModule       ::= "module" KModuleName OptionalAttributes
@@ -111,17 +111,17 @@ module OUTER-KORE
                            "endmodule"
                                [klabel(#KModule), hook(org.kframework.kore.outer.Module)]
   syntax KModuleList   ::= ""  [klabel(#emptyKModuleList), onlyLabel]
-                         | KModule KModuleList
+                         | KModuleList KModule
                                [klabel(#KModuleList), assoc, comm, unit(#emptyKModuleList)]
 
   syntax KImport       ::= "imports" KModuleName
                                [klabel(#KImport), hook(org.kframework.kore.outer.Import)]
   syntax KImportList   ::= ""  [klabel(#emptyKImportList), onlyLabel]
-                         | KImport KImportList
+                         | KImportList KImport
                                [klabel(#KImportList), assoc, comm, unit(#emptyKImportList)]
 
   syntax KSentenceList ::= ""  [klabel(#emptyKSentenceList), onlyLabel]
-                         | KSentence KSentenceList
+                         | KSentenceList KSentence
                                [klabel(#KSentenceList), assoc, comm, unit(#kemptyKSentenceList)]
 
   syntax KSentence ::= "syntax" KSort OptionalAttributes
@@ -139,14 +139,14 @@ module OUTER-KORE
                      | "syntax" "non-assoc" KNeTagSet OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
 
-  syntax KPrioritySeq ::= KNeTagSet ">" KPrioritySeq   [klabel(#KPrioritySeq), assoc]
+  syntax KPrioritySeq ::= KPrioritySeq ">" KNeTagSet   [klabel(#KPrioritySeq), assoc]
                         | KNeTagSet                    [klabel(#KPrioritySeq)]
   syntax KNeTagSet    ::= Tag KNeTagSet                [klabel(#KTagSet), assoc, comm]
                         | Tag                          [klabel(#KTagSet)]
   syntax Tag ::= KLabel
 
   syntax KProduction ::= KProductionItem
-                       | KProductionItem KProduction
+                       | KProduction KProductionItem
                                [klabel(#KProduction), assoc, unit(#emptyKProduction)]
   syntax KProductionItem ::= KSort       [hook(org.kframework.kore.outer.NonTerminal)]
                            | KString     [hook(org.kframework.kore.outer.Terminal)]
@@ -156,24 +156,24 @@ module OUTER-KORE
 						   | "NeList" "{" KSort "," KString "}" [klabel(#NeList)]
 						   |   "List" "{" KSort "," KString "}" [klabel(#List)]
   syntax TokenContent ::= r"[^\\n\\r}]" [token]
-  syntax PrioritySeqBlock ::= ProdBlock ">" AssocAttribute PrioritySeqBlock [klabel(#PrioritySeqBlock)]
+  syntax PrioritySeqBlock ::= PrioritySeqBlock ">" AssocAttribute ProdBlock [klabel(#PrioritySeqBlock)]
                             | ProdBlock
   syntax AssocAttribute ::= ""           [klabel(#NoAttribute)]
                           | "left:"      [klabel(#LeftAttribute)]
                           | "right:"     [klabel(#RightAttribute)]
                           | "non-assoc:" [klabel(#NonAssocAttribute)]
-  syntax ProdBlock ::= KProductionWAttr "|" ProdBlock [klabel(#ProdBlock)]
+  syntax ProdBlock ::= ProdBlock "|" KProductionWAttr [klabel(#ProdBlock)]
                      | KProductionWAttr
   syntax KProductionWAttr ::= KProduction OptionalAttributes [klabel(#KProductionWAttr)]
                             | KLabel "(" KSortList ")" OptionalAttributes [klabel(#KFuncProductionWAttr)]
 							|        "(" KSortList ")" OptionalAttributes [klabel(#KTupleProductionWAttr)]
-  syntax KSortList ::= KSort "," KSortList [klabel(#KSortList)]
+  syntax KSortList ::= KSortList "," KSort [klabel(#KSortList)]
                      | KSort
   // We use #KAttributes as top KLabel in the K term holding the attributes
   syntax OptionalAttributes ::= KAttributesDeclaration
                               | "" [klabel(#NoKAttributesDeclaration)]
   syntax KAttributesDeclaration ::= "[" AttrList "]" [klabel(#KAttributesDeclaration), hook(org.kframework.kore.KAttributes)]
-  syntax AttrList ::= Attr "," AttrList [klabel(#KAttributesList)]
+  syntax AttrList ::= AttrList "," Attr [klabel(#KAttributesList)]
                     | Attr
 
   syntax KSentence ::= "configuration" Contents
