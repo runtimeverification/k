@@ -188,4 +188,8 @@ public class MetaK {
         return KItem.of(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context,
             kItem.getSource(), kItem.getLocation());
     }
+
+    public static Term configuration(TermContext context) {
+        return KLabelInjection.injectionOf(context.getTopTerm(), context);
+    }
 }
