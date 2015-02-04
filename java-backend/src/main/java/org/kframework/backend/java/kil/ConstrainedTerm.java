@@ -96,7 +96,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public ConstrainedTerm expandPatterns(boolean narrowing) {
         ConstrainedTerm result = this;
         while (true) {
-            PatternExpander patternExpander = new PatternExpander(result.constraint(), narrowing);
+            PatternExpander patternExpander = new PatternExpander(
+                    result.constraint(),
+                    narrowing,
+                    context);
             ConstrainedTerm expandedTerm = (ConstrainedTerm) result.accept(patternExpander);
             if (expandedTerm == result) {
                 break;
