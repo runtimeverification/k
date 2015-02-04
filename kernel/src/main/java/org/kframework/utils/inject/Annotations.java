@@ -33,4 +33,33 @@ public class Annotations {
 
         };
     }
+
+    public static Spec spec(Class<? extends Annotation> annotation) {
+        return new Spec() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Spec.class;
+            }
+
+            @Override
+            public Class<? extends Annotation> value() {
+                return annotation;
+            }
+
+            public int hashCode() {
+                // This is specified in java.lang.Annotation.
+                return (127 * "value".hashCode()) ^ annotation.hashCode();
+            }
+
+            public boolean equals(Object o) {
+                if (!(o instanceof Spec)) {
+                    return false;
+                }
+                Spec other = (Spec) o;
+                return annotation.equals(other.value());
+            }
+
+        };
+    }
 }

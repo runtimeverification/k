@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 /**
  * Utility class that handles the builtin (hooked) operations and their Java
