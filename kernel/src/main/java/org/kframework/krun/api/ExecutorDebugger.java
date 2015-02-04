@@ -104,7 +104,6 @@ public class ExecutorDebugger implements Debugger {
         for (DefinitionItem item : definition.getItems()) {
             if (item instanceof Module) {
                 // Get the rules from the module and add to store
-
                 for (ModuleItem moduleItem : ((Module) item).getItems()) {
                     if (moduleItem.getSource() != null && moduleItem.getLocation() != null) {
                         String key = moduleItem.getSource().toString() + moduleItem.getLocation().toString();
