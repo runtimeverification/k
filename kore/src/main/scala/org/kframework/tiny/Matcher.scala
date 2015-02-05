@@ -36,7 +36,7 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends Matcher {
 }
 
 object KRegularAppMatcher extends MatcherLabel {
-  override def apply(k1: K, k2: K, att: Att)(implicit theory: Theory): K =
+  def apply(k1: K, k2: K, att: Att): KProduct =
     KRegularAppMatcher(k1.asInstanceOf[KRegularApp], k2)
 }
 
@@ -49,8 +49,8 @@ case class KVarMatcher(left: KVar, right: K) extends Matcher {
 }
 
 object KVarMatcher extends MatcherLabel with KProduct2Label {
-  override def apply(k1: K, k2: K, att: Att): K =
-    new KVarMatcher(k1.asInstanceOf[KVar], k2).normalize
+  override def apply(k1: K, k2: K, att: Att): KProduct =
+    new KVarMatcher(k1.asInstanceOf[KVar], k2)
 }
 
 //      case (_, headP +: tailP) =>

@@ -123,11 +123,11 @@ object InjectedLabel {
 /////////////////////
 
 trait Label extends kore.KLabel {
-  def apply(l: Seq[K], att: Att)(implicit theory: Theory): K =
-    construct(l, att).normalize
+  def apply(l: Seq[K], att: Att): K =
+    construct(l, att)
 
   def construct(l: Iterable[K], att: Att): KApp
-  def apply(l: K*)(implicit theory: Theory): K = apply(l, Att())
+  def apply(l: K*): K = apply(l, Att())
   def att: Att
 }
 
