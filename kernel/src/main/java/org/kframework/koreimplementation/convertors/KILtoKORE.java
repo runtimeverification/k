@@ -82,7 +82,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Module apply(Module i, Set<Module> allKilModules,
-            Map<String, org.kframework.definition.Module> koreModules) {
+                                                  Map<String, org.kframework.definition.Module> koreModules) {
         Set<org.kframework.definition.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
@@ -149,14 +149,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
-        case "left":
-            return Associativity.Left();
-        case "right":
-            return Associativity.Right();
-        case "non-assoc":
-            return Associativity.NonAssoc();
-        default:
-            throw new AssertionError("Incorrect assoc string: " + assocOrig);
+            case "left":
+                return Associativity.Left();
+            case "right":
+                return Associativity.Right();
+            case "non-assoc":
+                return Associativity.NonAssoc();
+            default:
+                throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
@@ -241,7 +241,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-            org.kframework.kore.Sort sort, Production p, UserList userList) {
+                              org.kframework.kore.Sort sort, Production p, UserList userList) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
@@ -252,7 +252,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Att attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.definition.Production prod1, prod2, prod3;
 

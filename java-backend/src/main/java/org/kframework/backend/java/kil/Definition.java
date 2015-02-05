@@ -152,14 +152,16 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("binder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    new TypeToken<Multimap<Integer, Integer>>() {
+                                    },
                                     Names.named("binder")),
                             p.getBinderMap()));
                 }
                 if (p.containsAttribute("metabinder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    new TypeToken<Multimap<Integer, Integer>>() {
+                                    },
                                     Names.named("metabinder")),
                             p.getBinderMap()));
                 }
@@ -223,7 +225,6 @@ public class Definition extends JavaSymbolicObject {
                 null,
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                ImmutableSetMultimap.<String, Production>builder().build(),
                 null,
                 null,
                 new GlobalOptions(),
