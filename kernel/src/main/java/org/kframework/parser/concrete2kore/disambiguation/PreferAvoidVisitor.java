@@ -64,8 +64,6 @@ public class PreferAvoidVisitor extends Transformer<Set<ParseFailedException>> {
     }
 
     public Set<ParseFailedException> merge(Set<ParseFailedException> a, Set<ParseFailedException> b) {
-        Set<ParseFailedException> ret = new HashSet<>(a);
-        ret.addAll(b);
-        return ret;
+        return Sets.union(a, b);
     }
 }
