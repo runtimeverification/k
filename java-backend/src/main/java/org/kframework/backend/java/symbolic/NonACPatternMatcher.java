@@ -417,8 +417,8 @@ public class NonACPatternMatcher {
 
     private void match(BuiltinList builtinList, BuiltinList pattern) {
         addMatchingTask(
-                builtinList.toKore(),
-                pattern.toKore());
+                ((BuiltinList) BuiltinList.concatenate(termContext, builtinList)).toKore(),
+                ((BuiltinList) BuiltinList.concatenate(termContext, ((BuiltinList) pattern))).toKore());
     }
 
     /**
