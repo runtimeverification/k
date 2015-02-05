@@ -11,7 +11,8 @@ class AbstractTest {
   import Builtins._
 
   val cons = new Constructors(Module("TEST", Set(), Set(
-    Production(ADT.KLabel("foo"), String, Seq(), Att())
+    Production(ADT.KLabel("'foo"), String, Seq(), Att()),
+    Production(ADT.KLabel("'bar"), String, Seq(), Att())
   ), Att()))
 
   val X = KVar("X")

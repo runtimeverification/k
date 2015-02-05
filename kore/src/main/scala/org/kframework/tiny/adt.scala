@@ -14,8 +14,8 @@ import scala.collection.mutable.ListBuffer
 
 trait K extends kore.K {
   def att: Att
-  def matcher(right: K): Matcher = ???
-  def normalize(implicit theory: Theory): K = this
+  def matcher(right: K): Matcher
+  def normalize(implicit theory: Theory): K
 }
 
 object KApp {
@@ -30,7 +30,7 @@ trait KApp extends kore.KApply with K {
   def size: Int = children.size
   def children: Iterable[K]
 
-  def klabel: Label
+  val klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
   def klist = kore.ADTConstructors.KList(children.asInstanceOf[Iterable[kore.K]].toSeq.asJava)
 
@@ -40,6 +40,11 @@ trait KApp extends kore.KApply with K {
       case _ => false
     })
   }
+
+  def normalize(implicit theory: Theory): K =
+    klabel((children map theory.normalize).toSeq, att)
+
+  override def toString = klabel + "(" + children.mkString(",") + ")"
 }
 
 /**
@@ -47,21 +52,24 @@ trait KApp extends kore.KApply with K {
  */
 trait KLeaf extends K {
   def copy(att: Att): KLeaf
+  def normalize(implicit theory: Theory): K = theory.normalize(this)
 }
 
 /**
  * KApp with a collection of children which are usually defined using an associative operator.
  */
 trait KAssocApp extends KApp {
-  def klabel: KAssocAppLabel
+  val klabel: KAssocAppLabel
 
   def head: K = children.head
   def tail: KAssocApp = klabel.construct(children.tail, att)
   def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
+
+  override def matcher(right: K): Matcher = ???
 }
 
 trait KRegularApp extends KApp {
-  def klabel: KRegularAppLabel
+  val klabel: KRegularAppLabel
   override def matcher(other: K) = KRegularAppMatcher(this, other)
 }
 
@@ -76,7 +84,9 @@ trait KProduct extends KRegularApp with Product {
  * KToken-like term, i.e. term without children representing a constant value.
  * KSimpleTok is one example. KInt is another.
  */
-trait KTok extends kore.KToken with KLeaf
+trait KTok extends kore.KToken with KLeaf {
+  override def matcher(right: K): Matcher = EqualsMatcher(this, right)
+}
 
 trait EmptyAtt {
   def att = Att()
@@ -89,10 +99,12 @@ trait EmptyAtt {
 case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLeaf {
   def copy(att: Att): KVar = KVar(name, att)
   override def matcher(right: K): Matcher = KVarMatcher(this, right)
+  override def toString = name
 }
 
 case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
   def copy(att: Att): RegularKTok = RegularKTok(sort, s, att)
+  override def toString = s + ":" + sort
 }
 
 class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KRegularApp
@@ -100,12 +112,12 @@ class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: A
 class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], val att: Att = Att()) extends KAssocApp
 
 class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KAssocApp {
-  def klabel = KSeq
+  val klabel = KSeq
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 }
 
 case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewrite with KProduct {
-  def klabel = KRewrite
+  val klabel = KRewrite
 }
 
 case class InjectedLabel(klabel: Label, att: Att) extends kore.InjectedKLabel with KTok {
@@ -129,6 +141,8 @@ trait Label extends kore.KLabel {
   def construct(l: Iterable[K], att: Att): KApp
   def apply(l: K*): K = apply(l, Att())
   def att: Att
+
+  override def toString = name
 }
 
 trait KRegularAppLabel extends Label {
