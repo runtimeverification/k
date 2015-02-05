@@ -154,9 +154,9 @@ public class Grammar implements Serializable {
             start = (NextableState) start.next.iterator().next();
         }
         PrimitiveState whitespace = new RegExState(
-                "whitespace", start.nt, pattern, null);
+            "whitespace", start.nt, pattern, null);
         RuleState deleteToken = new RuleState(
-                "whitespace-D", start.nt, new DeleteRule(1, true));
+            "whitespace-D", start.nt, new DeleteRule(1, true));
         whitespace.next.add(deleteToken);
         deleteToken.next.addAll(start.next);
         start.next.clear();
