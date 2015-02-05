@@ -35,7 +35,7 @@ public class NewOuterParserTest {
                 ("/e-kore.k").toURI()).getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
-        System.out.println(kBody);
+        //System.out.println(kBody);
     }
 
     /**

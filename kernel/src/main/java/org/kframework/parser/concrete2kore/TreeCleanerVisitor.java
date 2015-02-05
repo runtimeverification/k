@@ -20,6 +20,7 @@ import scala.util.Left;
 public class TreeCleanerVisitor extends Transformer<Set<ParseFailedException>> {
     @Override
     public Either<Set<ParseFailedException>, Term> apply(TermCons tc) {
+        // TODO: this is a DAG, so don't visit the same node multiple times.
         Either<Set<ParseFailedException>, Term> vis;
         if (tc.production().klabel().isEmpty()) {
             // eliminating syntactic subsort
@@ -31,7 +32,7 @@ public class TreeCleanerVisitor extends Transformer<Set<ParseFailedException>> {
             vis = apply(tc.items().get(0));
         } else {
             // invalidate the hashCode cache
-//            tc.invalidateHashCode();
+            tc.invalidateHashCode();
             vis = super.apply(tc);
         }
         return vis;
