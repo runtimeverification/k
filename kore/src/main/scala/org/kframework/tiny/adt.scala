@@ -62,6 +62,7 @@ trait KAssocApp extends KApp {
 
 trait KRegularApp extends KApp {
   def klabel: KRegularAppLabel
+  override def matcher(other: K) = KRegularAppMatcher(this, other)
 }
 
 /**

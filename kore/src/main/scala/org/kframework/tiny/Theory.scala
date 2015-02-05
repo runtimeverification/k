@@ -5,7 +5,7 @@ trait Theory {
   def normalize(k: K): K
   def deepNormalize(k: K): K = k match {
     case KApp(label, children, att) =>
-      normalize(label(children map deepNormalize, att)(this)) // normalization inside the label apply
+      normalize(label(children map deepNormalize, att)(this).normalize(this)) // normalization inside the label apply
     case l: KLeaf => normalize(l)
   }
 }

@@ -22,7 +22,6 @@ trait MatcherLabel extends KRegularAppLabel with EmptyAtt with KProduct2Label {
 case class KRegularAppMatcher(left: KRegularApp, right: K) extends Matcher {
   def klabel = KRegularAppMatcher
 
-
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
     And(ksL.zip(ksR) map { case (k1, k2) => k1.matcher(k2) }: _*)
 
@@ -37,7 +36,7 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends Matcher {
 }
 
 object KRegularAppMatcher extends MatcherLabel {
-  override def apply(k1: K, k2: K, att: Att): KRegularAppMatcher =
+  override def apply(k1: K, k2: K, att: Att)(implicit theory: Theory): K =
     KRegularAppMatcher(k1.asInstanceOf[KRegularApp], k2)
 }
 
@@ -50,7 +49,8 @@ case class KVarMatcher(left: KVar, right: K) extends Matcher {
 }
 
 object KVarMatcher extends MatcherLabel with KProduct2Label {
-  override def apply(k1: K, k2: K, att: Att): KVarMatcher = new KVarMatcher(k1.asInstanceOf[KVar], k2)
+  override def apply(k1: K, k2: K, att: Att): K =
+    new KVarMatcher(k1.asInstanceOf[KVar], k2).normalize
 }
 
 //      case (_, headP +: tailP) =>

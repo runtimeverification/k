@@ -155,7 +155,7 @@ case class Anywhere(pattern: K, name: String = "SINGLETON") extends K with KColl
               val newAnywhere: K = k map { childK: K =>
                 childK match {
                   case `c` => s(TOPVariable)
-                  case theory: K => theory
+                  case t: K => t
                 }
               }
               val anywhereWrapper = TOPVariable -> newAnywhere

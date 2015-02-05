@@ -38,8 +38,8 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
     children.fold(True) {
       case (sum: And, p: And) =>
         val conflict = (for (
-          b1 <- sum.children.collect { case b: Binding => b };
-          b2 <- p.children.collect { case b: Binding => b } if b1.variable == b2.variable
+          b1 <- sum.bindings;
+          b2 <- p.bindings if b1.variable == b2.variable
         ) yield {
           theory.deepNormalize(Equals(b1.value, b2.value))
         }) contains True
@@ -59,16 +59,24 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
         Or((for (m1 <- sum.children; m2 <- p.children) yield {
           And(m1, m2)
         }).toSeq: _*)
-      case (sum: And, b: Binding) => And(sum, And(b))
+      case (sum: And, b: Binding) => addBinding(b)
       case (sum: And, p) => And(sum.children + p, sum.att)
       case (sum: Or, p) => And(sum, And(p))
     }
+  }
+
+  lazy val bindings = children collect { case b: Binding => b }
+
+  def addBinding(b: Binding)(implicit theory: Theory): K = {
+    if (bindings.exists { bb => bb.variable == b.variable && theory.normalize(Equals(bb.value, b.value)) == True })
+      False
+    else
+      And(children + b, att)
   }
 }
 
 case class Binding(variable: K, value: K, att: Att) extends KProduct {
   override def klabel = Binding
-  override def matcher(right: K): Matcher = ???
 }
 
 object Binding extends KProduct2Label with EmptyAtt {
@@ -77,7 +85,6 @@ object Binding extends KProduct2Label with EmptyAtt {
 
 case class Equals(a: K, b: K, att: Att) extends KProduct {
   override def klabel = Equals
-  override def matcher(right: K): Matcher = ???
 }
 
 object Equals extends KProduct2Label with EmptyAtt {

@@ -7,7 +7,7 @@ class TestPatternMatching extends AbstractTest {
   import cons._
 
   implicit class KWithMatcherMethods(k: K) {
-    def matchAll(other: K, sideConditions: K): Set[K] = And(k.matcher(other), sideConditions).normalize match {
+    def matchAll(other: K, sideConditions: K): Set[K] = theory.deepNormalize(And(k.matcher(other), sideConditions)) match {
       case or: Or => or.children
       case k => Set(k)
     }
@@ -34,14 +34,15 @@ class TestPatternMatching extends AbstractTest {
 
   @Test def testEmptyMatch() {
     val foo = 'foo()
-    Assert.assertEquals(Some(True), foo.matchOne(foo, True))
+    Assert.assertEquals(True, foo.matchOne(foo, True))
   }
-  //
-  //  @Test def testKApply() {
-  //    val foo = 'foo(5: K)
-  //    val pattern = 'foo(X)
-  //    assertEquals(Some(And(X -> ((5: K): K))), pattern.matchOne(foo))
-  //  }
+
+  @Test def testKApply() {
+    val foo = 'foo(5: K)
+    val pattern = 'foo(X)
+    Assert.assertEquals(And(X -> ((5: K): K)),
+      pattern.matchOne(foo, True))
+  }
   //
   //  @Test def testKApplyWithCondition() {
   //    val foo = 'foo(5: K)
