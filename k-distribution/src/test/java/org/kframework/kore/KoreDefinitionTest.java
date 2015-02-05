@@ -38,10 +38,12 @@ public class KoreDefinitionTest {
         assertEquals(323, stream(def.modules()).flatMap(m -> stream(m.localSentences())).count());
     }
 
+    // TODO(radu): generalize this function, and eliminate duplicates
     private Definition parse(InputStream definition) {
         return bubbles.parseBubbles(outerParse(definition));
     }
 
+    // TODO(radu): generalize this function, and eliminate duplicates
     private static Definition outerParse(InputStream definition) {
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         String definitionText;

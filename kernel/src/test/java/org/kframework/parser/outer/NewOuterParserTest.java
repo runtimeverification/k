@@ -38,7 +38,7 @@ public class NewOuterParserTest {
         //System.out.println(kBody);
     }
 
-    /**
+    /** TODO(radu): generalize this function, and eliminate duplicates
      * @param theTextToParse
      * @param mainModule
      * @param startSymbol
