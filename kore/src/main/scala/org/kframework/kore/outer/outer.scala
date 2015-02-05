@@ -2,26 +2,13 @@
 
 package org.kframework.kore.outer
 
-import org.kframework.kore
-import org.kframework.kore.Sort
-import scala.util.matching.Regex
-import org.kframework.kore.Attributes
-import org.kframework.POSet
-import org.kframework.kore.KLabel
-import org.kframework.kore.KToken
-import org.kframework.kore.KList
+import org.kframework.{POSet, kore}
+import org.kframework.kore.{Attributes, KLabel, KList, KToken, Sort}
 
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
   extends AssertionError(nonTerminals.toString)
-
-//object NonTerminalsWithUndefinedSortException {
-//  def apply(nonTerminals: Set[NonTerminal]) =
-//    new NonTerminalsWithUndefinedSortException(nonTerminals.toString, nonTerminals)
-//
-//}
-
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {

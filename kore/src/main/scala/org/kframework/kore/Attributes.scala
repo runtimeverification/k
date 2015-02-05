@@ -53,11 +53,6 @@ object Attributes {
   val classFromUp = "classType"
 }
 
-//case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) {
-//
-//  // TODO: Radu: Add offset when the parser knows how to compute it.
-//}
-
 object Location {
   import KORE._
 
