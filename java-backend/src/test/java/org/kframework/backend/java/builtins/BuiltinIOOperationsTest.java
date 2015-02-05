@@ -29,7 +29,7 @@ public class BuiltinIOOperationsTest {
 
         Mockito.when(fs.open("foo", "r")).thenReturn(3L);
 
-        Term res = new BuiltinIOOperations(null, fs, null, null, null, null, null).open(path, mode, context);
+        Term res = new BuiltinIOOperations(null, fs, null, null, null, null).open(path, mode, context);
         Assert.assertTrue(res instanceof IntToken);
         Assert.assertEquals(3, ((IntToken)res).intValue());
     }

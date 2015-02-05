@@ -16,7 +16,6 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
@@ -38,7 +37,7 @@ public class UseSMTTest {
     Definition definition;
 
     @Mock
-    SymbolicConstraintOperations constraintOps;
+    SMTOperations constraintOps;
 
 
     @Before
@@ -47,7 +46,7 @@ public class UseSMTTest {
         when(tc.definition().context()).thenReturn(context);
         when(definition.functionRules()).thenReturn(HashMultimap.<KLabelConstant, Rule>create());
         context.productions = new HashSet<>();
-        when(tc.global()).thenReturn(new GlobalContext(null, null, null, constraintOps, null));
+        when(tc.global()).thenReturn(new GlobalContext(null, null, constraintOps, null, null));
     }
 
     @Test

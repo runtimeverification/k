@@ -7,10 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.main.Tool;
 
 
 /**
@@ -68,7 +70,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
         Term term = (Term) constrainedTerm.term().accept(this);
-        SymbolicConstraint constraint = (SymbolicConstraint) constrainedTerm.constraint().accept(this);
+        ConjunctiveFormula constraint = (ConjunctiveFormula) constrainedTerm.constraint().accept(this);
         if (term != constrainedTerm.term() || constraint != constrainedTerm.constraint()) {
             constrainedTerm = new ConstrainedTerm(term, constraint);
         }
@@ -125,20 +127,6 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(Token token) {
         return token;
-    }
-
-    @Override
-    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
-        boolean changed = false;
-        UninterpretedConstraint.Builder builder = UninterpretedConstraint.builder();
-        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
-            Term transformedLHS = (Term) equality.leftHandSide().accept(this);
-            Term transformedRHS = (Term) equality.rightHandSide().accept(this);
-            changed = changed || transformedLHS != equality.leftHandSide()
-                    || transformedRHS != equality.rightHandSide();
-            builder.add(transformedLHS, transformedRHS, context);
-        }
-        return changed ? builder.build() : uninterpretedConstraint;
     }
 
     @Override
@@ -347,8 +335,8 @@ public class CopyOnWriteTransformer implements Transformer {
         for (Variable variable : rule.freshVariables()) {
             processedFreshVariables.add((Variable) variable.accept(this));
         }
-        UninterpretedConstraint processedLookups
-                = (UninterpretedConstraint) rule.lookups().accept(this);
+        ConjunctiveFormula processedLookups
+                = (ConjunctiveFormula) rule.lookups().accept(this);
 
         Map<CellLabel, Term> processedLhsOfReadCell = null;
         Map<CellLabel, Term> processedRhsOfWriteCell = null;
@@ -391,22 +379,43 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
-        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(context);
+    public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
+        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(context);
 
-        for (Map.Entry<Variable, Term> entry : symbolicConstraint.substitution().entrySet()) {
-            transformedSymbolicConstraint.add(
+        for (Map.Entry<Variable, Term> entry : conjunctiveFormula.substitution().entrySet()) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.add(
                     (Term) entry.getKey().accept(this),
                     (Term) entry.getValue().accept(this));
         }
 
-        for (Equality equality : symbolicConstraint.equalities()) {
-            transformedSymbolicConstraint.add(
+        for (Equality equality : conjunctiveFormula.equalities()) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.add(
                     (Term) equality.leftHandSide().accept(this),
                     (Term) equality.rightHandSide().accept(this));
         }
 
-        return transformedSymbolicConstraint;
+        for (DisjunctiveFormula disjunctiveFormula : conjunctiveFormula.disjunctions()) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.add(
+                    (DisjunctiveFormula) disjunctiveFormula.accept(this));
+        }
+
+        if (context.global().tool != Tool.KOMPILE) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
+        }
+        return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
+                transformedConjunctiveFormula :
+                conjunctiveFormula;
+    }
+
+    @Override
+    public ASTNode transform(DisjunctiveFormula disjunctiveFormula) {
+        DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
+                disjunctiveFormula.conjunctions().stream()
+                        .map(c -> (ConjunctiveFormula) c.accept(this))
+                        .collect(Collectors.toList()), context);
+        return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
+                transformedDisjunctiveFormula :
+                disjunctiveFormula;
     }
 
     @Override
