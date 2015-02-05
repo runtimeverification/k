@@ -25,11 +25,11 @@ public class PatternExpander extends CopyOnWriteTransformer {
 
     private ConjunctiveFormula extraConstraint;
 
-    public PatternExpander(ConjunctiveFormula constraint, boolean narrowing) {
-        super(constraint.termContext());
+    public PatternExpander(ConjunctiveFormula constraint, boolean narrowing, TermContext context) {
+        super(context);
         this.constraint = constraint;
         this.narrowing = narrowing;
-        extraConstraint = ConjunctiveFormula.of(constraint.termContext());
+        extraConstraint = ConjunctiveFormula.of(context);
     }
 
     public ConjunctiveFormula extraConstraint() {
@@ -42,7 +42,6 @@ public class PatternExpander extends CopyOnWriteTransformer {
         if (constraint == null) {
             return kItem;
         }
-        TermContext context = constraint.termContext();
 
         if (!(kItem.kLabel() instanceof KLabelConstant
                 && ((KLabelConstant) kItem.kLabel()).isPattern()

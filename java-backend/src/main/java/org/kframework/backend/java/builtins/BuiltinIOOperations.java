@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -40,7 +41,6 @@ public class BuiltinIOOperations {
     public BuiltinIOOperations(
             Definition def,
             FileSystem fs,
-            Context context,
             ConfigurationCreationOptions ccOptions,
             KILtoBackendJavaKILTransformer kilTransformer,
             RunProcess rp) {

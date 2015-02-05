@@ -60,8 +60,6 @@ public class SymbolicRewriter {
     private boolean transition;
     private RuleIndex ruleIndex;
     private KRunState.Counter counter;
-    public static Stopwatch isw = Stopwatch.createUnstarted();
-    public static Stopwatch rsw = Stopwatch.createUnstarted();
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -439,7 +437,6 @@ public class SymbolicRewriter {
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> rules) {
-        ConjunctiveFormula.cfsw.reset();
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -454,12 +451,9 @@ public class SymbolicRewriter {
             step++;
 //            System.err.println("step #" + step);
             for (ConstrainedTerm term : queue) {
-                isw.start();
                 if (term.implies(targetTerm)) {
-                    isw.stop();
                     continue;
                 }
-                isw.stop();
 
                 // TODO(YilongL): the `get(0)` seems hacky
                 Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
@@ -550,9 +544,6 @@ public class SymbolicRewriter {
              */
         }
 
-        System.err.println("=== " + ConjunctiveFormula.cfsw.elapsed(TimeUnit.MILLISECONDS));
-        System.err.println("*** " + isw.elapsed(TimeUnit.MILLISECONDS));
-        System.err.println(">>> " + rsw.elapsed(TimeUnit.MILLISECONDS));
         return proofResults;
     }
 

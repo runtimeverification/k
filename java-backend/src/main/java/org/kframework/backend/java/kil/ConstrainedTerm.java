@@ -96,7 +96,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public ConstrainedTerm expandPatterns(boolean narrowing) {
         ConstrainedTerm result = this;
         while (true) {
-            PatternExpander patternExpander = new PatternExpander(result.constraint(), narrowing);
+            PatternExpander patternExpander = new PatternExpander(
+                    result.constraint(),
+                    narrowing,
+                    context);
             ConstrainedTerm expandedTerm = (ConstrainedTerm) result.accept(patternExpander);
             if (expandedTerm == result) {
                 break;
@@ -197,19 +200,15 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             if (!candidate.isMatching(constrainedTerm.variableSet())) {
-                SymbolicRewriter.rsw.start();
                 if (solution.isFalse() || solution.checkUnsat()) {
-                    SymbolicRewriter.rsw.stop();
                     continue;
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion
                 solution = solution.expandPatterns(true).simplify();
                 if (solution.isFalse() || solution.checkUnsat()) {
-                    SymbolicRewriter.rsw.stop();
                     continue;
                 }
-                SymbolicRewriter.rsw.stop();
             }
 
             assert solution.disjunctions().isEmpty();

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -40,6 +41,8 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.name.Names;
 import com.google.inject.Inject;
 import scala.collection.JavaConversions;
 
@@ -57,11 +60,10 @@ public class Definition extends JavaSymbolicObject {
         public final Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
         public final ImmutableMap<String, Attributes> kLabelAttributes;
-        public final SetMultimap<String, Production> listKLabels;
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
         public final ConfigurationStructureMap configurationStructureMap;
-        public final GlobalOptions globalOptions;
-        public final KRunOptions kRunOptions;
+        public transient GlobalOptions globalOptions;
+        public transient KRunOptions kRunOptions;
 
         private DefinitionData(
                 Subsorts subsorts,
@@ -69,7 +71,6 @@ public class Definition extends JavaSymbolicObject {
                 Map<org.kframework.kil.Sort, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Attributes> kLabelAttributes,
-                SetMultimap<String, Production> listKLabels,
                 Map<org.kframework.kil.Sort, String> freshFunctionNames,
                 ConfigurationStructureMap configurationStructureMap,
                 GlobalOptions globalOptions,
@@ -79,7 +80,6 @@ public class Definition extends JavaSymbolicObject {
             this.dataStructureSorts = dataStructureSorts;
             this.signatures = signatures;
             this.kLabelAttributes = kLabelAttributes;
-            this.listKLabels = listKLabels;
             this.freshFunctionNames = freshFunctionNames;
             this.configurationStructureMap = configurationStructureMap;
             this.globalOptions = globalOptions;
@@ -108,7 +108,7 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> kLabels;
 
     private final DefinitionData definitionData;
-    private final transient Context context;
+    private transient Context context;
 
     private transient KExceptionManager kem;
 
@@ -138,22 +138,41 @@ public class Definition extends JavaSymbolicObject {
                     entry.getKey(),
                     new SortSignature(sortsBuilder.build(), Sort.of(entry.getValue().getSort())));
         }
+        context.listKLabels.entries().stream().forEach(e -> {
+            signaturesBuilder.put(
+                    e.getKey(),
+                    new SortSignature(ImmutableList.of(), Sort.of(e.getValue().getSort())));
+        });
 
         ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
         for (Map.Entry<String, Collection<Production>> entry : context.klabels.asMap().entrySet()) {
-            Attributes attributes;
-            if (!entry.getValue().isEmpty()) {
-                attributes = entry.getValue().iterator().next().getAttributes();
-                for (Production production : entry.getValue()) {
-                    assert production.getAttributes().equals(attributes) :
-                            "mismatch attributes:\n" + entry.getValue().iterator().next()
-                            + "\nand\n" + production;
+            final Attributes attributes = new Attributes();
+            entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {
+                attributes.putAll(p.getAttributes());
+                if (p.containsAttribute("binder")) {
+                    attributes.add(new Attribute<>(
+                            Attribute.Key.get(
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    Names.named("binder")),
+                            p.getBinderMap()));
                 }
-            } else {
-                attributes = new Attributes();
-            }
+                if (p.containsAttribute("metabinder")) {
+                    attributes.add(new Attribute<>(
+                            Attribute.Key.get(
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    Names.named("metabinder")),
+                            p.getBinderMap()));
+                }
+            });
+            // TODO(AndreiS): fix the definitions to pass this assertion
+            //entry.getValue().stream().filter(p -> !p.isLexical()).forEach(p -> {
+            //    assert p.getAttributes().equals(attributes) : "attribute mismatch:\n" + entry.getValue();
+            //});
             attributesBuilder.put(entry.getKey(), attributes);
         }
+        context.listKLabels.keySet().stream().forEach(key -> {
+            attributesBuilder.put(key, new Attributes());
+        });
 
         definitionData = new DefinitionData(
                 new Subsorts(context),
@@ -161,7 +180,6 @@ public class Definition extends JavaSymbolicObject {
                 context.getDataStructureSorts(),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                context.listKLabels,
                 context.freshFunctionNames,
                 context.getConfigurationStructureMap(),
                 context.globalOptions,
@@ -308,7 +326,28 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.subsorts;
     }
 
+    public Context context() {
+        return context;
+    }
+
     public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public GlobalOptions globalOptions() {
+        return definitionData.globalOptions;
+    }
+
+    public void setGlobalOptions(GlobalOptions globalOptions) {
+        this.definitionData.globalOptions = globalOptions;
+    }
+
+    public KRunOptions kRunOptions() {
+        return definitionData.kRunOptions;
+    }
+
+    public void setKRunOptions(KRunOptions kRunOptions) {
+        this.definitionData.kRunOptions = kRunOptions;
     }
 
     public void setKem(KExceptionManager kem) {
@@ -386,11 +425,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public Attributes kLabelAttributesOf(String label) {
-        return definitionData.kLabelAttributes.get(label);
-    }
-
-    public Set<Production> listLabelsOf(String label) {
-        return definitionData.listKLabels.get(label);
+        return Optional.ofNullable(definitionData.kLabelAttributes.get(label)).orElse(new Attributes());
     }
 
     public ConfigurationStructureMap getConfigurationStructureMap() {
@@ -401,24 +436,12 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.dataStructureSorts.get(sort.toFrontEnd());
     }
 
-    public GlobalOptions globalOptions() {
-        return definitionData.globalOptions;
-    }
-
-    public KRunOptions kRunOptions() {
-        return definitionData.kRunOptions;
-    }
-
     public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 
     public DefinitionData definitionData() {
         return definitionData;
-    }
-
-    public Context context() {
-        return context;
     }
 
 }

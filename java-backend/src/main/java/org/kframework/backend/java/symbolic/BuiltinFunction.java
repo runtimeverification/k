@@ -65,13 +65,13 @@ public class BuiltinFunction {
             throw KExceptionManager.internalError("Failed to load partial evaluation hook implementation", e);
         }
         for (Map.Entry<String, Attributes> entry : definition.kLabelAttributes().entrySet()) {
-            if (entry.getValue().containsAttribute(Attribute.HOOK_KEY)) {
-                String hookAttribute = entry.getValue().getAttribute(Attribute.HOOK_KEY);
+            String hookAttribute = entry.getValue().getAttr(Attribute.HOOK_KEY);
+            if (hookAttribute != null) {
                 /*
                  * exclude hook from evaluation during compilation if the hook is dynamic
                  * in nature (is related to I/O or to meta properties).
                  * */
-                if (tool == Tool.KOMPILE && entry.getValue().containsAttribute(Attribute.IMPURE_KEY)) {
+                if (tool == Tool.KOMPILE && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
                     table.put(KLabelConstant.of(entry.getKey(), definition), throwImpureExceptionHandle);
                     continue;
                 }

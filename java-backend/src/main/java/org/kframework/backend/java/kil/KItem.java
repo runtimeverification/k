@@ -78,13 +78,6 @@ public class KItem extends Term implements KItemRepresentation {
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
 
-        if (kLabel instanceof KLabelConstant) {
-            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator(termContext.definition());
-            }
-        }
-
         // TODO(yilongli): break the dependency on the Tool object
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
@@ -693,13 +686,13 @@ public class KItem extends Term implements KItemRepresentation {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(kLabel.getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 
