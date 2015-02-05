@@ -78,13 +78,13 @@ module ATTRIBUTES
   syntax TAGList    ::= TAGCONTENT              [token]
   syntax TAGCONTENT ::= TAGCONTENT TC           [klabel(#TAGCONTENTList)] // dummy klabel
                       | TC                      [klabel(#TAGCONTENTTC)]   // dummy klabel
-					  | ""                      [klabel(#NOTAGCONTENT)]   // dummy klabel
+                      | ""                      [klabel(#NOTAGCONTENT)]   // dummy klabel
   syntax TC ::= r"[^\\n\\r\\(\\)\\\"]+"         [klabel('TC)]             // dummy klabel
               | "(" TAGCONTENT ")"
 
   syntax Attr ::= KEY                 [klabel(#TagSimple)]
                 | KEY "(" TAGList ")" [klabel(#TagContent)]
-			    | KEY "(" KString ")" [klabel(#TagString)]
+                | KEY "(" KString ")" [klabel(#TagString)]
 endmodule
 
 // To be used for first-level parsing/pretty-printing of global KORE
@@ -151,10 +151,10 @@ module OUTER-KORE
   syntax KProductionItem ::= KSort       [hook(org.kframework.kore.outer.NonTerminal)]
                            | KString     [hook(org.kframework.kore.outer.Terminal)]
                            | "r" KString [hook(org.kframework.kore.outer.RegexTerminal)]
-						   | "Token" "{" TokenContent "}" [klabel(#KPIToken)]
-						   | "Lexer" "{" TokenContent "}" [klabel(#KPIToken)]
-						   | "NeList" "{" KSort "," KString "}" [klabel(#NeList)]
-						   |   "List" "{" KSort "," KString "}" [klabel(#List)]
+                           | "Token" "{" TokenContent "}" [klabel(#KPIToken)]
+                           | "Lexer" "{" TokenContent "}" [klabel(#KPIToken)]
+                           | "NeList" "{" KSort "," KString "}" [klabel(#NeList)]
+                           |   "List" "{" KSort "," KString "}" [klabel(#List)]
   syntax TokenContent ::= r"[^\\n\\r}]" [token]
   syntax PrioritySeqBlock ::= PrioritySeqBlock ">" AssocAttribute ProdBlock [klabel(#PrioritySeqBlock)]
                             | ProdBlock
@@ -166,7 +166,7 @@ module OUTER-KORE
                      | KProductionWAttr
   syntax KProductionWAttr ::= KProduction OptionalAttributes [klabel(#KProductionWAttr)]
                             | KLabel "(" KSortList ")" OptionalAttributes [klabel(#KFuncProductionWAttr)]
-							|        "(" KSortList ")" OptionalAttributes [klabel(#KTupleProductionWAttr)]
+                            |        "(" KSortList ")" OptionalAttributes [klabel(#KTupleProductionWAttr)]
   syntax KSortList ::= KSortList "," KSort [klabel(#KSortList)]
                      | KSort
   // We use #KAttributes as top KLabel in the K term holding the attributes
