@@ -148,6 +148,11 @@ public class Grammar implements Serializable {
      * @return the remove whitespace state
      */
     private NextableState addWhitespace(NextableState start) {
+        // usually a terminal may be followed by AddLocationRule and WrapLabelRule.
+        // we want to add the whitespce after these, so we iterate over them
+        while (start.next.iterator().hasNext() && start.next.iterator().next() instanceof RuleState) {
+            start = (NextableState) start.next.iterator().next();
+        }
         PrimitiveState whitespace = new RegExState(
             "whitespace", start.nt, pattern, null);
         RuleState deleteToken = new RuleState(

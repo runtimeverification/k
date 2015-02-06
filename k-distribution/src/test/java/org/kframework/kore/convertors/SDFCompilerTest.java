@@ -17,7 +17,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kompile.KompileOptions.Experimental;
-import org.kframework.kore.convertors.BaseTest.DefintionWithContext;
+import org.kframework.kore.convertors.BaseTest.DefinitionWithContext;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.generator.OuterParser;
@@ -36,7 +36,15 @@ public abstract class SDFCompilerTest extends BaseTestCase {
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public DefintionWithContext parse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
+    public DefinitionWithContext parse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
+        // Not a complete fix, but seems to reduce sporadic test failures
+        synchronized (SDFCompilerTest.class) {
+            return unsafeParse(definitionFile, mainModule, autoinclude);
+        }
+    }
+
+    // Not threadsafe, SDF uses too much static state.
+    private DefinitionWithContext unsafeParse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -83,7 +91,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
                 kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),
                 autoinclude, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
-        return new DefintionWithContext(parsedKIL, context);
+        return new DefinitionWithContext(parsedKIL, context);
     }
 
 }

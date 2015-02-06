@@ -61,7 +61,7 @@ public class KSyntax2GrammarStatesFilter {
             if (prdItem instanceof Terminal) {
                 Terminal terminal = (Terminal) prdItem;
                 PrimitiveState pstate = new RegExState(prd.sort() + "-T", nt,
-                        Pattern.compile(terminal.value(), Pattern.LITERAL), null);
+                        Pattern.compile(terminal.value(), Pattern.LITERAL), prd);
                 previous.next.add(pstate);
                 RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                 pstate.next.add(del);
@@ -82,9 +82,11 @@ public class KSyntax2GrammarStatesFilter {
                     String msg = "Lexical pattern not compatible with the new parser.";
                     throw KExceptionManager.compilerError(msg, ex); // TODO: add location
                 }
-                PrimitiveState pstate = new RegExState(prd.sort().name() + "-T", nt, p, prd); // TODO: replace kil.Production with Sort in Grammar and parser, then replace this null
+                PrimitiveState pstate = new RegExState(prd.sort().name() + "-T", nt, p, prd);
+                RuleState del = new RuleState("DelRegexTerminalRS", nt, new DeleteRule(1, true));
                 previous.next.add(pstate);
-                previous = pstate;
+                pstate.next.add(del);
+                previous = del;
             } else {
                 assert false : "Didn't expect this ProductionItem type: "
                         + prdItem.getClass().getName();

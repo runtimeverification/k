@@ -1,0 +1,854 @@
+// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+
+/*
+* To translate type annotations to side conditions, we need to invent names for wildcard _.
+It's not clear how best to handle type annotations on more general terms, fortunately
+that doesn't appear in this definition (with the possible exception of an inferred
+type KItem on the HOLE in the contexts).
+
+* Expanding syntax declarations to single productions and separate priorities
+works fine also in the full K version of simple-untyped.
+The translation of List{} suggested on the wiki broke rule parsing (even before
+trying to kast/krun programs), and I didn't even try the cells.
+
+* In keeping with the principle that a .k should have a trivial translation into kore syntax, we need
+to pick representations for some of the allowed sugar that is somewhat less trivial to eliminate.
+
+In particular, context abstraction cannot be applied until we know the final configuration, and
+a module or file could contain rules that end up being used with several different configurations,
+so if kore is to be used for separate compilation or at least preparsing of individual files, it
+has to be possible to represent rules which have not been completed.
+
+For this we use a label #cellBracket for top-level lists of cells or any explicit grouping,
+and allow a constant label #dots() as the first or last item argument of a cell label or #cellBracket.
+We write the productions declaring a cell with the exact number and identities of child cells as
+described on the wiki, but allow terms to be less strict.
+
+A constant #HOLE is used for writing the terms in contexts.
+
+On the concrete syntax:
+Using a single ` for grouping looks too much like a label, so I use at least `` for grouping.
+
+Constants look very bad like true(.::KList), and it's trivial to fix kore.k to allow true()
+(and make it produce exactly the same meta-K term as for true(.::KList)).
+ */
+module BUILTIN-SYNTAX-HOOKS
+  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
+  syntax Int ::= #Int
+  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
+  syntax #Bool ::= "true" [klabel(true)]
+  syntax #Bool ::= "false" [klabel(false)]
+  syntax Bool ::= #Bool
+  syntax K
+  syntax Map
+  syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
+                    [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]")]
+  syntax String ::= #String
+
+endmodule
+
+module LIST
+  imports BUILTIN-SYNTAX-HOOKS
+  syntax List ::= List List               [left, function, hook(List:__), klabel(_List_)]
+  syntax List ::= ".List"                 [function, hook(List:.List), klabel(.List)]
+  syntax List ::= ListItem(K)             [function, hook(List:ListItem), klabel(ListItem)]
+
+  //@ Remove elements from the beginning and the end of the List.
+  // seems to be needed by the Java backend
+  syntax List ::= range(List, Int, Int)   [function, hook(List:range), klabel(List:range)]
+endmodule
+
+module BOOL
+  imports BUILTIN-SYNTAX-HOOKS
+
+  syntax priority equalEqualK notEqualEqualK > boolOperation
+  syntax priority notBool > _andBool_
+
+  syntax Bool ::= "notBool" "(" Bool ")"
+    [function, boolOperation, hook(#BOOL:notBool_), klabel(notBool)]
+  syntax Bool ::= Bool "andBool" Bool [function, left, hook(#BOOL:_andBool_), klabel(_andBool_)]
+
+  syntax Bool ::= K "==K" K  [function, equalEqualK, hook(#K-EQUAL:_==K_), left, klabel(_==K_)]
+  syntax Bool ::= K "=/=K" K [function, notEqualEqualK, hook(#K-EQUAL:_=/=K_), left, klabel(_=/=K_)]
+endmodule
+
+module INT
+  imports BOOL
+  syntax priority _*Int_ _/Int_ _%Int_ > _+Int_ _-Int_
+
+
+  syntax Int ::= Int "*Int" Int [function, left, klabel(_*Int_), hook(#INT:_*Int_)]
+  syntax Int ::= Int "/Int" Int [function, left, klabel(_/Int_), hook(#INT:_/Int_)] 
+  syntax Int ::= Int "%Int" Int [function, left, klabel(_%Int_), hook(#INT:_%Int_)]
+  syntax Int ::= Int "+Int" Int [function, left, klabel(_+Int_), hook(#INT:_+Int_)]
+  syntax Int ::= Int "-Int" Int [function, left, klabel(_-Int-), hook(#INT:_-Int_)]
+  syntax Int ::= "freshInt" "(" Int ")" [freshGenerator, function, klabel(freshInt)]
+  rule `freshInt`(I) => I requires `IsInt`(I)
+
+  syntax Bool ::= Int "<=Int" Int [function, left, klabel(_<=Int_), hook(#INT:_<=Int_)]
+  syntax Bool ::= Int "<Int" Int [function, left, klabel(_<Int_), hook(#INT:_<Int_)]
+  syntax Bool ::= Int ">=Int" Int [function, left, klabel(_>=Int_), hook(#INT:_>=Int_)]
+  syntax Bool ::= Int ">Int" Int [function, left, klabel(_>Int_), hook(#INT:_>Int_)]
+  syntax Bool ::= Int "==Int" Int [function, left, klabel(_==Int_), hook(#INT:_==Int_)]
+  syntax Bool ::= Int "=/=Int" Int [function, left, klabel(_=/=Int_), hook(#INT:_=/=Int_)]
+
+endmodule
+
+module STRING
+  imports INT
+
+  syntax String ::= String "+String" String [function, left, klabel(_+String_), hook(#STRING:_+String_)]
+  syntax Int ::= "String2Int" "(" String ")"
+    [function, klabel(String2Int), hook(#CONVERSION:string2int)]
+  syntax String ::= "Int2String" "(" Int ")"
+    [function, klabel(Int2String), hook(#CONVERSION:int2string)]
+
+  syntax Bool ::= String "==String" String [function, left, klabel(_==String_), hook(#STRING:_==String_)]
+  syntax Bool ::= String "=/=String" String [function, left, klabel(_=/=String_), hook(#STRING:_=/=String_)]
+
+  syntax String ::= "chrChar" "(" Int ")"   [function, klabel(chrChar), hook(#STRING:chrChar)]
+  syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
+
+  syntax Int ::= "findChar" "(" String "," String "," Int ")" [function, klabel(findChar), hook(#STRING:findChar)]
+  syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
+endmodule
+
+module BASIC-IO
+  imports LIST
+  imports INT
+  imports STRING
+  imports BUILTIN-SYNTAX-HOOKS
+
+  syntax Stream ::= "#buffer" "(" K ")"    [klabel(#buffer)]
+  syntax Stream ::= "#istream" "(" Int ")" [klabel(#istream)]
+  syntax Stream ::= "#ostream" "(" Int ")" [klabel(#ostream)]
+  syntax Stream ::= "#noIO"                [klabel(#noIO)]
+
+  syntax K ::= "#write" "(" Int "," String ")" [function, impure, klabel(#write), hook(#IO:#write)]
+  syntax KItem ::= "#getc" "(" Int ")"         [function, impure, klabel(#getc), hook(#IO:#getc)]
+
+  syntax Stream ::= "#parseInput" "(" String "," String ")" [klabel(#parseInput)]
+
+  syntax KItem ::= "#parse" "(" String "," String ")"
+    [function, klabel(#parse), hook(#K-PARSER:#parse), impure]
+
+  rule `_List_`(`ListItem`(`#ostream`(Wild1)),
+       `_List_`(`ListItem`(`#buffer`(Buffer => `_+String_`(Buffer,`Int2String`(I)))),
+       `_List_`(`ListItem`(I) => `.List`(),
+                 Wild2)))
+  requires `_andBool_`(`IsInt`(Wild1),
+           `_andBool_`(`IsString`(Buffer),
+           `_andBool_`(`IsInt`(I),
+                       `IsList`(Wild2))))
+           [stdout, stderr]
+  rule `_List_`(`ListItem`(`#ostream`(Wild1)),
+       `_List_`(`ListItem`(`#buffer`(Buffer => `_+String_`(Buffer,S))),
+       `_List_`(`ListItem`(S) => `.List`(),
+                 Wild2)))
+  requires `_andBool_`(`IsInt`(Wild1),
+           `_andBool_`(`IsString`(Buffer),
+           `_andBool__`(`IsString`(S),
+                        `IsList`(Wild2))))
+           [stdout, stderr]
+
+/*
+  rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
+       (ListItem(I:Int) => .List)
+       _:List [stdout, stderr]
+
+  rule ListItem(#buffer(Buffer:String => Buffer +String S))
+       (ListItem(S:String) => .List)
+       _:List [stdout, stderr]
+
+  // Send first char from the buffer to the server
+  rule ListItem(#ostream((.K => #write(N, S)) ~> N:Int))
+       ListItem(#buffer(S:String => ""))
+       _:List
+    when S =/=String "" [stdout, stderr]
+
+  // read one character at a time until we read whitespace
+  rule ListItem(#parseInput(_:KItem, Delimiters:String))
+       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem(#istream(N:Int))
+    when findChar(S, Delimiters, 0) ==Int -1 [stdin]
+
+  // when we reach whitespace, if it parses create a ListItem
+  rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S))
+       ListItem(#buffer(S:String => ""))
+       _:List
+    when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
+
+  // a hack: handle the case when we read integers without the help of the IO server
+  rule (ListItem(#parseInput("Int", Delimiters:String))
+       => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1))))
+       ListItem(#buffer(S:String => ""))
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool lengthString(S) >Int 1 [stdin]
+
+  rule (ListItem(#parseInput(Sort:String, Delimiters:String))
+       => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort)))
+       ListItem(#buffer(S:String => ""))
+       ListItem(#istream(_))
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
+       andBool lengthString(S) >Int 1 [stdin]
+
+  rule ListItem(#parseInput(Sort:String, Delimiters:String))
+       ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
+       _:List
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
+       andBool lengthString(S) <=Int 1 [stdin]
+
+  rule ListItem(#buffer(_))
+       (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
+
+  rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
+       ListItem(#buffer(_))
+       _:List [stdout, stderr]
+*/
+
+endmodule
+
+module BUILTINS
+  imports BUILTIN-SYNTAX-HOOKS
+  imports LIST
+  imports STRING
+  imports INT
+  imports BASIC-IO
+
+
+  syntax Map ::= Map Map                        [left, function, klabel(_Map_), hook(Map:__)]
+  syntax Map ::= ".Map"                         [function, klabel(.Map), hook(Map:.Map)]
+  syntax Map ::= K "|->" K                      [function, klabel(_|->_), hook(Map:_|->_)]
+  syntax priorities _|->_ > _Map_ .Map
+
+  syntax Map ::= Map "[" K "<-" K "]"  [function, klabel(_[_<-_]), hook(Map:update), prefer]
+
+  // These seem to be used by the Java backend
+  syntax K ::= Map "[" K "]"                    [function, hook(Map:lookup), klabel(Map:lookup)]
+  syntax K ::= List "[" Int "]"                 [function, hook(List:get), klabel(List:get)]
+  syntax Map ::= "updateMap" "(" Map "," Map ")"  [function, klabel(updateMap), hook(Map:updateAll)]
+
+  syntax Set ::= "keys" "(" Map ")"  [function, klabel(keys), hook(Map:keys)]
+
+  syntax Set ::= ".Set"     [function, klabel(.Set), hook(Set:.Set)]
+  syntax Set ::= "SetItem" "(" K ")" [function, klabel(SetItem), hook(Set:SetItem)]
+  syntax Set ::= Set Set    [left, function, klabel(_Set_), hook(Set:__)]
+  syntax Set ::= Set "-Set" Set [function, klabel(_-Set_), hook(Set:difference)]
+  syntax Bool ::= K "in" Set    [function, klabel(_in_), hook(Set:in)]
+
+endmodule
+
+module SIMPLE-UNTYPED-SYNTAX
+  imports BUILTIN-SYNTAX-HOOKS
+  syntax Id ::= "main" [token]
+
+  syntax Decl ::= "var" Exps ";" [kabel(var_;)]
+  syntax Decl ::= "function" Id "(" Ids ")" Block [klabel(function_(_)_)]
+
+  syntax priority '(_) ++_
+    > _[_]
+    > read sizeOf _(_) -_
+    > _*_ _%_ _/_
+    > _+_ _-_
+    > _>=_ _==_ _!=_ _<=_ _>_ _<_
+    > !_
+    > _&&_ _||_
+    > spawn
+    > _=_
+
+  // NOTE: initial translation inclued the bracket in the priority order, written '(_)
+  syntax Exp ::= Int
+  syntax Exp ::= Bool
+  syntax Exp ::= String
+  syntax Exp ::= Id
+  syntax Exp ::= "(" Exp ")"             [bracket]
+  syntax Exp ::= "++" Exp                [klabel(++_)]
+  syntax Exp ::= Exp "[" Exps "]"        [strict, klabel(_[_])]
+  syntax Exp ::= Exp "(" Exps ")"        [strict, klabel(_(_))]
+  syntax Exp ::= "-" Exp                 [strict, klabel(-_)]
+  syntax Exp ::= "sizeOf" "(" Exp ")"    [strict, klabel(sizeOf)]
+  syntax Exp ::= "read" "(" ")"          [klabel(read)]
+  syntax Exp ::= Exp "*" Exp             [strict, left, klabel(_*_)]
+  syntax Exp ::= Exp "/" Exp             [strict, left, klabel(_/_)]
+  syntax Exp ::= Exp "%" Exp             [strict, left, klabel(_%_)]
+  syntax Exp ::= Exp "+" Exp             [strict, left, klabel(_+_)]
+  syntax Exp ::= Exp "-" Exp             [strict, left, klabel(_-_)]
+  syntax Exp ::= Exp "<" Exp             [strict, non-assoc, klabel(_<_)]
+  syntax Exp ::= Exp "<=" Exp            [strict, non-assoc, klabel(_<=_)]
+  syntax Exp ::= Exp ">" Exp             [strict, non-assoc, klabel(_>_)]
+  syntax Exp ::= Exp ">=" Exp            [strict, non-assoc, klabel(_>=_)]
+  syntax Exp ::= Exp "==" Exp            [strict, non-assoc, klabel(_==_)]
+  syntax Exp ::= Exp "!=" Exp            [strict, non-assoc, klabel(_!=_)]
+  syntax Exp ::= "!" Exp                 [strict, klabel(!_)]
+  syntax Exp ::= Exp "&&" Exp            [strict(1), left, klabel(_&&_)]
+  syntax Exp ::= Exp "||" Exp            [strict(1), left, klabel(_||_)]
+  syntax Exp ::= "spawn" Block           [klabel(spawn)]
+  syntax Exp ::= Exp "=" Exp             [strict(2), right, klabel(_=_)]
+
+  syntax Ids  ::= Id "," Ids             [userlist,klabel(_,Ids_)]
+  syntax Ids  ::= ".Ids"                 [userlist,klabel(".List{\"_,Ids_\"}")]
+
+  syntax Exps ::= Exp "," Exps           [userlist, strict, klabel(_,_)]
+  syntax Exps ::= ".Exps"                [userlist, klabel(".List{\"_,_\"}")]
+
+
+  syntax Block ::= "{" "}"               [klabel({})]
+  syntax Block ::= "{" Stmts "}"         [klabel({_})]
+
+  syntax Stmt ::= Decl
+  syntax Stmt ::= Block
+  syntax Stmt ::= Exp ";"                               [strict, klabel(_;)]
+  syntax Stmt ::= "if" "(" Exp ")" Block "else" Block   [avoid, strict(1), klabel(if(_)_else_)]
+  syntax Stmt ::= "if" "(" Exp ")" Block [klabel(if(_)_)] // expanded by macro
+  syntax Stmt ::= "for" "(" Stmts Exp ";" Exp ")" Block [klabel(for(__;_)_)]
+  syntax Stmt ::= "while" "(" Exp ")" Block             [klabel(while(_)_)]
+  syntax Stmt ::= "return" Exp ";"                      [strict, klabel(return_;)]
+  syntax Stmt ::= "return" ";"                          [klabel(return;)]
+  syntax Stmt ::= "print" "(" Exps ")" ";"              [strict, klabel(print)]
+  syntax Stmt ::= "try" Block "catch" "(" Id ")" Block  [klabel(try_catch(_)_)]
+  syntax Stmt ::= "throw" Exp ";"                       [strict, klabel(throw)]
+  syntax Stmt ::= "join" Exp ";"                        [strict, klabel(join)]
+  syntax Stmt ::= "acquire" Exp ";"                     [strict, klabel(acquire)]
+  syntax Stmt ::= "release" Exp ";"                     [strict, klabel(release)]
+  syntax Stmt ::= "rendezvous" Exp ";"                  [strict, klabel(rendezvous)]
+
+  syntax Stmts ::= Stmt
+  syntax Stmts ::= Stmts Stmts                          [right, klabel(__)]
+
+// Macros are needed for proper execution of programs
+  rule `for(__;_)_`(Start,Cond,Step,`{_}`(S)) => `{_}`(`__`(Start,`while(_)_`(Cond,`{_}`(`__`(S,`_;`(Step))))))
+    requires `_andBool_`(`IsStmts`(Start),
+             `_andBool_`(`IsExp`(Cond),
+             `_andBool_`(`IsExp`(Step),
+                         `IsStmts`(S)))) [macro]
+  rule `for(__;_)_`(Start,Cond,Step,`{}`()) => `{_}`(`__`(Start,`while(_)_`(Cond,`{_}`(`_;`(Step)))))
+    requires `_andBool_`(`IsStmts`(Start),
+             `_andBool_`(`IsExp`(Cond),
+                         `IsExp`(Step))) [macro]
+  rule `if(_)_`(E,S) => `if(_)_else_`(E,S,`{}`())
+    requires `_andBool_`(`IsExp`(E),
+                         `IsBlock`(S)) [macro]
+  rule `var_;`(`_,_`(E1, `_,_`(E2, Es))) => `__`(`var_;`(E1),`var_;`(`_,_`(E2, Es)))
+     requires `andBool`(`IsExp`(E1),`andBool`(`IsExp`(E2),`IsExps`(Es))) [macro]
+  rule `var_;`(`_,_`(`_=_`(X,E),`.List{"_,_"}`()))
+       => `__`(`var_;`(`_,_`(X,`.List{"_,_"}`())),`_=_`(X,E))
+     requires `andBool`(`IsId`(X), `IsExp`(E)) [macro]
+
+// For the semantics, we can therefore assume from now on that each
+// conditional has both branches, that there are only \texttt{while} loops, and
+// that each variable is declared alone and
+// without any initialization as part of the declaration.
+
+endmodule
+
+
+module SIMPLE-UNTYPED
+  imports BUILTINS
+  imports SIMPLE-UNTYPED-SYNTAX
+
+  syntax Val ::= Int
+  syntax Val ::= Bool
+  syntax Val ::= String
+  syntax Val ::= "array" "(" Int "," Int ")" [klabel(array)]
+  syntax Val ::= "lambda" "(" Ids "," Stmt ")" [klabel(lambda)]
+
+  syntax Vals ::= Val "," Vals [userList, klabel(_,_)]
+  syntax Vals ::= ".Vals" [userList, klabel(".List{\"_,_\"}")]
+
+  syntax Exp ::= Val
+  syntax KResult ::= Val
+
+/*
+  configuration <T color="red">
+                  <threads color="orange">
+                    <thread multiplicity="*" color="yellow">
+                      <k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <br/>
+                      <control color="cyan">
+                        <fstack color="blue"> .List </fstack>
+                        <xstack color="purple"> .List </xstack>
+                      </control>
+                      <br/>
+                      <env color="violet"> .Map </env>
+                      <holds color="black"> .Map </holds>
+                      <id color="pink"> 0 </id>
+                    </thread>
+                  </threads>
+                  <br/>
+                  <genv color="pink"> .Map </genv>
+                  <store color="white"> .Map </store>
+                  <busy color="cyan"> .Set </busy>
+                  <terminated color="red"> .Set </terminated>
+                  <br/>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
+                  <nextLoc color="gray"> 0 </nextLoc>
+                </T>
+ */
+
+  syntax TopCell ::= "<T>" Threads GEnv Store Busy Terminated In Out NextLoc "</T>" [cell,color("red"),topcell, klabel(<T>)]
+  syntax TopCell ::= "initTop" [initializer, klabel(initTop)]
+  rule initTop() => `<T>_</T>`(
+           initThreads(),
+           initGenv(),
+           initStore(),
+           initBusy(),
+           initTerminated(),
+           initIn(),
+           initOut(),
+           initNextLoc()) [macro]
+
+  syntax Threads ::= "<threads>" ThreadBag "</threads>" [cell,color("orange"),klabel(<threads>)]
+  syntax Threads ::= "initThreads" [initializer, klabel(initThreads)]
+  rule initThreads() => `<threads>`(initThread())
+
+  syntax ThreadBag ::= Thread
+  syntax ThreadBag ::= ".ThreadBag" [klabel(.ThreadBag)]
+  syntax ThreadBag ::= ThreadBag ThreadBag [klabel(_ThreadBag_), assoc, comm, unit(.ThreadBag)]
+
+  syntax Thread ::= "<thread>" KCell ControlCell EnvCell Holds IdCell "</thread>" [cell, color("yellow"),klabel(<thread>)]
+  syntax Thread ::= "initThread" [initializer, klabel(initThread)]
+
+  rule initThread() => `<thread>`(initKCell(),initControl(),initEnvCell(),initHolds(),initThreadId())  [macro]
+
+  syntax KCell ::= "<k>" K "</k>"  [maincell, color("green"),klabel(<k>)]
+  syntax KCell ::= "initKCell"  [initializer,klabel(initKCell)]
+  rule initKCell() => `<k>`(`_~>_`($PGM,`execute()`))
+       requires `IsStmts`($PGM) [macro]
+
+  syntax ControlCell ::= "<control>" FStack XStack "</contol>"  [cell, color("cyan"),klabel(<control>)]
+  syntax ControlCell ::= "initControl"  [initializer, klabel(initControl)]
+  rule initControl() => `<control>`(initFstack(),initXStack())  [macro]
+
+  syntax ControlCellFragment ::= FStack
+  syntax ControlCellFragment ::= XStack
+  syntax ControlCellFragment ::= ".ControlCellFragment" [klabel(.ControlCellFragment)]
+  syntax ControlCellFragment ::= ControlCellFragment ControlCellFragment
+    [assoc, comm, unit(.ControlCellFragment), klabel(_ControlCellFragment_)]
+
+  syntax FStack ::= "<fstack>" List "</fstack>"  [cell, color("blue"),klabel(<fstack>)]
+  syntax FStack ::= "initFStack" [initializer, klabel(initFStack)]
+  rule initFStack() => `<fstack>`(`.List`())  [macro]
+
+  syntax XStack ::= "<xstack>" List "</xstack>"  [cell, color("purple"), klabel(<xstack>)]
+  syntax XStack ::= "initXStack" [initializer, klabel(initXStack)]
+  rule initXStack() => `<xstack>`(`.List`())  [macro]
+
+  syntax EnvCell ::= "<env>" Map "</env>"  [cell, color("violet"), klabel(<env>)]
+  syntax EnvCell ::= "initEnvCell" [initializer, klabel(initEnvCell)]
+  rule initEnvCell() => `<env>`(`.Map`())  [macro]
+
+  syntax Holds ::= "<holds>" Map "</holds>"  [cell, color("black"), klabel(<holds>)]
+  syntax Holds ::= "initHolds" [initializer, klabel(initHolds)]
+  rule initHolds() => `<holds>`(`.Map`())  [macro]
+
+  syntax IdCell ::= "<id>" Int "</id>"  [cell, color("pink"), klabel(<id>)]
+  syntax IdCell ::= "initId" [initializer, klabel(initId)]
+  rule initId() => `<id>`(#token("Int","0"))  [macro]
+
+  syntax GEnv ::= "<genv>" Map "</genv>" [cell, color("pink"), klabel(<genv>)]
+  syntax GEnv ::= "initGEnv" [initializer, klabel(initGEnv)]
+  rule initGEnv() => `<genv>`(`.Map`())  [macro]
+
+  syntax Store ::= "<store>" Map "</store>" [cell, color("white"), klabel(<store>)]
+  syntax Store ::= "initStore" [initializer, klabel(initStore)]
+  rule initStore() => `<store>`(`.Map`())  [macro]
+
+  syntax Busy ::= "<busy>" Set "</busy>"   [cell, color("cyan"), klabel(<busy>)]
+  syntax Busy ::= "initBusy" [initializer, klabel(initBusy)]
+  rule initBusy() => `<busy>`(`.Set`())  [macro]
+
+  syntax Terminated ::= "<terminated>" Set "</terminated>"  [cell, color("red"), klabel(<terminated>)]
+  syntax Terminated ::= "initTerminated" [initializer, klabel(initTerminated)]
+  rule initTerminated() => `<terminated>`(`.Set`()) [macro]
+
+  syntax In ::= "<in>" List "</in>" [cell, color("magenta"), stream("stdin"), klabel(<in>)]
+  syntax In ::= "initIn" [initializer, klabel(initIn)]
+  rule initIn() => `<in>`(`.List`())  [macro]
+
+  syntax Out ::= "<out>" List "</out>"  [cell, color("brown"), stream("stdout"), klabel(<out>)]
+  syntax Out ::= "initOut" [initializer, klabel(initOut)]
+  rule initOut() => `<out>`(`.List`())  [macro]
+
+  syntax NextLoc ::= "<nextLoc>" Int "</nextLoc>" [cell, color("gray"), klabel(<nextLoc>)]
+  syntax NextLoc ::= "initNextLoc" [initializer, klabel(initNextLoc)]
+  rule initNextLoc() => `<nextLoc>`(#token("Int","0"))  [macro]
+
+  syntax KItem ::= "undefined"  [latex(\bot), klabel(undefined)]
+
+  rule #cellBracket(
+       `<k>`(`var_;`(`_,_`(X,`.List{"_,_"}`())) => .::K , #dots()),
+       `<env>`(Env => `_[_<-_]`(Env,X,L)),
+       `<store>`(#dots(), `.Map`() => `_|->_`(L,undefined()) ,#dots()),
+       `<nextLoc>`(L => `_+Int_`(L,#token("Int","1")))
+       )
+    requires `_andBool_`(`IsId`(X),`_andBool_`(`IsMap`(Env),`IsInt`(L)))
+
+  // context var _:Id[HOLE];
+  context `_[_]`(Wild1,#HOLE())
+    requires `IsId`(Wild1)
+  /* Try after context to rule to see...
+  rule `var_;`(`_,_`(`_[_]`(Wild1,Wild2),`.List{"_,_"}`()))
+    => Wild2 ~> #freezer(`var_;`(`_,_`(`_[_]`(Wild1,#HOLE()),`.List{"_,_"}`())))
+    requires `IsId`(Wild1)
+  rule Wild2 ~> #freezer(`var_;`(`_,_`(`_[_]`(Wild1,#HOLE()),`.List{"_,_"}`())))
+    => `var_;`(`_,_`(`_[_]`(Wild1,Wild2),`.List{"_,_"}`()))
+    requires `IsId`(Wild1)
+   */
+
+  rule #cellBracket(
+       `<k>`(`var_;`(`_,_`(`_[_]`(X,`_,_`(N,`.List{"_,_"}`())),`.List{"_,_"}`())) => .::K, #dots()),
+       `<env>`(Env => `_[_<-_]`(Env,X,L)),
+       `<store>`(#dots(), `.Map`() =>
+                 `_Map_`(`_|->_`(L, array(`_+Int_`(L,#token("Int","1")),N)),
+                         `_..._|->_`(`_+Int_`(L,#token("Int","1"))
+                                    ,`_+Int_`(L,N)
+                                    ,undefined())), #dots()),
+       `<nextLoc>`(L => `_+Int_`(`_+Int_`(L, #token("Int","1")), N)))
+    requires `_andBool_`(`IsId`(X),
+             `_andBool_`(`IsInt`(N),
+             `_andBool_`(`IsMap`(Env),
+             `_andBool_`(`IsInt`(L),
+                         `_>=Int_`(N,#token("Int","0"))))))
+
+  syntax Id ::= "$1" [token]
+  syntax Id ::= "$2" [token]
+
+  rule `var_;`(`_,_`(`_[_]`(X,`_,_`(N1,`_,_`(N2,Vs)))
+           ,`.List{"_,_"}`())) =>
+    `__`(`var_;`(`_,_`(`_[_]`(X,`_,_`(N1,`.List{"_,_"}`()))
+                    ,`.List{"_,_"}`())),
+        `{_}`(
+          `for(__;_)_`(`var_;`(`_,_`(`_=_`(`$1`(),#token("Int","0")),`.List{"_,_"}`()))
+                      ,`_<=_`(`$2`(),`_-_`(N1,#token("Int","1")))
+                      ,`++_`(`$1`()),
+            `{_}`(`__`(
+               `var_;`(`_,_`(`_[_]`(`$2`(),`_,_`(N2,Vs)),`.List{"_,_"}`())),
+               `_;`(`_=_`(`_[_]`(X,`$1`()),`$2`())))))))
+    requires `_andBool_`(`IsId`(X),
+             `_andBool_`(`IsInt`(N1),
+             `_andBool_`(`IsInt`(N2),
+                         `IsVals`(Vs))))
+    [structural]
+
+  rule #cellBracket(
+     `<k>`(`function_(_)_`(F,Xs,S) => .::K , #dots()),
+     `<env>`(Env => `_[_<-_]`(Env,F,L)),
+     `<store>`(#dots(), `.Map`() => `_|->_`(L,lambda(Xs, S)), #dots()),
+     `<nextLoc>`(L => `_+Int_`(L,#token("Int","1")))
+     )
+    requires `_andBool_`(`IsId`(F),
+             `_andBool_`(`IsIds`(Xs),
+             `_andBool_`(`IsBlock`(S),
+             `_andBool_`(`IsMap`(E),
+                         `IsInt`(L)))))
+
+  syntax KItem ::= "execute" [klabel(execute)]
+
+  rule #cellBracket(
+     `<k>`(execute() => `_;`(`_(_)`(#token("Id","main"),`.List{"_,_"}`()))),
+     `<env>`(Env),
+     `<genv>`(`.Map`() => Env)
+     )
+     requires `IsMap`(Env) [structural]
+
+  rule #cellBracket(
+     `<k>`(X => V, #dots()),
+     `<env>`(#dots(), `_|->_`(X,L), #dots()),
+     `<store>`(#dots(), `_|->_`(L,V), #dots())
+      )
+    // NOTE: inferred sort for L here is just K, might prefer Int
+    requires `_andBool_`(`IsId`(X), `_andBool`(`IsVal`(V), `IsK`(K))) [lookup]
+
+  context `++_`(#HOLE() => lvalue(#HOLE()))
+  // rule `++_`(Wild) => lvalue(Wild) ~> #freezer(`++_`(#HOLE()))
+  // rule lvalue(Wild) ~> #freezer(`++_`(#HOLE())) => `++_`(Wild)
+
+  rule #cellBracket(
+      `<k>`(`++_`(loc(L)) => `_+Int_`(I,#token("Int","1")), #dots()),
+      `<store>`(#dots(), `_|->_`(L, I => `_+Int_`(I,#token("Int","1"))), #dots())
+      )
+      requires `_andBool_`(`IsInt`(L),`IsInt`(I)) [increment]
+
+  rule `_+_`(I1,I2) => `_+Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_+_`(Str1,Str2) => `_+String_`(Str1,Str2) 
+  rule `_-_`(I1,I2) => `_-Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_*_`(I1,I2) => `_*Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_/_`(I1,I2) => `_/Int_`(I1,I2)
+     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("Int","0"))))
+  rule `_%_`(I1,I2) => `_%Int_`(I1,I2)
+     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("Int","0"))))
+  rule `-_`(I) => `_-Int_`(#token("Int","0"),I) requires `IsInt`(I)
+  rule `_<_`(I1,I2) => `_<Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_<=_`(I1,I2) => `_<=Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_>_`(I1,I2 )=> `_>Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+  rule `_>=_`(I1,I2) => `_>=Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
+
+  rule `_==_`(V1,V2) => `_==K_`(V1,V2) requires `_andBool_`(`IsVal`(V1),`IsVal`(V2))
+  rule `_!=_`(V1,V2) => `_=/=K_`(V1,V2) requires `_andBool_`(`IsVal`(V1),`IsVal`(V2))
+
+  rule `!_`(T) => notBool(T) requires `IsBool`(T)
+  rule `_&&_`(true(),E) => E requires `IsExp`(E)
+  rule `_&&_`(false(),_) => false()
+  rule `_||_`(true(), _) => true()
+  rule `_||_`(false(), E) => E requires `IsExp`(E)
+
+// The [anywhere] feature is underused, because it would only be used
+// at the top of the computation or inside the lvalue wrapper. So it
+// may not be worth, or we may need to come up with a special notation
+// allowing us to enumerate contexts for [anywhere] rules.
+  rule `_[_]`(V,`_,_`(N1, `_,_`(N2, Vs))) =>
+       `_[_]`(`_[_]`(V,`_,_`(N1,`.List{"_,_"}`())),`_,_`(N2,Vs))
+    requires `_andBool_`(`IsVal`(V),
+             `_andBool_`(`IsInt`(N1),
+             `_andBool_`(`IsInt`(N2),
+                         `IsVals`(Vs))))
+    [structural, anywhere]
+
+  rule `_[_]`(array(L,Wild1),`_,_`(N,`.List{"_,_"}`())) => lookup(`_+Int_`(L,N))
+    requires `_andBool_`(`IsInt`(L),
+             `_andBool_`(`IsInt`(Wild1),
+                         `IsInt`(N))) [structural, anywhere]
+
+  rule sizeOf(array(Wild1,N)) => N
+    requires `_andBool_`(`IsInt`(Wild1),`IsInt`(N))
+
+  syntax KItem ::=  "(" Map "," K "," ControlCellFragment ")" [klabel(fstackRecord)]
+
+  rule #cellBracket(
+       `<k>`(`_(_)`(lambda(Xs,S),Vs) ~> K => `__`(mkDecls(Xs,Vs),`__`(S,`return;`()))),
+       `<control>`(
+          `<fstack>`(`.List`() => `ListItem`(fstackRecord(Env,K,C)) ,#dots()),
+          C),
+       `<env>`(Env => GEnv),
+       `<genv>`(GEnv)
+    ) requires `_andBool_`(`IsIds`(Xs),
+               `_andBool_`(`IsStmt`(S),
+               `_andBool_`(`IsVals`(Vs),
+               `_andBool_`(`IsK`(K),
+               `_andBool_`(`IsMap`(Env),
+               `_andBool_`(`IsBag`(C) // TODO: why inferred as Bag despite ControlCellFragment above?
+                          ,`IsMap`(GEnv)))))))
+
+  rule #cellBracket(
+       `<k>`(`return_;`(V) ~> Wild1 => V ~> K),
+       `<control>`(
+         `<fstack>`(`ListItem`(fstackRecord(Env,K,C)) => `.List`(), #dots()),
+         Wild2 => C),
+       `<env>`(Wild3 => Env)
+     ) requires `_andBool_`(`IsVal`(V),
+                `_andBool_`(`IsK`(Wild1),
+                `_andBool_`(`IsK`(K),
+                `_andBool_`(`IsMap`(Env),
+                `_andBool_`(`IsBag`(C), // TODO: also expected ControlCellFragment
+                `_andBool_`(`IsBag`(Wild2),
+                            `IsMap`(Wild3)))))))
+
+  syntax Val ::= "nothing" [kabel(nothing)]
+  rule `return;`() => `return_;`(nothing())   [macro]
+
+  rule #cellBracket(
+     `<k>`(read() => I, #dots()),
+     `<in>`(`ListItem`(I) => `.List`(),#dots())
+     ) requires `IsInt`(I)  [read]
+
+  // context (HOLE => lvalue(HOLE)) = _
+  context `_=_`(#HOLE() => lvalue(#HOLE()), Wild1) requires `IsExp`(Wild1)
+  // rule `_=_`(Wild1,Wild2) => lvalue(Wild1) ~> #freezer(`_=_`(#HOLE(),Wild2))
+  // rule lvalue(Wild1) ~> #freezer(`_=_`(#HOLE(),Wild2)) => `_=_`(Wild1,Wild2)
+
+  rule #cellBracket(
+     `<k>`(`_=_`(loc(L),V) => V, #dots()),
+      `<store>`(#dots(), `_|->_`(L, _ => V), #dots()))
+    requires `_andBool_`(`IsInt`(L),`IsVal`(V))
+    [assignment]
+
+
+  rule `{}`() => .::K  [structural]
+  rule #cellBracket(
+      `<k>`(`{_}`(S) => S ~> env(Env), #dots()),
+      `<env>`(Env))
+    requires `_andBool_`(`IsStmts`(S),`IsMap`(Env)) [structural]
+
+  rule `__`(S1,S2) => S1 ~> S2
+    requires `_andBool_`(`IsStmts`(S1),`IsStmts`(S2)) [structural]
+
+  rule `_;`(Wild) => .::K requires `IsVal`(Wild)
+
+  rule `if(_)_else_`(true(),S,Wild1) => S
+    requires `_andBool_`(`IsBlock`(Wild1),`IsBlock`(S))
+  rule `if(_)_else_`(false(),Wild1,S) => S
+    requires `_andBool_`(`IsBlock`(S),`IsBlock`(Wild1))
+
+  rule `while(_)_`(E,S)
+       => `if(_)_else_`(E,`{_}`(`__`(S,`while(_)_`(E,S)),`{}`()) )
+    requires `_andBool_`(`IsExp`(E),`IsBlock`(S)) [structural]
+
+  rule #cellBracket(
+    `<k>`(print(`_,_`(V,Es) => Es), #dots()),
+    `<out>`(#dots(), `.List`() => `ListItem`(V)))
+    requires `_andBool_`(`IsVal`(V),`IsExps`(Es)) [print]
+  rule print(`.List{"_,_"}`()) => .::K  [structural]
+
+  syntax KItem ::= "(" Id "," Stmts "," K "," Map "," ControlCellFragment ")" [klabel(xstackRecord)]
+  syntax KItem ::= "popx" [klabel(popx)]
+
+  rule #cellBracket(
+      `<k>`(`` `try_catch(_)_`(S1,X,S2) => S1 ~> popx()`` ~> K),
+      `<control>`(
+         `<xstack>`(`.List`() => `ListItem`(xstackRecord(X, S2, K, Env, C)), #dots()),
+         C
+         ),
+      `<env>`(Env))
+    requires `_andBool_`(`IsBlock`(S1),
+             `_andBool_`(`IsId`(X),
+             `_andBool_`(`IsStmts`(S2),
+             `_andBool_`(`IsK`(K),
+             `_andBool_`(`IsMap`(Env)
+                        ,`IsBag`(C))))))
+
+  rule #cellBracket(
+      `<k>`(popx() => .::K, #dots()),
+      `<xstack>`(`ListItem`(Wild1) => `.List`(), #dots())
+      )
+    requires `IsK`(Wild1)
+
+  rule #cellBracket(
+      `<k>`(throw(V) ~> Wild1 => `{_}`(`__`(`var_;`(`_,_`(`_=_`(X,V),`.List{"_,_"}`())), S2)) ~> K),
+      `<control>`(
+         Wild2 => C,
+         `<xstack>`(`ListItem`(xstackRecord(X, S2, K, Env, C)) => `.List`(), #dots())),
+      `<env>`(Wild3 => Env)
+      ) 
+    requires `_andBool_`(`IsVal`(V),
+             `_andBool_`(`IsK`(Wild1),
+             `_andBool_`(`IsId`(X),
+             `_andBool_`(`IsVal`(V),
+             `_andBool_`(`IsStmts`(S2),
+             `_andBool_`(`IsK`(K),
+             `_andBool_`(`IsMap`(Env),
+             `_andBool_`(`IsBag`(C),
+             `_andBool_`(`IsBag`(Wild2),
+                         `IsMap`(Wild3))))))))))
+
+  rule #cellBracket(
+      `<thread>`(#dots(),
+         `<k>`(spawn(S) => !T, #dots()),
+          `<env>`(Env),
+         #dots()),
+      .::K =>
+      `<thread>`(#dots(),
+        `<k>`(S),
+        `<env>`(Env),
+        `<id>`(!T),
+        #dots())
+    )
+    requires `_andBool_`(`IsBlock`(S),
+             `_andBool_`(`IsInt`(!T),
+                         `IsMap`(Env)))
+
+  rule #cellBracket(
+      `<thread>`(#dots(), `<k>`(.::K),`<holds>`(H),`<id>`(T), #dots()) => .::K,
+      `<busy>`(Busy => `_-Set_`(Busy,keys(H))),
+      `<terminated>`(#dots(), `.Set`() => `SetItem`(T), #dots())
+      )
+    requires `_andBool_`(`IsMap`(H),
+             `_andBool_`(`IsKItem`(T),
+                         `IsSet`(Busy)))
+
+  rule #cellBracket(
+     `<k>`(join(T) => .::K, #dots()),
+     `<terminated>`(#dots(), `SetItem`(T), #dots())
+     ) requires `IsInt`(T)
+
+  rule #cellBracket(
+      `<k>`(acquire(V) => .::K, #dots()),
+      `<holds>`(#dots(), `.Map`() => `_|->_`(V,#token("Int","0")), #dots()),
+      `<busy>`(`_Set_`(Busy, `.Set`() => `SetItem`(V)))
+    ) requires `_andBool_`(`IsVal`(V),
+               `_andBool_`(`IsSet`(Busy),
+                           notBool(`_in_`(V,Busy)))) [acquire]
+
+  rule #cellBracket(
+      `<k>`(acquire(V) => .::K, #dots()),
+      `<holds>`(#dots(), `_|->_`(V, N => `_+Int_`(N,#token("Int","1"))), #dots())
+    ) requires `_andBool_`(`IsVal`(V),`IsInt`(N))
+
+  rule #cellBracket(
+      `<k>`(release(V) => .::K, #dots()),
+      `<holds>`(#dots(), `_|->_`(V, N => `_-Int_`(N, #token("Int","1"))), #dots())
+    ) requires `_andBool_`(`IsVal`(V),
+               `_andBool_`(`IsInt`(N),
+                           `_>Int_`(N, #token("Int","0"))))
+
+  rule #cellBracket(
+      `<k>`(release(V) => .::K, #dots()),
+      `<holds>`(#dots(), `_|->_`(V,#token("Int","0")) => `.Map`(), #dots()),
+      `<busy>`(#dots(), `SetItem`(V) => `.Set`(), #dots())
+    ) requires `IsVal`(V)
+
+  rule #cellBracket(
+      `<k>`(rendezvous(V) => .::K, #dots()),
+      `<k>`(rendezvous(V) => .::K, #dots())
+      ) requires `IsVal`(V) [rendezvous]
+
+  syntax Stmts ::= "mkDecls" "(" Ids "," Vals ")"  [function, klabel(mkDecls)]
+  rule mkDecls(`_,Ids_`(X, Xs), `_,_`(V, Vs)) =>
+       `__`(`var_;`(`_,_`(`_=_`(X,V),`.List{"_,_"}`())), mkDecls(Xs,Vs))
+    requires `_andBool_`(`IsId`(X),
+             `_andBool_`(`IsIds`(Xs),
+             `_andBool_`(`IsVal`(V),
+                         `IsVals`(Vs))))
+  rule mkDecls(`.List{"_,Ids_"}`(),`.List{"_,_"}`()) => `{}`()
+
+  syntax KItem ::= "lookup" "(" Int ")" [klabel(lookup)]
+  rule #cellBracket(
+    `<k>`(lookup(L) => V, #dots()),
+    `<store>`(#dots(), `_|->_`(L,V), #dots())
+     ) requires `_andBool_`(`IsInt`(L),`IsVal`(V)) [lookup]
+
+  syntax KItem ::= "env" "(" Map ")" [klabel(env)]
+  rule #cellBracket(
+    `<k>`(env(Env) => .::K, #dots()),
+    `<env>`(Wild1 => Env)
+    ) requires `_andBool_`(`IsMap`(Env),`IsMap`(Wild1)) [structural]
+
+  rule ``env(Wild1) => .::K`` ~> env(Wild2)
+    requires `_andBool_`(`IsMap`(Wild1),`IsMap`(Wild2)) [structural]
+
+  syntax Exp ::= "lvalue" "(" K ")" [klabel(lvalue)]
+  syntax Val ::= "loc" "(" Int ")" [klabel(loc)]
+
+  rule #cellBracket(
+     `<k>`(lvalue(X => loc(L)), #dots()),
+     `<env>`(#dots(), `_|->_`(X,L), #dots())
+     ) requires `_andBool_`(`IsId`(X),`IsInt`(L)) [structural]
+
+  // context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(`_[_]`(Wild1,#HOLE())) requires `IsK`(Wild1)
+  // rule lvalue(`_[_]`(Wild1,Wild2)) => Wild2 ~> #freezer(lvalue(`_[_]`(Wild1,#HOLE())))
+  // rule Wild2 ~> #freezer(lvalue(`_[_]`(Wild1,#HOLE()))) => lvalue(`_[_]`(Wild1,Wild2))
+
+  // context lvalue(HOLE:>Exp[_:>Exps])
+  context lvalue(`_[_]`(#HOLE(),Wild1)) requires `IsK`(Wild1)
+  // rule lvalue(`_[_]`(Wild1,Wild2)) => Wild1 ~> #freezer(lvalue(`_[_]`(#HOLE(),Wild2)))
+  // rule Wild1 ~> #freezer(lvalue(`_[_]`(#HOLE(),Wild2))) => lvalue(`_[_]`(Wild1,Wild2))
+
+  rule lvalue(lookup(L) => loc(L)) requires `IsInt`(L) [structural]
+
+  syntax Map ::= Int "..." Int "|->" K [function, klabel(_..._|->_)]
+  rule `_..._|->_`(N,M,Wild1) => `.Map`()
+    requires `_andBool_`(`IsInt`(N),
+             `_andBool_`(`IsInt`(M),
+             `_andBool_`(`IsK`(Wild1),
+                         `_>Int_`(N,M))))
+  rule `_..._|->_`(N,M,K)
+    => `_Map_`(`_|->_`(N,K),
+               `_..._|->_`(`_+Int_`(N,#token("Int","1")),M,K))
+    requires `_andBool_`(`IsInt`(N),
+             `_andBool_`(`IsInt`(M),
+             `_andBool_`(`IsK`(K),
+                         `_<=Int_`(N, M))))
+endmodule
