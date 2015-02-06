@@ -62,3 +62,9 @@ abstract class Transformer[O] {
     }
   }
 }
+
+abstract class TranformerWithExceptionGathering[O] extends Transformer[java.util.Set[O]] {
+  def merge(a: java.util.Set[O], b: java.util.Set[O]): java.util.Set[O] = {
+    (a.asScala | b.asScala).asJava
+  }
+}

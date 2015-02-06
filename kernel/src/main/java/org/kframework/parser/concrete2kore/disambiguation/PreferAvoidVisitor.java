@@ -6,6 +6,7 @@ import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.parser.TranformerWithExceptionGathering;
 import org.kframework.parser.Transformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -23,7 +24,7 @@ import java.util.Set;
  * 2. remove the productions that are labeled with 'avoid'
  * 3. keep only those productions which have 'prefer' (if any)
  */
-public class PreferAvoidVisitor extends Transformer<Set<ParseFailedException>> {
+public class PreferAvoidVisitor extends TranformerWithExceptionGathering<ParseFailedException> {
     @Override
     public Either<Set<ParseFailedException>, Term> apply(Ambiguity amb) {
         List<Term> prefer = new ArrayList<>();
@@ -61,9 +62,5 @@ public class PreferAvoidVisitor extends Transformer<Set<ParseFailedException>> {
             // visit the preferred child
             return this.apply(result);
         }
-    }
-
-    public Set<ParseFailedException> merge(Set<ParseFailedException> a, Set<ParseFailedException> b) {
-        return Sets.union(a, b);
     }
 }

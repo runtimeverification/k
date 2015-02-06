@@ -115,6 +115,8 @@ trait Production {
   def items: Seq[ProductionItem]
   def klabel: Option[KLabel] =
     att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
+  def isSyntacticSubsort: Boolean =
+    items.size == 1 && items.head.isInstanceOf[NonTerminal]
 }
 
 object Production {
