@@ -1,6 +1,7 @@
-package org.kframework.tiny
+package org.kframework.tiny.matcher
 
 import org.kframework.attributes.Att
+import org.kframework.tiny._
 
 trait Matcher extends KProduct with EmptyAtt {
   def left: K

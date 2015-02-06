@@ -1,6 +1,7 @@
-package org.kframework.tiny
+package org.kframework.tiny.matcher
 
 import org.junit.{Assert, Ignore, Test}
+import org.kframework.tiny._
 
 class MatcherTest extends AbstractTest {
 
@@ -165,11 +166,12 @@ class MatcherTest extends AbstractTest {
     assertEquals(And(X -> '+()), pattern.matchOne(foo))
   }
 
-//  @Test def testKVariableMatchingKLabel() {
-//    val foo = 'foo()
-//    val pattern = KApp(X, Seq(), Att())
-//    assertEquals(And(X -> InjectedKLabel('foo)), pattern.matchOne(foo))
-//  }
+  //  @Test def testKVariableMatchingKLabel() {
+  //    val foo = 'foo()
+  //    val pattern = KApp(X, Seq(), Att())
+  //    assertEquals(And(X -> InjectedKLabel('foo)), pattern.matchOne(foo))
+  //  }
+
 
   //  // TODO: uningore when fixing side conditions
   //  @Test
@@ -189,32 +191,27 @@ class MatcherTest extends AbstractTest {
   //    assertEquals(Some(And(X -> foo)), X.matchOne(foo))
   //  }
   //
-  //  @Test def testAnywhere() {
-  //    val o = 'foo('bar('foo()))
-  //    val a = Anywhere('foo(X))
-  //    assertEquals(
-  //      Or(And(X -> 'bar('foo()), a.TOPVariable -> a.HOLEVariable),
-  //        And(X -> KList(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
-  //      a.matchAll(o))
-  //  }
-  //
-  //
-  //  @Test def testTwoAnywheres() {
-  //    val o = 'foo('foo('foo()))
-  //    val inner = Anywhere('foo(X), "inner")
-  //    val outer = Anywhere('foo(inner), "outer")
-  //    println(outer)
-  //    assertEquals(
-  //      Or(And(X -> 'foo(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> outer.HOLEVariable),
-  //        And(X -> KList(), inner.TOPVariable -> 'foo(inner.HOLEVariable), outer.TOPVariable -> outer.HOLEVariable),
-  //        And(X -> KList(), inner.TOPVariable -> inner.HOLEVariable, outer.TOPVariable -> 'foo(outer.HOLEVariable))),
-  //      outer.matchAll(o))
-  //  }
-  //
-  //  def assertEquals(expected: Any, actual: Any) {
-  //    if (expected != actual) {
-  //      Assert.assertEquals(expected.toString(), actual.toString())
-  //    }
-  //  }
+
+  @Test def testAnywhere() {
+    val o = 'foo('bar('foo('bar())))
+    val a: Anywhere = Anywhere("ONE", 'foo(X))
+    assertEquals(
+      Or(And(X -> 'bar('foo('bar())), a.TOPVariable -> a.HOLEVariable),
+        And(X -> 'bar(), a.TOPVariable -> 'foo('bar(a.HOLEVariable)))),
+      a.matchAll(o))
+  }
+
+
+  @Test def testTwoAnywheres() {
+    val o = 'foo('foo('foo('bar())))
+    val inner = Anywhere("inner", 'foo(X))
+    val outer = Anywhere("outer", 'foo(inner))
+    println(outer)
+    Assert.assertEquals(
+      ((X -> 'foo('bar()) && inner.TOPVariable -> inner.HOLEVariable && outer.TOPVariable -> outer.HOLEVariable) ||
+        (X -> 'bar() && inner.TOPVariable -> 'foo(inner.HOLEVariable) && outer.TOPVariable -> outer.HOLEVariable) ||
+        (X -> 'bar() && inner.TOPVariable -> inner.HOLEVariable && outer.TOPVariable -> 'foo(outer.HOLEVariable))),
+      outer.matchAll(o))
+  }
 
 }

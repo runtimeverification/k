@@ -58,6 +58,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     def ~>(other: K) = KSeq(Seq(k, other), Att())
     def ==>(other: K) = KRewrite(k, other, Att())
     def +(other: K) = KLabel("+")(k, other)
+    def &&(other: K) = And(k, other)
+    def ||(other: K) = Or(k, other)
   }
 
   implicit class KVarWithArrow(k: KVar) {

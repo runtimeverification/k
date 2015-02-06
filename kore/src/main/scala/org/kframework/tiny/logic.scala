@@ -95,6 +95,8 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
     case b: Binding => b
   }
 
+  lazy val binding = bindings map { case Binding(k, v, _) => (k, v) } toMap
+
   def addBinding(b: Binding)(implicit theory: Theory): K = {
     if (bindings.exists {
       bb => bb.variable == b.variable && Equals(bb.value, b.value).normalize != True

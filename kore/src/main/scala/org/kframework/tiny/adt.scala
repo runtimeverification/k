@@ -3,6 +3,7 @@ package org.kframework.tiny
 import org.kframework._
 import org.kframework.attributes.Att
 import org.kframework.kore.ADT
+import org.kframework.tiny.matcher._
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -70,7 +71,7 @@ trait KAssocApp extends KApp {
 
 trait KRegularApp extends KApp {
   val klabel: KRegularAppLabel
-  override def matcher(other: K) = KRegularAppMatcher(this, other)
+  override def matcher(other: K): Matcher = KRegularAppMatcher(this, other)
 }
 
 /**
@@ -201,3 +202,4 @@ object KSeq extends {
   /* required */
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new KSeq(l, att)
 }
+

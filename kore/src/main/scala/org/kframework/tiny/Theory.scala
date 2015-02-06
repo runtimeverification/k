@@ -1,5 +1,7 @@
 package org.kframework.tiny
 
+import org.kframework.tiny.matcher.EqualsMatcher
+
 
 trait Theory {
   def normalize(k: K): K
