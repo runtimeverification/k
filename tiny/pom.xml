@@ -15,6 +15,14 @@
 
   <name>K Framework tiny rewriter</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.kframework.k</groupId>
+      <artifactId>kore</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
