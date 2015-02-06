@@ -1,10 +1,11 @@
 package org.kframework.attributes
 
+import org.kframework.Collections._
 import org.kframework.builtin.Sorts
-import org.kframework.kore._
-import org.kframework.kore.{ADTConstructors => cons}
 import org.kframework.kore.Unapply._
-import collection.JavaConverters._
+import org.kframework.kore.{ADTConstructors => cons, _}
+
+import scala.collection.JavaConverters._
 
 case class Att(att: Set[K]) extends AttributesToString {
   def getK(key: String): Option[K] = {
@@ -49,6 +50,9 @@ trait KeyWithType
 
 object Att {
   def apply(atts: K*): Att = Att(atts.toSet)
+
+  implicit def asK(key: String, value: String) =
+    cons.KApply(cons.KLabel(key), cons.KList(mutable(List(cons.KToken(Sorts.KString, value, Att())))), Att())
 }
 
 trait AttributesToString {

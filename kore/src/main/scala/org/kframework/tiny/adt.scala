@@ -65,7 +65,7 @@ trait KAssocApp extends KApp {
   def tail: KAssocApp = klabel.construct(children.tail, att)
   def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
 
-  override def matcher(right: K): Matcher = ???
+  override def matcher(right: K): Matcher = KAssocAppMatcher(this, right)
 }
 
 trait KRegularApp extends KApp {

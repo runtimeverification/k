@@ -23,6 +23,22 @@ case class Or(children: Set[K], att: Att = Att()) extends KAssocApp {
       "False"
     else
       "(" + children.mkString(" || ") + ")"
+
+  override def normalize(implicit theory: Theory) =
+    children.map(_.normalize).foldLeft(False: K) {
+      case (sum: Or, True) =>
+        Or(True)
+      case (sum: Or, False) =>
+        sum
+      case (True, p) =>
+        Or(True)
+      case (sum: Or, p: Or) =>
+        new Or(sum.children | p.children)
+      case (sum: Or, p: And) =>
+        new Or(sum.children + p)
+      case (sum: Or, p) =>
+        new Or(sum.children + And(p).asInstanceOf[And])
+    }
 }
 
 object And extends KAssocAppLabel with EmptyAtt {
@@ -42,39 +58,47 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
 
   override def normalize(implicit theory: Theory) = {
     children.map(_.normalize).fold(True) {
+      case (sum: And, False) => False
+      case (sum: And, True) => sum
+      case (True, or: Or) => or
+      case (False, or: Or) => False
       case (sum: And, p: And) =>
-        val conflict = (for (
-          b1 <- sum.bindings;
-          b2 <- p.bindings if b1.variable == b2.variable
-        ) yield {
-          Equals(b1.value, b2.value).normalize
-        }) contains True
+        // working with streams to stop at first conflict
+        val conflict: Stream[Boolean] = for (
+          b1 <- sum.bindings.toStream;
+          b2 <- p.bindings.toStream if b1.variable == b2.variable;
+          r = true if Equals(b1.value, b2.value).normalize == True
+        ) yield {r }
 
-        if (conflict)
+        if (!conflict.isEmpty)
           False
         else
-          And(sum.children | p.children, sum.att)
+          new And(sum.children | p.children, sum.att)
 
-      case (sum: And, p: Or) =>
-        Or((for (m1 <- p.children) yield {
+      case (sum: And, or: Or) =>
+        Or((for (m1 <- or.children) yield {
           And(m1, sum).normalize
         }).toSeq: _*)
 
-      case (sum: Or, p: And) => And(p, sum)
+      case (sum: Or, p: And) => And(p, sum).normalize
       case (sum: Or, p: Or) =>
         Or((for (m1 <- sum.children; m2 <- p.children) yield {
-          And(m1, m2)
-        }).toSeq: _*)
+          And(m1, m2).normalize
+        }).toSeq: _*).normalize
       case (sum: And, b: Binding) => sum.addBinding(b)
-      case (sum: And, p) => And(sum.children + p, sum.att)
-      case (sum: Or, p) => And(sum, And(p))
+      case (sum: And, p) => new And(sum.children + p, sum.att)
+      case (sum: Or, p) => And(p, sum).normalize
     }
   }
 
-  lazy val bindings = children collect { case b: Binding => b }
+  lazy val bindings = children collect {
+    case b: Binding => b
+  }
 
   def addBinding(b: Binding)(implicit theory: Theory): K = {
-    if (bindings.exists { bb => bb.variable == b.variable && Equals(bb.value, b.value).normalize != True })
+    if (bindings.exists {
+      bb => bb.variable == b.variable && Equals(bb.value, b.value).normalize != True
+    })
       False
     else
       And(children + b, att)

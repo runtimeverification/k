@@ -51,12 +51,13 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   import Builtins._
 
   implicit def stringToToken(s: String) = KToken(String, s, Att())
-  implicit def symbolToLabel(l: Symbol) = KLabel("'" + l.name)
+  implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
   implicit def intToToken(n: Int): K = KToken(Int, n.toString, Att())
 
-  implicit class KWithSeq(k: K) {
+  implicit class EnhancedK(k: K) {
     def ~>(other: K) = KSeq(Seq(k, other), Att())
     def ==>(other: K) = KRewrite(k, other, Att())
+    def +(other: K) = KLabel("+")(k, other)
   }
 
   implicit class KVarWithArrow(k: KVar) {
