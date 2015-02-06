@@ -88,7 +88,7 @@ public class BubbleParsing {
         return def;
     }
 
-    /**
+    /** TODO(radu): generalize this function, and eliminate duplicates
      * Replaces the bubbles in m with their parsing.
      */
     public Module parseBubbles(Module m) {
