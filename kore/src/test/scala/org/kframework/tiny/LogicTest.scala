@@ -1,6 +1,5 @@
 package org.kframework.tiny
 
-import net.sf.tweety.logics.pl.{syntax => tw}
 import org.junit.Test
 
 class LogicTest extends AbstractTest {

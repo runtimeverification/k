@@ -1,6 +1,5 @@
 package org.kframework.tiny
 
-import net.sf.tweety.logics.pl.{syntax => tw}
 import org.kframework.attributes.Att
 
 object Or extends KAssocAppLabel with EmptyAtt {
