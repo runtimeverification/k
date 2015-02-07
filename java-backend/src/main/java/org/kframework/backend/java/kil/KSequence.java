@@ -43,6 +43,16 @@ public class KSequence extends KCollection implements org.kframework.kore.KSeque
     private final ImmutableList<Variable> kSequenceVariables;
 
     /**
+     * Builds a KSequence consisting of the given variable. This method is
+     * necessary in addition to the {@code Builder} because the {@code Builder}
+     * will canonicalize its result and, thus, simply return the given variable.
+     */
+    public static KSequence frame(Variable variable) {
+        assert variable.kind().equals(Kind.K);
+        return new KSequence(ImmutableList.of(), variable, ImmutableList.<Variable>of());
+    }
+
+    /**
      * Builds a single-element KSequence based on the given term. This method is
      * necessary in addition to the {@code Builder} because the {@code Builder}
      * will canonicalize its result and, thus, simply return the given term.

@@ -22,7 +22,7 @@ import com.google.inject.multibindings.MapBinder;
 
 public class JavaSymbolicCommonModule extends AbstractModule {
 
-    private static final String HOOK_PROPERTIES_FILE_NAME = "hooks.properties";
+    private static final String HOOK_PROPERTIES_FILE_NAME = "/org/kframework/backend/java/symbolic/hooks.properties";
 
     @Override
     protected void configure() {

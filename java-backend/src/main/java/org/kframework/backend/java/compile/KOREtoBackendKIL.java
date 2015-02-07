@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import scala.Option;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
 
     @Override
     public Token KToken(org.kframework.kore.Sort sort, String s, Att att) {
-        return Token.of(Sort(sort.name()), s);
+        return !sort.name().equals("KBoolean") ? Token.of(Sort(sort.name()), s) : Token.of(Sort("Bool"), s);
     }
 
     @Override
@@ -56,20 +57,21 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
         throw new AssertionError("Unsupported for now because KVariable is not a KLabel. See KApply1()");
     }
 
-    public KItem KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
-        return KItem.of(KLabel(klabel.name()), KList(klist.items()), context);
+    public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
+        return KItem.of(KLabel(klabel.name()), KList(klist.items()), context).evaluate(context);
     }
 
     @Override
     public <KK extends org.kframework.kore.K> KSequence KSequence(List<KK> items, Att att) {
         KSequence.Builder builder = KSequence.builder();
         items.stream().map(this::convert).forEach(builder::concatenate);
-        return (KSequence) KCollection.upKind(builder.build(), Kind.K);
+        Term kSequence = KCollection.upKind(builder.build(), Kind.K);
+        return kSequence instanceof Variable ? KSequence.frame((Variable) kSequence) : (KSequence) kSequence;
     }
 
     @Override
     public Variable KVariable(String name, Att att) {
-        return new Variable(name, Sort.KITEM);
+        return new Variable(name, Sort.of(att.<String>get("sort").get()));
     }
 
     @Override

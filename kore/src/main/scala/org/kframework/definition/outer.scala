@@ -66,7 +66,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
   }
 
-  lazy val subsorts = POSet(subsortRelations)
+  lazy val subsorts : POSet[Sort] = POSet(subsortRelations)
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {

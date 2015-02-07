@@ -17,6 +17,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.KRewrite;
+import org.kframework.koreimplementation.convertors.KOREtoKIL;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -208,10 +209,7 @@ public class Definition extends JavaSymbolicObject {
 
         ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
         JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
-            attributesBuilder.put(e.getKey().name(), new Attributes());
-        });
-        JavaConversions.setAsJavaSet(module.labelsToProductions().keySet()).stream().forEach(l -> {
-            attributesBuilder.put(l.name(), new Attributes());
+            attributesBuilder.put(e.getKey().name(), new KOREtoKIL().convertAttributes(e.getValue()));
         });
 
         definitionData = new DefinitionData(
@@ -239,12 +237,14 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
                 org.kframework.definition.Rule rule = (org.kframework.definition.Rule) s;
+                org.kframework.kil.Rule oldRule = new org.kframework.kil.Rule();
+                oldRule.setAttributes(new KOREtoKIL().convertAttributes(rule.att()));
                 addRule(new Rule(
                         "",
                         transformer.convert(((KRewrite) rule.body()).left()),
                         transformer.convert(((KRewrite) rule.body()).right()),
-                        Collections.emptyList(),
-                        Collections.emptyList(),
+                        Collections.singletonList(transformer.convert(rule.requires())),
+                        Collections.singletonList(transformer.convert(rule.ensures())),
                         Collections.emptySet(),
                         Collections.emptySet(),
                         ConjunctiveFormula.of(termContext),

@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.Collections;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
@@ -60,13 +61,12 @@ public class Subsorts implements Serializable {
                 .collect(Collectors.toSet());
 
         this.subsort = ArrayTable.create(sorts, sorts);
-        for (Sort sort1 : sorts) {
-            for (Sort sort2 : sorts) {
-                if (!sort1.equals(sort2)) {
-                    subsort.put(sort1, sort2, module.subsorts().$greater(sort1, sort2));
-                } else {
-                    subsort.put(sort1, sort2, false);
-                }
+        for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
+            for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
+                subsort.put(
+                        Sort.of(sort1.name()),
+                        Sort.of(sort2.name()),
+                        module.subsorts().$greater(sort1, sort2));
             }
         }
     }
