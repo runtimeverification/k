@@ -1,12 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation;
+package org.kframework.kore;
 
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
 
 import static org.junit.Assert.*;
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 public class InterfaceTest {
 

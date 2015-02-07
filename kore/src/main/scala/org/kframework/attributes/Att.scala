@@ -2,8 +2,8 @@ package org.kframework.attributes
 
 import org.kframework.Collections._
 import org.kframework.builtin.Sorts
+import org.kframework.kore.{KToken, KORE, K}
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{ADTConstructors => cons, _}
 
 import scala.collection.JavaConverters._
 
@@ -32,8 +32,8 @@ case class Att(att: Set[K]) extends AttributesToString {
     }
 
   def +(k: K): Att = new Att(att + k)
-  def +(k: String): Att = add(cons.KApply(cons.KLabel(k), cons.KList(), Att()))
-  def +(kv: (String, String)): Att = add(cons.KApply(cons.KLabel(kv._1), cons.KList(cons.KToken(Sorts.KString, kv._2,
+  def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
+  def +(kv: (String, String)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(KORE.KToken(Sorts.KString, kv._2,
     Att())), Att()))
   def ++(that: Att) = new Att(att ++ that.att)
 
@@ -52,7 +52,7 @@ object Att {
   def apply(atts: K*): Att = Att(atts.toSet)
 
   implicit def asK(key: String, value: String) =
-    cons.KApply(cons.KLabel(key), cons.KList(mutable(List(cons.KToken(Sorts.KString, value, Att())))), Att())
+    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(Sorts.KString, value, Att())))), Att())
 }
 
 trait AttributesToString {

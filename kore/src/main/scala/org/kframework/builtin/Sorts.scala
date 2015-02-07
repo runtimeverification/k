@@ -2,7 +2,7 @@
 
 package org.kframework.builtin
 
-import org.kframework.kore.ADTConstructors.Sort
+import org.kframework.kore.KORE.Sort
 
 object Sorts {
   val KString = Sort("KString")

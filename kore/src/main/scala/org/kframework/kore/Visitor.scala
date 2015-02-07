@@ -1,8 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation
-
-import scala.collection.immutable.Nil
+package org.kframework.kore
 
 trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
@@ -11,7 +9,7 @@ trait KORETransformer[T] extends ((K) => T) with java.util.function.Function[K, 
     case k: KRewrite => apply(k)
     case k: KToken => apply(k)
     case k: KVariable => apply(k)
-    case k: KSequence => apply(k)
+    case k: KSequence => apply(k: KSequence)
   }
 
   def apply(k: KApply): T

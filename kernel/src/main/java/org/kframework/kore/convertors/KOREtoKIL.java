@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Labels;
@@ -13,7 +13,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.definition.*;
 import org.kframework.kore.Sort;
-import org.kframework.koreimplementation.Constructors;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 import java.util.function.Function;
 
 import static org.kframework.Collections.*;
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
@@ -489,7 +488,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKVariable((KVariable) k);
         } else if (k instanceof KToken) {
             return convertKToken((KToken) k);
-        } else if (k instanceof KApply && ((KApply) k).klabel() == KLabel(Constructors.injectedKListLabel())) {
+        } else if (k instanceof KApply && ((KApply) k).klabel() == KLabel(KORE.injectedKListLabel())) {
             return convertKList(((KApply) k).klist());
 //        } else if (k instanceof KRewrite) {
 //

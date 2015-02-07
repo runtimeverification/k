@@ -4,13 +4,13 @@ import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.kore
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{ADTConstructors => con, _}
+import org.kframework.kore.{Constructors => con, _}
 
 import scala.collection.JavaConverters._
 
 object TreeNodesToKORE {
 
-  import con._
+  import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
     // TODO(Radu): the content of the constant should not be trimmed (see below) but we do this now due to an

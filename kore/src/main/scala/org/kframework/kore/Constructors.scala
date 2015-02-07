@@ -2,6 +2,7 @@ package org.kframework.kore
 
 import org.kframework.attributes._
 
+
 trait Constructors {
   def KLabel(name: String): KLabel
   def Sort(name: String): Sort
@@ -11,7 +12,9 @@ trait Constructors {
   def KSequence[KK <: K](items: java.util.List[KK], att: Att): KSequence
   def KVariable(name: String, att: Att): KVariable
   def KRewrite(left: K, right: K, att: Att): KRewrite
-  def InjectedKLabel(klabel: KLabel, att:Att): InjectedKLabel
+  def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel
 
   val injectedKListLabel = "INJECTED-KLIST"
 }
+
+

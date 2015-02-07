@@ -3,7 +3,8 @@
 package org.kframework.koreimplementation
 
 import org.kframework._
-import org.kframework.tinyimplementation.{Theory, Proposition, Reflection}
+import org.kframework.meta.Reflection
+import org.kframework.tinyimplementation.{Theory, Proposition}
 import org.kframework.tinyimplementation.builtin.KAnd
 
 import collection._

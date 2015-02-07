@@ -47,7 +47,7 @@ trait KApply extends KItem {
   def klist: KList
 }
 
-trait KSequence extends KCollection
+trait KSequence extends KCollection with K
 
 trait KVariable extends KItem with KLabel {
   def name: String

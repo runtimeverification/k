@@ -1,8 +1,8 @@
 package org.kframework.builtin
 
-import org.kframework.koreimplementation.KLabel
+import org.kframework.kore.ADT
 
 object Labels {
-  val Hole = KLabel("HOLE")
-  val KBag = KLabel("KBag")
+  val Hole = ADT.KLabel("HOLE")
+  val KBag = ADT.KLabel("KBag")
 }

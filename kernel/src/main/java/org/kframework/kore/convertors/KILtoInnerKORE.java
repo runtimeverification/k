@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import java.util.List;
 import java.util.Set;
@@ -27,10 +27,10 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.koreimplementation.*;
-import org.kframework.tinyimplementation.Up;
+import org.kframework.kore.*;
+import org.kframework.meta.Up;
 
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
 @SuppressWarnings("unused")
@@ -73,7 +73,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return InjectedKLabel(KLabel(c.getLabel()), Attributes());
     }
 
-    public org.kframework.koreimplementation.KSequence apply(KSequence seq) {
+    public org.kframework.kore.KSequence apply(KSequence seq) {
         return KSequence(apply(seq.getContents()));
     }
 
@@ -81,10 +81,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return contents.stream().map(this).collect(Collectors.toList());
     }
 
-    public org.kframework.koreimplementation.KApply apply(Bracket b) {
+    public org.kframework.kore.KApply apply(Bracket b) {
         Object content = apply(b.getContent());
         if (content instanceof KList) {
-            content = InjectedKList((KList) content);
+            content = KApply(KLabel(KORE.injectedKListLabel()), (KList) content);
         }
         return KApply(KLabel("bracket"), KList((K) content));
     }
@@ -164,11 +164,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     public KRewrite apply(Rewrite r) {
         Object right = apply(r.getRight());
         if (right instanceof KList)
-            right = InjectedKList((KList) right);
+            right = KApply(KLabel(KORE.injectedKListLabel()), (KList) right);
 
         Object left = apply(r.getLeft());
         if (left instanceof KList)
-            left = InjectedKList((KList) left);
+            left = KApply(KLabel(KORE.injectedKListLabel()), (KList) left);
 
         return KRewrite((K) left, (K) right, sortAttributes(r));
     }
@@ -203,9 +203,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     private org.kframework.attributes.Att attributesFromLocation(Location location) {
+        Up up = new Up(KORE.self());
+
         if (location != null) {
             org.kframework.attributes.Location koreLocation = org.kframework.attributes.Location.apply(location.lineStart, location.columnStart, location.lineEnd, location.columnEnd);
-            return org.kframework.attributes.Att.apply(Set(Up.apply(koreLocation)));
+            return org.kframework.attributes.Att.apply(Set(up.apply(koreLocation)));
         } else
             return Attributes();
     }

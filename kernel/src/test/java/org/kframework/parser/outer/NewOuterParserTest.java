@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
-import org.kframework.koreimplementation.convertors.KILtoKORE;
+import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;

@@ -1,11 +1,9 @@
-package org.kframework.tinyimplementation
+package org.kframework.meta
 
-import scala.reflect.ManifestFactory
 import collection.JavaConverters._
 
 object Reflection {
   import scala.reflect.runtime.universe._
-  import scala.reflect.ClassTag
   val m = runtimeMirror(getClass.getClassLoader)
 
   def getTypeTag[T: TypeTag](obj: T) = typeTag[T]

@@ -1,6 +1,7 @@
 package org.kframework.tinyimplementation
 
 import org.junit.Test
+import org.kframework.meta.Reflection
 
 case class Foo(bar: Int = 6, buz: String)(zzz: String = "foo") {
   override def toString = s"Foo($bar,$buz)($zzz)"

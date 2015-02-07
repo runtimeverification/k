@@ -1,14 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.kframework.kil.Definition;
+import org.junit.runners.MethodSorters;
 
-public class TstKOREtoKILIT extends BaseTest {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class TstKILtoKOREIT extends BaseTest {
 
     @Test
     public void emptyModule() throws IOException {
@@ -30,10 +31,13 @@ public class TstKOREtoKILIT extends BaseTest {
         outerOnlyTest();
     }
 
-    // Ignore becuase it crashed when executed along with the other tests
-    // it passes on its own
+    // we'll have to eventually convert the configuration
+    // to macro rules, as Grigore wrote on the wiki
+    // for now, we'll do this conversion:
+    // <k foo="bla"> .K </k> becomes:
+    // KApply(KLabel("k"), KList(EmptyK), Att(KApply(KLabel("foo",
+    // KToken(String, "bla"))))
     @Test
-    @Ignore
     public void configuration() throws IOException {
         sdfTest();
     }
@@ -96,12 +100,11 @@ public class TstKOREtoKILIT extends BaseTest {
     protected String convert(DefinitionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
         org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
-        Definition kilDefinitionTranslatedBack = new KOREtoKIL().apply(koreDef);
-        String actualOutput = kilDefinitionTranslatedBack.toString();
-        return actualOutput;
+        String koreDefString = koreDef.toString();
+        return koreDefString;
     }
 
     protected String expectedFilePostfix() {
-        return "-kilexpected.k";
+        return "-expected.k";
     }
 }

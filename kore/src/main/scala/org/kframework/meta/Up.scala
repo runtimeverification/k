@@ -1,15 +1,12 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
-
-package org.kframework.tinyimplementation
+package org.kframework.meta
 
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.definition.Associativity
-import org.kframework.kore.{ADTConstructors => cons, _}
+import org.kframework.kore.{Constructors, K, KApply, Sort}
+import collection.JavaConverters._
 
-import scala.collection.JavaConverters._
-
-object Up extends (Any => K) {
+class Up(cons: Constructors) extends (Any => K) {
 
   implicit def symbolWithKApply(s: Symbol) = new {
     def apply(ks: K*): KApply = apply(ks.toList, Att())

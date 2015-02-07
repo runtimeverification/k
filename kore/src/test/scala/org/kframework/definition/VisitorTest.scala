@@ -2,10 +2,7 @@
 
 package org.kframework.definition
 
-import org.junit.Test
-import org.kframework.tinyimplementation.Reflection
-import org.junit.Assert
-import java.lang.reflect.Method
+import org.junit.{Assert, Test}
 
 trait Foo {
   def accept(x: DoubleDispatchVisitor)
@@ -41,8 +38,6 @@ case class FooReflectionVisitor() extends AbstractVisitor {
 }
 
 class VisitorTest {
-  import java.lang.Class
-  import java.lang.reflect.Constructor
 
   @Test def testSimple {
     val visitor = FooReflectionVisitor()

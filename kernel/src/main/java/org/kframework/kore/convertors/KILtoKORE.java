@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import scala.collection.Seq;
 import com.google.common.collect.Sets;
 
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
@@ -252,7 +252,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Att attrs = Attributes().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Att attrs = Att().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.definition.Production prod1, prod2, prod3;
 

@@ -4,7 +4,7 @@ package org.kframework.definition
 
 import org.kframework.kore._
 import org.kframework.attributes._
-import org.kframework.kore.{ADTConstructors => con}
+import org.kframework.kore.{KORE => con}
 
 case class Configuration(body: K, ensures: K, att: Att = Att()) extends Sentence with OuterKORE {
 

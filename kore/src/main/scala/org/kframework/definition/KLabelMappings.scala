@@ -1,16 +1,17 @@
 package org.kframework.definition
 
-import org.kframework.koreimplementation
+import org.kframework.kore
+import org.kframework.kore.ADT
 
 trait KLabelMappings {
   self: Module =>
 
-  lazy val labelsToProductions: Map[koreimplementation.KLabel, Set[Production]] =
+  lazy val labelsToProductions: Map[kore.KLabel, Set[Production]] =
     sentences collect {
       case prod: Production => (makeKLabel(prod.items), prod)
     } groupBy (_._1) mapValues (_ map { _._2 })
 
-  def makeKLabel(items: Seq[ProductionItem]): koreimplementation.KLabel = koreimplementation.KLabel(
+  def makeKLabel(items: Seq[ProductionItem]): kore.KLabel = ADT.KLabel(
     items map {
       case NonTerminal(sort) => "_"
       case Terminal(string) => string

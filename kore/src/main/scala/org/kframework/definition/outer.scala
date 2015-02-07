@@ -132,7 +132,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.ADTConstructors.KLabel(_) }
+  def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
 }
 
 object Production {

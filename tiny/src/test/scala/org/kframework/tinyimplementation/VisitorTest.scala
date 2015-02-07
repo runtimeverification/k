@@ -4,6 +4,7 @@ package org.kframework.tinyimplementation
 
 import org.junit.Test
 import org.junit.Assert
+import org.kframework.meta.AbstractReflectiveVisitor
 
 class VisitorTest {
   import java.lang.Class

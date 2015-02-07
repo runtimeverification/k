@@ -1,10 +1,8 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation
-
-import org.kframework._
 import org.kframework.attributes.Att
+import org.kframework._
 import org.kframework.kore.Sort
+import org.kframework.koreimplementation._
 
 import scala.collection.JavaConverters._
 
@@ -23,7 +21,8 @@ object Constructors extends kore.Constructors {
 
   //  @annotation.varargs def KBag(ks: K*) = koreimplementation.KBag(ks)
 
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine, startColumn, endLine, endColumn)
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine,
+    startColumn, endLine, endColumn)
 
   //  def KBag(ks: KList) = koreimplementation.KBag(ks);
 
@@ -65,14 +64,7 @@ object Constructors extends kore.Constructors {
 
   //  def KInt(n: Int) = koreimplementation.KInt(n)
 
-//  def stream(c: KCollection) = org.kframework.Collections.stream(c);
-
-  def toKList: Collector[K, KList] =
-    Collector(() => new CombinerFromBuilder(koreimplementation.KList.newBuilder()))
-
-  def toKSequence: Collector[K, KSequence] =
-    Collector(() => new CombinerFromBuilder(koreimplementation.KSequence.newBuilder()))
-
+  //  def stream(c: KCollection) = org.kframework.Collections.stream(c);
 
   override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): kore.KApply = ???
   override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): kore.KSequence = ???

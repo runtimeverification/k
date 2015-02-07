@@ -33,7 +33,7 @@ trait KApp extends kore.KApply with K {
 
   val klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
-  def klist = kore.ADTConstructors.KList(children.asInstanceOf[Iterable[kore.K]].toSeq.asJava)
+  def klist = kore.KORE.KList(children.asInstanceOf[Iterable[kore.K]].toSeq.asJava)
 
   override def equals(that: Any) = {
     (that match {

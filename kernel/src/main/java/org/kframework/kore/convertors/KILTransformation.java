@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

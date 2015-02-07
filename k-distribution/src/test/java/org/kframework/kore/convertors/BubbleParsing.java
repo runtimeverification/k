@@ -1,6 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import static org.kframework.Collections.immutable;
 import static org.kframework.Collections.stream;

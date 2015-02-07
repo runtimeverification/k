@@ -1,7 +1,7 @@
 package org.kframework.tiny
 
 import org.kframework.attributes._
-import org.kframework.kore.{ADTConstructors => basic, InjectedKLabel, Unapply}
+import org.kframework.kore.{Constructors => basic, InjectedKLabel, KORE, Unapply}
 import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
@@ -11,7 +11,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   implicit val theory = FreeTheory
 
   override def KLabel(name: String): Label = {
-    val att = module.attributesFor(basic.KLabel(name))
+    val att = module.attributesFor(KORE.KLabel(name))
     if (att.contains("assoc"))
       RegularKAssocAppLabel(name, att)
     else
@@ -28,14 +28,14 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   override def KVariable(name: String, att: Att): KVar = KVar(name, att)
 
-  override def Sort(name: String): kore.Sort = basic.Sort(name)
+  override def Sort(name: String): kore.Sort = KORE.Sort(name)
 
   override def KToken(sort: kore.Sort, s: String, att: Att): KTok = RegularKTok(sort, s)
 
   override def KRewrite(left: kore.K, right: kore.K, att: Att): kore.KRewrite = tiny.KRewrite(convert(left), convert
     (right), att)
 
-  override def KList[KK <: kore.K](items: java.util.List[KK]): kore.KList = basic.KList(items)
+  override def KList[KK <: kore.K](items: java.util.List[KK]): kore.KList = KORE.KList(items)
 
   override def InjectedKLabel(klabel: kore.KLabel, att: Att): InjectedKLabel = InjectedLabel(convert(klabel), att)
 
@@ -48,7 +48,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     case t@Unapply.KApply(label, list) => KApply(label, KList(list.asJava), t.att)
   }
 
-  import Builtins._
+  import org.kframework.tiny.Builtins._
 
   implicit def stringToToken(s: String) = KToken(String, s, Att())
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
