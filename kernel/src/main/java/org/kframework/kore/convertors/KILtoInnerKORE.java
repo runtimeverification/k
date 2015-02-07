@@ -54,7 +54,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     // return KList();
     // }
 
-    private K cellMarker = convert(org.kframework.definition.Configuration.cellMarker());
+    private K cellMarker = org.kframework.definition.Configuration.cellMarker();
 
     @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {

@@ -16,7 +16,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.parser.*;
 
 import static org.kframework.Collections.*;
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.definition.Constructors.*;
 
 import org.kframework.parser.concrete2kore.Grammar.NonTerminal;

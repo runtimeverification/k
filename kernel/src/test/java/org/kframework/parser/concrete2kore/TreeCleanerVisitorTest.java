@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.koreimplementation.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
 public class TreeCleanerVisitorTest {
