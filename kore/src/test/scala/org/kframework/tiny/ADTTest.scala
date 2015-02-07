@@ -18,7 +18,7 @@ class ADTTest extends AbstractTest {
     assertNotEquals(seqX2, X ~> X ~> 2)
     assertEquals(KSeq(X, X, 2), KSeq(X, KSeq(X, 2)))
     assertEquals(KSeq(X, X, 2), KSeq(KSeq(X, X), 2))
-    assertEquals('foo(), RegularKAppLabel("'foo", Att())())
+    assertEquals('foo(), RegularKAppLabel("foo", Att())())
     assertNotEquals('foo(), RegularKAppLabel("foo foo", Att())())
     assertNotEquals('foo(), RegularKAppLabel("foo", Att())(X))
   }

@@ -12,9 +12,21 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
 
-  case class KSequence(elements: List[K], att: Att = Att()) extends kore.KSequence {
+  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
+    override def equals(that: Any) = that match {
+      case s: KSequence => s.elements == elements && s.att == att
+      case _ => false
+    }
+  }
+
+  object KSequence {
+    def apply(elements: List[K], att: Att = Att()): KSequence =
+      new KSequence(elements.foldLeft(List[K]()) {
+        case (sum, s: KSequence) => sum ++ s.items.asScala
+        case (sum, t) => sum :+ t
+      }, att)
   }
 
   case class KVariable(name: String, att: Att = Att()) extends kore.KVariable
