@@ -17,7 +17,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.KRewrite;
-import org.kframework.koreimplementation.convertors.KOREtoKIL;
+import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;

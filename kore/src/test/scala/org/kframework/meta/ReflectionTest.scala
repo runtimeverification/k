@@ -18,7 +18,7 @@ case class Bar(x: Int, y: String = "foo") {
 class ReflectionTest {
 
   @Test def findObject() {
-    assertEquals(Foo, Reflection.findObject("org.kframework.tinyimplementation.Foo"))
+    assertEquals(Foo, Reflection.findObject("org.kframework.meta.Foo"))
   }
 
   @Test def findSet() {
@@ -74,7 +74,7 @@ class ReflectionTest {
 
   @Test def constructObject {
     assertEquals(Bar(4, "Foo"),
-      Reflection.construct("org.kframework.tinyimplementation.Bar", Seq(4, "Foo")))
+      Reflection.construct("org.kframework.meta.Bar", Seq(4, "Foo")))
   }
 
   @Test def performanceTest {

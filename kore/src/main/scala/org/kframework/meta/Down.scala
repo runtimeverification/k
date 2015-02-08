@@ -3,6 +3,7 @@ package org.kframework.meta
 import org.kframework.attributes._
 import org.kframework.kore.K
 import org.kframework.kore.Unapply._
+import org.kframework.kore.KORE.Sort
 
 import scala.util.Try
 
@@ -13,8 +14,11 @@ case class Down(imports: Set[String]) extends (K => Any) {
 
   import org.kframework.builtin.Sorts.KString
 
+  val AttVal = Sort("AttributeValue")
+
   def apply(o: K): Any = o match {
     case KToken(`KString`, v) => v
+    case KToken(`AttVal`, v) => v
     //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet

@@ -196,9 +196,7 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
         return items().stream();
     }
 
-    @Override
     public int size() {
         return items().size();
     }
-
 }

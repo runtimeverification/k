@@ -1,4 +1,4 @@
-package org.kframework.koreimplementation.convertors;
+package org.kframework.kore.convertors;
 
 import org.junit.Test;
 
