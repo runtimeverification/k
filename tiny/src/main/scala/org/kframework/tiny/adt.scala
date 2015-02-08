@@ -117,7 +117,7 @@ class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence wi
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 }
 
-case class KRewrite(val left: K, val right: K, val att: Att) extends kore.KRewrite with KProduct {
+case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends kore.KRewrite with KProduct with K {
   val klabel = KRewrite
 }
 
@@ -153,7 +153,7 @@ trait KRegularAppLabel extends Label {
 trait KProduct1Label extends KRegularAppLabel {
   def apply(k: K, att: Att): KProduct
   def construct(l: Iterable[K], att: Att): KProduct =
-    l match {case List(k) => apply(k, att) }
+    l match {case Seq(k) => apply(k, att) }
 }
 
 trait KProduct2Label extends KRegularAppLabel {
@@ -183,7 +183,7 @@ object KRewrite extends KRegularAppLabel {
   val name = "=>"
   def construct(l: Iterable[K], att: Att): KRewrite =
     l match {
-      case List(left, right) => new KRewrite(left, right, att)
+      case Seq(left, right) => new KRewrite(left, right, att)
     }
 }
 

@@ -94,7 +94,7 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
     case b: Binding => b
   }
 
-  lazy val binding = bindings map { case Binding(k, v, _) => (k, v) } toMap
+  lazy val binding: Map[KVar, K] = bindings map { case Binding(k, v, _) => (k, v) } toMap
 
   def addBinding(b: Binding)(implicit theory: Theory): K = {
     if (bindings.exists {
@@ -112,13 +112,14 @@ case class And(children: Set[K], att: Att) extends KAssocApp {
       "(" + children.mkString(" && ") + ")"
 }
 
-case class Binding(variable: K, value: K, att: Att) extends KProduct {
+case class Binding(variable: KVar, value: K, att: Att) extends KProduct {
   override val klabel = Binding
   override def toString = variable + "->" + value
 }
 
 object Binding extends KProduct2Label with EmptyAtt {
   val name: String = "Binding"
+  override def apply(k1: K, k2: K, att: Att): KProduct = Binding(k1.asInstanceOf[KVar], k2, att)
 }
 
 case class Equals(a: K, b: K, att: Att) extends KProduct {

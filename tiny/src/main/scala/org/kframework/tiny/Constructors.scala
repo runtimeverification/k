@@ -23,6 +23,11 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     x(klist.items.asScala.toSeq map convert, att).asInstanceOf[KApp]
   }
 
+  def KApply(klabel: kore.KLabel, list: List[tiny.K], att: Att = Att()): KApp = {
+    val x: Label = convert(klabel)
+    x(list, att).asInstanceOf[KApp]
+  }
+
   override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): KSeq =
     KSeq(items.asScala.toSeq map convert, att).asInstanceOf[KSeq]
 
@@ -32,7 +37,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   override def KToken(sort: kore.Sort, s: String, att: Att): KTok = RegularKTok(sort, s)
 
-  override def KRewrite(left: kore.K, right: kore.K, att: Att): kore.KRewrite = tiny.KRewrite(convert(left), convert
+  override def KRewrite(left: kore.K, right: kore.K, att: Att) = tiny.KRewrite(convert(left), convert
     (right), att)
 
   override def KList[KK <: kore.K](items: java.util.List[KK]): kore.KList = KORE.KList(items)
@@ -56,7 +61,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   implicit class EnhancedK(k: K) {
     def ~>(other: K) = KSeq(Seq(k, other), Att())
-    def ==>(other: K) = KRewrite(k, other, Att())
+    def ==>(other: K): KRewrite = KRewrite(k, other, Att())
     def +(other: K) = KLabel("+")(k, other)
     def &&(other: K) = And(k, other)
     def ||(other: K) = Or(k, other)
