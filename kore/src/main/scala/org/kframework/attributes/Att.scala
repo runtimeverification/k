@@ -2,8 +2,9 @@ package org.kframework.attributes
 
 import org.kframework.Collections._
 import org.kframework.builtin.Sorts
-import org.kframework.kore.{KToken, KORE, K}
 import org.kframework.kore.Unapply._
+import org.kframework.kore.{K, KORE}
+import org.kframework.meta.Down
 
 import scala.collection.JavaConverters._
 
@@ -14,10 +15,9 @@ case class Att(att: Set[K]) extends AttributesToString {
     })
   }
 
-  def get[T](key: String): Option[T] = getK(key) map {
-    case t: KToken => t.s.asInstanceOf[T]
-    case x => println(x); ???
-  }
+  val down = Down(Set("scala.collection.immutable"))
+
+  def get[T](key: String): Option[T] = getK(key) map down map { _.asInstanceOf[T] }
 
   def getOptional[T](label: String): java.util.Optional[T] =
     get[T](label) match {
