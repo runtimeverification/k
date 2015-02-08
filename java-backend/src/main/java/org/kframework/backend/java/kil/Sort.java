@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableSet;
  * @author YilongL
  *
  */
-public final class Sort implements MaximalSharing, Serializable {
+public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
     private static final MapCache<String, Sort> cache = new MapCache<>(new PatriciaTrie<>());
 

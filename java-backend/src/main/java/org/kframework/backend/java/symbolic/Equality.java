@@ -137,7 +137,7 @@ public class Equality implements Serializable {
 
     public KItem toK(TermContext context) {
         return KItem.of(
-                KLabelConstant.of("'_==K_", context.definition().context()),
+                KLabelConstant.of("'_==K_", context.definition()),
                 KList.concatenate(leftHandSide, rightHandSide),
                 context);
     }

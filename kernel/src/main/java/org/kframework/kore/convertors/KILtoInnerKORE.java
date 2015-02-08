@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Bracket;
@@ -193,6 +194,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 .map(key -> {
                     String keyString = key.toString();
                     String valueString = attributes.get(key).getValue().toString();
+                    keyString = keyString.equals("klabel") ? "#klabel" : keyString;
 
                     return (K) KApply(KLabel(keyString),
                             KList(KToken(Sort("AttributeValue"), valueString)));

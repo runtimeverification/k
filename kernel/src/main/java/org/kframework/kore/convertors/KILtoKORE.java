@@ -252,7 +252,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Att attrs = Att().add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
         org.kframework.definition.Production prod1, prod2, prod3;
 

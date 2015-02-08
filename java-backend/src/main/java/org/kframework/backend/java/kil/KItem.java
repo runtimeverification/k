@@ -18,6 +18,7 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
+import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -34,6 +35,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 
 /**
@@ -52,7 +54,7 @@ import com.google.inject.Inject;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term {
+public class KItem extends Term implements KItemRepresentation {
 
     private final Term kLabel;
     private final Term kList;
@@ -76,18 +78,11 @@ public class KItem extends Term {
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
 
-        if (kLabel instanceof KLabelConstant) {
-            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isListLabel()) {
-                return kLabelConstant.getListTerminator(termContext.definition().context());
-            }
-        }
-
         // TODO(yilongli): break the dependency on the Tool object
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
 
-    KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+    public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
     }
 
@@ -194,11 +189,11 @@ public class KItem extends Term {
             }
         }
 
-        for (Production production : kLabelConstant.productions()) {
+        for (SortSignature signature : kLabelConstant.signatures()) {
             boolean mustMatch = true;
             boolean mayMatch = true;
 
-            if (kList.concreteSize() == production.getArity()) {
+            if (kList.concreteSize() == signature.parameters().size()) {
                 /* check if the production can match this KItem */
                 int idx = 0;
                 for (Term term : kList) {
@@ -207,7 +202,7 @@ public class KItem extends Term {
                     }
 
                     Sort childSort = term.sort();
-                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
+                    if (!definition.subsorts().isSubsortedEq(signature.parameters().get(idx), childSort)) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -216,7 +211,7 @@ public class KItem extends Term {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
+                                && definition.subsorts().hasCommonSubsort(signature.parameters().get(idx), childSort);
                     }
                     idx++;
                 }
@@ -225,9 +220,9 @@ public class KItem extends Term {
             }
 
             if (mustMatch) {
-                sorts.add(Sort.of(production.getSort()));
+                sorts.add(signature.result());
             } else if (mayMatch) {
-                possibleSorts.add(Sort.of(production.getSort()));
+                possibleSorts.add(signature.result());
             }
         }
 
@@ -271,13 +266,17 @@ public class KItem extends Term {
         return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
     }
 
+    @Override
+    public Term toKore() {
+        return this;
+    }
+
     public static class KItemOperations {
 
-        // TODO(AndreiS): make private again
-        public final Tool tool;
+        private final Tool tool;
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
-        private final BuiltinFunction builtins;
+        private final Provider<BuiltinFunction> builtins;
         private final GlobalOptions options;
 
         @Inject
@@ -285,7 +284,7 @@ public class KItem extends Term {
                 Tool tool,
                 JavaExecutionOptions javaOptions,
                 KExceptionManager kem,
-                BuiltinFunction builtins,
+                Provider<BuiltinFunction> builtins,
                 GlobalOptions options) {
             this.tool = tool;
             this.javaOptions = javaOptions;
@@ -361,7 +360,7 @@ public class KItem extends Term {
 
             if (kLabelConstant.isSortPredicate()
                     || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                    || builtins.isBuiltinKLabel(kLabelConstant)) {
+                    || builtins.get().isBuiltinKLabel(kLabelConstant)) {
                 kItem.evaluable = true;
             }
             return kItem.evaluable;
@@ -393,10 +392,10 @@ public class KItem extends Term {
             try {
                 KList kList = (KList) kItem.kList;
 
-                if (builtins.isBuiltinKLabel(kLabelConstant)) {
+                if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                        Term result = builtins.invoke(context, kLabelConstant, arguments);
+                        Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null) {
                             return result;
                         }
@@ -594,10 +593,12 @@ public class KItem extends Term {
         return this;
     }
 
+    @Override
     public Term kLabel() {
         return kLabel;
     }
 
+    @Override
     public Term kList() {
         return kList;
     }
@@ -685,15 +686,13 @@ public class KItem extends Term {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(
-                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(
-                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 

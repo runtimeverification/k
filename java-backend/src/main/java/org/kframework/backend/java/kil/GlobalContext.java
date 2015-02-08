@@ -3,38 +3,40 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.kil.KItem.KItemOperations;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.main.Tool;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import java.io.Serializable;
+
 @Singleton
-public class GlobalContext {
+public class GlobalContext implements Serializable {
     private Definition def;
-    public final FileSystem fs;
-    public final BuiltinFunction builtins;
+    public final transient FileSystem fs;
+    public final transient Tool tool;
     @Deprecated
-    public final EqualityOperations equalityOps;
+    public final transient EqualityOperations equalityOps;
     @Deprecated
-    public final SMTOperations constraintOps;
+    public final transient SMTOperations constraintOps;
     @Deprecated
-    public final KItemOperations kItemOps;
+    public final transient KItemOperations kItemOps;
 
     @Inject
     public GlobalContext(
             FileSystem fs,
-            BuiltinFunction builtins,
             EqualityOperations equalityOps,
             SMTOperations constraintOps,
-            KItemOperations kItemOps) {
+            KItemOperations kItemOps,
+            Tool tool) {
         this.fs = fs;
-        this.builtins = builtins;
         this.equalityOps = equalityOps;
         this.constraintOps = constraintOps;
         this.kItemOps = kItemOps;
+        this.tool = tool;
     }
 
     public void setDefinition(Definition def) {

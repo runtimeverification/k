@@ -149,7 +149,7 @@ public class MetaK {
      * {@link BuiltinSet} of {@link MetaVariable}s.
      */
     public static BuiltinSet variables(Term term, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         for (Variable variable : term.variableSet()) {
             builder.add(new MetaVariable(variable));
         }
@@ -161,13 +161,13 @@ public class MetaK {
      * {@link BuiltinSet}.
      */
     public static BuiltinSet trueVariables(Term term, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(term.variableSet());
         return (BuiltinSet) builder.build();
     }
 
     public static Term variablesMap(Term term, TermContext context) {
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(context);
         for (Variable variable : term.variableSet()) {
             builder.put(new MetaVariable(variable), variable);
         }
@@ -187,5 +187,9 @@ public class MetaK {
         // TODO(AndreiS): handle KLabel variables
         return KItem.of(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context,
             kItem.getSource(), kItem.getLocation());
+    }
+
+    public static Term configuration(TermContext context) {
+        return KLabelInjection.injectionOf(context.getTopTerm(), context);
     }
 }

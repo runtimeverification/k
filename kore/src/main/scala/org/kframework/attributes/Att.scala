@@ -49,7 +49,7 @@ case class Att(att: Set[K]) extends AttributesToString {
 trait KeyWithType
 
 object Att {
-  def apply(atts: K*): Att = Att(atts.toSet)
+  @annotation.varargs def apply(atts: K*): Att = Att(atts.toSet)
 
   implicit def asK(key: String, value: String) =
     KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(Sorts.KString, value, Att())))), Att())

@@ -15,6 +15,7 @@ trait KLabelMappings {
     items map {
       case NonTerminal(sort) => "_"
       case Terminal(string) => string
-      case RegexTerminal(regex) => ???
+      //TODO(cos): remove this
+      case RegexTerminal(regex) => "regexp"
     } mkString)
 }

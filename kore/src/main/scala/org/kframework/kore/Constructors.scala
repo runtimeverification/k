@@ -16,5 +16,6 @@ trait Constructors {
 
   val injectedKListLabel = "INJECTED-KLIST"
 }
+abstract class AbstractConstructors extends Constructors
 
 

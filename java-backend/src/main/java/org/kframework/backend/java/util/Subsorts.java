@@ -1,28 +1,32 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.Collections;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.definition.Module;
+import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.kil.loader.Context;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import scala.collection.JavaConversions;
+
 
 /**
  * Subsort relation.
  *
- * @author YilongL
+ * TODO(YilongL): delegates this to KORE/Context
  *
+ * @author YilongL
  */
 public class Subsorts implements Serializable {
-
-    private final Context context;
 
     private final Set<Sort> sorts;
 
@@ -33,8 +37,6 @@ public class Subsorts implements Serializable {
     private final Table<Sort, Sort, Boolean> subsort;
 
     public Subsorts(Context context) {
-        this.context = context;
-
         Set<org.kframework.kil.Sort> genericKILSorts = context.getAllSorts();
         ImmutableSet.Builder<Sort> setBuilder = ImmutableSet.builder();
         for (org.kframework.kil.Sort genericKILSort : genericKILSorts) {
@@ -49,6 +51,22 @@ public class Subsorts implements Serializable {
             for (Sort sort2 : sorts) {
                 subsort.put(sort1, sort2, context
                         .isSubsorted(sort1.toFrontEnd(), sort2.toFrontEnd()));
+            }
+        }
+    }
+
+    public Subsorts(Module module) {
+        sorts = JavaConversions.asJavaCollection(module.definedSorts()).stream()
+                .map(s -> Sort.of(s.name()))
+                .collect(Collectors.toSet());
+
+        this.subsort = ArrayTable.create(sorts, sorts);
+        for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
+            for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
+                subsort.put(
+                        Sort.of(sort1.name()),
+                        Sort.of(sort2.name()),
+                        module.subsorts().$greater(sort1, sort2));
             }
         }
     }
@@ -77,10 +95,6 @@ public class Subsorts implements Serializable {
         return getGLBSort(Sets.newHashSet(sorts));
     }
 
-    /**
-     * TODO(YilongL): delegates this method to Context#getGLBSort once all
-     * string representation of sorts are eliminated
-     */
     public Sort getGLBSort(Set<Sort> subset) {
         if (subset == null || subset.size() == 0) {
             return null;
@@ -131,7 +145,8 @@ public class Subsorts implements Serializable {
     }
 
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        return context.hasCommonSubsort(sort1.toFrontEnd(), sort2.toFrontEnd());
+        Sort glbSort = getGLBSort(sort1, sort2);
+        return glbSort != null && !glbSort.equals(Sort.BOTTOM);
     }
 
 }

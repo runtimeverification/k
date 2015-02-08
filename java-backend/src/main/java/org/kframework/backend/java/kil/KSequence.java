@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KSequence extends KCollection {
+public class KSequence extends KCollection implements org.kframework.kore.KSequence {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
@@ -41,6 +41,16 @@ public class KSequence extends KCollection {
      * List of variables of sort K in {@link KSequence#contents}.
      */
     private final ImmutableList<Variable> kSequenceVariables;
+
+    /**
+     * Builds a KSequence consisting of the given variable. This method is
+     * necessary in addition to the {@code Builder} because the {@code Builder}
+     * will canonicalize its result and, thus, simply return the given variable.
+     */
+    public static KSequence frame(Variable variable) {
+        assert variable.kind().equals(Kind.K);
+        return new KSequence(ImmutableList.of(), variable, ImmutableList.<Variable>of());
+    }
 
     /**
      * Builds a single-element KSequence based on the given term. This method is

@@ -145,6 +145,20 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         return typeSafeGet(Key.get(cls, Names.named(string)));
     }
 
+    /**
+     * Retrieves the attribute by key from the list of attributes
+     */
+    public <T> T getAttr(Key<T> key) {
+        final Attribute<T> value = (Attribute<T>) get(key);
+        if (value == null)
+            return null;
+        return value.getValue();
+    }
+
+    public String getAttr(String key) {
+        return getAttr(Attribute.keyOf(key));
+    }
+
     @Override
     public void clear() {
         contents.clear();
