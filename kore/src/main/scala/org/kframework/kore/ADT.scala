@@ -38,6 +38,7 @@ object ADT {
   case class KToken(sort: kore.Sort, s: String, att: Att = Att()) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
+    elements foreach { e => assert(e.isInstanceOf[K]) }
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
   }
