@@ -48,12 +48,7 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private File testResource(String baseName) {
-        try {
-            return new File(BaseTest.class.getResource(baseName).toURI())
-                    .getAbsoluteFile();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return new File("src/test/resources" + baseName).getAbsoluteFile();
     }
 
     // WARNING: only use this after checking the results manually
@@ -71,7 +66,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         if (forceFixAssertionFiles) {
             PrintWriter printWriter = new PrintWriter(kilExpectedDefinitionFile);
             String sep = "\n";
-            if(actualOutput.startsWith("\n"))
+            if (actualOutput.startsWith("\n"))
                 sep = "";
 
             actualOutput = actualOutput.replaceAll(" +\n", "\n");
@@ -79,7 +74,7 @@ public abstract class BaseTest extends SDFCompilerTest {
             printWriter.print(COPYRIGHT_HEADER + sep + actualOutput + "\n");
             printWriter.close();
         } else {
-            String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile).replaceAll("\r\n","\n");
+            String expectedOutput = FileUtils.readFileToString(kilExpectedDefinitionFile).replaceAll("\r\n", "\n");
             // fixing Windows line endings (git autocrlf=auto generates Windows line endings on checkout)
 
             assertEquals(clean(expectedOutput), clean(actualOutput));

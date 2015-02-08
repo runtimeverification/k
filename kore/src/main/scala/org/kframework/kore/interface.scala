@@ -4,6 +4,7 @@ import org.kframework.attributes._
 
 trait K {
   def att: Att
+  override def toString = Unparse.apply(this)
 }
 
 trait KItem extends K

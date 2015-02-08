@@ -1,12 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"13")),endColumn(#token(Int,"9")))]
+module TEST [org.kframework.attributes.Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"13"),#token(Int,"9"))]
   syntax priority 'x > 'y 'z > 't > 'u
   syntax associativity right 'y
   syntax associativity left 'x
-  syntax Foo ::= "z" [location(startLine(#token(Int,"6")),startColumn(#token(Int,"18")),endLine(#token(Int,"6")),endColumn(#token(Int,"20")))]
-  syntax Foo ::= "y" [location(startLine(#token(Int,"5")),startColumn(#token(Int,"18")),endLine(#token(Int,"5")),endColumn(#token(Int,"40"))) someattribute()]
-  syntax Foo ::= "x" [location(startLine(#token(Int,"4")),startColumn(#token(Int,"18")),endLine(#token(Int,"4")),endColumn(#token(Int,"20")))]
-  syntax Foo ::= "u" [location(startLine(#token(Int,"8")),startColumn(#token(Int,"18")),endLine(#token(Int,"8")),endColumn(#token(Int,"29"))) off()]
-  syntax Foo ::= "t" [andanohter() location(startLine(#token(Int,"7")),startColumn(#token(Int,"18")),endLine(#token(Int,"7")),endColumn(#token(Int,"36")))]
+  syntax Foo ::= "z" [org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"18"),#token(Int,"6"),#token(Int,"20"))]
+  syntax Foo ::= "y" [org.kframework.attributes.Location(#token(Int,"5"),#token(Int,"18"),#token(Int,"5"),#token(Int,"40")) someattribute(#token(AttributeValue,""))]
+  syntax Foo ::= "x" [org.kframework.attributes.Location(#token(Int,"4"),#token(Int,"18"),#token(Int,"4"),#token(Int,"20"))]
+  syntax Foo ::= "u" [off(#token(AttributeValue,"")) org.kframework.attributes.Location(#token(Int,"8"),#token(Int,"18"),#token(Int,"8"),#token(Int,"29"))]
+  syntax Foo ::= "t" [andanohter(#token(AttributeValue,"")) org.kframework.attributes.Location(#token(Int,"7"),#token(Int,"18"),#token(Int,"7"),#token(Int,"36"))]
 endmodule

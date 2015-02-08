@@ -1,8 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module TEST [location(startLine(#token(Int,"3")),startColumn(#token(Int,"1")),endLine(#token(Int,"6")),endColumn(#token(Int,"9")))]
-  syntax Stxs ::= Stxs "," Stxs [userList(Stxs)]
-  syntax Stxs ::= Stx [userList(Stxs)]
-  syntax Stxs ::= ".Stxs" [userList(Stxs)]
-  syntax Stx ::= "1" [location(startLine(#token(Int,"4")),startColumn(#token(Int,"20")),endLine(#token(Int,"4")),endColumn(#token(Int,"22")))]
+module TEST [org.kframework.attributes.Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"6"),#token(Int,"9"))]
+  syntax Stxs ::= Stxs "," Stxs [userList(#token(KString,"Stxs"))]
+  syntax Stxs ::= Stx [userList(#token(KString,"Stxs"))]
+  syntax Stxs ::= ".Stxs" [userList(#token(KString,"Stxs"))]
+  syntax Stx ::= "1" [org.kframework.attributes.Location(#token(Int,"4"),#token(Int,"20"),#token(Int,"4"),#token(Int,"22"))]
 endmodule
