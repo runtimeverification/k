@@ -42,13 +42,13 @@ public class PrintTransition implements Transformation<Transition, String> {
             Transformation<KRunState, String> statePrinter) {
         this.astNodePrinter = astNodePrinter;
         this.statePrinter = statePrinter;
-        this.ruleStore = new HashMap<>();
     }
 
     /**
      * Populates a map containing the unparsed rules, for pretty printing.
      */
     private void populateRuleStore() {
+        this.ruleStore = new HashMap<>();
         definition.getItems().stream().filter((item) -> item instanceof Module).forEach((item) -> {
             ((Module) item).getItems().stream().forEach((moduleItem) -> {
                 Source src = moduleItem.getSource();
@@ -67,7 +67,7 @@ public class PrintTransition implements Transformation<Transition, String> {
         StringBuilder sb = new StringBuilder();
         boolean verbose = a.typeSafeGet(Boolean.class, PRINT_VERBOSE_GRAPH);
         KRunGraph graph = a.typeSafeGet(KRunGraph.class);
-        if (!(definition != null)) {
+        if (definition == null) {
             definition = a.typeSafeGet(Attribute.Key.get(Definition.class));
             populateRuleStore();
         }
@@ -96,6 +96,7 @@ public class PrintTransition implements Transformation<Transition, String> {
         } else {
             sb.append(" [Node ");
             sb.append(graph.getSource(trans).getStateId());
+            sb.append("Rule at : " + t)
             sb.append(", Node ");
             sb.append(graph.getDest(trans).getStateId());
             sb.append("]");

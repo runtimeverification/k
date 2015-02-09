@@ -348,8 +348,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Rule rule) {
-        //temporary
-        return (ASTNode) rule;
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
