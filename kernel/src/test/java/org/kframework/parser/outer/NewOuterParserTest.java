@@ -72,8 +72,7 @@ public class NewOuterParserTest {
             throw new AssertionError("There are parsing errors: " + errors.toString());
         }
 
-        TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
-        Term cleaned = treeCleanerVisitor.apply(parsed).right().get();
+        Term cleaned = new TreeCleanerVisitor().apply(parsed);
         cleaned = new PreferAvoidVisitor().apply(parsed).right().get();
 
         return TreeNodesToKORE.apply(cleaned);

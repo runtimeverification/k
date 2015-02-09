@@ -57,19 +57,15 @@ public class TreeCleanerVisitorTest {
 //        amb([amb([NOKLABEL(amb([#emptyKRequireList()]),amb([#KModuleList(amb([#KModule(amb([#token(KModuleName,"FOO ")]),amb([#emptyKImportList()]),amb([#emptyKSentenceList()]))]),amb([#emptyKModuleList()]))]))])])
 
     public void assertCleanup(Term input, Term expected) {
-        Term actual = treeCleanerVisitor.apply(input).right().get();
+        Term actual = treeCleanerVisitor.apply(input);
         if (!actual.equals(expected)) {
             assertEquals(expected.toString(), actual.toString());
         }
     }
 
     public void throwFirstLeftException(Term input) {
-        Either<Set<ParseFailedException>, Term> result = treeCleanerVisitor.apply(input);
-        if (result.isRight()) {
-            fail("Expected an exception but got:" + result.right().get());
-        } else {
-            throw result.left().get().iterator().next();
-        }
+        Term result = treeCleanerVisitor.apply(input);
+        fail("Expected an exception but got:" + result);
     }
 
     @Test

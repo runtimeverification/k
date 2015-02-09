@@ -79,7 +79,7 @@ object TermCons {
 
 object KList {
   def apply(items: List[Term]): KList = new KList(items, Optional.empty[Location]())
-  @annotation.varargs def apply(ts: Term*): KList = KList(ts.asJava)
+  @annotation.varargs def apply(ts: Term*): KList = KList(new ArrayList(ts.asJava))
   def apply(toCopy: KList): KList = KList(new ArrayList(toCopy.items)) // change when making the classes mutable
 }
 
