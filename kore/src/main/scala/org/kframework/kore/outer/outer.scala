@@ -2,18 +2,13 @@
 
 package org.kframework.kore.outer
 
-import org.kframework.kore
-import org.kframework.kore.Sort
-import scala.util.matching.Regex
-import org.kframework.kore.Attributes
-import org.kframework.POSet
-import org.kframework.kore.KLabel
-import org.kframework.kore.KToken
-import org.kframework.kore.KList
+import org.kframework.{POSet, kore}
+import org.kframework.kore.{Attributes, KLabel, KList, KToken, Sort}
 
 trait OuterKORE
 
-case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal]) extends AssertionError(nonTerminals.toString)
+case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
+  extends AssertionError(nonTerminals.toString)
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
@@ -28,9 +23,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p; case p: SyntaxSort => p }
+  val productions: Set[Production] = sentences collect { case p: SyntaxProduction => p }
 
-  val definedSorts: Set[Sort] = productions collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
+  val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
   private lazy val subsortRelations = sentences flatMap {
     case SyntaxProduction(endSort, items, _) =>
@@ -106,8 +101,7 @@ object Production {
 }
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString with OuterKORE with Production {
-  def items = Seq()
+  with SyntaxSortToString with OuterKORE {
 }
 
 case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())

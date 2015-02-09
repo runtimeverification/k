@@ -51,6 +51,7 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -257,7 +258,7 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            exposeBindings(definitionSpecificModules, Main.class);
+            exposeBindings(definitionSpecificModules, Main.class, Annotations::main);
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
         }
     }

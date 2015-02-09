@@ -7,17 +7,19 @@ import static org.kframework.Collections.stream;
 import static org.kframework.kore.outer.Constructors.Module;
 import static org.kframework.kore.outer.Constructors.Rule;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
-import org.kframework.kil.Definition;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import org.kframework.Collections;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.outer.Bubble;
 import org.kframework.kore.outer.Module;
+import org.kframework.kore.outer.Definition;
 import org.kframework.kore.outer.Sentence;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
@@ -40,26 +42,43 @@ import org.kframework.parser.outer.Outer;
 
 public class BubbleParsing {
 
-    private Grammar kastGrammar;
+    private final Grammar.NonTerminal startNonterminal;
 
     /**
-     * TODO: WARNING: paths are hardwired for now.
+     * Parse bubbles as sort K from module K in the defaulte kore.k
      */
     public BubbleParsing() {
-        Definition kilDefinitionOfKORE = parseUsingOuter(new File(TestParserOnKORE.ROOT + "/kore.k"));
-        KILtoKORE kilToKore1 = new KILtoKORE(null);
-        kilDefinitionOfKORE.setMainModule("K");
-        org.kframework.kore.outer.Definition definitionOfKORE = kilToKore1.apply(kilDefinitionOfKORE);
-        Module kastModule = definitionOfKORE.getModule("K").get();
-
-        kastGrammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
+        this("K", "K");
     }
 
-    private Definition parseUsingOuter(File file) {
-        Definition def = new Definition();
+    /**
+     * Cusomize start sort and module within the default kore.k.
+     * @param mainModule Module containing desired start sort
+     * @param startSort Sort to parse bubbles as
+     */
+    public BubbleParsing(String mainModule, String startSort) {
+        this(BubbleParsing.class.getResource("/convertor-tests/kore.k"), mainModule, startSort);
+    }
+
+    /**
+     * Take grammar from a custom file.
+     * @param koreSyntax URL of the file defining the syntax of kore
+     * @param mainModule Moudule containing the start sort.
+     * @param startSort Sort to parse the bubble as
+     */
+    public BubbleParsing(URL koreSyntax, String mainModule, String startSort) {
+        org.kframework.kil.Definition kilDefinitionOfKORE = parseUsingOuter(koreSyntax);
+        kilDefinitionOfKORE.setMainModule(mainModule);
+        Definition definitionOfKORE = new KILtoKORE(null).apply(kilDefinitionOfKORE);
+        Module kastModule = definitionOfKORE.getModule(mainModule).get();
+        startNonterminal = KSyntax2GrammarStatesFilter.getGrammar(kastModule).get(startSort);
+    }
+
+    private org.kframework.kil.Definition parseUsingOuter(URL file) {
+        org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         String definitionText;
         try {
-            definitionText = FileUtils.readFileToString(file);
+            definitionText = Resources.toString(file, Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -69,18 +88,18 @@ public class BubbleParsing {
         return def;
     }
 
-    /**
+    /** TODO(radu): generalize this function, and eliminate duplicates
      * Replaces the bubbles in m with their parsing.
      */
     public Module parseBubbles(Module m) {
         Set<Module> newImports = stream(m.imports()).map(this::parseBubbles).collect(Collectors.toSet());
 
-        Set<Sentence> newSentences = stream(m.sentences()).map(s -> {
+        Set<Sentence> newSentences = stream(m.localSentences()).map(s -> {
             if (s instanceof Bubble) {
                 Bubble bubble = (Bubble) s;
 
                 Parser parser = new Parser(bubble.contents());
-                Term parsed = parser.parse(kastGrammar.get("K"), 0);
+                Term parsed = parser.parse(startNonterminal, 0);
 
                 if(parsed.equals(Ambiguity.apply())) {
                     ParseError errors = parser.getErrors();
@@ -103,5 +122,15 @@ public class BubbleParsing {
         }).collect(Collectors.toSet());
 
         return Module(m.name(), immutable(newImports), immutable(newSentences), m.att());
+    }
+
+    /**
+     * Parse bubbles in all modules of d.
+     */
+    public Definition parseBubbles(Definition d) {
+        return new Definition(
+                d.requires(),
+                stream(d.modules()).map(this::parseBubbles).collect(Collections.toSet()),
+                d.att());
     }
 }

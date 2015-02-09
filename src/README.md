@@ -107,6 +107,8 @@ The functionality to create a tagged release is currently incomplete.
 Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
+For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
+
 # Cross platform compilation
 To build a version of the K framework for a platform other than the current version,
 you can specify the OS and architecture using profiles. For example, to build a 32-bit

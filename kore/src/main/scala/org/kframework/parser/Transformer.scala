@@ -3,14 +3,21 @@
 package org.kframework.parser
 
 import collection.JavaConverters._
+import collection.mutable
 
 abstract class Transformer[O] {
-  def apply(t: Term): Either[O, Term] = t match {
-    case a: Ambiguity => apply(a)
-    case tc: TermCons => apply(tc)
-    case kl: KList => apply(kl)
-    case c: Constant => apply(c)
-  }
+  // we expect this data structures to represent a DAG, so we
+  // use a cache to remember nodes that we already visited.
+  val cache = mutable.Map[Term, Either[O, Term]]()
+
+  def apply(t: Term): Either[O, Term] =
+    cache.getOrElseUpdate(t,
+      t match {
+        case a: Ambiguity => apply(a)
+        case tc: TermCons => apply(tc)
+        case kl: KList => apply(kl)
+        case c: Constant => apply(c)
+      })
 
   def apply(a: Ambiguity): Either[O, Term] = mapChildren(a)
   def apply(tc: TermCons): Either[O, Term] = mapChildrenStrict(tc)
