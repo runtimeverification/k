@@ -51,7 +51,6 @@ case class TermCons(items: List[Term], production: Production, location: Optiona
       cachedHashCode.get
     case Some(hc) => hc
   }
-  override def toString() = production.klabel + "(" + (items.asScala mkString ",") + ")"
 }
 
 case class Ambiguity(items: Set[Term], location: Optional[Location])

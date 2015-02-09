@@ -5,6 +5,7 @@ import org.kframework.builtin.Sorts
 import org.kframework.kore
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{Constructors => con, _}
+import org.kframework.meta.Up
 
 import scala.collection.JavaConverters._
 
@@ -47,6 +48,8 @@ object TreeNodesToKORE {
     case t@KApply(l, items) => KApply(l, KList((items map down _).asJava), t.att)
   }
 
+  val up = new Up(KORE)
+
   def locationToAtt(l: Location): Att =
-    Att(ObjectToKORE(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))
+    Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))
 }
