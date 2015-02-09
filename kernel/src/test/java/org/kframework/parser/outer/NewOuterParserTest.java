@@ -15,6 +15,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.Grammar;
 import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.Parser;
+import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
 
 import java.io.File;
@@ -27,17 +28,17 @@ public class NewOuterParserTest {
 
     @Test
     public void testKOREOuter() throws Exception {
-        CharSequence theTextToParse = "module FOO endmodule";
+        CharSequence theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
         String startSymbol = "KDefinition";
         File definitionFile = new File(NewOuterParserTest.class.getResource
-                ("/convertor-tests/kore.k").toURI()).getAbsoluteFile();
+                ("/e-kore.k").toURI()).getAbsoluteFile();
 
         K kBody = parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
-        System.out.println(kBody);
+        //System.out.println(kBody);
     }
 
-    /**
+    /** TODO(radu): generalize this function, and eliminate duplicates
      * @param theTextToParse
      * @param mainModule
      * @param startSymbol
@@ -73,6 +74,7 @@ public class NewOuterParserTest {
 
         TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
         Term cleaned = treeCleanerVisitor.apply(parsed).right().get();
+        cleaned = new PreferAvoidVisitor().apply(parsed).right().get();
 
         return TreeNodesToKORE.apply(cleaned);
     }

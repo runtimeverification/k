@@ -13,17 +13,12 @@ object TreeNodesToKORE {
   import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
-    // TODO(Radu): the content of the constant should not be trimmed (see below) but we do this now due to an
-    // but related to whitespace in the parser.
-    case Constant(s, p, l) => KToken(p.sort, s.trim, locationToAtt(l.get()))
+    case Constant(s, p, l) => KToken(p.sort, s, locationToAtt(l.get()))
     case TermCons(items, p, l) => KApply(p.klabel.get, KList(items.asScala map apply asJava), locationToAtt(l.get()))
     case Ambiguity(items, l) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
   }
 
   def down(t: K): K = t match {
-    // TODO(Radu): the content of the constant should not be trimmed (see below) but we do this now due to an
-    // but related to whitespace in the parser.
-    //    case Constant(s, p, l) if p.sort == Sorts.KLabel => KLabel(s.trim)
     case t@KToken(sort, s) if sort == Sorts.KVariable =>
       KVariable(s.trim, t.att)
 

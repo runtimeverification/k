@@ -93,7 +93,18 @@ module K
 //  syntax KItem     ::= KItem ":" KSort  [ hook ]
 endmodule
 
+// Temporary support for handwritten kore definitions
+module K-TEST
+  imports K
+  // The old outer parser leaves "requires" as part of a bubble, so we need a production here to
+  // hack around this until the new outer parser is available.
+  syntax RuleBody ::= K [ klabel(#KRule)]
+  syntax RuleBody ::= K "requires" K [klabel(#KRule)]
 
+  // Allow label() in addition to label(.::KList)
+  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
+  syntax EmptyKList ::= "" [klabel(#emptyKList)]
+endmodule
 
 // To be used for first-level parsing of global KORE definitions,
 // where the K terms are put in bubbles.  A similar, but larger
