@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -24,7 +25,7 @@
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>org.kframework.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
@@ -34,6 +35,12 @@
     <dependency>
       <groupId>org.kframework.k</groupId>
       <artifactId>java-backend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.k</groupId>
+      <artifactId>tiny</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -62,11 +69,12 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
-                  <arg value="2113" />
-                  <arg value="100000" />
+                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}"
+                      spawn="true">
+                  <arg value="2113"/>
+                  <arg value="100000"/>
                 </exec>
-                <sleep seconds="1" />
+                <sleep seconds="1"/>
               </target>
               <skip>${skipKTest}</skip>
             </configuration>
@@ -79,12 +87,13 @@
             <phase>integration-test</phase>
             <configuration>
               <target>
-                <exec dir="${ktestDir}" executable="${project.build.directory}/release/k/bin/ktest${native.script.extension}">
-                  <arg value="${config}" />
-                  <arg value="-v" />
-                  <arg value="--report" />
-                  <arg value="--debug" />
-                  <env key="K_NAILGUN" value="true" />
+                <exec dir="${ktestDir}"
+                      executable="${project.build.directory}/release/k/bin/ktest${native.script.extension}">
+                  <arg value="${config}"/>
+                  <arg value="-v"/>
+                  <arg value="--report"/>
+                  <arg value="--debug"/>
+                  <env key="K_NAILGUN" value="true"/>
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
@@ -98,9 +107,10 @@
             <phase>post-integration-test</phase>
             <configuration>
               <target>
-                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
-                <exec executable="${project.build.directory}/release/k/lib/native/${native.os.classifier}/ng${native.exe.extension}">
-                  <arg value="ng-stop" />
+                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false"/>
+                <exec
+                    executable="${project.build.directory}/release/k/lib/native/${native.os.classifier}/ng${native.exe.extension}">
+                  <arg value="ng-stop"/>
                 </exec>
               </target>
             </configuration>
@@ -121,7 +131,9 @@
             </goals>
             <configuration>
               <environmentVariables>
-                <PATH>${env.PATH}${path.separator}${project.build.directory}/release/k/lib/native/${native.os.classifier}</PATH>
+                <PATH>
+                  ${env.PATH}${path.separator}${project.build.directory}/release/k/lib/native/${native.os.classifier}
+                </PATH>
               </environmentVariables>
             </configuration>
           </execution>
@@ -170,7 +182,7 @@
               <stripVersion>true</stripVersion>
               <outputDirectory>${project.build.directory}/lib/java/dynamic</outputDirectory>
             </configuration>
-          </execution> 
+          </execution>
           <execution>
             <id>unpack-zip-dependencies</id>
             <goals>

@@ -6,7 +6,7 @@ import org.kframework.definition.{Module, Production}
 import org.kframework.kore.{ADT, Unparse}
 
 
-class AbstractTest {
+trait AbstractTest {
 
   import org.kframework.tiny.Builtins._
 

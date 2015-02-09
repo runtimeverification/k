@@ -18,6 +18,7 @@ object FreeTheory extends Theory {
     case EqualsMatcher(a, b) => if (a == b) True else False
     case t => t
   }
+  val self = this
 }
 
 case class RewriteBasedTheory(rw: K => K) extends Theory {

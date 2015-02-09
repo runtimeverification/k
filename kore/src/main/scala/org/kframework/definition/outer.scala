@@ -37,9 +37,13 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  val productionsFor: Map[KLabel, Set[Production]] = productions.collect({ case p if p.klabel != None => p }).groupBy(_.klabel.get) map {
-    case (l, ps) => (l, ps)
-  }
+  val productionsFor: Map[KLabel, Set[Production]] =
+    productions
+      .collect({ case p if p.klabel != None => p })
+      .groupBy(_.klabel.get)
+      .map { case (l, ps) => (l, ps) }
+
+  val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
   // Check that productions with the same #klabel have identical attributes
   productionsFor.foreach {
@@ -66,7 +70,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
   }
 
-  lazy val subsorts : POSet[Sort] = POSet(subsortRelations)
+  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {

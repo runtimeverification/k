@@ -1,8 +1,6 @@
 package org.kframework.tiny
 
 object Rule {
-
-
   def apply(termWithRewrite: K, sideConditions: K = True)(implicit theory: Theory = FreeTheory): Rule = {
     val left = RewriteToTop.toLeft(termWithRewrite)
     val right = RewriteToTop.toRight(termWithRewrite)

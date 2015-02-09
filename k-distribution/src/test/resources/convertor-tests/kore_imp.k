@@ -3,6 +3,10 @@ module TEST
   syntax KItem ::= KResult
   syntax KResult
 
+  syntax Freezer  ::= K "=[];" [klabel('_=[];)]
+  syntax Freezer  ::= "[]/_" K [klabel('[]/_)]
+  syntax UserList ::= K "," K  [klabel('_,_), assoc]
+
   syntax Bool ::= Token{"true"}
   syntax Bool ::= Token{"false"}
   syntax Int ::= Token{[\-\+]? [0-9]+}     [regex("[\\+-]?\\d+"), prefer]
