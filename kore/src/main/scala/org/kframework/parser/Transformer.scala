@@ -14,11 +14,14 @@ abstract class Transformer[O] {
     cache.getOrElseUpdate(t,
       t match {
         case a: Ambiguity => apply(a)
-        case tc: TermCons => apply(tc)
         case kl: KList => apply(kl)
-        case c: Constant => apply(c)
+        case p: ProductionReference => apply(p)
       })
 
+  def apply(p: ProductionReference): Either[O, Term] = p match {
+    case tc: TermCons => apply(tc)
+    case c: Constant => apply(c)
+  }
   def apply(a: Ambiguity): Either[O, Term] = mapChildren(a)
   def apply(tc: TermCons): Either[O, Term] = mapChildrenStrict(tc)
   def apply(kl: KList): Either[O, Term] = mapChildren(kl)
@@ -30,8 +33,8 @@ abstract class Transformer[O] {
   def merge(a: O, b: O): O
 
   /**
-   *  Transforms all children of the current item. If any of them is problematic,
-   *  it merge(...)es all problems and returns Left(...).
+   * Transforms all children of the current item. If any of them is problematic,
+   * it merge(...)es all problems and returns Left(...).
    */
   protected def mapChildrenStrict(t: HasChildren): Either[O, Term] = {
     val newItems = t.items.asScala.map(apply)
@@ -43,10 +46,10 @@ abstract class Transformer[O] {
 
   /**
    * Transforms all children of the current item:
-   *  - if all children are problematic (i.e., Left(...)), then return the
+   * - if all children are problematic (i.e., Left(...)), then return the
    * merge(...) of all problems.
-   *  - if one child is left, return that child.
-   *  - otherwise, i.e., a few of the children are correct, disregard all problems and
+   * - if one child is left, return that child.
+   * - otherwise, i.e., a few of the children are correct, disregard all problems and
    * replace the children of the current element with the correct transformed children.
    */
   protected def mapChildren(t: HasChildren) = {
