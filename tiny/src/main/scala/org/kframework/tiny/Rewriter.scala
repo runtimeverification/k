@@ -8,7 +8,7 @@ class Rewriter(module: definition.Module) {
 
   import cons._
 
-  val rules = module.rules map { r => Rule(convert(r.body), True) }
+  val rules = module.rules map { r => Rule(convert(r.body), convert(r.requires)) }
 
   def rewrite(k: K): Set[K] = {
     val newKs = rules flatMap { r => r(k) }

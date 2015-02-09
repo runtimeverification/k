@@ -16,8 +16,9 @@ class Substitution(self: K) {
 
   private def doSubstitution(substitution: Map[KVar, K]) =
     self match {
+      case v: KVar => substitution.get(v) map { _.substitute(substitution) } getOrElse v
       case Anywhere(l, p, _) => substitution(l.TOPVariable).substitute(substitution + (l.HOLEVariable -> p))
-      case v: KVar => substitution(v).substitute(substitution)
+      case b: Binding => b.klabel(b.variable, b.value.substitute(substitution))
       case KApp(l, ks, att) =>
         l(ks map { x: K => x.substitute(substitution) }, att)
       case e => e

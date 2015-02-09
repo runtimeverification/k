@@ -1,7 +1,9 @@
 package org.kframework.kore.convertors;
 
 import org.junit.Test;
+import org.kframework.Collections;
 import org.kframework.definition.Module;
+import org.kframework.kore.Unparse;
 import org.kframework.tiny.Constructors;
 import org.kframework.tiny.FreeTheory;
 import org.kframework.tiny.K;
@@ -18,7 +20,7 @@ import java.io.IOException;
 
 public class TstTinyOnKORE extends BaseTest {
     @Test
-    public void kore_imp() throws IOException {
+    public void kore_imp_tiny() throws IOException {
         sdfTest();
     }
 
@@ -40,7 +42,7 @@ public class TstTinyOnKORE extends BaseTest {
 
         Set<K> results = rewriter.rewrite(program);
 
-        return results.mkString("\n\n");
+        return stream(results).map(r -> Unparse.apply(r)).collect(Collections.toList()).mkString("\n");
     }
 
     @Override

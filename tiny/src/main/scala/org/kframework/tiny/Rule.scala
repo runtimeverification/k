@@ -5,13 +5,18 @@ object Rule {
     val left = RewriteToTop.toLeft(termWithRewrite)
     val right = RewriteToTop.toRight(termWithRewrite)
 
+    def substitute(and: And): K = {
+      assert(and.isPureSubsitution, and)
+      Substitution(right).substitute(and.binding)
+    }
+
     (t: K) => {
       val pmSolutions = And(left.matcher(t), sideConditions).normalize
       pmSolutions match {
         case Or(children, _) => children map {
-          case and: And => Substitution(right).substitute(and.binding)
+          case and: And => substitute(and)
         }
-        case and: And => Set(Substitution(right).substitute(and.binding))
+        case and: And => Set(substitute(and))
       }
     }
   }

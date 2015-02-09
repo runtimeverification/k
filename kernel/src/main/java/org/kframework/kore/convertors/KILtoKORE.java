@@ -263,14 +263,14 @@ public class KILtoKORE extends KILTransformation<Object> {
                 kilProductionId);
         prod1 = Production(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId);
+                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
 
         // lst ::= elem
         prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
 
         // lst ::= .UserList
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId);
+                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
 
         res.add(prod1);
         res.add(prod2);

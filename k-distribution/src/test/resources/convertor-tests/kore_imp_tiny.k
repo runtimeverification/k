@@ -3,6 +3,10 @@ module TEST
   syntax KItem ::= KResult
   syntax KResult
 
+  syntax HOLE ::= "[]"   [klabel('HOLE)]
+//  syntax UserList ::= KItem "," KItem    [klabel('_,_), assoc]
+//  syntax UserList ::= KItem              [klabel('.EmptyUserList)]
+
   syntax Bool ::= Token{"true"}
   syntax Bool ::= Token{"false"}
   syntax Int ::= Token{[\-\+]? [0-9]+}     [regex("[\\+-]?\\d+"), prefer]
@@ -30,7 +34,7 @@ module TEST
 
   syntax priority '_*Int_ '_/Int_ '_%Int_ > '_+Int_ '_-Int_
 
-  syntax Int ::= "freshInt" "(" Int ")" [klabel(freshInt), function, freshGenerator]
+  syntax Int ::= "freshInt" "(" Int ")" [klabel('freshInt), function, freshGenerator]
   rule 'freshInt(I:Int) => I:Int
 
 
@@ -98,6 +102,7 @@ module TEST
     '<top>('<k>(X:Id  ~> K:K),, '<state>('_Map_('_|->_(X:Id,, I:Int),, M:Map)))
   =>
     '<top>('<k>(I:Int ~> K:K),, '<state>('_Map_('_|->_(X:Id,, I:Int),, M:Map)))
+
   rule
     '<top>('<k>('_+_(I1:Int,, I2:Int)    ~> K:K),, SC:StateCell)
   =>
@@ -169,129 +174,28 @@ module TEST
   =>
     '<top>('<k>(S:Stmt                 ~> K:K),, SC:StateCell)
 
-
-  /* Strictness */
-  // '_+_
-  rule
-    '<top>('<k>('_+_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K1:KItem ~> '`[`]+_(K2:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K1:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K1:KResult ~> '`[`]+_(K2:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_+_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
-  //[cool]
-  rule
-    '<top>('<k>('_+_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K2:KItem ~> '_+`[`](K1:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K2:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K2:KResult ~> '_+`[`](K1:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_+_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
-  //[cool]
-
   // '_/_
   rule
     '<top>('<k>('_/_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
   =>
-    '<top>('<k>(K1:KItem ~> '`[`]/_(K2:KItem) ~> K:K),, SC:StateCell)
+    '<top>('<k>(K1:KItem ~> '_/_([],,K2:KItem) ~> K:K),, SC:StateCell)
   when 'notBool_(isKResult(K1:KItem))
   [heat]
   rule
-    '<top>('<k>(K1:KResult ~> '`[`]/_(K2:KItem) ~> K:K),, SC:StateCell)
+    '<top>('<k>(K1:KResult ~> '_/_([],,K2:KItem) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
   //[cool]
   rule
     '<top>('<k>('_/_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
   =>
-    '<top>('<k>(K2:KItem ~> '_/`[`](K1:KItem) ~> K:K),, SC:StateCell)
+    '<top>('<k>(K2:KItem ~> '_/_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
   when 'notBool_(isKResult(K2:KItem))
   [heat]
   rule
-    '<top>('<k>(K2:KResult ~> '_/`[`](K1:KItem) ~> K:K),, SC:StateCell)
+    '<top>('<k>(K2:KResult ~> '_/_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
   //[cool]
 
-  // '_<=_
-  rule
-    '<top>('<k>('_<=_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K1:KItem ~> '`[`]<=_(K2:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K1:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K1:KResult ~> '`[`]<=_(K2:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_<=_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
-  //[cool]
-  rule
-    '<top>('<k>('_<=_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K2:KItem ~> '_<=`[`](K1:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K2:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K2:KResult ~> '_<=`[`](K1:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_<=_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
-  //[cool]
-
-  // '!_
-  rule
-    '<top>('<k>('!_(KI:KItem)              ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(KI:KItem ~> '!`[`](.KList) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(KI:KItem))
-  [heat]
-  rule
-    '<top>('<k>(KI:KResult ~> '!`[`](.KList) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('!_(KI:KResult)              ~> K:K),, SC:StateCell)
-  //[cool]
-
-  // '_&&_
-  rule
-    '<top>('<k>('_&&_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K1:KItem ~> '`[`]&&_(K2:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K1:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K1:KResult ~> '`[`]&&_(K2:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_&&_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
-  //[cool]
-
-  // '_=_;
-  rule
-    '<top>('<k>('_=_;(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K2:KItem ~> '_=`[`];(K1:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K2:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K2:KResult ~> '_=`[`];(K1:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('_=_;(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
-  //[cool]
-
-  // 'if__then_
-  rule
-    '<top>('<k>('if__then_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>(K1:KItem ~> 'if`[`]_then_(K2:KItem) ~> K:K),, SC:StateCell)
-  when 'notBool_(isKResult(K1:KItem))
-  [heat]
-  rule
-    '<top>('<k>(K1:KResult ~> 'if`[`]_then_(K2:KItem) ~> K:K),, SC:StateCell)
-  =>
-    '<top>('<k>('if__then_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
-  //[cool]
 endmodule

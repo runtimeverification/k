@@ -99,11 +99,11 @@ module K-TEST
   // The old outer parser leaves "requires" as part of a bubble, so we need a production here to
   // hack around this until the new outer parser is available.
   syntax RuleBody ::= K [ klabel(#KRule)]
-  syntax RuleBody ::= K "requires" K [klabel(#KRule)]
+  syntax RuleBody ::= K "requires" K [klabel(#KRuleWithRequires)]
 
   // Allow label() in addition to label(.::KList)
-  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
-  syntax EmptyKList ::= "" [klabel(#emptyKList)]
+  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApplyEmptyKList), hook(org.kframework.kore.KItem) ]
+  syntax EmptyKList ::= "" [klabel(#emptyKListDuplicateHack)]
 endmodule
 
 // To be used for first-level parsing of global KORE definitions,

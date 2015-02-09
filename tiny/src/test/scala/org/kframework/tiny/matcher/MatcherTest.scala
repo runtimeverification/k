@@ -147,14 +147,14 @@ class MatcherTest extends AbstractTest {
     ), pattern.matchAll(foo, Equals(X, 5: K)))
   }
 
-  @Test def testKListMultipleVar() {
+  @Test def testAssocMultipleVar() {
     val foo = '+(5: K, 5: K)
     val pattern = '+(X, X)
     assertEquals(Or(And(X -> (5: K))),
       pattern.matchAll(foo))
   }
 
-  @Test def testKListAssocMultipleVar() {
+  @Test def testAssocAssocMultipleVar() {
     val foo = '+(5: K, 5: K, 5: K)
     val pattern = '+(X, X)
     assertEquals(False, pattern.matchAll(foo))

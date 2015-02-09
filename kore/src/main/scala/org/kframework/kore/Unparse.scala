@@ -3,7 +3,7 @@ package org.kframework.kore
 import Unapply._
 import org.apache.commons.lang3.StringEscapeUtils
 
-object Unparse {
+object Unparse extends {
   def apply(k: K): String = k match {
     case KToken(sort, s) => "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")"
     case KSequence(l) => if (l.isEmpty) ".K" else l.map(apply).mkString("~>")
