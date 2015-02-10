@@ -76,17 +76,16 @@ public class PrintTransition implements Transformation<Transition, String> {
         }
         Location location = trans.getLocation();
         Source source = trans.getSource();
-        ModuleItem ruleItem = ruleStore.get(new MutablePair<>(source, location));
+        Pair keyPair = new MutablePair<>(source, location);
+        ModuleItem ruleItem = ruleStore.get(keyPair);
         if (trans.getType() == TransitionType.RULE) {
             if (verbose) {
-                sb.append("Rule at Source " + source.toString() + " " + location.toString() + "\n");
+                sb.append("Rule at  " + source.toString() + " " + location.toString() + "\n");
                 if (ruleItem != null) {
                     sb.append(unparser.print(ruleItem));
                 }
             } else {
-                Attributes ruleAttrs = trans.getRule().getAttributes();
-                sb.append("\nRule tagged ");
-                sb.append(astNodePrinter.run(ruleAttrs, a));
+                sb.append("Rule at  " + source.toString() + " " + location.toString() + "\n");
             }
         } else if (trans.getType() == TransitionType.REDUCE) {
             sb.append("\nFunction evaluation");
