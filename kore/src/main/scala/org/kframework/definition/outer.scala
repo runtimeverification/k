@@ -46,9 +46,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
   // Check that productions with the same #klabel have identical attributes
-  productionsFor.foreach {
-    case (l, ps) => if (ps.groupBy(_.att).size != 1) throw DivergingAttributesForTheSameKLabel(ps)
-  }
+//  productionsFor.foreach {
+//    case (l, ps) =>
+//      if (ps.groupBy(_.att).size != 1)
+//        throw DivergingAttributesForTheSameKLabel(ps)
+//  }
 
   val attributesFor: Map[KLabel, Att] = productionsFor mapValues { _.head.att }
 

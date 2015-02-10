@@ -27,5 +27,4 @@ public class TestParserOnKORE extends BaseTest {
     @Test public void simpleRuleKORE() throws IOException {
         outerOnlyTest();
     }
-
 }

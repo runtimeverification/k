@@ -48,7 +48,12 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private File testResource(String baseName) {
-        return new File("src/test/resources" + baseName).getAbsoluteFile();
+        try {
+            return new File(BaseTest.class.getResource(baseName).toURI())
+                    .getAbsoluteFile();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // WARNING: only use this after checking the results manually
@@ -56,8 +61,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     private void testConversion(Function<File, DefinitionWithContext> parse) throws IOException {
         File kilDefinitionFile = testResource("/convertor-tests/" + name.getMethodName() + ".k");
-        File kilExpectedDefinitionFile = testResource(
-                "/convertor-tests/" + name.getMethodName() + expectedFilePostfix());
+        File kilExpectedDefinitionFile = testResource("/convertor-tests/" + name.getMethodName() + expectedFilePostfix());
 
         DefinitionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
