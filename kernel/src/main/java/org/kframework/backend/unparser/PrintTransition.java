@@ -1,27 +1,25 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Source;
 import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.transformation.Transformation;
-import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.InjectGeneric;
-
-import com.google.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +30,7 @@ public class PrintTransition implements Transformation<Transition, String> {
     @InjectGeneric private Transformation<KRunState, String> statePrinter;
     private Definition definition;
     private Map<Pair<Source, Location>, ModuleItem> ruleStore;
+    private Unparser unparser;
 
     @Inject
     public PrintTransition() {
@@ -45,7 +44,7 @@ public class PrintTransition implements Transformation<Transition, String> {
     }
 
     /**
-     * Populates a map containing the unparsed rules, for pretty printing.
+     * Populates a map containing the rules, for pretty printing.
      */
     private void populateRuleStore() {
         this.ruleStore = new HashMap<>();
@@ -71,9 +70,19 @@ public class PrintTransition implements Transformation<Transition, String> {
             definition = a.typeSafeGet(Attribute.Key.get(Definition.class));
             populateRuleStore();
         }
+        if (unparser == null) {
+            Context context = a.typeSafeGet(Context.class);
+            unparser = new Unparser(context);
+        }
+        Location location = trans.getLocation();
+        Source source = trans.getSource();
+        ModuleItem ruleItem = ruleStore.get(new MutablePair<>(source, location));
         if (trans.getType() == TransitionType.RULE) {
             if (verbose) {
-                sb.append(astNodePrinter.run(trans.getRule(), a));
+                sb.append("Rule at Source " + source.toString() + " " + location.toString() + "\n");
+                if (ruleItem != null) {
+                    sb.append(unparser.print(ruleItem));
+                }
             } else {
                 Attributes ruleAttrs = trans.getRule().getAttributes();
                 sb.append("\nRule tagged ");
@@ -93,10 +102,14 @@ public class PrintTransition implements Transformation<Transition, String> {
             sb.append("\n=>\n");
             sb.append(statePrinter.run(graph.getDest(trans), a));
             sb.append("\n");
+            sb.append("Rule at Source " + source.toString() + " " + location.toString() + "\n");
+            if (ruleItem != null) {
+                sb.append(unparser.print(ruleItem));
+            }
         } else {
             sb.append(" [Node ");
             sb.append(graph.getSource(trans).getStateId());
-            sb.append("Rule at : " + t)
+            sb.append("Rule at " + source.toString() + " " + location.toString());
             sb.append(", Node ");
             sb.append(graph.getDest(trans).getStateId());
             sb.append("]");
