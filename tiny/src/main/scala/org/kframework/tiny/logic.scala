@@ -20,7 +20,11 @@ trait NormalizationCache {
   val normalBy: Option[Theory]
   def normalize(implicit theory: Theory) = normalBy match {
     case Some(`normalBy`) => this
-    case _ => actualNormalize
+    case _ =>
+      if (this == True || this == False)
+        this
+      else
+        actualNormalize
   }
   def actualNormalize(implicit theory: Theory): K
 }
@@ -66,7 +70,7 @@ NormalizationCache {
     case or: Or =>
       val newMe = Or(or.children map { _.normalize }, att)
       if (theory.equals(newMe, this) == True)
-        Or(children, att, Some(theory))
+        Or(or.children, att, Some(theory))
       else
         newMe.normalize
     case x => x.normalize
@@ -93,27 +97,36 @@ NormalizationCache {
 
   override def normalize(implicit theory: Theory) = super[NormalizationCache].normalize
 
-  def actualNormalize(implicit theory: Theory): K = toDNF match {
-    case and: And =>
-      val newMe = and.normalizeChildren
-      if (theory.equals(newMe, this) == True)
-        And(children, att, Some(theory))
-      else
-        newMe.normalize
-    case x => x.normalize
+  def actualNormalize(implicit theory: Theory): K = {
+    val dnf = toDNF.eliminateGroundBooleans
+    dnf match {
+      case and: And =>
+        val newMe = and.normalizeChildren
+        if (theory.equals(newMe, this) == True)
+          And(and.children, att, Some(theory))
+        else
+          newMe.normalize
+      case x => x.normalize
+    }
   }
 
   def normalizeChildren(implicit theory: Theory): Logic = {
     // working with streams to stop at first conflict
-    val normalizedChildren = children map { _.normalize }
+    val normalizedChildren = children map {
+      _.normalize
+    }
 
     val newChildren = normalizedChildren -- children
 
-    val newBindings = newChildren collect { case c: Binding => (c.variable, c.value) } toMap
+    val newBindings = newChildren collect {
+      case c: Binding => (c.variable, c.value)
+    } toMap
 
     import org.kframework.tiny.Substitution._
-    val childrenWithSubstitution = normalizedChildren map { c =>
-      c.substitute(newBindings)
+
+    val childrenWithSubstitution = normalizedChildren map {
+      c =>
+        c.substitute(newBindings)
     }
 
     childrenWithSubstitution.foldLeft(True: Logic) {

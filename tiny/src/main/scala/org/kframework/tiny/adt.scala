@@ -42,6 +42,8 @@ trait KApp extends kore.KApply with K {
     })
   }
 
+  override def hashCode = klabel.hashCode * 5333 + children.hashCode
+
   def normalize(implicit theory: Theory): K =
     klabel((children map theory.normalize).toSeq, att)
 
