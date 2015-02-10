@@ -152,7 +152,7 @@ public class JavaSymbolicExecutor implements Executor {
 
         SearchResults retval = new SearchResults(
                 searchResults,
-                null);
+                getSymbolicRewriter().getExecutionGraph());
 
         return retval;
     }

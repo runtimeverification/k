@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -29,6 +31,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.Transition;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
 import com.google.common.base.Stopwatch;
@@ -343,6 +346,11 @@ public class SymbolicRewriter {
             SearchType searchType,
             TermContext context) {
         stopwatch.start();
+        
+        executionGraph = new KRunGraph();
+        Context kilContext = context.definition().context();
+        KRunState initialState = new JavaKRunState(initialTerm, kilContext, counter);
+        executionGraph.addVertex(initialState);
 
         List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
@@ -382,6 +390,9 @@ public class SymbolicRewriter {
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
+                
+                JavaKRunState startState = new JavaKRunState(term.term(), kilContext, counter);
+                
                 computeRewriteStep(term);
 //                    System.out.println(step);
 //                    System.err.println(term);
@@ -395,7 +406,14 @@ public class SymbolicRewriter {
                     }
                 }
 
-                for (ConstrainedTerm result : results) {
+                for (int resultIndex = 0; resultIndex < results.size(); resultIndex++) {
+                    ConstrainedTerm result = results.get(resultIndex);
+                    JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
+                    substitutions.get(resultIndex);
+                    JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
+                    executionGraph.addVertex(resultState);
+                    executionGraph.addEdge(javaTransition, startState, resultState);
+                    
                     if (!transition) {
                         nextQueue.put(result, currentDepth);
                         break;
