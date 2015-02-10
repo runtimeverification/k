@@ -116,9 +116,12 @@ NormalizationCache {
       _.normalize
     }
 
-    val newChildren = normalizedChildren -- children
+    // this could be optimized to only consider new children but it somehow doesn't work
+    // will look into it another time. We could use newChildren to find bindings instead
+    // of normalizedChildren.
+    //    val newChildren = normalizedChildren -- children
 
-    val newBindings = newChildren collect {
+    val newBindings = normalizedChildren collect {
       case c: Binding => (c.variable, c.value)
     } toMap
 
