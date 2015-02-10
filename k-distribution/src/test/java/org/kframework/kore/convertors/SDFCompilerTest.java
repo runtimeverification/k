@@ -28,6 +28,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.util.Providers;
+import org.kframework.utils.file.JarInfo;
 
 public abstract class SDFCompilerTest extends BaseTestCase {
 
@@ -63,7 +64,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
 
         context.files = fileUtil;
 
-        String path = new File("k-distribution/target/release/k/lib/native/").getAbsolutePath()
+        String path = new File(JarInfo.getKBase() + "/lib/native/").getAbsolutePath()
                 + "/" + OS.current().name().toLowerCase() + "/";
 
         String nativeSDF2TableExecutable = path + OS.current().getNativeExecutable("sdf2table");

@@ -2,6 +2,7 @@
 
 package org.kframework.kore.convertors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.Collections;
 import org.kframework.definition.Module;
@@ -21,7 +22,7 @@ import java.io.IOException;
 
 
 public class TstTinyOnKORE extends BaseTest {
-    @Test
+    @Test @Ignore
     public void kore_imp_tiny() throws IOException {
         sdfTest();
     }

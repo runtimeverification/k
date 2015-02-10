@@ -70,6 +70,7 @@ trait AttributesToString {
     if (filteredAtt.isEmpty) "" else (" " + toString())
   }
 
-  lazy val filteredAtt: Set[K] = att filter { case KApply(KLabel("productionID"), _) => false; case _ => true } //
+  lazy val filteredAtt: List[K] =
+    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy { _.toString }
   // TODO: remove along with KIL to KORE to KIL convertors
 }
