@@ -27,12 +27,14 @@ Windows:
 
 Maven usually requires setting an environment variable `JAVA_HOME` pointing
 to the installation directory of the JDK (not to be mistaken with JRE).
+
+You can test if it works by calling `mvn -version` in a Terminal.
+This will provide the information about the JDK Maven is using, in case
+it is the wrong one.
 	
 ## Git - command line
 Having a GUI client is not enough. Most distributions have an installation
 option to make git accessible in the command line too.
-
-You can test if it works by calling `mvn -version` in a Terminal.
 
 # Install
 Checkout this directory in your desired location and call `mvn package` from the main
@@ -106,6 +108,8 @@ The functionality to create a tagged release is currently incomplete.
 # Compiling definitions and running programs
 Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
+
+For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
 
 # Cross platform compilation
 To build a version of the K framework for a platform other than the current version,

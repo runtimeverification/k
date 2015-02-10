@@ -416,110 +416,115 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Rule node, Void _void)  {
-        assert node.getBody() instanceof org.kframework.kil.Rewrite;
+        try {
+            assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
-        JavaBackendRuleData ruleData = node.getAttribute(JavaBackendRuleData.class);
-        if (ruleData == null) {
-            ruleData = new JavaBackendRuleData();
-        }
-        concreteCollectionSize = ruleData.getConcreteDataStructureSize();
+            JavaBackendRuleData ruleData = node.getAttribute(JavaBackendRuleData.class);
+            if (ruleData == null) {
+                ruleData = new JavaBackendRuleData();
+            }
+            concreteCollectionSize = ruleData.getConcreteDataStructureSize();
 
-        org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
-        Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
-        Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
+            org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
+            Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
+            Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
 
-        List<Term> requires = new ArrayList<>();
-        if (node.getRequires() != null) {
-            transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
-        }
+            List<Term> requires = new ArrayList<>();
+            if (node.getRequires() != null) {
+                transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
+            }
 
-        List<Term> ensures = new ArrayList<>();
-        if (node.getEnsures() != null) {
-            transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
-        }
+            List<Term> ensures = new ArrayList<>();
+            if (node.getEnsures() != null) {
+                transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
+            }
 
-        ConjunctiveFormula lookups = ConjunctiveFormula.of(TermContext.of(globalContext));
-        for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
-            Variable base = (Variable) this.visitNode(lookup.base());
-            Term key = (Term) this.visitNode(lookup.key());
-            if (lookup instanceof org.kframework.kil.SetLookup) {
-                if (lookup.choice()) {
-                    lookups = lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
-                } else {
-                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
-                }
-            } else {
-                Term value = (Term) this.visitNode(lookup.value());
-                if (lookup instanceof org.kframework.kil.MapLookup) {
+            ConjunctiveFormula lookups = ConjunctiveFormula.of(TermContext.of(globalContext));
+            for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
+                Variable base = (Variable) this.visitNode(lookup.base());
+                Term key = (Term) this.visitNode(lookup.key());
+                if (lookup instanceof org.kframework.kil.SetLookup) {
                     if (lookup.choice()) {
                         lookups = lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                    } else {
+                        lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), BoolToken.TRUE);
                     }
-                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
-                } else { // ListLookup
-                    lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                } else {
+                    Term value = (Term) this.visitNode(lookup.value());
+                    if (lookup instanceof org.kframework.kil.MapLookup) {
+                        if (lookup.choice()) {
+                            lookups = lookups.add(DataStructures.choice(base, TermContext.of(globalContext)), key);
+                        }
+                        lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    } else { // ListLookup
+                        lookups = lookups.add(DataStructures.lookup(base, key, TermContext.of(globalContext)), value);
+                    }
+                }
+
+            }
+
+            // TODO(AndreiS): check !Variable only appears in the RHS
+            Set<Variable> freshConstants = node.getBody().variables().stream()
+                    .filter(v -> v.isFreshConstant())
+                    .map(v -> (Variable) this.visitNode(v))
+                    .collect(Collectors.toSet());
+
+            Set<Variable> freshVariables = node.getBody().variables().stream()
+                    .filter(v -> v.isFreshVariable())
+                    .map(v -> (Variable) this.visitNode(v))
+                    .collect(Collectors.toSet());
+
+            assert leftHandSide.kind() == rightHandSide.kind()
+                    || leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational();
+
+            concreteCollectionSize = Collections.emptyMap();
+
+            java.util.Map<CellLabel, Term> lhsOfReadCell = null;
+            java.util.Map<CellLabel, Term> rhsOfWriteCell = null;
+            if (ruleData.isCompiledForFastRewriting()) {
+                lhsOfReadCell = Maps.newHashMap();
+                for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getLhsOfReadCell().entrySet()) {
+                    lhsOfReadCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
+                }
+                rhsOfWriteCell = Maps.newHashMap();
+                for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getRhsOfWriteCell().entrySet()) {
+                    rhsOfWriteCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
                 }
             }
 
-        }
-
-        // TODO(AndreiS): check !Variable only appears in the RHS
-        Set<Variable> freshConstants = node.getBody().variables().stream()
-                .filter(v -> v.isFreshConstant())
-                .map(v -> (Variable) this.visitNode(v))
-                .collect(Collectors.toSet());
-
-        Set<Variable> freshVariables = node.getBody().variables().stream()
-                .filter(v -> v.isFreshVariable())
-                .map(v -> (Variable) this.visitNode(v))
-                .collect(Collectors.toSet());
-
-        assert leftHandSide.kind() == rightHandSide.kind()
-                || leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational();
-
-        concreteCollectionSize = Collections.emptyMap();
-
-        java.util.Map<CellLabel, Term> lhsOfReadCell = null;
-        java.util.Map<CellLabel, Term> rhsOfWriteCell = null;
-        if (ruleData.isCompiledForFastRewriting()) {
-            lhsOfReadCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getLhsOfReadCell().entrySet()) {
-                lhsOfReadCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
+            java.util.Set<CellLabel> cellsToCopy = null;
+            if (ruleData.getCellsToCopy() != null) {
+                cellsToCopy = Sets.newHashSet();
+                for (String cellLabelName : ruleData.getCellsToCopy()) {
+                    cellsToCopy.add(CellLabel.of(cellLabelName));
+                }
             }
-            rhsOfWriteCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getRhsOfWriteCell().entrySet()) {
-                rhsOfWriteCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
+
+            Rule rule = new Rule(
+                    node.getLabel(),
+                    leftHandSide,
+                    rightHandSide,
+                    requires,
+                    ensures,
+                    freshConstants,
+                    freshVariables,
+                    lookups,
+                    ruleData.isCompiledForFastRewriting(),
+                    lhsOfReadCell,
+                    rhsOfWriteCell,
+                    cellsToCopy,
+                    ruleData.getMatchingInstructions(),
+                    node,
+                    TermContext.of(globalContext));
+
+            if (freshRules) {
+                return rule.getFreshRule(TermContext.of(globalContext));
             }
+            return rule;
+        } catch (KEMException e) {
+            e.exception.addTraceFrame("while compiling rule at " + node.getSource() + node.getLocation() + " to backend");
+            throw e;
         }
-
-        java.util.Set<CellLabel> cellsToCopy = null;
-        if (ruleData.getCellsToCopy() != null) {
-            cellsToCopy = Sets.newHashSet();
-            for (String cellLabelName : ruleData.getCellsToCopy()) {
-                cellsToCopy.add(CellLabel.of(cellLabelName));
-            }
-        }
-
-        Rule rule = new Rule(
-                node.getLabel(),
-                leftHandSide,
-                rightHandSide,
-                requires,
-                ensures,
-                freshConstants,
-                freshVariables,
-                lookups,
-                ruleData.isCompiledForFastRewriting(),
-                lhsOfReadCell,
-                rhsOfWriteCell,
-                cellsToCopy,
-                ruleData.getMatchingInstructions(),
-                node,
-                TermContext.of(globalContext));
-
-        if (freshRules) {
-            return rule.getFreshRule(TermContext.of(globalContext));
-        }
-        return rule;
     }
 
     private void transformConjunction(Collection<Term> requires, Term term) {
