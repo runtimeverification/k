@@ -2,27 +2,40 @@ package org.kframework.tiny
 
 import org.kframework.attributes._
 import org.kframework.kore.{Constructors => basic, InjectedKLabel, KORE, Unapply}
+import org.kframework.meta.{Down, Up}
+import org.kframework.tiny.builtin.{KMapAppLabel, MapKeys, Tuple2Label}
 import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
 
 class Constructors(module: definition.Module) extends kore.Constructors {
 
-  implicit val theory = FreeTheory
+  implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()))
+
+  // separate the hook mappings at some point
+  val hookMappings = Map[String, Label](
+    "#K-EQUAL:_==K_" -> Equals,
+    "#BOOL:notBool_" -> Not,
+    "#INT:_+Int_" -> RegularKAppLabel("+", Att()),
+    "#INT:_/Int_" -> RegularKAppLabel("/", Att()),
+    "#INT:_<=Int_" -> RegularKAppLabel("<=", Att()),
+    "Map:.Map" -> KMapAppLabel("Map"),
+    "Map:__" -> KMapAppLabel("Map"),
+    "Map:_|->_" -> Tuple2Label,
+    "Map:keys" -> MapKeys,
+    "Set:in" ->  RegularKAppLabel("???in???", Att())
+  )
 
   override def KLabel(name: String): Label = {
 
     if (name.startsWith("'<")) {
-      RegularKAssocAppLabel(name, Att())
+      RegularKAppLabel(name, Att())
     } else {
-      if(name == "'_=[];")
-        println(module.attributesFor)
       val att = module.attributesFor(KORE.KLabel(name))
-
       if (att.contains("assoc"))
         RegularKAssocAppLabel(name, att)
       else
-        RegularKAppLabel(name, att)
+        att.get[String]("hook").map(hookMappings).getOrElse { RegularKAppLabel(name, att) }
     }
   }
 

@@ -1,5 +1,6 @@
 package org.kframework.tiny
 
+import org.kframework.meta.{Up, Down}
 import org.kframework.tiny.matcher.EqualsMatcher
 
 
@@ -17,6 +18,19 @@ object FreeTheory extends Theory {
   def normalize(k: K): K = k match {
     case EqualsMatcher(a, b) => if (a == b) True else False
     case t => t
+  }
+  val self = this
+}
+
+class TheoryWithUpDown(up: Up, down: Down) extends Theory {
+  def normalize(k: K): K = k match {
+    case EqualsMatcher(a, b) => if (a == b) True else False
+    case t =>
+      try {
+        up(down(t)).asInstanceOf[K]
+      } catch {
+        case e => t
+      }
   }
   val self = this
 }

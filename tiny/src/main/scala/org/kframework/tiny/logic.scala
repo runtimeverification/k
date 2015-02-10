@@ -207,6 +207,9 @@ NormalizationCache {
 }
 
 case class Binding(variable: KVar, value: K, att: Att) extends KProduct {
+
+  assert(variable != value)
+
   override val klabel = Binding
   override def toString = variable + "->" + value
 }
@@ -225,4 +228,19 @@ case class Equals(a: K, b: K, att: Att) extends KProduct {
 
 object Equals extends KProduct2Label with EmptyAtt {
   val name: String = "Equals"
+}
+
+case class Not(k: K, att: Att = Att()) extends KProduct {
+  override val klabel = Equals
+  override def toString = "!" + k
+
+  override def normalize(implicit theory: Theory) = k.normalize match {
+    case True => False
+    case False => True
+    case x => Not(x, att)
+  }
+}
+
+object Not extends KProduct1Label with EmptyAtt {
+  val name: String = "!"
 }

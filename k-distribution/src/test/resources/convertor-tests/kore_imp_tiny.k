@@ -111,7 +111,7 @@ module TEST
     '<top>('<k>('_/_(I1:Int,, I2:Int)    ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/Int_(I1:Int,, I2:Int) ~> K:K),, SC:StateCell)
-  when I2:Int =/=K 0
+  when notBool(I2:Int ==K 0)
 
   // BExp
   rule
