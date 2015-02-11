@@ -18,17 +18,21 @@ public class CommandLineSource implements Source {
         return "Command line: " + optionName;
     }
 
-    @Override
-    public int hashCode() {
-        return optionName.hashCode();
-    }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Source)) {
-            return false;
-        }
-        Source s = (Source) o;
-        return optionName.equals(s.toString());
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CommandLineSource that = (CommandLineSource) o;
+
+        if (!optionName.equals(that.optionName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return optionName.hashCode();
     }
 }

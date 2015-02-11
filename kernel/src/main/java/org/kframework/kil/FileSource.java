@@ -24,16 +24,19 @@ public class FileSource implements Source {
     }
 
     @Override
-    public int hashCode() {
-        return path.hashCode();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileSource that = (FileSource) o;
+
+        if (!path.equals(that.path)) return false;
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Source)) {
-            return false;
-        }
-        Source s = (Source) o;
-        return path.equals(s.toString());
+    public int hashCode() {
+        return path.hashCode();
     }
 }

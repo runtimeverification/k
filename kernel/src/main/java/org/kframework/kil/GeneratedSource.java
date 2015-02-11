@@ -21,16 +21,19 @@ public class GeneratedSource implements Source {
     }
 
     @Override
-    public int hashCode() {
-        return simpleName.hashCode();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GeneratedSource that = (GeneratedSource) o;
+
+        if (!simpleName.equals(that.simpleName)) return false;
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Source)) {
-            return false;
-        }
-        Source s = (Source) o;
-        return simpleName.equals(s.toString());
+    public int hashCode() {
+        return simpleName.hashCode();
     }
 }
