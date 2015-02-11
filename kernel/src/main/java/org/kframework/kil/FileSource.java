@@ -7,8 +7,11 @@ public class FileSource implements Source {
 
     private File file;
 
+    private String path;
+
     public FileSource(File file) {
         this.file = file;
+        this.path = file.getAbsolutePath();
     }
 
     public File getFile() {
@@ -17,6 +20,23 @@ public class FileSource implements Source {
 
     @Override
     public String toString() {
-        return "File: " + file.getAbsolutePath();
+        return "File: " + path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileSource that = (FileSource) o;
+
+        if (!path.equals(that.path)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode();
     }
 }
