@@ -401,10 +401,9 @@ public class SymbolicRewriter {
 
                 for (int resultIndex = 0; resultIndex < results.size(); resultIndex++) {
                     ConstrainedTerm result = results.get(resultIndex);
-                    JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
-                    substitutions.get(resultIndex);
-                    JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
                     if (computeGraph) {
+                        JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
+                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
                         executionGraph.addVertex(resultState);
                         executionGraph.addEdge(javaTransition, startState, resultState);
                     }
