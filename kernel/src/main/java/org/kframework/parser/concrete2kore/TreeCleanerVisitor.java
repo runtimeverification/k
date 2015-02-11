@@ -28,7 +28,7 @@ public class TreeCleanerVisitor extends CatchTransformer {
                         KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
                         "Only subsort productions are allowed to have no #klabel attribute", null, null));
             //TODO: add source and location to error
-            return super.apply(tc.items().get(0));
+            return apply(tc.items().get(0));
         } else {
             // invalidate the hashCode cache
             tc.invalidateHashCode();
