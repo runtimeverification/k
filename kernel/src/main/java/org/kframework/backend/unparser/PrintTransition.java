@@ -95,7 +95,7 @@ public class PrintTransition implements Transformation<Transition, String> {
                 sb.append(" Rule at " + source.toString() + " " + location.toString());
                 sb.append(", Node ");
                 sb.append(graph.getDest(trans).getStateId());
-                sb.append("]");
+                sb.append("]\n");
             }
             return sb.toString();
         } else if (trans.getType() == TransitionType.REDUCE) {
