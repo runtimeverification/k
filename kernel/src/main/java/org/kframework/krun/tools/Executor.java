@@ -61,12 +61,13 @@ public interface Executor {
     @param cfg The term to begin the search at
     @param compilationInfo the object used to kompile the search pattern, which contains
     metadata used to pretty-print results
+    @param computeGraph whether to compute the search graph
     @exception KRunExecutionException Thrown if the backend fails to successfully perform the
     search
     @return An object containing both metadata about krun's execution, and information about
     the results of the search
     */
-    public abstract SearchResults search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
+    public abstract SearchResults search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo, boolean computeGraph) throws KRunExecutionException;
 
     /**
     Execute a term in normal-execution mode for a specified number of steps
@@ -153,7 +154,7 @@ public interface Executor {
                         options.depth,
                         options.searchType(),
                         searchPattern.patternRule,
-                        initialConfiguration.get(), searchPattern.steps);
+                        initialConfiguration.get(), searchPattern.steps, false);
 
             sw.printIntermediate("Search total");
             return result;
@@ -176,7 +177,7 @@ public interface Executor {
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
                 Term res = result.getRawResult();
-                return executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
+                return executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
             }
             return result;
         }
@@ -184,7 +185,7 @@ public interface Executor {
         private int getExitCode(Term res) throws KRunExecutionException {
             ASTNode exitCodePattern = pattern(options.exitCodePattern);
             SearchPattern searchPattern = new SearchPattern(exitCodePattern);
-            SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps);
+            SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
             if (results.getSolutions().size() != 1) {
                 kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 112.");
                 return 112;

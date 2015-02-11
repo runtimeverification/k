@@ -1,27 +1,17 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
@@ -31,15 +21,10 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.Transition;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -334,6 +319,7 @@ public class SymbolicRewriter {
      * @param depth a negative value specifies no bound
      * @param searchType defines when we will attempt to match the pattern
 
+     * @param computeGraph
      * @return a list of substitution mappings for results that matched the pattern
      */
     public List<Substitution<Variable,Term>> search(
@@ -344,13 +330,17 @@ public class SymbolicRewriter {
             int bound,
             int depth,
             SearchType searchType,
-            TermContext context) {
+            TermContext context, boolean computeGraph) {
         stopwatch.start();
-        
-        executionGraph = new KRunGraph();
+
         Context kilContext = context.definition().context();
-        KRunState initialState = new JavaKRunState(initialTerm, kilContext, counter);
-        executionGraph.addVertex(initialState);
+        if (computeGraph) {
+            executionGraph = new KRunGraph();
+            KRunState initialState = new JavaKRunState(initialTerm, kilContext, counter);
+            executionGraph.addVertex(initialState);
+        } else {
+            executionGraph = null;
+        }
 
         List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
@@ -411,9 +401,10 @@ public class SymbolicRewriter {
                     JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
                     substitutions.get(resultIndex);
                     JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
-                    executionGraph.addVertex(resultState);
-                    executionGraph.addEdge(javaTransition, startState, resultState);
-                    
+                    if (computeGraph) {
+                        executionGraph.addVertex(resultState);
+                        executionGraph.addEdge(javaTransition, startState, resultState);
+                    }
                     if (!transition) {
                         nextQueue.put(result, currentDepth);
                         break;
