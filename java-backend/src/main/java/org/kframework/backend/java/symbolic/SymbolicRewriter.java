@@ -382,7 +382,7 @@ public class SymbolicRewriter {
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
-                
+
                 if (computeGraph) {
                     startState = new JavaKRunState(term.term(), kilContext, counter);
                 }
