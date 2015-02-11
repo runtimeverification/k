@@ -334,10 +334,11 @@ public class SymbolicRewriter {
         stopwatch.start();
 
         Context kilContext = context.definition().context();
+        JavaKRunState startState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            KRunState initialState = new JavaKRunState(initialTerm, kilContext, counter);
-            executionGraph.addVertex(initialState);
+            startState = new JavaKRunState(initialTerm, kilContext, counter);
+            executionGraph.addVertex(startState);
         } else {
             executionGraph = null;
         }
@@ -381,8 +382,10 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
                 
-                JavaKRunState startState = new JavaKRunState(term.term(), kilContext, counter);
-                
+                if (computeGraph) {
+                    startState = new JavaKRunState(term.term(), kilContext, counter);
+                }
+
                 computeRewriteStep(term);
 //                    System.out.println(step);
 //                    System.err.println(term);
