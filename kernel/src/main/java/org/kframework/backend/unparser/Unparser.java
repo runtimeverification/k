@@ -130,7 +130,7 @@ public class Unparser implements Comparator<ASTNode> {
             int result = comparator.compare(s1, s2);
             if (result != 0) return result;
             if (thisStack.isEmpty() && thatStack.isEmpty()) {
-                return comparator.compare(thisString.stringBuilder.substring(lim), thatString.stringBuilder.substring(lim));
+                return comparator.compare(thisString.toString(), thatString.toString());
             }
         }
     }

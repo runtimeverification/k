@@ -27,12 +27,14 @@ Windows:
 
 Maven usually requires setting an environment variable `JAVA_HOME` pointing
 to the installation directory of the JDK (not to be mistaken with JRE).
+
+You can test if it works by calling `mvn -version` in a Terminal.
+This will provide the information about the JDK Maven is using, in case
+it is the wrong one.
 	
 ## Git - command line
 Having a GUI client is not enough. Most distributions have an installation
 option to make git accessible in the command line too.
-
-You can test if it works by calling `mvn -version` in a Terminal.
 
 # Install
 Checkout this directory in your desired location and call `mvn package` from the main

@@ -291,4 +291,8 @@ module REGRESSION
   syntax Int ::= foo1219(Map) [function]
   rule foo1219((K1 |-> K2) M:Map) => foo1219(M)
   rule foo1219(.Map) => 0
+
+  // semantic casts shouldn't strictly type check terms
+  syntax Id ::= "foo25"
+  rule foo25:Exp => .K
 endmodule
