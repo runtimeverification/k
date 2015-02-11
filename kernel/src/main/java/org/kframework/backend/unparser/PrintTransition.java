@@ -2,7 +2,6 @@
 package org.kframework.backend.unparser;
 
 import com.google.inject.Inject;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -53,7 +52,7 @@ public class PrintTransition implements Transformation<Transition, String> {
                 Source src = moduleItem.getSource();
                 Location location = moduleItem.getLocation();
                 if (src != null && location != null) {
-                    ruleStore.put(new MutablePair<>(src, location), moduleItem);
+                    ruleStore.put(Pair.of(src, location), moduleItem);
                 }
             });
         });
@@ -76,7 +75,7 @@ public class PrintTransition implements Transformation<Transition, String> {
         }
         Location location = trans.getLocation();
         Source source = trans.getSource();
-        Pair keyPair = new MutablePair<>(source, location);
+        Pair keyPair = Pair.of(source, location);
         ModuleItem ruleItem = ruleStore.get(keyPair);
         if (trans.getType() == TransitionType.RULE) {
             if (verbose) {
