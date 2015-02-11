@@ -116,7 +116,7 @@ public class Unparser implements Comparator<ASTNode> {
         Indenter thisString = new Indenter();
         thisString.setWidth(-1);
         Indenter thatString = new Indenter();
-        thisString.setWidth(-1);
+        thatString.setWidth(-1);
         thisStack.push(new TermComponent(o1));
         thatStack.push(new TermComponent(o2));
         int lastIdx = 0;
@@ -130,7 +130,7 @@ public class Unparser implements Comparator<ASTNode> {
             int result = comparator.compare(s1, s2);
             if (result != 0) return result;
             if (thisStack.isEmpty() && thatStack.isEmpty()) {
-                return comparator.compare(thisString.toString(), thatString.toString());
+                return comparator.compare(thisString.stringBuilder.substring(lim), thatString.stringBuilder.substring(lim));
             }
         }
     }
