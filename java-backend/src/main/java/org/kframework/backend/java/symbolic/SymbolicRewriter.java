@@ -330,7 +330,8 @@ public class SymbolicRewriter {
             int bound,
             int depth,
             SearchType searchType,
-            TermContext context, boolean computeGraph) {
+            TermContext context,
+            boolean computeGraph) {
         stopwatch.start();
 
         Context kilContext = context.definition().context();

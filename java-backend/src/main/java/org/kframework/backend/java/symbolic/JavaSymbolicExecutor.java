@@ -93,7 +93,8 @@ public class JavaSymbolicExecutor implements Executor {
             SearchType searchType,
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
-            RuleCompilerSteps compilationInfo, boolean computeGraph) throws KRunExecutionException {
+            RuleCompilerSteps compilationInfo,
+            boolean computeGraph) throws KRunExecutionException {
 
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {
