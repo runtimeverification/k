@@ -80,13 +80,24 @@ public class PrintTransition implements Transformation<Transition, String> {
         ModuleItem ruleItem = ruleStore.get(keyPair);
         if (trans.getType() == TransitionType.RULE) {
             if (verbose) {
-                sb.append("Rule at  " + source.toString() + " " + location.toString() + "\n");
+                sb.append("\n");
+                sb.append(statePrinter.run(graph.getSource(trans), a));
+                sb.append("\n=>\n");
+                sb.append(statePrinter.run(graph.getDest(trans), a));
+                sb.append("\n");
+                sb.append("Rule at Source " + source.toString() + " " + location.toString() + "\n");
                 if (ruleItem != null) {
                     sb.append(unparser.print(ruleItem));
                 }
             } else {
-                sb.append("Rule at  " + source.toString() + " " + location.toString() + "\n");
+                sb.append(" [Node ");
+                sb.append(graph.getSource(trans).getStateId());
+                sb.append(" Rule at " + source.toString() + " " + location.toString());
+                sb.append(", Node ");
+                sb.append(graph.getDest(trans).getStateId());
+                sb.append("]");
             }
+            return sb.toString();
         } else if (trans.getType() == TransitionType.REDUCE) {
             sb.append("\nFunction evaluation");
         } else if (trans.getType() == TransitionType.UNLABELLED) {
@@ -94,27 +105,9 @@ public class PrintTransition implements Transformation<Transition, String> {
         } else {
             sb.append("\nRead " + StringBuiltin.of(trans.getReadString()).value());
         }
-
-        if (verbose) {
-            sb.append("\n");
-            sb.append(statePrinter.run(graph.getSource(trans), a));
-            sb.append("\n=>\n");
-            sb.append(statePrinter.run(graph.getDest(trans), a));
-            sb.append("\n");
-            sb.append("Rule at Source " + source.toString() + " " + location.toString() + "\n");
-            if (ruleItem != null) {
-                sb.append(unparser.print(ruleItem));
-            }
-        } else {
-            sb.append(" [Node ");
-            sb.append(graph.getSource(trans).getStateId());
-            sb.append("Rule at " + source.toString() + " " + location.toString());
-            sb.append(", Node ");
-            sb.append(graph.getDest(trans).getStateId());
-            sb.append("]");
-        }
         return sb.toString();
     }
+
 
     @Override
     public String getName() {
