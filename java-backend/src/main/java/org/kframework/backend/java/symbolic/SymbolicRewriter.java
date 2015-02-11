@@ -319,7 +319,7 @@ public class SymbolicRewriter {
      * @param depth a negative value specifies no bound
      * @param searchType defines when we will attempt to match the pattern
 
-     * @param computeGraph
+     * @param computeGraph determines whether the transition graph should be computed.
      * @return a list of substitution mappings for results that matched the pattern
      */
     public List<Substitution<Variable,Term>> search(
