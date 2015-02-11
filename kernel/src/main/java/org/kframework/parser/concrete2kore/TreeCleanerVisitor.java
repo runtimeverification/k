@@ -51,7 +51,7 @@ public class TreeCleanerVisitor extends CatchTransformer {
         if (contents.size() == 0)
             return KList.apply();
         else if(contents.size() == 1)
-            return contents.get(0);
+            return apply(contents.get(0));
         else
             return node;
     }

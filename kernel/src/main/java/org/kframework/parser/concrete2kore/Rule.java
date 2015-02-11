@@ -85,7 +85,7 @@ public abstract class Rule implements Serializable {
             } else {
                 term = TermCons.apply(klist.items(), label, Optional.empty());
             }
-            return new KList(Arrays.asList(term), Optional.empty());
+            return new KList(arrayList(term), Optional.empty());
         }
     }
 
@@ -145,7 +145,7 @@ public abstract class Rule implements Serializable {
         protected boolean rejectSmallKLists() { return reject; }
         protected int getSuffixLength() { return length; }
         protected List<Term> applySuffix(List<Term> terms, MetaData metaData) {
-            return Arrays.asList();
+            return new ArrayList<>();
         }
     }
 
@@ -159,7 +159,7 @@ public abstract class Rule implements Serializable {
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 0; }
         public List<Term> applySuffix(List<Term> set, MetaData metaData) {
-            return Arrays.asList(term);
+            return arrayList(term);
         }
     }
 
@@ -173,7 +173,7 @@ public abstract class Rule implements Serializable {
             Term newTerm = terms.get(0).shallowCopy(
                     new Location(metaData.start.line, metaData.start.column,
                                  metaData.end.line, metaData.end.column));
-            return Arrays.asList(newTerm);
+            return arrayList(newTerm);
         }
     }
 
@@ -206,6 +206,12 @@ public abstract class Rule implements Serializable {
      */
     public static abstract class ContextSensitiveRule extends Rule {
         abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
+    }
+
+    private static  List<Term> arrayList(Term term) {
+        List<Term> lst = new ArrayList<Term>();
+        lst.add(term);
+        return lst;
     }
 
     /*
