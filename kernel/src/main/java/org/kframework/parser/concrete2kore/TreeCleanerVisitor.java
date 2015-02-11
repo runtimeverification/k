@@ -53,6 +53,6 @@ public class TreeCleanerVisitor extends CatchTransformer {
         else if(contents.size() == 1)
             return apply(contents.get(0));
         else
-            return node;
+            return super.apply(node);
     }
 }

@@ -8,6 +8,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.TranformerWithExceptionGathering;
 import org.kframework.parser.Transformer;
+import org.kframework.parser.concrete2kore.CatchTransformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.util.Either;
@@ -24,9 +25,9 @@ import java.util.Set;
  * 2. remove the productions that are labeled with 'avoid'
  * 3. keep only those productions which have 'prefer' (if any)
  */
-public class PreferAvoidVisitor extends TranformerWithExceptionGathering<ParseFailedException> {
+public class PreferAvoidVisitor extends CatchTransformer {
     @Override
-    public Either<Set<ParseFailedException>, Term> apply(Ambiguity amb) {
+    public Term apply(Ambiguity amb) {
         List<Term> prefer = new ArrayList<>();
         List<Term> avoid = new ArrayList<>();
         for (Term t : amb.items()) {
@@ -54,7 +55,6 @@ public class PreferAvoidVisitor extends TranformerWithExceptionGathering<ParseFa
             }
         }
 
-        Either<Set<ParseFailedException>, Term> vis;
         if (result instanceof Ambiguity) {
             // didn't manage to completely disambiguate, but I still need to go deeper into the tree
             return super.apply((Ambiguity) result);

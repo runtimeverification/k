@@ -17,6 +17,7 @@ import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.Parser;
 import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,8 @@ public class NewOuterParserTest {
         }
 
         Term cleaned = new TreeCleanerVisitor().apply(parsed);
-        cleaned = new PreferAvoidVisitor().apply(parsed).right().get();
+        cleaned = new PreferAvoidVisitor().apply(cleaned);
+        cleaned = new PriorityVisitor(kastModule.priorities()).apply(cleaned);
 
         return TreeNodesToKORE.apply(cleaned);
     }
