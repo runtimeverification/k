@@ -62,10 +62,9 @@ public class PriorityVisitor extends CatchTransformer {
             Tag parentLabel = new Tag(parent.production().klabel().get().name());
             Tag localLabel = new Tag(tc.production().klabel().get().name());
             // TODO: add location information
-            if (priorities.inSomeRelation(parentLabel, localLabel)) {
+            if (priorities.lessThen(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                System.out.println("PriorityVisitor2.apply");
                 throw new PriorityException(kex);
             }
             /*if (context.isLeftAssoc(parentLabel, localLabel) && Side.RIGHT == side) {

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 /**
  * Remove parsing artifacts such as single element ambiguities.
  */
-// TODO: simplify by removing leftover "null" checks and recheck this code
 public class TreeCleanerVisitor extends CatchTransformer {
 
     @Override

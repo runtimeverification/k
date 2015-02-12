@@ -12,25 +12,29 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class CatchTransformer {
-    Set<Term> visited = new HashSet<>();
+    Map<Term, Term> visited = new HashMap<>();
     public Term apply(Term t) throws ParseFailedException {
-        if (cache() && visited.contains(t))
-            return t;
-        else
-            visited.add(t);
+        if (cache() && visited.containsKey(t))
+                return visited.get(t);
+        Term rez;
         if (t instanceof Ambiguity) {
-            return apply((Ambiguity) t);
+            rez = apply((Ambiguity) t);
         } else if (t instanceof KList) {
-            return apply((KList) t);
+            rez = apply((KList) t);
         } else if (t instanceof ProductionReference) {
-            return apply((ProductionReference) t);
+            rez = apply((ProductionReference) t);
         } else {
             throw new RuntimeException("Unexpected term type: " + t.getClass());
         }
+        if (cache())
+            visited.put(t, rez);
+        return rez;
     }
 
     public Term apply(ProductionReference p) throws ParseFailedException {
