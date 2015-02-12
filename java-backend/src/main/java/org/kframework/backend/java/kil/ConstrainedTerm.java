@@ -200,6 +200,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
                 .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
                 .filter(c -> !c.isFalse())
+                .map(ConjunctiveFormula::resolveNonDeterministicLookups)
                 .map(ConjunctiveFormula::getDisjunctiveNormalForm)
                 .map(DisjunctiveFormula::conjunctions)
                 .flatMap(List::stream)
