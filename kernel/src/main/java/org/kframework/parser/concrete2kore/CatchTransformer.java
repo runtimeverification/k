@@ -28,6 +28,7 @@ import java.util.Set;
  *
  * This a lightweight wiring mechanism, and error handling is isolated greatly.
  */
+// TODO(radum) make it so the transformer gathers all the thrown exceptions.
 public class CatchTransformer {
     Map<Term, Term> visited = new HashMap<>();
     public Term apply(Term t) throws ParseFailedException {
