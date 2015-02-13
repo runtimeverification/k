@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.beust.jcommander.internal.Lists;
 import org.kframework.kore.outer.Production;
 import org.kframework.parser.*;
 
@@ -85,7 +86,7 @@ public abstract class Rule implements Serializable {
             } else {
                 term = TermCons.apply(klist.items(), label, Optional.empty());
             }
-            return new KList(arrayList(term), Optional.empty());
+            return new KList(Lists.newArrayList(term), Optional.empty());
         }
     }
 
@@ -159,7 +160,7 @@ public abstract class Rule implements Serializable {
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 0; }
         public List<Term> applySuffix(List<Term> set, MetaData metaData) {
-            return arrayList(term);
+            return Lists.newArrayList(term);
         }
     }
 
@@ -173,7 +174,7 @@ public abstract class Rule implements Serializable {
             Term newTerm = terms.get(0).shallowCopy(
                     new Location(metaData.start.line, metaData.start.column,
                                  metaData.end.line, metaData.end.column));
-            return arrayList(newTerm);
+            return Lists.newArrayList(newTerm);
         }
     }
 
@@ -206,12 +207,6 @@ public abstract class Rule implements Serializable {
      */
     public static abstract class ContextSensitiveRule extends Rule {
         abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
-    }
-
-    private static  List<Term> arrayList(Term term) {
-        List<Term> lst = new ArrayList<Term>();
-        lst.add(term);
-        return lst;
     }
 
     /*

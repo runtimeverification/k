@@ -2,21 +2,27 @@
 
 package org.kframework.parser.concrete2kore;
 
+import com.beust.jcommander.internal.Lists;
 import org.junit.Test;
 import org.kframework.kore.outer.SyntaxProduction;
-import org.kframework.parser.*;
+import org.kframework.parser.Ambiguity;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.ParseFailedException;
-import scala.util.Either;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import static org.kframework.kore.outer.Constructors.*;
-import static org.kframework.kore.Constructors.*;
-import static org.kframework.Collections.*;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.kframework.Collections.Seq;
+import static org.kframework.kore.Constructors.Sort;
+import static org.kframework.kore.outer.Constructors.NonTerminal;
+import static org.kframework.kore.outer.Constructors.RegexTerminal;
+import static org.kframework.kore.outer.Constructors.SyntaxProduction;
 
 public class TreeCleanerVisitorTest {
 
