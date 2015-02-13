@@ -21,9 +21,13 @@ import java.util.Set;
 public class PriorityVisitor extends CatchTransformer {
 
     private final POSet<Tag> priorities;
-    public PriorityVisitor(POSet<Tag> priorities) {
+    private final POSet<Tag> leftAssoc;
+    private final POSet<Tag> rightAssoc;
+    public PriorityVisitor(POSet<Tag> priorities, POSet<Tag> leftAssoc, POSet<Tag> rightAssoc) {
         super();
         this.priorities = priorities;
+        this.leftAssoc = leftAssoc;
+        this.rightAssoc = rightAssoc;
     }
 
     @Override
@@ -32,11 +36,11 @@ public class PriorityVisitor extends CatchTransformer {
         if (!tc.production().isSyntacticSubsort()) {
             // match only on the outermost elements
             if (tc.production().items().head() instanceof NonTerminal) {
-                tc.items().set(0, new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities).apply(tc.items().get(0)));
+                tc.items().set(0, new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities, leftAssoc, rightAssoc).apply(tc.items().get(0)));
             }
             if (tc.production().items().last() instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
-                tc.items().set(last, new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities).apply(tc.items().get(last)));
+                tc.items().set(last, new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities, leftAssoc, rightAssoc).apply(tc.items().get(last)));
             }
         }
         return super.apply(tc);
@@ -51,11 +55,15 @@ public class PriorityVisitor extends CatchTransformer {
         private final TermCons parent;
         private final Side side;
         private final POSet<Tag> priorities;
+        private final POSet<Tag> leftAssoc;
+        private final POSet<Tag> rigthAssoc;
 
-        public PriorityVisitor2(TermCons parent, Side side, POSet<Tag> priorities) {
+        public PriorityVisitor2(TermCons parent, Side side, POSet<Tag> priorities, POSet<Tag> leftAssoc, POSet<Tag> rightAssoc) {
             this.parent = parent;
             this.side = side;
             this.priorities = priorities;
+            this.leftAssoc = leftAssoc;
+            this.rigthAssoc = rightAssoc;
         }
 
         public Term apply(TermCons tc) {
@@ -67,16 +75,16 @@ public class PriorityVisitor extends CatchTransformer {
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);
             }
-            /*if (context.isLeftAssoc(parentLabel, localLabel) && Side.RIGHT == side) {
+            if (leftAssoc.inSomeRelation(parentLabel, localLabel) && Side.RIGHT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);
             }
-            if (context.isRightAssoc(parentLabel, localLabel) && Side.LEFT == side) {
+            if (rigthAssoc.inSomeRelation(parentLabel, localLabel) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);
-            }*/
+            }
 
             return tc;
         }

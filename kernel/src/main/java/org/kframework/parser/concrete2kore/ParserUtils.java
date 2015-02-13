@@ -58,7 +58,7 @@ public class ParserUtils {
 
         Term cleaned = new TreeCleanerVisitor().apply(parsed);
         cleaned = new PreferAvoidVisitor().apply(cleaned);
-        cleaned = new PriorityVisitor(kastModule.priorities()).apply(cleaned);
+        cleaned = new PriorityVisitor(kastModule.priorities(), kastModule.leftAssoc(), kastModule.rightAssoc()).apply(cleaned);
 
         return TreeNodesToKORE.apply(cleaned);
     }
