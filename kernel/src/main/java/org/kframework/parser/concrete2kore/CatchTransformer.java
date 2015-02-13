@@ -18,6 +18,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Base class Transformer used by the front-end to filter out ambiguities in
+ * the DAG returned by the parser. It matches on every node based on the class hierarchy
+ * from the most general to the most specialized.
+ * The Ambiguity node is special since every call to visit a child is surrounded by a
+ * try/catch statement, which captures errors thrown by the child visitor. If such an error
+ * occurs, then the child is eliminated from the tree.
+ *
+ * This a lightweight wiring mechanism, and error handling is isolated greatly.
+ */
 public class CatchTransformer {
     Map<Term, Term> visited = new HashMap<>();
     public Term apply(Term t) throws ParseFailedException {

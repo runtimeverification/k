@@ -53,9 +53,6 @@ public class TreeCleanerVisitorTest {
         assertCleanup(Ambiguity.apply(KList.apply(foo)), foo);
     }
 
-
-//        amb([amb([NOKLABEL(amb([#emptyKRequireList()]),amb([#KModuleList(amb([#KModule(amb([#token(KModuleName,"FOO ")]),amb([#emptyKImportList()]),amb([#emptyKSentenceList()]))]),amb([#emptyKModuleList()]))]))])])
-
     public void assertCleanup(Term input, Term expected) {
         Term actual = treeCleanerVisitor.apply(input);
         if (!actual.equals(expected)) {

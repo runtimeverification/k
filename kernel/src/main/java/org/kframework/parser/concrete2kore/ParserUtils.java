@@ -48,9 +48,12 @@ public class ParserUtils {
         Module kastModule = definition.getModule(mainModule).get();
 
         Grammar kastGrammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
+        return parseWithGrammar(theTextToParse, startSymbol, kastModule, kastGrammar);
+    }
 
+    public static K parseWithGrammar(CharSequence theTextToParse, String startSymbol, org.kframework.kore.outer.Module kastModule, Grammar grammar) {
         Parser parser = new Parser(theTextToParse);
-        Term parsed = parser.parse(kastGrammar.get(startSymbol), 0);
+        Term parsed = parser.parse(grammar.get(startSymbol), 0);
 
         if (parsed.equals(Ambiguity.apply())) {
             Parser.ParseError errors = parser.getErrors();
