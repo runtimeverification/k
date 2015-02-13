@@ -48,6 +48,21 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     }.flatten
 
   lazy val priorities = POSet(expressedPriorities)
+  private lazy val expressedLeftAssoc: Set[(Tag, Tag)] =
+    sentences
+      .collect({ case SyntaxAssociativity(Associativity.Left, ps, _) => ps })
+      .map { ps: Set[Tag] =>
+      val x = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
+        case ((all: Set[(Tag, Tag)], prev: Set[Tag]), current: Set[Tag]) =>
+          val newPairs: Set[(Tag, Tag)] =
+            for (a <- prev; b <- current) yield {(a, b) }
+
+          (newPairs | all, current)
+      }
+      x._1
+    }.flatten
+  lazy val leftAssoc = POSet()
+  lazy val rightAssoc = POSet()
   
 
   lazy val subsorts = POSet(subsortRelations)
