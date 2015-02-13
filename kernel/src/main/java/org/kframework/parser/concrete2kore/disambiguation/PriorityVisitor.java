@@ -6,14 +6,12 @@ import org.kframework.kore.outer.NonTerminal;
 import org.kframework.kore.outer.Tag;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.TranformerWithExceptionGathering;
 import org.kframework.parser.concrete2kore.CatchTransformer;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.PriorityException;
-import scala.util.Either;
+import scala.Tuple2;
+import scala.collection.Set;
 
-import java.util.Set;
 
 /**
  * Apply the priority and associativity filters.
@@ -21,9 +19,9 @@ import java.util.Set;
 public class PriorityVisitor extends CatchTransformer {
 
     private final POSet<Tag> priorities;
-    private final POSet<Tag> leftAssoc;
-    private final POSet<Tag> rightAssoc;
-    public PriorityVisitor(POSet<Tag> priorities, POSet<Tag> leftAssoc, POSet<Tag> rightAssoc) {
+    private final Set<Tuple2<Tag, Tag>> leftAssoc;
+    private final Set<Tuple2<Tag, Tag>> rightAssoc;
+    public PriorityVisitor(POSet<Tag> priorities, Set<Tuple2<Tag, Tag>> leftAssoc, Set<Tuple2<Tag, Tag>> rightAssoc) {
         super();
         this.priorities = priorities;
         this.leftAssoc = leftAssoc;
@@ -55,10 +53,10 @@ public class PriorityVisitor extends CatchTransformer {
         private final TermCons parent;
         private final Side side;
         private final POSet<Tag> priorities;
-        private final POSet<Tag> leftAssoc;
-        private final POSet<Tag> rigthAssoc;
+        private final Set<Tuple2<Tag, Tag>> leftAssoc;
+        private final Set<Tuple2<Tag, Tag>> rigthAssoc;
 
-        public PriorityVisitor2(TermCons parent, Side side, POSet<Tag> priorities, POSet<Tag> leftAssoc, POSet<Tag> rightAssoc) {
+        public PriorityVisitor2(TermCons parent, Side side, POSet<Tag> priorities, Set<Tuple2<Tag, Tag>> leftAssoc, Set<Tuple2<Tag, Tag>> rightAssoc) {
             this.parent = parent;
             this.side = side;
             this.priorities = priorities;
@@ -75,12 +73,12 @@ public class PriorityVisitor extends CatchTransformer {
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);
             }
-            if (leftAssoc.inSomeRelation(parentLabel, localLabel) && Side.RIGHT == side) {
+            if (leftAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.RIGHT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);
             }
-            if (rigthAssoc.inSomeRelation(parentLabel, localLabel) && Side.LEFT == side) {
+            if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 throw new PriorityException(kex);

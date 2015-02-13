@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.outer
 
@@ -8,7 +8,7 @@ import org.kframework.kore.{Attributes, KLabel, KList, KToken, Sort}
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
-  extends AssertionError(nonTerminals.toString)
+  extends AssertionError(nonTerminals.toString())
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
@@ -47,23 +47,16 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       x._1
     }.flatten
   lazy val priorities = POSet(expressedPriorities)
+  lazy val leftAssoc  = BuildAssoc(Associativity.Left)
+  lazy val rightAssoc = BuildAssoc(Associativity.Right)
 
-  private lazy val expressedLeftAssoc: Set[(Tag, Tag)] =
+  private def BuildAssoc(side:Associativity.Value): Set[(Tag, Tag)] = {
     sentences
-      .collect({ case SyntaxAssociativity(Associativity.Left | Associativity.NonAssoc , ps, _) => ps })
+      .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps})
       .map { ps: Set[Tag] =>
-        for (a <- ps; b <- ps) yield {(a, b)}
-      }.flatten
-  lazy val leftAssoc = POSet(expressedLeftAssoc)
-
-  private lazy val expressedRightAssoc: Set[(Tag, Tag)] =
-    sentences
-      .collect({ case SyntaxAssociativity(Associativity.Right | Associativity.NonAssoc , ps, _) => ps })
-      .map { ps: Set[Tag] =>
-      for (a <- ps; b <- ps) yield {(a, b)}
+      for (a <- ps; b <- ps) yield (a, b)
     }.flatten
-  lazy val rightAssoc = POSet(expressedRightAssoc)
-  
+  }
 
   lazy val subsorts = POSet(subsortRelations)
 
@@ -73,7 +66,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
     case _ => Set()
   }
-  if (!nonTerminalsWithUndefinedSort.isEmpty)
+  if (nonTerminalsWithUndefinedSort.nonEmpty)
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
 }
