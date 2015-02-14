@@ -2,7 +2,6 @@
 
 package org.kframework.parser.concrete2kore;
 
-import com.beust.jcommander.internal.Lists;
 import org.junit.Test;
 import org.kframework.kore.outer.SyntaxProduction;
 import org.kframework.parser.Ambiguity;
@@ -10,10 +9,9 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedExceptionSet;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +47,7 @@ public class TreeCleanerVisitorTest {
         assertCleanup(two, two);
     }
 
-    @Test(expected = ParseFailedException.class)
+    @Test(expected = ParseFailedExceptionSet.class)
     public void testNoKLabel() throws Exception {
         throwFirstLeftException(TermCons.apply(Arrays.asList(foo, bar), noKLabelProduction));
     }
