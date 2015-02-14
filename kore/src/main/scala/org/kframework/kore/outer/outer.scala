@@ -47,10 +47,10 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       x._1
     }.flatten
   lazy val priorities = POSet(expressedPriorities)
-  lazy val leftAssoc  = BuildAssoc(Associativity.Left)
-  lazy val rightAssoc = BuildAssoc(Associativity.Right)
+  lazy val leftAssoc  = buildAssoc(Associativity.Left)
+  lazy val rightAssoc = buildAssoc(Associativity.Right)
 
-  private def BuildAssoc(side:Associativity.Value): Set[(Tag, Tag)] = {
+  private def buildAssoc(side:Associativity.Value): Set[(Tag, Tag)] = {
     sentences
       .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps})
       .map { ps: Set[Tag] =>

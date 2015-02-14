@@ -8,6 +8,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.concrete2kore.CatchTransformer;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.ParseFailedExceptionSet;
 import org.kframework.utils.errorsystem.PriorityException;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -71,17 +72,17 @@ public class PriorityVisitor extends CatchTransformer {
             if (priorities.lessThen(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                throw new PriorityException(kex);
+                throw new ParseFailedExceptionSet(new PriorityException(kex));
             }
             if (leftAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.RIGHT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                throw new PriorityException(kex);
+                throw new ParseFailedExceptionSet(new PriorityException(kex));
             }
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                throw new PriorityException(kex);
+                throw new ParseFailedExceptionSet(new PriorityException(kex));
             }
 
             return tc;

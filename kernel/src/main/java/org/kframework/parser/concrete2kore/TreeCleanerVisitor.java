@@ -6,6 +6,8 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedExceptionSet;
+
 import java.util.ArrayList;
 
 /**
@@ -19,13 +21,13 @@ public class TreeCleanerVisitor extends CatchTransformer {
     }
 
     @Override
-    public Term apply(TermCons tc) throws ParseFailedException {
+    public Term apply(TermCons tc) throws ParseFailedExceptionSet {
         if (!tc.production().klabel().isDefined()) {
             // eliminating syntactic subsort
             if (tc.items().size() != 1)
-                throw  new ParseFailedException(new KException(
+                throw  new ParseFailedExceptionSet(new ParseFailedException(new KException(
                         KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
-                        "Only subsort productions are allowed to have no #klabel attribute", null, null));
+                        "Only subsort productions are allowed to have no #klabel attribute", null, null)));
             //TODO: add source and location to error
             return apply(tc.items().get(0));
         } else {
@@ -39,7 +41,7 @@ public class TreeCleanerVisitor extends CatchTransformer {
      * Remove KList artifacts from parsing only they contain only one element.
      */
     @Override
-    public Term apply(KList node) throws ParseFailedException {
+    public Term apply(KList node) throws ParseFailedExceptionSet {
         java.util.List<Term> contents = new ArrayList<>();
         for (Term t : node.items()) {
             Term transformed = super.apply(t);

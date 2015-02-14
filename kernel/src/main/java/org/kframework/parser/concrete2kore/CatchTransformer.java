@@ -12,11 +12,11 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedExceptionSet;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Base class Transformer used by the front-end to filter out ambiguities in
@@ -31,7 +31,7 @@ import java.util.Set;
 // TODO(radum) make it so the transformer gathers all the thrown exceptions.
 public class CatchTransformer {
     Map<Term, Term> visited = new HashMap<>();
-    public Term apply(Term t) throws ParseFailedException {
+    public Term apply(Term t) throws ParseFailedExceptionSet {
         if (cache() && visited.containsKey(t))
                 return visited.get(t);
         Term rez;
@@ -49,7 +49,7 @@ public class CatchTransformer {
         return rez;
     }
 
-    public Term apply(ProductionReference p) throws ParseFailedException {
+    public Term apply(ProductionReference p) throws ParseFailedExceptionSet {
         if (p instanceof TermCons) {
             return apply((TermCons) p);
         } else if (p instanceof Constant) {
@@ -67,22 +67,27 @@ public class CatchTransformer {
      * children, whichever passes the filter tests.
      * @throws ParseFailedException if all the children failed to be visited.
      */
-    public Term apply(Ambiguity a) throws ParseFailedException {
-        ParseFailedException exception = new ParseFailedException(new KException(
-                ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
-                "Parse forest contains no trees!", null, null));
+    public Term apply(Ambiguity a) throws ParseFailedExceptionSet {
+        ParseFailedExceptionSet exceptionSet = new ParseFailedExceptionSet();
         java.util.Set<Term> terms = new HashSet<>();
         for (Term t : a.items()) {
             Term result;
             try {
                 result = apply(t);
                 terms.add(result);
-            } catch (ParseFailedException e) {
-                exception = e;
+            } catch (ParseFailedExceptionSet e) {
+                exceptionSet.exceptions.addAll(e.exceptions);
             }
         }
-        if (terms.isEmpty())
-            throw exception;
+        if (terms.isEmpty()) {
+            if (exceptionSet.exceptions.size() == 0) {
+                ParseFailedException exception = new ParseFailedException(new KException(
+                        ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
+                        "Parse forest contains no trees!", null, null));
+                exceptionSet.exceptions.add(exception);
+            }
+            throw exceptionSet;
+        }
         if (terms.size() == 1) {
             return apply(terms.iterator().next());
         }
@@ -90,21 +95,21 @@ public class CatchTransformer {
         return a;
     }
 
-    public Term apply(KList kl) throws ParseFailedException {
+    public Term apply(KList kl) throws ParseFailedExceptionSet {
         for (int i = 0; i < kl.items().size(); i++) {
             kl.items().set(i, apply(kl.items().get(i)));
         }
         return kl;
     }
 
-    public Term apply(TermCons tc) throws ParseFailedException {
+    public Term apply(TermCons tc) throws ParseFailedExceptionSet {
         for (int i = 0; i < tc.items().size(); i++) {
             tc.items().set(i, apply(tc.items().get(i)));
         }
         return tc;
     }
 
-    public Term apply(Constant c) throws ParseFailedException {
+    public Term apply(Constant c) throws ParseFailedExceptionSet {
         return c;
     }
 
