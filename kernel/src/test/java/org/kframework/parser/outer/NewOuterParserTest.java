@@ -45,7 +45,7 @@ public class NewOuterParserTest {
      * @param definitionFile
      * @return
      */
-    private K parseWithFile(CharSequence theTextToParse, String mainModule, String startSymbol, File definitionFile) {
+    public static K parseWithFile(CharSequence theTextToParse, String mainModule, String startSymbol, File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {

@@ -3,7 +3,7 @@ package org.kframework.tiny
 
 import org.kframework.definition
 
-class Rewriter(module: definition.Module) {
+class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
   val cons = new Constructors(module)
 
   import cons._
