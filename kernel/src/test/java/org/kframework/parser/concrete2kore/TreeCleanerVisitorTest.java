@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.kframework.Collections.Seq;
 import static org.kframework.kore.Constructors.Sort;
@@ -70,7 +71,13 @@ public class TreeCleanerVisitorTest {
     }
 
     @Test
-    public void testMerge() throws Exception {
-
+    public void testMultipleExceptions() throws Exception {
+        try {
+            Term t = Ambiguity.apply(Ambiguity.apply(), KList.apply(Ambiguity.apply()));
+            t = new CatchTransformer().apply(t);
+            throw new AssertionError("Should have thrown an exception before this point.");
+        } catch (ParseFailedExceptionSet e) {
+            assertEquals("Should throw a set of 2 exceptions: ", 2, e.exceptions.size());
+        }
     }
 }
