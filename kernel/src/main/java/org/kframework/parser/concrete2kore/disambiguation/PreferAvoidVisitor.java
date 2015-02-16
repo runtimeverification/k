@@ -1,23 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
-import com.google.common.collect.Sets;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
-import org.kframework.parser.TermCons;
-import org.kframework.parser.TranformerWithExceptionGathering;
-import org.kframework.parser.Transformer;
 import org.kframework.parser.concrete2kore.CatchTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import scala.util.Either;
-import scala.util.Left;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Apply the prefer/avoid disambiguation filter.

@@ -24,7 +24,7 @@ abstract class Transformer[O] {
   }
   def apply(a: Ambiguity): Either[O, Term] = mapChildren(a)
   def apply(tc: TermCons): Either[O, Term] = mapChildrenStrict(tc)
-  def apply(kl: KList): Either[O, Term] = mapChildren(kl)
+  def apply(kl: KList):    Either[O, Term] = mapChildrenStrict(kl)
   def apply(kl: Constant): Either[O, Term] = { Right(kl) }
 
   /**
