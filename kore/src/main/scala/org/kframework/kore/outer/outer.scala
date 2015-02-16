@@ -37,14 +37,13 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     sentences
       .collect({ case SyntaxPriority(ps, _) => ps })
       .map { ps: Seq[Set[Tag]] =>
-      val x = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
-        case ((all: Set[(Tag, Tag)], prev: Set[Tag]), current: Set[Tag]) =>
-          val newPairs: Set[(Tag, Tag)] =
-            for (a <- prev; b <- current) yield {(a, b) }
+      val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
+        case ((all, prev), current) =>
+          val newPairs = for (a <- prev; b <- current) yield (a, b)
 
           (newPairs | all, current)
       }
-      x._1
+      pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
     }.flatten
   lazy val priorities = POSet(expressedPriorities)
   lazy val leftAssoc  = buildAssoc(Associativity.Left)
