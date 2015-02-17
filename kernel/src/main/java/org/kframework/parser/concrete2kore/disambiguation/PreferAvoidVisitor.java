@@ -3,8 +3,8 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.Term;
-import org.kframework.parser.concrete2kore.CatchTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * 2. remove the productions that are labeled with 'avoid'
  * 3. keep only those productions which have 'prefer' (if any)
  */
-public class PreferAvoidVisitor extends CatchTransformer {
+public class PreferAvoidVisitor extends SafeTransformer {
     @Override
     public Term apply(Ambiguity amb) {
         List<Term> prefer = new ArrayList<>();

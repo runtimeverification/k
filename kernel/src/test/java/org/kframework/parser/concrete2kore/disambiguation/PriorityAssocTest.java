@@ -21,7 +21,7 @@ public class PriorityAssocTest {
         K out1 = ParserUtils.parseWithString("1+2", "TEST", "Exp", def);
         //System.out.println("out1 = " + out1);
         K out2 = ParserUtils.parseWithString("1+2*3", "TEST", "Exp", def);
-        //System.out.println("out2 = " + out2);+
+        //System.out.println("out2 = " + out2);
         K out3 = ParserUtils.parseWithString("1+2+3", "TEST", "Exp", def);
         //System.out.println("out3 = " + out3);
     }

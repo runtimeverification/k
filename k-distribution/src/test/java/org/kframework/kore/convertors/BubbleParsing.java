@@ -105,7 +105,7 @@ public class BubbleParsing {
                     ParseError errors = parser.getErrors();
                 }
 
-                Term cleaned = new TreeCleanerVisitor().apply(parsed);
+                Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
 
                 K kBody = TreeNodesToKORE.apply(cleaned);
 
