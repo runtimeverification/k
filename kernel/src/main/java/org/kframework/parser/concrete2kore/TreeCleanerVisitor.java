@@ -1,13 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.Transformer;
+import org.kframework.parser.TransformerWithErrors;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 
@@ -17,7 +17,7 @@ import scala.util.Left;
 /**
  * Remove parsing artifacts such as single element ambiguities.
  */
-public class TreeCleanerVisitor extends Transformer<Set<ParseFailedException>> {
+public class TreeCleanerVisitor extends TransformerWithErrors<Set<ParseFailedException>> {
     @Override
     public Either<Set<ParseFailedException>, Term> apply(TermCons tc) {
         Either<Set<ParseFailedException>, Term> vis;
@@ -39,5 +39,12 @@ public class TreeCleanerVisitor extends Transformer<Set<ParseFailedException>> {
 
     public Set<ParseFailedException> merge(Set<ParseFailedException> a, Set<ParseFailedException> b) {
         return Sets.union(a, b);
+    }
+
+    // TODO: Radu: fix handling of KList()
+
+    @Override
+    public Set<ParseFailedException> errorUnit() {
+        return new LinkedHashSet<>();
     }
 }
