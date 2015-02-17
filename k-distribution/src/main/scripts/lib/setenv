@@ -9,7 +9,7 @@ K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
 if [ `uname` = 'Darwin' ]; then
   export PATH="$K_LIB_DIR/native/osx":$PATH
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
-elif [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
+elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
   export PATH="$K_LIB_DIR/native/windows":"$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
 else
   export PATH="$K_LIB_DIR/native/linux":"$K_LIB_DIR/native/linux$ARCH":$PATH
