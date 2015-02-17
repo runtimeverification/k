@@ -60,7 +60,7 @@ public class ParserUtils {
             throw new AssertionError("There are parsing errors: " + errors.toString());
         }
 
-        Term cleaned = new TreeCleanerVisitor().apply(parsed);
+        Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
         cleaned = new PreferAvoidVisitor().apply(cleaned);
         cleaned = new PriorityVisitor(kastModule.priorities(), kastModule.leftAssoc(), kastModule.rightAssoc()).apply(cleaned);
 

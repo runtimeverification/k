@@ -1,23 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
-import com.google.common.collect.Sets;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.Term;
-import org.kframework.parser.TermCons;
-import org.kframework.parser.TranformerWithExceptionGathering;
-import org.kframework.parser.Transformer;
-import org.kframework.parser.concrete2kore.CatchTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import scala.util.Either;
-import scala.util.Left;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Apply the prefer/avoid disambiguation filter.
@@ -25,7 +15,7 @@ import java.util.Set;
  * 2. remove the productions that are labeled with 'avoid'
  * 3. keep only those productions which have 'prefer' (if any)
  */
-public class PreferAvoidVisitor extends CatchTransformer {
+public class PreferAvoidVisitor extends SafeTransformer {
     @Override
     public Term apply(Ambiguity amb) {
         List<Term> prefer = new ArrayList<>();
