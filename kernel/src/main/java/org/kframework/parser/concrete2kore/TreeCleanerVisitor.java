@@ -51,7 +51,7 @@ public class TreeCleanerVisitor extends TransformerWithErrors<Set<ParseFailedExc
             return res;
     }
 
-    public Set<ParseFailedException> merge(Set<ParseFailedException> a, Set<ParseFailedException> b) {
+    public Set<ParseFailedException> mergeErrors(Set<ParseFailedException> a, Set<ParseFailedException> b) {
         return Sets.union(a, b);
     }
 
