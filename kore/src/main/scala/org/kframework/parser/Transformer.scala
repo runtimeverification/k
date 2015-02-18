@@ -74,10 +74,10 @@ trait ChildrenMapping[E, W] {
  * Visitor pattern for the front end classes.
  * Applies the visitor transformation on each node, and returns a tuple of either a term, or a set of errors, and
  * a set of possible warnings.
- * @tparam E container for error.
- * @tparam W container for warning.
+ * @tparam E container for errors.
+ * @tparam W container for warnings.
  */
-abstract class GeneralTransfomer[E, W] extends ChildrenMapping[E, W] {
+abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
@@ -105,7 +105,7 @@ abstract class GeneralTransfomer[E, W] extends ChildrenMapping[E, W] {
 /**
  * Visitor pattern for the front end classes.
  * Applies the visitor transformation on each node, and returns either a term, or a set of errors. (no warnings)
- * @tparam E container for error.
+ * @tparam E container for errors.
  */
 abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
