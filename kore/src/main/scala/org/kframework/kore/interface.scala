@@ -15,6 +15,7 @@ trait KLabel {
     case l: KLabel => name == l.name
     case _ => false
   }
+  override def hashCode = name.hashCode
 }
 
 trait KToken extends KItem {

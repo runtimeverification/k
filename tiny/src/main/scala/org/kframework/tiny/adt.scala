@@ -16,7 +16,11 @@ import scala.collection.mutable.ListBuffer
 trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher
-  def normalize(implicit theory: Theory): K
+  final def normalize(implicit theory: Theory): K = {
+    val inner = normalizeInner
+    theory.normalize(inner)
+  }
+  def normalizeInner(implicit theory: Theory): K
 }
 
 object KApp {
@@ -44,10 +48,13 @@ trait KApp extends kore.KApply with K {
 
   override def hashCode = klabel.hashCode * 5333 + children.hashCode
 
-  def normalize(implicit theory: Theory): K =
-    klabel((children map theory.normalize).toSeq, att)
-
   override def toString = klabel + "(" + children.mkString(",") + ")"
+}
+
+trait PlainNormalization {
+  self: KApp =>
+  def normalizeInner(implicit theory: Theory): K =
+    klabel((children map theory.normalize).toSeq, att)
 }
 
 /**
@@ -55,13 +62,13 @@ trait KApp extends kore.KApply with K {
  */
 trait KLeaf extends K {
   def copy(att: Att): KLeaf
-  def normalize(implicit theory: Theory): K = theory.normalize(this)
+  def normalizeInner(implicit theory: Theory): K = this
 }
 
 /**
  * KApp with a collection of children which are usually defined using an associative operator.
  */
-trait KAssocApp extends KApp {
+trait KAssocApp extends KApp with PlainNormalization {
   val klabel: KAssocAppLabel
 
   def head: K = children.head
@@ -110,16 +117,20 @@ case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
   override def toString = s + ":" + sort
 }
 
-class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att()) extends KRegularApp
+final class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att())
+  extends KRegularApp with PlainNormalization
 
-class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], val att: Att = Att()) extends KAssocApp
+final class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], val att: Att = Att())
+  extends KAssocApp
 
-class KSeq private(val children: Seq[K], val att: Att) extends kore.KSequence with K with KAssocApp {
+final class KSeq private(val children: Seq[K], val att: Att)
+  extends kore.KSequence with KAssocApp with PlainNormalization {
   val klabel = KSeq
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 }
 
-case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends kore.KRewrite with KProduct with K {
+case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends
+kore.KRewrite with KProduct with PlainNormalization {
   val klabel = KRewrite
 }
 

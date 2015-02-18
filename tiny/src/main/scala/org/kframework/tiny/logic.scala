@@ -2,6 +2,7 @@ package org.kframework.tiny
 
 import org.kframework.attributes.Att
 import org.kframework.kore.Unparse
+import org.kframework.tiny.matcher.EqualsMatcher
 
 trait Logic extends K {
   def toDNF: Logic
@@ -18,7 +19,7 @@ trait NormalizationCache {
   self: K =>
 
   val normalBy: Option[Theory]
-  def normalize(implicit theory: Theory) = normalBy match {
+  def normalizeInner(implicit theory: Theory) = normalBy match {
     case Some(`normalBy`) => this
     case _ =>
       if (this == True || this == False)
@@ -29,8 +30,8 @@ trait NormalizationCache {
   def actualNormalize(implicit theory: Theory): K
 }
 
-case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None) extends KAssocApp with Logic with
-NormalizationCache {
+case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None)
+  extends KAssocApp with Logic with NormalizationCache {
   /** Estimate the time it takes to solve (up to available data) one of the child formulas  */
   def estimate(implicit t: Theory): Int = ???
 
@@ -46,7 +47,7 @@ NormalizationCache {
     else
       "(" + children.mkString(" || ") + ")"
 
-  override def normalize(implicit theory: Theory) = super[NormalizationCache].normalize
+  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
 
   def toDNF: Logic = toDNF(False, children.toSeq).eliminateGroundBooleans
 
@@ -83,8 +84,8 @@ object And extends KAssocAppLabel with EmptyAtt {
   override def apply(ks: K*): And = super.apply(ks: _*).asInstanceOf[And]
 }
 
-case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None) extends KAssocApp with Logic with
-NormalizationCache {
+case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
+  extends KAssocApp with Logic with NormalizationCache {
 
   /** Estimate the time it takes to solve one variable in one formula */
   def estimate(implicit t: Theory): Int = ???
@@ -95,7 +96,7 @@ NormalizationCache {
   // Implementing K
   val klabel = And
 
-  override def normalize(implicit theory: Theory) = super[NormalizationCache].normalize
+  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
 
   def actualNormalize(implicit theory: Theory): K = {
     val dnf = toDNF.eliminateGroundBooleans
@@ -203,10 +204,9 @@ NormalizationCache {
       "True"
     else
       "(" + children.mkString(" && ") + ")"
-
 }
 
-case class Binding(variable: KVar, value: K, att: Att) extends KProduct {
+case class Binding(variable: KVar, value: K, att: Att) extends KProduct with PlainNormalization {
 
   assert(variable != value)
 
@@ -223,7 +223,7 @@ case class Equals(a: K, b: K, att: Att) extends KProduct {
   override val klabel = Equals
   override def toString = a + "=" + b
 
-  override def normalize(implicit theory: Theory) = a.matcher(b).normalize
+  override def normalizeInner(implicit theory: Theory) = EqualsMatcher(a, b)
 }
 
 object Equals extends KProduct2Label with EmptyAtt {
@@ -231,10 +231,10 @@ object Equals extends KProduct2Label with EmptyAtt {
 }
 
 case class Not(k: K, att: Att = Att()) extends KProduct {
-  override val klabel = Equals
+  override val klabel = Not
   override def toString = "!" + k
 
-  override def normalize(implicit theory: Theory) = k.normalize match {
+  override def normalizeInner(implicit theory: Theory) = k.normalize match {
     case True => False
     case False => True
     case x => Not(x, att)

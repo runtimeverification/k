@@ -22,7 +22,7 @@ import java.io.IOException;
 
 
 public class TstTinyOnKORE extends BaseTest {
-    @Test @Ignore
+    @Test
     public void kore_imp_tiny() throws IOException {
         sdfTest();
     }
@@ -36,8 +36,11 @@ public class TstTinyOnKORE extends BaseTest {
         KApp program = cons.KApply(cons.KLabel("'<top>"),
                 cons.KApply(cons.KLabel("'<k>"),
                         cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y"))),
-                cons.KApply(cons.KLabel("'<state>"), cons.intToToken(1), cons.intToToken(2))
-        );
+                cons.KApply(cons.KLabel("'<state>"),
+                        cons.KApply(cons.KLabel("'_Map_"),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(1)),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
+                ));
 
         System.out.println("module = " + module);
 

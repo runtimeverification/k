@@ -18,6 +18,7 @@ trait AbstractTest {
 
   val X = KVar("X")
   val Y = KVar("Y")
+  val Z = KVar("Z")
 
   def assertEquals(k1: K, k2: K) {
     if (k1 != k2)

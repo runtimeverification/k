@@ -49,6 +49,6 @@ case class Down(imports: Set[String]) extends (K => Any) {
             matchingClasses.mkString("\n    "))
         }
       }
-
+    case _ => throw new AssertionError("Could not down.")
   }
 }

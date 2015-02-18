@@ -25,8 +25,6 @@ class MatcherTest extends AbstractTest {
   @Test def testSimpleWithFalseSideCondition() {
     val foo = 'foo()
 
-    println(And(X.matcher('foo())))
-
     assertEquals(False, And(X.matcher('foo()), False).normalize)
   }
 
@@ -173,18 +171,24 @@ class MatcherTest extends AbstractTest {
   //  }
 
 
-  //  // TODO: uningore when fixing side conditions
-  //  @Test
-  //  @Ignore def testKSeqAssoc() {
-  //    val foo = KSequence(5: K, 5: K, 5: K)
-  //
-  //    val pattern = KSequence(X, 5: K, Y)
-  //    assertEquals(Or(
-  //      And(X -> KSequence(), Y -> KSequence(5: K, 5: K)),
-  //      And(X -> KSequence(5: K), Y -> KSequence(5: K)),
-  //      And(X -> KSequence(5: K, 5: K), Y -> KSequence())),
-  //      pattern.matchAll(foo))
-  //  }
+  @Test def testKSeqAssoc() {
+    val foo = KSequence(5: K, 5: K, 5: K)
+
+    val pattern = KSequence(X, 5: K, Y)
+    assertEquals(Or(
+      And(X -> KSequence(), Y -> KSequence(5: K, 5: K)),
+      And(X -> 5: K, Y -> 5: K),
+      And(X -> KSequence(5: K, 5: K), Y -> KSequence())),
+      pattern.matchAll(foo))
+  }
+
+  @Test def testKSeqWithMatchAtEnd() {
+    val foo = KSequence('+(5: K, 5: K))
+
+    val pattern = KSequence(X + Y, Z)
+    assertEquals(Or(), pattern.matchAll(foo))
+  }
+
   //
   //  @Test def testAttributes() {
   //    val foo = 'foo()

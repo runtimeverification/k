@@ -5,11 +5,12 @@ import org.kframework.kore.ADT.Sort
 import org.kframework.tiny._
 import org.kframework.tiny.matcher.{MatcherLabel, Matcher}
 
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.collection.mutable.Builder
 
-class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: Att = Att()) extends KApp {
-  val children = theMap map { case (k, v) => Tuple2Label(k, v) }
+final class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: Att = Att())
+  extends KApp with PlainNormalization {
+  val children: immutable.Iterable[K] = theMap map { case (k, v) => Tuple2Label(k, v) }
   override def matcher(right: K): Matcher = KMapAppMatcher(this, right)
 }
 
@@ -55,7 +56,7 @@ case class MapKeys(k: K, att: Att = Att()) extends KProduct {
   override val klabel = MapKeys
   override def toString = "keys(" + k + ")"
 
-  override def normalize(implicit theory: Theory) = ???
+  override def normalizeInner(implicit theory: Theory) = ???
 }
 
 object MapKeys extends KProduct1Label with EmptyAtt {
@@ -64,6 +65,18 @@ object MapKeys extends KProduct1Label with EmptyAtt {
 
 case class KMapAppMatcher(left: KMapApp, right: K) extends Matcher {
   override val klabel = KMapAppMatcher
+
+  override def normalizeInner(implicit theory: Theory): K = (left.normalize, right.normalize) match {
+    case (left: KMapApp, right: KMapApp) =>
+      val leftGroundKeys = left.theMap.keys filter theory.isGround toSet
+      val rightGroundKeys = right.theMap.keys filter theory.isGround toSet
+
+      if ((leftGroundKeys &~ rightGroundKeys) != Set())
+        False
+      else
+        this
+    case _ => this
+  }
 }
 
 object KMapAppMatcher extends MatcherLabel {

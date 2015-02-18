@@ -23,7 +23,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     "Map:__" -> KMapAppLabel("Map"),
     "Map:_|->_" -> Tuple2Label,
     "Map:keys" -> MapKeys,
-    "Set:in" ->  RegularKAppLabel("???in???", Att())
+    "Set:in" -> RegularKAppLabel("???in???", Att())
   )
 
   override def KLabel(name: String): Label = {
@@ -52,6 +52,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   def KApply(klabel: kore.KLabel, list: List[tiny.K]): KApp = KApply(klabel, list, Att())
 
   @annotation.varargs def KApply(klabel: kore.KLabel, list: K*): KApp = KApply(klabel, list.toList)
+
+  @annotation.varargs def KSequence(list: K*): KApp = KSequence(list.toList.asJava, Att())
 
   override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): KSeq =
     KSeq(items.asScala.toSeq map convert, att).asInstanceOf[KSeq]
