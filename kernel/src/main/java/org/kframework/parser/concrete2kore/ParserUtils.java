@@ -6,7 +6,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.outer.Module;
+import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -39,11 +39,11 @@ public class ParserUtils {
         def.setMainSyntaxModule(mainModule);
 
         KILtoKORE kilToKore = new KILtoKORE(null);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(def);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(def);
         return parseWithDef(theTextToParse, mainModule, startSymbol, koreDef);
     }
 
-    public static K parseWithDef(CharSequence theTextToParse, String mainModule, String startSymbol, org.kframework.kore.outer.Definition definition) {
+    public static K parseWithDef(CharSequence theTextToParse, String mainModule, String startSymbol, org.kframework.definition.Definition definition) {
 
         Module kastModule = definition.getModule(mainModule).get();
 
@@ -51,7 +51,7 @@ public class ParserUtils {
         return parseWithGrammar(theTextToParse, startSymbol, kastModule, kastGrammar);
     }
 
-    public static K parseWithGrammar(CharSequence theTextToParse, String startSymbol, org.kframework.kore.outer.Module kastModule, Grammar grammar) {
+    public static K parseWithGrammar(CharSequence theTextToParse, String startSymbol, org.kframework.definition.Module kastModule, Grammar grammar) {
         Parser parser = new Parser(theTextToParse);
         Term parsed = parser.parse(grammar.get(startSymbol), 0);
 

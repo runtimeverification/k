@@ -3,15 +3,13 @@
 package org.kframework.definition
 
 import org.kframework.POSet
-import org.kframework.kore.KLabel
-import org.kframework.kore.Sort
-import org.kframework.kore.K
-import org.kframework.attributes._
+import org.kframework.attributes.Att
+import org.kframework.kore._
 
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
-  extends AssertionError(nonTerminals.toString)
+  extends AssertionError(nonTerminals.toString())
 
 case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
   extends AssertionError(ps.toString)
@@ -46,11 +44,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
   // Check that productions with the same #klabel have identical attributes
-//  productionsFor.foreach {
-//    case (l, ps) =>
-//      if (ps.groupBy(_.att).size != 1)
-//        throw DivergingAttributesForTheSameKLabel(ps)
-//  }
+  //  productionsFor.foreach {
+  //    case (l, ps) =>
+  //      if (ps.groupBy(_.att).size != 1)
+  //        throw DivergingAttributesForTheSameKLabel(ps)
+  //  }
 
   val attributesFor: Map[KLabel, Att] = productionsFor mapValues { _.head.att }
 
@@ -70,6 +68,30 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
+  }
+
+  private lazy val expressedPriorities: Set[(Tag, Tag)] =
+    sentences
+      .collect({ case SyntaxPriority(ps, _) => ps })
+      .map { ps: Seq[Set[Tag]] =>
+      val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
+        case ((all, prev), current) =>
+          val newPairs = for (a <- prev; b <- current) yield (a, b)
+
+          (newPairs | all, current)
+      }
+      pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
+    }.flatten
+  lazy val priorities = POSet(expressedPriorities)
+  lazy val leftAssoc = buildAssoc(Associativity.Left)
+  lazy val rightAssoc = buildAssoc(Associativity.Right)
+
+  private def buildAssoc(side: Associativity.Value): Set[(Tag, Tag)] = {
+    sentences
+      .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
+      .map { ps: Set[Tag] =>
+      for (a <- ps; b <- ps) yield (a, b)
+    }.flatten
   }
 
   lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
@@ -137,6 +159,10 @@ with SyntaxSortToString with OuterKORE {
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
   def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
+
+
+  def isSyntacticSubsort: Boolean =
+    items.size == 1 && items.head.isInstanceOf[NonTerminal]
 }
 
 object Production {
@@ -159,3 +185,8 @@ case class RegexTerminal(regex: String) extends ProductionItem with RegexTermina
 
 case class Terminal(value: String) extends ProductionItem // hooked
 with TerminalToString
+
+/* Helper constructors */
+object NonTerminal {
+  def apply(sort: String): NonTerminal = NonTerminal(ADT.Sort(sort))
+}

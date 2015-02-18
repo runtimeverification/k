@@ -74,5 +74,4 @@ public class TreeCleanerVisitorTest {
             throw result.left().get().iterator().next();
         }
     }
-    }
 }
