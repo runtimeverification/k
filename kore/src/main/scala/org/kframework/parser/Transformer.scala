@@ -70,6 +70,13 @@ trait ChildrenMapping[E, W] {
   def mergeWarnings(a: W, b: W): W
 }
 
+/**
+ * Visitor pattern for the front end classes.
+ * Applies the visitor transformation on each node, and returns a tuple of either a term, or a set of errors, and
+ * a set of possible warnings.
+ * @tparam E container for error.
+ * @tparam W container for warning.
+ */
 abstract class GeneralTransfomer[E, W] extends ChildrenMapping[E, W] {
 
   // we expect this data structures to represent a DAG, so we
@@ -95,6 +102,11 @@ abstract class GeneralTransfomer[E, W] extends ChildrenMapping[E, W] {
   def apply(c: Constant): (Either[E, Term], W) = { (Right(c), warningUnit) }
 }
 
+/**
+ * Visitor pattern for the front end classes.
+ * Applies the visitor transformation on each node, and returns either a term, or a set of errors. (no warnings)
+ * @tparam E container for error.
+ */
 abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
   def applyTerm(t: Term): (Either[E, Term], Ignore) = (apply(t), Ignore)
@@ -125,6 +137,10 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   override val warningUnit = Ignore
 }
 
+/**
+ * Visitor pattern for the front end classes.
+ * Applies the visitor transformation on each node, and returns a term. (no errors and no warnings)
+ */
 abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 
   def applyTerm(t: Term): (Either[Ignore, Term], Ignore) = (Right(apply(t)), Ignore)
