@@ -193,7 +193,7 @@ public class KAbstractRewriteMachine {
                 case KITEM:
                     Term kLabel = stack.pop();
                     Term kList = stack.pop();
-                    stack.push(KItem.of(kLabel, kList, context));
+                    stack.push(KItem.of(kLabel, kList, context, constructor.getSource(), constructor.getLocation()));
                     break;
                 case KITEM_PROJECTION:
                     stack.push(new KItemProjection(constructor.kind(), stack.pop()));

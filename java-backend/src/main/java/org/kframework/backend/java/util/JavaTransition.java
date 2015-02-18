@@ -5,6 +5,8 @@ import org.kframework.backend.java.kil.Rule;
 
 import org.kframework.backend.java.symbolic.BackendJavaKILtoKILTransformer;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -67,6 +69,16 @@ public class JavaTransition extends Transition {
         }
         substitution = genericSubs;
         return substitution;
+    }
+
+    @Override
+    public Location getLocation() {
+        return javaRule.getLocation();
+    }
+
+    @Override
+    public Source getSource() {
+        return javaRule.getSource();
     }
 
 }
