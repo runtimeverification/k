@@ -2,10 +2,8 @@
 
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Assert;
 import org.junit.Test;
-import org.kframework.backend.java.builtins.BuiltinListOperations;
 import org.kframework.backend.java.builtins.BuiltinMapOperations;
 import org.kframework.backend.java.builtins.IntToken;
 import org.mockito.Mock;
@@ -18,13 +16,13 @@ public class BuiltinMapTest {
 
     @Test
     public void testMapUpdate1() throws Exception {
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(0), IntToken.of(0));
         builder.put(IntToken.of(1), IntToken.of(0));
         BuiltinMap builtinMap = (BuiltinMap) builder.build();
 
 
-        builder = BuiltinMap.builder();
+        builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(1), IntToken.of(1));
         builder.put(IntToken.of(2), IntToken.of(1));
         BuiltinMap updateMap = (BuiltinMap) builder.build();
@@ -43,7 +41,7 @@ public class BuiltinMapTest {
 
     @Test
     public void testMapUpdate2() throws Exception {
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(0), IntToken.of(0));
         builder.put(IntToken.of(1), IntToken.of(0));
         builder.put(IntToken.of(2), IntToken.of(0));
@@ -51,7 +49,7 @@ public class BuiltinMapTest {
         BuiltinMap builtinMap = (BuiltinMap) builder.build();
 
 
-        builder = BuiltinMap.builder();
+        builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(0), IntToken.of(1));
         builder.put(IntToken.of(1), IntToken.of(1));
         BuiltinMap updateMap = (BuiltinMap) builder.build();
@@ -70,14 +68,14 @@ public class BuiltinMapTest {
 
     @Test
     public void testMapUpdate3() throws Exception {
-        BuiltinMap.Builder builder = BuiltinMap.builder();
+        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(0), IntToken.of(0));
         builder.put(IntToken.of(1), IntToken.of(0));
         builder.concatenate(new Variable("M", Sort.MAP));
         BuiltinMap builtinMap = (BuiltinMap) builder.build();
 
 
-        builder = BuiltinMap.builder();
+        builder = BuiltinMap.builder(termContext);
         builder.put(IntToken.of(0), IntToken.of(1));
         builder.put(IntToken.of(1), IntToken.of(1));
         builder.put(IntToken.of(2), IntToken.of(1));

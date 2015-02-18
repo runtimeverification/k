@@ -2,6 +2,8 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.TermContext;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,22 +84,23 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public BuiltinList sdiv(BitVector<BigInteger> bitVector) {
+    public BuiltinList sdiv(BitVector<BigInteger> bitVector, TermContext context) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
             BigInteger result = signedValue().divide(bitVector.signedValue());
-            return getBuiltinList(result, checkSignedOverflow(result));
+            return getBuiltinList(result, checkSignedOverflow(result), context);
         } else {
             return null;
         }
     }
 
     @Override
-    public BuiltinList srem(BitVector<BigInteger> bitVector) {
+    public BuiltinList srem(BitVector<BigInteger> bitVector, TermContext context) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
             /* the overflow flag for srem is set if the associated sdiv overflows */
             return getBuiltinList(
                     signedValue().remainder(bitVector.signedValue()),
-                    checkSignedOverflow(signedValue().divide(bitVector.signedValue())));
+                    checkSignedOverflow(signedValue().divide(bitVector.signedValue())),
+                    context);
         } else {
             return null;
         }
@@ -126,39 +129,39 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public BuiltinList sadd(BitVector<BigInteger> bitVector) {
+    public BuiltinList sadd(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = signedValue().add(bitVector.signedValue());
-        return getBuiltinList(result, checkSignedOverflow(result));
+        return getBuiltinList(result, checkSignedOverflow(result), context);
     }
 
     @Override
-    public BuiltinList uadd(BitVector<BigInteger> bitVector) {
+    public BuiltinList uadd(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = unsignedValue().add(bitVector.unsignedValue());
-        return getBuiltinList(result, checkUnsignedOverflow(result));
+        return getBuiltinList(result, checkUnsignedOverflow(result), context);
     }
 
     @Override
-    public BuiltinList ssub(BitVector<BigInteger> bitVector) {
+    public BuiltinList ssub(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = signedValue().subtract(bitVector.signedValue());
-        return getBuiltinList(result, checkSignedOverflow(result));
+        return getBuiltinList(result, checkSignedOverflow(result), context);
     }
 
     @Override
-    public BuiltinList usub(BitVector<BigInteger> bitVector) {
+    public BuiltinList usub(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = unsignedValue().subtract(bitVector.unsignedValue());
-        return getBuiltinList(result, checkUnsignedOverflow(result));
+        return getBuiltinList(result, checkUnsignedOverflow(result), context);
     }
 
     @Override
-    public BuiltinList smul(BitVector<BigInteger> bitVector) {
+    public BuiltinList smul(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = signedValue().multiply(bitVector.signedValue());
-        return getBuiltinList(result, checkSignedOverflow(result));
+        return getBuiltinList(result, checkSignedOverflow(result), context);
     }
 
     @Override
-    public BuiltinList umul(BitVector<BigInteger> bitVector) {
+    public BuiltinList umul(BitVector<BigInteger> bitVector, TermContext context) {
         BigInteger result = unsignedValue().multiply(bitVector.unsignedValue());
-        return getBuiltinList(result, checkUnsignedOverflow(result));
+        return getBuiltinList(result, checkUnsignedOverflow(result), context);
     }
 
     @Override
@@ -269,8 +272,8 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
         return digits;
     }
 
-    private BuiltinList getBuiltinList(BigInteger result, boolean overflow) {
-        BuiltinList.Builder builder = BuiltinList.builder();
+    private BuiltinList getBuiltinList(BigInteger result, boolean overflow, TermContext context) {
+        BuiltinList.Builder builder = BuiltinList.builder(context);
         builder.addItem(BitVector.of(result, bitwidth));
         builder.addItem(BoolToken.of(overflow));
         return (BuiltinList) builder.build();

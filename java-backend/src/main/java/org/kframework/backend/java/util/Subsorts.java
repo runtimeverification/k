@@ -1,28 +1,28 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import org.kframework.utils.errorsystem.KExceptionManager;
+
 
 /**
  * Subsort relation.
  *
- * @author YilongL
+ * TODO(YilongL): delegates this to KORE/Context
  *
+ * @author YilongL
  */
 public class Subsorts implements Serializable {
-
-    private final Context context;
 
     private final Set<Sort> sorts;
 
@@ -33,8 +33,6 @@ public class Subsorts implements Serializable {
     private final Table<Sort, Sort, Boolean> subsort;
 
     public Subsorts(Context context) {
-        this.context = context;
-
         Set<org.kframework.kil.Sort> genericKILSorts = context.getAllSorts();
         ImmutableSet.Builder<Sort> setBuilder = ImmutableSet.builder();
         for (org.kframework.kil.Sort genericKILSort : genericKILSorts) {
@@ -77,10 +75,6 @@ public class Subsorts implements Serializable {
         return getGLBSort(Sets.newHashSet(sorts));
     }
 
-    /**
-     * TODO(YilongL): delegates this method to Context#getGLBSort once all
-     * string representation of sorts are eliminated
-     */
     public Sort getGLBSort(Set<Sort> subset) {
         if (subset == null || subset.size() == 0) {
             return null;
@@ -131,7 +125,8 @@ public class Subsorts implements Serializable {
     }
 
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        return context.hasCommonSubsort(sort1.toFrontEnd(), sort2.toFrontEnd());
+        Sort glbSort = getGLBSort(sort1, sort2);
+        return glbSort != null && !glbSort.equals(Sort.BOTTOM);
     }
 
 }

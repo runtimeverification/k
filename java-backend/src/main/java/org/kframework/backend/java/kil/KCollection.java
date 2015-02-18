@@ -21,7 +21,7 @@ import com.google.common.base.Joiner;
 public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected KCollection(Variable frame, Kind kind) {
-        super(frame, kind);
+        super(frame, kind, null);
     }
 
     /**
@@ -105,7 +105,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         throw new UnsupportedOperationException();
     }
 
