@@ -4,7 +4,11 @@ package org.kframework.parser.concrete2kore;
 
 import org.junit.Test;
 import org.kframework.kore.outer.SyntaxProduction;
-import org.kframework.parser.*;
+import org.kframework.parser.Ambiguity;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.util.Either;
 
@@ -12,13 +16,14 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.kframework.Collections.Seq;
+import static org.kframework.kore.Constructors.Sort;
 import static org.kframework.kore.outer.Constructors.*;
-import static org.kframework.kore.Constructors.*;
-import static org.kframework.Collections.*;
-
-import static org.junit.Assert.*;
 
 public class TreeCleanerVisitorTest {
+
 
     TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
     SyntaxProduction fooProduction = SyntaxProduction(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
@@ -53,9 +58,6 @@ public class TreeCleanerVisitorTest {
         assertCleanup(Ambiguity.apply(KList.apply(foo)), foo);
     }
 
-
-//        amb([amb([NOKLABEL(amb([#emptyKRequireList()]),amb([#KModuleList(amb([#KModule(amb([#token(KModuleName,"FOO ")]),amb([#emptyKImportList()]),amb([#emptyKSentenceList()]))]),amb([#emptyKModuleList()]))]))])])
-
     public void assertCleanup(Term input, Term expected) {
         Term actual = treeCleanerVisitor.apply(input).right().get();
         if (!actual.equals(expected)) {
@@ -70,10 +72,5 @@ public class TreeCleanerVisitorTest {
         } else {
             throw result.left().get().iterator().next();
         }
-    }
-
-    @Test
-    public void testMerge() throws Exception {
-
     }
 }
