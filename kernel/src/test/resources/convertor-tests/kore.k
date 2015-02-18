@@ -40,6 +40,7 @@ module BASIC-K
   syntax K   //[...]   // no constructors at this stage
   syntax KString ::= r"[\\\"]([^\\\"\\n\\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"   [token, noAutoReject, onlyLabel]
          // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
+  syntax KLabel
 endmodule
 
 
@@ -81,7 +82,7 @@ endmodule
 // To be used to parse semantic rules
 module K
   imports KSEQ
-  syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)" [ hook ] // same like KSort?
+  syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)" [ hook, token ] // same like KSort?
   syntax KItem     ::= KVariable        //[ ... ]
   syntax KLabel    ::= KVariable        //[ ... ]
   syntax K         ::= K "=>" K         [ klabel(#KRewrite), hook(Rewrite) ]
@@ -92,7 +93,18 @@ module K
 //  syntax KItem     ::= KItem ":" KSort  [ hook ]
 endmodule
 
+// Temporary support for handwritten kore definitions
+module K-TEST
+  imports K
+  // The old outer parser leaves "requires" as part of a bubble, so we need a production here to
+  // hack around this until the new outer parser is available.
+  syntax RuleBody ::= K [ klabel(#KRule)]
+  syntax RuleBody ::= K "requires" K [klabel(#KRule)]
 
+  // Allow label() in addition to label(.::KList)
+  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
+  syntax EmptyKList ::= "" [klabel(#emptyKList)]
+endmodule
 
 // To be used for first-level parsing of global KORE definitions,
 // where the K terms are put in bubbles.  A similar, but larger
@@ -100,7 +112,7 @@ endmodule
 module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
   imports BASIC-K
 
-  syntax KDefinition   ::= KRequireList KModuleList   [ hook ]
+  syntax KDefinition   ::= KRequireList KModuleList   [ hook, klabel(#Definition) ]
 
   syntax KRequire      ::= "require" KString          [ klabel(#KRequire), hook ]
   // Radu: These list declarations are a bit tricky (no separator, and the empty element is null).

@@ -45,6 +45,8 @@
         <include>samples/**</include>
         <include>tutorial/**</include>
         <include>editor-support/**</include>
+        <include>INSTALL*</include>
+        <include>README*</include>
       </includes>
       <excludes>
         <exclude>**/.*/**</exclude>
@@ -55,9 +57,7 @@
       <directory>${project.parent.basedir}</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>INSTALL*</include>
         <include>LICENSE*</include>
-        <include>README*</include>
         <include>CHANGELOG*</include>
       </includes>
     </fileSet>

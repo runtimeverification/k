@@ -37,6 +37,19 @@ case class TermCons(items: List[Term], production: Production, location: Optiona
     this
   }
   override def toString() = production.klabel.getOrElse("NOKLABEL") + "(" + (items.asScala mkString ",") + ")"
+
+  var cachedHashCode: Option[Int] = None
+
+  def invalidateHashCode() {
+    cachedHashCode = None
+  }
+
+  override def hashCode = cachedHashCode match {
+    case None =>
+      cachedHashCode  = Some(items.asScala.map(_.hashCode).fold(production.hashCode * 37)( 31 * _ + _))
+      cachedHashCode.get
+    case Some(hc) => hc
+  }
 }
 
 case class Ambiguity(items: Set[Term], location: Optional[Location])
@@ -66,7 +79,7 @@ object TermCons {
 
 object KList {
   def apply(items: List[Term]): KList = new KList(items, Optional.empty[Location]())
-  @annotation.varargs def apply(ts: Term*): KList = KList(ts.asJava)
+  @annotation.varargs def apply(ts: Term*): KList = KList(new ArrayList(ts.asJava))
   def apply(toCopy: KList): KList = KList(new ArrayList(toCopy.items)) // change when making the classes mutable
 }
 
