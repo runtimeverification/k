@@ -4,7 +4,11 @@ package org.kframework.parser.concrete2kore;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.kframework.parser.*;
+import org.kframework.parser.Ambiguity;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.util.Either;
 
@@ -17,6 +21,7 @@ import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
 public class TreeCleanerVisitorTest {
+
 
     TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
     org.kframework.definition.Production fooProduction = Production(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
@@ -68,10 +73,5 @@ public class TreeCleanerVisitorTest {
         } else {
             throw result.left().get().iterator().next();
         }
-    }
-
-    @Test
-    public void testMerge() throws Exception {
-
     }
 }

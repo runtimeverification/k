@@ -8,6 +8,8 @@ import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 
 public final class RHSInstruction implements Serializable {
 
@@ -29,6 +31,8 @@ public final class RHSInstruction implements Serializable {
         private final int size3;
         private final Kind kind;
         private final List<CellLabel> cellLabels;
+        private final Source source;
+        private final Location location;
 
         @Override
         public String toString() {
@@ -83,12 +87,24 @@ public final class RHSInstruction implements Serializable {
 
         public Constructor(ConstructorType type, int size1,
                 int size2, int size3, Kind kind, List<CellLabel> cellLabels) {
+            this(type, size1, size2, size3, kind, cellLabels, null, null);
+        }
+
+        public Constructor(ConstructorType type, Source source, Location location) {
+            this(type, 0, 0, 0, null, null, source, location);
+        }
+
+        public Constructor(ConstructorType type, int size1,
+                int size2, int size3, Kind kind, List<CellLabel> cellLabels,
+                Source source, Location location) {
             this.type = type;
             this.size1 = size1;
             this.size2 = size2;
             this.size3 = size3;
             this.kind = kind;
             this.cellLabels = cellLabels;
+            this.source = source;
+            this.location = location;
         }
 
         public Constructor(ConstructorType type, Kind kind) {
@@ -121,6 +137,14 @@ public final class RHSInstruction implements Serializable {
 
         public List<CellLabel> cellLabels() {
             return cellLabels;
+        }
+
+        public Source getSource() {
+            return source;
+        }
+
+        public Location getLocation() {
+            return location;
         }
     }
 

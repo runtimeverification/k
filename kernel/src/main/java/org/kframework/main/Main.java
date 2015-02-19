@@ -195,6 +195,6 @@ public class Main {
     }
 
     public static Injector getInjector(String tool, String[] args2) {
-        return getInjector(new File("."), System.getenv(), tool, args2);
+        return getInjector(new File(System.getProperty("user.dir")), System.getenv(), tool, args2);
     }
 }

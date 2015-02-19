@@ -3,6 +3,7 @@ package org.kframework.parser.outer;
 
 import org.junit.Test;
 import org.kframework.kore.K;
+import org.kframework.parser.concrete2kore.ParserUtils;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -16,7 +17,7 @@ public class EKoreToKoreTest {
         String startSymbol = "KDefinition";
         File definitionFile = new File(this.getClass().getResource("/e-kore.k").toURI()).getAbsoluteFile();
 
-        K kBody = NewOuterParserTest.parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
+        K kBody = ParserUtils.parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);
 
         doTransformation(kBody);
     }

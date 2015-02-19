@@ -1,17 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
-import com.google.common.collect.Sets;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.Term;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import scala.util.Either;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Apply the prefer/avoid disambiguation filter.
@@ -49,7 +45,6 @@ public class PreferAvoidVisitor extends SafeTransformer {
             }
         }
 
-        Either<Set<ParseFailedException>, Term> vis;
         if (result instanceof Ambiguity) {
             // didn't manage to completely disambiguate, but I still need to go deeper into the tree
             return super.apply((Ambiguity) result);

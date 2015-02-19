@@ -398,7 +398,7 @@ public class BuiltinList extends Collection {
                 baseTermTypesBuilder.add(BaseTermType.VARIABLE);
                 listVariablesBuilder.add((Variable) term);
             } else {
-                throw KExceptionManager.criticalError("unexpected concatenated term" + term);
+                throw KExceptionManager.criticalError("unexpected concatenated term" + term, term);
             }
         }
 
@@ -461,7 +461,7 @@ public class BuiltinList extends Collection {
             } else {
                 throw KExceptionManager.criticalError(
                         "the builder is not allowed to concatencate list terms in "
-                        + BuilderStatus.ELEMENTS_RIGHT);
+                        + BuilderStatus.ELEMENTS_RIGHT, term);
             }
         }
 
