@@ -69,6 +69,8 @@ public abstract class SDFCompilerTest extends BaseTestCase {
 
         String nativeSDF2TableExecutable = path + OS.current().getNativeExecutable("sdf2table");
 
+        nativeSDF2TableExecutable = nativeSDF2TableExecutable.replace("k-distribution/k-distribution", "k-distribution");
+
         Sdf2Table sdf2Table = new Sdf2Table(Providers.of(new ProcessBuilder()),
                 nativeSDF2TableExecutable);
 
