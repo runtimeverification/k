@@ -1,6 +1,6 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework
 
-import org.kframework.kore.Sort
 import java.util.Optional
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
@@ -23,7 +23,7 @@ class POSet[T](directRelations: Set[(T, T)]) {
   private def transitiveClosure(relations: Map[T, Set[T]]): Map[T, Set[T]] = {
     val newRelations = relations map {
       case (start, succ) =>
-        val newSucc = (succ flatMap { relations.get(_).getOrElse(Set()) })
+        val newSucc = succ flatMap { relations.getOrElse(_, Set()) }
         if (newSucc.contains(start))
           constructAndThrowCycleException(start, start, Seq())
         (start, succ | newSucc)
@@ -34,9 +34,9 @@ class POSet[T](directRelations: Set[(T, T)]) {
   /**
    * Recursive method constructing and throwing and the cycle exception.
    *
-   * @param the "start" (or tail) element to look for when constructing the cycle
-   * @param the current element
-   * @param the path so far
+   * @param start (or tail) element to look for when constructing the cycle
+   * @param current element
+   * @param path so far
    */
   private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
     val currentPath = path :+ current
@@ -52,8 +52,8 @@ class POSet[T](directRelations: Set[(T, T)]) {
    */
   val relations = transitiveClosure(directRelationsMap)
 
-  def <(x: T, y: T): Boolean = relations.get(x) map { _.contains(y) } getOrElse (false)
-  def >(x: T, y: T): Boolean = relations.get(y) map { _.contains(x) } getOrElse (false)
+  def <(x: T, y: T): Boolean = relations.get(x).exists(_.contains(y))
+  def >(x: T, y: T): Boolean = relations.get(y).exists(_.contains(x))
   def ~(x: T, y: T) = <(x, y) || <(y, x)
 
   /**

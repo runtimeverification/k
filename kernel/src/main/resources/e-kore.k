@@ -19,9 +19,9 @@ module KAST
                        [klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel)]
                  | KLabel "(" KList ")" [klabel(#KApply), hook(org.kframework.kore.KApply)]
 
-  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`" [klabel(#KLabel), token]
+  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`" [token, hook(org.kframework.kore.KLabel)]
                   | r"[#a-z][a-zA-Z0-9]*"
-                       [klabel(#KLabel), token, hook(org.kframework.kore.KLabel)]
+                       [token, hook(org.kframework.kore.KLabel)]
                        // something that doesn't collide with meta-variables
 
   syntax KList ::= K
@@ -131,18 +131,18 @@ module OUTER-KORE
                      | "syntax" "priority"   KPrioritySeq OptionalAttributes
                                [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
                      | "syntax" "priorities" KPrioritySeq OptionalAttributes
-                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                               [klabel(#KSyntaxPriorities), hook(org.kframework.kore.outer.SyntaxPriority)]
                      | "syntax" "left" KNeTagSet OptionalAttributes
-                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                               [klabel(#KSyntaxLeft), hook(org.kframework.kore.outer.SyntaxPriority)]
                      | "syntax" "right" KNeTagSet OptionalAttributes
-                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                               [klabel(#KSyntaxRight), hook(org.kframework.kore.outer.SyntaxPriority)]
                      | "syntax" "non-assoc" KNeTagSet OptionalAttributes
-                               [klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority)]
+                               [klabel(#KSyntaxNonAssoc), hook(org.kframework.kore.outer.SyntaxPriority)]
 
   syntax KPrioritySeq ::= KPrioritySeq ">" KNeTagSet   [klabel(#KPrioritySeq), assoc]
-                        | KNeTagSet                    [klabel(#KPrioritySeq)]
+                        | KNeTagSet
   syntax KNeTagSet    ::= Tag KNeTagSet                [klabel(#KTagSet), assoc, comm]
-                        | Tag                          [klabel(#KTagSet)]
+                        | Tag
   syntax Tag ::= KLabel
 
   syntax KProduction ::= KProductionItem
@@ -152,7 +152,7 @@ module OUTER-KORE
                            | KString     [hook(org.kframework.kore.outer.Terminal)]
                            | "r" KString [hook(org.kframework.kore.outer.RegexTerminal)]
                            | "Token" "{" TokenContent "}" [klabel(#KPIToken)]
-                           | "Lexer" "{" TokenContent "}" [klabel(#KPIToken)]
+                           | "Lexer" "{" TokenContent "}" [klabel(#KPILexer)]
                            | "NeList" "{" KSort "," KString "}" [klabel(#NeList)]
                            |   "List" "{" KSort "," KString "}" [klabel(#List)]
   syntax TokenContent ::= r"[^\\n\\r}]" [token]

@@ -101,16 +101,16 @@ public class CellCollection extends Collection {
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasMultiplicityCell;
 
-    public static CellCollection singleton(CellLabel cellLabel, Term content, Context context) {
-        return (CellCollection) builder(context).put(cellLabel, content).build();
+    public static CellCollection singleton(CellLabel cellLabel, Term content, Definition definition) {
+        return (CellCollection) builder(definition).put(cellLabel, content).build();
     }
 
     /**
      * Static helper method which creates canonicalized cell collection
      * according to the given contents.
      */
-    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame, Context context) {
-        Builder builder = builder(context);
+    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame, Definition definition) {
+        Builder builder = builder(definition);
         builder.putAll(cells);
         if (frame != null) {
             builder.concatenate(frame);
@@ -121,15 +121,15 @@ public class CellCollection extends Collection {
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
-            Context context) {
-        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, context) > 0);
+            Definition definition) {
+        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0);
     }
 
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             boolean hasMultiplicityCell) {
-        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
+        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;
@@ -139,11 +139,11 @@ public class CellCollection extends Collection {
         return collectionVariables.size() == 1 ? collectionVariables.iterator().next() : null;
     }
 
-    private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Context context) {
+    private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Definition definition) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().containsKey(cellLabel.name())) {
-                if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+            if (definition.getConfigurationStructureMap().containsKey(cellLabel.name())) {
+                if (definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     count++;
                 } else {
                     assert cells.get(cellLabel).size() == 1:
@@ -195,8 +195,8 @@ public class CellCollection extends Collection {
      * Builds a new {@code CellCollection} by removing all the given cell
      * labels.
      */
-    public Term removeAll(Set<CellLabel> removeLabels, Context context) {
-        Builder builder = builder(context);
+    public Term removeAll(Set<CellLabel> removeLabels, Definition definition) {
+        Builder builder = builder(definition);
         cells.keySet().stream()
                 .filter(label -> !removeLabels.contains(label))
                 .forEach(label -> builder.addAll(cells.get(label)));
@@ -281,7 +281,7 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         throw new UnsupportedOperationException();
     }
 
@@ -305,17 +305,17 @@ public class CellCollection extends Collection {
         return transformer.transform(this);
     }
 
-    public static Builder builder(Context context) {
-        return new Builder(context);
+    public static Builder builder(Definition definition) {
+        return new Builder(definition);
     }
 
     public static class Builder {
         private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder;
         private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder;
-        private final Context context;
+        private final Definition definition;
 
-        private Builder(Context context) {
-            this.context = context;
+        private Builder(Definition definition) {
+            this.definition = definition;
             cellsBuilder = ImmutableListMultimap.builder();
             collectionVariablesBuilder = ImmutableMultiset.builder();
         }
@@ -376,10 +376,10 @@ public class CellCollection extends Collection {
                 switch (collectionVariables.size()) {
                     case 0:  return EMPTY;
                     case 1:  return collectionVariables.iterator().next();
-                    default: return new CellCollection(cells, collectionVariables, context);
+                    default: return new CellCollection(cells, collectionVariables, definition);
                 }
             } else {
-                return new CellCollection(cells, collectionVariables, context);
+                return new CellCollection(cells, collectionVariables, definition);
             }
         }
     }

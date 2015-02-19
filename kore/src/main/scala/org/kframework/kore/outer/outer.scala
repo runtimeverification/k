@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2015 K Team. All Rights Reserved.
 
 package org.kframework.kore.outer
 
@@ -8,7 +8,7 @@ import org.kframework.kore.{Attributes, KLabel, KList, KToken, Sort}
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
-  extends AssertionError(nonTerminals.toString)
+  extends AssertionError(nonTerminals.toString())
 
 case class Definition(requires: Set[Require], modules: Set[Module], att: Attributes = Attributes())
   extends DefinitionToString with OuterKORE {
@@ -27,10 +27,34 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
-  private lazy val subsortRelations = sentences flatMap {
+  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences flatMap {
     case SyntaxProduction(endSort, items, _) =>
       items collect { case NonTerminal(startSort) => (startSort, endSort) }
     case _ => Set()
+  }
+
+  private lazy val expressedPriorities: Set[(Tag, Tag)] =
+    sentences
+      .collect({ case SyntaxPriority(ps, _) => ps })
+      .map { ps: Seq[Set[Tag]] =>
+      val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
+        case ((all, prev), current) =>
+          val newPairs = for (a <- prev; b <- current) yield (a, b)
+
+          (newPairs | all, current)
+      }
+      pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
+    }.flatten
+  lazy val priorities = POSet(expressedPriorities)
+  lazy val leftAssoc  = buildAssoc(Associativity.Left)
+  lazy val rightAssoc = buildAssoc(Associativity.Right)
+
+  private def buildAssoc(side:Associativity.Value): Set[(Tag, Tag)] = {
+    sentences
+      .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps})
+      .map { ps: Set[Tag] =>
+      for (a <- ps; b <- ps) yield (a, b)
+    }.flatten
   }
 
   lazy val subsorts = POSet(subsortRelations)
@@ -41,13 +65,15 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
     case _ => Set()
   }
-  if (!nonTerminalsWithUndefinedSort.isEmpty)
+  if (nonTerminalsWithUndefinedSort.nonEmpty)
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
 }
+
 // hooked but different from core, Import is a sentence here
 
-trait Sentence { // marker
+trait Sentence {
+  // marker
   val att: Attributes
 }
 
@@ -62,13 +88,15 @@ case class Rule(
   requires: kore.K,
   ensures: kore.K,
   att: Attributes) extends Sentence
-  with RuleToString with OuterKORE
+with RuleToString with OuterKORE
 
 case class ModuleComment(comment: String, att: Attributes = Attributes())
   extends Sentence with OuterKORE
 
 case class Import(moduleName: String, att: Attributes = Attributes())
-  extends Sentence with ImportToString with OuterKORE // hooked
+  extends Sentence with ImportToString with OuterKORE
+
+// hooked
 
 // syntax declarations
 
@@ -94,6 +122,8 @@ trait Production {
   def items: Seq[ProductionItem]
   def klabel: Option[KLabel] =
     att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
+  def isSyntacticSubsort: Boolean =
+    items.size == 1 && items.head.isInstanceOf[NonTerminal]
 }
 
 object Production {
@@ -101,19 +131,25 @@ object Production {
 }
 
 case class SyntaxSort(sort: Sort, att: Attributes = Attributes()) extends Sentence
-  with SyntaxSortToString with OuterKORE {
+with SyntaxSortToString with OuterKORE {
 }
 
 case class SyntaxProduction(sort: Sort, items: Seq[ProductionItem], att: Attributes = Attributes())
-  extends Sentence with SyntaxProductionToString with Production // hooked but problematic, see kast-core.k
+  extends Sentence with SyntaxProductionToString with Production
 
-sealed trait ProductionItem extends OuterKORE // marker
+// hooked but problematic, see kast-core.k
+
+sealed trait ProductionItem extends OuterKORE
+
+// marker
 
 case class NonTerminal(sort: Sort) extends ProductionItem
-  with NonTerminalToString
+with NonTerminalToString
+
 case class RegexTerminal(regex: String) extends ProductionItem with RegexTerminalToString
+
 case class Terminal(value: String) extends ProductionItem // hooked
-  with TerminalToString
+with TerminalToString
 
 /* Helper constructors */
 object NonTerminal {

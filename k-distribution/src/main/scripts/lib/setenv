@@ -9,9 +9,12 @@ K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
 if [ `uname` = 'Darwin' ]; then
   export PATH="$K_LIB_DIR/native/osx":$PATH
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
-elif [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
+elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
   export PATH="$K_LIB_DIR/native/windows":"$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
 else
+  if [ `uname` != 'Linux' ]; then
+    echo "Warning: unsupported OS detected. Defaulting to Linux mode, but errors may occur." 1>&2
+  fi
   export PATH="$K_LIB_DIR/native/linux":"$K_LIB_DIR/native/linux$ARCH":$PATH
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
 fi
