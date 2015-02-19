@@ -29,6 +29,8 @@ import com.google.common.collect.Lists;
  */
 public class BuiltinList extends Collection {
 
+    public static final BuiltinList EMPTY_LIST = (BuiltinList) builder().build();
+
     private static enum BaseTermType {
         VARIABLE, FUNCTION, PATTERN, LIST;
     }
@@ -47,9 +49,9 @@ public class BuiltinList extends Collection {
             ImmutableList<Term> baseTerms,
             ImmutableList<Term> elementsRight,
             ImmutableList<BaseTermType> baseTermTypes,
-            ImmutableList<Variable> listVariables,
-            TermContext context) {
-        super(computeFrame(baseTerms), Kind.KITEM, context);
+            ImmutableList<Variable> listVariables
+            ) {
+        super(computeFrame(baseTerms), Kind.KITEM);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
@@ -65,17 +67,12 @@ public class BuiltinList extends Collection {
         }
     }
 
-    private BuiltinList(ImmutableList<Term> elementsLeft, TermContext context) {
-        this(elementsLeft,
-             ImmutableList.<Term>of(),
-             ImmutableList.<Term>of(),
-             ImmutableList.<BaseTermType>of(),
-             ImmutableList.<Variable>of(),
-             context);
+    private BuiltinList(ImmutableList<Term> elementsLeft) {
+        this(elementsLeft, ImmutableList.<Term>of(), ImmutableList.<Term>of(), ImmutableList.<BaseTermType>of(), ImmutableList.<Variable>of());
     }
 
-    public static Term concatenate(TermContext context, Term... lists) {
-        Builder builder = new Builder(context);
+    public static Term concatenate(Term... lists) {
+        Builder builder = new Builder();
         builder.concatenate(lists);
         return builder.build();
     }
@@ -237,20 +234,21 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public List<Term> getKComponents() {
-        DataStructureSort sort = context.definition().dataStructureSortOf(sort());
+    public List<Term> getKComponents(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
 
         ArrayList<Term> components = Lists.newArrayList();
         Consumer<Term> addElementToComponents = element ->
                 components.add(KItem.of(
-                        KLabelConstant.of(sort.elementLabel(), context.definition()),
+                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
                         KList.singleton(element),
                         context, element.getSource(), element.getLocation()));
 
         elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
             if (term instanceof BuiltinList) {
-                components.addAll(((BuiltinList) term).getKComponents());
+                components.addAll(((BuiltinList) term).getKComponents(context));
             } else {
                 components.add(term);
             }
@@ -260,8 +258,8 @@ public class BuiltinList extends Collection {
         return components;
     }
 
-    public static Builder builder(TermContext context) {
-        return new Builder(context);
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class BaseTerm {
@@ -354,11 +352,6 @@ public class BuiltinList extends Collection {
         private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<Variable> listVariablesBuilder = new ImmutableList.Builder<>();
-        private final TermContext context;
-
-        public Builder(TermContext context) {
-            this.context = context;
-        }
 
         /**
          * Appends the specified term as a list item, namely
@@ -436,9 +429,7 @@ public class BuiltinList extends Collection {
             } else if (status == BuilderStatus.BASE_TERMS) {
                 if (!(term instanceof BuiltinList)) {
                     if (!pendingElements.isEmpty()) {
-                        addConcatTerm(new BuiltinList(
-                                ImmutableList.copyOf(pendingElements),
-                                context));
+                        addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
                         pendingElements.clear();
                     }
                     addConcatTerm(term);
@@ -449,9 +440,7 @@ public class BuiltinList extends Collection {
                     } else {
                         pendingElements.addAll(list.elementsLeft);
                         if (!pendingElements.isEmpty()) {
-                            addConcatTerm(new BuiltinList(
-                                    ImmutableList.copyOf(pendingElements),
-                                    context));
+                            addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
                             pendingElements.clear();
                         }
                         addConcatTerms(list.baseTerms);
@@ -494,8 +483,7 @@ public class BuiltinList extends Collection {
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build(),
-                    listVariablesBuilder.build(),
-                    context);
+                    listVariablesBuilder.build());
             return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
                    builtinList.baseTerms().get(0) :
                    builtinList;

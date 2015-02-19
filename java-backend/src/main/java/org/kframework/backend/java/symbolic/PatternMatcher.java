@@ -269,9 +269,7 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (matchOnFunctionSymbol) {
-            ((BuiltinList) BuiltinList.concatenate(termContext, builtinList)).toKore().accept(
-                    this,
-                    ((BuiltinList) BuiltinList.concatenate(termContext, ((BuiltinList) pattern))).toKore());
+            builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
             return;
         }
 
@@ -364,8 +362,7 @@ public class PatternMatcher extends AbstractMatcher {
             Substitution<Variable, Term> substitution = addFrameMatching(
                     builtinMap,
                     patternBuiltinMap,
-                    ps,
-                    termContext);
+                    ps);
             if (substitution != null) {
                 substitutions.add(substitution);
             }
@@ -387,15 +384,14 @@ public class PatternMatcher extends AbstractMatcher {
     private static Substitution<Variable, Term> addFrameMatching(
             BuiltinMap builtinMap,
             BuiltinMap patternBuiltinMap,
-            PartialSubstitution ps,
-            TermContext context) {
+            PartialSubstitution ps) {
         if (!patternBuiltinMap.collectionVariables().isEmpty()) {
             Variable frame = patternBuiltinMap.collectionVariables().iterator().next();
             if (ps.substitution.containsKey(frame)) {
                 return null;
             }
 
-            BuiltinMap.Builder builder = BuiltinMap.builder(context);
+            BuiltinMap.Builder builder = BuiltinMap.builder();
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
                 if (!ps.matched.contains(entry.getKey())) {
                     builder.put(entry.getKey(), entry.getValue());
@@ -475,6 +471,8 @@ public class PatternMatcher extends AbstractMatcher {
         }
         CellCollection otherCellCollection = (CellCollection) pattern;
 
+        Context context = termContext.definition().context();
+
         if (cellCollection.hasFrame()) {
         // TODO(dwightguth): put this assertion back in once this class is constructed by
         // the injector
@@ -508,9 +506,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             if (frame != null) {
                 if (otherFrame != null && numOfOtherDiffCellLabels == 0) {
-                    addSubstitution(
-                            otherFrame,
-                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+                    addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
                 } else {
                     fail(cellCollection, otherCellCollection);
                 }
@@ -523,9 +519,7 @@ public class PatternMatcher extends AbstractMatcher {
                         fail(cellCollection, otherCellCollection);
                     }
                 } else {
-                    addSubstitution(
-                            otherFrame,
-                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+                    addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
                 }
             }
         }
@@ -542,7 +536,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!termContext.definition().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (!termContext.definition().context().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     match(cellCollection.get(cellLabel).iterator().next().content(),
@@ -601,7 +595,7 @@ public class PatternMatcher extends AbstractMatcher {
                     continue;
                 }
 
-                CellCollection.Builder builder = CellCollection.builder(termContext.definition());
+                CellCollection.Builder builder = CellCollection.builder(termContext.definition().context());
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.isSelected(i)) {
                         builder.add(cells[i]);
@@ -695,7 +689,7 @@ public class PatternMatcher extends AbstractMatcher {
             if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
-                Multimap<Integer, Integer> binderMap = kLabelConstant.getMetaBinderMap();
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
                 List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);

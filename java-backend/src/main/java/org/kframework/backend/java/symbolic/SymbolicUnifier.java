@@ -8,7 +8,6 @@ import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -228,20 +227,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(list, otherList);
         }
 
-        BuiltinList.Builder builder = BuiltinList.builder(termContext);
+        BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItems(remainingElementsLeft);
         builder.concatenate(remainingBaseTerms);
         builder.addItems(remainingElementsRight);
         Term remainingList = builder.build();
 
-        BuiltinList.Builder otherBuilder = BuiltinList.builder(termContext);
+        BuiltinList.Builder otherBuilder = BuiltinList.builder();
         otherBuilder.addItems(otherRemainingElementsLeft);
         otherBuilder.concatenate(otherRemainingBaseTerms);
         otherBuilder.addItems(otherRemainingElementsRight);
         Term otherRemainingList = otherBuilder.build();
 
-        if (!(remainingList instanceof BuiltinList && ((BuiltinList) remainingList).isEmpty())
-                || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
+        if (!remainingList.equals(BuiltinList.EMPTY_LIST) || !otherRemainingList.equals(BuiltinList.EMPTY_LIST)) {
             if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
                 add(remainingList, otherRemainingList);
             } else {
@@ -309,20 +307,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(set, otherSet);
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(termContext);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
         builder.addAll(remainingElements);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingSet = builder.build();
 
-        BuiltinSet.Builder otherBuilder = BuiltinSet.builder(termContext);
+        BuiltinSet.Builder otherBuilder = BuiltinSet.builder();
         otherBuilder.addAll(otherRemainingElements);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
         Term otherRemainingSet = otherBuilder.build();
 
-        if (!(remainingSet instanceof BuiltinSet && ((BuiltinSet) remainingSet).isEmpty())
-                || !(otherRemainingSet instanceof BuiltinSet && ((BuiltinSet) otherRemainingSet).isEmpty())) {
+        if (!remainingSet.equals(BuiltinSet.EMPTY_SET) || !otherRemainingSet.equals(BuiltinSet.EMPTY_SET)) {
             if (remainingSet instanceof Variable || otherRemainingSet instanceof Variable || partialSimpl) {
                 // set equality resolved or partial simplification enabled
                 add(remainingSet, otherRemainingSet);
@@ -450,20 +447,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             fail(map, otherMap);
         }
 
-        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         builder.putAll(remainingEntries);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingMap = builder.build();
 
-        BuiltinMap.Builder otherBuilder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
         otherBuilder.putAll(otherRemainingEntries);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
         Term otherRemainingMap = otherBuilder.build();
 
-        if (!(remainingMap instanceof BuiltinMap && ((BuiltinMap) remainingMap).isEmpty())
-                || !(otherRemainingMap instanceof BuiltinMap && ((BuiltinMap) otherRemainingMap).isEmpty())) {
+        if (!remainingMap.equals(BuiltinMap.EMPTY_MAP) || !otherRemainingMap.equals(BuiltinMap.EMPTY_MAP)) {
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable || partialSimpl) {
                 // map equality resolved or partial simplification enabled
                 add(remainingMap, otherRemainingMap);
@@ -535,7 +531,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
         int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
-        Definition definition = termContext.definition();
+        Context context = termContext.definition().context();
 
         /*
          * CASE 1: cellCollection has no explicitly specified starred-cell;
@@ -554,8 +550,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             if (frame != null && otherFrame != null && (numOfDiffCellLabels > 0) && (numOfOtherDiffCellLabels > 0)) {
                 Variable variable = Variable.getAnonVariable(Sort.BAG);
-                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, definition));
-                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, definition), otherFrame);
+                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, context));
+                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, context), otherFrame);
             } else if (frame == null && (numOfOtherDiffCellLabels > 0)
                     || otherFrame == null && (numOfDiffCellLabels > 0)) {
                 fail(cellCollection, otherCellCollection);
@@ -565,8 +561,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 }
             } else {
                 add(
-                        CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, definition),
-                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, definition));
+                        CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, context),
+                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, context));
             }
         }
         /* Case 2: both cell collections have explicitly specified starred-cells */
@@ -592,7 +588,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next().content(),
@@ -640,7 +636,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                CellCollection.Builder builder = CellCollection.builder(definition);
+                CellCollection.Builder builder = CellCollection.builder(context);
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.isSelected(i)) {
                         builder.add(cells[i]);
@@ -726,7 +722,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
-                Multimap<Integer, Integer> binderMap = kLabelConstant.getMetaBinderMap();
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
                 List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);

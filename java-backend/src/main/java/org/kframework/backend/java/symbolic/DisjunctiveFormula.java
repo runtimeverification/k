@@ -4,7 +4,7 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.CollectionInternalRepresentation;
+import org.kframework.backend.java.kil.InternalRepresentationToK;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
-public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation {
+public class DisjunctiveFormula extends Term implements InternalRepresentationToK {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 
@@ -60,22 +60,17 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     @Override
-    public Term toKore() {
-        return toKore(context);
+    public List<Term> getKComponents(TermContext context) {
+        return conjunctions.stream().map(c -> c.toK(context)).collect(Collectors.toList());
     }
 
     @Override
-    public List<Term> getKComponents() {
-        return conjunctions.stream().map(ConjunctiveFormula::toKore).collect(Collectors.toList());
+    public KLabel constructorLabel(TermContext context) {
+        return KLabelConstant.of("'_orBool_", context.definition().context());
     }
 
     @Override
-    public KLabel constructorLabel() {
-        return KLabelConstant.of("'_orBool_", context.definition());
-    }
-
-    @Override
-    public Token unit() {
+    public Token unit(TermContext context) {
         return BoolToken.FALSE;
     }
 
@@ -100,7 +95,7 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public String toString() {
-        return toKore().toString();
+        return toK(context).toString();
     }
 
     @Override

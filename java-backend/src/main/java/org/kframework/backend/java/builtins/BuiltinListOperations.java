@@ -24,15 +24,15 @@ public class BuiltinListOperations {
         if (list1.sort() != Sort.LIST || list2.sort() != Sort.LIST) {
             throw new IllegalArgumentException();
         }
-        return BuiltinList.concatenate(context, list1, list2);
+        return BuiltinList.concatenate(list1, list2);
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinList.builder(context).build();
+        return BuiltinList.EMPTY_LIST;
     }
 
     public static Term element(Term element, TermContext context) {
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItem(element);
         return builder.build();
     }
@@ -91,7 +91,7 @@ public class BuiltinListOperations {
             }
         }
 
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItems(elementsLeft);
         builder.concatenate(list.baseTerms());
         builder.addItems(elementsRight);

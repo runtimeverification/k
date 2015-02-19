@@ -11,19 +11,17 @@ import org.kframework.main.Tool;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import java.io.Serializable;
-
 @Singleton
-public class GlobalContext implements Serializable {
+public class GlobalContext {
     private Definition def;
-    public final transient FileSystem fs;
-    public final transient Tool tool;
+    public final FileSystem fs;
+    public final Tool tool;
     @Deprecated
-    public final transient EqualityOperations equalityOps;
+    public final EqualityOperations equalityOps;
     @Deprecated
-    public final transient SMTOperations constraintOps;
+    public final SMTOperations constraintOps;
     @Deprecated
-    public final transient KItemOperations kItemOps;
+    public final KItemOperations kItemOps;
 
     @Inject
     public GlobalContext(

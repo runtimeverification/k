@@ -1,11 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Set;
-
-import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.name.Names;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -14,7 +11,13 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
+import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -25,17 +28,13 @@ import org.kframework.kil.Attributes;
 public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
-    private static final MapCache<Set<SortSignature>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
+    private static final MapCache<ImmutableSet<Production>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
 
     /* un-escaped label */
     private final String label;
 
-    /* the sort signatures of the productions generating this {@code KLabelConstant} */
-    private final Set<SortSignature> signatures;
-
-    /* the attributes associated with the productions generating this {@code KLabelConstant}
-     * (attributes are assumed to be identical for all productions) */
-    private final Attributes productionAttributes;
+    /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
+    private final ImmutableSet<Production> productions;
 
     /*
      * boolean flag set iff a production tagged with "function" or "predicate"
@@ -55,26 +54,59 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
 
     private final Sort predicateSort;
 
-    private KLabelConstant(
-            String label,
-            Set<SortSignature> signatures,
-            Attributes productionAttributes) {
+    /**
+     * Specifies if this {@code KLabelConstant} is a list label,
+     * e.g. {@code '.List{"'_,_"}}.
+     */
+    private final boolean isListLabel;
+
+    private KLabelConstant(String label, ImmutableSet<Production> productions, Context context) {
         this.label = label;
-        this.signatures = signatures;
-        this.productionAttributes = productionAttributes;
+        this.productions = productions;
 
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
-        boolean isFunction;
+        boolean isFunction = false;
         boolean isPattern = false;
         String smtlib = null;
         if (!label.startsWith("is")) {
             predicateSort = null;
-            isFunction = productionAttributes.containsKey(Attribute.FUNCTION.getKey())
-                    || productionAttributes.containsKey(Attribute.PREDICATE.getKey());
-            isPattern = productionAttributes.containsKey(Attribute.keyOf(Attribute.PATTERN_KEY));
-            Attribute<?> smtlibAttribute = productionAttributes.get(Attribute.keyOf(Attribute.SMTLIB_KEY));
-            smtlib = smtlibAttribute != null ? (String) smtlibAttribute.getValue() : null;
+
+            Iterator<Production> iterator = productions.iterator();
+            if (iterator.hasNext()) {
+                Production fstProd = iterator.next();
+                isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
+                        || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
+                isPattern = fstProd.containsAttribute(Attribute.PATTERN_KEY);
+                smtlib = fstProd.getAttribute(Attribute.SMTLIB_KEY);
+            }
+
+            while (iterator.hasNext()) {
+                Production production = iterator.next();
+                /*
+                 * YilongL: this assertion is necessary because whether this
+                 * KLabel is a function determines if the KItem constructed by
+                 * this KLabel can be split during unification
+                 */
+                if (isFunction != (production
+                        .containsAttribute(Attribute.FUNCTION.getKey()) || production
+                        .containsAttribute(Attribute.PREDICATE.getKey()))) {
+                    throw KExceptionManager.criticalError("Cannot determine if the KLabel "
+                        + label
+                        + " is a function symbol because there are multiple productions associated with this KLabel: "
+                        + productions);
+                }
+                if (isPattern != production.containsAttribute(Attribute.PATTERN_KEY)) {
+                    throw KExceptionManager.criticalError("Cannot determine if the KLabel " + label
+                        + " is a pattern symbol because there are multiple productions associated with this KLabel: "
+                        + productions);
+                }
+                if (!(smtlib == null && production.getAttribute(Attribute.SMTLIB_KEY) == null || smtlib.equals(production.getAttribute(Attribute.SMTLIB_KEY)))) {
+                    throw KExceptionManager.criticalError("Cannot determine the smtlib attribute of the KLabel " + label
+                        + " because there are multiple productions associated with this KLabel: "
+                        + productions);
+                }
+            }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
@@ -84,6 +116,17 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isFunction = isFunction;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
+
+        this.isListLabel = !context.listKLabels.get(label).isEmpty();
+    }
+
+    private KItem buildListTerminator(Context context) {
+        if (!context.listKLabels.get(label).isEmpty()) {
+            Production production = context.listKLabels.get(label).iterator().next();
+            String separator = production.getListDecl().getSeparator();
+            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
+        }
+        return null;
     }
 
     /**
@@ -94,12 +137,10 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, Definition definition) {
-        return cache.get(definition.signaturesOf(label), () -> new MapCache<>(new PatriciaTrie<>()))
-                .get(label, () -> new KLabelConstant(
-                        label,
-                        definition.signaturesOf(label),
-                        definition.kLabelAttributesOf(label)));
+    public static KLabelConstant of(String label, Context context) {
+        ImmutableSet<Production> productions = ImmutableSet.copyOf(context.productionsOf(label));
+        MapCache<String, KLabelConstant> trie = cache.get(productions, () -> new MapCache<>(new PatriciaTrie<>()));
+        return trie.get(label, () -> new KLabelConstant(label, productions, context));
     }
 
     /**
@@ -150,6 +191,18 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         return predicateSort;
     }
 
+    public boolean isListLabel() {
+        return isListLabel;
+    }
+
+    /**
+     * Returns the associated list terminator if this {@code KLabelConstant} is
+     * a list label; otherwise, {@code null}.
+     */
+    public KItem getListTerminator(Context context) {
+        return buildListTerminator(context);
+    }
+
     public String label() {
         return label;
     }
@@ -157,8 +210,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     /**
      * Returns a list of productions generating this {@code KLabelConstant}.
      */
-    public Set<SortSignature> signatures() {
-        return signatures;
+    public List<Production> productions() {
+        return ImmutableList.copyOf(productions);
     }
 
     @Override
@@ -207,52 +260,42 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        MapCache<String, KLabelConstant> trie = cache.get(signatures, () -> new MapCache<>(new PatriciaTrie<>()));
+        MapCache<String, KLabelConstant> trie = cache.get(productions, () -> new MapCache<>(new PatriciaTrie<>()));
         return trie.get(label, () -> this);
     }
 
-    public String getAttr(String attribute) {
-        return productionAttributes.getAttr(attribute);
-    }
-
     public boolean isMetaBinder() {
-        return getAttr("metabinder") != null;
+        return hasAttribute("metabinder");
     }
 
     public boolean isBinder() {
-        return getAttr("binder") != null;
+        return hasAttribute("binder");
+    }
+
+    private boolean hasAttribute(String attribute) {
+        for (Production production : productions) {
+            if (production.containsAttribute(attribute)) {
+                return true;
+                //assuming is binder if one production says so.
+            }
+        }
+        return false;
     }
 
     /**
-     * Searches for and retrieves (if found) a binder map for this label
+     * Searches for and retieves (if found) a binder map for this label
      * See {@link org.kframework.kil.Production#getBinderMap()}
      *
      * @return the binder map for this label (or {@code null} if no binder map was defined.
      */
     public Multimap<Integer, Integer> getBinderMap() {
-        if (isBinder()) {
-            return productionAttributes.getAttr(Attribute.Key.get(
-                    new TypeToken<Multimap<Integer, Integer>>() {},
-                    Names.named("binder")));
-        } else {
-            return null;
+        for (Production production : productions) {
+            Multimap<Integer, Integer> binderMap = production.getBinderMap();
+            if (binderMap != null) {
+                return binderMap;
+                //assuming is binder if one production says so.
+            }
         }
+        return  null;
     }
-
-    /**
-     * Searches for and retrieves (if found) a meta binder map for this label
-     * See {@link org.kframework.kil.Production#getBinderMap()}
-     *
-     * @return the binder map for this label (or {@code null} if no meta binder map was defined.
-     */
-    public Multimap<Integer, Integer> getMetaBinderMap() {
-        if (isMetaBinder()) {
-            return productionAttributes.getAttr(Attribute.Key.get(
-                    new TypeToken<Multimap<Integer, Integer>>() {},
-                    Names.named("metabinder")));
-        } else {
-            return null;
-        }
-    }
-
 }

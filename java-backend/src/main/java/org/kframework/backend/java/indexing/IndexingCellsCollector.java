@@ -40,8 +40,9 @@ public class IndexingCellsCollector extends BottomUpVisitor {
     public void visit(CellCollection cellCollection) {
         for (CellCollection.Cell cell : cellCollection.cells().values()) {
             CellLabel cellLabel = cell.cellLabel();
-            String streamCellAttr = definition.getConfigurationStructureMap()
-                    .get(cellLabel.name()).cell.getCellAttribute(Attribute.STREAM_KEY);
+            String streamCellAttr = definition.context()
+                    .getConfigurationStructureMap().get(cellLabel.name()).cell
+                    .getCellAttribute(Attribute.STREAM_KEY);
 
             if (cellLabel.equals(CellLabel.K)
                     || Constants.STDIN.equals(streamCellAttr)

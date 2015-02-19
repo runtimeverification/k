@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.primitives.UnsignedInts;
-import org.kframework.backend.java.kil.TermContext;
 
 
 /**
@@ -58,22 +57,18 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public BuiltinList sdiv(BitVector<Integer> bitVector, TermContext context) {
+    public BuiltinList sdiv(BitVector<Integer> bitVector) {
         if (bitVector.value != 0) {
-            return makeBuiltinListOfOverflowArithmeticResult(
-                    Ints.checkedDiv(value, bitVector.value),
-                    context);
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedDiv(value, bitVector.value));
         } else {
             return null;
         }
     }
 
     @Override
-    public BuiltinList srem(BitVector<Integer> bitVector, TermContext context) {
+    public BuiltinList srem(BitVector<Integer> bitVector) {
         if (bitVector.value != 0) {
-            return makeBuiltinListOfOverflowArithmeticResult(
-                    Ints.checkedRem(value, bitVector.value),
-                    context);
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedRem(value, bitVector.value));
         } else {
             return null;
         }
@@ -98,45 +93,36 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public BuiltinList sadd(BitVector<Integer> bitVector, TermContext context) {
-        return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedAdd(value, bitVector.value),
-                context);
+    public BuiltinList sadd(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedAdd(value, bitVector.value));
     }
 
     @Override
-    public BuiltinList uadd(BitVector<Integer> bitVector, TermContext context) {
+    public BuiltinList uadd(BitVector<Integer> bitVector) {
         return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedUnsignedAdd(value, bitVector.value),
-                context);
+                Ints.checkedUnsignedAdd(value, bitVector.value));
     }
 
     @Override
-    public BuiltinList ssub(BitVector<Integer> bitVector, TermContext context) {
-        return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedSub(value, bitVector.value),
-                context);
+    public BuiltinList ssub(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedSub(value, bitVector.value));
     }
 
     @Override
-    public BuiltinList usub(BitVector<Integer> bitVector, TermContext context) {
+    public BuiltinList usub(BitVector<Integer> bitVector) {
         return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedUnsignedSub(value, bitVector.value),
-                context);
+                Ints.checkedUnsignedSub(value, bitVector.value));
     }
 
     @Override
-    public BuiltinList smul(BitVector<Integer> bitVector, TermContext context) {
-        return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedMul(value, bitVector.value),
-                context);
+    public BuiltinList smul(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedMul(value, bitVector.value));
     }
 
     @Override
-    public BuiltinList umul(BitVector<Integer> bitVector, TermContext context) {
+    public BuiltinList umul(BitVector<Integer> bitVector) {
         return makeBuiltinListOfOverflowArithmeticResult(
-                Ints.checkedUnsignedMul(value, bitVector.value),
-                context);
+                Ints.checkedUnsignedMul(value, bitVector.value));
     }
 
     @Override
@@ -253,8 +239,8 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     private static BuiltinList makeBuiltinListOfOverflowArithmeticResult(
-            OverflowArithmeticResult<Integer> result, TermContext context) {
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+            OverflowArithmeticResult<Integer> result) {
+        BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItem(Int32Token.of(result.value));
         builder.addItem(BoolToken.of(result.overflow));
         return (BuiltinList) builder.build();

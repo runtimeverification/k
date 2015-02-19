@@ -149,7 +149,7 @@ public class MetaK {
      * {@link BuiltinSet} of {@link MetaVariable}s.
      */
     public static BuiltinSet variables(Term term, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
         for (Variable variable : term.variableSet()) {
             builder.add(new MetaVariable(variable));
         }
@@ -161,13 +161,13 @@ public class MetaK {
      * {@link BuiltinSet}.
      */
     public static BuiltinSet trueVariables(Term term, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
         builder.addAll(term.variableSet());
         return (BuiltinSet) builder.build();
     }
 
     public static Term variablesMap(Term term, TermContext context) {
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         for (Variable variable : term.variableSet()) {
             builder.put(new MetaVariable(variable), variable);
         }

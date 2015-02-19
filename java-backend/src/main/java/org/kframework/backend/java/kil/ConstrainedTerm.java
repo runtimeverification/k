@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.PatternExpander;
-import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -96,10 +95,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public ConstrainedTerm expandPatterns(boolean narrowing) {
         ConstrainedTerm result = this;
         while (true) {
-            PatternExpander patternExpander = new PatternExpander(
-                    result.constraint(),
-                    narrowing,
-                    context);
+            PatternExpander patternExpander = new PatternExpander(result.constraint(), narrowing);
             ConstrainedTerm expandedTerm = (ConstrainedTerm) result.accept(patternExpander);
             if (expandedTerm == result) {
                 break;

@@ -93,8 +93,8 @@ public class NonACPatternMatcher {
         if (match()) {
             // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
             // (used during associative matching) back to builtin representation
-            if (termContext.definition().kRunOptions() != null
-                    && termContext.definition().kRunOptions().experimental.prove != null) {
+            if (termContext.definition().context().krunOptions != null
+                    && termContext.definition().context().krunOptions.experimental.prove != null) {
                 substitution = substitution.evaluate(termContext);
             }
             return substitution;
@@ -248,6 +248,8 @@ public class NonACPatternMatcher {
     }
 
     private void match(CellCollection cellCollection, CellCollection otherCellCollection) {
+        Context context = termContext.definition().context();
+
         Set<CellLabel> unifiableCellLabels = Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet());
         check(otherCellCollection.labelSet().size() == unifiableCellLabels.size(),
                 cellCollection, otherCellCollection);
@@ -266,14 +268,10 @@ public class NonACPatternMatcher {
                 return;
             }
 
-            addSubstitution(
-                    otherFrame,
-                    cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+            addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
         } else {
             if (otherFrame != null) {
-                addSubstitution(
-                        otherFrame,
-                        cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+                addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
             } else {
                 check(numOfDiffCellLabels == 0, cellCollection, otherCellCollection);
                 if (failed) {
@@ -306,7 +304,7 @@ public class NonACPatternMatcher {
             if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
-                Multimap<Integer, Integer> binderMap = kLabelConstant.getMetaBinderMap();
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
                 List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
@@ -417,8 +415,8 @@ public class NonACPatternMatcher {
 
     private void match(BuiltinList builtinList, BuiltinList pattern) {
         addMatchingTask(
-                ((BuiltinList) BuiltinList.concatenate(termContext, builtinList)).toKore(),
-                ((BuiltinList) BuiltinList.concatenate(termContext, ((BuiltinList) pattern))).toKore());
+                builtinList.toK(termContext),
+                pattern.toK(termContext));
     }
 
     /**

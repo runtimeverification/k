@@ -37,7 +37,7 @@ public class UseSMT implements Serializable {
             return null;
         }
 
-        BuiltinMap.Builder resultBuilder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder resultBuilder = BuiltinMap.builder();
         try {
             ConjunctiveFormula constraint = ConjunctiveFormula.of(termContext)
                     .add(term, BoolToken.TRUE);

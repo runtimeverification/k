@@ -53,7 +53,7 @@ import com.google.inject.Provider;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term implements KItemRepresentation {
+public class KItem extends Term {
 
     private final Term kLabel;
     private final Term kList;
@@ -76,6 +76,13 @@ public class KItem extends Term implements KItemRepresentation {
         /* YilongL: since KList.Builder always canonicalizes its result, the
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
+
+        if (kLabel instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            if (kLabelConstant.isListLabel()) {
+                return kLabelConstant.getListTerminator(termContext.definition().context());
+            }
+        }
 
         // TODO(yilongli): break the dependency on the Tool object
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
@@ -188,11 +195,11 @@ public class KItem extends Term implements KItemRepresentation {
             }
         }
 
-        for (SortSignature signature : kLabelConstant.signatures()) {
+        for (Production production : kLabelConstant.productions()) {
             boolean mustMatch = true;
             boolean mayMatch = true;
 
-            if (kList.concreteSize() == signature.parameters().size()) {
+            if (kList.concreteSize() == production.getArity()) {
                 /* check if the production can match this KItem */
                 int idx = 0;
                 for (Term term : kList) {
@@ -201,7 +208,7 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     Sort childSort = term.sort();
-                    if (!definition.subsorts().isSubsortedEq(signature.parameters().get(idx), childSort)) {
+                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -210,7 +217,7 @@ public class KItem extends Term implements KItemRepresentation {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.subsorts().hasCommonSubsort(signature.parameters().get(idx), childSort);
+                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
                     }
                     idx++;
                 }
@@ -219,9 +226,9 @@ public class KItem extends Term implements KItemRepresentation {
             }
 
             if (mustMatch) {
-                sorts.add(signature.result());
+                sorts.add(Sort.of(production.getSort()));
             } else if (mayMatch) {
-                possibleSorts.add(signature.result());
+                possibleSorts.add(Sort.of(production.getSort()));
             }
         }
 
@@ -263,11 +270,6 @@ public class KItem extends Term implements KItemRepresentation {
 
     public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
         return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
-    }
-
-    @Override
-    public Term toKore() {
-        return this;
     }
 
     public static class KItemOperations {
@@ -592,12 +594,10 @@ public class KItem extends Term implements KItemRepresentation {
         return this;
     }
 
-    @Override
     public Term kLabel() {
         return kLabel;
     }
 
-    @Override
     public Term kList() {
         return kList;
     }
@@ -685,13 +685,15 @@ public class KItem extends Term implements KItemRepresentation {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 
