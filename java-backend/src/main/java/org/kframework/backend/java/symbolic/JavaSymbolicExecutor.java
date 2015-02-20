@@ -170,6 +170,15 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     @Override
+    public RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException {
+        if (!(initialState instanceof JavaKRunState)) {
+            KExceptionManager.criticalError("Term received not instance of java backend");
+        }
+        JavaKRunState javaKRunState = (JavaKRunState) initialState;
+        return javaRewriteEngineRun(null, javaKRunState.getJavaKilTerm(), -1, computeGraph);
+    }
+
+    @Override
     public RewriteRelation step(KRunState initialState, int steps, boolean computeGraph)
             throws KRunExecutionException {
         if (!(initialState instanceof JavaKRunState)) {
