@@ -86,6 +86,9 @@ public interface Executor {
     */
     public abstract RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
 
+
+    public abstract RewriteRelation step(KRunState initialState, int steps, boolean computeGraph) throws KRunExecutionException;
+
     public static class Tool implements Transformation<Void, KRunResult> {
 
         public static final String EXIT_CODE = "exitCode";
