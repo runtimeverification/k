@@ -97,6 +97,7 @@ module TEST
   syntax KResult ::= Bool
   syntax KResult ::= Int
   syntax Bool ::= "isKResult" "(" KItem ")"     [klabel(isKResult), function]
+  syntax Bool ::= "isInt" "(" KItem ")"     [klabel(isInt), function]
 
 
   // AExp
@@ -113,7 +114,7 @@ module TEST
     '<top>('<k>('_/_(I1:Int,, I2:Int)    ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/Int_(I1:Int,, I2:Int) ~> K:K),, SC:StateCell)
-  when notBool(I2:Int ==K 0)
+  when notBool(I2:Int ==K 0) andBool isInt(I1) andBool isInt(I2)
 
   // BExp
   rule

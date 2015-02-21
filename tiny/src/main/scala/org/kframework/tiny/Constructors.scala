@@ -24,7 +24,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     "Map:__" -> KMapAppLabel("Map"),
     "Map:_|->_" -> Tuple2Label,
     "Map:keys" -> MapKeys,
-    "Set:in" -> RegularKAppLabel("???in???", Att())
+    "Set:in" -> RegularKAppLabel("???in???", Att()),
+    "#BOOL:_andBool_" -> And
   )
 
   override def KLabel(name: String): Label = {

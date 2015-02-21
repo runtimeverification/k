@@ -44,7 +44,7 @@ class TheoryWithUpDown(up: Up, down: Down, module: Module) extends FreeTheory {
           case KApp(l, _, _) => module.sortFor(l)
           case Unapply.KToken(s, _) => s
         }
-        if (module.subsorts.<(actualSort, s)) True else False
+        if (actualSort == s || module.subsorts.<(actualSort, s)) True else False
 
       case t: KTok => t.sort match {
         case Sorts.KBoolean => t.s match {

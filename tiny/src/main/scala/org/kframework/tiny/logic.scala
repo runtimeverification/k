@@ -252,6 +252,7 @@ object SortPredicate {
 }
 
 case class SortPredicateLabel(s: Sort) extends KRegularAppLabel {
+  assert(s != null)
   override def att: Att = Att()
   override def name: String = s.name
   override def construct(l: Iterable[K], att: Att): KApp = l match {

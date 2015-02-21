@@ -39,7 +39,7 @@ public class TstTinyOnKORE extends BaseTest {
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
                                 cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(10)),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(0)))
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
                 ));
 
         System.out.println("module = " + module);
