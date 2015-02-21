@@ -56,7 +56,7 @@ case class MapKeys(k: K, att: Att = Att()) extends KProduct {
   override val klabel = MapKeys
   override def toString = "keys(" + k + ")"
 
-  override def normalizeInner(implicit theory: Theory) = ???
+  override def normalizeInner(implicit theory: Theory) = MapKeys(k.normalize)
 }
 
 object MapKeys extends KProduct1Label with EmptyAtt {
@@ -73,8 +73,27 @@ case class KMapAppMatcher(left: KMapApp, right: K) extends Matcher {
 
       if ((leftGroundKeys &~ rightGroundKeys) != Set())
         False
-      else
-        this
+      else {
+        val leftoverGround = rightGroundKeys &~ leftGroundKeys
+
+        val lookupStyleResults = for (lKey <- leftGroundKeys) yield {
+          left.theMap(lKey) match {
+            case v: KVar => Binding(v, right.theMap(lKey))
+            case v if (v == right.theMap(lKey)) => True
+            case _ => False
+          }
+        }
+
+        val leftSymbolicKeys = left.theMap.keys.toSet &~ leftGroundKeys
+        if (leftSymbolicKeys.size == 0 && rightGroundKeys.size == leftGroundKeys.size)
+          And(lookupStyleResults, Att())
+        else if (leftSymbolicKeys.size == 1 && left.theMap(leftSymbolicKeys.head) == KVarMapValue) {
+          val leftoverMap = left.klabel((leftoverGround map { k => Tuple2Label(k, right.theMap(k)) }).toSeq: _*)
+          And(lookupStyleResults + Binding(leftSymbolicKeys.head, leftoverMap), Att())
+        } else
+          this
+      }
+
     case _ => this
   }
 }

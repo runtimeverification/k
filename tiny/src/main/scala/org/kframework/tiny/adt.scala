@@ -54,7 +54,7 @@ trait KApp extends kore.KApply with K {
 trait PlainNormalization {
   self: KApp =>
   def normalizeInner(implicit theory: Theory): K =
-    klabel((children map theory.normalize).toSeq, att)
+    klabel((children map { _.normalize }).toSeq, att)
 }
 
 /**
@@ -115,6 +115,21 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLea
 case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
   def copy(att: Att): RegularKTok = RegularKTok(sort, s, att)
   override def toString = s + ":" + sort
+}
+
+case class TypedKTok[T](sort: Sort, nativeValue: T, att: Att = Att()) extends KTok {
+  override def copy(att: Att): KLeaf = TypedKTok(sort, nativeValue, att)
+  override def s: String = nativeValue.toString
+  override def toString = nativeValue.toString
+}
+
+case class NativeBinaryOp[T](val klabel: NativeBinaryOpLabel[T], val children: Seq[K], val att: Att = Att())
+  extends KRegularApp {
+  override def normalizeInner(implicit theory: Theory): K = children match {
+    case Seq(TypedKTok(s1, v1: T, _), TypedKTok(s2, v2: T, _)) if s1 == s2 =>
+      TypedKTok(s1, klabel.f(v1, v2))
+    case _ => this
+  }
 }
 
 final class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att())
@@ -202,6 +217,10 @@ object KRewrite extends KRegularAppLabel {
 
 case class RegularKAppLabel(name: String, att: Att) extends KRegularAppLabel {
   override def construct(l: Iterable[K], att: Att): RegularKApp = new RegularKApp(this, l.toSeq, att)
+}
+
+case class NativeBinaryOpLabel[T](name: String, att: Att, f: (T, T) => T) extends KRegularAppLabel {
+  override def construct(l: Iterable[K], att: Att): NativeBinaryOp[T] = new NativeBinaryOp(this, l.toSeq, att)
 }
 
 case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel {

@@ -1,6 +1,7 @@
 package org.kframework.tiny
 
 import org.kframework.attributes._
+import org.kframework.builtin.Sorts
 import org.kframework.kore.{Constructors => basic, InjectedKLabel, KORE, Unapply}
 import org.kframework.meta.{Down, Up}
 import org.kframework.tiny.builtin.{KMapAppLabel, MapKeys, Tuple2Label}
@@ -10,14 +11,14 @@ import scala.collection.JavaConverters._
 
 class Constructors(module: definition.Module) extends kore.Constructors {
 
-  implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()))
+  implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()), module)
 
   // separate the hook mappings at some point
   val hookMappings = Map[String, Label](
     "#K-EQUAL:_==K_" -> Equals,
     "#BOOL:notBool_" -> Not,
-    "#INT:_+Int_" -> RegularKAppLabel("+", Att()),
-    "#INT:_/Int_" -> RegularKAppLabel("/", Att()),
+    "#INT:_+Int_" -> NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y),
+    "#INT:_/Int_" -> NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y),
     "#INT:_<=Int_" -> RegularKAppLabel("<=", Att()),
     "Map:.Map" -> KMapAppLabel("Map"),
     "Map:__" -> KMapAppLabel("Map"),
@@ -30,6 +31,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
     if (name.startsWith("'<")) {
       RegularKAppLabel(name, Att())
+    } else if (name.startsWith("is")) {
+      SortPredicateLabel(Sort(name.replace("is", "")))
     } else {
       val att = module.attributesFor(KORE.KLabel(name))
       if (att.contains("assoc"))
@@ -62,7 +65,14 @@ class Constructors(module: definition.Module) extends kore.Constructors {
 
   override def Sort(name: String): kore.Sort = KORE.Sort(name)
 
-  override def KToken(sort: kore.Sort, s: String, att: Att): KTok = RegularKTok(sort, s)
+  override def KToken(sort: kore.Sort, s: String, att: Att): KTok = {
+    sort match {
+      case Sorts.KString => TypedKTok(sort, s)
+      case Sorts.Int => TypedKTok(sort, s.toInt)
+      case _ => RegularKTok(sort, s)
+    }
+  }
+
 
   override def KRewrite(left: kore.K, right: kore.K, att: Att) = tiny.KRewrite(convert(left), convert
     (right), att)
@@ -84,12 +94,10 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     case t@Unapply.KApply(label, list) => KApply(label, KList((list map convert).asJava), t.att)
   }
 
-  import org.kframework.tiny.Builtins._
-
-  implicit def stringToToken(s: String) = KToken(String, s, Att())
-  implicit def stringToId(s: String) = KToken(Id, s, Att())
+  implicit def stringToToken(s: String) = TypedKTok(Builtins.String, s, Att())
+  implicit def stringToId(s: String) = KToken(Builtins.Id, s, Att())
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
-  implicit def intToToken(n: Int): K = KToken(Int, n.toString, Att())
+  implicit def intToToken(n: Int): K = TypedKTok(Builtins.Int, n, Att())
 
   implicit class EnhancedK(k: K) {
     def ~>(other: K) = KSeq(Seq(k, other), Att())

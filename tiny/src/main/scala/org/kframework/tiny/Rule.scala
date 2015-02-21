@@ -1,7 +1,5 @@
 package org.kframework.tiny
 
-import org.kframework.kore.Unparse
-
 object Rule {
   def apply(termWithRewrite: K, sideConditions: K = True)(implicit theory: Theory = FreeTheory): Rule = {
     val left = RewriteToTop.toLeft(termWithRewrite)
@@ -14,13 +12,12 @@ object Rule {
     }
 
     (t: K) => {
-      println(And(left.matcher(t), sideConditions))
       val pmSolutions = And(left.matcher(t), sideConditions).normalize
       pmSolutions match {
         case Or(children, _, _) => children map {
-          case and: And => substitute(and, t)
+          case and: And => substitute(and, t).normalize
         }
-        case and: And => Set(substitute(and, t))
+        case and: And => Set(substitute(and, t).normalize)
       }
     }
   }

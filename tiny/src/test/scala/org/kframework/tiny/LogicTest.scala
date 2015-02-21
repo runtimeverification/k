@@ -11,4 +11,9 @@ class LogicTest extends AbstractTest {
     assertEquals(Or(And(X)), And(Or(And(Or(And(X))))).normalize)
     assertEquals(Or(And(Binding(X, 'foo()))), And(Or(And(Or(Binding(X, 'foo()))))).normalize)
   }
+
+  @Test def notProperty {
+    implicit val theory = FreeTheory
+    assertEquals(Or(), Not('foo(X)).normalize)
+  }
 }

@@ -244,3 +244,17 @@ case class Not(k: K, att: Att = Att()) extends KProduct {
 object Not extends KProduct1Label with EmptyAtt {
   val name: String = "!"
 }
+
+case class SortPredicate(klabel: SortPredicateLabel, k: K, att: Att = Att()) extends KProduct with PlainNormalization
+
+object SortPredicate {
+  def apply(s: Sort, k: K) = SortPredicateLabel(s)(k)
+}
+
+case class SortPredicateLabel(s: Sort) extends KRegularAppLabel {
+  override def att: Att = Att()
+  override def name: String = s.name
+  override def construct(l: Iterable[K], att: Att): KApp = l match {
+    case Seq(k) => SortPredicate(this, k, att)
+  }
+}

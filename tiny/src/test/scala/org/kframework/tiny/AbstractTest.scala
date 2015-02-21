@@ -11,9 +11,10 @@ trait AbstractTest {
   import org.kframework.tiny.Builtins._
 
   val cons = new Constructors(Module("TEST", Set(), Set(
+    Production(ADT.KLabel("~>"), Builtins.KSeq, Seq(), Att() + "assoc"),
     Production(ADT.KLabel("foo"), String, Seq(), Att()),
     Production(ADT.KLabel("bar"), String, Seq(), Att()),
-    Production(ADT.KLabel("+"), String, Seq(), Att() + "assoc")
+    Production(ADT.KLabel("+"), Int, Seq(), Att() + "assoc")
   ), Att()))
 
   val X = KVar("X")

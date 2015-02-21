@@ -25,8 +25,8 @@ trait MatcherLabel extends KRegularAppLabel with EmptyAtt with KProduct2Label {
 trait KAppMatcher extends Matcher {
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K
 
-  override def normalizeInner(implicit theory: Theory): K =
-    (left.normalize, right.normalize) match {
+  override def normalizeInner(implicit theory: Theory): K = {
+    val x = (left.normalize, right.normalize) match {
       case (KApp(labelVariable: KVar, contentsP, _), KApp(label2, contents, _)) =>
         And(Binding(labelVariable, InjectedLabel(label2, Att())), matchContents(contentsP, contents).normalize)
       case (KApp(label, contentsP, att), KApp(label2, contents, att2)) if label == label2 =>
@@ -35,6 +35,8 @@ trait KAppMatcher extends Matcher {
         matchContents(contentsP, Seq(k)).normalize
       case _ => False
     }
+    x
+  }
 }
 
 case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
@@ -94,11 +96,9 @@ object KVarMatcher extends MatcherLabel with KProduct2Label {
     new KVarMatcher(k1.asInstanceOf[KVar], k2)
 }
 
-case class EqualsMatcher(left: K, right: K) extends Matcher {
+case class EqualsMatcher(left: K, right: K) extends Matcher with PlainNormalization {
   override val klabel = EqualsMatcher
   override def toString = left + ":=" + right
-
-  override def normalizeInner(implicit theory: Theory) = this
 }
 
 object EqualsMatcher extends MatcherLabel with KProduct2Label {

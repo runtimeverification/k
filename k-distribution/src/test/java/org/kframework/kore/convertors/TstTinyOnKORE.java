@@ -38,17 +38,17 @@ public class TstTinyOnKORE extends BaseTest {
                         cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y"))),
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(1)),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(10)),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(0)))
                 ));
 
         System.out.println("module = " + module);
 
         Rewriter rewriter = new Rewriter(module);
 
-        Set<K> results = rewriter.rewrite(program);
+        Set<K> results = rewriter.rewriteRepeat(program);
 
-        return stream(results).map(r -> Unparse.apply(r)).collect(Collections.toList()).mkString("\n");
+        return stream(results).map(r -> r.toString()).collect(Collections.toList()).mkString("\n");
     }
 
     @Override

@@ -187,6 +187,7 @@ module TEST
     '<top>('<k>(K1:KResult ~> '_/_([],,K2:KItem) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
+  when isKResult(K1)
   //[cool]
   rule
     '<top>('<k>('_/_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
@@ -198,6 +199,7 @@ module TEST
     '<top>('<k>(K2:KResult ~> '_/_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
+  when isKResult(K2)
   //[cool]
 
 endmodule

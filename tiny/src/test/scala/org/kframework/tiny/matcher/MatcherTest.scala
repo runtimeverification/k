@@ -186,7 +186,24 @@ class MatcherTest extends AbstractTest {
     val foo = KSequence('+(5: K, 5: K))
 
     val pattern = KSequence(X + Y, Z)
-    assertEquals(Or(), pattern.matchAll(foo))
+    assertEquals(
+      Or(And(Y -> '+(), Z -> KSeq(), X -> '+(5, 5)),
+        And(Y -> 5, Z -> KSeq(), X -> 5),
+        And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
+      , pattern.matchAll(foo,
+        And(SortPredicate(Builtins.KSeq, Z), SortPredicate(Builtins.Int, X))))
+  }
+
+  @Test def testKSeqWithMatchAtEnd1() {
+    val foo = KSequence('+(5: K, 5: K), KSeq())
+
+    val pattern = KSequence(X + Y, Z)
+    assertEquals(
+      Or(And(Y -> '+(), Z -> KSeq(), X -> '+(5, 5)),
+        And(Y -> 5, Z -> KSeq(), X -> 5),
+        And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
+      , pattern.matchAll(foo,
+        And(SortPredicate(Builtins.KSeq, Z), SortPredicate(Builtins.Int, X))))
   }
 
   //
@@ -210,7 +227,6 @@ class MatcherTest extends AbstractTest {
     val o = 'foo('foo('foo('bar())))
     val inner = Anywhere("inner", 'foo(X))
     val outer = Anywhere("outer", 'foo(inner))
-    println(outer)
     Assert.assertEquals(
       ((X -> 'foo('bar()) && inner.TOPVariable -> inner.HOLEVariable && outer.TOPVariable -> outer.HOLEVariable) ||
         (X -> 'bar() && inner.TOPVariable -> 'foo(inner.HOLEVariable) && outer.TOPVariable -> outer.HOLEVariable) ||
