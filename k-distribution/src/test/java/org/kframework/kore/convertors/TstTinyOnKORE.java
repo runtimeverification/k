@@ -17,6 +17,7 @@ import org.kframework.tiny.package$;
 import scala.collection.immutable.Set;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 
 import java.io.IOException;
 
@@ -29,13 +30,22 @@ public class TstTinyOnKORE extends BaseTest {
 
     protected String convert(DefinitionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        Module module = kilToKore.apply(defWithContext.definition).getModule("TEST").get();
+        Module moduleWithoutK = kilToKore.apply(defWithContext.definition).getModule("TEST").get();
+
+        Module module = Module("IMP", Set(moduleWithoutK), Set(
+                Production(Sort("K"), Seq(NonTerminal(Sort("KSequence"))))
+        ), Att());
+
+        System.out.println("module.subsorts() = " + module.subsorts());
+
         Constructors cons = new Constructors(module);
         package$ tiny = package$.MODULE$;
 
         KApp program = cons.KApply(cons.KLabel("'<top>"),
                 cons.KApply(cons.KLabel("'<k>"),
-                        cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y"))),
+                        cons.KApply(cons.KLabel("'_+_"),
+                                cons.stringToId("x"),
+                                cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y")))),
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
                                 cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(10)),

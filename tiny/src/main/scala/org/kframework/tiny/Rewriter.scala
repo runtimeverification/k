@@ -14,7 +14,6 @@ class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
 
   def rewriteRepeat(k: K): Set[K] = {
     val newKs = rewrite(k)
-    println(newKs)
     if (newKs.size == 0)
       Set(k)
     else {

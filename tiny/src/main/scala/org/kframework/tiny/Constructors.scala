@@ -14,19 +14,19 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()), module)
 
   // separate the hook mappings at some point
-  val hookMappings = Map[String, Label](
-    "#K-EQUAL:_==K_" -> Equals,
-    "#BOOL:notBool_" -> Not,
-    "#INT:_+Int_" -> NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y),
-    "#INT:_/Int_" -> NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y),
-    "#INT:_<=Int_" -> RegularKAppLabel("<=", Att()),
-    "Map:.Map" -> KMapAppLabel("Map"),
-    "Map:__" -> KMapAppLabel("Map"),
-    "Map:_|->_" -> Tuple2Label,
-    "Map:keys" -> MapKeys,
-    "Set:in" -> RegularKAppLabel("???in???", Att()),
-    "#BOOL:_andBool_" -> And
-  )
+  def hookMappings(hook: String, labelString: String) = hook match {
+    case "#K-EQUAL:_==K_" => Equals
+    case "#BOOL:notBool_" => Not
+    case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y)
+    case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y)
+    case "#INT:_<=Int_" => RegularKAppLabel("<=", Att())
+    case "Map:.Map" => KMapAppLabel("'_Map_")
+    case "Map:__" => KMapAppLabel("'_Map_")
+    case "Map:_|->_" => Tuple2Label
+    case "Map:keys" => MapKeys
+    case "Set:in" => RegularKAppLabel("???in???", Att())
+    case "#BOOL:_andBool_" => And
+  }
 
   override def KLabel(name: String): Label = {
 
@@ -39,7 +39,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
       if (att.contains("assoc"))
         RegularKAssocAppLabel(name, att)
       else
-        att.get[String]("hook").map(hookMappings).getOrElse { RegularKAppLabel(name, att) }
+        att.get[String]("hook").map(hookMappings(_, name)).getOrElse { RegularKAppLabel(name, att) }
     }
   }
 

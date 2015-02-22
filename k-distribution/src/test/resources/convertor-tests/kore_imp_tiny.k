@@ -4,10 +4,13 @@ module TEST
   syntax K ::= KItem
   syntax KItem ::= KResult
   syntax KResult
+  syntax KItem ::= Id
 
   syntax HOLE ::= "[]"   [klabel('HOLE)]
 //  syntax UserList ::= KItem "," KItem    [klabel('_,_), assoc]
 //  syntax UserList ::= KItem              [klabel('.EmptyUserList)]
+
+  syntax KSequence ::= K "~>" K   [ klabel(~>), left, assoc, unit(#EmptyK), hook(org.kframework.koreimplementation.KSequence) ]
 
   syntax Bool ::= Token{"true"}
   syntax Bool ::= Token{"false"}
@@ -97,7 +100,7 @@ module TEST
   syntax KResult ::= Bool
   syntax KResult ::= Int
   syntax Bool ::= "isKResult" "(" KItem ")"     [klabel(isKResult), function]
-  syntax Bool ::= "isInt" "(" KItem ")"     [klabel(isInt), function]
+  syntax Bool ::= "isInt" "(" KItem ")"     [klabel(isKResult), function]
 
 
   // AExp
@@ -114,7 +117,7 @@ module TEST
     '<top>('<k>('_/_(I1:Int,, I2:Int)    ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/Int_(I1:Int,, I2:Int) ~> K:K),, SC:StateCell)
-  when notBool(I2:Int ==K 0) andBool isInt(I1) andBool isInt(I2)
+  when notBool(I2:Int ==K 0)
 
   // BExp
   rule
@@ -200,6 +203,33 @@ module TEST
     '<top>('<k>(K2:KResult ~> '_/_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>('_/_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
+  when isKResult(K2)
+  //[cool]
+
+
+  // '_+_
+  rule
+    '<top>('<k>('_+_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(K1:KItem ~> '_+_([],,K2:KItem) ~> K:K),, SC:StateCell)
+  when 'notBool_(isKResult(K1:KItem))
+  [heat]
+  rule
+    '<top>('<k>(K1:KResult ~> '_+_([],,K2:KItem) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>('_+_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
+  when isKResult(K1)
+  //[cool]
+  rule
+    '<top>('<k>('_+_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(K2:KItem ~> '_+_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
+  when 'notBool_(isKResult(K2:KItem))
+  [heat]
+  rule
+    '<top>('<k>(K2:KResult ~> '_+_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>('_+_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
   when isKResult(K2)
   //[cool]
 

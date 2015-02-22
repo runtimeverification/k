@@ -5,6 +5,6 @@ import org.kframework.kore.ADT
 object Builtins {
   val Int = ADT.Sort("Int")
   val String = ADT.Sort("String")
-  val Id = ADT.Sort("ID")
+  val Id = ADT.Sort("Id")
   val KSeq = ADT.Sort("~>")
 }
