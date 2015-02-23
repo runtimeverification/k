@@ -20,6 +20,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.SimpleScope;
+import org.kframework.utils.inject.Concrete;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -82,6 +83,7 @@ public abstract class BaseTestCase {
             bind(Definition.class).toInstance(definition);
             bind(Configuration.class).toInstance(configuration);
             bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
+            bind(Definition.class).annotatedWith(Concrete.class).toInstance(definition);
         }
 
         @Provides

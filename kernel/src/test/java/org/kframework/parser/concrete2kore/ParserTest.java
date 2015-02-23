@@ -761,7 +761,7 @@ public class ParserTest {
 
         Term result = new Parser("-1").parse(expsNt, 0);
         //System.out.println(result);
-        Term result2 = (Term) new TreeCleanerVisitor().apply(result).right().get();
+        Term result2 = new TreeCleanerVisitor().apply(result).right().get();
         //System.out.println(result2);
 
         Term one = Constant.apply("1", intProd09, Optional.empty());

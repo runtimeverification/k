@@ -46,8 +46,9 @@ public class TypeSystemFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cast cast, Void _void) throws ParseFailedException {
+        // don't do type checking for outer casts, and be strict about it only for syntactic ones
         if (cast.getType() != Cast.CastType.OUTER)
-            cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), true, context).visitNode(cast.getContent()));
+            cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), cast.getType() != Cast.CastType.SEMANTIC, context).visitNode(cast.getContent()));
         return super.visit(cast, _void);
     }
 }

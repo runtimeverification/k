@@ -15,11 +15,7 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.RewriteRelation;
-import org.kframework.krun.api.SearchResult;
-import org.kframework.krun.api.SearchResults;
-import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.*;
 import org.kframework.krun.tools.Executor;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -97,7 +93,8 @@ public class JavaSymbolicExecutor implements Executor {
             SearchType searchType,
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
-            RuleCompilerSteps compilationInfo) throws KRunExecutionException {
+            RuleCompilerSteps compilationInfo,
+            boolean computeGraph) throws KRunExecutionException {
 
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {
@@ -120,12 +117,18 @@ public class JavaSymbolicExecutor implements Executor {
         Term initialTerm = kilTransformer.transformAndEval(cfg);
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
+        KRunGraph executionGraph = null;
         if (javaOptions.patternMatching) {
+            if (computeGraph) {
+                KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            }
             hits = getPatternMatchRewriter().search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType, termContext);
         } else {
-            hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
-                    patternRule, bound, depth, searchType, termContext);
+            SymbolicRewriter rewriter = getSymbolicRewriter();
+            hits = rewriter.search(initialTerm, targetTerm, claims,
+                    patternRule, bound, depth, searchType, termContext, computeGraph);
+            executionGraph = rewriter.getExecutionGraph();
         }
 
         for (Map<Variable,Term> map : hits) {
@@ -152,7 +155,7 @@ public class JavaSymbolicExecutor implements Executor {
 
         SearchResults retval = new SearchResults(
                 searchResults,
-                null);
+                executionGraph);
 
         return retval;
     }

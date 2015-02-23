@@ -116,7 +116,7 @@ public class Unparser implements Comparator<ASTNode> {
         Indenter thisString = new Indenter();
         thisString.setWidth(-1);
         Indenter thatString = new Indenter();
-        thisString.setWidth(-1);
+        thatString.setWidth(-1);
         thisStack.push(new TermComponent(o1));
         thatStack.push(new TermComponent(o2));
         int lastIdx = 0;

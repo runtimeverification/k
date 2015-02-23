@@ -14,6 +14,7 @@ import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
+import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
@@ -46,7 +47,7 @@ public class KDocFrontEnd extends FrontEnd {
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             Provider<PosterBackend> backend,
-            Provider<Definition> def,
+            @Concrete Provider<Definition> def,
             FileUtil files,
             DefinitionScope scope,
             @KompiledDir Provider<File> kompiledDir) {

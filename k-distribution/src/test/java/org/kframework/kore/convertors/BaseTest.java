@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -20,8 +21,6 @@ import org.kframework.parser.outer.Outer;
 public abstract class BaseTest extends SDFCompilerTest {
 
     private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
-
-    static final String ROOT = "src/test/resources/convertor-tests/";
 
     @Rule
     public TestName name = new TestName();
@@ -38,25 +37,34 @@ public abstract class BaseTest extends SDFCompilerTest {
         testConversion(this::parseUsingSDF);
     }
 
-    public static class DefintionWithContext {
+    public static class DefinitionWithContext {
         public final Definition definition;
         public final Context context;
 
-        public DefintionWithContext(Definition d, Context c) {
+        public DefinitionWithContext(Definition d, Context c) {
             this.definition = d;
             this.context = c;
+        }
+    }
+
+    private File testResource(String baseName) {
+        try {
+            return new File(BaseTest.class.getResource(baseName).toURI())
+                    .getAbsoluteFile();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
     // WARNING: only use this after checking the results manually
     private static boolean forceFixAssertionFiles = false;
 
-    private void testConversion(Function<File, DefintionWithContext> parse) throws IOException {
-        File kilDefinitionFile = new File(ROOT + name.getMethodName() + ".k").getAbsoluteFile();
-        File kilExpectedDefinitionFile = new File(ROOT + name.getMethodName()
-                + expectedFilePostfix()).getAbsoluteFile();
+    private void testConversion(Function<File, DefinitionWithContext> parse) throws IOException {
+        File kilDefinitionFile = testResource("/convertor-tests/" + name.getMethodName() + ".k");
+        File kilExpectedDefinitionFile = testResource(
+                "/convertor-tests/" + name.getMethodName() + expectedFilePostfix());
 
-        DefintionWithContext defWithContext = parse.apply(kilDefinitionFile);
+        DefinitionWithContext defWithContext = parse.apply(kilDefinitionFile);
 
         String actualOutput = convert(defWithContext);
 
@@ -78,11 +86,11 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    protected abstract String convert(DefintionWithContext defWithContext);
+    protected abstract String convert(DefinitionWithContext defWithContext);
 
     protected abstract String expectedFilePostfix();
 
-    private DefintionWithContext parseUsingSDF(File definitionFile) {
+    private DefinitionWithContext parseUsingSDF(File definitionFile) {
         try {
             return parse(definitionFile, "TEST", false);
         } catch (IOException e) {
@@ -90,7 +98,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         }
     }
 
-    protected DefintionWithContext parseUsingOuter(File definitionFile) {
+    protected DefinitionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();
         String definitionText;
         try {
@@ -101,7 +109,7 @@ public abstract class BaseTest extends SDFCompilerTest {
         def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
         def.setMainModule("TEST");
         def.setMainSyntaxModule("TEST");
-        return new DefintionWithContext(def, null);
+        return new DefinitionWithContext(def, null);
     }
 
     private String clean(String definitionText) {

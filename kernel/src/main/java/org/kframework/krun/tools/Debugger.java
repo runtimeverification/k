@@ -18,6 +18,7 @@ import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.kframework.backend.unparser.PrintTransition;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Definition;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -33,6 +34,7 @@ import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 
@@ -131,6 +133,7 @@ public interface Debugger {
         private final Debugger debugger;
         private final Context context;
         private final FileUtil files;
+        private final Definition definition;
 
         @Inject
         Tool(
@@ -139,13 +142,15 @@ public interface Debugger {
                 BinaryLoader loader,
                 @Main Debugger debugger,
                 @Main Context context,
-                @Main FileUtil files) {
+                @Main FileUtil files,
+                @Main(Concrete.class) Definition definition) {
             this.initialConfiguration = initialConfiguration;
             this.kompileOptions = kompileOptions;
             this.loader = loader;
             this.debugger = debugger;
             this.context = context;
             this.files = files;
+            this.definition = definition;
         }
 
         Tool(
@@ -158,8 +163,9 @@ public interface Debugger {
                 Transformation<Transition, String> transitionPrinter,
                 @Main Debugger debugger,
                 @Main Context context,
-                @Main FileUtil files) {
-            this(initialConfiguration, kompileOptions, loader, debugger, context, files);
+                @Main FileUtil files,
+                @Main(Concrete.class) Definition definition) {
+            this(initialConfiguration, kompileOptions, loader, debugger, context, files, definition);
             this.statePrinter = statePrinter;
             this.searchPrinter = searchPrinter;
             this.graphPrinter = graphPrinter;
@@ -173,6 +179,7 @@ public interface Debugger {
         @Override
         public Void run(Void v, Attributes a) {
             a.add(Context.class, context);
+            a.add(Definition.class, definition);
             ConsoleReader reader;
             try {
                 reader = new ConsoleReader();

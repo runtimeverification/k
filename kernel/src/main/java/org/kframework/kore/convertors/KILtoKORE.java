@@ -191,7 +191,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         }
 
         Function<PriorityBlock, scala.collection.immutable.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
-                .getProductions().stream().map(p -> Tag(p.getKLabel()))
+                .getProductions().stream().filter(p -> p.getKLabel() != null).map(p -> Tag(p.getKLabel()))
                 .collect(Collectors.toSet()));
 
         if (s.getPriorityBlocks().size() > 1) {

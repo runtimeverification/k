@@ -2,6 +2,8 @@
 package org.kframework.krun;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.krun.api.Transition;
@@ -27,6 +29,16 @@ public class GenericTransition extends Transition {
     @Override
     public Map<Variable, Term> getSubstitution() {
         return substitution;
+    }
+
+    @Override
+    public Location getLocation() {
+        return rule.getLocation();
+    }
+
+    @Override
+    public Source getSource() {
+        return rule.getSource();
     }
 
 
