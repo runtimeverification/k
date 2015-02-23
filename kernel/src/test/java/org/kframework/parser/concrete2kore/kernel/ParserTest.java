@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.concrete2kore.kernel;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -10,9 +10,7 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
-import org.kframework.kore.Attributes;
 import org.kframework.kore.Sort;
-import org.kframework.kore.UninterpretedSort;
 import org.kframework.kore.outer.Production;
 import org.kframework.kore.outer.ProductionItem;
 import org.kframework.parser.*;
@@ -21,13 +19,14 @@ import static org.kframework.Collections.*;
 import static org.kframework.kore.Constructors.*;
 import static org.kframework.kore.outer.Constructors.*;
 
-import org.kframework.parser.concrete2kore.Grammar.NonTerminal;
-import org.kframework.parser.concrete2kore.Grammar.NonTerminalState;
-import org.kframework.parser.concrete2kore.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2kore.Grammar.RegExState;
-import org.kframework.parser.concrete2kore.Grammar.RuleState;
-import org.kframework.parser.concrete2kore.Rule.DeleteRule;
-import org.kframework.parser.concrete2kore.Rule.WrapLabelRule;
+import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
+import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
+import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
 
 public class ParserTest {
     /* public static void main(String[] args) {

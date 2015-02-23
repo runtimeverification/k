@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.parser.KList;

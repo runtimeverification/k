@@ -1,6 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.junit.Test;
 import org.kframework.kore.outer.SyntaxProduction;

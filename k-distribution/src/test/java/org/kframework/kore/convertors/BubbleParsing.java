@@ -24,11 +24,11 @@ import org.kframework.kore.outer.Sentence;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.Grammar;
-import org.kframework.parser.concrete2kore.KSyntax2GrammarStatesFilter;
-import org.kframework.parser.concrete2kore.Parser;
-import org.kframework.parser.concrete2kore.Parser.ParseError;
-import org.kframework.parser.concrete2kore.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.kernel.Grammar;
+import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
+import org.kframework.parser.concrete2kore.kernel.Parser;
+import org.kframework.parser.concrete2kore.kernel.Parser.ParseError;
+import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
 import org.kframework.parser.outer.Outer;
 
 /**
