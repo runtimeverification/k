@@ -12,6 +12,7 @@ import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Builtins;
+import org.kframework.utils.inject.RequestScoped;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -31,7 +32,7 @@ import com.google.inject.Singleton;
  *
  * @author AndreiS
  */
-@Singleton
+@RequestScoped
 public class BuiltinFunction {
 
     /**

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.jar.Manifest;
@@ -47,8 +48,12 @@ public class JarInfo {
     public void printVersionMessage() {
         try {
             URL url = JarInfo.class.getResource("versionMarker");
-            JarURLConnection conn = (JarURLConnection)url.openConnection();
-            Manifest mf = conn.getManifest();
+            URLConnection conn = url.openConnection();
+            if (!(conn instanceof JarURLConnection)) {
+                System.out.println("K framework internal build");
+                return;
+            }
+            Manifest mf = ((JarURLConnection)conn).getManifest();
             String revision = mf.getMainAttributes().getValue("Implementation-Revision");
             String branch = mf.getMainAttributes().getValue("Implementation-Branch");
             Date date = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date")));

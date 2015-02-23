@@ -12,6 +12,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
@@ -24,13 +25,8 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 
+@RequestScoped
 public final class KRunOptions {
-
-    public KRunOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public KRunOptions(Void v) {}
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();

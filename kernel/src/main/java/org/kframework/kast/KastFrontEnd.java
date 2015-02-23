@@ -2,6 +2,7 @@
 package org.kframework.kast;
 
 import java.io.Reader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,12 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
@@ -30,12 +33,10 @@ import com.google.inject.Provider;
 
 public class KastFrontEnd extends FrontEnd {
 
-    public static List<Module> getModules(String[] args) {
-        KastOptions options = new KastOptions();
-
+    public static List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
-        modules.add(new KastModule(options));
-        modules.add(new JCommanderModule(args));
+        modules.add(new KastModule());
+        modules.add(new JCommanderModule());
         modules.add(new CommonModule());
         return modules;
     }
@@ -45,7 +46,8 @@ public class KastFrontEnd extends FrontEnd {
     private final Stopwatch sw;
     private final Map<String, String> env;
     private final ProgramLoader loader;
-    private final KExceptionManager kem;
+    private final Provider<File> kompiledDir;
+    private final DefinitionScope scope;
 
     @Inject
     KastFrontEnd(
@@ -58,14 +60,17 @@ public class KastFrontEnd extends FrontEnd {
             JarInfo jarInfo,
             @Environment Map<String, String> env,
             ProgramLoader loader,
-            FileUtil files) {
+            FileUtil files,
+            @KompiledDir Provider<File> kompiledDir,
+            DefinitionScope scope) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.contextProvider = contextProvider;
         this.sw = sw;
         this.env = env;
         this.loader = loader;
-        this.kem = kem;
+        this.kompiledDir = kompiledDir;
+        this.scope = scope;
     }
 
     /**
@@ -74,25 +79,30 @@ public class KastFrontEnd extends FrontEnd {
      */
     @Override
     public int run() {
-        Reader stringToParse = options.stringToParse();
-        Source source = options.source();
+        scope.enter(kompiledDir.get());
+        try {
+            Reader stringToParse = options.stringToParse();
+            Source source = options.source();
 
-        Context context = contextProvider.get();
-        Sort sort = sort(options.sort, context);
+            Context context = contextProvider.get();
+            Sort sort = sort(options.sort, context);
 
-        ASTNode out = loader.processPgm(stringToParse, source, sort, context, options.parser);
-        StringBuilder kast;
-        KoreFilter koreFilter = new KoreFilter(context);
-        StringBuilder sb = new StringBuilder();
-        koreFilter.visitNode(out, sb);
-        kast = sb;
-        kast.append("\n");
+            ASTNode out = loader.processPgm(stringToParse, source, sort, context, options.parser);
+            StringBuilder kast;
+            KoreFilter koreFilter = new KoreFilter(context);
+            StringBuilder sb = new StringBuilder();
+            koreFilter.visitNode(out, sb);
+            kast = sb;
+            kast.append("\n");
 
-        System.out.print(kast.toString());
+            System.out.print(kast.toString());
 
-        sw.printIntermediate("Maudify Program");
-        sw.printTotal("Total");
-        return 0;
+            sw.printIntermediate("Maudify Program");
+            sw.printTotal("Total");
+            return 0;
+        } finally {
+            scope.exit();
+        }
     }
 
 

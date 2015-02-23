@@ -33,6 +33,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
 
+import com.google.inject.Inject;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -90,7 +92,7 @@ public interface Executor {
 
         public static final String EXIT_CODE = "exitCode";
         private final KRunOptions options;
-        private final Provider<Term> initialConfiguration;
+        private final Term initialConfiguration;
         private final Context context;
         private final Stopwatch sw;
         private final KExceptionManager kem;
@@ -100,7 +102,7 @@ public interface Executor {
         @Inject
         Tool(
                 KRunOptions options,
-                @Main Provider<Term> initialConfiguration,
+                @Main Term initialConfiguration,
                 Stopwatch sw,
                 @Main Context context,
                 KExceptionManager kem,
@@ -154,7 +156,7 @@ public interface Executor {
                         options.depth,
                         options.searchType(),
                         searchPattern.patternRule,
-                        initialConfiguration.get(), searchPattern.steps, false);
+                        initialConfiguration, searchPattern.steps, false);
 
             sw.printIntermediate("Search total");
             return result;
@@ -163,10 +165,10 @@ public interface Executor {
         public KRunResult execute(Attributes a) throws ParseFailedException, KRunExecutionException {
             KRunState result;
             if (options.depth != null) {
-                result = executor.step(initialConfiguration.get(), options.depth, false).getFinalState();
+                result = executor.step(initialConfiguration, options.depth, false).getFinalState();
                 sw.printIntermediate("Bounded execution total");
             } else {
-                result = executor.run(initialConfiguration.get(), false).getFinalState();
+                result = executor.run(initialConfiguration, false).getFinalState();
                 sw.printIntermediate("Normal execution total");
             }
             ASTNode pattern = pattern(options.pattern);

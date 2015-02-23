@@ -19,6 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.util.Providers;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KompileOptionsTest {
@@ -34,7 +35,7 @@ public class KompileOptionsTest {
     @Before
     public void setUp() {
         options = new KompileOptions();
-        options.setFiles(files);
+        options.setFiles(Providers.of(files));
         when(files.resolveWorkingDirectory(Matchers.anyString())).thenAnswer(new Answer<File>() {
             @Override
             public File answer(InvocationOnMock invocation) throws Throwable {

@@ -2,16 +2,15 @@
 package org.kframework.utils;
 
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import java.util.Formatter;
 
 /**
  * To use, access {@link #instance()} after calling {@link #init(GlobalOptions) init()}.
  */
-@Singleton
+@RequestScoped
 public class Stopwatch {
     private long start;
     private long lastIntermediate;
