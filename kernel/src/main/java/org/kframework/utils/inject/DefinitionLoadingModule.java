@@ -47,12 +47,12 @@ public class DefinitionLoadingModule extends AbstractModule {
         return context;
     }
 
-    @Provides @RequestScoped @Concrete
+    @Provides @DefinitionScoped @Concrete
     Definition concreteDefinition(Tool tool, BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
     }
 
-    @Provides @RequestScoped
+    @Provides @DefinitionScoped
     Definition definition(Tool tool, BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(Definition.class, files.resolveKompiled("definition.bin"));
     }

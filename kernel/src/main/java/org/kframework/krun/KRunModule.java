@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
+import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -242,7 +244,7 @@ public class KRunModule extends AbstractModule {
             return provider.get();
         }
 
-        @Provides @RequestScoped
+        @Provides @DefinitionScoped
         Configuration configuration(BinaryLoader loader, Context context, Stopwatch sw, FileUtil files) {
             Configuration cfg = loader.loadOrDie(Configuration.class,
                     files.resolveKompiled("configuration.bin"));
