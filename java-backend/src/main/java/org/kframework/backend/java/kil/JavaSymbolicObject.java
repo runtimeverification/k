@@ -42,7 +42,7 @@ public abstract class JavaSymbolicObject extends ASTNode
     transient Set<Term> functionKLabels = null;
 
     // TODO(dwightguth): more granular locking if necessary for performance
-    private static Object lock;
+    private static Object lock = new Object();
 
     protected JavaSymbolicObject() {
         super();
