@@ -18,7 +18,6 @@ import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -69,7 +68,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             executorBinder.addBinding("java").to(JavaSymbolicExecutor.class);
         }
 
-        @Provides @DefinitionScoped
+        @Provides @RequestScoped
         Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files, KExceptionManager kem) {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
