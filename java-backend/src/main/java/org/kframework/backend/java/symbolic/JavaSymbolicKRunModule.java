@@ -69,7 +69,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             executorBinder.addBinding("java").to(JavaSymbolicExecutor.class);
         }
 
-        @Provides @DefinitionScoped
+        @Provides @RequestScoped
         Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files, KExceptionManager kem) {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));

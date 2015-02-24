@@ -119,7 +119,7 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getVariableSet()}.
      */
     public Set<Variable> variableSet() {
-        synchronized(lock) {
+//        synchronized(lock) {
             if (variableSet == null) {
                 IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
                         (set, term) -> term.setVariableSet(set),
@@ -134,7 +134,7 @@ public abstract class JavaSymbolicObject extends ASTNode
                 variableSet = visitor.getResultSet();
             }
             return Collections.unmodifiableSet(variableSet);
-        }
+//        }
     }
 
      /**
@@ -146,7 +146,7 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getUserVariableSet()}.
      */
     public Set<Term> userVariableSet(TermContext context) {
-        synchronized(lock) {
+//        synchronized(lock) {
             if (userVariableSet == null) {
                 IncrementalCollector<Term> visitor = new IncrementalCollector<>(
                         (set, term) -> term.setUserVariableSet(set),
@@ -163,7 +163,7 @@ public abstract class JavaSymbolicObject extends ASTNode
                 userVariableSet = visitor.getResultSet();
             }
             return Collections.unmodifiableSet(userVariableSet);
-        }
+//        }
     }
 
 
@@ -176,7 +176,7 @@ public abstract class JavaSymbolicObject extends ASTNode
      * computation instead of simply returning {@code null}.
      */
     public boolean isNormal() {
-        synchronized(lock) {
+//        synchronized(lock) {
             if (functionKLabels == null) {
                 IncrementalCollector<Term> visitor = new IncrementalCollector<>(
                         (set, term) -> term.functionKLabels = set,
@@ -198,7 +198,7 @@ public abstract class JavaSymbolicObject extends ASTNode
                 functionKLabels = visitor.getResultSet();
             }
             return functionKLabels.size() == 0;
-        }
+//        }
     }
 
     @Override
