@@ -213,15 +213,6 @@ public abstract class JavaSymbolicObject extends ASTNode
     }
 
     /**
-     * Forces to recompute the cached set of variables in this
-     * {@code JavaSymbolicObject}.
-     */
-    public void updateVariableSet() {
-        variableSet = null;
-        variableSet();
-    }
-
-    /**
      * Gets the cached set of variables in this {@code JavaSymbolicObject}.
      *
      * @return a set of variables in this {@code JavaSymbolicObject} if they
@@ -232,7 +223,7 @@ public abstract class JavaSymbolicObject extends ASTNode
         return variableSet;
     }
 
-    public void setVariableSet(Set<Variable> variableSet) {
+    private void setVariableSet(Set<Variable> variableSet) {
         this.variableSet = variableSet;
     }
 
@@ -247,7 +238,7 @@ public abstract class JavaSymbolicObject extends ASTNode
         return userVariableSet;
     }
 
-    public void setUserVariableSet(Set<Term> variableSet) {
+    private void setUserVariableSet(Set<Term> variableSet) {
         this.userVariableSet = variableSet;
     }
 

@@ -16,10 +16,11 @@ import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.transformation.ToolActivation;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.Annotations;
+import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
@@ -69,14 +70,20 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             executorBinder.addBinding("java").to(JavaSymbolicExecutor.class);
         }
 
-        @Provides @RequestScoped
-        Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files, KExceptionManager kem) {
+        @Provides @DefinitionScoped
+        Definition javaDefinition(
+                BinaryLoader loader,
+                Context context,
+                FileUtil files,
+                KExceptionManager kem,
+                Stopwatch sw) {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
             def.setContext(context);
             def.setGlobalOptions(context.globalOptions);
             def.setKRunOptions(context.krunOptions);
             def.setKem(kem);
+            sw.printIntermediate("Deserialize internal definition representation");
             return def;
         }
     }

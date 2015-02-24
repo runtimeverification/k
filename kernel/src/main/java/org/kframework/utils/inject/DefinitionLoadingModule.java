@@ -30,7 +30,7 @@ public class DefinitionLoadingModule extends AbstractModule {
     protected void configure() {
     }
 
-    @Provides @RequestScoped
+    @Provides @DefinitionScoped
     Context context(
             BinaryLoader loader,
             DefinitionLoadingOptions options,

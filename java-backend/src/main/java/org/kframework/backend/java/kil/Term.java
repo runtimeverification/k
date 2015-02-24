@@ -228,8 +228,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public final int hashCode() {
         if (hashCode == Utils.NO_HASHCODE) {
-            hashCode = computeHash();
-            hashCode = hashCode == 0 ? 1 : hashCode;
+            int accum = computeHash();
+            hashCode = accum == 0 ? 1 : accum;
         }
         return hashCode;
     }

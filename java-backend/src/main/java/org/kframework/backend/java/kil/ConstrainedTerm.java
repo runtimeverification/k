@@ -234,8 +234,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + data.hashCode();
+        int accum = 1;
+        accum = accum * Utils.HASH_PRIME + data.hashCode();
+        hashCode = accum;
         return hashCode;
     }
 
