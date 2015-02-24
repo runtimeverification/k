@@ -25,7 +25,7 @@ public class RuleGrammarGenerator {
 
     private final Module baseK;
     private static final Sort KBott = Sort("KBott");
-    private static final Sort KSort = Sort("K");
+    private static final Sort KTop = Sort("K");
 
     public RuleGrammarGenerator(Module baseK) {
         this.baseK = renameKItem2Bottom(baseK);
@@ -45,7 +45,7 @@ public class RuleGrammarGenerator {
             // Sort ::= KBott
             prods.add(SyntaxProduction(srt, Seq(NonTerminal(KBott)), Attributes()));
             // K ::= Sort
-            prods.add(SyntaxProduction(KSort, Seq(NonTerminal(srt)), Attributes()));
+            prods.add(SyntaxProduction(KTop, Seq(NonTerminal(srt)), Attributes()));
         }
 
         Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);

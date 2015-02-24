@@ -19,7 +19,8 @@ import java.io.IOException;
 public class RuleGrammarTest {
     private File definitionFile = null;
     private Module baseK = null;
-    private final String mainModule = "K";
+    private final static String mainModule = "K";
+    private final static String startSymbol = "KList";
     private RuleGrammarGenerator gen;
 
     @Before
@@ -50,7 +51,7 @@ public class RuleGrammarTest {
                 "endmodule";
         Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
         ParseInModule parser = gen.getRuleGrammar(test);
-        Term rule = parser.parseString("1=>2+3", "KList");
+        Term rule = parser.parseString("1=>2+A", startSymbol);
         System.out.println("rule = " + rule);
     }
 }

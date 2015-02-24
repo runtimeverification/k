@@ -4,6 +4,7 @@ package org.kframework.parser
 
 import collection.JavaConverters._
 import collection.mutable
+import org.kframework.Collections._;
 
 class Ignore
 object Ignore extends Ignore
@@ -40,7 +41,12 @@ trait ChildrenMapping[E, W] {
    * replace the children of the current element with the correct transformed children.
    */
   def mapChildren(t: HasChildren): (Either[E, Term], W) = {
-    val allResults = t.items.asScala.map(applyTerm) // visit all children
+    val allResults1 = t.items.asScala.map(applyTerm) // visit all children
+    val allResults = allResults1 flatMap {
+        case (Right(Ambiguity(items, _)), warns) => immutable(items) map { t => (Right(t): Either[E, Term], warns) }
+        case x => Set(x)
+      }
+
     val (eithers: Iterable[Either[E, Term]], warnings: Iterable[W]) = allResults.unzip
     val newCorrectItems: List[(Term, W)] = allResults.collect { case (Right(v), w) => (v, w) }.toList
     newCorrectItems match {
