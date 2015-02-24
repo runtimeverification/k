@@ -3,6 +3,9 @@ package org.kframework.parser.concrete2kore;
 import org.kframework.kore.outer.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
@@ -43,6 +46,9 @@ public class ParseInModule {
         Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
         cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
         cleaned = new PreferAvoidVisitor().apply(cleaned);
+        cleaned = new CorrectRewritePriorityVisitor().apply(cleaned).right().get();
+        cleaned = new CorrectKSeqPriorityVisitor().apply(cleaned).right().get();
+        cleaned = new CorrectCastPriorityVisitor().apply(cleaned).right().get();
 
         return cleaned;
     }

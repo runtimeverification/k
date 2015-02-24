@@ -32,6 +32,7 @@ module KSEQ
   imports KAST
   syntax KBott ::= ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
+  syntax left #KSequence
 endmodule
 
 
@@ -47,7 +48,8 @@ endmodule
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
-  syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite)]
+  syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
+  syntax non-assoc #KRewrite
   syntax KBott     ::= "`" K "`"    [bracket]
 
 endmodule

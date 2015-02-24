@@ -5,13 +5,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Sources;
-import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.kore.outer.Module;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.outer.Outer;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,10 +44,11 @@ public class RuleGrammarTest {
                 "module TEST " +
                 "syntax Exp ::= Exp \"+\" Exp [klabel('Plus), left] " +
                 "| r\"[0-9]+\" [token] " +
+                "syntax left 'Plus " +
                 "endmodule";
         Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
         ParseInModule parser = gen.getRuleGrammar(test);
-        Term rule = parser.parseString("1=>2+A", startSymbol);
+        Term rule = parser.parseString("1+2=>A:Exp~>B::Exp", startSymbol);
         System.out.println("rule = " + rule);
     }
 }
