@@ -1,8 +1,16 @@
 package org.kframework.parser.concrete2kore.generator;
 
-import org.kframework.kore.outer.Definition;
+import org.kframework.kore.Sort;
 import org.kframework.kore.outer.Module;
+import org.kframework.kore.outer.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.kframework.Collections.*;
+import static org.kframework.kore.Constructors.*;
+import static org.kframework.kore.outer.Constructors.*;
 
 /**
  * Generator for rule and ground parsers.
@@ -15,19 +23,32 @@ import org.kframework.parser.concrete2kore.ParseInModule;
  */
 public class RuleGrammarGenerator {
 
-    private final Definition baseK;
+    private final Module baseK;
+    private static final Sort KBott = Sort("KBott");
+    private static final Sort KSort = Sort("K");
 
-    public RuleGrammarGenerator(Definition baseK) {
-        this.baseK = renameKItem2TopBottom(baseK);
+    public RuleGrammarGenerator(Module baseK) {
+        this.baseK = renameKItem2Bottom(baseK);
     }
 
-    private Definition renameKItem2TopBottom(Definition def) {
-        // TODO: do renaming of KItem and K in the LHS to #Bottom
+    private Module renameKItem2Bottom(Module def) {
+        // TODO: do renaming of KItem and K in the LHS to KBott
         return def;
     }
 
     public ParseInModule getRuleGrammar(Module mod) {
         // TODO: do some changes to the module
-        return new ParseInModule(mod);
+        Set<Sentence> prods = new HashSet<>();
+
+        // create the diamond
+        for (Sort srt : iterable(mod.definedSorts())) {
+            // Sort ::= KBott
+            prods.add(SyntaxProduction(srt, Seq(NonTerminal(KBott)), Attributes()));
+            // K ::= Sort
+            prods.add(SyntaxProduction(KSort, Seq(NonTerminal(srt)), Attributes()));
+        }
+
+        Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);
+        return new ParseInModule(newM);
     }
 }

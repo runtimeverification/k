@@ -1,0 +1,56 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+package org.kframework.parser.concrete2kore;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Sources;
+import org.kframework.kore.convertors.KILtoKORE;
+import org.kframework.kore.outer.Module;
+import org.kframework.parser.Term;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.outer.Outer;
+
+import java.io.File;
+import java.io.IOException;
+
+public class RuleGrammarTest {
+    private File definitionFile = null;
+    private Module baseK = null;
+    private final String mainModule = "K";
+    private RuleGrammarGenerator gen;
+
+    @Before
+    public void setUp() throws  Exception{
+        definitionFile = new File(RuleGrammarTest.class.getResource
+                ("/kast.k").toURI()).getAbsoluteFile();
+        String definitionText;
+        try {
+            definitionText = FileUtils.readFileToString(definitionFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
+        gen = new RuleGrammarGenerator(baseK);
+    }
+
+    @Test
+    public void test1() throws Exception {
+        Assert.assertNotNull(definitionFile);
+    }
+
+    @Test
+    public void test2() throws Exception {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= Exp \"+\" Exp [klabel('Plus), left] " +
+                "| r\"[0-9]+\" [token] " +
+                "endmodule";
+        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
+        ParseInModule parser = gen.getRuleGrammar(test);
+        Term rule = parser.parseString("1=>2+3", "KList");
+        System.out.println("rule = " + rule);
+    }
+}
