@@ -51,4 +51,23 @@ public class RuleGrammarTest {
         Term rule = parser.parseString("1+2=>A:Exp~>B::Exp", startSymbol);
         System.out.println("rule = " + rule);
     }
+
+    @Test
+    public void test3() throws Exception {
+        String def = "" +
+                "module TEST " +
+                "syntax Exps ::= Exp \",\" Exps [klabel('Exps)] " +
+                "| Exp " +
+                "syntax Exp ::= Id " +
+                "syntax Stmt ::= \"val\" Exps \";\" Stmt [klabel('Decl)] " +
+                "syntax KBott ::= \"(\" K \")\" [bracket, klabel('bracket)] " +
+                "| (Id, Stmt) [klabel('tuple)] " +
+                "syntax Id " +
+                "syntax K " +
+                "endmodule";
+        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
+        ParseInModule parser = gen.getRuleGrammar(test);
+        Term rule = parser.parseString("val X ; S => (X, S)", startSymbol);
+        System.out.println("rule = " + rule);
+    }
 }

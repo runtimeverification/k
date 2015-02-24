@@ -44,11 +44,12 @@ public class ParseInModule {
         }
 
         Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
-        cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
-        cleaned = new PreferAvoidVisitor().apply(cleaned);
         cleaned = new CorrectRewritePriorityVisitor().apply(cleaned).right().get();
         cleaned = new CorrectKSeqPriorityVisitor().apply(cleaned).right().get();
         cleaned = new CorrectCastPriorityVisitor().apply(cleaned).right().get();
+        cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
+
+        cleaned = new PreferAvoidVisitor().apply(cleaned);
 
         return cleaned;
     }

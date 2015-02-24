@@ -27,9 +27,15 @@ public class RuleGrammarGenerator {
     private final Module baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
+    private static final Set<Sort> kSorts = new HashSet<>();;
 
     public RuleGrammarGenerator(Module baseK) {
         this.baseK = renameKItem2Bottom(baseK);
+        kSorts.add(KBott);
+        kSorts.add(KTop);
+        kSorts.add(Sort("KLabel"));
+        kSorts.add(Sort("KList"));
+        kSorts.add(Sort("KItem"));
     }
 
     private Module renameKItem2Bottom(Module def) {
@@ -40,22 +46,23 @@ public class RuleGrammarGenerator {
     public ParseInModule getRuleGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 
-        // TODO: ignore predefined sorts
         // create the diamond
         for (Sort srt : iterable(mod.definedSorts())) {
-            // Sort ::= KBott
-            prods.add(SyntaxProduction(srt, Seq(NonTerminal(KBott)), Attributes()));
-            // K ::= Sort
-            prods.add(SyntaxProduction(KTop, Seq(NonTerminal(srt)), Attributes()));
-            // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-            Attributes attrs1 = Attributes().add("klabel", "#SyntacticCast").add("sort", srt.name());
-            prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal("::" + srt.name() + "(?![a-zA-Z0-9])")), attrs1));
-            Attributes attrs2 = Attributes().add("klabel", "#SemanticCast").add("sort", srt.name());
-            prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal(":" + srt.name() + "(?![a-zA-Z0-9])")), attrs2));
-            Attributes attrs3 = Attributes().add("klabel", "#InnerCast").add("sort", srt.name());
-            prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal("<:" + srt.name() + "(?![a-zA-Z0-9])")), attrs3));
-            Attributes attrs4 = Attributes().add("klabel", "#OuterCast").add("sort", srt.name());
-            prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal(":>" + srt.name() + "(?![a-zA-Z0-9])")), attrs4));
+            if (!kSorts.contains(srt)) {
+                // Sort ::= KBott
+                prods.add(SyntaxProduction(srt, Seq(NonTerminal(KBott)), Attributes()));
+                // K ::= Sort
+                prods.add(SyntaxProduction(KTop, Seq(NonTerminal(srt)), Attributes()));
+                // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
+                Attributes attrs1 = Attributes().add("klabel", "#SyntacticCast").add("sort", srt.name());
+                prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal("::" + srt.name() + "(?![a-zA-Z0-9])")), attrs1));
+                Attributes attrs2 = Attributes().add("klabel", "#SemanticCast").add("sort", srt.name());
+                prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal(":" + srt.name() + "(?![a-zA-Z0-9])")), attrs2));
+                Attributes attrs3 = Attributes().add("klabel", "#InnerCast").add("sort", srt.name());
+                prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal("<:" + srt.name() + "(?![a-zA-Z0-9])")), attrs3));
+                Attributes attrs4 = Attributes().add("klabel", "#OuterCast").add("sort", srt.name());
+                prods.add(SyntaxProduction(KBott, Seq(NonTerminal(KTop), RegexTerminal(":>" + srt.name() + "(?![a-zA-Z0-9])")), attrs4));
+            }
         }
 
         Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);
