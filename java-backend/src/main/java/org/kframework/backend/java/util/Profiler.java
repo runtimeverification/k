@@ -47,13 +47,17 @@ public class Profiler {
     private static final Map<KLabelConstant, ReentrantStopwatch> FUNCTION_PROFILING_TIMERS = new HashMap<>();
 
     public static ReentrantStopwatch getTimerForFunction(KLabelConstant klabel) {
-        synchronized(FUNCTION_PROFILING_TIMERS) {
-            ReentrantStopwatch stopwatch = FUNCTION_PROFILING_TIMERS.get(klabel);
-            if (stopwatch == null) {
-               stopwatch = new ReentrantStopwatch(klabel.label());
-               FUNCTION_PROFILING_TIMERS.put(klabel, stopwatch);
+        if (enableProfilingMode.get()) {
+            synchronized(FUNCTION_PROFILING_TIMERS) {
+                ReentrantStopwatch stopwatch = FUNCTION_PROFILING_TIMERS.get(klabel);
+                if (stopwatch == null) {
+                   stopwatch = new ReentrantStopwatch(klabel.label());
+                   FUNCTION_PROFILING_TIMERS.put(klabel, stopwatch);
+                }
+                return stopwatch;
             }
-            return stopwatch;
+        } else {
+            return null;
         }
     }
 

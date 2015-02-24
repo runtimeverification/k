@@ -64,7 +64,7 @@
               <target>
                 <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
                 </exec>
-                <sleep seconds="2" />
+                <sleep seconds="5" />
               </target>
               <skip>${skipKTest}</skip>
             </configuration>
