@@ -89,6 +89,8 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, (Either[E, Term], W)]()
 
+  def applyTerm(t: Term): (Either[E, Term], W) = apply(t)
+
   def apply(t: Term): (Either[E, Term], W) =
     cache.getOrElseUpdate(t,
       t match {
