@@ -136,7 +136,7 @@ public class Rule extends JavaSymbolicObject {
                 || oldRule.containsAttribute(Constants.STDOUT)
                 || oldRule.containsAttribute(Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
-            BuiltinList.Builder streamListBuilder = BuiltinList.builder();
+            BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
             for (Equality eq : lookups.equalities()) {
                 streamListBuilder.addItem(eq.rightHandSide());
             }
@@ -234,7 +234,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
             for (CellLabel wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (termContext.definition().context().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
+                if (termContext.definition().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }

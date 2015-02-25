@@ -3,6 +3,7 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -143,18 +144,18 @@ public abstract class BitVector<T extends Number> extends Token {
     public abstract BitVector<T> sub(BitVector<T> bitVector);
     public abstract BitVector<T> mul(BitVector<T> bitVector);
 
-    public abstract BuiltinList sdiv(BitVector<T> bitVector);
-    public abstract BuiltinList srem(BitVector<T> bitVector);
+    public abstract BuiltinList sdiv(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList srem(BitVector<T> bitVector, TermContext context);
 
     public abstract BitVector<T> udiv(BitVector<T> bitVector);
     public abstract BitVector<T> urem(BitVector<T> bitVector);
 
-    public abstract BuiltinList sadd(BitVector<T> bitVector);
-    public abstract BuiltinList uadd(BitVector<T> bitVector);
-    public abstract BuiltinList ssub(BitVector<T> bitVector);
-    public abstract BuiltinList usub(BitVector<T> bitVector);
-    public abstract BuiltinList smul(BitVector<T> bitVector);
-    public abstract BuiltinList umul(BitVector<T> bitVector);
+    public abstract BuiltinList sadd(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList uadd(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList ssub(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList usub(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList smul(BitVector<T> bitVector, TermContext context);
+    public abstract BuiltinList umul(BitVector<T> bitVector, TermContext context);
 
     public abstract BitVector<T> shl(IntToken intToken);
     public abstract BitVector<T> ashr(IntToken intToken);
