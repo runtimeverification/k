@@ -20,10 +20,12 @@ public class RewriteRelation {
      */
     private Optional<KRunGraph> executionGraph;
 
+
     public RewriteRelation(KRunState finalState, KRunGraph executionGraph) {
         this.finalState = finalState;
         this.executionGraph = Optional.ofNullable(executionGraph);
     }
+
 
     public KRunState getFinalState() {
         return finalState;

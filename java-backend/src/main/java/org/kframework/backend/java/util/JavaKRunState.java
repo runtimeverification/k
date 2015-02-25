@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.symbolic.BackendJavaKILtoKILTransformer;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -12,17 +13,27 @@ import org.kframework.krun.api.KRunState;
  */
 public class JavaKRunState extends KRunState{
     private org.kframework.backend.java.kil.Term javaKilTerm;
+    private ConstrainedTerm constrainedTerm;
 
     private Context context;
+
     public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
         super(null, counter);
         this.context = context;
         this.javaKilTerm = javaTerm;
     }
-
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter);
     }
+
+    public JavaKRunState(org.kframework.backend.java.kil.Term javaKilTerm, ConstrainedTerm constrainedTerm,
+                         Context context, Counter counter) {
+        super(null, counter);
+        this.javaKilTerm = javaKilTerm;
+        this.constrainedTerm = constrainedTerm;
+        this.context = context;
+    }
+
 
     public org.kframework.backend.java.kil.Term getJavaKilTerm() {
         return javaKilTerm;

@@ -60,14 +60,37 @@ public class JavaSymbolicExecutor implements Executor {
 
     @Override
     public RewriteRelation run(org.kframework.kil.Term cfg, boolean computeGraph) throws KRunExecutionException {
-        return javaRewriteEngineRun(cfg, null, -1, computeGraph);
+        return javaRewriteEngineRun(cfg, -1, computeGraph);
     }
 
 
-    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, Term term, int bound, boolean computeGraph) {
-        if (term == null) {
-            term = kilTransformer.transformAndEval(cfg);
+    private ConstrainedTerm getConstrainedTerm(org.kframework.kil.Term cfg) {
+        Term term = kilTransformer.transformAndEval(cfg);
+        TermContext termContext = TermContext.of(globalContext);
+        termContext.setTopTerm(term);
+
+    }
+
+    private RewriteRelation patternMatcherRewriteRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
+        Term term = kilTransformer.transformAndEval(cfg);
+        TermContext termContext = TermContext.of(globalContext);
+        termContext.setTopTerm(term);
+
+        if (javaOptions.patternMatching) {
+            if (computeGraph) {
+                KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            }
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
+            JavaKRunState finalState = new JavaKRunState(rewriteResult.term(), context, counter);
+            return new RewriteRelation(finalState, null);
         }
+
+
+    }
+
+
+    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
+        Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
 
@@ -85,7 +108,11 @@ public class JavaSymbolicExecutor implements Executor {
                 new ConstrainedTerm(term, ConjunctiveFormula.of(termContext)),
                 bound,
                 computeGraph);
-        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
+        return new RewriteRelation(finalState, rewriter.getExecutionGraph(), termContext);
+    }
+
+    private RewriteRelation javaRewriteEngineRun(JavaKRunState initialState, int bound, boolean computeGraph) {
+        TermContext termContext = initialState.get
     }
 
 
@@ -166,26 +193,18 @@ public class JavaSymbolicExecutor implements Executor {
     @Override
     public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
-        return javaRewriteEngineRun(cfg, null, steps, computeGraph);
-    }
-
-    @Override
-    public RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException {
-        if (!(initialState instanceof JavaKRunState)) {
-            KExceptionManager.criticalError("Term received not instance of java backend");
-        }
-        JavaKRunState javaKRunState = (JavaKRunState) initialState;
-        return javaRewriteEngineRun(null, javaKRunState.getJavaKilTerm(), -1, computeGraph);
+        return javaRewriteEngineRun(cfg, steps, computeGraph);
     }
 
     @Override
     public RewriteRelation step(KRunState initialState, int steps, boolean computeGraph)
             throws KRunExecutionException {
+
         if (!(initialState instanceof JavaKRunState)) {
             KExceptionManager.criticalError("Term received not instance of java backend");
         }
         JavaKRunState javaKRunState = (JavaKRunState) initialState;
-        return javaRewriteEngineRun(null, javaKRunState.getJavaKilTerm(), steps, computeGraph);
+        return javaRewriteEngineRun(null, javaKRunState.getJavaKilTerm(), steps, computeGraph)
     }
 
     public SymbolicRewriter getSymbolicRewriter() {
