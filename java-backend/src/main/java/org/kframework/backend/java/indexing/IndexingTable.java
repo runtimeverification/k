@@ -6,8 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
-
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
@@ -19,6 +17,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
+import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -42,7 +41,7 @@ public class IndexingTable implements Serializable, RuleIndex {
 
     private final Data data;
 
-    @Singleton
+    @RequestScoped
     public static class Data implements Serializable {
         public final TopIndex TOP_INDEX = new TopIndex();
         public final IndexingPair TOP_INDEXING_PAIR = new IndexingPair(TOP_INDEX, TOP_INDEX);

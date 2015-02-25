@@ -59,6 +59,9 @@ public class PatternMatchRewriter {
         ruleIndex = definition.getIndex();
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
         this.javaOptions = javaOptions;
+        if (options.experimental.statistics) {
+            Profiler.enableProfilingMode.set(true);
+        }
     }
 
     public Term rewrite(Term subject, int bound, TermContext termContext) {

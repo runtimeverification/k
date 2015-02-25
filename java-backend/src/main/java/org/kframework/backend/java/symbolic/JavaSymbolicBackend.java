@@ -28,6 +28,7 @@ import org.kframework.kil.loader.CollectBracketsVisitor;
 import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -56,12 +57,13 @@ public class JavaSymbolicBackend extends BasicBackend {
     JavaSymbolicBackend(
             Stopwatch sw,
             Context context,
+            KompileOptions options,
             BinaryLoader loader,
             Provider<RuleIndex> index,
             Provider<KILtoBackendJavaKILTransformer> transformer,
             FileUtil files,
             KExceptionManager kem) {
-        super(sw, context);
+        super(sw, context, options);
         this.loader = loader;
         this.index = index;
         this.transformer = transformer;

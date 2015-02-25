@@ -2,18 +2,13 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
-import com.google.inject.Inject;
 
+@RequestScoped
 public final class JavaExecutionOptions {
-
-    public JavaExecutionOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public JavaExecutionOptions(Void v) {}
 
     @Parameter(names="--deterministic-functions", description="Throw assertion failure during "
         + "execution in the java backend if function definitions are not deterministic.")

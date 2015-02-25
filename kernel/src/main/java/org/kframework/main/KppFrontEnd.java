@@ -8,7 +8,7 @@ import java.util.List;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
-import org.kframework.utils.inject.FirstArg;
+import org.kframework.utils.inject.Options;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -27,25 +27,23 @@ public class KppFrontEnd extends FrontEnd {
     KppFrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            @FirstArg String fileName,
             JarInfo jarInfo,
-            FileUtil files) {
+            FileUtil files,
+            @Options String[] args) {
         super(kem, globalOptions, USAGE, "", jarInfo, files);
-        this.fileName = fileName;
-    }
-
-    public static List<Module> getModules(final String[] args) {
         if (args.length != 1) {
             printBootError("Kpp takes exactly one file");
-            return null;
         }
+        this.fileName = args[0];
+    }
+
+    public static List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
         modules.add(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(FrontEnd.class).to(KppFrontEnd.class);
-                bind(Tool.class).toInstance(Tool.OTHER);
-                bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
+                bind(Tool.class).toInstance(Tool.KPP);
                 bind(GlobalOptions.class).toInstance(new GlobalOptions());
             }
         });

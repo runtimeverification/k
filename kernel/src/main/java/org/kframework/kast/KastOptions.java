@@ -14,20 +14,17 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
+@RequestScoped
 public final class KastOptions {
-
-    public KastOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public KastOptions(Void v) {}
 
     @Parameter(description="<file>")
     private List<String> parameters;
@@ -45,13 +42,13 @@ public final class KastOptions {
         if (parameters == null || parameters.size() != 1) {
             throw KExceptionManager.criticalError("You have to provide a file in order to kast a program.");
         }
-        return files.readFromWorkingDirectory(parameters.get(0));
+        return files.get().readFromWorkingDirectory(parameters.get(0));
     }
 
-    private FileUtil files;
+    private Provider<FileUtil> files;
 
     @Inject
-    public void setFiles(FileUtil files) {
+    public void setFiles(Provider<FileUtil> files) {
         this.files = files;
     }
 
@@ -64,7 +61,7 @@ public final class KastOptions {
         if (expression != null) {
             return Sources.fromCommandLine("-e");
         } else {
-            return Sources.fromFile(files.resolveWorkingDirectory(parameters.get(0)));
+            return Sources.fromFile(files.get().resolveWorkingDirectory(parameters.get(0)));
         }
     }
 
