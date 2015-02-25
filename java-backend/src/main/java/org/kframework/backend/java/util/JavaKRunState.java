@@ -12,31 +12,26 @@ import org.kframework.krun.api.KRunState;
  * Generic KRunState
  */
 public class JavaKRunState extends KRunState{
-    private org.kframework.backend.java.kil.Term javaKilTerm;
     private ConstrainedTerm constrainedTerm;
 
     private Context context;
 
-    public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
+    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter) {
         super(null, counter);
         this.context = context;
-        this.javaKilTerm = javaTerm;
+        this.constrainedTerm = constrainedTerm;
     }
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter);
     }
 
-    public JavaKRunState(org.kframework.backend.java.kil.Term javaKilTerm, ConstrainedTerm constrainedTerm,
-                         Context context, Counter counter) {
-        super(null, counter);
-        this.javaKilTerm = javaKilTerm;
-        this.constrainedTerm = constrainedTerm;
-        this.context = context;
-    }
-
 
     public org.kframework.backend.java.kil.Term getJavaKilTerm() {
-        return javaKilTerm;
+        return constrainedTerm.term();
+    }
+
+    public ConstrainedTerm getConstrainedTerm() {
+        return constrainedTerm;
     }
 
     @Override
@@ -44,7 +39,7 @@ public class JavaKRunState extends KRunState{
         if (rawResult != null) {
             return rawResult;
         }
-        rawResult = (Term) javaKilTerm.accept(new BackendJavaKILtoKILTransformer(context));
+        rawResult = (Term) constrainedTerm.term().accept(new BackendJavaKILtoKILTransformer(context));
         return rawResult;
     }
 
@@ -54,13 +49,12 @@ public class JavaKRunState extends KRunState{
             return false;
         }
         JavaKRunState state2 = (JavaKRunState) o;
-        return javaKilTerm.equals(state2.getJavaKilTerm());
+        return constrainedTerm.term().equals(state2.getJavaKilTerm());
 
     }
 
     @Override
     public int hashCode() {
-        return javaKilTerm.hashCode();
+        return constrainedTerm.term().hashCode();
     }
-
 }
