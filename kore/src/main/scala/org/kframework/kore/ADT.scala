@@ -4,6 +4,13 @@ import org.kframework.kore
 import org.kframework.attributes._
 import collection.JavaConverters._
 
+/**
+ * Abstract Data Types: basic implementations for the inner KORE interfaces.
+ *
+ * Tools using inner KORE data structures can either use these classes directly or have their own implementations.
+ */
+
+
 object ADT {
 
   case class KLabel(name: String) extends kore.KLabel {

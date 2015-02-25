@@ -231,7 +231,6 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                                     .seqAsJavaList(syntaxProduction.items())) {
                                 kilProdItems.add(convertProdItem(it));
                             }
-                            System.out.println("sentence = " + sentence);
                             org.kframework.kil.NonTerminal lhs = new org.kframework.kil.NonTerminal(
                                     convertSort(syntaxProduction.sort()));
 
@@ -494,7 +493,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
 //        } else if (k instanceof KRewrite) {
 //
         } else {
-            System.out.println(k);
+            System.err.println(k);
             throw NOT_IMPLEMENTED("Not implemented: KORE.K(" + k.getClass().getName()
                     + ") -> KIL.Term");
         }

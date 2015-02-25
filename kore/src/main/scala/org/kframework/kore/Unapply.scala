@@ -3,6 +3,10 @@ package org.kframework.kore
 import org.kframework.kore
 import collection.JavaConverters._
 
+/**
+ * Scala deconstructors for inner KORE objects.
+ */
+
 object Unapply {
 
   // objects for unapply -- we keep them in the same file as Scala requires this

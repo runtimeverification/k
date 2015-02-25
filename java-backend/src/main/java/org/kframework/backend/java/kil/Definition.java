@@ -153,8 +153,7 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("binder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {
-                                    },
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
                                     Names.named("binder")),
                             p.getBinderMap()));
                 }
