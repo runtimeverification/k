@@ -48,12 +48,8 @@ public abstract class BaseTest extends SDFCompilerTest {
     }
 
     private File testResource(String baseName) {
-        try {
-            return new File(BaseTest.class.getResource(baseName).toURI())
-                    .getAbsoluteFile();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return new File(new File("k-distribution/src/test/resources" + baseName)
+                .getAbsoluteFile().toString().replace("k-distribution/k-distribution", "k-distribution"));
     }
 
     // WARNING: only use this after checking the results manually
