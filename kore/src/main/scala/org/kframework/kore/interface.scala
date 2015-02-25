@@ -2,6 +2,12 @@ package org.kframework.kore
 
 import org.kframework.attributes._
 
+/**
+ * This file contains all inner KORE interfaces.
+ * The the wiki for documentation:
+ * https://github.com/kframework/k/wiki/KORE-data-structures-guide
+ */
+
 trait K {
   def att: Att
   override def toString = Unparse.apply(this)

@@ -3,6 +3,10 @@ package org.kframework.kore
 import Unapply._
 import org.apache.commons.lang3.StringEscapeUtils
 
+/**
+ * Pretty prints inner KORE structures to labeled form.
+ */
+
 object Unparse extends {
   def apply(k: K): String = k match {
     case KToken(sort, s) => "#token(" + sort + ",\"" + StringEscapeUtils.escapeJava(s) + "\")"

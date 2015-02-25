@@ -8,10 +8,12 @@ import collection.JavaConverters._
 
 /**
  *
- * Helper constructors for KORE classes. The class is meant to be imported
- * statically.
+ * Basic implementation of a Constructor of inner KORE classes.
+ * It can be used by either creating a KORE object, or by importing
+ * the class statically.
  *
- * @see org.kframework.InterfaceTest
+ * See the wiki for more details:
+ * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  *
  */
 object KORE extends Constructors {
