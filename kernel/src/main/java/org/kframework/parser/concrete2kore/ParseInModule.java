@@ -9,6 +9,7 @@ import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriority
 import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
@@ -48,6 +49,8 @@ public class ParseInModule {
         cleaned = new CorrectKSeqPriorityVisitor().apply(cleaned).right().get();
         cleaned = new CorrectCastPriorityVisitor().apply(cleaned).right().get();
         cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
+        cleaned = new VariableTypeInferenceFilter().apply(cleaned)._1().right().get();
+
 
         cleaned = new PreferAvoidVisitor().apply(cleaned);
 

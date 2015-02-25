@@ -31,7 +31,7 @@ object Constructors {
 
   def Sort(name: String) = kore.Sort(name);
 
-  def KLabel(name: String) = kore.KLabel(name);
+  def KLabel(name: String): KLabel = kore.KLabel(name);
 
   @annotation.varargs def KList(ks: K*): KList = kore.KList(ks)
 

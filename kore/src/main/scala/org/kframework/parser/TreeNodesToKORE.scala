@@ -33,8 +33,8 @@ object TreeNodesToKORE {
     case KApply(KLabel("#KToken"), items, att) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1)
 
-      KToken(Sort(removeQuotes(items(0).asInstanceOf[Constant].s)),
-        removeQuotes(items.tail.head.asInstanceOf[Constant].s))
+      KToken(Sort(removeQuotes(items(0).asInstanceOf[Constant].value)),
+        removeQuotes(items.tail.head.asInstanceOf[Constant].value))
 
     case KApply(l, items, att) => KApply(l, items map down _, att)
   }

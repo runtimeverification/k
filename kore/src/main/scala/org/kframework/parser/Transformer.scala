@@ -6,7 +6,7 @@ import com.google.common.collect.Sets
 
 import collection.JavaConverters._
 import collection.mutable
-import org.kframework.Collections._;
+import org.kframework.Collections._
 
 class Ignore
 
@@ -53,11 +53,10 @@ trait ChildrenMapping[E, W] {
     val (eithers: Iterable[Either[E, Term]], warnings: Iterable[W]) = allResults.unzip
     val newCorrectItems: List[(Term, W)] = allResults.collect { case (Right(v), w) => (v, w) }.toList
     newCorrectItems match {
-      case List() => {
+      case List() =>
         val mergedWarnings = warnings.foldLeft(warningUnit)(mergeWarnings)
         val mergedErrors = (eithers collect { case Left(err) => err }).foldLeft(errorUnit)(mergeErrors)
         (Left(mergedErrors), mergedWarnings)
-      }
       case List((term, w)) => (Right(term), w)
       case l =>
         val (newTerms, warnings) = l.unzip
@@ -119,15 +118,19 @@ trait EAsSet[E] {
    */
   def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = Sets.union(a, b)
 
-  val errorUnit: java.util.Set[E] = Sets.newHashSet()
+  val errorUnit: java.util.Set[E] = makeErrorSet()
+
+  @annotation.varargs def makeErrorSet(l:E*) = l.toSet.asJava
 }
 
 trait WAsSet[W] {
-  val warningUnit: java.util.Set[W] = Sets.newHashSet()
+  val warningUnit: java.util.Set[W] = makeWarningSet()
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
   def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = Sets.union(a, b)
+
+  @annotation.varargs def makeWarningSet(l:W*) = l.toSet.asJava
 }
 
 abstract class SetsGeneralTransformer[E, W]
