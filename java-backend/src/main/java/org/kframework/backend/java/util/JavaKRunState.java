@@ -57,8 +57,7 @@ public class JavaKRunState extends KRunState{
         if (!(o instanceof JavaKRunState)) {
             return false;
         }
-
-
+        
         JavaKRunState state2 = (JavaKRunState) o;
         return javaTerm.equals(state2.getJavaKilTerm());
 
