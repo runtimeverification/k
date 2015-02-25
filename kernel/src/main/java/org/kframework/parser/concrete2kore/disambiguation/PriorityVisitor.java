@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.kore.outer.NonTerminal;
 import org.kframework.kore.outer.Tag;
+import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.TransformerWithErrors;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.PriorityException;
@@ -17,13 +17,11 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.util.LinkedHashSet;
-
 
 /**
  * Apply the priority and associativity filters.
  */
-public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
 
     private final POSet<Tag> priorities;
     private final Set<Tuple2<Tag, Tag>> leftAssoc;
@@ -59,7 +57,7 @@ public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFa
         return super.apply(tc);
     }
 
-    private static class PriorityVisitor2 extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+    private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
         /**
          * Specifies whether the current node is the left most or the right most child of the parent.
          * This is useful because associativity can be checked at the same time with priorities.
@@ -101,23 +99,5 @@ public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFa
 
             return Right.apply(tc);
         }
-
-        public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-            return Sets.union(a, b);
-        }
-
-        @Override
-        public java.util.Set<ParseFailedException> errorUnit() {
-            return new LinkedHashSet<>();
-        }
-    }
-
-    public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-        return Sets.union(a, b);
-    }
-
-    @Override
-    public java.util.Set<ParseFailedException> errorUnit() {
-        return new LinkedHashSet<>();
     }
 }

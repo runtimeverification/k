@@ -3,9 +3,9 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.kore.outer.NonTerminal;
+import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.TransformerWithErrors;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.PriorityException;
@@ -13,13 +13,11 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.util.LinkedHashSet;
-
 
 /**
  * Make sure that KSequence binds greedy (has least priority after rewrite).
  */
-public class CorrectCastPriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+public class CorrectCastPriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
 
     @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
@@ -40,7 +38,7 @@ public class CorrectCastPriorityVisitor extends TransformerWithErrors<java.util.
         return super.apply(tc);
     }
 
-    private static class PriorityVisitor2 extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+    private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
             // TODO: add location information
             if (tc.production().items().last() instanceof NonTerminal) {
@@ -50,23 +48,5 @@ public class CorrectCastPriorityVisitor extends TransformerWithErrors<java.util.
             }
             return Right.apply(tc);
         }
-
-        public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-            return Sets.union(a, b);
-        }
-
-        @Override
-        public java.util.Set<ParseFailedException> errorUnit() {
-            return new LinkedHashSet<>();
-        }
-    }
-
-    public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-        return Sets.union(a, b);
-    }
-
-    @Override
-    public java.util.Set<ParseFailedException> errorUnit() {
-        return new LinkedHashSet<>();
     }
 }

@@ -131,7 +131,7 @@ trait WAsSet[W] {
 }
 
 abstract class SetsGeneralTransformer[E, W]
-  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] with EAsSet[E] with WAsSet
+  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] with EAsSet[E] with WAsSet[W]
 
 /**
  * Visitor pattern for the front end classes.

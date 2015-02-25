@@ -2,28 +2,22 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
-import org.kframework.POSet;
 import org.kframework.kore.outer.NonTerminal;
-import org.kframework.kore.outer.Tag;
+import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.TransformerWithErrors;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.PriorityException;
-import scala.Tuple2;
-import scala.collection.Set;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
-
-import java.util.LinkedHashSet;
 
 
 /**
  * Make sure that the rewrite binds greedy (has least priority).
  */
-public class CorrectRewritePriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
 
     @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
@@ -49,7 +43,7 @@ public class CorrectRewritePriorityVisitor extends TransformerWithErrors<java.ut
         return super.apply(tc);
     }
 
-    private static class PriorityVisitor2 extends TransformerWithErrors<java.util.Set<ParseFailedException>> {
+    private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
             // TODO: add location information
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KRewrite")) {
@@ -59,23 +53,5 @@ public class CorrectRewritePriorityVisitor extends TransformerWithErrors<java.ut
             }
             return Right.apply(tc);
         }
-
-        public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-            return Sets.union(a, b);
-        }
-
-        @Override
-        public java.util.Set<ParseFailedException> errorUnit() {
-            return new LinkedHashSet<>();
-        }
-    }
-
-    public java.util.Set<ParseFailedException> mergeErrors(java.util.Set<ParseFailedException> a, java.util.Set<ParseFailedException> b) {
-        return Sets.union(a, b);
-    }
-
-    @Override
-    public java.util.Set<ParseFailedException> errorUnit() {
-        return new LinkedHashSet<>();
     }
 }
