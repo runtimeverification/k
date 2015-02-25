@@ -2,6 +2,7 @@ package org.kframework.tiny
 
 import org.kframework.attributes.Att
 import org.kframework.kore.Unparse
+import org.kframework.tiny.matcher.EqualsMatcher
 
 trait Logic extends K {
   def toDNF: Logic
@@ -10,7 +11,7 @@ trait Logic extends K {
 
 object Or extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
-  override def name: String = "Or"
+  override def name: String = "'_orBool_"
   override def apply(ks: K*): Or = super.apply(ks: _*).asInstanceOf[Or]
 }
 
@@ -18,7 +19,7 @@ trait NormalizationCache {
   self: K =>
 
   val normalBy: Option[Theory]
-  def normalize(implicit theory: Theory) = normalBy match {
+  def normalizeInner(implicit theory: Theory) = normalBy match {
     case Some(`normalBy`) => this
     case _ =>
       if (this == True || this == False)
@@ -29,8 +30,8 @@ trait NormalizationCache {
   def actualNormalize(implicit theory: Theory): K
 }
 
-case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None) extends KAssocApp with Logic with
-NormalizationCache {
+case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None)
+  extends KAssocApp with Logic with NormalizationCache {
   /** Estimate the time it takes to solve (up to available data) one of the child formulas  */
   def estimate(implicit t: Theory): Int = ???
 
@@ -46,7 +47,7 @@ NormalizationCache {
     else
       "(" + children.mkString(" || ") + ")"
 
-  override def normalize(implicit theory: Theory) = super[NormalizationCache].normalize
+  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
 
   def toDNF: Logic = toDNF(False, children.toSeq).eliminateGroundBooleans
 
@@ -79,12 +80,12 @@ NormalizationCache {
 
 object And extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new And(l.toSet, att)
-  override def name: String = "And"
+  override def name: String = "'_andBool_"
   override def apply(ks: K*): And = super.apply(ks: _*).asInstanceOf[And]
 }
 
-case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None) extends KAssocApp with Logic with
-NormalizationCache {
+case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
+  extends KAssocApp with Logic with NormalizationCache {
 
   /** Estimate the time it takes to solve one variable in one formula */
   def estimate(implicit t: Theory): Int = ???
@@ -95,7 +96,7 @@ NormalizationCache {
   // Implementing K
   val klabel = And
 
-  override def normalize(implicit theory: Theory) = super[NormalizationCache].normalize
+  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
 
   def actualNormalize(implicit theory: Theory): K = {
     val dnf = toDNF.eliminateGroundBooleans
@@ -111,31 +112,40 @@ NormalizationCache {
   }
 
   def normalizeChildren(implicit theory: Theory): Logic = {
-    // working with streams to stop at first conflict
-    val normalizedChildren = children map {
-      _.normalize
-    }
 
-    // this could be optimized to only consider new children but it somehow doesn't work
-    // will look into it another time. We could use newChildren to find bindings instead
-    // of normalizedChildren.
-    //    val newChildren = normalizedChildren -- children
+    if (children.toStream.exists(_.isFalse))
+      False
+    else {
+      // working with streams to stop at first conflict
+      val normalizedChildren: Stream[K] = children.toStream map {
+        _.normalize
+      }
 
-    val newBindings = normalizedChildren collect {
-      case c: Binding => (c.variable, c.value)
-    } toMap
+      if (normalizedChildren.contains(False))
+        False
+      else {
+        // this could be optimized to only consider new children but it somehow doesn't work
+        // will look into it another time. We could use newChildren to find bindings instead
+        // of normalizedChildren.
+        //    val newChildren = normalizedChildren -- children
 
-    import org.kframework.tiny.Substitution._
+        val newBindings: Map[KVar, K] = normalizedChildren collect {
+          case c: Binding => (c.variable, c.value)
+        } toMap
 
-    val childrenWithSubstitution = normalizedChildren map {
-      c =>
-        c.substitute(newBindings)
-    }
+        import org.kframework.tiny.Substitution._
 
-    childrenWithSubstitution.foldLeft(True: Logic) {
-      case (False, _) => False
-      case (sum: And, b: Binding) => sum.addBinding(b)
-      case (sum: And, c) => And(sum.children + c, sum.att)
+        val childrenWithSubstitution: Stream[K] = normalizedChildren map {
+          c =>
+            c.substitute(newBindings).normalize
+        }
+
+        childrenWithSubstitution.foldLeft(True: Logic) {
+          case (False, _) => False
+          case (sum: And, b: Binding) => sum.addBinding(b)
+          case (sum: And, c) => And(sum.children + c, sum.att)
+        }
+      }
     }
   }
 
@@ -203,10 +213,9 @@ NormalizationCache {
       "True"
     else
       "(" + children.mkString(" && ") + ")"
-
 }
 
-case class Binding(variable: KVar, value: K, att: Att) extends KProduct {
+case class Binding(variable: KVar, value: K, att: Att) extends KProduct with PlainNormalization {
 
   assert(variable != value)
 
@@ -223,7 +232,7 @@ case class Equals(a: K, b: K, att: Att) extends KProduct {
   override val klabel = Equals
   override def toString = a + "=" + b
 
-  override def normalize(implicit theory: Theory) = a.matcher(b).normalize
+  override def normalizeInner(implicit theory: Theory) = EqualsMatcher(a, b)
 }
 
 object Equals extends KProduct2Label with EmptyAtt {
@@ -231,10 +240,10 @@ object Equals extends KProduct2Label with EmptyAtt {
 }
 
 case class Not(k: K, att: Att = Att()) extends KProduct {
-  override val klabel = Equals
+  override val klabel = Not
   override def toString = "!" + k
 
-  override def normalize(implicit theory: Theory) = k.normalize match {
+  override def normalizeInner(implicit theory: Theory) = k.normalize match {
     case True => False
     case False => True
     case x => Not(x, att)
@@ -243,4 +252,19 @@ case class Not(k: K, att: Att = Att()) extends KProduct {
 
 object Not extends KProduct1Label with EmptyAtt {
   val name: String = "!"
+}
+
+case class SortPredicate(klabel: SortPredicateLabel, k: K, att: Att = Att()) extends KProduct with PlainNormalization
+
+object SortPredicate {
+  def apply(s: Sort, k: K) = SortPredicateLabel(s)(k)
+}
+
+case class SortPredicateLabel(s: Sort) extends KRegularAppLabel {
+  assert(s != null)
+  override def att: Att = Att()
+  override def name: String = s.name
+  override def construct(l: Iterable[K], att: Att): KApp = l match {
+    case Seq(k) => SortPredicate(this, k, att)
+  }
 }

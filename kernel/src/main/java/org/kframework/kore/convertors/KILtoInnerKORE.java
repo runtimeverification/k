@@ -178,7 +178,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         if (t != null)
             return apply(t);
         else
-            return KToken(Sorts.KBoolean(), "true");
+            return KToken(Sorts.Bool(), "true");
     }
 
     public K apply(TermComment t) {

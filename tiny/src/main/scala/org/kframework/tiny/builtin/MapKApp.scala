@@ -5,12 +5,23 @@ import org.kframework.kore.ADT.Sort
 import org.kframework.tiny._
 import org.kframework.tiny.matcher.{MatcherLabel, Matcher}
 
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.collection.mutable.Builder
 
-class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: Att = Att()) extends KApp {
-  val children = theMap map { case (k, v) => Tuple2Label(k, v) }
+final class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: Att = Att())
+  extends KApp with PlainNormalization {
+  val children: immutable.Iterable[K] = theMap map { case (k, v) => Tuple2Label(k, v) }
   override def matcher(right: K): Matcher = KMapAppMatcher(this, right)
+
+  override def computeHashCode = klabel.hashCode * 8 + theMap.hashCode
+
+  override def equals(that: Any) =
+    this.hashCode == that.hashCode &&
+      (that match {
+        case that: AnyRef if that.asInstanceOf[AnyRef].eq(this) => true
+        case that: KMapApp => that.klabel == this.klabel && that.theMap == this.theMap
+        case _ => false
+      })
 }
 
 object Tuple2Label extends RegularKAppLabel("Tuple2", Att())
@@ -55,7 +66,7 @@ case class MapKeys(k: K, att: Att = Att()) extends KProduct {
   override val klabel = MapKeys
   override def toString = "keys(" + k + ")"
 
-  override def normalize(implicit theory: Theory) = ???
+  override def normalizeInner(implicit theory: Theory) = MapKeys(k.normalize)
 }
 
 object MapKeys extends KProduct1Label with EmptyAtt {
@@ -64,6 +75,37 @@ object MapKeys extends KProduct1Label with EmptyAtt {
 
 case class KMapAppMatcher(left: KMapApp, right: K) extends Matcher {
   override val klabel = KMapAppMatcher
+
+  override def normalizeInner(implicit theory: Theory): K = (left.normalize, right.normalize) match {
+    case (left: KMapApp, right: KMapApp) =>
+      val leftGroundKeys = left.theMap.keys filter theory.isGround toSet
+      val rightGroundKeys = right.theMap.keys filter theory.isGround toSet
+
+      if ((leftGroundKeys &~ rightGroundKeys) != Set())
+        False
+      else {
+        val leftoverGround = rightGroundKeys &~ leftGroundKeys
+
+        val lookupStyleResults = for (lKey <- leftGroundKeys) yield {
+          left.theMap(lKey) match {
+            case v: KVar => Binding(v, right.theMap(lKey))
+            case v if (v == right.theMap(lKey)) => True
+            case _ => False
+          }
+        }
+
+        val leftSymbolicKeys = left.theMap.keys.toSet &~ leftGroundKeys
+        if (leftSymbolicKeys.size == 0 && rightGroundKeys.size == leftGroundKeys.size)
+          And(lookupStyleResults, Att())
+        else if (leftSymbolicKeys.size == 1 && left.theMap(leftSymbolicKeys.head) == KVarMapValue) {
+          val leftoverMap = left.klabel((leftoverGround map { k => Tuple2Label(k, right.theMap(k)) }).toSeq: _*)
+          And(lookupStyleResults + Binding(leftSymbolicKeys.head, leftoverMap), Att())
+        } else
+          this
+      }
+
+    case _ => this
+  }
 }
 
 object KMapAppMatcher extends MatcherLabel {

@@ -550,7 +550,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.Term convertKBool(K k) {
-        if (k instanceof KToken && ((KToken) k).sort() == Sorts.KBoolean()) {
+        if (k instanceof KToken && ((KToken) k).sort() == Sorts.Bool()) {
             return null; // FIXME
             // throw new AssertionError("Unimplemented");
         }
