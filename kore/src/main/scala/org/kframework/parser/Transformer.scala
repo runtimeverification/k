@@ -2,11 +2,14 @@
 
 package org.kframework.parser
 
+import com.google.common.collect.Sets
+
 import collection.JavaConverters._
 import collection.mutable
 import org.kframework.Collections._;
 
 class Ignore
+
 object Ignore extends Ignore
 
 trait ChildrenMapping[E, W] {
@@ -110,6 +113,26 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   def apply(c: Constant): (Either[E, Term], W) = { (Right(c), warningUnit) }
 }
 
+trait EAsSet[E] {
+  /**
+   * Merges the set of problematic (i.e., Left) results.
+   */
+  def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = Sets.union(a, b)
+
+  val errorUnit: java.util.Set[E] = Sets.newHashSet()
+}
+
+trait WAsSet[W] {
+  val warningUnit: java.util.Set[W] = Sets.newHashSet()
+  /**
+   * Merges the set of problematic (i.e., Left) results.
+   */
+  def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = Sets.union(a, b)
+}
+
+abstract class SetsGeneralTransformer[E, W]
+  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] with EAsSet[E] with WAsSet
+
 /**
  * Visitor pattern for the front end classes.
  * Applies the visitor transformation on each node, and returns either a term, or a set of errors. (no warnings)
@@ -144,6 +167,9 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   override def mergeWarnings(a: Ignore, b: Ignore) = Ignore
   override val warningUnit = Ignore
 }
+
+abstract class SetsTransformerWithErrors[E]
+  extends TransformerWithErrors[java.util.Set[E]] with EAsSet[E]
 
 /**
  * Visitor pattern for the front end classes.
