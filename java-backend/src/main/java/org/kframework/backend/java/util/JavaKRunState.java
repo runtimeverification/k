@@ -11,7 +11,7 @@ import org.kframework.krun.api.KRunState;
  * Backend Specific Functionality added to the
  * Generic KRunState
  */
-public class JavaKRunState extends KRunState{
+public class JavaKRunState extends KRunState {
     private ConstrainedTerm constrainedTerm;
     private org.kframework.backend.java.kil.Term javaTerm;
 
@@ -29,6 +29,7 @@ public class JavaKRunState extends KRunState{
         this.context = context;
         this.javaTerm = javaTerm;
     }
+
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter);
     }
