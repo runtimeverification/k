@@ -13,6 +13,6 @@ endmodule
 module TEST [org.kframework.attributes.Location(#token(Int,"5"),#token(Int,"1"),#token(Int,"13"),#token(Int,"9"))]
   syntax Exp ::= Exp "+" Exp [org.kframework.attributes.Location(#token(Int,"8"),#token(Int,"18"),#token(Int,"8"),#token(Int,"28"))]
   imports INCLUDE [org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"3"),#token(Int,"6"),#token(Int,"17"))]
-  context '_+_(_,HOLE(#token(KItem,""))) requires #token(KBoolean,"true")
-  context '_+_(HOLE(#token(KItem,"")),_) requires #token(KBoolean,"true")
+  context '_+_(_,HOLE(#token(KItem,""))) requires #token(Bool,"true")
+  context '_+_(HOLE(#token(KItem,"")),_) requires #token(Bool,"true")
 endmodule

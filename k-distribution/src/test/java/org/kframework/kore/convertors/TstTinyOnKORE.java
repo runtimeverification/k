@@ -45,7 +45,7 @@ public class TstTinyOnKORE extends BaseTest {
         KApp program = cons.KApply(cons.KLabel("'<top>"),
                 cons.KApply(cons.KLabel("'<k>"),
                         cons.KApply(cons.KLabel("'while__"),
-                                cons.KApply(cons.KLabel("'_<=_"), cons.stringToId("x"), cons.intToToken(1000)),
+                                cons.KApply(cons.KLabel("'_<=_"), cons.stringToId("x"), cons.intToToken(10)),
                                 cons.KApply(cons.KLabel("'_=_;"),
                                         cons.stringToId("x"),
                                         cons.KApply(cons.KLabel("'_+_"),
