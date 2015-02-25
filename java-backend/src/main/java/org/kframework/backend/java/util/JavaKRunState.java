@@ -12,59 +12,58 @@ import org.kframework.krun.api.KRunState;
  * Generic KRunState
  */
 public class JavaKRunState extends KRunState{
-    private ConstrainedTerm constrainedTerm;
-    private org.kframework.backend.java.kil.Term javaTerm;
+	private ConstrainedTerm constrainedTerm;
+	private org.kframework.backend.java.kil.Term javaTerm;
 
-    private Context context;
+	private Context context;
 
-    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter) {
-        super(null, counter);
-        this.context = context;
-        this.constrainedTerm = constrainedTerm;
-        this.javaTerm = constrainedTerm.term();
-    }
+	public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter) {
+		super(null, counter);
+		this.context = context;
+		this.constrainedTerm = constrainedTerm;
+		this.javaTerm = constrainedTerm.term();
+	}
 
-    public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
-        super(null, counter);
-        this.context = context;
-        this.javaTerm = javaTerm;
-    }
-    public JavaKRunState(Term term, Counter counter) {
-        super(term, counter);
-    }
+	public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
+		super(null, counter);
+		this.context = context;
+		this.javaTerm = javaTerm;
+	}
+	public JavaKRunState(Term term, Counter counter) {
+		super(term, counter);
+	}
 
 
-    public org.kframework.backend.java.kil.Term getJavaKilTerm() {
-        return javaTerm;
-    }
+	public org.kframework.backend.java.kil.Term getJavaKilTerm() {
+		return javaTerm;
+	}
 
-    public ConstrainedTerm getConstrainedTerm() {
-        return constrainedTerm;
-    }
+	public ConstrainedTerm getConstrainedTerm() {
+		return constrainedTerm;
+	}
 
-    @Override
-    public Term getRawResult() {
-        if (rawResult != null) {
-            return rawResult;
-        }
+	@Override
+	public Term getRawResult() {
+		if (rawResult != null) {
+			return rawResult;
+		}
 
-        rawResult = (Term) javaTerm.accept(new BackendJavaKILtoKILTransformer(context));
-        return rawResult;
-    }
+		rawResult = (Term) javaTerm.accept(new BackendJavaKILtoKILTransformer(context));
+		return rawResult;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof JavaKRunState)) {
-            return false;
-        }
-        
-        JavaKRunState state2 = (JavaKRunState) o;
-        return javaTerm.equals(state2.getJavaKilTerm());
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof JavaKRunState)) {
+			return false;
+		}
+		JavaKRunState state2 = (JavaKRunState) o;
+		return javaTerm.equals(state2.getJavaKilTerm());
 
-    }
+	}
 
-    @Override
-    public int hashCode() {
-        return javaTerm.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return javaTerm.hashCode();
+	}
 }
