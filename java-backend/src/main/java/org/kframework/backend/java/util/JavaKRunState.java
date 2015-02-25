@@ -13,6 +13,7 @@ import org.kframework.krun.api.KRunState;
  */
 public class JavaKRunState extends KRunState{
     private ConstrainedTerm constrainedTerm;
+    private org.kframework.backend.java.kil.Term javaTerm;
 
     private Context context;
 
@@ -20,6 +21,13 @@ public class JavaKRunState extends KRunState{
         super(null, counter);
         this.context = context;
         this.constrainedTerm = constrainedTerm;
+        this.javaTerm = constrainedTerm.term();
+    }
+
+    public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
+        super(null, counter);
+        this.context = context;
+        this.javaTerm = javaTerm;
     }
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter);
@@ -27,7 +35,7 @@ public class JavaKRunState extends KRunState{
 
 
     public org.kframework.backend.java.kil.Term getJavaKilTerm() {
-        return constrainedTerm.term();
+        return javaTerm;
     }
 
     public ConstrainedTerm getConstrainedTerm() {
@@ -39,7 +47,8 @@ public class JavaKRunState extends KRunState{
         if (rawResult != null) {
             return rawResult;
         }
-        rawResult = (Term) constrainedTerm.term().accept(new BackendJavaKILtoKILTransformer(context));
+
+        rawResult = (Term) javaTerm.accept(new BackendJavaKILtoKILTransformer(context));
         return rawResult;
     }
 
@@ -48,13 +57,15 @@ public class JavaKRunState extends KRunState{
         if (!(o instanceof JavaKRunState)) {
             return false;
         }
+
+
         JavaKRunState state2 = (JavaKRunState) o;
-        return constrainedTerm.term().equals(state2.getJavaKilTerm());
+        return javaTerm.equals(state2.getJavaKilTerm());
 
     }
 
     @Override
     public int hashCode() {
-        return constrainedTerm.term().hashCode();
+        return javaTerm.hashCode();
     }
 }
