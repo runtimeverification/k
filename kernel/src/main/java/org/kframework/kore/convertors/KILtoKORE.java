@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.kframework.Collections;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -191,7 +192,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
                 .reduce(makeAnd)
-                .orElseGet(() -> KToken(Sort("Bool"), "true"));
+                .orElseGet(() -> KToken(Sorts.Bool(), "true"));
 
 
         return Rule(body, makeAnd.apply(inner.applyOrTrue(r.getRequires()), sortPredicates),

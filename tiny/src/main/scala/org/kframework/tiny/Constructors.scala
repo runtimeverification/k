@@ -17,15 +17,16 @@ class Constructors(module: definition.Module) extends kore.Constructors {
   def hookMappings(hook: String, labelString: String) = hook match {
     case "#K-EQUAL:_==K_" => Equals
     case "#BOOL:notBool_" => Not
-    case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y)
-    case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y)
-    case "#INT:_<=Int_" => RegularKAppLabel("<=", Att())
+    case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y, Sorts.Int)
+    case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y, Sorts.Int)
+    case "#INT:_<=Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x <= y, Sorts.Bool)
     case "Map:.Map" => KMapAppLabel("'_Map_")
     case "Map:__" => KMapAppLabel("'_Map_")
     case "Map:_|->_" => Tuple2Label
     case "Map:keys" => MapKeys
     case "Set:in" => RegularKAppLabel("???in???", Att())
     case "#BOOL:_andBool_" => And
+    case "#BOOL:_orBool_" => Or
   }
 
   override def KLabel(name: String): Label = {
@@ -70,6 +71,7 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
+      case Sorts.Bool => TypedKTok(sort, s.toBoolean)
       case _ => RegularKTok(sort, s)
     }
   }

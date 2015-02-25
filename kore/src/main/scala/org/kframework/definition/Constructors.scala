@@ -2,10 +2,8 @@
 
 package org.kframework.definition
 
-import org.kframework.definition
-import org.kframework.kore
+import org.kframework.{attributes, definition}
 import org.kframework.kore._
-import org.kframework.attributes
 
 /**
  *
@@ -55,8 +53,6 @@ object Constructors {
   def Associativity = definition.Associativity;
 
   def Att() = attributes.Att();
-
-  def Sort(s: String) = kore.ADT.Sort(s);
 
   // EXTRA
 

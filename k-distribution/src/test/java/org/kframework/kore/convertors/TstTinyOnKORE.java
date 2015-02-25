@@ -2,6 +2,7 @@
 
 package org.kframework.kore.convertors;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.Collections;
@@ -18,11 +19,14 @@ import scala.collection.immutable.Set;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 import java.io.IOException;
 
 
 public class TstTinyOnKORE extends BaseTest {
+
+
     @Test
     public void kore_imp_tiny() throws IOException {
         sdfTest();
@@ -36,29 +40,48 @@ public class TstTinyOnKORE extends BaseTest {
                 Production(Sort("K"), Seq(NonTerminal(Sort("KSequence"))))
         ), Att());
 
-        System.out.println("module.subsorts() = " + module.subsorts());
-
         Constructors cons = new Constructors(module);
-        package$ tiny = package$.MODULE$;
 
         KApp program = cons.KApply(cons.KLabel("'<top>"),
                 cons.KApply(cons.KLabel("'<k>"),
-                        cons.KApply(cons.KLabel("'_+_"),
-                                cons.stringToId("x"),
-                                cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y")))),
+                        cons.KApply(cons.KLabel("'while__"),
+                                cons.KApply(cons.KLabel("'_<=_"), cons.stringToId("x"), cons.intToToken(1000)),
+                                cons.KApply(cons.KLabel("'_=_;"),
+                                        cons.stringToId("x"),
+                                        cons.KApply(cons.KLabel("'_+_"),
+                                                cons.stringToId("x"),
+                                                cons.intToToken(1))))),
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(10)),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(0)),
                                 cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
                 ));
+
+//        KApp program = cons.KApply(cons.KLabel("'<top>"),
+//                cons.KApply(cons.KLabel("'<k>"),
+//                        cons.KApply(cons.KLabel("'_/_"), cons.stringToId("x"), cons.stringToId("y"))),
+//                        cons.KApply(cons.KLabel("'<state>"),
+//                                cons.KApply(cons.KLabel("'_Map_"),
+//                                        cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(10)),
+//                                        cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
+//                        ));
+
 
         System.out.println("module = " + module);
 
         Rewriter rewriter = new Rewriter(module);
 
-        Set<K> results = rewriter.rewriteRepeat(program);
+//        long l = System.nanoTime();
+//        Set<K> results = rewriter.rewrite(program, Set());
+//        System.out.println("time = " + (System.nanoTime() - l) / 1000000);
+//
+//        return stream(results).map(r -> r.toString()).collect(Collections.toList()).mkString("\n");
 
-        return stream(results).map(r -> r.toString()).collect(Collections.toList()).mkString("\n");
+        long l = System.nanoTime();
+        K result = rewriter.execute(program);
+        System.out.println("time = " + (System.nanoTime() - l) / 1000000);
+
+        return result.toString();
     }
 
     @Override

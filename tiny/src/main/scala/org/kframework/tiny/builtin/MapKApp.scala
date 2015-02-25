@@ -13,12 +13,15 @@ final class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: At
   val children: immutable.Iterable[K] = theMap map { case (k, v) => Tuple2Label(k, v) }
   override def matcher(right: K): Matcher = KMapAppMatcher(this, right)
 
-  override def hashCode = klabel.hashCode * 8 + theMap.hashCode
+  override def computeHashCode = klabel.hashCode * 8 + theMap.hashCode
 
-  override def equals(that: Any) = that match {
-    case that: KMapApp => that.klabel == this.klabel && that.theMap == this.theMap
-    case _ => false
-  }
+  override def equals(that: Any) =
+    this.hashCode == that.hashCode &&
+      (that match {
+        case that: AnyRef if that.asInstanceOf[AnyRef].eq(this) => true
+        case that: KMapApp => that.klabel == this.klabel && that.theMap == this.theMap
+        case _ => false
+      })
 }
 
 object Tuple2Label extends RegularKAppLabel("Tuple2", Att())

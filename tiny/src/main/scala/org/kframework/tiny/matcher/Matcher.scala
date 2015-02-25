@@ -33,10 +33,12 @@ trait KAppMatcher extends Matcher {
         matchContents(contentsP, contents).normalize
       case (KApp(label, contentsP, att), k) if this.isInstanceOf[KAssocAppMatcher] => // ugly instanceOf
         matchContents(contentsP, Seq(k)).normalize
-      case _ => False
+      case _ =>
+        False
     }
     x
   }
+
 }
 
 case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
@@ -45,6 +47,10 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
     And(ksL.zip(ksR) map { case (k1, k2) => k1.matcher(k2) }: _*)
 
+  override def isFalse = (left, right) match {
+    case (KApp(label, _, _), KApp(label2, _, _)) => label != label2
+    case _ => false
+  }
 }
 
 object KRegularAppMatcher extends MatcherLabel {
@@ -57,7 +63,7 @@ case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K = {
     val res = (ksL, ksR) match {
-      case (List(), List()) => Or(True)
+      case (Seq(), Seq()) => Or(True)
       case (headL +: tailL, headR +: tailR) if theory.equals(headL, headR) => matchContents(tailL, tailR)
       case (headL +: tailL, ksR) =>
         (0 to ksR.size)
@@ -73,6 +79,11 @@ case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
       case other => False
     }
     res
+  }
+
+  override def isFalse = (left, right) match {
+    case (KApp(label, Seq(), _), KApp(label2, Seq(), _)) => label != label2
+    case _ => false
   }
 }
 

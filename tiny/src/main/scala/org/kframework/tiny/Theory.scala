@@ -47,18 +47,16 @@ class TheoryWithUpDown(up: Up, down: Down, module: Module) extends FreeTheory {
         if (actualSort == s || module.subsorts.<(actualSort, s)) True else False
 
       case t: KTok => t.sort match {
-        case Sorts.KBoolean => t.s match {
+        case Sorts.Bool => t.s match {
           case "true" => And()
           case "false" => Or()
         }
-        case _ => t
+        case _ =>
+          if (t.s.toString == "true")
+            println(">>>>>>>>>" + t + " " + t.sort);
+          t
       }
-      case t =>
-        try {
-          up(down(t)).asInstanceOf[K]
-        } catch {
-          case e => super.normalize(k)
-        }
+      case t => super.normalize(k)
     }
   }
 }

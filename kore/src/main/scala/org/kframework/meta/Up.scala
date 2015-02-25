@@ -23,7 +23,7 @@ class Up(cons: Constructors) extends (Any => K) {
       // Primitives
       case o: Int => cons.KToken(Sorts.Int, o.toString, Att())
       case o: String => cons.KToken(Sorts.KString, o.toString, Att())
-      case o: Boolean => cons.KToken(cons.Sort("Boolean"), o.toString, Att())
+      case o: Boolean => cons.KToken(Sorts.Bool, o.toString, Att())
 
       case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
       case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())

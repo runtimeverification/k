@@ -1,10 +1,14 @@
 package org.kframework.tiny
 
+import java.util.concurrent.Callable
+
+import com.google.common.cache.CacheBuilder
 import org.kframework._
 import org.kframework.attributes.Att
-import org.kframework.kore.ADT
+import org.kframework.kore.{KLabel, ADT}
 import org.kframework.tiny.matcher._
 
+import scala.annotation.switch
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -13,14 +17,42 @@ import scala.collection.mutable.ListBuffer
 //   TRAITS
 //////////////////
 
+object NormalizationCaching {
+  val cache = CacheBuilder.newBuilder().maximumSize(10000).build[K, K]()
+}
+
 trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher
   final def normalize(implicit theory: Theory): K = {
-    val inner = normalizeInner
-    theory.normalize(inner)
+    if (this.isNormal)
+      this
+    else
+      NormalizationCaching.cache.get(this, new Callable[K] {
+        override def call(): K = {
+          val inner = normalizeInner
+          val res = theory.normalize(inner)
+          res.isNormal = true
+          res
+        }
+      })
   }
   def normalizeInner(implicit theory: Theory): K
+
+  var isNormal = false
+  var cachedHashCode: Option[Int] = None
+
+  override def hashCode = (cachedHashCode: @switch) match {
+    case Some(x) => x
+    case None =>
+      val x = computeHashCode
+      cachedHashCode = Some(x)
+      x
+  }
+
+  def computeHashCode: Int
+
+  def isFalse: Boolean = false
 }
 
 object KApp {
@@ -30,7 +62,7 @@ object KApp {
 /**
  * Term with children. We automatically lift KSeq and KRewrite to KApp.
  */
-trait KApp extends kore.KApply with K {
+trait KApp extends {} with kore.KApply with K {
   // KApp seen as a collection Set(2, Set(3, 4)) is normalized and has size 3 and 2,3,4 as children
   def size: Int = children.size
   def children: Iterable[K]
@@ -39,14 +71,15 @@ trait KApp extends kore.KApply with K {
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
   def klist = kore.KORE.KList(children.asInstanceOf[Iterable[kore.K]].toSeq.asJava)
 
-  override def equals(that: Any) = {
-    (that match {
+  override def equals(that: Any) =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
       case that: KApp => that.klabel == klabel && this.children == that.children
       case _ => false
     })
-  }
 
-  override def hashCode = klabel.hashCode * 5333 + children.hashCode
+
+  override def computeHashCode = klabel.hashCode * 5333 + children.toSet.hashCode
 
   override def toString = klabel + "(" + children.mkString(",") + ")"
 }
@@ -96,6 +129,7 @@ trait KProduct extends KRegularApp with Product {
  */
 trait KTok extends kore.KToken with KLeaf {
   override def matcher(right: K): Matcher = EqualsMatcher(this, right)
+  def computeHashCode = this.sort.hashCode * 19 + this.s.hashCode
 }
 
 trait EmptyAtt {
@@ -110,6 +144,7 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLea
   def copy(att: Att): KVar = KVar(name, att)
   override def matcher(right: K): Matcher = KVarMatcher(this, right)
   override def toString = name
+  def computeHashCode = name.hashCode
 }
 
 case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
@@ -123,11 +158,11 @@ case class TypedKTok[T](sort: Sort, nativeValue: T, att: Att = Att()) extends KT
   override def toString = nativeValue.toString
 }
 
-case class NativeBinaryOp[T](val klabel: NativeBinaryOpLabel[T], val children: Seq[K], val att: Att = Att())
+case class NativeBinaryOp[T, R](val klabel: NativeBinaryOpLabel[T, R], val children: Seq[K], val att: Att = Att())
   extends KRegularApp {
   override def normalizeInner(implicit theory: Theory): K = children match {
     case Seq(TypedKTok(s1, v1: T, _), TypedKTok(s2, v2: T, _)) if s1 == s2 =>
-      TypedKTok(s1, klabel.f(v1, v2))
+      TypedKTok(klabel.resSort, klabel.f(v1, v2))
     case _ => this
   }
 }
@@ -172,6 +207,17 @@ trait Label extends kore.KLabel {
   def att: Att
 
   override def toString = name
+
+  lazy val cachedHashCode = name.hashCode
+
+  override def hashCode = cachedHashCode
+  override def equals(that: Any) =
+    (this.hashCode == that.hashCode) &&
+      (that match {
+        case that: AnyRef if that.asInstanceOf[AnyRef].eq(this) => true
+        case that: KLabel => this.name == that.name
+        case _ => false
+      })
 }
 
 trait KRegularAppLabel extends Label {
@@ -219,8 +265,8 @@ case class RegularKAppLabel(name: String, att: Att) extends KRegularAppLabel {
   override def construct(l: Iterable[K], att: Att): RegularKApp = new RegularKApp(this, l.toSeq, att)
 }
 
-case class NativeBinaryOpLabel[T](name: String, att: Att, f: (T, T) => T) extends KRegularAppLabel {
-  override def construct(l: Iterable[K], att: Att): NativeBinaryOp[T] = new NativeBinaryOp(this, l.toSeq, att)
+case class NativeBinaryOpLabel[T, R](name: String, att: Att, f: (T, T) => R, resSort: Sort) extends KRegularAppLabel {
+  override def construct(l: Iterable[K], att: Att): NativeBinaryOp[T, R] = new NativeBinaryOp(this, l.toSeq, att)
 }
 
 case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel {

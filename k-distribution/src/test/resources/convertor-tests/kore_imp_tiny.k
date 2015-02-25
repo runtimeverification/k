@@ -2,7 +2,6 @@
 
 module TEST
   syntax K ::= KItem
-  syntax KItem ::= KResult
   syntax KResult
   syntax KItem ::= Id
 
@@ -12,8 +11,8 @@ module TEST
 
   syntax KSequence ::= K "~>" K   [ klabel(~>), left, assoc, unit(#EmptyK), hook(org.kframework.koreimplementation.KSequence) ]
 
-  syntax Bool ::= Token{"true"}
-  syntax Bool ::= Token{"false"}
+  syntax Bool ::= "true"           [klabel('_andBool_), function, hook(#BOOL:_andBool_)]
+  syntax Bool ::= "false"          [klabel('_orBool_), function, hook(#BOOL:_orBool_)]
   syntax Int ::= Token{[\-\+]? [0-9]+}     [regex("[\\+-]?\\d+"), prefer]
   syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
 
@@ -40,7 +39,7 @@ module TEST
   syntax priority '_*Int_ '_/Int_ '_%Int_ > '_+Int_ '_-Int_
 
   syntax Int ::= "freshInt" "(" Int ")" [klabel('freshInt), function, freshGenerator]
-  rule 'freshInt(I:Int) => I:Int
+//  rule 'freshInt(I:Int) => I:Int
 
 
   syntax Map ::= Map Map        [klabel('_Map_), function, hook(Map:__)]
@@ -167,7 +166,7 @@ module TEST
   rule
     '<top>('<k>('while__(BE:BExp,, S:Stmt)                                                       ~> K:K),, SC:StateCell)
   =>
-    '<top>('<k>('if__else_(BE:BExp,, 'block_('while__(BE:BExp,, S:Stmt)),, 'empty-block(.KList)) ~> K:K),, SC:StateCell)
+    '<top>('<k>('if__else_(BE:BExp,, 'block_(S 'while__(BE:BExp,, S:Stmt)),, 'empty-block(.KList)) ~> K:K),, SC:StateCell)
 
   // Pgm
   rule
@@ -179,6 +178,20 @@ module TEST
     '<top>('<k>('int_;_(.Ids,, S:Stmt) ~> K:K),, SC:StateCell)
   =>
     '<top>('<k>(S:Stmt                 ~> K:K),, SC:StateCell)
+
+
+  rule
+    '<top>('<k>('if__else_(C:BExp,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(C ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+    when 'notBool_(isKResult(C))
+  [heat]
+
+  rule
+      '<top>('<k>(C:KResult ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+    =>
+      '<top>('<k>('if__else_(C,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+  [heat]
 
   // '_/_
   rule
@@ -231,6 +244,47 @@ module TEST
   =>
     '<top>('<k>('_+_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
   when isKResult(K2)
+  //[cool]
+
+
+  // '_<=_
+  rule
+    '<top>('<k>('_<=_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(K1:KItem ~> '_<=_([],,K2:KItem) ~> K:K),, SC:StateCell)
+  when 'notBool_(isKResult(K1:KItem))
+  [heat]
+  rule
+    '<top>('<k>(K1:KResult ~> '_<=_([],,K2:KItem) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>('_<=_(K1:KResult,, K2:KItem)     ~> K:K),, SC:StateCell)
+  when isKResult(K1)
+  //[cool]
+  rule
+    '<top>('<k>('_<=_(K1:KItem,, K2:KItem)     ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(K2:KItem ~> '_<=_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
+  when 'notBool_(isKResult(K2:KItem))
+  [heat]
+  rule
+    '<top>('<k>(K2:KResult ~> '_<=_(K1:KItem,,[]) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>('_<=_(K1:KItem,, K2:KResult)     ~> K:K),, SC:StateCell)
+  when isKResult(K2)
+  //[cool]
+
+  // '_=_;
+  rule
+    '<top>('<k>('_=_;(V:KItem,,E) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(E ~> '_=_;(V,,[]) ~> K:K),, SC:StateCell)
+  when 'notBool_(isKResult(E))
+  [heat]
+  rule
+    '<top>('<k>(R:KResult ~> '_=_;(V:KItem,,[]) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>('_=_;(V,, R) ~> K:K),, SC:StateCell)
+  when isKResult(R)
   //[cool]
 
 endmodule

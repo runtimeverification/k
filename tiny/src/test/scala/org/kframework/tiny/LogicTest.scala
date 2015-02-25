@@ -14,6 +14,9 @@ class LogicTest extends AbstractTest {
 
   @Test def notProperty {
     implicit val theory = FreeTheory
-    assertEquals(Or(), Not('foo(X)).normalize)
+    assertEquals(True, Not(False).normalize)
+    assertEquals(False, Not(True).normalize)
+    assertEquals(Not('foo(X)), Not('foo(X)).normalize)
+    assertEquals(Not('foo()), Not('foo()).normalize)
   }
 }

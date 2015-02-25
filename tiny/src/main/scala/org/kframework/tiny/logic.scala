@@ -11,7 +11,7 @@ trait Logic extends K {
 
 object Or extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
-  override def name: String = "Or"
+  override def name: String = "'_orBool_"
   override def apply(ks: K*): Or = super.apply(ks: _*).asInstanceOf[Or]
 }
 
@@ -80,7 +80,7 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
 
 object And extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new And(l.toSet, att)
-  override def name: String = "And"
+  override def name: String = "'_andBool_"
   override def apply(ks: K*): And = super.apply(ks: _*).asInstanceOf[And]
 }
 
@@ -112,31 +112,40 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   }
 
   def normalizeChildren(implicit theory: Theory): Logic = {
-    // working with streams to stop at first conflict
-    val normalizedChildren = children map {
-      _.normalize
-    }
 
-    // this could be optimized to only consider new children but it somehow doesn't work
-    // will look into it another time. We could use newChildren to find bindings instead
-    // of normalizedChildren.
-    //    val newChildren = normalizedChildren -- children
+    if (children.toStream.exists(_.isFalse))
+      False
+    else {
+      // working with streams to stop at first conflict
+      val normalizedChildren: Stream[K] = children.toStream map {
+        _.normalize
+      }
 
-    val newBindings = normalizedChildren collect {
-      case c: Binding => (c.variable, c.value)
-    } toMap
+      if (normalizedChildren.contains(False))
+        False
+      else {
+        // this could be optimized to only consider new children but it somehow doesn't work
+        // will look into it another time. We could use newChildren to find bindings instead
+        // of normalizedChildren.
+        //    val newChildren = normalizedChildren -- children
 
-    import org.kframework.tiny.Substitution._
+        val newBindings: Map[KVar, K] = normalizedChildren collect {
+          case c: Binding => (c.variable, c.value)
+        } toMap
 
-    val childrenWithSubstitution = normalizedChildren map {
-      c =>
-        c.substitute(newBindings)
-    }
+        import org.kframework.tiny.Substitution._
 
-    childrenWithSubstitution.foldLeft(True: Logic) {
-      case (False, _) => False
-      case (sum: And, b: Binding) => sum.addBinding(b)
-      case (sum: And, c) => And(sum.children + c, sum.att)
+        val childrenWithSubstitution: Stream[K] = normalizedChildren map {
+          c =>
+            c.substitute(newBindings).normalize
+        }
+
+        childrenWithSubstitution.foldLeft(True: Logic) {
+          case (False, _) => False
+          case (sum: And, b: Binding) => sum.addBinding(b)
+          case (sum: And, c) => And(sum.children + c, sum.att)
+        }
+      }
     }
   }
 
