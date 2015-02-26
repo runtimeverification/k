@@ -156,7 +156,7 @@ public class KAbstractRewriteMachine {
                 Constructor constructor = instruction.constructor();
                 switch (constructor.type()) {
                 case BUILTIN_LIST:
-                    BuiltinList.Builder builder = BuiltinList.builder();
+                    BuiltinList.Builder builder = BuiltinList.builder(context);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder.addItem(stack.pop());
                     }
@@ -169,7 +169,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder.build());
                     break;
                 case BUILTIN_MAP:
-                    BuiltinMap.Builder builder1 = BuiltinMap.builder();
+                    BuiltinMap.Builder builder1 = BuiltinMap.builder(context);
                     for (int i = 0; i < constructor.size1(); i++) {
                         Term key = stack.pop();
                         Term value = stack.pop();
@@ -181,7 +181,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder1.build());
                     break;
                 case BUILTIN_SET:
-                    BuiltinSet.Builder builder2 = BuiltinSet.builder();
+                    BuiltinSet.Builder builder2 = BuiltinSet.builder(context);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder2.add(stack.pop());
                     }
@@ -219,7 +219,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder4.build());
                     break;
                 case CELL_COLLECTION:
-                    CellCollection.Builder builder5 = CellCollection.builder(context.definition().context());
+                    CellCollection.Builder builder5 = CellCollection.builder(context.definition());
                     for (CellLabel cellLabel : constructor.cellLabels()) {
                         builder5.add(new Cell(cellLabel, stack.pop()));
                     }

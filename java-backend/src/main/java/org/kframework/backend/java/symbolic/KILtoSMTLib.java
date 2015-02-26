@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SMTLibTerm;
 import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.SortSignature;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -182,15 +183,17 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     private static String getSortAndFunctionDeclarations(Definition definition, Set<Variable> variables) {
         Set<Sort> sorts = new HashSet<>();
-        List<Production> functions = new ArrayList<>();
-        for (Production production : definition.context().productions) {
-            String smtlib = production.getAttribute(Attribute.SMTLIB_KEY);
+        List<KLabelConstant> functions = new ArrayList<>();
+        for (KLabelConstant kLabel : definition.kLabels()) {
+            String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
             if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
-                functions.add(production);
-                sorts.add(renameSort(Sort.of(production.getSort())));
-                for (int i = 0; i < production.getArity(); ++i) {
-                    sorts.add(renameSort(Sort.of(production.getChildSort(i))));
-                }
+                functions.add(kLabel);
+                assert kLabel.signatures().size() == 1;
+                SortSignature signature = kLabel.signatures().iterator().next();
+                sorts.add(renameSort(signature.result()));
+                signature.parameters().stream()
+                        .map(KILtoSMTLib::renameSort)
+                        .forEach(sorts::add);
             }
         }
         for (Variable variable : variables) {
@@ -209,17 +212,17 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append(")\n");
         }
 
-        for (Production production : functions) {
+        for (KLabelConstant kLabel : functions) {
             sb.append("(declare-fun ");
-            sb.append(production.getAttribute(Attribute.SMTLIB_KEY));
+            sb.append(kLabel.getAttr(Attribute.SMTLIB_KEY));
             sb.append(" (");
             List<String> childrenSorts = new ArrayList<>();
-            for (int i = 0; i < production.getArity(); ++i) {
-                childrenSorts.add(getSortName(production.getChildNode(i)));
+            for (Sort sort : kLabel.signatures().iterator().next().parameters()) {
+                childrenSorts.add(renameSort(sort).name());
             }
             Joiner.on(" ").appendTo(sb, childrenSorts);
             sb.append(") ");
-            sb.append(getSortName(production));
+            sb.append(renameSort(kLabel.signatures().iterator().next().result()).name());
             sb.append(")\n");
         }
 
@@ -480,7 +483,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
-        return builtinList.toK(context).accept(this);
+        //return builtinList.toKore().accept(this);
+        return ((BuiltinList) BuiltinList.concatenate(context, builtinList)).toKore().accept(this);
     }
 
     @Override

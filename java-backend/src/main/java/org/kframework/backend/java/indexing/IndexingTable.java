@@ -250,9 +250,8 @@ public class IndexingTable implements Serializable, RuleIndex {
 
         for (CellCollection.Cell cell : indexingCells) {
             CellLabel cellLabel = cell.cellLabel();
-            String streamCellAttr = definition.context()
-                    .getConfigurationStructureMap().get(cellLabel.name()).cell
-                    .getCellAttribute(Attribute.STREAM_KEY);
+            String streamCellAttr = definition.getConfigurationStructureMap()
+                    .get(cellLabel.name()).cell.getCellAttribute(Attribute.STREAM_KEY);
 
             if (cellLabel.equals(CellLabel.K)) {
                 kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell.content(), definition));

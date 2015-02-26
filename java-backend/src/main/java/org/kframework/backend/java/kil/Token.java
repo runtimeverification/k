@@ -20,7 +20,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term implements Immutable {
+public abstract class Token extends Term implements KoreRepresentation, Immutable {
 
     public static Token of(Sort sort, String value) {
         if (sort.equals(BoolToken.SORT)) {
@@ -69,6 +69,11 @@ public abstract class Token extends Term implements Immutable {
     @Override
     protected final boolean computeMutability() {
         return false;
+    }
+
+    @Override
+    public Token toKore() {
+        return this;
     }
 
     @Override

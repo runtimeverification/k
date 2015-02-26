@@ -4,24 +4,24 @@ package org.kframework.backend.java.kil;
 import java.util.List;
 
 
-public interface InternalRepresentationToK {
+public interface CollectionInternalRepresentation extends KItemRepresentation {
     /**
-     * Returns a KORE (KLabel/KList) representation of this backend object.
+     * Returns a KORE (KLabel/KList) representation of this collection object.
      * The returned representation is not unique (due to associativity/commutativity).
      * {@link Term#evaluate} is the inverse operation.
      */
-    public default Term toK(TermContext context) {
-        List<Term> components = getKComponents(context);
+    public default Term toKore(TermContext context) {
+        List<Term> components = getKComponents();
 
         if (components.isEmpty()) {
-            return unit(context);
+            return unit();
         }
 
         Term result = components.get(components.size() - 1);
         for (int i = components.size() - 2; i >= 0; --i) {
             Term component = components.get(i);
             result = KItem.of(
-                    constructorLabel(context),
+                    constructorLabel(),
                     KList.concatenate(component, result),
                     context,
                     component.getSource(),
@@ -36,15 +36,15 @@ public interface InternalRepresentationToK {
      * Each collection is responsible for representing its elements/entries in KLabel and KList
      * format.
      */
-    List<Term> getKComponents(TermContext context);
+    List<Term> getKComponents();
 
     /**
      * Returns the KLabel that constructs an instance of this collection/formula.
      */
-    public KLabel constructorLabel(TermContext context);
+    public KLabel constructorLabel();
 
     /**
      * Returns the KItem representation of the unit of this collection/formula.
      */
-    public Term unit(TermContext context);
+    public Term unit();
 }
