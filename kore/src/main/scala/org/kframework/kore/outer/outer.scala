@@ -28,7 +28,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val definedSorts: Set[Sort] = sentences collect { case SyntaxProduction(s, _, _) => s; case SyntaxSort(s, _) => s }
 
   private lazy val subsortRelations: Set[(Sort, Sort)] = sentences flatMap {
-    case SyntaxProduction(endSort, items, _) =>
+    case SyntaxProduction(endSort, items, _) if items.size == 1 =>
       items collect { case NonTerminal(startSort) => (startSort, endSort) }
     case _ => Set()
   }
