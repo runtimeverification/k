@@ -46,6 +46,11 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <args>
+            <arg>-Xexperimental</arg>
+          </args>
+        </configuration>
       </plugin>
     </plugins>
   </build>
