@@ -6,7 +6,9 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Names;
+
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -25,7 +27,7 @@ import org.kframework.kil.Attributes;
 public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
-    private static final MapCache<Set<SortSignature>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
+    private static final MapCache<Pair<Set<SortSignature>, Attributes>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
 
     /* un-escaped label */
     private final String label;
@@ -95,7 +97,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Definition definition) {
-        return cache.get(definition.signaturesOf(label), () -> new MapCache<>(new PatriciaTrie<>()))
+        return cache.get(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), () -> new MapCache<>(new PatriciaTrie<>()))
                 .get(label, () -> new KLabelConstant(
                         label,
                         definition.signaturesOf(label),
@@ -207,7 +209,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        MapCache<String, KLabelConstant> trie = cache.get(signatures, () -> new MapCache<>(new PatriciaTrie<>()));
+        MapCache<String, KLabelConstant> trie = cache.get(Pair.of(signatures, productionAttributes),
+                () -> new MapCache<>(new PatriciaTrie<>()));
         return trie.get(label, () -> this);
     }
 

@@ -113,7 +113,6 @@ public class Definition extends JavaSymbolicObject {
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
-    @Inject
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
         this.indexingData = indexingData;
         this.kem = kem;
