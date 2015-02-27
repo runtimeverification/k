@@ -5,10 +5,9 @@ import java.util.concurrent.Callable
 import com.google.common.cache.CacheBuilder
 import org.kframework._
 import org.kframework.attributes.Att
-import org.kframework.kore.{KLabel, ADT}
+import org.kframework.kore.{ADT, KLabel}
 import org.kframework.tiny.matcher._
 
-import scala.annotation.switch
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -37,18 +36,12 @@ trait K extends kore.K {
         }
       })
   }
-  def normalizeInner(implicit theory: Theory): K
+  protected[this] def normalizeInner(implicit theory: Theory): K
 
   var isNormal = false
-  var cachedHashCode: Option[Int] = None
+  lazy val cachedHashCode = computeHashCode
 
-  override def hashCode = (cachedHashCode: @switch) match {
-    case Some(x) => x
-    case None =>
-      val x = computeHashCode
-      cachedHashCode = Some(x)
-      x
-  }
+  override def hashCode = cachedHashCode
 
   def computeHashCode: Int
 
@@ -74,12 +67,13 @@ trait KApp extends {} with kore.KApply with K {
   override def equals(that: Any) =
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KApp => that.klabel == klabel && this.children == that.children
+      case that: KApp =>
+        that.klabel == klabel && this.children == that.children
       case _ => false
     })
 
 
-  override def computeHashCode = klabel.hashCode * 5333 + children.toSet.hashCode
+  override def computeHashCode = klabel.hashCode * 5333 + children.hashCode
 
   override def toString = klabel + "(" + children.mkString(",") + ")"
 }
@@ -208,9 +202,8 @@ trait Label extends kore.KLabel {
 
   override def toString = name
 
-  lazy val cachedHashCode = name.hashCode
+  lazy override val hashCode = name.hashCode
 
-  override def hashCode = cachedHashCode
   override def equals(that: Any) =
     (this.hashCode == that.hashCode) &&
       (that match {

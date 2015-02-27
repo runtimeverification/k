@@ -4,7 +4,7 @@ package org.kframework.tiny
 import org.kframework.definition
 import org.kframework.kore.Unapply.KLabel
 
-class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
+class Rewriter(module: definition.Module) {
   val cons = new Constructors(module)
 
   import cons._
@@ -13,13 +13,16 @@ class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
 
   val executeRules = module.rules
     .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
-    .toStream
 
-  val indexedRules: Map[String, Set[K => Option[K]]] = module.rules
-    .groupBy { r => index(convert(r.body)).get }
-    .mapValues { ruleSet =>
-    ruleSet map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
+  val indexedRules: Map[String, Set[K => Option[K]]] = {
+    module.rules
+      .groupBy { r => index(convert(r.body)).get }
+      .map { case (k, ruleSet) =>
+      (k, ruleSet map { r => ExecuteRule(convert(r.body), convert(r.requires)) })
+    }
   }
+
+  println(indexedRules.keys)
 
   def index(k: K): Option[String] = k match {
     case KApp(KLabel("'<k>"), c, _) =>
@@ -27,35 +30,50 @@ class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
         case s: KSeq => s.children.headOption.getOrElse(KSeq())
         case x => x
       }
-      top match {
-        case KApp(l, _, _) => Some(l.toString)
-        case x => Some("foo")
-      }
+      innerIndex(top)
     case KApp(_, l, _) =>
-      l.toStream map index collectFirst { case Some(s) => s }
+      l.toStream map index collectFirst {
+        case Some(s) => s
+      }
     case _ => None
+  }
+
+  def innerIndex(k: K) = k match {
+    case KApp(l, _, _) => Some(l.toString)
+    case v => Some("")
   }
 
   def rewriteStep(k: K): Set[K] = {
     //    println("\n\n MATCHING ON: " + k.normalize)
 
-    val res = rules flatMap { r => r(k) }
+    val res = rules flatMap {
+      r => r(k)
+    }
     //    println("RESULTS:\n    " + res.mkString("\n    "))
     res
   }
 
   var totalTriedRules = 0
+  var indexFailures = 0
 
   def executeStep(k: K): Option[K] = {
     //    println("\n\n MATCHING ON: " + k)
 
     val i = index(k).get
 
-    val prioritized = indexedRules.get(i).getOrElse(executeRules)
+    val prioritized = indexedRules.get(i).getOrElse({
+      indexFailures += 1;
+      executeRules
+    })
 
     val res = prioritized
-      .map { r => totalTriedRules += 1; r(k) }
-      .collectFirst { case Some(x) => x }
+      .map {
+      r => totalTriedRules += 1;
+        r(k)
+    }
+      .collectFirst {
+      case Some(x) => x
+    }
     //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
@@ -71,7 +89,8 @@ class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
         println(steps +
           " runtime: " + (System.nanoTime() - time) / 1000000 +
           " cache size: " + NormalizationCaching.cache.size +
-          " avg tried rules: " + totalTriedRules / steps)
+          " avg tried rules: " + totalTriedRules / steps +
+          " index failures: " + indexFailures)
         time = System.nanoTime()
       }
       prev = current;
@@ -89,7 +108,9 @@ class Rewriter(module: definition.Module) extends org.kframework.Rewriter {
     if (newKs.size == 0)
       sofar
     else {
-      sofar | (newKs flatMap { rewrite(_)(sofar | newKs) })
+      sofar | (newKs flatMap {
+        rewrite(_)(sofar | newKs)
+      })
     }
   }
 }

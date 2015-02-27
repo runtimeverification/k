@@ -60,8 +60,10 @@ public class TstTinyOnKORE extends BaseTest {
                                 ))),
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("n"), cons.intToToken(1000)),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("n"), cons.intToToken(100)),
                                 cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("s"), cons.intToToken(0)))
+                ),
+                cons.KApply(cons.KLabel("'<s>")
                 ));
 
 //        KApp program = cons.KApply(cons.KLabel("'<top>"),
