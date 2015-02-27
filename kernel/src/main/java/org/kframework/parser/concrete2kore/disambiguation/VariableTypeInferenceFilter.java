@@ -5,6 +5,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kore.Sort;
 import org.kframework.kore.outer.NonTerminal;
 import org.kframework.parser.Constant;
@@ -22,6 +23,7 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,8 +67,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             t = rez.right().get();
 
         // TODO: (Radu) do type inference for the variables which are left.
-        Set<Multimap<String, Sort>> vars = new CollectUndeclaredVariables(decl.keySet()).apply(t)._2();
-        System.out.println("vars = " + vars);
+        CollectExpectedVariablesVisitor vars = new CollectExpectedVariablesVisitor(decl.keySet());
+        vars.apply(t);
+        System.out.println("vars = " + vars.vars);
 
         return new Tuple2<>(Right.apply(t), this.warningUnit());
     }
@@ -240,72 +243,85 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
-    private class CollectUndeclaredVariables extends SetsGeneralTransformer<ParseFailedException, Multimap<String, Sort>> {
+    public class CollectExpectedVariablesVisitor extends SafeTransformer {
+        /**
+         * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
+         * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
+         */
+        public Set<Multimap<String, Sort>> vars = new HashSet<>();
         private final Set<String> declaredNames;
-        public CollectUndeclaredVariables(Set<String> declaredNames) {
+
+        public CollectExpectedVariablesVisitor(Set<String> declaredNames) {
             this.declaredNames = declaredNames;
         }
 
-        public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(TermCons tc) {
+        @Override
+        public Term apply(Ambiguity node) {
+            Set<Multimap<String, Sort>> newVars = new HashSet<>();
+            for (Term t : node.items()) {
+                CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(declaredNames);
+                viz.apply(t);
+                // create the split
+                for (Multimap<String, Sort> elem : vars) { // for every local type restrictions
+                    for (Multimap<String, Sort> elem2 : viz.vars) { // create a combination with every ambiguity detected
+                        Multimap<String, Sort> clone = HashMultimap.create();
+                        clone.putAll(elem);
+                        clone.putAll(elem2);
+                        newVars.add(clone);
+                    }
+                }
+                if (vars.size() == 0)
+                    newVars.addAll(viz.vars);
+            }
+            if (!newVars.isEmpty())
+                vars = newVars;
+            return node;
+        }
+
+        public Term apply(TermCons tc) {
             // TODO: (Radu) if this is cast, take the sort from annotations?
-            Set<Multimap<String, Sort>> collector = this.makeWarningSet();
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().equals("#SemanticCast")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.items().get(0);
-                collector = new CollectUndeclaredVariables2(Sort(tc.production().att().getString("sort").get())).apply(t)._2();
+                new CollectUndeclaredVariables2(Sort(tc.production().att().getString("sort").get())).apply(t);
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
                         Term t = tc.items().get(j);
-                        Sort srt = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Set<Multimap<String, Sort>> vars = new CollectUndeclaredVariables2(srt).apply(t)._2();
-                        collector = mergeRestrictions(collector, vars);
+                        new CollectUndeclaredVariables2(((NonTerminal) tc.production().items().apply(i)).sort()).apply(t);
                         j++;
                     }
                 }
             }
-            Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> rez = super.apply(tc);
-            // TODO: apply automatically merges my sets, but I don't want to do that here.
-            java.util.Set<Multimap<String, Sort>> restrictions = mergeRestrictions(collector, rez._2());
-            return new Tuple2<>(Right.apply(rez._1().right().get()), restrictions);
+            return super.apply(tc);
         }
 
-        private Set<Multimap<String, Sort>> mergeRestrictions(Set<Multimap<String, Sort>> a, Set<Multimap<String, Sort>> b) {
-            // TODO: figure out this cartesian product
-            if (a.isEmpty())
-                return b;
-            for (Multimap aa : a) {
-                for (Multimap bb : b) {
-                    aa.putAll(bb);
-                }
-            }
-            return a;
-        }
-
-        private class CollectUndeclaredVariables2 extends SetsGeneralTransformer<ParseFailedException, Multimap<String, Sort>> {
+        private class CollectUndeclaredVariables2 extends SafeTransformer {
             private final Sort sort;
             public CollectUndeclaredVariables2(Sort sort) {
                 this.sort = sort;
             }
 
-            public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(TermCons tc) {
+            public Term apply(TermCons tc) {
                 if (tc.production().att().contains("bracket")
                         || (tc.production().klabel().isDefined()
                         && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
                     return super.apply(tc);
                 }
-                return new Tuple2<>(Right.apply(tc), this.warningUnit());
+                return tc;
             }
 
-            public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable") && !declaredNames.contains(c.value())) {
-                    Multimap<String, Sort> one = HashMultimap.create();
-                    one.put(c.value(), sort);
-                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(one));
+            public Term apply(Constant c) {
+                if (c.production().sort().name().equals("KVariable") && !declaredNames.contains(c.value()) && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
+                    if (vars.isEmpty())
+                        vars.add(HashMultimap.<String, Sort>create());
+                    for (Multimap<String, Sort> vars2 : vars)
+                        vars2.put(c.value(), sort);
                 }
-                return new Tuple2<>(Right.apply(c), this.warningUnit());
+
+                return c;
             }
         }
     }
