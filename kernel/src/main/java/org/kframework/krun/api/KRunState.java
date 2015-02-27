@@ -1,8 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import com.google.inject.Singleton;
 import org.kframework.kil.Term;
+import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
 
@@ -27,7 +27,7 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
      */
     protected int stateId;
 
-    @Singleton
+    @RequestScoped
     public static class Counter {
         private int nextState;
     }

@@ -24,9 +24,8 @@ public class JavaBackendKModule implements KModule {
 
     @Override
     public List<Module> getKRunModules(List<Module> definitionSpecificModules) {
-        JavaExecutionOptions options = new JavaExecutionOptions();
         return ImmutableList.<Module>of(
-                new JavaSymbolicKRunModule(options),
+                new JavaSymbolicKRunModule(),
                 new JavaSymbolicKRunModule.SimulationModule(definitionSpecificModules));
     }
 

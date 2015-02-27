@@ -7,13 +7,13 @@ import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.Tool;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.io.Serializable;
 
-@Singleton
+@RequestScoped
 public class GlobalContext implements Serializable {
     private Definition def;
     public final transient FileSystem fs;

@@ -20,7 +20,6 @@ import org.kframework.utils.inject.Main;
 
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public interface LtlModelChecker {
 
@@ -40,7 +39,7 @@ public interface LtlModelChecker {
     public static class Tool implements Transformation<Void, KRunResult> {
 
         private final KRunOptions options;
-        private final Provider<Term> initialConfiguration;
+        private final Term initialConfiguration;
         private final Context context;
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
@@ -49,7 +48,7 @@ public interface LtlModelChecker {
         @Inject
         protected Tool(
                 KRunOptions options,
-                @Main Provider<Term> initialConfiguration,
+                @Main Term initialConfiguration,
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
@@ -68,7 +67,7 @@ public interface LtlModelChecker {
             try {
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 ltlmc(),
-                                initialConfiguration.get());
+                                initialConfiguration);
                 sw.printIntermediate("Model checking total");
                 return result;
             } catch (KRunExecutionException e) {

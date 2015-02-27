@@ -41,6 +41,9 @@ public abstract class JavaSymbolicObject extends ASTNode
     transient Set<Term> userVariableSet = null;
     transient Set<Term> functionKLabels = null;
 
+    // TODO(dwightguth): more granular locking if necessary for performance
+    private static Object lock = new Object();
+
     protected JavaSymbolicObject() {
         super();
     }
@@ -116,20 +119,22 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getVariableSet()}.
      */
     public Set<Variable> variableSet() {
-        if (variableSet == null) {
-            IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
-                    (set, term) -> term.setVariableSet(set),
-                    term -> term.getVariableSet(),
-                    new LocalVisitor() {
-                        @Override
-                        public void visit(Variable variable) {
-                            variable.getVariableSet().add(variable);
-                        }
-                    });
-            accept(visitor);
-            variableSet = visitor.getResultSet();
-        }
-        return Collections.unmodifiableSet(variableSet);
+//        synchronized(lock) {
+            if (variableSet == null) {
+                IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
+                        (set, term) -> term.setVariableSet(set),
+                        term -> term.getVariableSet(),
+                        new LocalVisitor() {
+                            @Override
+                            public void visit(Variable variable) {
+                                variable.getVariableSet().add(variable);
+                            }
+                        });
+                accept(visitor);
+                variableSet = visitor.getResultSet();
+            }
+            return Collections.unmodifiableSet(variableSet);
+//        }
     }
 
      /**
@@ -141,22 +146,24 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getUserVariableSet()}.
      */
     public Set<Term> userVariableSet(TermContext context) {
-        if (userVariableSet == null) {
-            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
-                    (set, term) -> term.setUserVariableSet(set),
-                    term -> term.getUserVariableSet(),
-                    new LocalVisitor() {
-                        @Override
-                        public void visit(Term term) {
-                            if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
-                                term.getUserVariableSet().add(term);
+//        synchronized(lock) {
+            if (userVariableSet == null) {
+                IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                        (set, term) -> term.setUserVariableSet(set),
+                        term -> term.getUserVariableSet(),
+                        new LocalVisitor() {
+                            @Override
+                            public void visit(Term term) {
+                                if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
+                                    term.getUserVariableSet().add(term);
+                                }
                             }
-                        }
-                    });
-            accept(visitor);
-            userVariableSet = visitor.getResultSet();
-        }
-        return Collections.unmodifiableSet(userVariableSet);
+                        });
+                accept(visitor);
+                userVariableSet = visitor.getResultSet();
+            }
+            return Collections.unmodifiableSet(userVariableSet);
+//        }
     }
 
 
@@ -169,27 +176,29 @@ public abstract class JavaSymbolicObject extends ASTNode
      * computation instead of simply returning {@code null}.
      */
     public boolean isNormal() {
-        if (functionKLabels == null) {
-            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
-                    (set, term) -> term.functionKLabels = set,
-                    term -> term.functionKLabels,
-                    new LocalVisitor() {
-                        @Override
-                        public void visit(KItem kItem) {
-                            if (kItem.isSymbolic()) {
-                                kItem.functionKLabels.add(kItem.kLabel());
+//        synchronized(lock) {
+            if (functionKLabels == null) {
+                IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                        (set, term) -> term.functionKLabels = set,
+                        term -> term.functionKLabels,
+                        new LocalVisitor() {
+                            @Override
+                            public void visit(KItem kItem) {
+                                if (kItem.isSymbolic()) {
+                                    kItem.functionKLabels.add(kItem.kLabel());
+                                }
                             }
-                        }
 
-                        @Override
-                        public void visit(KItemProjection projection) {
-                            projection.functionKLabels.add(projection);
-                        }
-                    });
-            accept(visitor);
-            functionKLabels = visitor.getResultSet();
-        }
-        return functionKLabels.size() == 0;
+                            @Override
+                            public void visit(KItemProjection projection) {
+                                projection.functionKLabels.add(projection);
+                            }
+                        });
+                accept(visitor);
+                functionKLabels = visitor.getResultSet();
+            }
+            return functionKLabels.size() == 0;
+//        }
     }
 
     @Override

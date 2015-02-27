@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.kframework.main.Main;
@@ -16,7 +15,7 @@ public class ProfileInjection {
     public static void main(String[] args) {
         while(true) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-            Injector injector = Main.getInjector(args[0], args2);
+            Injector injector = Main.getInjector(args[0]);
             injector.getInstance(Key.get(new TypeLiteral<Transformation<Void, Void>>() {}));
         }
     }

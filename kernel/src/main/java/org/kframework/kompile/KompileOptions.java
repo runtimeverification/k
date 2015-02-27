@@ -10,20 +10,17 @@ import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
+@RequestScoped
 public class KompileOptions implements Serializable {
-
-    public KompileOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public KompileOptions(Void v) {}
 
     @Parameter(description="<file>")
     private List<String> parameters;
@@ -32,13 +29,13 @@ public class KompileOptions implements Serializable {
         if (parameters == null || parameters.size() == 0) {
             throw KExceptionManager.criticalError("You have to provide exactly one main file in order to compile.");
         }
-        return files.resolveWorkingDirectory(parameters.get(0));
+        return files.get().resolveWorkingDirectory(parameters.get(0));
     }
 
-    private transient FileUtil files;
+    private transient Provider<FileUtil> files;
 
     @Inject
-    public void setFiles(FileUtil files) {
+    public void setFiles(Provider<FileUtil> files) {
         this.files = files;
     }
 
@@ -97,13 +94,13 @@ public class KompileOptions implements Serializable {
     }
 
     // Advanced options
-    @Parameter(names="--superheat", listConverter=StringListConverter.class, description="Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a comma-separated list of production tags.")
+    @Parameter(names="--superheat", listConverter=StringListConverter.class, description="Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a whitespace-separated list of production tags.")
     public List<String> superheat = Collections.singletonList("superheat");
 
-    @Parameter(names="--supercool", listConverter=StringListConverter.class, description="Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a comma-separated list of rule tags.")
+    @Parameter(names="--supercool", listConverter=StringListConverter.class, description="Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a whitespace-separated list of rule tags.")
     public List<String> supercool = Collections.singletonList("supercool");
 
-    @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to become transitions.")
+    @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
     public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
     public static final String DEFAULT_TRANSITION = "transition";

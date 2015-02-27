@@ -7,11 +7,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
-
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,7 +21,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@Singleton
+@RequestScoped
 public class FileUtil {
 
     private final File tempDir;
