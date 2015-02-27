@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.BiConsumer;
@@ -22,15 +23,18 @@ public class IncrementalCollector<T> extends PrePostVisitor {
     private final Stack<Set<T>> setStack = new Stack<>();
     private final BiConsumer<Set<T>, JavaSymbolicObject> setValue;
     private final Function<JavaSymbolicObject, Set<T>> getValue;
+    private final Map<JavaSymbolicObject, Set<T>> intermediate;
 
     public IncrementalCollector(
             BiConsumer<Set<T>, JavaSymbolicObject> setValue,
             Function<JavaSymbolicObject, Set<T>> getValue,
+            Map<JavaSymbolicObject, Set<T>> intermediate,
             LocalVisitor computeLocal) {
         getPreVisitor().addVisitor(new PreIncrementalVisitor());
         getPostVisitor().addVisitor(computeLocal);
         getPostVisitor().addVisitor(new PostIncrementalVisitor());
         this.setValue = setValue;
+        this.intermediate = intermediate;
         this.getValue = getValue;
     }
 
@@ -38,13 +42,16 @@ public class IncrementalCollector<T> extends PrePostVisitor {
         @Override
         public void visit(JavaSymbolicObject term) {
             Set<T> termSet = getValue.apply(term);
+            if (termSet == null) {
+                termSet = intermediate.get(term);
+            }
             if (termSet != null) {
                 proceed = false;
                 set.addAll(termSet);
             } else {
                 setStack.push(set);
                 set = new HashSet<>();
-                setValue.accept(set, term);
+                intermediate.put(term, set);
             }
         }
     }
@@ -53,7 +60,9 @@ public class IncrementalCollector<T> extends PrePostVisitor {
         @Override
         public void visit(JavaSymbolicObject term) {
             set = setStack.pop();
-            set.addAll(getValue.apply(term));
+            set.addAll(intermediate.get(term));
+            setValue.accept(intermediate.get(term), term);
+            intermediate.remove(term);
         }
     }
 

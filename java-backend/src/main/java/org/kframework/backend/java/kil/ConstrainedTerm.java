@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.PatternExpander;
-import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -234,9 +233,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + data.hashCode();
-        return hashCode;
+        int h = hashCode;
+        if (h == Utils.NO_HASHCODE) {
+            h = 1;
+            h = h * Utils.HASH_PRIME + data.hashCode();
+            hashCode = h == 0 ? 1 : h;
+        }
+        return h;
     }
 
     @Override
