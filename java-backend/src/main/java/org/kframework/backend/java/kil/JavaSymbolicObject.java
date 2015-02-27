@@ -16,6 +16,7 @@ import org.kframework.kil.visitors.Visitor;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,9 +41,6 @@ public abstract class JavaSymbolicObject extends ASTNode
     transient Set<Variable> variableSet = null;
     transient Set<Term> userVariableSet = null;
     transient Set<Term> functionKLabels = null;
-
-    // TODO(dwightguth): more granular locking if necessary for performance
-    private static Object lock = new Object();
 
     protected JavaSymbolicObject() {
         super();
@@ -119,22 +117,21 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getVariableSet()}.
      */
     public Set<Variable> variableSet() {
-//        synchronized(lock) {
-            if (variableSet == null) {
-                IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
-                        (set, term) -> term.setVariableSet(set),
-                        term -> term.getVariableSet(),
-                        new LocalVisitor() {
-                            @Override
-                            public void visit(Variable variable) {
-                                variable.getVariableSet().add(variable);
-                            }
-                        });
-                accept(visitor);
-                variableSet = visitor.getResultSet();
-            }
-            return Collections.unmodifiableSet(variableSet);
-//        }
+        if (variableSet == null) {
+            final Map<JavaSymbolicObject, Set<Variable>> intermediate = new IdentityHashMap<>();
+            IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.variableSet = set,
+                    intermediate,
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(Variable variable) {
+                            intermediate.get(variable).add(variable);
+                        }
+                    });
+            accept(visitor);
+            variableSet = visitor.getResultSet();
+        }
+        return Collections.unmodifiableSet(variableSet);
     }
 
      /**
@@ -146,24 +143,23 @@ public abstract class JavaSymbolicObject extends ASTNode
      * {@link JavaSymbolicObject#getUserVariableSet()}.
      */
     public Set<Term> userVariableSet(TermContext context) {
-//        synchronized(lock) {
-            if (userVariableSet == null) {
-                IncrementalCollector<Term> visitor = new IncrementalCollector<>(
-                        (set, term) -> term.setUserVariableSet(set),
-                        term -> term.getUserVariableSet(),
-                        new LocalVisitor() {
-                            @Override
-                            public void visit(Term term) {
-                                if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
-                                    term.getUserVariableSet().add(term);
-                                }
+        if (userVariableSet == null) {
+            final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
+            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.userVariableSet = set,
+                    intermediate,
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(Term term) {
+                            if (context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
+                                intermediate.get(term).add(term);
                             }
-                        });
-                accept(visitor);
-                userVariableSet = visitor.getResultSet();
-            }
-            return Collections.unmodifiableSet(userVariableSet);
-//        }
+                        }
+                    });
+            accept(visitor);
+            userVariableSet = visitor.getResultSet();
+        }
+        return Collections.unmodifiableSet(userVariableSet);
     }
 
 
@@ -176,29 +172,28 @@ public abstract class JavaSymbolicObject extends ASTNode
      * computation instead of simply returning {@code null}.
      */
     public boolean isNormal() {
-//        synchronized(lock) {
-            if (functionKLabels == null) {
-                IncrementalCollector<Term> visitor = new IncrementalCollector<>(
-                        (set, term) -> term.functionKLabels = set,
-                        term -> term.functionKLabels,
-                        new LocalVisitor() {
-                            @Override
-                            public void visit(KItem kItem) {
-                                if (kItem.isSymbolic()) {
-                                    kItem.functionKLabels.add(kItem.kLabel());
-                                }
+        if (functionKLabels == null) {
+            final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
+            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
+                    (set, term) -> term.functionKLabels = set,
+                    intermediate,
+                    new LocalVisitor() {
+                        @Override
+                        public void visit(KItem kItem) {
+                            if (kItem.isSymbolic()) {
+                                intermediate.get(kItem).add(kItem.kLabel());
                             }
+                        }
 
-                            @Override
-                            public void visit(KItemProjection projection) {
-                                projection.functionKLabels.add(projection);
-                            }
-                        });
-                accept(visitor);
-                functionKLabels = visitor.getResultSet();
-            }
-            return functionKLabels.size() == 0;
-//        }
+                        @Override
+                        public void visit(KItemProjection projection) {
+                            intermediate.get(projection).add(projection);
+                        }
+                    });
+            accept(visitor);
+            functionKLabels = visitor.getResultSet();
+        }
+        return functionKLabels.size() == 0;
     }
 
     @Override
@@ -223,10 +218,6 @@ public abstract class JavaSymbolicObject extends ASTNode
         return variableSet;
     }
 
-    private void setVariableSet(Set<Variable> variableSet) {
-        this.variableSet = variableSet;
-    }
-
     /**
      * Gets the cached set of variables in this {@code JavaSymbolicObject}.
      *
@@ -236,10 +227,6 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public Set<Term> getUserVariableSet() {
         return userVariableSet;
-    }
-
-    private void setUserVariableSet(Set<Term> variableSet) {
-        this.userVariableSet = variableSet;
     }
 
     // TODO(YilongL): remove the comments below to enforce that every subclass
