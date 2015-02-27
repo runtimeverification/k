@@ -1,6 +1,8 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.kore.Sort;
@@ -10,7 +12,7 @@ import org.kframework.parser.Location;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
-import org.kframework.parser.TermCons;
+import org.kframework.parser.*;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.VariableTypeClashException;
@@ -61,6 +63,10 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             return Tuple2.apply(rez, this.warningUnit());
         else
             t = rez.right().get();
+
+        // TODO: (Radu) do type inference for the variables which are left.
+        Set<Multimap<String, Sort>> vars = new CollectUndeclaredVariables(decl.keySet()).apply(t)._2();
+        System.out.println("vars = " + vars);
 
         return new Tuple2<>(Right.apply(t), this.warningUnit());
     }
@@ -176,7 +182,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     || tc.production().klabel().get().name().equals("#SemanticCast")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.items().get(0);
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(Sort(tc.production().att().getString("sort").get()), decl, subsorts).apply(t);
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(Sort(tc.production().att().getString("sort").get())).apply(t);
                 if (rez.isLeft())
                     return rez;
                 tc.items().set(0, rez.right().get());
@@ -185,7 +191,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
                         Term t = tc.items().get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, decl, subsorts).apply(t);
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc.items().set(j, rez.right().get());
@@ -201,12 +207,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         private class ApplyTypeCheck2 extends SetsTransformerWithErrors<ParseFailedException> {
             private final Sort sort;
-            private final Map<String, Sort> decl;
-            private final POSet<Sort> subsorts;
-            public ApplyTypeCheck2(Sort sort, Map<String, Sort> decl, POSet<Sort> subsorts) {
+            public ApplyTypeCheck2(Sort sort) {
                 this.sort = sort;
-                this.decl = decl;
-                this.subsorts = subsorts;
             }
 
             // TODO (Radu): check types of terms under rewrites too?
@@ -223,7 +225,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (c.production().sort().name().equals("KVariable")) {
                     Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sort("K"))) {
-                        System.out.println("c = " + c.value() + ", " + sort + " < " + declared);
+                        System.out.println("c = " + c.value() + ", " + declared + " < " + sort);
                         if (!subsorts.lessThenEq(declared, sort)) {
                             // TODO: location information
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
@@ -234,6 +236,76 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     }
                 }
                 return Right.apply(c);
+            }
+        }
+    }
+
+    private class CollectUndeclaredVariables extends SetsGeneralTransformer<ParseFailedException, Multimap<String, Sort>> {
+        private final Set<String> declaredNames;
+        public CollectUndeclaredVariables(Set<String> declaredNames) {
+            this.declaredNames = declaredNames;
+        }
+
+        public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(TermCons tc) {
+            // TODO: (Radu) if this is cast, take the sort from annotations?
+            Set<Multimap<String, Sort>> collector = this.makeWarningSet();
+            if (tc.production().klabel().isDefined()
+                    && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
+                Term t = tc.items().get(0);
+                collector = new CollectUndeclaredVariables2(Sort(tc.production().att().getString("sort").get())).apply(t)._2();
+            } else {
+                for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+                    if (tc.production().items().apply(i) instanceof NonTerminal) {
+                        Term t = tc.items().get(j);
+                        Sort srt = ((NonTerminal) tc.production().items().apply(i)).sort();
+                        Set<Multimap<String, Sort>> vars = new CollectUndeclaredVariables2(srt).apply(t)._2();
+                        collector = mergeRestrictions(collector, vars);
+                        j++;
+                    }
+                }
+            }
+            Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> rez = super.apply(tc);
+            // TODO: apply automatically merges my sets, but I don't want to do that here.
+            java.util.Set<Multimap<String, Sort>> restrictions = mergeRestrictions(collector, rez._2());
+            return new Tuple2<>(Right.apply(rez._1().right().get()), restrictions);
+        }
+
+        private Set<Multimap<String, Sort>> mergeRestrictions(Set<Multimap<String, Sort>> a, Set<Multimap<String, Sort>> b) {
+            // TODO: figure out this cartesian product
+            if (a.isEmpty())
+                return b;
+            for (Multimap aa : a) {
+                for (Multimap bb : b) {
+                    aa.putAll(bb);
+                }
+            }
+            return a;
+        }
+
+        private class CollectUndeclaredVariables2 extends SetsGeneralTransformer<ParseFailedException, Multimap<String, Sort>> {
+            private final Sort sort;
+            public CollectUndeclaredVariables2(Sort sort) {
+                this.sort = sort;
+            }
+
+            public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(TermCons tc) {
+                if (tc.production().att().contains("bracket")
+                        || (tc.production().klabel().isDefined()
+                        && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
+                    return super.apply(tc);
+                }
+                return new Tuple2<>(Right.apply(tc), this.warningUnit());
+            }
+
+            public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<Multimap<String, Sort>>> apply(Constant c) {
+                if (c.production().sort().name().equals("KVariable") && !declaredNames.contains(c.value())) {
+                    Multimap<String, Sort> one = HashMultimap.create();
+                    one.put(c.value(), sort);
+                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(one));
+                }
+                return new Tuple2<>(Right.apply(c), this.warningUnit());
             }
         }
     }
