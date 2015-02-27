@@ -32,15 +32,15 @@ public abstract class JavaSymbolicObject extends ASTNode
     /**
      * Field used for caching the hash code
      */
-    protected transient int hashCode = Utils.NO_HASHCODE;
+    protected volatile transient int hashCode = Utils.NO_HASHCODE;
 
     /**
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
      * Variable (the variable has all fields set to null at the moment of hashing).
      */
-    transient Set<Variable> variableSet = null;
-    transient Set<Term> userVariableSet = null;
-    transient Set<Term> functionKLabels = null;
+    volatile transient Set<Variable> variableSet = null;
+    volatile transient Set<Term> userVariableSet = null;
+    volatile transient Set<Term> functionKLabels = null;
 
     protected JavaSymbolicObject() {
         super();
