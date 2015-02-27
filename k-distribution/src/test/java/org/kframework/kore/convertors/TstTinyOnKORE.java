@@ -45,16 +45,23 @@ public class TstTinyOnKORE extends BaseTest {
         KApp program = cons.KApply(cons.KLabel("'<top>"),
                 cons.KApply(cons.KLabel("'<k>"),
                         cons.KApply(cons.KLabel("'while__"),
-                                cons.KApply(cons.KLabel("'_<=_"), cons.stringToId("x"), cons.intToToken(10)),
-                                cons.KApply(cons.KLabel("'_=_;"),
-                                        cons.stringToId("x"),
-                                        cons.KApply(cons.KLabel("'_+_"),
-                                                cons.stringToId("x"),
-                                                cons.intToToken(1))))),
+                                cons.KApply(cons.KLabel("'_<=_"), cons.intToToken(0), cons.stringToId("n")),
+                                cons.KApply(cons.KLabel("'__"),
+                                        cons.KApply(cons.KLabel("'_=_;"),
+                                                cons.stringToId("s"),
+                                                cons.KApply(cons.KLabel("'_+_"),
+                                                        cons.stringToId("s"),
+                                                        cons.stringToId("n"))),
+                                        cons.KApply(cons.KLabel("'_=_;"),
+                                                cons.stringToId("n"),
+                                                cons.KApply(cons.KLabel("'_+_"),
+                                                        cons.stringToId("n"),
+                                                        cons.intToToken(-1)))
+                                ))),
                 cons.KApply(cons.KLabel("'<state>"),
                         cons.KApply(cons.KLabel("'_Map_"),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("x"), cons.intToToken(0)),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("y"), cons.intToToken(2)))
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("n"), cons.intToToken(1000)),
+                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("s"), cons.intToToken(0)))
                 ));
 
 //        KApp program = cons.KApply(cons.KLabel("'<top>"),
