@@ -54,6 +54,7 @@ public class IncrementalCollector<T> extends PrePostVisitor {
             set = setStack.pop();
             set.addAll(intermediate.get(term));
             setValue.accept(intermediate.get(term), term);
+            intermediate.remove(term);
         }
     }
 
