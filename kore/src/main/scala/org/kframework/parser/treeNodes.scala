@@ -24,9 +24,9 @@ trait HasChildren {
   def replaceChildren(newChildren: Collection[Term]): Term
 }
 
-case class Constant(v: String, production: Production, location: Optional[Location]) extends ProductionReference {
-  def shallowCopy(location: Location) = Constant(v, production, Optional.of(location))
-  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(v) + "\")"
+case class Constant(value: String, production: Production, location: Optional[Location]) extends ProductionReference {
+  def shallowCopy(location: Location) = Constant(value, production, Optional.of(location))
+  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(value) + "\")"
 }
 
 case class TermCons(items: List[Term], production: Production, location: Optional[Location])

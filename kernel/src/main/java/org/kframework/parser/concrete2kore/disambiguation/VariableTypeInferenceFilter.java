@@ -357,7 +357,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
             public Either<java.util.Set<ParseFailedException>, Term> apply(Constant c) {
                 if (c.production().sort().name().equals("KVariable")) {
-                    Sort declared = decl.get(c.v());
+                    Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sort("K"))) {
                         //System.out.println("c = " + c.value() + ", " + declared + " < " + sort);
                         if (!subsorts.lessThenEq(declared, sort)) {
