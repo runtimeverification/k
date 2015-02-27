@@ -71,7 +71,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             long startTime2 = System.currentTimeMillis();
             ASTNode config = null;
             String parsed = null;
-            if (ss.containsAttribute("kore")) {
+            if (ss.containsAttribute("koreimplementation")) {
                 long startTime = System.currentTimeMillis();
                 parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
                 if (context.globalOptions.verbose)

@@ -2,7 +2,8 @@
 
 package org.kframework.parser
 
-import org.kframework.kore.outer.Production
+import org.kframework.attributes.Location
+import org.kframework.definition.Production
 import java.util._
 import java.lang.Iterable
 import collection.JavaConverters._
@@ -87,5 +88,3 @@ object Ambiguity {
   def apply(items: List[Term]): Ambiguity = new Ambiguity(new HashSet(items), Optional.empty())
   @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
 }
-
-case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int)

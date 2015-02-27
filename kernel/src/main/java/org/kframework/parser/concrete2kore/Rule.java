@@ -10,7 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import org.kframework.kore.outer.Production;
+import org.kframework.attributes.Location;
+import org.kframework.definition.Production;
 import org.kframework.parser.*;
 
 /**

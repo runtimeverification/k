@@ -9,7 +9,7 @@ import static org.kframework.Collections.stream;
 import org.kframework.kil.Sources;
 import org.kframework.kore.convertors.BubbleParsing;
 import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.outer.*;
+import org.kframework.definition.*;
 import org.kframework.parser.outer.Outer;
 
 import java.io.FileInputStream;

@@ -95,7 +95,7 @@ public class TstKOREtoKILIT extends BaseTest {
 
     protected String convert(DefinitionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
         Definition kilDefinitionTranslatedBack = new KOREtoKIL().apply(koreDef);
         String actualOutput = kilDefinitionTranslatedBack.toString();
         return actualOutput;

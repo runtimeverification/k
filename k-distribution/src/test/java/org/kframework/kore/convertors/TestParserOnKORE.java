@@ -5,13 +5,13 @@ package org.kframework.kore.convertors;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.kframework.kore.outer.Module;
+import org.kframework.definition.Module;
 
 public class TestParserOnKORE extends BaseTest {
 
     protected String convert(DefinitionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
 
         BubbleParsing bubbleParsing = new BubbleParsing();
         Module koreModule = bubbleParsing.parseBubbles(koreDef.getModule("TEST").get());
@@ -27,5 +27,4 @@ public class TestParserOnKORE extends BaseTest {
     @Test public void simpleRuleKORE() throws IOException {
         outerOnlyTest();
     }
-
 }

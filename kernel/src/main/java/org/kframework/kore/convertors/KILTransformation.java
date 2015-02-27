@@ -4,7 +4,6 @@ package org.kframework.kore.convertors;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -31,6 +30,8 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
                     + " is missing a definition for visit(" + t.getClass() + ")"
                     + ". Encounteed when visiting " + makeErrorMessage(t), e);
         // DISABLE EXCEPTION CHECKSTYLE
+        } catch (VisitingException e) {
+            throw e;
         } catch (Throwable e) {
             throw new VisitingException(makeErrorMessage(t), e);
         }

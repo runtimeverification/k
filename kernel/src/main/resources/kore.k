@@ -22,7 +22,7 @@ Known issues:
 module BASIC-K
   syntax K   //[...]   // no constructors at this stage
   syntax KString ::= r"[\\\"]([^\\\"\\n\\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"
-    [token, noAutoReject, onlyLabel, hook(org.kframework.kore.KString)]
+    [token, noAutoReject, onlyLabel, hook(org.kframework.koreimplementation.KString)]
     // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
 endmodule
 
@@ -34,23 +34,23 @@ module KAST
   imports BASIC-K
   syntax K     ::= KItem
   syntax KItem ::= "#token" "(" KString "," KString ")"
-    [ klabel(#KToken), hook(org.kframework.kore.KToken) ]
+    [ klabel(#KToken), hook(org.kframework.koreimplementation.KToken) ]
   syntax KItem ::= "#klabel" "(" KLabel ")"
-    [ klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel) ]
+    [ klabel(#WrappedKLabel), hook(org.kframework.koreimplementation.meta.WrappedKLabel) ]
   syntax KItem ::= KLabel "(" KList ")"
-    [ klabel(#KApply), hook(org.kframework.kore.KApply) ]
+    [ klabel(#KApply), hook(org.kframework.koreimplementation.KApply) ]
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`"
     [ klabel(#KLabel), token ] // everything except `, unless escaped \`
   syntax KLabel ::= r"[#a-z][a-zA-Z0-9]*"
-    [ klabel(#KLabel), token, hook(org.kframework.kore.KLabel) ]
+    [ klabel(#KLabel), token, hook(org.kframework.koreimplementation.KLabel) ]
     // something that doesn't collide with meta-variables
 
   syntax KList ::= K
   syntax KList ::= ".::KList"
-    [ klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList) ]
+    [ klabel(#EmptyKList), hook(org.kframework.koreimplementation.EmptyKList) ]
   syntax KList ::= KList "," KList
-    [ klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList) ]
+    [ klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.koreimplementation.KList) ]
 endmodule
 
 
@@ -59,9 +59,9 @@ endmodule
 module KSEQ
   imports KAST
   syntax K     ::= ".::K"
-    [ klabel(#EmptyK), hook(org.kframework.kore.EmptyK) ]
+    [ klabel(#EmptyK), hook(org.kframework.koreimplementation.EmptyK) ]
   syntax K     ::= K "~>" K
-    [ klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence) ]
+    [ klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.koreimplementation.KSequence) ]
 endmodule
 
 
@@ -70,7 +70,7 @@ endmodule
 module KSEQ-SYMBOLIC
   imports KSEQ
   syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)"
-    [ hook(org.kframework.kore.KVariable) ] // same like KSort?
+    [ hook(org.kframework.koreimplementation.KVariable) ] // same like KSort?
   syntax KItem     ::= KVariable
   syntax KLabel    ::= KVariable
 endmodule
@@ -81,7 +81,7 @@ endmodule
 module K
   imports KSEQ-SYMBOLIC
   syntax K         ::= K "=>" K
-    [ klabel(#KRewrite), hook(org.kframework.kore.KRewrite) ]
+    [ klabel(#KRewrite), hook(org.kframework.koreimplementation.KRewrite) ]
   // K bracket needed, e.g., Cxt[V ~> `env(E) => .`]
   syntax K         ::= "`" K "`"        [ bracket ]
 
@@ -98,10 +98,10 @@ module OUTER-KORE
   imports BASIC-K
 
   syntax KDefinition   ::= KRequireList KModuleList
-    [ klabel(#KDefinition), hook(org.kframework.kore.outer.Definition) ]
+    [ klabel(#KDefinition), hook(org.kframework.koreimplementation.outer.Definition) ]
 
   syntax KRequire      ::= "require" KString
-    [ klabel(#KRequire), hook(org.kframework.kore.outer.Require) ]
+    [ klabel(#KRequire), hook(org.kframework.koreimplementation.outer.Require) ]
 
   // Radu says: The list declarations below are a bit tricky (no separator,
   // and the empty element is null).
@@ -139,14 +139,14 @@ module OUTER-KORE
                                     KImportList
                                     KSentenceList
                            "endmodule"
-    [ klabel(#KModule), hook(org.kframework.kore.outer.Module) ]
+    [ klabel(#KModule), hook(org.kframework.koreimplementation.outer.Module) ]
   syntax KModuleList   ::= KModule KModuleList
     [ klabel(#KModuleList), assoc, comm, unit(#emptyKModuleList) ]
   syntax KModuleList   ::= ""
     [ klabel(#emptyKModuleList), onlyLabel]
 
   syntax KImport       ::= "imports" KModuleName
-    [ klabel(#KImport), hook(org.kframework.kore.outer.Import) ]
+    [ klabel(#KImport), hook(org.kframework.koreimplementation.outer.Import) ]
   syntax KImportList   ::= KImport KImportList
     [ klabel(#KImportList), assoc, comm, unit(#emptyKImportList) ]
   syntax KImportList   ::= ""
@@ -158,44 +158,44 @@ module OUTER-KORE
     [ klabel(#emptyKSentenceList), onlyLabel]
 
   syntax KSentence ::= "syntax" KSort KAttributesDeclaration
-    [ klabel(#KSyntaxSort), hook(org.kframework.kore.outer.SyntaxSort) ]
+    [ klabel(#KSyntaxSort), hook(org.kframework.koreimplementation.outer.SyntaxSort) ]
   syntax KSentence ::= "syntax" KSort "::=" KProduction KAttributesDeclaration
-    [ klabel(#KSyntaxProduction), hook(org.kframework.kore.outer.SyntaxProduction) ] ]
+    [ klabel(#KSyntaxProduction), hook(org.kframework.koreimplementation.outer.SyntaxProduction) ] ]
   syntax KSentence ::= "syntax" "priority" KString ">" KString KAttributesDeclaration
-    [ klabel(#KSyntaxPriority), hook(org.kframework.kore.outer.SyntaxPriority) ]
+    [ klabel(#KSyntaxPriority), hook(org.kframework.koreimplementation.outer.SyntaxPriority) ]
     // TYhe above should be changed to allow partial orders between lists of KLabels
     // in order to avoid the quadratic explosion of the translation from K to KORE
 
 // Configuration declarations not needed anymore, as it can be replaced
 // with existing KORE plus conventions; see Wiki mentioned above
 //  syntax KSentence ::= "configuration" K "requires" K             KAttributesDeclaration
-//    [ klabel(#KConfiguration), hook(org.kframework.kore.outer.Configuration) ]
+//    [ klabel(#KConfiguration), hook(org.kframework.koreimplementation.outer.Configuration) ]
 
   syntax KSentence ::= "rule"    K "requires" K "ensures" K KAttributesDeclaration
-    [ klabel(#KRule), hook(org.kframework.kore.outer.Rule) ]
+    [ klabel(#KRule), hook(org.kframework.koreimplementation.outer.Rule) ]
   syntax KSentence ::= "context" K "requires" K             KAttributesDeclaration
-    [ klabel(#KContext), hook(org.kframework.kore.outer.Context) ]
+    [ klabel(#KContext), hook(org.kframework.koreimplementation.outer.Context) ]
 
   syntax KProduction ::= ""
     [ klabel(#emptyKProduction), onlyLabel]
   syntax KProduction ::= KProductionItem KProduction
     [ klabel(#KProduction), assoc, unit(#emptyKProduction) ]
   syntax KProductionItem ::= KSort
-    [ hook(org.kframework.kore.outer.NonTerminal) ] // non-terminal
+    [ hook(org.kframework.koreimplementation.outer.NonTerminal) ] // non-terminal
   syntax KProductionItem ::= KString
-    [ hook(org.kframework.kore.outer.Terminal) ]    // terminals, including regexes
+    [ hook(org.kframework.koreimplementation.outer.Terminal) ]    // terminals, including regexes
   syntax KProductionItem ::= "r" KString
-    [ hook(org.kframework.kore.outer.RegexTerminal) ]    // terminals, including regexes
+    [ hook(org.kframework.koreimplementation.outer.RegexTerminal) ]    // terminals, including regexes
 
   // We use #KAttributes as top KLabel in the K term holding the attributes
   syntax KAttributesDeclaration ::= "[" K "]"
-    [ klabel(#KAttributesDeclaration), hook(org.kframework.kore.KAttributes) ]
+    [ klabel(#KAttributesDeclaration), hook(org.kframework.koreimplementation.KAttributes) ]
 
   // The following can still change
   syntax KModuleName ::= r"[A-Z][A-Z\\-]*"
     [ token ]
   syntax KSort       ::= r"[A-Z][A-Za-z0-9]*"
-    [ token, hook(org.kframework.kore.outer.Sort) ]
+    [ token, hook(org.kframework.koreimplementation.outer.Sort) ]
 endmodule
 
 

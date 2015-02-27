@@ -24,7 +24,7 @@ import org.kframework.kil.Attributes;
  *
  * @author AndreiS
  */
-public class KLabelConstant extends KLabel implements MaximalSharing {
+public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
     /* KLabelConstant cache */
     private static final MapCache<Pair<Set<SortSignature>, Attributes>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
@@ -161,6 +161,11 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     public Set<SortSignature> signatures() {
         return signatures;
+    }
+
+    @Override
+    public String name() {
+        return label;
     }
 
     @Override

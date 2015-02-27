@@ -1,18 +1,23 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -40,6 +45,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Names;
 import com.google.inject.Inject;
+import scala.collection.JavaConversions;
 
 
 /**
@@ -101,7 +107,6 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> patternFoldingRules = new ArrayList<>();
 
     private final Set<KLabelConstant> kLabels;
-    private final Set<KLabelConstant> frozenKLabels;
 
     private final DefinitionData definitionData;
     private transient Context context;
@@ -114,10 +119,9 @@ public class Definition extends JavaSymbolicObject {
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
-        this.indexingData = indexingData;
-        this.kem = kem;
         kLabels = new HashSet<>();
-        frozenKLabels = new HashSet<>();
+        this.kem = kem;
+        this.indexingData = indexingData;
 
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
@@ -155,7 +159,8 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("metabinder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    new TypeToken<Multimap<Integer, Integer>>() {
+                                    },
                                     Names.named("metabinder")),
                             p.getBinderMap()));
                 }
@@ -183,47 +188,83 @@ public class Definition extends JavaSymbolicObject {
         this.context = context;
     }
 
-//    public Definition(org.kframework.definition.Module m) {
-//        kLabels = new HashSet<>();
-//        frozenKLabels = new HashSet<>();
-//        definitionData = new DefinitionData(
-//                new Subsorts(context),
-//                ImmutableSet.builder()
-//                        .addAll(TOKEN_SORTS)
-//                        .add(Sort.of("#Int"))
-//                        .add(Sort.of("#String"))
-//                        .add(Sort.of("#Id"))
-//                        .build(),
-//                null,
-//                context.klabels,
-//                null,
-//                null,
-//                null,
-//                context.globalOptions,
-//                context.krunOptions);
-//        this.indexingData = null;
-//        this.kem = null;
-//    }
+    public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
+        kLabels = new HashSet<>();
+        this.kem = kem;
+
+        ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
+        JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
+            JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
+                ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
+                JavaConversions.seqAsJavaList(p._1()).stream()
+                        .map(s -> Sort.of(s.name()))
+                        .forEach(sortsBuilder::add);
+                signaturesBuilder.put(
+                        e.getKey().name(),
+                        new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
+            });
+        });
+
+        ImmutableMap.Builder<String, Attributes> attributesBuilder = ImmutableMap.builder();
+        JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
+            attributesBuilder.put(e.getKey().name(), new KOREtoKIL().convertAttributes(e.getValue()));
+        });
+
+        definitionData = new DefinitionData(
+                new Subsorts(module),
+                ImmutableSet.<Sort>builder()
+                        .addAll(TOKEN_SORTS)
+                        .add(Sort.of("#Int"))
+                        .add(Sort.of("#String"))
+                        .add(Sort.of("#Id"))
+                        .build(),
+                null,
+                signaturesBuilder.build(),
+                attributesBuilder.build(),
+                null,
+                null,
+                new GlobalOptions(),
+                new KRunOptions());
+        context = null;
+
+        this.indexingData = new IndexingTable.Data();
+    }
+
+    public void addKoreRules(Module module, TermContext termContext) {
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(termContext);
+        JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
+            if (s instanceof org.kframework.definition.Rule) {
+                org.kframework.definition.Rule rule = (org.kframework.definition.Rule) s;
+                org.kframework.kil.Rule oldRule = new org.kframework.kil.Rule();
+                oldRule.setAttributes(new KOREtoKIL().convertAttributes(rule.att()));
+                addRule(new Rule(
+                        "",
+                        transformer.convert(((KRewrite) rule.body()).left()),
+                        transformer.convert(((KRewrite) rule.body()).right()),
+                        Collections.singletonList(transformer.convert(rule.requires())),
+                        Collections.singletonList(transformer.convert(rule.ensures())),
+                        Collections.emptySet(),
+                        Collections.emptySet(),
+                        ConjunctiveFormula.of(termContext),
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new org.kframework.kil.Rule(),
+                        termContext));
+            }
+        });
+    }
 
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
-        this.indexingData = indexingData;
-        this.kem = kem;
         kLabels = new HashSet<>();
-        frozenKLabels = new HashSet<>();
+        this.kem = kem;
+        this.indexingData = indexingData;
 
         this.definitionData = definitionData;
         this.context = null;
-    }
-
-    public void addFrozenKLabel(KLabelConstant frozenKLabel) {
-        frozenKLabels.add(frozenKLabel);
-    }
-
-    public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
-        for (KLabelConstant frozenKLabel : frozenKLabels) {
-            this.frozenKLabels.add(frozenKLabel);
-        }
     }
 
     public void addKLabel(KLabelConstant kLabel) {
@@ -333,10 +374,6 @@ public class Definition extends JavaSymbolicObject {
 
     public List<Rule> patternFoldingRules() {
         return patternFoldingRules;
-    }
-
-    public Set<KLabelConstant> frozenKLabels() {
-        return frozenKLabels;
     }
 
     public Set<KLabelConstant> kLabels() {

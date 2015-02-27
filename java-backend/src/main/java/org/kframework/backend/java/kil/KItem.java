@@ -18,6 +18,7 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
+import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -81,7 +82,7 @@ public class KItem extends Term implements KItemRepresentation {
         return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
     }
 
-    KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+    public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
     }
 

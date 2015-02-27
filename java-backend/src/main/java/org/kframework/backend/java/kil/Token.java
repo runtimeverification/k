@@ -10,6 +10,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kore.KToken;
 
 import java.util.Collections;
 import java.util.Set;
@@ -20,7 +21,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term implements KoreRepresentation, Immutable {
+public abstract class Token extends Term implements KoreRepresentation, Immutable, KToken {
 
     public static Token of(Sort sort, String value) {
         if (sort.equals(BoolToken.SORT)) {
@@ -45,6 +46,11 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
 
     @Override
     public abstract Sort sort();
+
+    @Override
+    public String s() {
+        return value();
+    }
 
     /**
      * Returns a {@code String} representation of the (uninterpreted) value of this token.

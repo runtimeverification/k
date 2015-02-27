@@ -1,18 +1,22 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.Collections;
 import org.kframework.backend.java.kil.Sort;
+import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import scala.collection.JavaConversions;
 
 
 /**
@@ -47,6 +51,22 @@ public class Subsorts implements Serializable {
             for (Sort sort2 : sorts) {
                 subsort.put(sort1, sort2, context
                         .isSubsorted(sort1.toFrontEnd(), sort2.toFrontEnd()));
+            }
+        }
+    }
+
+    public Subsorts(Module module) {
+        sorts = JavaConversions.asJavaCollection(module.definedSorts()).stream()
+                .map(s -> Sort.of(s.name()))
+                .collect(Collectors.toSet());
+
+        this.subsort = ArrayTable.create(sorts, sorts);
+        for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
+            for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
+                subsort.put(
+                        Sort.of(sort1.name()),
+                        Sort.of(sort2.name()),
+                        module.subsorts().$greater(sort1, sort2));
             }
         }
     }

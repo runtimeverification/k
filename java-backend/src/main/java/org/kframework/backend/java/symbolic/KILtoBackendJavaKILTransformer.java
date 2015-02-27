@@ -558,13 +558,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             definition.addKLabel(KLabelConstant.of(kLabelName, globalContext.getDefinition()));
         }
 
-        /* collect the productions which have the attributes strict and seqstrict */
-        Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
-        productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
-        for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabelOfKItem(), globalContext.getDefinition()));
-        }
-
         return definition;
     }
 

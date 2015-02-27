@@ -6,8 +6,6 @@ import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.convertors.KOREtoKIL;
 
 public class KORECompilationSteps extends BasicCompilerStep<Definition> {
 
@@ -20,7 +18,7 @@ public class KORECompilationSteps extends BasicCompilerStep<Definition> {
 //        KILtoKORE kilToKORE = new KILtoKORE(context);
 //        KOREtoKIL koreToKIL = new KOREtoKIL();
 
-//        org.kframework.kore.outer.Definition koreDefinition = kilToKORE.apply(ast);
+//        org.kframework.definition.Definition koreDefinition = kilToKORE.apply(ast);
 //        Definition newKIL = koreToKIL.convertDefinition(koreDefinition);
 
         return ast;
