@@ -21,6 +21,10 @@
   and `rawResult`. If you are developing a feature that cannot work effectively
   without one or both of these fields, please file an issue so that we can
   evaluate your case and attempt to come up with a new API.
+- The `kompileOptions()` and `krunOptions()` methods of `AbstractKModule` now
+  take a class literal instead of an object. The object is constructed from
+  the class by dependency injection (i.e. via a 0-args or `@Inject`-annotated
+  constructor)
 
 
 # K Framework 3.5 (released 2014-12-19) #

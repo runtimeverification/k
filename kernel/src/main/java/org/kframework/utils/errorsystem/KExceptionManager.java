@@ -9,10 +9,9 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-@Singleton
+@RequestScoped
 public class KExceptionManager {
     private final List<KException> exceptions = new ArrayList<KException>();
 

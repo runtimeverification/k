@@ -152,7 +152,7 @@ public class ExecutorDebugger implements Debugger {
                     + "If you previously used the search command you must"
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
-        SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo);
+        SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo, true);
         mergeSearchGraph(results.getGraph());
         currentState = null;
         return results;

@@ -11,6 +11,8 @@ import org.kframework.utils.errorsystem.KEMExceptionProvider;
 import org.kframework.utils.file.JarInfo;
 import org.mockito.Mock;
 
+import com.google.inject.util.Providers;
+
 public class KRunFrontEndTest extends BaseTestCase {
 
     @Mock
@@ -20,7 +22,7 @@ public class KRunFrontEndTest extends BaseTestCase {
     public void testVersion() {
         GlobalOptions options = new GlobalOptions();
         options.version = true;
-        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files);
+        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files, scope, Providers.of(kompiledDir));
         frontend.main();
         verify(jarInfo).printVersionMessage();
     }
@@ -28,7 +30,7 @@ public class KRunFrontEndTest extends BaseTestCase {
     @Test
     public void testNothingAvailable() {
         GlobalOptions options = new GlobalOptions();
-        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files);
+        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files, scope, Providers.of(kompiledDir));
         frontend.main();
         verify(kem).print();
     }

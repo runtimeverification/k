@@ -17,7 +17,7 @@ public class GraphInjector {
 
     public static void main(String[] args) throws IOException {
         String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-        Injector injector = Main.getInjector(args[0], args2);
+        Injector injector = Main.getInjector(args[0]);
         graph("injector.dot", injector);
     }
 

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.Backends;
-import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
@@ -27,31 +26,32 @@ import com.google.inject.multibindings.Multibinder;
 
 public class KompileModule extends AbstractModule {
 
-    private final Context context;
-    private final KompileOptions options;
-
-    public KompileModule(Context context, KompileOptions options) {
-        this.context = context;
-        this.options = options;
+    public KompileModule() {
     }
 
     @Override
     protected void configure() {
         bind(FrontEnd.class).to(KompileFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KOMPILE);
-        bind(Context.class).toInstance(context);
-        bind(KompileOptions.class).toInstance(options);
-        bind(GlobalOptions.class).toInstance(options.global);
-        bind(SMTOptions.class).toInstance(options.experimental.smt);
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
-        optionsBinder.addBinding().toInstance(options);
+        optionsBinder.addBinding().to(KompileOptions.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
         experimentalOptionsBinder.addBinding().toInstance(KompileOptions.Experimental.class);
         experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
 
         MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), String.class, Backend.class);
+    }
+
+    @Provides
+    SMTOptions smtOptions(KompileOptions options) {
+        return options.experimental.smt;
+    }
+
+    @Provides
+    GlobalOptions globalOptions(KompileOptions options) {
+        return options.global;
     }
 
     @Provides @DefinitionDir

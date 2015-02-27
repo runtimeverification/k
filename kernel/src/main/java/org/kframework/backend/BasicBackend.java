@@ -17,10 +17,10 @@ public abstract class BasicBackend implements Backend {
     protected Context context;
     protected KompileOptions options;
 
-    public BasicBackend(Stopwatch sw, Context context) {
+    public BasicBackend(Stopwatch sw, Context context, KompileOptions options) {
         this.sw = sw;
         this.context = context;
-        this.options = context.kompileOptions;
+        this.options = options;
     }
 
     @Override
