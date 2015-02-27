@@ -121,6 +121,7 @@ public abstract class JavaSymbolicObject extends ASTNode
             final Map<JavaSymbolicObject, Set<Variable>> intermediate = new IdentityHashMap<>();
             IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
                     (set, term) -> term.variableSet = set,
+                    term -> term.variableSet,
                     intermediate,
                     new LocalVisitor() {
                         @Override
@@ -147,6 +148,7 @@ public abstract class JavaSymbolicObject extends ASTNode
             final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
             IncrementalCollector<Term> visitor = new IncrementalCollector<>(
                     (set, term) -> term.userVariableSet = set,
+                    term -> term.userVariableSet,
                     intermediate,
                     new LocalVisitor() {
                         @Override
@@ -176,6 +178,7 @@ public abstract class JavaSymbolicObject extends ASTNode
             final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
             IncrementalCollector<Term> visitor = new IncrementalCollector<>(
                     (set, term) -> term.functionKLabels = set,
+                    term -> term.functionKLabels,
                     intermediate,
                     new LocalVisitor() {
                         @Override

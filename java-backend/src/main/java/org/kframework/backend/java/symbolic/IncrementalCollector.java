@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 
 
@@ -20,10 +22,12 @@ public class IncrementalCollector<T> extends PrePostVisitor {
     private Set<T> set = new HashSet<>();
     private final Stack<Set<T>> setStack = new Stack<>();
     private final BiConsumer<Set<T>, JavaSymbolicObject> setValue;
+    private final Function<JavaSymbolicObject, Set<T>> getValue;
     private final Map<JavaSymbolicObject, Set<T>> intermediate;
 
     public IncrementalCollector(
             BiConsumer<Set<T>, JavaSymbolicObject> setValue,
+            Function<JavaSymbolicObject, Set<T>> getValue,
             Map<JavaSymbolicObject, Set<T>> intermediate,
             LocalVisitor computeLocal) {
         getPreVisitor().addVisitor(new PreIncrementalVisitor());
@@ -31,12 +35,16 @@ public class IncrementalCollector<T> extends PrePostVisitor {
         getPostVisitor().addVisitor(new PostIncrementalVisitor());
         this.setValue = setValue;
         this.intermediate = intermediate;
+        this.getValue = getValue;
     }
 
     private class PreIncrementalVisitor extends LocalVisitor {
         @Override
         public void visit(JavaSymbolicObject term) {
-            Set<T> termSet = intermediate.get(term);
+            Set<T> termSet = getValue.apply(term);
+            if (termSet == null) {
+                termSet = intermediate.get(term);
+            }
             if (termSet != null) {
                 proceed = false;
                 set.addAll(termSet);
