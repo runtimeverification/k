@@ -1,6 +1,6 @@
 package org.kframework.parser.concrete2kore;
 
-import org.kframework.kore.outer.Module;
+import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;

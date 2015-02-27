@@ -35,7 +35,7 @@ public class TstKILtoKOREIT extends BaseTest {
     // to macro rules, as Grigore wrote on the wiki
     // for now, we'll do this conversion:
     // <k foo="bla"> .K </k> becomes:
-    // KApply(KLabel("k"), KList(EmptyK), Attributes(KApply(KLabel("foo",
+    // KApply(KLabel("k"), KList(EmptyK), Att(KApply(KLabel("foo",
     // KToken(String, "bla"))))
     @Test
     public void configuration() throws IOException {
@@ -99,7 +99,7 @@ public class TstKILtoKOREIT extends BaseTest {
 
     protected String convert(DefinitionWithContext defWithContext) {
         KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        org.kframework.kore.outer.Definition koreDef = kilToKore.apply(defWithContext.definition);
+        org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
         String koreDefString = koreDef.toString();
         return koreDefString;
     }

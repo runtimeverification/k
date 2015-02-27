@@ -47,7 +47,7 @@ endmodule
 
 // To be used when parsing programs in KAST format
 // (e.g., programs parsed and then output by an external parser)
-module KAST //[ hookNamespace(org.kframework.kore) ]  // the hook will probably change
+module KAST //[ hookNamespace(org.kframework.koreimplementation) ]  // the hook will probably change
   imports BASIC-K
   syntax K     ::= KItem                                 //[ ... ]
 
@@ -55,8 +55,8 @@ module KAST //[ hookNamespace(org.kframework.kore) ]  // the hook will probably 
   // @cos proposes to eliminate the next injection, and instead to allow
   // the use of meta-level KAST in definitions: #KApply(#token("_+_","KLabel"),#KList(1,3))
   // @grosu is sceptic: that would imply to allow KAST syntax in programs; not worth the price
-  syntax KItem ::= "#klabel" "(" KLabel ")"              [ klabel(#KLabel), hook(org.kframework.kore.KItem) ]
-  syntax KItem ::= KLabel "(" KList ")"                  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
+  syntax KItem ::= "#klabel" "(" KLabel ")"              [ klabel(#KLabel), hook(org.kframework.koreimplementation.KItem) ]
+  syntax KItem ::= KLabel "(" KList ")"                  [ klabel(#KApply), hook(org.kframework.koreimplementation.KItem) ]
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`"   [ token, hook ] // everything except `, unless escaped \`
   syntax KLabel ::= r"[#a-z][a-zA-Z0-9]*"                [ token, hook ] // something that doesn't collide with meta-variables
@@ -99,17 +99,17 @@ module K-TEST
   // The old outer parser leaves "requires" as part of a bubble, so we need a production here to
   // hack around this until the new outer parser is available.
   syntax RuleBody ::= K [ klabel(#KRule)]
-  syntax RuleBody ::= K "requires" K [klabel(#KRule)]
+  syntax RuleBody ::= K "requires" K [klabel(#KRuleWithRequires)]
 
   // Allow label() in addition to label(.::KList)
-  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApply), hook(org.kframework.kore.KItem) ]
-  syntax EmptyKList ::= "" [klabel(#emptyKList)]
+  syntax KItem ::= KLabel "(" EmptyKList ")"  [ klabel(#KApplyEmptyKList), hook(org.kframework.kore.KItem) ]
+  syntax EmptyKList ::= "" [klabel(#emptyKListDuplicateHack)]
 endmodule
 
 // To be used for first-level parsing of global KORE definitions,
 // where the K terms are put in bubbles.  A similar, but larger
 // module can be defined for global KAST definitions.
-module OUTER-KORE //[ hookNamespace(org.kframework.kore.outer) ]
+module OUTER-KORE //[ hookNamespace(org.kframework.koreimplementation.outer) ]
   imports BASIC-K
 
   syntax KDefinition   ::= KRequireList KModuleList   [ hook, klabel(#Definition) ]

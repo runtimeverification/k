@@ -3,16 +3,21 @@
 package org.kframework.kore;
 
 import static org.junit.Assert.*;
-import static org.kframework.kore.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 import org.junit.Test;
+import org.kframework.Collections;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class VisitorTest {
     class FooTransformer extends AbstractKORETransformer<K> {
 
         @Override
         public K apply(KApply k) {
-            return (K) k.map(this);
+            List<K> newItems = k.klist().items().stream().map(this).collect(Collectors.toList());
+            return KApply(k.klabel(), KList(newItems), k.att());
         }
 
         @Override
@@ -32,7 +37,8 @@ public class VisitorTest {
 
         @Override
         public K apply(KSequence k) {
-            return (K) k.map(this);
+            List<K> newItems = k.items().stream().map(this).collect(Collectors.toList());
+            return KORE.KSequence(newItems, k.att());
         }
     }
 

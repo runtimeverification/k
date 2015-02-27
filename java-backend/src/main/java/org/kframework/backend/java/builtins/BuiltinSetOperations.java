@@ -2,10 +2,8 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.DataStructures;
-import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -27,15 +25,15 @@ public class BuiltinSetOperations {
         if (set1.sort() != Sort.SET || set2.sort() != Sort.SET) {
             throw new IllegalArgumentException();
         }
-        return BuiltinSet.concatenate(set1, set2);
+        return BuiltinSet.concatenate(context, set1, set2);
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinSet.EMPTY_SET;
+        return BuiltinSet.builder(context).build();
     }
 
     public static Term element(Term element, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.add(element);
         return builder.build();
     }
@@ -45,7 +43,7 @@ public class BuiltinSetOperations {
             return null;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.addAll(Sets.intersection(set1.elements(), set2.elements()));
         return builder.build();
     }
@@ -64,7 +62,7 @@ public class BuiltinSetOperations {
         }
         BuiltinSet builtinSet = (BuiltinSet) set;
 
-        BuiltinSet.Builder builder = BuiltinSet.builder();
+        BuiltinSet.Builder builder = BuiltinSet.builder(context);
         builder.concatenate(builtinSet);
 
         Set<Term> pendingRemoveSet = removeBuiltinSet.elements().stream()

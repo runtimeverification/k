@@ -15,6 +15,7 @@ import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -29,8 +30,8 @@ public class CoqBackend extends BasicBackend {
     private final Provider<ProcessBuilder> pb;
 
     @Inject
-    public CoqBackend(Stopwatch sw, Context context, Provider<ProcessBuilder> pb, FileUtil files) {
-        super(sw, context);
+    public CoqBackend(Stopwatch sw, Context context, KompileOptions options, Provider<ProcessBuilder> pb, FileUtil files) {
+        super(sw, context, options);
         this.pb = pb;
         this.files = files;
     }

@@ -3,18 +3,14 @@ package org.kframework.kdoc;
 
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
 
+@RequestScoped
 public class KDocOptions {
-    public KDocOptions() {}
-
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public KDocOptions(Void v) {}
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();

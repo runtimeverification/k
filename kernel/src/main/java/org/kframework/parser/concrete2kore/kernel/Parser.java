@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Location;
 import org.kframework.kil.Source;
-import org.kframework.kore.outer.Production;
+import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.KList;

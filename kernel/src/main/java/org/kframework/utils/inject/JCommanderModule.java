@@ -21,15 +21,8 @@ import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 
 public class JCommanderModule extends AbstractModule  {
-
-    private final String[] args;
-
-    public JCommanderModule(String[] args) {
-        this.args = args;
-    }
 
     @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
     public @interface Usage {}
@@ -37,10 +30,13 @@ public class JCommanderModule extends AbstractModule  {
     public @interface ExperimentalUsage {}
 
     @Override
-    protected void configure() {}
+    protected void configure() {
+        bind(String[].class).annotatedWith(Options.class)
+            .toProvider(SimpleScope.seededKeyProvider()).in(RequestScoped.class);;
+    }
 
-    @Provides @Singleton
-    JCommander jcommander(Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem, Stopwatch sw) {
+    @Provides @RequestScoped
+    JCommander jcommander(@Options String[] args, Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem, Stopwatch sw) {
         try {
             JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
             jc.setProgramName(tool.name().toLowerCase());
@@ -52,14 +48,14 @@ public class JCommanderModule extends AbstractModule  {
         }
     }
 
-    @Provides @Usage
+    @Provides @Usage @RequestScoped
     String usage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
         jc.usage(sb);
         return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0];
     }
 
-    @Provides @ExperimentalUsage
+    @Provides @ExperimentalUsage @RequestScoped
     String experimentalUsage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
         jc.usage(sb);

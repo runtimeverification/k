@@ -21,7 +21,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Variable extends Term implements Immutable {
+public class Variable extends Term implements Immutable, org.kframework.kore.KVariable {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;

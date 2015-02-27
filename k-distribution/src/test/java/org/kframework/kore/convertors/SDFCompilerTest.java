@@ -17,7 +17,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kompile.KompileOptions.Experimental;
-import org.kframework.kore.convertors.BaseTest.DefinitionWithContext;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.generator.OuterParser;
@@ -29,6 +28,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.util.Providers;
+import org.kframework.utils.file.JarInfo;
 
 public abstract class SDFCompilerTest extends BaseTestCase {
 
@@ -36,7 +36,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
     public TestName name = new TestName();
 
     @SuppressWarnings("deprecation")
-    public DefinitionWithContext parse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
+    public BaseTest.DefinitionWithContext parse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
         // Not a complete fix, but seems to reduce sporadic test failures
         synchronized (SDFCompilerTest.class) {
             return unsafeParse(definitionFile, mainModule, autoinclude);
@@ -44,7 +44,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
     }
 
     // Not threadsafe, SDF uses too much static state.
-    private DefinitionWithContext unsafeParse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
+    private BaseTest.DefinitionWithContext unsafeParse(File definitionFile, String mainModule, boolean autoinclude) throws IOException {
         // KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         GlobalOptions globalOptions = new GlobalOptions();
@@ -64,10 +64,12 @@ public abstract class SDFCompilerTest extends BaseTestCase {
 
         context.files = fileUtil;
 
-        String path = new File("../k-distribution/target/release/k/lib/native/").getAbsolutePath()
+        String path = new File(JarInfo.getKBase() + "/lib/native/").getAbsolutePath()
                 + "/" + OS.current().name().toLowerCase() + "/";
 
         String nativeSDF2TableExecutable = path + OS.current().getNativeExecutable("sdf2table");
+
+        nativeSDF2TableExecutable = nativeSDF2TableExecutable.replace("k-distribution/k-distribution", "k-distribution");
 
         Sdf2Table sdf2Table = new Sdf2Table(Providers.of(new ProcessBuilder()),
                 nativeSDF2TableExecutable);
@@ -91,7 +93,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
                 kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),
                 autoinclude, fileUtil, sdf2Table).parseDefinition(definitionFile, mainModule, context);
 
-        return new DefinitionWithContext(parsedKIL, context);
+        return new BaseTest.DefinitionWithContext(parsedKIL, context);
     }
 
 }

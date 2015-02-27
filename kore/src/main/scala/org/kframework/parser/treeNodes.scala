@@ -2,7 +2,8 @@
 
 package org.kframework.parser
 
-import org.kframework.kore.outer.Production
+import org.kframework.attributes.Location
+import org.kframework.definition.Production
 import java.util._
 import java.lang.Iterable
 import collection.JavaConverters._
@@ -23,9 +24,9 @@ trait HasChildren {
   def replaceChildren(newChildren: Collection[Term]): Term
 }
 
-case class Constant(value: String, production: Production, location: Optional[Location]) extends ProductionReference {
-  def shallowCopy(location: Location) = Constant(value, production, Optional.of(location))
-  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(value) + "\")"
+case class Constant(v: String, production: Production, location: Optional[Location]) extends ProductionReference {
+  def shallowCopy(location: Location) = Constant(v, production, Optional.of(location))
+  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(v) + "\")"
 }
 
 case class TermCons(items: List[Term], production: Production, location: Optional[Location])
@@ -87,5 +88,3 @@ object Ambiguity {
   def apply(items: List[Term]): Ambiguity = new Ambiguity(new HashSet(items), Optional.empty())
   @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toList.asJava)
 }
-
-case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int)

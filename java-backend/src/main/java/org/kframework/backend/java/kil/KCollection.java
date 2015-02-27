@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -10,6 +11,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Joiner;
+import org.kframework.kore.K;
 
 
 /**
@@ -18,10 +20,10 @@ import com.google.common.base.Joiner;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public abstract class KCollection extends Collection implements Iterable<Term> {
+public abstract class KCollection extends Collection implements Iterable<Term>, org.kframework.kore.KCollection {
 
     protected KCollection(Variable frame, Kind kind) {
-        super(frame, kind);
+        super(frame, kind, null);
     }
 
     /**
@@ -105,7 +107,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public List<Term> getKComponents(TermContext context) {
+    public List<Term> getKComponents() {
         throw new UnsupportedOperationException();
     }
 
@@ -184,4 +186,17 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return term;
     }
 
+    @Override
+    public List<K> items() {
+        return (List<K>) (Object) getContents();
+    }
+
+    @Override
+    public Stream<K> stream() {
+        return items().stream();
+    }
+
+    public int size() {
+        return items().size();
+    }
 }

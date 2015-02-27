@@ -35,9 +35,11 @@ public class MacroExpander extends CopyOnWriteTransformer {
     }
 
     public Definition processDefinition() {
-        Definition processedDefinition = new Definition(definition.context(), kem, definition.indexingData);
+        Definition processedDefinition = new Definition(
+                definition.definitionData(),
+                kem,
+                definition.indexingData);
         processedDefinition.addKLabelCollection(definition.kLabels());
-        processedDefinition.addFrozenKLabelCollection(definition.frozenKLabels());
         for (Rule rule : definition.rules()) {
             processedDefinition.addRule(processRule(rule));
         }

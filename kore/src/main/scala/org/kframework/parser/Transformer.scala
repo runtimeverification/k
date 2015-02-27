@@ -5,8 +5,8 @@ package org.kframework.parser
 import com.google.common.collect.Sets
 
 import collection.JavaConverters._
-import collection.mutable
 import org.kframework.Collections._
+
 
 class Ignore
 
@@ -87,6 +87,7 @@ trait ChildrenMapping[E, W] {
  */
 abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, (Either[E, Term], W)]()
@@ -145,6 +146,7 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
   def applyTerm(t: Term): (Either[E, Term], Ignore) = (apply(t), Ignore)
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, Either[E, Term]]()
@@ -182,6 +184,7 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 
   def applyTerm(t: Term): (Either[Ignore, Term], Ignore) = (Right(apply(t)), Ignore)
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, Term]()

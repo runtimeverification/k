@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.kore.outer.Production;
+import org.kframework.definition.Production;
 import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 

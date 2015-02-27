@@ -50,12 +50,13 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
     public void testCreateInjectionJava() {
         context.kompileOptions.backend = "java";
         String[] argv = new String[] { "foo.c" };
-        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules(argv));
+        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules());
         definitionSpecificModules.addAll(new JavaBackendKModule().getDefinitionSpecificKRunModules());
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride)));
+        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(ImmutableList.of(definitionSpecificModuleOverride)));
         modules.addAll(new JavaBackendKModule().getKRunModules(ImmutableList.of(definitionSpecificModuleOverride)));
         Injector injector = Guice.createInjector(Modules.override(modules).with(new BaseTestCase.TestModule()));
+        prepInjector(injector, "-krun", argv);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(Executor.class, Main.class));
         injector.getInstance(Key.get(Debugger.class, Main.class));
@@ -67,12 +68,13 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
 
         context.kompileOptions.backend = "java";
         String[] argv = new String[] { "foo.c", "--simulation", "bar.c" };
-        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules(argv));
+        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules());
         definitionSpecificModules.addAll(new JavaBackendKModule().getDefinitionSpecificKRunModules());
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride)));
+        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(ImmutableList.of(definitionSpecificModuleOverride)));
         modules.addAll(new JavaBackendKModule().getKRunModules(ImmutableList.of(definitionSpecificModuleOverride)));
         Injector injector = Guice.createInjector(Modules.override(modules).with(new BaseTestCase.TestModule()));
+        prepInjector(injector, "-krun", argv);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(Simulator.class, Main.class));
     }
@@ -80,9 +82,10 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
     @Test
     public void testCreateInjectionJavaKompile() {
         String[] argv = new String[] { "foo.k", "--backend", "java" };
-        List<Module> modules = Lists.newArrayList(KompileFrontEnd.getModules(argv));
+        List<Module> modules = Lists.newArrayList(KompileFrontEnd.getModules());
         modules.addAll(new JavaBackendKModule().getKompileModules());
         Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule(), new BaseTestCase.TestModule()));
+        prepInjector(injector, "-kompile", argv);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);
     }
 

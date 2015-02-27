@@ -33,6 +33,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
 
+import com.google.inject.Inject;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +51,17 @@ public interface Executor {
     term
     */
     public abstract RewriteRelation run(Term cfg, boolean computeGraph) throws KRunExecutionException;
+
+    /**
+     Execute a term in normal execution mode until it cannot rewrite any further
+     @param initialState The KRunState containing the backend specific term to rewrite
+     @param computeGraph Specified as true if the graph of execution needs to be calculated.
+     @return An object containing both metadata about krun's execution, information about
+     the exit state of the execution, and the graph if computeGraph was true.
+     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
+     term
+     */
+    public abstract RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException;
 
     /**
     Perform a breadth-first search of the transition system starting at a particular term.
@@ -86,11 +99,30 @@ public interface Executor {
     */
     public abstract RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
 
+    /**
+     Execute a term in normal-execution mode for a specified number of steps. Takes as input a KRunState, and instead of
+     performing the Generic Kil to backend Kil operation, uses the backend Kil from the state.
+     @param initialState The KRunState containing the backend  K term to rewrite
+     @param steps The maximum number of transitions to execute for (zero if you want to rewrite
+     @param computeGraph If true, all the states and transitions involved in the execution are
+     returned in the result.
+     only until the first transition)
+     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
+     term
+     @exception UnsupportedOperationException The backend implementing this interface does not
+     support bounded stepping
+     @return An object containing both metadata about krun's execution, information about
+     the resulting term after executing the specified number of steps (or fewer if no further
+     rewrites are possible), and the execution graph if computeGraph was true.
+     */
+
+    public abstract RewriteRelation step(KRunState initialState, int steps, boolean computeGraph) throws KRunExecutionException;
+
     public static class Tool implements Transformation<Void, KRunResult> {
 
         public static final String EXIT_CODE = "exitCode";
         private final KRunOptions options;
-        private final Provider<Term> initialConfiguration;
+        private final Term initialConfiguration;
         private final Context context;
         private final Stopwatch sw;
         private final KExceptionManager kem;
@@ -100,7 +132,7 @@ public interface Executor {
         @Inject
         Tool(
                 KRunOptions options,
-                @Main Provider<Term> initialConfiguration,
+                @Main Term initialConfiguration,
                 Stopwatch sw,
                 @Main Context context,
                 KExceptionManager kem,
@@ -154,7 +186,7 @@ public interface Executor {
                         options.depth,
                         options.searchType(),
                         searchPattern.patternRule,
-                        initialConfiguration.get(), searchPattern.steps, false);
+                        initialConfiguration, searchPattern.steps, false);
 
             sw.printIntermediate("Search total");
             return result;
@@ -163,10 +195,10 @@ public interface Executor {
         public KRunResult execute(Attributes a) throws ParseFailedException, KRunExecutionException {
             KRunState result;
             if (options.depth != null) {
-                result = executor.step(initialConfiguration.get(), options.depth, false).getFinalState();
+                result = executor.step(initialConfiguration, options.depth, false).getFinalState();
                 sw.printIntermediate("Bounded execution total");
             } else {
-                result = executor.run(initialConfiguration.get(), false).getFinalState();
+                result = executor.run(initialConfiguration, false).getFinalState();
                 sw.printIntermediate("Normal execution total");
             }
             ASTNode pattern = pattern(options.pattern);

@@ -2,7 +2,7 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
-import org.kframework.kore.outer.NonTerminal;
+import org.kframework.definition.NonTerminal;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;

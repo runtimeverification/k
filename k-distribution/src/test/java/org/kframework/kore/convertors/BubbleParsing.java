@@ -4,8 +4,8 @@ package org.kframework.kore.convertors;
 
 import static org.kframework.Collections.immutable;
 import static org.kframework.Collections.stream;
-import static org.kframework.kore.outer.Constructors.Module;
-import static org.kframework.kore.outer.Constructors.Rule;
+import static org.kframework.definition.Constructors.Module;
+import static org.kframework.definition.Constructors.Rule;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,10 +17,10 @@ import com.google.common.io.Resources;
 import org.kframework.Collections;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
-import org.kframework.kore.outer.Bubble;
-import org.kframework.kore.outer.Module;
-import org.kframework.kore.outer.Definition;
-import org.kframework.kore.outer.Sentence;
+import org.kframework.definition.Bubble;
+import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
+import org.kframework.definition.Sentence;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;

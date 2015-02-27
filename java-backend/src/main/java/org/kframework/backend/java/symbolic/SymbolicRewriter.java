@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -63,13 +62,12 @@ public class SymbolicRewriter {
         return executionGraph;
     }
 
-    public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
         stopwatch.start();
-        Context context = definition.context();
         KRunState initialState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter);
             executionGraph.addVertex(initialState);
         }
         for (step = 0; step != bound; ++step) {
@@ -79,7 +77,7 @@ public class SymbolicRewriter {
             KRunState finalState = null;
             if (result != null) {
                 if (computeGraph) {
-                    finalState = new JavaKRunState(result.term(), context, counter);
+                    finalState = new JavaKRunState(result, context, counter);
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
                     executionGraph.addEdge(javaTransition, initialState, finalState);
@@ -92,12 +90,12 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        if (definition.context().krunOptions.experimental.statistics) {
+        if (definition.kRunOptions().experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
         if (initialState == null) {
-            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter);
         }
         return initialState;
     }
@@ -172,8 +170,8 @@ public class SymbolicRewriter {
                             results.add(result);
                             appliedRules.add(rule);
                             substitutions.add(unificationConstraint.substitution());
-                            Coverage.print(definition.context().krunOptions.experimental.coverage, subject);
-                            Coverage.print(definition.context().krunOptions.experimental.coverage, rule);
+                            Coverage.print(definition.kRunOptions().experimental.coverage, subject);
+                            Coverage.print(definition.kRunOptions().experimental.coverage, rule);
                             if (results.size() == successorBound) {
                                 return;
                             }
@@ -439,7 +437,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        if (definition.context().krunOptions.experimental.statistics) {
+        if (definition.kRunOptions().experimental.statistics) {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 

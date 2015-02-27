@@ -6,7 +6,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.kore.outer.Module;
+import org.kframework.definition.Module;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
@@ -34,13 +34,13 @@ public class ParserUtils {
         return parseWithModule(theTextToParse, startSymbol, kastModule);
     }
 
-    public static K parseWithModule(CharSequence theTextToParse, String startSymbol, org.kframework.kore.outer.Module kastModule) {
+    public static K parseWithModule(CharSequence theTextToParse, String startSymbol, org.kframework.definition.Module kastModule) {
         ParseInModule parser = new ParseInModule(kastModule);
         Term cleaned = parser.parseString(theTextToParse, startSymbol);
         return TreeNodesToKORE.apply(cleaned);
     }
 
-    public static org.kframework.kore.outer.Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
+    public static org.kframework.definition.Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(ParserUtils.class), definitionText, null));
         def.setMainModule(mainModule);

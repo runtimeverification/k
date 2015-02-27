@@ -34,11 +34,11 @@ public abstract class AbstractKModule implements KModule {
         return Collections.emptyList();
     }
 
-    public List<Pair<Object, Boolean>> kompileOptions() {
+    public List<Pair<Class<?>, Boolean>> kompileOptions() {
         return Collections.emptyList();
     }
 
-    public List<Pair<Object, Boolean>> krunOptions() {
+    public List<Pair<Class<?>, Boolean>> krunOptions() {
         return Collections.emptyList();
     }
 
@@ -73,18 +73,11 @@ public abstract class AbstractKModule implements KModule {
         });
     }
 
-    private void bindOptions(Supplier<List<Pair<Object, Boolean>>> action, Binder binder) {
+    private void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder, Object.class, Options.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder, new TypeLiteral<Class<?>>() {}, Options.class);
-        for (Pair<Object, Boolean> option : action.get()) {
-            optionsBinder.addBinding().toInstance(option.getKey());
-            // we are actually deliberately breaking the type theory of Java here because there's no other
-            // way to make this method call type correctly. Clearly it would be very bad to do this if we didn't know
-            // in advance that the class pointed to an instance of the exact same class as the object, but
-            // we got it from the object itself, so this should be safe, even though it's technically an incorrect cast.
-            @SuppressWarnings("unchecked")
-            Class<Object> unsafelyCastClass = (Class<Object>) option.getKey().getClass();
-            binder.bind(unsafelyCastClass).toInstance(option.getKey());
+        for (Pair<Class<?>, Boolean> option : action.get()) {
+            optionsBinder.addBinding().to(option.getKey());
             if (option.getValue()) {
                 experimentalOptionsBinder.addBinding().toInstance(option.getKey().getClass());
             }
