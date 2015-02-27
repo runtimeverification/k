@@ -490,17 +490,19 @@ public class Rule extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        if (hashCode == Utils.NO_HASHCODE) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + requires.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + ensures.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + freshConstants.hashCode();
+        int h = hashCode;
+        if (h == Utils.NO_HASHCODE) {
+            h = 1;
+            h = h * Utils.HASH_PRIME + label.hashCode();
+            h = h * Utils.HASH_PRIME + leftHandSide.hashCode();
+            h = h * Utils.HASH_PRIME + rightHandSide.hashCode();
+            h = h * Utils.HASH_PRIME + requires.hashCode();
+            h = h * Utils.HASH_PRIME + ensures.hashCode();
+            h = h * Utils.HASH_PRIME + lookups.hashCode();
+            h = h * Utils.HASH_PRIME + freshConstants.hashCode();
+            hashCode = h == 0 ? 1 : h;
         }
-        return hashCode;
+        return h;
     }
 
     @Override
