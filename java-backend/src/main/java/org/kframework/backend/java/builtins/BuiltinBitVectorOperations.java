@@ -73,7 +73,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList sadd(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.sadd(term2);
+            return term1.sadd(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -81,7 +81,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList uadd(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.uadd(term2);
+            return term1.uadd(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -89,7 +89,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList ssub(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.ssub(term2);
+            return term1.ssub(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -97,7 +97,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList usub(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.usub(term2);
+            return term1.usub(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -105,7 +105,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList smul(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.smul(term2);
+            return term1.smul(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -113,7 +113,7 @@ public final class BuiltinBitVectorOperations {
 
     public static BuiltinList umul(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.umul(term2);
+            return term1.umul(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -121,7 +121,7 @@ public final class BuiltinBitVectorOperations {
 
     public static Term sdiv(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.sdiv(term2);
+            return term1.sdiv(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -137,7 +137,7 @@ public final class BuiltinBitVectorOperations {
 
     public static Term srem(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.srem(term2);
+            return term1.srem(term2, context);
         } else {
             throw bitwidthMismatchException(term1, term2);
         }
@@ -285,7 +285,7 @@ public final class BuiltinBitVectorOperations {
             IntToken count,
             TermContext context) {
         if (bitwidth.intValue() > 0 && bitwidth.intValue() * count.intValue() <= term.bitwidth) {
-            BuiltinList.Builder builder = BuiltinList.builder();
+            BuiltinList.Builder builder = BuiltinList.builder(context);
             builder.addItems(term.toDigits(bitwidth.intValue(), count.intValue()));
             return (BuiltinList) builder.build();
         } else {

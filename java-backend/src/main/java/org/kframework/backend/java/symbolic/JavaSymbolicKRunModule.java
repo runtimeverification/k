@@ -74,6 +74,8 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
             def.setContext(context);
+            def.setGlobalOptions(context.globalOptions);
+            def.setKRunOptions(context.krunOptions);
             def.setKem(kem);
             return def;
         }

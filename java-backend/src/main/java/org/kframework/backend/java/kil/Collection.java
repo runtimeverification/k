@@ -12,7 +12,7 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public abstract class Collection extends Term implements InternalRepresentationToK {
+public abstract class Collection extends Term implements CollectionInternalRepresentation {
 
     /**
      * Represents the rest part of this {@code Collection} which is not
@@ -21,18 +21,16 @@ public abstract class Collection extends Term implements InternalRepresentationT
      */
     protected final Variable frame;
 
+    protected final TermContext context;
+
     /**
      * Creates an instance of class {@code Collection} given its kind and a
      * frame variable. If the given frame is non-null, the kind of the frame
      * must be equal to the kind of the instance.
-     *
-     * @param frame
-     *            the frame variable
-     * @param kind
-     *            the kind
      */
-    protected Collection(Variable frame, Kind kind) {
+    protected Collection(Variable frame, Kind kind, TermContext context) {
         super(kind);
+        this.context = context;
 
         assert frame == null || frame.kind() == kind
                 : "unexpected kind " + frame.kind() + " for frame variable " + frame.name()
@@ -84,18 +82,23 @@ public abstract class Collection extends Term implements InternalRepresentationT
     }
 
     @Override
-    public KLabel constructorLabel(TermContext context) {
-        return KLabelConstant.of(
-                context.definition().context().dataStructureSortOf(sort().toFrontEnd()).constructorLabel(),
-                context.definition().context());
+    public Term toKore() {
+        return toKore(context);
     }
 
     @Override
-    public KItem unit(TermContext context) {
+    public KLabel constructorLabel() {
+        return KLabelConstant.of(
+                context.definition().dataStructureSortOf(sort()).constructorLabel(),
+                context.definition());
+    }
+
+    @Override
+    public KItem unit() {
         return KItem.of(
                 KLabelConstant.of(
-                        context.definition().context().dataStructureSortOf(sort().toFrontEnd()).unitLabel(),
-                        context.definition().context()),
+                        context.definition().dataStructureSortOf(sort()).unitLabel(),
+                        context.definition()),
                 KList.EMPTY,
                 context);
     }

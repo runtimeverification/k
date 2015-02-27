@@ -544,4 +544,8 @@ public class Context implements Serializable {
         }
     }
 
+    public Poset<Sort> subsorts() {
+        return subsorts;
+    }
+
 }

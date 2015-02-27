@@ -104,6 +104,7 @@ public class JavaSymbolicExecutor implements Executor {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
                 getConstrainedTerm(cfg),
+                context,
                 bound,
                 computeGraph);
         return new RewriteRelation(finalState, rewriter.getExecutionGraph());
@@ -113,6 +114,7 @@ public class JavaSymbolicExecutor implements Executor {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
                 initialState.getConstrainedTerm(),
+                context,
                 bound,
                 computeGraph);
         return new RewriteRelation(finalState, rewriter.getExecutionGraph());

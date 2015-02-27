@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
@@ -64,31 +65,26 @@ public class BuiltinFunction {
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw KExceptionManager.internalError("Failed to load partial evaluation hook implementation", e);
         }
-        for (String label : definition.context().klabels.keySet()) {
-            for (Production production : definition.context().productionsOf(label)) {
-                if (production.getKLabel().equals(label) // make sure the label is a Klabel
-                        && production.containsAttribute(Attribute.HOOK_KEY)) {
-                    String hookAttribute = production.getAttribute(Attribute.HOOK_KEY);
-                    String hookPrefix = hookAttribute.substring(0, hookAttribute.indexOf(":"));
-                    /*
-                     * exclude hook from evaluation during compilation if the hook is dynamic
-                     * in nature (is related to I/O or to meta properties).
-                     * */
-                    if (tool == Tool.KOMPILE && production.containsAttribute(Attribute.IMPURE_KEY)) {
-                        table.put(KLabelConstant.of(label, definition.context()), throwImpureExceptionHandle);
-                        continue;
-                    }
-
-                    if (!hookProvider.containsKey(hookAttribute)) {
-                        kem.register(new KException(
-                                KException.ExceptionType.HIDDENWARNING,
-                                KException.KExceptionGroup.CRITICAL, "missing entry for hook " + hookAttribute,
-                                production.getSource(), production.getLocation()));
-                        continue;
-                    }
-
-                    table.put(KLabelConstant.of(label, definition.context()), hookProvider.get(hookAttribute).get());
+        for (Map.Entry<String, Attributes> entry : definition.kLabelAttributes().entrySet()) {
+            String hookAttribute = entry.getValue().getAttr(Attribute.HOOK_KEY);
+            if (hookAttribute != null) {
+                /*
+                 * exclude hook from evaluation during compilation if the hook is dynamic
+                 * in nature (is related to I/O or to meta properties).
+                 * */
+                if (tool == Tool.KOMPILE && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
+                    table.put(KLabelConstant.of(entry.getKey(), definition), throwImpureExceptionHandle);
+                    continue;
                 }
+
+                if (!hookProvider.containsKey(hookAttribute)) {
+                    kem.register(new KException(
+                            KException.ExceptionType.HIDDENWARNING,
+                            KException.KExceptionGroup.CRITICAL, "missing entry for hook " + hookAttribute));
+                    continue;
+                }
+
+                table.put(KLabelConstant.of(entry.getKey(), definition), hookProvider.get(hookAttribute).get());
             }
         }
     }
