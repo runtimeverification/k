@@ -15,7 +15,12 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRunGraph;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.RewriteRelation;
+import org.kframework.krun.api.SearchResult;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
 import org.kframework.krun.tools.Executor;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -74,18 +79,32 @@ public class JavaSymbolicExecutor implements Executor {
         return javaRewriteEngineRun(javaKRunState, -1, computeGraph);
     }
 
-    private ConstrainedTerm getConstrainedTerm(org.kframework.kil.Term cfg) {
+    /**
+     * private method to convert a generic kil term to java kil.1
+     *
+     * @return JavaKil Term.
+     */
+    private Term getJavaKilTerm(org.kframework.kil.Term cfg) {
         Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
-        return new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
-
+        return term;
     }
 
-    private RewriteRelation patternMatcherRewriteRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
-        Term term = kilTransformer.transformAndEval(cfg);
+    /**
+     * Given a term, return the TermContext constructed from the globalContext
+     *
+     * @param term
+     * @return
+     */
+    private TermContext getTermContext(Term term) {
         TermContext termContext = TermContext.of(globalContext);
         termContext.setTopTerm(term);
+        return termContext;
+    }
+
+
+    private RewriteRelation patternMatcherRewriteRun(Term term, TermContext termContext, int bound, boolean computeGraph) {
 
         if (computeGraph) {
             KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
@@ -95,29 +114,43 @@ public class JavaSymbolicExecutor implements Executor {
         return new RewriteRelation(finalState, null);
     }
 
-
-    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
-        if (javaOptions.patternMatching) {
-            return patternMatcherRewriteRun(cfg, bound, computeGraph);
-        }
-
+    private RewriteRelation conventionalRewriteRun(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
-                getConstrainedTerm(cfg),
+                constrainedTerm,
                 context,
                 bound,
                 computeGraph);
+
         return new RewriteRelation(finalState, rewriter.getExecutionGraph());
     }
 
+    /**
+     * Rewrite Enginre run that creates a new KRun State.
+     * @param cfg The term configuration to begin with.
+     * @param bound The number of steps
+     * @param computeGraph Option to compute Execution Graph,
+     * @return The execution relation.
+     */
+    private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
+        Term term = getJavaKilTerm(cfg);
+        TermContext termContext = getTermContext(term);
+        if (javaOptions.patternMatching) {
+            return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
+        }
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
+        return conventionalRewriteRun(constrainedTerm, bound, computeGraph);
+    }
+
+    /**
+     * Rewrite Engine Run with existing krun State.
+     * @param initialState The existing State
+     * @param bound The number of steps
+     * @param computeGraph Option to compute Execution Graph.
+     * @return The execution relation.
+     */
     private RewriteRelation javaRewriteEngineRun(JavaKRunState initialState, int bound, boolean computeGraph) {
-        SymbolicRewriter rewriter = symbolicRewriter.get();
-        KRunState finalState = rewriter.rewrite(
-                initialState.getConstrainedTerm(),
-                context,
-                bound,
-                computeGraph);
-        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
+        return conventionalRewriteRun(initialState.getConstrainedTerm(), bound, computeGraph);
     }
 
 
@@ -148,7 +181,7 @@ public class JavaSymbolicExecutor implements Executor {
         Rule patternRule = transformer.transformAndEval(pattern);
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
-        List<Substitution<Variable,Term>> hits;
+        List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
@@ -166,7 +199,7 @@ public class JavaSymbolicExecutor implements Executor {
             executionGraph = rewriter.getExecutionGraph();
         }
 
-        for (Map<Variable,Term> map : hits) {
+        for (Map<Variable, Term> map : hits) {
             // Construct substitution map from the search results
             Map<String, org.kframework.kil.Term> substitutionMap =
                     new HashMap<String, org.kframework.kil.Term>();
@@ -180,7 +213,7 @@ public class JavaSymbolicExecutor implements Executor {
             // Apply the substitution to the pattern
             org.kframework.kil.Term rawResult =
                     (org.kframework.kil.Term) new SubstitutionFilter(substitutionMap, context)
-                        .visitNode(pattern.getBody());
+                            .visitNode(pattern.getBody());
 
             searchResults.add(new SearchResult(
                     new JavaKRunState(rawResult, counter),
