@@ -1,6 +1,7 @@
 package org.kframework.parser.outer;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.kore.K;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -11,6 +12,7 @@ import java.net.URISyntaxException;
 public class EKoreToKoreTest {
 
     @Test
+    @Ignore
     public void test() throws URISyntaxException {
         CharSequence theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
