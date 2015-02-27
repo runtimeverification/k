@@ -49,7 +49,7 @@ public class ParseInModule {
         cleaned = new CorrectKSeqPriorityVisitor().apply(cleaned).right().get();
         cleaned = new CorrectCastPriorityVisitor().apply(cleaned).right().get();
         cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
-        cleaned = new VariableTypeInferenceFilter(module.subsorts()).apply(cleaned)._1().right().get();
+        cleaned = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts()).apply(cleaned)._1().right().get();
 
 
         cleaned = new PreferAvoidVisitor().apply(cleaned);
