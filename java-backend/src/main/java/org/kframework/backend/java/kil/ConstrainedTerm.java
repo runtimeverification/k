@@ -233,12 +233,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        if (hashCode == Utils.NO_HASHCODE) {
-            int accum = 1;
-            accum = accum * Utils.HASH_PRIME + data.hashCode();
-            hashCode = accum == 0 ? 1 : accum;
+        int h = hashCode;
+        if (h == Utils.NO_HASHCODE) {
+            h = 1;
+            h = h * Utils.HASH_PRIME + data.hashCode();
+            hashCode = h == 0 ? 1 : h;
         }
-        return hashCode;
+        return h;
     }
 
     @Override
