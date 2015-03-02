@@ -78,6 +78,6 @@ public class ParseInModule implements Serializable {
         rez2 = new AmbFilter().apply(rez.right().get());
         warn = new AmbFilter().mergeWarnings(rez2._2(), warn);
 
-        return new Tuple2<>(Right.apply(rez3), warn);
+        return new Tuple2<>(Right.apply(rez2._1().right().get()), warn);
     }
 }

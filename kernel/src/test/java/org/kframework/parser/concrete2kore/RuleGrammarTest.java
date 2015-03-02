@@ -6,8 +6,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.definition.Module;
+import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 import scala.util.Either;
@@ -22,6 +24,7 @@ public class RuleGrammarTest {
     private final static String mainModule = "K";
     private final static String startSymbol = "KList";
     private RuleGrammarGenerator gen;
+    private final boolean printout = false;
 
     @Before
     public void setUp() throws  Exception{
@@ -35,6 +38,23 @@ public class RuleGrammarTest {
         }
         baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
         gen = new RuleGrammarGenerator(baseK);
+    }
+
+    private void printout(Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule) {
+        if (printout) {
+            KExceptionManager kem = new KExceptionManager(true, Warnings.ALL, true);
+            if (rule._1().isLeft()) {
+                for (ParseFailedException x : rule._1().left().get()) {
+                    kem.addKException(x.getKException());
+                }
+            } else {
+                System.err.println("rule = " + rule._1().right().get());
+            }
+            for (ParseFailedException x : rule._2()) {
+                kem.addKException(x.getKException());
+            }
+            kem.print();
+        }
     }
 
     @Test
@@ -56,8 +76,7 @@ public class RuleGrammarTest {
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parser.parseString("1+2=>A:Exp~>B:>Exp", startSymbol);
         Assert.assertEquals("Expected 0 warnings: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-
-        System.out.println("rule = " + rule._1().right().get());
+        printout(rule);
     }
 
     // test variable disambiguation when a variable is declared by the user
@@ -80,7 +99,7 @@ public class RuleGrammarTest {
                 parser.parseString("val X ; S:Stmt => (X, S)", startSymbol);
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        System.out.println("rule = " + rule._1().right().get());
+        printout(rule);
     }
 
     // test variable disambiguation when all variables are being inferred
@@ -103,7 +122,7 @@ public class RuleGrammarTest {
                 parser.parseString("val X ; S => (X, S)", startSymbol);
         Assert.assertEquals("Expected 2 warnings: ", 2, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        System.out.println("rule = " + rule._1().right().get());
+        printout(rule);
     }
 
     // test error reporting when + is non-associative
@@ -121,6 +140,7 @@ public class RuleGrammarTest {
                 parser.parseString("1+2+3", startSymbol);
         Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
         Assert.assertTrue("Expected error here: ", rule._1().isLeft());
+        printout(rule);
     }
 
     // test AmbFilter which should report ambiguities and return a clean term
@@ -137,6 +157,7 @@ public class RuleGrammarTest {
                 parser.parseString("1+2+3", startSymbol);
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+        printout(rule);
     }
 
     // test error reporting when rewrite priority is not met
@@ -153,5 +174,6 @@ public class RuleGrammarTest {
                 parser.parseString("foo bar => X", startSymbol);
         Assert.assertEquals("Expected 0 warning: ", 0, rule._2().size());
         Assert.assertTrue("Expected errors here: ", rule._1().isLeft());
+        printout(rule);
     }
 }

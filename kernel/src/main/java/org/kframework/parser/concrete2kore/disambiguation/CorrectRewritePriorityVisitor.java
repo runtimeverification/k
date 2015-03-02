@@ -54,7 +54,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KRewrite")) {
                 String msg = "Could not parse rewrite as a child of " + parent.production() +
                         "    Use parentheses to set the proper scope of the rewrite operation.";
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
             return Right.apply(tc);
