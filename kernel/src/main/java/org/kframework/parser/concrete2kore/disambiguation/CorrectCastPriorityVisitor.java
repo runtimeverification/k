@@ -47,8 +47,8 @@ public class CorrectCastPriorityVisitor extends SetsTransformerWithErrors<ParseF
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
             // TODO: add location information
             if (tc.production().items().last() instanceof NonTerminal) {
-                String msg = "Could not parse " + parent.production() + " as a child of cast.\n" +
-                        "    Use parentheses to set the proper scope of the cast operation.";
+                String msg = parent.production().klabel().get() + " is not allowed to be an immediate child of cast." +
+                        "    Use parentheses: (x):Sort to set the proper scope of the operations.";
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
