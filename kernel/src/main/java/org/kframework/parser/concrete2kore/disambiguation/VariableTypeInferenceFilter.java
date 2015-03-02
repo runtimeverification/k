@@ -73,8 +73,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         else
             t = rez.right().get();
 
-        // TODO: (Radu) do type inference for the variables which are left.
-
         boolean varTypeInference = true;
         if (varTypeInference) {
             CollectExpectedVariablesVisitor vars2 = new CollectExpectedVariablesVisitor(decl.keySet());
