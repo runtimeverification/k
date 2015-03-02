@@ -75,7 +75,7 @@ case class KList(items: List[Term], location: Optional[Location])
 }
 
 object TermCons {
-  def apply(items: List[Term], production: Production): TermCons = TermCons(items, production, Optional.of(Location(0,0,0,0)))
+  def apply(items: List[Term], production: Production): TermCons = TermCons(items, production, Optional.empty[Location])
 }
 
 object KList {
