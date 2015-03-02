@@ -1,7 +1,7 @@
 package org.kframework.tiny
 
 import org.kframework.attributes.Att
-import org.kframework.kore.Unparse
+import org.kframework.kore.{Unapply, Unparse}
 import org.kframework.tiny.matcher.EqualsMatcher
 
 trait Logic extends K {
@@ -62,15 +62,17 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
 
   def eliminateGroundBooleans: Logic = children.foldLeft(False: Logic) {
     case (_, True) => Or(True)
+//    case (sum, TypedKTok(Sorts.Bool, true, _)) => Or(True)
     case (True, _) => Or(True)
     case (sum: Or, False) => sum
+//    case (sum, TypedKTok(Sorts.Bool, false, _)) => sum
     case (sum: Or, p) => Or(sum.children + p)
   }
 
   override def actualNormalize(implicit theory: Theory): K = toDNF.eliminateGroundBooleans match {
     case or: Or =>
       val newMe = Or(or.children map { _.normalize }, att)
-      if (theory.equals(newMe, this) == True)
+      if (EqualsMatcher(newMe, this).normalize == True)
         Or(or.children, att, Some(theory))
       else
         newMe.normalize
@@ -103,7 +105,7 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
     dnf match {
       case and: And =>
         val newMe = and.normalizeChildren
-        if (theory.equals(newMe, this) == True)
+        if (EqualsMatcher(newMe, this).normalize == True)
           And(and.children, att, Some(theory))
         else
           newMe.normalize
@@ -112,7 +114,6 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   }
 
   def normalizeChildren(implicit theory: Theory): Logic = {
-
     if (children.toStream.exists(_.isFalse))
       False
     else {
@@ -182,8 +183,10 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
 
   override def eliminateGroundBooleans: Logic = children.foldLeft(True: Logic) {
     case (_, False) => False
+//    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
     case (False, _) => False
     case (sum, True) => sum
+//    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
     case (sum, Or(True, _, _)) => sum
     case (sum: And, p) => And(sum.children + p, sum.att)
   }
@@ -254,16 +257,32 @@ object Not extends KProduct1Label with EmptyAtt {
   val name: String = "!"
 }
 
-case class SortPredicate(klabel: SortPredicateLabel, k: K, att: Att = Att()) extends KProduct with PlainNormalization
+case class SortPredicate(klabel: SortPredicateLabel, k: K, att: Att = Att())
+  extends KProduct {
+  override protected[this] def normalizeInner(implicit theory: Theory): K =
+    if (!k.isInstanceOf[KVar]) {
+      val actualSort = k match {
+        case KApp(l, _, _) => theory.asInstanceOf[TheoryWithUpDown].module.sortFor(l)
+        case Unapply.KToken(s, _) => s
+      }
+      if (actualSort == klabel.sort ||
+        theory.asInstanceOf[TheoryWithUpDown].module.subsorts.<(actualSort, klabel.sort))
+        True
+      else
+        False
+    } else {
+      this
+    }
+}
 
 object SortPredicate {
   def apply(s: Sort, k: K) = SortPredicateLabel(s)(k)
 }
 
-case class SortPredicateLabel(s: Sort) extends KRegularAppLabel {
-  assert(s != null)
+case class SortPredicateLabel(sort: Sort) extends KRegularAppLabel {
+  assert(sort != null)
   override def att: Att = Att()
-  override def name: String = "is" + s.name
+  override def name: String = "is" + sort.name
   override def construct(l: Iterable[K], att: Att): KApp = l match {
     case Seq(k) => SortPredicate(this, k, att)
   }

@@ -78,8 +78,8 @@ case class KMapAppMatcher(left: KMapApp, right: K) extends Matcher {
 
   override def normalizeInner(implicit theory: Theory): K = (left.normalize, right.normalize) match {
     case (left: KMapApp, right: KMapApp) =>
-      val leftGroundKeys = left.theMap.keys filter theory.isGround toSet
-      val rightGroundKeys = right.theMap.keys filter theory.isGround toSet
+      val leftGroundKeys = left.theMap.keys filter { _.isGround } toSet
+      val rightGroundKeys = right.theMap.keys filter { _.isGround } toSet
 
       if ((leftGroundKeys &~ rightGroundKeys) != Set())
         False

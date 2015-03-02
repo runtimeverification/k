@@ -107,9 +107,20 @@ object KVarMatcher extends MatcherLabel with KProduct2Label {
     new KVarMatcher(k1.asInstanceOf[KVar], k2)
 }
 
-case class EqualsMatcher(left: K, right: K) extends Matcher with PlainNormalization {
+case class EqualsMatcher(left: K, right: K) extends Matcher {
   override val klabel = EqualsMatcher
   override def toString = left + ":=" + right
+
+  override protected[this] def normalizeInner(implicit theory: Theory): K = {
+    val res = if (left == right)
+      True
+    else if (isGround && left != right)
+      False
+    else
+      this
+
+    res
+  }
 }
 
 object EqualsMatcher extends MatcherLabel with KProduct2Label {

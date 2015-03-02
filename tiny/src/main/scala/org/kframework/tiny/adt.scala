@@ -38,6 +38,8 @@ trait K extends kore.K {
   }
   protected[this] def normalizeInner(implicit theory: Theory): K
 
+  def isGround: Boolean
+
   var isNormal = false
   lazy val cachedHashCode = computeHashCode
 
@@ -59,6 +61,8 @@ trait KApp extends {} with kore.KApply with K {
   // KApp seen as a collection Set(2, Set(3, 4)) is normalized and has size 3 and 2,3,4 as children
   def size: Int = children.size
   def children: Iterable[K]
+
+  lazy val isGround = !(children exists { !_.isGround })
 
   val klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
@@ -124,6 +128,7 @@ trait KProduct extends KRegularApp with Product {
 trait KTok extends kore.KToken with KLeaf {
   override def matcher(right: K): Matcher = EqualsMatcher(this, right)
   def computeHashCode = this.sort.hashCode * 19 + this.s.hashCode
+  val isGround = true
 }
 
 trait EmptyAtt {
@@ -139,6 +144,8 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLea
   override def matcher(right: K): Matcher = KVarMatcher(this, right)
   override def toString = name
   def computeHashCode = name.hashCode
+
+  lazy val isGround = false
 }
 
 case class RegularKTok(sort: Sort, s: String, att: Att = Att()) extends KTok {
