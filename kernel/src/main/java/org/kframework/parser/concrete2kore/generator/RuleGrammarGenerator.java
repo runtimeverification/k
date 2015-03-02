@@ -43,6 +43,14 @@ public class RuleGrammarGenerator {
         return def;
     }
 
+    /**
+     * Create the rule parser for the given module.
+     * It creates a module which includes the given module and the base K module given to the
+     * constructor. The new module contains syntax declaration for Casts and the diamond
+     * which connects the user concrete syntax with K syntax.
+     * @param mod    module for which to create the parser.
+     * @return parser which applies disambiguation filters by default.
+     */
     public ParseInModule getRuleGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 

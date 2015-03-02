@@ -140,7 +140,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (solutions.size() == 0) {
                     if (fails != null) {
                         String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null));
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null);
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+
                     } else {
                         // Failure when in the same solution I can't find a unique sort for a specific variable.
                         String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
@@ -148,7 +150,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         for (Sort vv1 : failsAmb)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null));
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null);
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
 
                     }
                 } else if (solutions.size() == 1) {
@@ -178,7 +181,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             for (Sort vv1 : values)
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
-                            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null));
+                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null);
+                            return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                         }
                     }
                     // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
@@ -190,8 +194,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     // This makes it that I can't disambiguate properly
                     // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
                     String msg = "Unsolvable ambiguities. Please write the rule in labeled form.\n (Generally because of __ productions mixing with variables).";
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null));
-                    //assert false : "An error message should have been thrown here in the above loop.";
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null);
+                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
         }
@@ -202,7 +206,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         // -- Error: could not infer a unique sort for variable... (when there is more than one solution)
         // -- Warning: untyped variable, assuming sort...
 
-        return new Tuple2<>(Right.apply(t), this.warningUnit());
+        return new Tuple2<>(Right.apply(t), warnings);
     }
 
     private class VarInfo {

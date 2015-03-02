@@ -36,10 +36,17 @@ public class ParserUtils {
 
     public static K parseWithModule(CharSequence theTextToParse, String startSymbol, org.kframework.definition.Module kastModule) {
         ParseInModule parser = new ParseInModule(kastModule);
-        Term cleaned = parser.parseString(theTextToParse, startSymbol);
+        Term cleaned = parser.parseString(theTextToParse, startSymbol)._1().right().get();
         return TreeNodesToKORE.apply(cleaned);
     }
 
+    /**
+     * Takes a definition in e-kore textual format and a main module name, and returns the KORE
+     * representation of that module. Current implementation uses JavaCC and goes through KIL.
+     * @param definitionText    textual representation of the modules.
+     * @param mainModule        main module name.
+     * @return KORE representation of the main module.
+     */
     public static org.kframework.definition.Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(ParserUtils.class), definitionText, null));

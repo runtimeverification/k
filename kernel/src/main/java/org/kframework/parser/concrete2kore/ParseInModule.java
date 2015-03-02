@@ -3,6 +3,7 @@ package org.kframework.parser.concrete2kore;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
+import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
@@ -13,6 +14,13 @@ import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceF
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
+import org.kframework.utils.errorsystem.ParseFailedException;
+import scala.Tuple2;
+import scala.util.Either;
+import scala.util.Left;
+import scala.util.Right;
+
+import java.util.Set;
 
 /**
  * A wrapper that takes a module and one can call the parser
@@ -35,7 +43,7 @@ public class ParseInModule {
      */
     // TODO: require source location to this call
     // TODO: figure out how to handle parsing errors
-    public Term parseString(CharSequence input, String startSymbol) {
+    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> parseString(CharSequence input, String startSymbol) {
         Parser parser = new Parser(input);
         Term parsed = parser.parse(grammar.get(startSymbol), 0);
 
@@ -43,17 +51,32 @@ public class ParseInModule {
             Parser.ParseError errors = parser.getErrors();
             throw new AssertionError("There are parsing errors: " + errors.toString());
         }
+        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
 
-        Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
-        cleaned = new CorrectRewritePriorityVisitor().apply(cleaned).right().get();
-        cleaned = new CorrectKSeqPriorityVisitor().apply(cleaned).right().get();
-        cleaned = new CorrectCastPriorityVisitor().apply(cleaned).right().get();
-        cleaned = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(cleaned).right().get();
-        cleaned = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts()).apply(cleaned)._1().right().get();
+        Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts()).apply(rez.right().get());
+        if (rez2._1().isLeft())
+            return rez2;
+        warn = rez2._2();
 
+        Term rez3 = new PreferAvoidVisitor().apply(rez2._1().right().get());
+        rez2 = new AmbFilter().apply(rez.right().get());
+        warn = new AmbFilter().mergeWarnings(rez2._2(), warn);
 
-        cleaned = new PreferAvoidVisitor().apply(cleaned);
-
-        return cleaned;
+        return new Tuple2<>(Right.apply(rez3), warn);
     }
 }
