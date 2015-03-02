@@ -49,7 +49,7 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     private File testResource(String baseName) {
         return new File(new File("k-distribution/src/test/resources" + baseName)
-                .getAbsoluteFile().toString().replaceAll("k-distribution.k-distribution", "k-distribution"));
+                .getAbsoluteFile().toString().replace("k-distribution" + File.separator + "k-distribution", "k-distribution"));
         // a bit of a hack to get around not having a clear working directory
         // Eclipse runs tests within k/k-distribution, IntelliJ within /k
     }
