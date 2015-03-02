@@ -191,7 +191,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     // and it creates multiple parses with different amounts of variables
                     // This makes it that I can't disambiguate properly
                     // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
-                    String msg = "Unsolvable ambiguities. Please write the rule in labeled form.\n (Generally because of __ productions mixing with variables).";
+                    String msg = "Parser: failed to infer sorts for variables.\n    Please file a bug report at https://github.com/kframework/k/issues.";
                     KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, null);
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
