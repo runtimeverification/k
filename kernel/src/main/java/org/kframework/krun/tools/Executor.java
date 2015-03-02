@@ -53,6 +53,17 @@ public interface Executor {
     public abstract RewriteRelation run(Term cfg, boolean computeGraph) throws KRunExecutionException;
 
     /**
+     Execute a term in normal execution mode until it cannot rewrite any further
+     @param initialState The KRunState containing the backend specific term to rewrite
+     @param computeGraph Specified as true if the graph of execution needs to be calculated.
+     @return An object containing both metadata about krun's execution, information about
+     the exit state of the execution, and the graph if computeGraph was true.
+     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
+     term
+     */
+    public abstract RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException;
+
+    /**
     Perform a breadth-first search of the transition system starting at a particular term.
     @param bound The maximum number of search results to return; null if unbounded
     @param depth The maximum number of transitions to make before terminating; null if
@@ -87,6 +98,25 @@ public interface Executor {
     rewrites are possible), and the execution graph if computeGraph was true.
     */
     public abstract RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
+
+    /**
+     Execute a term in normal-execution mode for a specified number of steps. Takes as input a KRunState, and instead of
+     performing the Generic Kil to backend Kil operation, uses the backend Kil from the state.
+     @param initialState The KRunState containing the backend  K term to rewrite
+     @param steps The maximum number of transitions to execute for (zero if you want to rewrite
+     @param computeGraph If true, all the states and transitions involved in the execution are
+     returned in the result.
+     only until the first transition)
+     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
+     term
+     @exception UnsupportedOperationException The backend implementing this interface does not
+     support bounded stepping
+     @return An object containing both metadata about krun's execution, information about
+     the resulting term after executing the specified number of steps (or fewer if no further
+     rewrites are possible), and the execution graph if computeGraph was true.
+     */
+
+    public abstract RewriteRelation step(KRunState initialState, int steps, boolean computeGraph) throws KRunExecutionException;
 
     public static class Tool implements Transformation<Void, KRunResult> {
 

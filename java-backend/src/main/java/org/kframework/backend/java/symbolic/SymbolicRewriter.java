@@ -67,7 +67,7 @@ public class SymbolicRewriter {
         KRunState initialState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter);
             executionGraph.addVertex(initialState);
         }
         for (step = 0; step != bound; ++step) {
@@ -77,7 +77,7 @@ public class SymbolicRewriter {
             KRunState finalState = null;
             if (result != null) {
                 if (computeGraph) {
-                    finalState = new JavaKRunState(result.term(), context, counter);
+                    finalState = new JavaKRunState(result, context, counter);
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
                     executionGraph.addEdge(javaTransition, initialState, finalState);
@@ -95,7 +95,7 @@ public class SymbolicRewriter {
         }
 
         if (initialState == null) {
-            initialState = new JavaKRunState(constrainedTerm.term(), context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter);
         }
         return initialState;
     }
