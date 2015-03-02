@@ -26,7 +26,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
             // match only on the outermost elements
             if (tc.production().items().head() instanceof NonTerminal) {
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2().apply(tc.items().get(0));
+                        new PriorityVisitor2(tc).apply(tc.items().get(0));
                 if (rez.isLeft())
                     return rez;
                 tc.items().set(0, rez.right().get());
@@ -34,7 +34,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
             if (tc.production().items().last() instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2().apply(tc.items().get(last));
+                        new PriorityVisitor2(tc).apply(tc.items().get(last));
                 if (rez.isLeft())
                     return rez;
                 tc.items().set(last, rez.right().get());
@@ -44,10 +44,16 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
     }
 
     private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
+        private final TermCons parent;
+        public PriorityVisitor2(TermCons parent) {
+            this.parent = parent;
+        }
+
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
             // TODO: add location information
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KRewrite")) {
-                String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
+                String msg = "Could not parse rewrite as a child of " + parent.production() +
+                        "    Use parentheses to set the proper scope of the rewrite operation.";
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }

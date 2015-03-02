@@ -42,6 +42,7 @@ public class RuleGrammarTest {
         Assert.assertNotNull(definitionFile);
     }
 
+    // test proper associativity for rewrite, ~> and cast
     @Test
     public void test2() {
         String def = "" +
@@ -52,10 +53,14 @@ public class RuleGrammarTest {
                 "endmodule";
         Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
         ParseInModule parser = gen.getRuleGrammar(test);
-        Term rule = parser.parseString("1+2=>A:Exp~>B:>Exp", startSymbol)._1().right().get();
-        System.out.println("rule = " + rule);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parser.parseString("1+2=>A:Exp~>B:>Exp", startSymbol);
+        Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
+        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+
+        System.out.println("rule = " + rule._1().right().get());
     }
 
+    // test variable disambiguation when a variable is declared by the user
     @Test
     public void test3() {
         String def = "" +
@@ -78,6 +83,7 @@ public class RuleGrammarTest {
         System.out.println("rule = " + rule._1().right().get());
     }
 
+    // test variable disambiguation when all variables are being inferred
     @Test
     public void test4() {
         String def = "" +
@@ -100,6 +106,7 @@ public class RuleGrammarTest {
         System.out.println("rule = " + rule._1().right().get());
     }
 
+    // test error reporting when + is non-associative
     @Test
     public void test5() {
         String def = "" +
@@ -116,6 +123,7 @@ public class RuleGrammarTest {
         Assert.assertTrue("Expected error here: ", rule._1().isLeft());
     }
 
+    // test AmbFilter which should report ambiguities and return a clean term
     @Test
     public void test6() {
         String def = "" +
@@ -129,5 +137,21 @@ public class RuleGrammarTest {
                 parser.parseString("1+2+3", startSymbol);
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+    }
+
+    // test error reporting when rewrite priority is not met
+    @Test
+    public void test7() {
+        String def = "" +
+                "module TEST " +
+                "syntax A ::= \"foo\" A [klabel('foo)] " +
+                "syntax B ::= \"bar\"   [klabel('bar)] " +
+                "endmodule";
+        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
+        ParseInModule parser = gen.getRuleGrammar(test);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
+                parser.parseString("foo bar => X", startSymbol);
+        Assert.assertEquals("Expected 0 warning: ", 0, rule._2().size());
+        Assert.assertTrue("Expected errors here: ", rule._1().isLeft());
     }
 }
