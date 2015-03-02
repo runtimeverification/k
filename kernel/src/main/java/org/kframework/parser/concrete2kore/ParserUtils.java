@@ -2,11 +2,11 @@
 package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.definition.Module;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
@@ -19,7 +19,10 @@ import java.io.IOException;
  */
 public class ParserUtils {
 
-    public static K parseWithFile(CharSequence theTextToParse, String mainModule, String startSymbol, File definitionFile) {
+    public static K parseWithFile(CharSequence theTextToParse,
+                                  String mainModule,
+                                  String startSymbol,
+                                  File definitionFile) {
         String definitionText;
         try {
             definitionText = FileUtils.readFileToString(definitionFile);
@@ -29,14 +32,25 @@ public class ParserUtils {
         return parseWithString(theTextToParse, mainModule, startSymbol, definitionText);
     }
 
-    public static K parseWithString(CharSequence theTextToParse, String mainModule, String startSymbol, String definitionText) {
+    public static K parseWithString(CharSequence theTextToParse,
+                                    String mainModule,
+                                    String startSymbol,
+                                    String definitionText) {
         Module kastModule = parseMainModuleOuterSyntax(definitionText, mainModule);
         return parseWithModule(theTextToParse, startSymbol, kastModule);
     }
 
-    public static K parseWithModule(CharSequence theTextToParse, String startSymbol, org.kframework.definition.Module kastModule) {
+    public static K parseWithModule(CharSequence theTextToParse,
+                                    String startSymbol,
+                                    org.kframework.definition.Module kastModule) {
         ParseInModule parser = new ParseInModule(kastModule);
-        Term cleaned = parser.parseString(theTextToParse, startSymbol)._1().right().get();
+        return parseWithModule(theTextToParse, startSymbol, parser);
+    }
+
+    public static K parseWithModule(CharSequence theTextToParse,
+                                    String startSymbol,
+                                    ParseInModule kastModule) {
+        Term cleaned = kastModule.parseString(theTextToParse, startSymbol)._1().right().get();
         return TreeNodesToKORE.apply(cleaned);
     }
 
@@ -47,7 +61,7 @@ public class ParserUtils {
      * @param mainModule        main module name.
      * @return KORE representation of the main module.
      */
-    public static org.kframework.definition.Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
+    public static Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(ParserUtils.class), definitionText, null));
         def.setMainModule(mainModule);

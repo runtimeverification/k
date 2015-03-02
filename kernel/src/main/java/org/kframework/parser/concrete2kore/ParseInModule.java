@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
 import org.kframework.definition.Module;
@@ -17,9 +18,9 @@ import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 import scala.util.Either;
-import scala.util.Left;
 import scala.util.Right;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Set;
  * for that module in thread safe way.
  * Declarative disambiguation filters are also applied.
  */
-public class ParseInModule {
+public class ParseInModule implements Serializable {
     private final Module module;
     private final Grammar grammar;
     public ParseInModule(Module module) {
