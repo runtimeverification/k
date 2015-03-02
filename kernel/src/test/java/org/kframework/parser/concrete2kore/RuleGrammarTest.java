@@ -54,7 +54,7 @@ public class RuleGrammarTest {
         Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
         ParseInModule parser = gen.getRuleGrammar(test);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parser.parseString("1+2=>A:Exp~>B:>Exp", startSymbol);
-        Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
+        Assert.assertEquals("Expected 0 warnings: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
 
         System.out.println("rule = " + rule._1().right().get());
