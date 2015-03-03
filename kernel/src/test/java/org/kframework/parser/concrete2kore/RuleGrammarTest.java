@@ -24,7 +24,7 @@ public class RuleGrammarTest {
     private final static String mainModule = "K";
     private final static String startSymbol = "KList";
     private RuleGrammarGenerator gen;
-    private final boolean printout = true;
+    private final boolean printout = false;
 
     @Before
     public void setUp() throws  Exception{
@@ -160,7 +160,7 @@ public class RuleGrammarTest {
                 "syntax A ::= \"foo\" A [klabel('foo)] " +
                 "syntax B ::= \"bar\"   [klabel('bar)] " +
                 "endmodule";
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "foo bar => X);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "foo bar => X");
         Assert.assertEquals("Expected 0 warning: ", 0, rule._2().size());
         Assert.assertTrue("Expected errors here: ", rule._1().isLeft());
         printout(rule);
