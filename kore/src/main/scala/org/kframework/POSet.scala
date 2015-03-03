@@ -60,14 +60,17 @@ class POSet[T](directRelations: Set[(T, T)]) {
    * Returns true if x < y
    */
   def lessThen(x: T, y: T): Boolean = <(x, y)
+  def lessThenEq(x: T, y: T): Boolean = <(x, y) | x == y
   /**
    * Returns true if y < x
    */
   def greaterThen(x: T, y: T): Boolean = >(x, y)
+  def greaterThenEq(x: T, y: T): Boolean = >(x, y) | x == y
   /**
    * Returns true if y < x or y < x
    */
   def inSomeRelation(x: T, y: T) = this.~(x, y)
+  def inSomeRelationEq(x: T, y: T) = this.~(x, y) | x == y
 
   /**
    * Returns an Optional of the least upper bound if it exists, or an empty Optional otherwise.

@@ -6,6 +6,7 @@ import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Location;
 import org.kframework.kil.Source;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -14,6 +15,7 @@ import org.kframework.utils.inject.RequestScoped;
 import com.google.inject.Inject;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,11 +25,21 @@ import java.util.regex.PatternSyntaxException;
 public class KExceptionManager {
     private final List<KException> exceptions = new ArrayList<KException>();
 
-    private final GlobalOptions options;
+    private final boolean debug;
+    private final Warnings warnings;
+    private final boolean verbose;
+
+    public KExceptionManager(boolean debug, Warnings warnings, boolean verbose) {
+        this.debug = debug;
+        this.warnings = warnings;
+        this.verbose = verbose;
+    }
 
     @Inject
     KExceptionManager(GlobalOptions options) {
-        this.options = options;
+        this.debug = options.debug;
+        this.warnings = options.warnings;
+        this.verbose = options.verbose;
     }
 
     public void installForUncaughtExceptions() {
@@ -35,7 +47,7 @@ public class KExceptionManager {
 
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                if (options.debug) {
+                if (debug) {
                     e.printStackTrace();
                 }
                 exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
@@ -48,7 +60,7 @@ public class KExceptionManager {
 
     private void printStackTrace(KException e) {
         if (e.getException() != null) {
-            if (options.debug) {
+            if (debug) {
                 e.getException().printStackTrace();
             }
         }
@@ -131,6 +143,14 @@ public class KExceptionManager {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
     }
 
+    public void addKException(KException kex) {
+        exceptions.add(kex);
+    }
+
+    public void addAllKException(Collection<KException> kex) {
+        exceptions.addAll(kex);
+    }
+
     public void registerCompilerWarning(String message) {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, null, null);
     }
@@ -199,7 +219,7 @@ public class KExceptionManager {
     }
 
     private void registerInternal(KException exception) {
-        if (!options.warnings.includesExceptionType(exception.type))
+        if (!warnings.includesExceptionType(exception.type))
             return;
         synchronized(exceptions) {
             exceptions.add(exception);
@@ -214,16 +234,16 @@ public class KExceptionManager {
             Collections.sort(exceptions, new Comparator<KException>() {
                 @Override
                 public int compare(KException arg0, KException arg1) {
-                    return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
+                    return arg0.toString(verbose).compareTo(arg1.toString(verbose));
                 }
             });
             KException last = null;
             for (KException e : exceptions) {
-                if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
+                if (last != null && last.toString(verbose).equals(e.toString(verbose))) {
                     continue;
                 }
                 printStackTrace(e);
-                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+                System.err.println(StringUtil.splitLines(e.toString(verbose)));
                 last = e;
             }
         }

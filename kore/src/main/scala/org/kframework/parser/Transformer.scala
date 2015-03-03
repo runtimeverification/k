@@ -2,10 +2,14 @@
 
 package org.kframework.parser
 
+import com.google.common.collect.Sets
+
 import collection.JavaConverters._
-import collection.mutable
+import org.kframework.Collections._
+
 
 class Ignore
+
 object Ignore extends Ignore
 
 trait ChildrenMapping[E, W] {
@@ -40,15 +44,19 @@ trait ChildrenMapping[E, W] {
    * replace the children of the current element with the correct transformed children.
    */
   def mapChildren(t: HasChildren): (Either[E, Term], W) = {
-    val allResults = t.items.asScala.map(applyTerm) // visit all children
+    val allResults1 = t.items.asScala.map(applyTerm) // visit all children
+    val allResults = allResults1 flatMap {
+        case (Right(Ambiguity(items, _)), warns) => immutable(items) map { t => (Right(t): Either[E, Term], warns) }
+        case x => Set(x)
+      }
+
     val (eithers: Iterable[Either[E, Term]], warnings: Iterable[W]) = allResults.unzip
     val newCorrectItems: List[(Term, W)] = allResults.collect { case (Right(v), w) => (v, w) }.toList
     newCorrectItems match {
-      case List() => {
+      case List() =>
         val mergedWarnings = warnings.foldLeft(warningUnit)(mergeWarnings)
         val mergedErrors = (eithers collect { case Left(err) => err }).foldLeft(errorUnit)(mergeErrors)
         (Left(mergedErrors), mergedWarnings)
-      }
       case List((term, w)) => (Right(term), w)
       case l =>
         val (newTerms, warnings) = l.unzip
@@ -79,9 +87,12 @@ trait ChildrenMapping[E, W] {
  */
 abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, (Either[E, Term], W)]()
+
+  def applyTerm(t: Term): (Either[E, Term], W) = apply(t)
 
   def apply(t: Term): (Either[E, Term], W) =
     cache.getOrElseUpdate(t,
@@ -102,6 +113,30 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   def apply(c: Constant): (Either[E, Term], W) = { (Right(c), warningUnit) }
 }
 
+trait EAsSet[E] {
+  /**
+   * Merges the set of problematic (i.e., Left) results.
+   */
+  def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = Sets.union(a, b)
+
+  val errorUnit: java.util.Set[E] = makeErrorSet()
+
+  @annotation.varargs def makeErrorSet(l:E*) = l.toSet.asJava
+}
+
+trait WAsSet[W] {
+  val warningUnit: java.util.Set[W] = makeWarningSet()
+  /**
+   * Merges the set of problematic (i.e., Left) results.
+   */
+  def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = Sets.union(a, b)
+
+  @annotation.varargs def makeWarningSet(l:W*) = l.toSet.asJava
+}
+
+abstract class SetsGeneralTransformer[E, W]
+  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] with EAsSet[E] with WAsSet[W]
+
 /**
  * Visitor pattern for the front end classes.
  * Applies the visitor transformation on each node, and returns either a term, or a set of errors. (no warnings)
@@ -111,6 +146,7 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
   def applyTerm(t: Term): (Either[E, Term], Ignore) = (apply(t), Ignore)
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, Either[E, Term]]()
@@ -137,6 +173,9 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   override val warningUnit = Ignore
 }
 
+abstract class SetsTransformerWithErrors[E]
+  extends TransformerWithErrors[java.util.Set[E]] with EAsSet[E]
+
 /**
  * Visitor pattern for the front end classes.
  * Applies the visitor transformation on each node, and returns a term. (no errors and no warnings)
@@ -145,6 +184,7 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 
   def applyTerm(t: Term): (Either[Ignore, Term], Ignore) = (Right(apply(t)), Ignore)
 
+  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = mutable.Map[Term, Term]()

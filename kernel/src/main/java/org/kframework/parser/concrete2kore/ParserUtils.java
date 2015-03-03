@@ -2,16 +2,13 @@
 package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
-import org.kframework.definition.Module;
-import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
 import org.kframework.parser.outer.Outer;
 
 import java.io.File;
@@ -22,7 +19,10 @@ import java.io.IOException;
  */
 public class ParserUtils {
 
-    public static K parseWithFile(CharSequence theTextToParse, String mainModule, String startSymbol, File definitionFile) {
+    public static K parseWithFile(CharSequence theTextToParse,
+                                  String mainModule,
+                                  String startSymbol,
+                                  File definitionFile) {
         String definitionText;
         try {
             definitionText = FileUtils.readFileToString(definitionFile);
@@ -32,38 +32,42 @@ public class ParserUtils {
         return parseWithString(theTextToParse, mainModule, startSymbol, definitionText);
     }
 
-    public static K parseWithString(CharSequence theTextToParse, String mainModule, String startSymbol, String definitionText) {
+    public static K parseWithString(CharSequence theTextToParse,
+                                    String mainModule,
+                                    String startSymbol,
+                                    String definitionText) {
+        Module kastModule = parseMainModuleOuterSyntax(definitionText, mainModule);
+        return parseWithModule(theTextToParse, startSymbol, kastModule);
+    }
+
+    public static K parseWithModule(CharSequence theTextToParse,
+                                    String startSymbol,
+                                    org.kframework.definition.Module kastModule) {
+        ParseInModule parser = new ParseInModule(kastModule);
+        return parseWithModule(theTextToParse, startSymbol, parser);
+    }
+
+    public static K parseWithModule(CharSequence theTextToParse,
+                                    String startSymbol,
+                                    ParseInModule kastModule) {
+        Term cleaned = kastModule.parseString(theTextToParse, startSymbol)._1().right().get();
+        return TreeNodesToKORE.apply(cleaned);
+    }
+
+    /**
+     * Takes a definition in e-kore textual format and a main module name, and returns the KORE
+     * representation of that module. Current implementation uses JavaCC and goes through KIL.
+     * @param definitionText    textual representation of the modules.
+     * @param mainModule        main module name.
+     * @return KORE representation of the main module.
+     */
+    public static Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
         Definition def = new Definition();
         def.setItems(Outer.parse(Sources.generatedBy(ParserUtils.class), definitionText, null));
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
         KILtoKORE kilToKore = new KILtoKORE(null);
-        org.kframework.definition.Definition koreDef = kilToKore.apply(def);
-        return parseWithDef(theTextToParse, mainModule, startSymbol, koreDef);
-    }
-
-    public static K parseWithDef(CharSequence theTextToParse, String mainModule, String startSymbol, org.kframework.definition.Definition definition) {
-
-        Module kastModule = definition.getModule(mainModule).get();
-
-        Grammar kastGrammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
-        return parseWithGrammar(theTextToParse, startSymbol, kastModule, kastGrammar);
-    }
-
-    public static K parseWithGrammar(CharSequence theTextToParse, String startSymbol, org.kframework.definition.Module kastModule, Grammar grammar) {
-        Parser parser = new Parser(theTextToParse);
-        Term parsed = parser.parse(grammar.get(startSymbol), 0);
-
-        if (parsed.equals(Ambiguity.apply())) {
-            Parser.ParseError errors = parser.getErrors();
-            throw new AssertionError("There are parsing errors: " + errors.toString());
-        }
-
-        Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
-        cleaned = new PreferAvoidVisitor().apply(cleaned);
-        cleaned = new PriorityVisitor(kastModule.priorities(), kastModule.leftAssoc(), kastModule.rightAssoc()).apply(cleaned).right().get();
-
-        return TreeNodesToKORE.apply(cleaned);
+        return kilToKore.apply(def).getModule(mainModule).get();
     }
 }
