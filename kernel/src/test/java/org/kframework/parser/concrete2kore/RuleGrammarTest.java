@@ -24,7 +24,7 @@ public class RuleGrammarTest {
     private final static String mainModule = "K";
     private final static String startSymbol = "KList";
     private RuleGrammarGenerator gen;
-    private final boolean printout = false;
+    private final boolean printout = true;
 
     @Before
     public void setUp() throws  Exception{
@@ -57,6 +57,12 @@ public class RuleGrammarTest {
         }
     }
 
+    private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> parseRule(String def, String input) {
+        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
+        ParseInModule parser = gen.getRuleGrammar(test);
+        return parser.parseString(input, startSymbol);
+    }
+
     @Test
     public void test1() {
         Assert.assertNotNull(definitionFile);
@@ -71,9 +77,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax left 'Plus " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parser.parseString("1+2=>A:Exp~>B:>Exp", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2=>A:Exp~>B:>Exp");
         Assert.assertEquals("Expected 0 warnings: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
         printout(rule);
@@ -93,10 +97,7 @@ public class RuleGrammarTest {
                 "syntax Id " +
                 "syntax K " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
-                parser.parseString("val X ; S:Stmt => (X, S)", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "val X ; S:Stmt => (X, S)");
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
         printout(rule);
@@ -116,10 +117,7 @@ public class RuleGrammarTest {
                 "syntax Id " +
                 "syntax K " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
-                parser.parseString("val X ; S => (X, S)", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "val X ; S => (X, S)");
         Assert.assertEquals("Expected 2 warnings: ", 2, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
         printout(rule);
@@ -134,10 +132,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax non-assoc 'Plus " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
-                parser.parseString("1+2+3", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2+3");
         Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
         Assert.assertTrue("Expected error here: ", rule._1().isLeft());
         printout(rule);
@@ -151,10 +146,7 @@ public class RuleGrammarTest {
                 "syntax Exp ::= Exp \"+\" Exp [klabel('Plus)] " +
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
-                parser.parseString("1+2+3", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2+3");
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
         printout(rule);
@@ -168,10 +160,7 @@ public class RuleGrammarTest {
                 "syntax A ::= \"foo\" A [klabel('foo)] " +
                 "syntax B ::= \"bar\"   [klabel('bar)] " +
                 "endmodule";
-        Module test = ParserUtils.parseMainModuleOuterSyntax(def, "TEST");
-        ParseInModule parser = gen.getRuleGrammar(test);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule =
-                parser.parseString("foo bar => X", startSymbol);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "foo bar => X);
         Assert.assertEquals("Expected 0 warning: ", 0, rule._2().size());
         Assert.assertTrue("Expected errors here: ", rule._1().isLeft());
         printout(rule);
