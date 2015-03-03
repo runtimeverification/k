@@ -176,7 +176,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2*3");
-        Assert.assertEquals("Expected 1 warning: ", 0, rule._2().size());
+        Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
         printout(rule);
     }
