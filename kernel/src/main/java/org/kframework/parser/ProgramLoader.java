@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -13,7 +14,9 @@ import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Location;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
@@ -22,11 +25,14 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.kore.convertors.KILtoKORE;
+import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -40,6 +46,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.inject.Inject;
+import scala.Tuple2;
+import scala.util.Either;
 
 public class ProgramLoader {
 
@@ -131,6 +139,18 @@ public class ProgramLoader {
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
+        } else if (whatParser == ParserType.NEWPROGRAM) {
+            Definition def = loader.loadOrDie(Definition.class, context.files.resolveKompiled("definition-concrete.bin"));
+            Module synMod = new KILtoKORE(null).apply(def).getModule(def.getMainSyntaxModule()).get();
+            ParseInModule parser = new ParseInModule(synMod);
+            Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
+                    = parser.parseString(FileUtil.read(content), startSymbol.getName());
+            if (parsed._1().isLeft()) {
+                for (ParseFailedException k : parsed._1().left().get())
+                    kem.addKException(k.getKException());
+            }
+
+            out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));
         } else {
             out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
