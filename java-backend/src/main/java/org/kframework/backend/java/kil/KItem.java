@@ -18,7 +18,6 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
-import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -126,7 +125,9 @@ public class KItem extends Term implements KItemRepresentation {
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                cacheTabVal = definition.getSortCacheTable().get(cacheTabColKey);
+                synchronized(definition.getSortCacheTable()) {
+                    cacheTabVal = definition.getSortCacheTable().get(cacheTabColKey);
+                }
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
@@ -250,7 +251,9 @@ public class KItem extends Term implements KItemRepresentation {
         CacheTableValue cacheTabVal = new CacheTableValue(sort, isExactSort, possibleSorts);
 
         if (enableCache) {
-            definition.getSortCacheTable().put(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
+            synchronized(definition.getSortCacheTable()) {
+                definition.getSortCacheTable().put(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
+            }
         }
     }
 
