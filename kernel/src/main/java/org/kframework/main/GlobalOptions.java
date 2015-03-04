@@ -18,6 +18,12 @@ public final class GlobalOptions {
     @Inject
     public GlobalOptions(Void v) {}
 
+    public GlobalOptions(boolean debug, Warnings warnings, boolean verbose) {
+        this.debug = debug;
+        this.warnings = warnings;
+        this.verbose = verbose;
+    }
+
     public static enum Warnings {
         /**
          * All warnings and errors

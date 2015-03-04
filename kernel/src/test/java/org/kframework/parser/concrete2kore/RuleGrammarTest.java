@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.definition.Module;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -42,7 +43,7 @@ public class RuleGrammarTest {
 
     private void printout(Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule) {
         if (printout) {
-            KExceptionManager kem = new KExceptionManager(true, Warnings.ALL, true);
+            KExceptionManager kem = new KExceptionManager(new GlobalOptions(true, Warnings.ALL, true));
             if (rule._1().isLeft()) {
                 for (ParseFailedException x : rule._1().left().get()) {
                     kem.addKException(x.getKException());
