@@ -125,9 +125,7 @@ public class KItem extends Term implements KItemRepresentation {
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                synchronized(definition.getSortCacheTable()) {
-                    cacheTabVal = definition.getSortCacheTable().get(cacheTabColKey);
-                }
+                cacheTabVal = definition.getSortCacheValue(cacheTabColKey);
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
@@ -251,9 +249,7 @@ public class KItem extends Term implements KItemRepresentation {
         CacheTableValue cacheTabVal = new CacheTableValue(sort, isExactSort, possibleSorts);
 
         if (enableCache) {
-            synchronized(definition.getSortCacheTable()) {
-                definition.getSortCacheTable().put(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
-            }
+            definition.putSortCacheValue(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
         }
     }
 
