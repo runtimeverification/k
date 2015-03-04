@@ -410,8 +410,16 @@ public class Definition extends JavaSymbolicObject {
         return index;
     }
 
-    public Map<KItem.CacheTableColKey, KItem.CacheTableValue> getSortCacheTable() {
-        return sortCacheTable;
+    public KItem.CacheTableValue getSortCacheValue(KItem.CacheTableColKey key) {
+        synchronized(sortCacheTable) {
+            return sortCacheTable.get(key);
+        }
+    }
+
+    public void putSortCacheValue(KItem.CacheTableColKey key, KItem.CacheTableValue value) {
+        synchronized(sortCacheTable) {
+            sortCacheTable.put(key, value);
+        }
     }
 
     // added from context
