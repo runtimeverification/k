@@ -1,12 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.inject.Inject;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -17,7 +12,6 @@ import org.kframework.compile.transformers.ResolveAnonymousVariables;
 import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Location;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
@@ -37,17 +31,20 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.inject.Inject;
 import scala.Tuple2;
 import scala.util.Either;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Set;
 
 public class ProgramLoader {
 

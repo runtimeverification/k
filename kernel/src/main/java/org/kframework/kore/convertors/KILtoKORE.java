@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -120,7 +121,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Context apply(org.kframework.kil.Context c) {
-        return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
+        return Context(KApply(KLabel("'context"), KList()), KToken(Sorts.KBoolean(), "true"));
     }
 
     public ModuleComment apply(LiterateModuleComment m) {
@@ -129,14 +130,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
-        Cell body = (Cell) kilConfiguration.getBody();
-        return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
+        //Cell body = (Cell) kilConfiguration.getBody();
+        return Configuration(KApply(KLabel("'config"), KList()), KToken(Sorts.KBoolean(), "true"),
                 inner.convertAttributes(kilConfiguration));
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
-        return Rule(inner.apply(r.getBody()), inner.applyOrTrue(r.getRequires()),
-                inner.applyOrTrue(r.getEnsures()), inner.convertAttributes(r));
+        return Rule(KApply(KLabel("'rule"), KList()), KToken(Sorts.KBoolean(), "true"),
+                KToken(Sorts.KBoolean(), "true"), inner.convertAttributes(r));
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
@@ -215,9 +216,12 @@ public class KILtoKORE extends KILTransformation<Object> {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new AssertionError("Lists should have applyed before.");
+                            throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
-                            items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
+                            if (p.containsAttribute("regex"))
+                                items.add(RegexTerminal(p.getAttribute("regex")));
+                            else
+                                items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
