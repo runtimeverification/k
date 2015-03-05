@@ -500,7 +500,8 @@ public class Rule extends JavaSymbolicObject {
             h = h * Utils.HASH_PRIME + ensures.hashCode();
             h = h * Utils.HASH_PRIME + lookups.hashCode();
             h = h * Utils.HASH_PRIME + freshConstants.hashCode();
-            hashCode = h == 0 ? 1 : h;
+            h = h == 0 ? 1 : h;
+            hashCode = h;
         }
         return h;
     }
