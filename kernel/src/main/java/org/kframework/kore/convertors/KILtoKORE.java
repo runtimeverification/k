@@ -209,14 +209,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
-            case "left":
-                return Associativity.Left();
-            case "right":
-                return Associativity.Right();
-            case "non-assoc":
-                return Associativity.NonAssoc();
-            default:
-                throw new AssertionError("Incorrect assoc string: " + assocOrig);
+        case "left":
+            return Associativity.Left();
+        case "right":
+            return Associativity.Right();
+        case "non-assoc":
+            return Associativity.NonAssoc();
+        default:
+            throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
