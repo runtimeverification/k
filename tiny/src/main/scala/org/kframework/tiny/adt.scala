@@ -5,7 +5,7 @@ import java.util.concurrent.Callable
 import com.google.common.cache.CacheBuilder
 import org.kframework._
 import org.kframework.attributes.Att
-import org.kframework.kore.{ADT, KLabel}
+import org.kframework.kore.ADT
 import org.kframework.tiny.matcher._
 
 import scala.collection.JavaConverters._
@@ -211,13 +211,7 @@ trait Label extends kore.KLabel {
 
   lazy override val hashCode = name.hashCode
 
-  override def equals(that: Any) =
-    (this.hashCode == that.hashCode) &&
-      (that match {
-        case that: AnyRef if that.asInstanceOf[AnyRef].eq(this) => true
-        case that: KLabel => this.name == that.name
-        case _ => false
-      })
+  override def equals(that: Any) = super.equals(that)
 }
 
 trait KRegularAppLabel extends Label {

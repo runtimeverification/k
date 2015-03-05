@@ -29,9 +29,11 @@ class Constructors(module: definition.Module) extends kore.Constructors {
     case "#BOOL:_orBool_" => Or
   }
 
+  val uniqueLabelCache = collection.mutable.Map[String, Label]()
+
   override def KLabel(name: String): Label = {
 
-    if (name.startsWith("'<")) {
+    val res = if (name.startsWith("'<")) {
       RegularKAppLabel(name, Att())
     } else if (name.startsWith("is")) {
       SortPredicateLabel(Sort(name.replace("is", "")))
@@ -42,6 +44,8 @@ class Constructors(module: definition.Module) extends kore.Constructors {
       else
         att.get[String]("hook").map(hookMappings(_, name)).getOrElse { RegularKAppLabel(name, att) }
     }
+
+    uniqueLabelCache.getOrElseUpdate(res.name, res)
   }
 
   override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): KApp = {
