@@ -231,7 +231,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         ((BuiltinLookup) queue.get(i)).variables(),
                         ((BuiltinLookup) queue.get(j)).variables());
                 if (!commonVariables.isEmpty()) {
-                    throw KExceptionManager.criticalError("Unsupported map pattern in the rule left-hand side", node);
+                    throw KExceptionManager.criticalError("Unsupported map, list, or set pattern in the rule left-hand side", node);
                 }
             }
         }
@@ -258,7 +258,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 if (setLookup.key() instanceof Variable && !variables.contains(setLookup.key())) {
                     lookups.add(new SetLookup(setLookup.base(), setLookup.key(), true));
                 } else {
-                    throw KExceptionManager.criticalError("Unsupported map pattern in the rule left-hand side", node);
+                    throw KExceptionManager.criticalError("Unsupported set pattern in the rule left-hand side", node);
                 }
             } else {
                 assert false: "unexpected builtin data structure type";
