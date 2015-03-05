@@ -96,7 +96,7 @@ public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFa
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                return Left.apply(Sets.newHashSet(new PriorityExceptios(kex)));
+                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
 
             return Right.apply(tc);
