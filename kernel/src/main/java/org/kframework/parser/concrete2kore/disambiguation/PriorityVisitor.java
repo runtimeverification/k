@@ -47,7 +47,7 @@ public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFa
                     return rez;
                 tc.items().set(0, rez.right().get());
             }
-            if (tc.production().items().apply(tc.production().items().size()) instanceof NonTerminal) {
+            if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
                         new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities, leftAssoc, rightAssoc).apply(tc.items().get(last));
@@ -96,7 +96,7 @@ public class PriorityVisitor extends TransformerWithErrors<java.util.Set<ParseFa
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, null);
-                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
+                return Left.apply(Sets.newHashSet(new PriorityExceptiosin(kex)));
             }
 
             return Right.apply(tc);
