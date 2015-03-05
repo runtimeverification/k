@@ -14,6 +14,7 @@ import org.kframework.utils.inject.RequestScoped;
 import com.google.inject.Inject;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -26,7 +27,7 @@ public class KExceptionManager {
     private final GlobalOptions options;
 
     @Inject
-    KExceptionManager(GlobalOptions options) {
+    public KExceptionManager(GlobalOptions options) {
         this.options = options;
     }
 
@@ -129,6 +130,14 @@ public class KExceptionManager {
 
     public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
+    }
+
+    public void addKException(KException kex) {
+        exceptions.add(kex);
+    }
+
+    public void addAllKException(Collection<KException> kex) {
+        exceptions.addAll(kex);
     }
 
     public void registerCompilerWarning(String message) {

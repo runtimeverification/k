@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.concrete2kore.kernel;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -19,13 +19,14 @@ import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 import static org.kframework.definition.Constructors.*;
 
-import org.kframework.parser.concrete2kore.Grammar.NonTerminal;
-import org.kframework.parser.concrete2kore.Grammar.NonTerminalState;
-import org.kframework.parser.concrete2kore.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2kore.Grammar.RegExState;
-import org.kframework.parser.concrete2kore.Grammar.RuleState;
-import org.kframework.parser.concrete2kore.Rule.DeleteRule;
-import org.kframework.parser.concrete2kore.Rule.WrapLabelRule;
+import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
+import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
+import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
 
 public class ParserTest {
     /* public static void main(String[] args) {

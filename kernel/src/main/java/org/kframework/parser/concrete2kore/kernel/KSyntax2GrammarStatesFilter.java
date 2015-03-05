@@ -1,8 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
-
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+package org.kframework.parser.concrete2kore.kernel;
 
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
@@ -10,12 +7,23 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
+import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
+import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
+import org.kframework.parser.concrete2kore.kernel.Rule.AddLocationRule;
+import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
+import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
 import org.kframework.parser.generator.CollectTerminalsVisitor;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.parser.concrete2kore.Rule.*;
-import org.kframework.parser.concrete2kore.Grammar.*;
 
-import static org.kframework.Collections.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import static org.kframework.Collections.iterable;
+import static org.kframework.Collections.stream;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the

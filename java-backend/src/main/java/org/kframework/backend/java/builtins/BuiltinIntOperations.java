@@ -24,11 +24,19 @@ public class BuiltinIntOperations {
     }
 
     public static IntToken div(IntToken term1, IntToken term2, TermContext context) {
-        return IntToken.of(term1.bigIntegerValue().divide(term2.bigIntegerValue()));
+        try {
+            return IntToken.of(term1.bigIntegerValue().divide(term2.bigIntegerValue()));
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 
     public static IntToken rem(IntToken term1, IntToken term2, TermContext context) {
-        return IntToken.of(term1.bigIntegerValue().remainder(term2.bigIntegerValue()));
+        try {
+            return IntToken.of(term1.bigIntegerValue().remainder(term2.bigIntegerValue()));
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 
     public static IntToken mod(IntToken term1, IntToken term2, TermContext context) {

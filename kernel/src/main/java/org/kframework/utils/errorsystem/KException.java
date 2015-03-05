@@ -39,14 +39,18 @@ public class KException {
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message) {
-        this(type, label, message, null, null, null, null);
+        this(type, label, message, null, null, (Location) null, null);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Throwable e) {
-        this(type, label, message, null, null, null, e);
+        this(type, label, message, null, null, (Location) null, e);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
+        this(type, label, message, null, source, location, null);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, Source source, org.kframework.attributes.Location location) {
         this(type, label, message, null, source, location, null);
     }
 
@@ -77,8 +81,22 @@ public class KException {
         this.location = location;
         this.exception = exception;
     }
+    public KException(
+            ExceptionType type,
+            KExceptionGroup label,
+            String message,
+            String compilationPhase,
+            Source source,
+            org.kframework.attributes.Location location,
+            Throwable exception) {
+        this(type, label, message, compilationPhase, source, new Location(location.startLine(), location.startColumn(), location.endLine(), location.endColumn()), exception);
+    }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
+        this(type,label,message,compilationPhase,source,location, null);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, org.kframework.attributes.Location location) {
         this(type,label,message,compilationPhase,source,location, null);
     }
 
