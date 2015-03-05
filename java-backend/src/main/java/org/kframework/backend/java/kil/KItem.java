@@ -236,7 +236,9 @@ public class KItem extends Term implements KItemRepresentation {
         Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
         if (sort == null) {
             throw KExceptionManager.criticalError("Cannot compute least sort of term: " +
-                            this.toString() + "\nPossible least sorts are: " + sorts);
+                            this.toString() + "\nPossible least sorts are: " + sorts +
+                            "\nAll terms must have a unique least sort; " +
+                            "consider assigning unique KLabels to overloaded productions", this);
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
