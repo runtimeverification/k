@@ -9,9 +9,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.kframework.Collections;
 import org.kframework.builtin.Sorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -36,7 +38,17 @@ import org.kframework.kil.UserList;
 import org.kframework.attributes.Att;
 import org.kframework.definition.*;
 
+import org.kframework.kore.AbstractKORETransformer;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KCollection;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KToken;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import scala.Enumeration.Value;
+import scala.Tuple2;
 import scala.collection.Seq;
 
 import com.google.common.collect.Sets;
@@ -83,7 +95,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Module apply(Module i, Set<Module> allKilModules,
-            Map<String, org.kframework.definition.Module> koreModules) {
+                                                  Map<String, org.kframework.definition.Module> koreModules) {
         Set<org.kframework.definition.Sentence> items = i.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
@@ -121,7 +133,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Context apply(org.kframework.kil.Context c) {
-        return Context(KApply(KLabel("'context"), KList()), KToken(Sorts.KBoolean(), "true"));
+        return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
 
     public ModuleComment apply(LiterateModuleComment m) {
@@ -130,14 +142,64 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
-        //Cell body = (Cell) kilConfiguration.getBody();
-        return Configuration(KApply(KLabel("'config"), KList()), KToken(Sorts.KBoolean(), "true"),
+        Cell body = (Cell) kilConfiguration.getBody();
+        return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
                 inner.convertAttributes(kilConfiguration));
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
-        return Rule(KApply(KLabel("'rule"), KList()), KToken(Sorts.KBoolean(), "true"),
-                KToken(Sorts.KBoolean(), "true"), inner.convertAttributes(r));
+        if (true)
+            return Rule(KApply(KLabel("'rule")), KToken(Sorts.Bool(), "true"),
+                    KToken(Sorts.Bool(), "true"), inner.convertAttributes(r));
+        K body = inner.apply(r.getBody());
+
+        AbstractKORETransformer<Set<Tuple2<K, Sort>>> gatherSorts = new AbstractKORETransformer<Set<Tuple2<K, Sort>>>() {
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KApply k) {
+                return processChildren(k.klist());
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KRewrite k) {
+                return Sets.union(apply(k.left()), apply(k.right()));
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KToken k) {
+                return Sets.newHashSet();
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KVariable k) {
+                return (Set<Tuple2<K, Sort>>) k.att().<String>getOptional("sort")
+                        .map(x -> Sets.<Tuple2<K, Sort>>newHashSet(new Tuple2((K) k, Sort(x))))
+                        .orElseGet(() -> Sets.<Tuple2<K, Sort>>newHashSet());
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KSequence k) {
+                return processChildren(k);
+            }
+
+            private Set<Tuple2<K, Sort>> processChildren(KCollection k) {
+                return k.stream().map(this::apply).reduce(Sets::union).orElseGet(() -> Sets.newHashSet());
+            }
+
+        };
+
+        Set<Tuple2<K, Sort>> expSorts = gatherSorts.apply(body);
+        //System.out.println("gatherSorts = " + expSorts);
+
+        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel("'_andBool_"), KList(a, b));
+        K sortPredicates = expSorts
+                .stream()
+                .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
+                .reduce(makeAnd)
+                .orElseGet(() -> KToken(Sorts.Bool(), "true"));
+
+
+        return Rule(body, makeAnd.apply(inner.applyOrTrue(r.getRequires()), sortPredicates),
+                inner.applyOrTrue(r.getEnsures()), inner.convertAttributes(r));
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
@@ -216,7 +278,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new AssertionError("Lists should have applied before.");
+                            throw new AssertionError("Lists should have applyed before.");
                         } else if (it instanceof Lexical) {
                             if (p.containsAttribute("regex"))
                                 items.add(RegexTerminal(p.getAttribute("regex")));
@@ -245,7 +307,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-            org.kframework.kore.Sort sort, Production p, UserList userList) {
+                              org.kframework.kore.Sort sort, Production p, UserList userList) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
         org.kframework.kore.Sort elementSort = apply(userList.getSort());

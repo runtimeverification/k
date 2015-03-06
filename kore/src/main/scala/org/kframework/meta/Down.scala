@@ -13,11 +13,13 @@ import scala.util.Try
 case class Down(imports: Set[String]) extends (K => Any) {
 
   import org.kframework.builtin.Sorts.KString
+  import org.kframework.builtin.Sorts.String
 
   val AttVal = Sort("AttributeValue")
 
   def apply(o: K): Any = o match {
     case KToken(`KString`, v) => v
+    case KToken(`String`, v) => v
     case KToken(`AttVal`, v) => v
     //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
@@ -49,6 +51,6 @@ case class Down(imports: Set[String]) extends (K => Any) {
             matchingClasses.mkString("\n    "))
         }
       }
-
+//    case _ => throw new AssertionError("Could not down.")
   }
 }

@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import scala.Option;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * KORE to backend KIL
  */
-public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors {
+public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<org.kframework.kore.K> {
 
     private final TermContext context;
 

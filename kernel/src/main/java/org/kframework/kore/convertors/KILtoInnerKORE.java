@@ -46,9 +46,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     public static final String PRODUCTION_ID = "productionID";
     public static final String LIST_TERMINATOR = "listTerminator";
 
+    public static final Labels labels = new Labels(KORE.constructor());
+
     public K apply(Bag body) {
         List<K> contents = body.getContents().stream().map(this).collect(Collectors.toList());
-        return KApply(Labels.KBag(), (KList(contents)));
+        return KApply(labels.KBag(), (KList(contents)));
     }
 
     // public K apply(TermComment c) {
@@ -154,7 +156,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public KApply apply(Hole hole) {
-        return KApply(Labels.Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
+        return KApply(labels.Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
                 sortAttributes(hole));
     }
 
@@ -178,7 +180,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         if (t != null)
             return apply(t);
         else
-            return KToken(Sorts.KBoolean(), "true");
+            return KToken(Sorts.Bool(), "true");
     }
 
     public K apply(TermComment t) {

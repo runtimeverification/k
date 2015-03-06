@@ -1,11 +1,13 @@
 package org.kframework.tiny.matcher
 
 import org.junit.{Assert, Ignore, Test}
+import org.kframework.builtin.Sorts
 import org.kframework.tiny._
 
 class MatcherTest extends AbstractTest {
 
   import cons._
+
 
   implicit class KWithMatcherMethods(k: K) {
     def matchAll(other: K, sideConditions: K = True): K = And(k.matcher(other), sideConditions).normalize match {
@@ -24,8 +26,6 @@ class MatcherTest extends AbstractTest {
 
   @Test def testSimpleWithFalseSideCondition() {
     val foo = 'foo()
-
-    println(And(X.matcher('foo())))
 
     assertEquals(False, And(X.matcher('foo()), False).normalize)
   }
@@ -173,18 +173,41 @@ class MatcherTest extends AbstractTest {
   //  }
 
 
-  //  // TODO: uningore when fixing side conditions
-  //  @Test
-  //  @Ignore def testKSeqAssoc() {
-  //    val foo = KSequence(5: K, 5: K, 5: K)
-  //
-  //    val pattern = KSequence(X, 5: K, Y)
-  //    assertEquals(Or(
-  //      And(X -> KSequence(), Y -> KSequence(5: K, 5: K)),
-  //      And(X -> KSequence(5: K), Y -> KSequence(5: K)),
-  //      And(X -> KSequence(5: K, 5: K), Y -> KSequence())),
-  //      pattern.matchAll(foo))
-  //  }
+  @Test def testKSeqAssoc() {
+    val foo = KSequence(5: K, 5: K, 5: K)
+
+    val pattern = KSequence(X, 5: K, Y)
+    assertEquals(Or(
+      And(X -> KSequence(), Y -> KSequence(5: K, 5: K)),
+      And(X -> 5: K, Y -> 5: K),
+      And(X -> KSequence(5: K, 5: K), Y -> KSequence())),
+      pattern.matchAll(foo))
+  }
+
+  @Test def testKSeqWithMatchAtEnd() {
+    val foo = KSequence('+(5: K, 5: K))
+
+    val pattern = KSequence(X + Y, Z)
+    assertEquals(
+      Or(And(Y -> '+(), Z -> KSeq(), X -> '+(5, 5)),
+        And(Y -> 5, Z -> KSeq(), X -> 5),
+        And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
+      , pattern.matchAll(foo,
+        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
+  }
+
+  @Test def testKSeqWithMatchAtEnd1() {
+    val foo = KSequence('+(5: K, 5: K), KSeq())
+
+    val pattern = KSequence(X + Y, Z)
+    assertEquals(
+      Or(And(Y -> '+(), Z -> KSeq(), X -> '+(5, 5)),
+        And(Y -> 5, Z -> KSeq(), X -> 5),
+        And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
+      , pattern.matchAll(foo,
+        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
+  }
+
   //
   //  @Test def testAttributes() {
   //    val foo = 'foo()
@@ -206,7 +229,6 @@ class MatcherTest extends AbstractTest {
     val o = 'foo('foo('foo('bar())))
     val inner = Anywhere("inner", 'foo(X))
     val outer = Anywhere("outer", 'foo(inner))
-    println(outer)
     Assert.assertEquals(
       ((X -> 'foo('bar()) && inner.TOPVariable -> inner.HOLEVariable && outer.TOPVariable -> outer.HOLEVariable) ||
         (X -> 'bar() && inner.TOPVariable -> 'foo(inner.HOLEVariable) && outer.TOPVariable -> outer.HOLEVariable) ||

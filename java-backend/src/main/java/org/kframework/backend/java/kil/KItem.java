@@ -18,7 +18,6 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.*;
-import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -126,7 +125,7 @@ public class KItem extends Term implements KItemRepresentation {
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                cacheTabVal = definition.getSortCacheTable().get(cacheTabColKey);
+                cacheTabVal = definition.getSortCacheValue(cacheTabColKey);
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
@@ -237,7 +236,9 @@ public class KItem extends Term implements KItemRepresentation {
         Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
         if (sort == null) {
             throw KExceptionManager.criticalError("Cannot compute least sort of term: " +
-                            this.toString() + "\nPossible least sorts are: " + sorts);
+                            this.toString() + "\nPossible least sorts are: " + sorts +
+                            "\nAll terms must have a unique least sort; " +
+                            "consider assigning unique KLabels to overloaded productions", this);
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
@@ -250,7 +251,7 @@ public class KItem extends Term implements KItemRepresentation {
         CacheTableValue cacheTabVal = new CacheTableValue(sort, isExactSort, possibleSorts);
 
         if (enableCache) {
-            definition.getSortCacheTable().put(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
+            definition.putSortCacheValue(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
         }
     }
 
