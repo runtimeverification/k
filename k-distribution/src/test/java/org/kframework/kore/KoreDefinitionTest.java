@@ -35,7 +35,7 @@ public class KoreDefinitionTest {
         Definition def = parse(KoreDefinitionTest.class.getResourceAsStream("/kore/simple-untyped-1.kore"));
         // mostly just care that it parses, check a few counts for a tiny bit of sanity-checking.
         assertEquals(9, stream(def.modules()).count());
-        assertEquals(323, stream(def.modules()).flatMap(m -> stream(m.localSentences())).count());
+        assertEquals(358, stream(def.modules()).flatMap(m -> stream(m.localSentences())).count());
     }
 
     // TODO(radu): generalize this function, and eliminate duplicates
