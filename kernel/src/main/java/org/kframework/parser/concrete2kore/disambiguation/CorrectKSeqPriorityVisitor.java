@@ -34,7 +34,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
                 tc.items().set(0, rez.right().get());
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
-                int last = tc.items().size() - 1;            	
+                int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
                         new PriorityVisitor2(tc).apply(tc.items().get(last));
                 if (rez.isLeft())

@@ -15,6 +15,7 @@ object ADT {
 
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
+    def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
@@ -36,7 +37,9 @@ object ADT {
       }, att)
   }
 
-  case class KVariable(name: String, att: Att = Att()) extends kore.KVariable
+  case class KVariable(name: String, att: Att = Att()) extends kore.KVariable {
+    def apply(ks: K*) = KApply(this, KList(ks.toList))
+  }
 
   case class Sort(name: String) extends kore.Sort {
     override def toString = name

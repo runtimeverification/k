@@ -204,7 +204,7 @@ trait Label extends kore.KLabel {
     construct(l, att)
 
   def construct(l: Iterable[K], att: Att): KApp
-  def apply(l: K*): K = apply(l, Att())
+  @annotation.varargs def apply(l: K*): K = apply(l, Att())
   def att: Att
 
   override def toString = name

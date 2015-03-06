@@ -1,11 +1,13 @@
 package org.kframework.tiny.matcher
 
 import org.junit.{Assert, Ignore, Test}
+import org.kframework.builtin.Sorts
 import org.kframework.tiny._
 
 class MatcherTest extends AbstractTest {
 
   import cons._
+
 
   implicit class KWithMatcherMethods(k: K) {
     def matchAll(other: K, sideConditions: K = True): K = And(k.matcher(other), sideConditions).normalize match {
@@ -191,7 +193,7 @@ class MatcherTest extends AbstractTest {
         And(Y -> 5, Z -> KSeq(), X -> 5),
         And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
       , pattern.matchAll(foo,
-        And(SortPredicate(Builtins.KSeq, Z), SortPredicate(Builtins.Int, X))))
+        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
   }
 
   @Test def testKSeqWithMatchAtEnd1() {
@@ -203,7 +205,7 @@ class MatcherTest extends AbstractTest {
         And(Y -> 5, Z -> KSeq(), X -> 5),
         And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
       , pattern.matchAll(foo,
-        And(SortPredicate(Builtins.KSeq, Z), SortPredicate(Builtins.Int, X))))
+        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
   }
 
   //

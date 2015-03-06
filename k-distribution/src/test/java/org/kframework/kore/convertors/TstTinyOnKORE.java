@@ -42,29 +42,29 @@ public class TstTinyOnKORE extends BaseTest {
 
         Constructors cons = new Constructors(module);
 
-        KApp program = cons.KApply(cons.KLabel("'<top>"),
-                cons.KApply(cons.KLabel("'<k>"),
-                        cons.KApply(cons.KLabel("'while__"),
-                                cons.KApply(cons.KLabel("'_<=_"), cons.intToToken(0), cons.stringToId("n")),
-                                cons.KApply(cons.KLabel("'__"),
-                                        cons.KApply(cons.KLabel("'_=_;"),
-                                                cons.stringToId("s"),
-                                                cons.KApply(cons.KLabel("'_+_"),
-                                                        cons.stringToId("s"),
-                                                        cons.stringToId("n"))),
-                                        cons.KApply(cons.KLabel("'_=_;"),
-                                                cons.stringToId("n"),
-                                                cons.KApply(cons.KLabel("'_+_"),
-                                                        cons.stringToId("n"),
-                                                        cons.intToToken(-1)))
+        K program = cons.KLabel("'<top>").apply(
+                cons.KLabel("'<k>").apply(
+                        cons.KLabel("'while__").apply(
+                                cons.KLabel("'_<=_").apply((K) cons.intToToken(0),(K) cons.stringToId("n")),
+                                cons.KLabel("'__").apply(
+                                        cons.KLabel("'_=_;").apply(
+                                                (K) cons.stringToId("s"),
+                                                cons.KLabel("'_+_").apply(
+                                                        (K) cons.stringToId("s"),
+                                                        (K) cons.stringToId("n"))),
+                                        cons.KLabel("'_=_;").apply(
+                                                (K) cons.stringToId("n"),
+                                                cons.KLabel("'_+_").apply(
+                                                        (K) cons.stringToId("n"),
+                                                        (K) cons.intToToken(-1)))
                                 ))),
-                cons.KApply(cons.KLabel("'<state>"),
-                        cons.KApply(cons.KLabel("'_Map_"),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("n"), cons.intToToken(10)),
-                                cons.KApply(cons.KLabel("'_|->_"), cons.stringToId("s"), cons.intToToken(0)))
+                cons.KLabel("'<state>").apply(
+                        cons.KLabel("'_Map_").apply(
+                                cons.KLabel("'_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(100)),
+                                cons.KLabel("'_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
                 ),
-                cons.KApply(cons.KLabel("'<s>")
-                ));
+                cons.KLabel("'<s>").apply()
+        );
 
 //        KApp program = cons.KApply(cons.KLabel("'<top>"),
 //                cons.KApply(cons.KLabel("'<k>"),

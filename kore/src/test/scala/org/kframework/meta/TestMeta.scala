@@ -4,16 +4,13 @@
 //
 //import org.kframework._
 //import org.kframework.definition._
-//import org.kframework.koreimplementation.KORE._
-//import org.kframework.koreimplementation._
+//import org.kframework.kore.KORE._
+//import org.kframework.kore._
 //
 //class TestMeta {
 //
 //  import org.junit._
-//  import org.kframework.koreimplementation.KToken._
-//  import org.kframework.tinyimplementation.Rewritable._
 //
-//  implicit val theory = FreeTheory
 //
 //  @Test def simple() {
 //    assertEquals(1: K, Up(1))

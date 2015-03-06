@@ -2,16 +2,22 @@ package org.kframework.tiny
 
 import org.junit.Assert
 import org.kframework.attributes.Att
-import org.kframework.definition.{Module, Production}
-import org.kframework.kore.{ADT, Unparse}
+import org.kframework.builtin.Sorts
+import org.kframework.definition.{NonTerminal, Module, Production}
 
 
 trait AbstractTest {
 
-  import org.kframework.tiny.Builtins._
+  import org.kframework.builtin.Sorts._
+  import org.kframework.kore._
+  import org.kframework.{kore, tiny}
 
-  val cons = new Constructors(Module("TEST", Set(), Set(
-    Production(ADT.KLabel("~>"), Builtins.KSeq, Seq(), Att() + "assoc"),
+  val cons = new tiny.Constructors(Module("TEST", Set(), Set(
+    Production(ADT.KLabel("_andBool_"), Sorts.Bool,
+      Seq(NonTerminal(Sorts.Bool), NonTerminal(Sorts.Bool)), Att() + ("hook" -> "#BOOL:_andBool_")),
+    Production(ADT.KLabel("_orBool_"), Sorts.Bool,
+      Seq(NonTerminal(Sorts.Bool), NonTerminal(Sorts.Bool)), Att() + ("hook" -> "#BOOL:_orBool_")),
+    Production(ADT.KLabel("~>"), Sorts.KSeq, Seq(), Att() + "assoc"),
     Production(ADT.KLabel("foo"), String, Seq(), Att()),
     Production(ADT.KLabel("bar"), String, Seq(), Att()),
     Production(ADT.KLabel("+"), Int, Seq(), Att() + "assoc")
@@ -21,12 +27,12 @@ trait AbstractTest {
   val Y = KVar("Y")
   val Z = KVar("Z")
 
-  def assertEquals(k1: K, k2: K) {
+  def assertEquals(k1: kore.K, k2: kore.K) {
     if (k1 != k2)
       Assert.assertEquals(Unparse(k1), Unparse(k2))
   }
 
-  def assertNotEquals(k1: K, k2: K): Unit = {
+  def assertNotEquals(k1: kore.K, k2: kore.K): Unit = {
     if (k1 == k2)
       Assert.assertNotEquals(Unparse(k1), Unparse(k2))
   }
