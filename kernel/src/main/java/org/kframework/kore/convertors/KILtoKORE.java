@@ -133,6 +133,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Context apply(org.kframework.kil.Context c) {
+        if (true)
+            return Context(KApply(KLabel("'context")), KToken(Sorts.Bool(), "true"),
+                    inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
 
@@ -142,6 +145,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
+        if (true)
+            return Configuration(KApply(KLabel("'configuration")), KToken(Sorts.Bool(), "true"),
+                    inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
                 inner.convertAttributes(kilConfiguration));
