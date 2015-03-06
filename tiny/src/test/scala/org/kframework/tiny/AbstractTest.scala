@@ -13,14 +13,14 @@ trait AbstractTest {
   import org.kframework.{kore, tiny}
 
   val cons = new tiny.Constructors(Module("TEST", Set(), Set(
-    Production(ADT.KLabel("_andBool_"), Sorts.Bool,
+    Production("_andBool_", Sorts.Bool,
       Seq(NonTerminal(Sorts.Bool), NonTerminal(Sorts.Bool)), Att() + ("hook" -> "#BOOL:_andBool_")),
-    Production(ADT.KLabel("_orBool_"), Sorts.Bool,
+    Production("_orBool_", Sorts.Bool,
       Seq(NonTerminal(Sorts.Bool), NonTerminal(Sorts.Bool)), Att() + ("hook" -> "#BOOL:_orBool_")),
-    Production(ADT.KLabel("~>"), Sorts.KSeq, Seq(), Att() + "assoc"),
-    Production(ADT.KLabel("foo"), String, Seq(), Att()),
-    Production(ADT.KLabel("bar"), String, Seq(), Att()),
-    Production(ADT.KLabel("+"), Int, Seq(), Att() + "assoc")
+    Production("~>", Sorts.KSeq, Seq(), Att() + "assoc"),
+    Production("foo", String, Seq(), Att()),
+    Production("bar", String, Seq(), Att()),
+    Production("+", Int, Seq(), Att() + "assoc")
   ), Att()))
 
   val X = KVar("X")

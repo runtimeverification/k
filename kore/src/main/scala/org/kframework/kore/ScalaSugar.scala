@@ -10,7 +10,7 @@ trait ScalaSugar[K <: kore.K] {
   self: Constructors[K] =>
 
   implicit def stringToToken(s: String) = KToken(Sorts.String, s, Att())
-  implicit def stringToId(s: String): K = KToken(Sorts.Id, s, Att())
+  def stringToId(s: String): K = KToken(Sorts.Id, s, Att())
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
   implicit def intToToken(n: Int): K = KToken(Sorts.Int, n.toString, Att())
 
