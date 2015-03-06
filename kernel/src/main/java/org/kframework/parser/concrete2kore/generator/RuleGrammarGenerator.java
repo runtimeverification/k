@@ -64,13 +64,13 @@ public class RuleGrammarGenerator {
                 prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
                 // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                 Att attrs1 = Att().add("sort", srt.name());
-                prods.add(Production(KLabel("#SyntacticCast"), KBott, Seq(NonTerminal(KTop), RegexTerminal("::" + srt.name() + "(?![a-zA-Z0-9])")), attrs1));
+                prods.add(Production("#SyntacticCast", KBott, Seq(NonTerminal(KTop), RegexTerminal("::" + srt.name() + "(?![a-zA-Z0-9])")), attrs1));
                 Att attrs2 = Att().add("sort", srt.name());
-                prods.add(Production(KLabel("#SemanticCast"), KBott, Seq(NonTerminal(KTop), RegexTerminal(":" + srt.name() + "(?![a-zA-Z0-9])")), attrs2));
+                prods.add(Production("#SemanticCast", KBott, Seq(NonTerminal(KTop), RegexTerminal(":" + srt.name() + "(?![a-zA-Z0-9])")), attrs2));
                 Att attrs3 = Att().add("sort", srt.name());
-                prods.add(Production(KLabel("#InnerCast"), KBott, Seq(NonTerminal(KTop), RegexTerminal("<:" + srt.name() + "(?![a-zA-Z0-9])")), attrs3));
+                prods.add(Production("#InnerCast", KBott, Seq(NonTerminal(KTop), RegexTerminal("<:" + srt.name() + "(?![a-zA-Z0-9])")), attrs3));
                 Att attrs4 = Att().add("sort", srt.name());
-                prods.add(Production(KLabel("#OuterCast"), KBott, Seq(NonTerminal(KTop), RegexTerminal(":>" + srt.name() + "(?![a-zA-Z0-9])")), attrs4));
+                prods.add(Production("#OuterCast", KBott, Seq(NonTerminal(KTop), RegexTerminal(":>" + srt.name() + "(?![a-zA-Z0-9])")), attrs4));
             }
         }
 

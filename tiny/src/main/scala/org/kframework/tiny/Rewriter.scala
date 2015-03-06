@@ -4,6 +4,8 @@ package org.kframework.tiny
 import org.kframework.definition
 import org.kframework.kore.Unapply.KLabel
 
+import scala.collection.parallel.ParIterable
+
 class Rewriter(module: definition.Module) {
   val cons = new Constructors(module)
 
@@ -13,12 +15,15 @@ class Rewriter(module: definition.Module) {
 
   val executeRules = module.rules
     .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
+    .seq.view.par
 
-  val indexedRules: Map[String, Set[K => Option[K]]] = {
+  val indexedRules: Map[String, ParIterable[(K) => Option[K]]] = {
     module.rules
       .groupBy { r => index(convert(r.body)).get }
       .map { case (k, ruleSet) =>
-      (k, ruleSet map { r => ExecuteRule(convert(r.body), convert(r.requires)) })
+      (k, ruleSet
+        .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
+        .seq.view.par)
     }
   }
 
@@ -67,13 +72,8 @@ class Rewriter(module: definition.Module) {
     })
 
     val res = prioritized
-      .map {
-      r => totalTriedRules += 1;
-        r(k)
-    }
-      .collectFirst {
-      case Some(x) => x
-    }
+      .map { r => totalTriedRules += 1; r(k) }
+      .find { _.isInstanceOf[Some[_]] }.getOrElse(None)
     //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }

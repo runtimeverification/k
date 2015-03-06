@@ -16,7 +16,10 @@ import collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  *
  */
-object KORE extends Constructors {
+object KORE extends Constructors[K] with ScalaSugar[K] {
+
+  val constructor = this
+
   def Attributes(ks: Set[K]) = attributes.Att(ks.toSeq: _*)
   @annotation.varargs def Attributes(ks: K*) = attributes.Att(ks: _*)
 
@@ -26,10 +29,6 @@ object KORE extends Constructors {
   def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Attributes())
 
   def KToken(sort: Sort, string: String): KToken = KToken(sort, string, Attributes())
-
-  def KVariable(name: String): KVariable = KVariable(name, Attributes())
-
-  @annotation.varargs def KSequence(ks: K*): KSequence = KSequence(ks.asJava, Att())
 
   def KSequence(ks: java.util.List[K]): KSequence = KSequence(ks, Att())
 
@@ -59,8 +58,6 @@ object KORE extends Constructors {
   override def KList[KK <: K](items: java.util.List[KK]): KList = ADT.KList(items.asScala.toList)
 
   override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel = ADT.InjectedKLabel(klabel, att)
-
-  @annotation.varargs def KList(ks: K*): KList = ADT.KList(ks.toList)
 
   def toKList: Collector[K, KList] =
     Collector(() => new CombinerFromBuilder(
