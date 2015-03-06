@@ -13,6 +13,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.definition.*;
 import org.kframework.kore.Sort;
+import org.kframework.utils.StringUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -512,15 +513,15 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         String labelSort = t.sort().name();
         String value = t.s();
         org.kframework.kil.Term kAppLabel;
-        if (labelSort.equals("int")) {
+        if (labelSort.equals("#Int")) {
             kAppLabel = org.kframework.kil.IntBuiltin.of(new BigInteger(t.s()));
-        } else if (labelSort.equals("int32")) {
+        } else if (labelSort.equals("Int32")) {
             kAppLabel = org.kframework.kil.Int32Builtin.of(new Integer(value));
-        } else if (labelSort.equals("string")) {
-            kAppLabel = org.kframework.kil.StringBuiltin.of(value);
-        } else if (labelSort.equals("float")) {
+        } else if (labelSort.equals("#String")) {
+            kAppLabel = org.kframework.kil.StringBuiltin.of(StringUtil.unquoteCString(value));
+        } else if (labelSort.equals("#Float")) {
             kAppLabel = org.kframework.kil.FloatBuiltin.of(value);
-        } else if (labelSort.equals("bool")) {
+        } else if (labelSort.equals("Bool")) {
             kAppLabel = org.kframework.kil.BoolBuiltin.of(value);
         } else {
             kAppLabel = org.kframework.kil.Token.of(org.kframework.kil.Sort.of(labelSort), value);

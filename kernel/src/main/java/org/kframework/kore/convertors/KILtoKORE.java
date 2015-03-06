@@ -341,28 +341,32 @@ public class KILtoKORE extends KILTransformation<Object> {
         // (to be used when translating those back to single KIL declaration)
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
-        org.kframework.definition.Production prod1, prod2, prod3;
+        org.kframework.definition.Production prod1, prod2, prod3, prod4;
 
         String kilProductionId = "" + System.identityHashCode(p);
 
-        // lst ::= lst sep lst
+        // lst ::= elem sep lst
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
                 kilProductionId);
-        prod1 = Production(sort,
-                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+        prod1 = Production(p.getKLabel(), sort,
+                Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                 attrsWithKilProductionId.add("#klabel", p.getKLabel()));
 
-        // lst ::= elem
-        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+        // lst ::= elem TerminalSort
+        prod2 = Production(p.getKLabel(), sort, Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminal"))), attrsWithKilProductionId);
 
-        // lst ::= .UserList
-        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
+        // TerminalSort ::= .UserList
+        prod3 = Production(p.getTerminatorKLabel(), Sort(sort.name() + "Terminal"), Seq(Terminal("")),
                 attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
+
+        // lst ::= TerminalSort
+        prod4 = Production(sort, Seq(NonTerminal(Sort(sort.name() + "Terminal"))));
 
         res.add(prod1);
         res.add(prod2);
+        res.add(prod3);
         if (!nonEmpty) {
-            res.add(prod3);
+            res.add(prod4);
         }
     }
 
