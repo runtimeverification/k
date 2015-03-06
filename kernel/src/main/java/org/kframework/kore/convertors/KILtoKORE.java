@@ -273,12 +273,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     applyUserList(res, sort, p, (UserList) p.getItems().get(0));
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
-                    // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new AssertionError("Lists should have applyed before.");
+                            throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
                             if (p.containsAttribute("regex"))
                                 items.add(RegexTerminal(p.getAttribute("regex")));
@@ -293,13 +292,29 @@ public class KILtoKORE extends KILTransformation<Object> {
 
                     org.kframework.attributes.Att attrs = inner.convertAttributes(p);
 
-                    org.kframework.definition.Production prod = Production(
-                            sort,
-                            immutable(items),
-                            attrs.add(KILtoInnerKORE.PRODUCTION_ID,
-                                    "" + System.identityHashCode(p)));
+                    org.kframework.definition.Production prod;
+                    if (p.getKLabel() == null)
+                        prod = Production(
+                                sort,
+                                immutable(items),
+                                attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                        "" + System.identityHashCode(p)));
+                    else
+                        prod = Production(
+                                p.getKLabel(),
+                                sort,
+                                immutable(items),
+                                attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                        "" + System.identityHashCode(p)));
 
                     res.add(prod);
+                    // handle associativity for the production
+                    if (p.containsAttribute("left"))
+                        res.add(SyntaxAssociativity(applyAssoc("left"), Set(Tag(p.getKLabel()))));
+                    else if (p.containsAttribute("right"))
+                        res.add(SyntaxAssociativity(applyAssoc("right"), Set(Tag(p.getKLabel()))));
+                    else if (p.containsAttribute("non-assoc"))
+                        res.add(SyntaxAssociativity(applyAssoc("non-assoc"), Set(Tag(p.getKLabel()))));
                 }
             }
         }
