@@ -146,6 +146,9 @@ public class ProgramLoader {
                 for (ParseFailedException k : parsed._1().left().get())
                     kem.addKException(k.getKException());
             }
+            for (ParseFailedException warn : parsed._2()) {
+                kem.addKException(warn.getKException());
+            }
 
             out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));
         } else {
