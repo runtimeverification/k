@@ -61,10 +61,18 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
     private KILtoInnerKORE inner;
+    private final boolean syntactic;
+
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic) {
+        this.context = context;
+        inner = new KILtoInnerKORE(context);
+        this.syntactic = syntactic;
+    }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
         inner = new KILtoInnerKORE(context);
+        this.syntactic = false;
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -133,7 +141,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Context apply(org.kframework.kil.Context c) {
-        if (true)
+        if (syntactic)
             return Context(KApply(KLabel("'context")), KToken(Sorts.Bool(), "true"),
                     inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
@@ -145,7 +153,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
-        if (true)
+        if (syntactic)
             return Configuration(KApply(KLabel("'configuration")), KToken(Sorts.Bool(), "true"),
                     inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
@@ -154,7 +162,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
-        if (true)
+        if (syntactic)
             return Rule(KApply(KLabel("'rule")), KToken(Sorts.Bool(), "true"),
                     KToken(Sorts.Bool(), "true"), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
