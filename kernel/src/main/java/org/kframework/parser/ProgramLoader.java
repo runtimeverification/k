@@ -27,6 +27,7 @@ import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -139,7 +140,7 @@ public class ProgramLoader {
         } else /*if (whatParser == ParserType.NEWPROGRAM)*/ {
             Definition def = loader.loadOrDie(Definition.class, context.files.resolveKompiled("definition-concrete.bin"));
             Module synMod = new KILtoKORE(null, true).apply(def).getModule(def.getMainSyntaxModule()).get();
-            ParseInModule parser = new ParseInModule(synMod);
+            ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName());
             if (parsed._1().isLeft()) {
