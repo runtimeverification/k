@@ -137,13 +137,12 @@ public class KSyntax2GrammarStatesFilter {
         Pattern pattern = null;
         if (prd.att().contains("token")) {
             // TODO: calculate reject list
-            if (prd.att().contains("autoReject") && prd.att().contains("reject"))
-                pattern = Pattern.compile("(" + prd.att().get("reject").get().toString() + ")|(" + rejectPattern + ")");
-            else if (!prd.att().contains("autoReject"))
+            if (prd.att().contains("autoReject") && prd.att().contains("rejectt"))
+                pattern = Pattern.compile("(" + prd.att().get("rejectt").get().toString() + ")|(" + rejectPattern + ")");
+            else if (prd.att().contains("autoReject"))
                 pattern = Pattern.compile(rejectPattern);
-            else if (prd.att().contains("reject"))
-                pattern = Pattern.compile(prd.att().get("reject").get().toString());
-
+            else if (prd.att().contains("rejectt"))
+                pattern = Pattern.compile(prd.att().get("rejectt").get().toString());
         }
         RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern));
         previous.next.add(labelRule);
