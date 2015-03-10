@@ -28,15 +28,17 @@ public class RuleGrammarGenerator {
     private final Module baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
-    private static final Set<Sort> kSorts = new HashSet<>();;
-
-    public RuleGrammarGenerator(Module baseK) {
-        this.baseK = renameKItem2Bottom(baseK);
+    private static final Set<Sort> kSorts = new HashSet<>();
+    static {
         kSorts.add(KBott);
         kSorts.add(KTop);
         kSorts.add(Sort("KLabel"));
         kSorts.add(Sort("KList"));
         kSorts.add(Sort("KItem"));
+    }
+
+    public RuleGrammarGenerator(Module baseK) {
+        this.baseK = renameKItem2Bottom(baseK);
     }
 
     private Module renameKItem2Bottom(Module def) {
