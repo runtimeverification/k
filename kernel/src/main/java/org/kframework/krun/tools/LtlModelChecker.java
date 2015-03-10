@@ -1,10 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Sources;
-import org.kframework.kil.Term;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
@@ -16,6 +13,7 @@ import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.Main;
 
 import com.beust.jcommander.ParameterException;
@@ -44,6 +42,7 @@ public interface LtlModelChecker {
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
         private final FileUtil files;
+        private final Definition definition;
 
         @Inject
         protected Tool(
@@ -52,18 +51,21 @@ public interface LtlModelChecker {
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
-                @Main FileUtil files) {
+                @Main FileUtil files,
+                @Main(Concrete.class) Definition definition) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
             this.sw = sw;
             this.modelChecker = modelChecker;
             this.files = files;
+            this.definition = definition;
         }
 
         @Override
         public KRunProofResult<KRunGraph> run(Void v, Attributes a) {
             a.add(Context.class, context);
+            a.add(Definition.class, definition);
             try {
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 ltlmc(),
