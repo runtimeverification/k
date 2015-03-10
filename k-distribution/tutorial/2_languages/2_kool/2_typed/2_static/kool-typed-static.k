@@ -105,7 +105,7 @@ static semantics of KOOL using the modified programs.  To avoid seeing
 the wrapper in the generated documentation, we associate it an
 ``invisibility'' latex attribute below.  */
 
-  syntax Id ::= "Object" | "Main"
+  syntax Id ::= "Object" [token] | "Main" [token]
 
 //@ \subsection{Types}
 
