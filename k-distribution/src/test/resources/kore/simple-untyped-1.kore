@@ -35,7 +35,7 @@ Constants look very bad like true(.::KList), and it's trivial to fix kore.k to a
 module BUILTIN-SYNTAX-HOOKS
   syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
   syntax Int ::= #Int
-  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
+  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"), autoReject]
   syntax #Bool ::= "true" [klabel(true)]
   syntax #Bool ::= "false" [klabel(false)]
   syntax Bool ::= #Bool
