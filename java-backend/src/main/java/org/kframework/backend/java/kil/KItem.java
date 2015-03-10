@@ -182,8 +182,8 @@ public class KItem extends Term implements KItemRepresentation {
             if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
                     .equals(BoolToken.TRUE)) {
                 sorts.add(rule.predicateSort());
-            } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
-                    .equals(BoolToken.TRUE)) {
+            } else if (BoolToken.TRUE.equals(MetaK.unifiable(
+                    kList, rule.sortPredicateArgument().kList(), termContext))) {
                 possibleSorts.add(rule.predicateSort());
             }
         }
