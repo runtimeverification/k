@@ -284,7 +284,10 @@ public class KILtoKORE extends KILTransformation<Object> {
                 // Handle a special case first: List productions have only
                 // one item.
                 if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
-                    applyUserList(res, sort, p, (UserList) p.getItems().get(0));
+                    if (syntactic)
+                        applyUserList2(res, sort, p, (UserList) p.getItems().get(0));
+                    else
+                        applyUserList(res, sort, p, (UserList) p.getItems().get(0));
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
@@ -335,7 +338,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         return res;
     }
 
-    public void applyUserList(Set<org.kframework.definition.Sentence> res,
+    public void applyUserList2(Set<org.kframework.definition.Sentence> res,
                               org.kframework.kore.Sort sort, Production p, UserList userList) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
@@ -380,6 +383,45 @@ public class KILtoKORE extends KILTransformation<Object> {
         res.add(SyntaxSort(Sort("Ne" + sort.name())));
         if (!nonEmpty) {
             res.add(prod5);
+        }
+    }
+
+    public void applyUserList(Set<org.kframework.definition.Sentence> res,
+                              org.kframework.kore.Sort sort, Production p, UserList userList) {
+        boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
+
+        org.kframework.kore.Sort elementSort = apply(userList.getSort());
+
+        // TODO: we're splitting one syntax declaration into three, where to put
+        // attributes
+        // of original declaration?
+
+        // Using attributes to mark these three rules
+        // (to be used when translating those back to single KIL declaration)
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+
+        org.kframework.definition.Production prod1, prod2, prod3;
+
+        String kilProductionId = "" + System.identityHashCode(p);
+
+        // lst ::= lst sep lst
+        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                kilProductionId);
+        prod1 = Production(sort,
+                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+
+        // lst ::= elem
+        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+
+        // lst ::= .UserList
+        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
+
+        res.add(prod1);
+        res.add(prod2);
+        if (!nonEmpty) {
+            res.add(prod3);
         }
     }
 
