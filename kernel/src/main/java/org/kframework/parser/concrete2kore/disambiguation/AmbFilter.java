@@ -30,7 +30,6 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
             Term elem = (Term) amb.items().toArray()[i];
             if (elem instanceof ProductionReference) {
                 ProductionReference tc = (ProductionReference) elem;
-                msg += tc.production().sort() + " ::= ";
                 msg += tc.production().toString();
             }
             // TODO: use the unparser

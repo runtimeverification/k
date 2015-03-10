@@ -26,12 +26,12 @@ public class TreeCleanerVisitor extends SetsTransformerWithErrors<ParseFailedExc
         Either<Set<ParseFailedException>, Term> vis;
         if (tc.production().isSyntacticSubsort() && tc.production().klabel().isEmpty()) {
             // eliminating syntactic subsort
-            if (tc.items().size() != 1)
-                return Left.apply(Sets.newHashSet(new ParseFailedException(new KException(
-                        KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
-                        "Only subsort productions and brackets are allowed to have no #klabel attribute", null, tc.location().get()))));
-            //TODO: add source and location to error
             vis = apply(tc.items().get(0));
+        } else if (!tc.production().att().contains("bracket") && tc.production().klabel().isEmpty()) {
+            return Left.apply(Sets.newHashSet(new ParseFailedException(new KException(
+                    KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
+                    "Only subsort productions are allowed to have no #klabel attribute", null, tc.location().get()))));
+            //TODO: add source and location to error
         } else {
             // invalidate the hashCode cache
             tc.invalidateHashCode();

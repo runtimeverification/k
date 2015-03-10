@@ -135,7 +135,7 @@ with the former category.  We prefer the names of variables and functions
 to start with lower case letters.  We take the freedom to tacitly introduce
 syntactic lists/sequences for each nonterminal for which we need them: */
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules]
+  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules, autoReject]
   syntax Names ::= List{Name,","}
 
 /*@ Expression constructs will be defined throughtout the syntax module.

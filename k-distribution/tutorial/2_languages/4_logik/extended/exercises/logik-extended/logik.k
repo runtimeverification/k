@@ -31,9 +31,9 @@ module LOGIK-SYNTAX
   syntax Query ::= "?-" Predicates "."
   syntax Pgm ::= Query | Clause Pgm
 
-  syntax Variable      ::= Token{[\_A-Z][a-zA-Z0-9\_]*}          [notInRules]
-  syntax OperationName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules]
-  syntax PredicateName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules]
+  syntax Variable      ::= Token{[\_A-Z][a-zA-Z0-9\_]*}          [notInRules, autoReject]
+  syntax OperationName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules, autoReject]
+  syntax PredicateName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules, autoReject]
 
   rule P. => P :- .Predicates .                                  [macro]
 

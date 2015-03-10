@@ -21,7 +21,7 @@ module FUN-UNTYPED-SYNTAX
 
 //@ \subsection{The Syntactic Constructs}
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules]
+  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules, autoReject]
   syntax Names ::= List{Name,","}
 
   syntax Exp ::= Int | Bool | String | Name
