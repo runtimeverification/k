@@ -2,10 +2,6 @@
 package org.kframework.krun.api;
 
 import com.google.inject.Inject;
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.util.Pair;
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -23,7 +19,6 @@ import org.kframework.krun.GenericKRunState;
 import org.kframework.krun.GenericTransition;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
-import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.parser.TermLoader;
@@ -33,8 +28,7 @@ import java.util.Map.Entry;
 
 public class ExecutorDebugger implements Debugger {
     private Integer currentState;
-    private KRunGraph graph;
-    private BidiMap<Integer, KRunState> states;
+    private KRunCompactGraph graph;
 
     private static Rule defaultPattern;
     private static RuleCompilerSteps defaultPatternInfo;
@@ -75,24 +69,11 @@ public class ExecutorDebugger implements Debugger {
             e.printStackTrace();
         }
         KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
-        graph = new KRunGraph();
-        states = new DualHashBidiMap<Integer, KRunState>();
-        putState(reduced);
+        graph = new KRunCompactGraph();
+        graph.putState(reduced);
         currentState = reduced.getStateId();
     }
 
-    /**
-     * Adds the new state to the states map
-     * @param state new state to add
-     * @return if the stated wasn't previously in the states map return true else return false
-     */
-    private boolean putState(KRunState state) {
-        if(!states.containsValue(state)){
-            states.put(state.getStateId(), state);
-            return true;
-        }
-        return false;
-    }
 
     public KRunGraph getGraph() {
         return graph;
@@ -103,7 +84,7 @@ public class ExecutorDebugger implements Debugger {
     }
 
     public void setCurrentState(Integer stateNum) throws IllegalArgumentException {
-        if (stateNum == null || states.containsKey(stateNum)) {
+        if (stateNum == null || graph.containsState(stateNum)) {
             currentState = stateNum;
         } else {
             throw new IllegalArgumentException("Cannot set current state to state " + stateNum
@@ -111,10 +92,9 @@ public class ExecutorDebugger implements Debugger {
         }
     }
 
+    @Override
     public KRunState getState(int stateNum) {
-        KRunState state = states.get(stateNum);
-        if (state == null) throw new IllegalArgumentException("State " + stateNum + " does not exist in the graph.");
-        return state;
+        return graph.getState(stateNum);
     }
 
 
@@ -132,9 +112,9 @@ public class ExecutorDebugger implements Debugger {
         }
         KRunGraph currentGraph = finalRelation.getExecutionGraph().get();
         //merge the new graph into the current graph
-        mergeSearchGraph(currentGraph);
+        graph.mergeSearchGraph(currentGraph);
         KRunState finalState = finalRelation.getFinalState();
-        Entry<Integer, KRunState> prevState = containsValue(finalState);
+        Entry<Integer, KRunState> prevState = graph.containsValue(finalState);
         if (!(prevState == null)) {
             currentState = prevState.getKey();
         } else {
@@ -153,58 +133,11 @@ public class ExecutorDebugger implements Debugger {
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
         SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo, true);
-        mergeSearchGraph(results.getGraph());
+        graph.mergeSearchGraph(results.getGraph());
         currentState = null;
         return results;
     }
 
-    private void mergeSearchGraph(DirectedGraph<KRunState, Transition> graphFragment) {
-        for (KRunState state : graphFragment.getVertices()) {
-            //check if graph already contains state
-            Entry<Integer, KRunState> prevValue = containsValue(state);
-            if (prevValue==null) {
-                putState(state);
-                graph.addVertex(state);
-            }
-        }
-        for (Transition edge : graphFragment.getEdges()) {
-            Pair<KRunState> vertices = graphFragment.getEndpoints(edge);
-            Transition existingEdge = graph.findEdge(vertices.getFirst(), vertices.getSecond());
-            KRunState first =vertices.getFirst();
-            KRunState second = vertices.getSecond();
-            //if graph already contained state used old state
-            Entry<Integer, KRunState> prevValue = containsValue(first);
-            if (prevValue!=null){
-                first = prevValue.getValue();
-            }
-            prevValue = containsValue(second);
-            if(prevValue!=null){
-                second = prevValue.getValue();
-            }
-            if (existingEdge != null && existingEdge.getType() == TransitionType.UNLABELLED) {
-                graph.removeEdge(existingEdge);
-                graph.addEdge(edge, first, second);
-            } else if (existingEdge == null) {
-                graph.addEdge(edge, first, second);
-            }
-        }
-    }
-
-    /* checks if state already exists(using Semantic equal)
-     * if it exists return old value
-     * this intends to replace states.containsValue which uses hash and equals defined in KRunState
-     */
-    private Entry<Integer, KRunState> containsValue(KRunState state){
-        for (Entry<Integer,KRunState> e : states.entrySet() ){
-            if(state.equals(e.getValue()))
-                return e ;
-        }
-        return null;
-    }
-    private KRunState canonicalizeState(KRunState state) {
-        int stateNum = states.getKey(state);
-        return states.get(stateNum);
-    }
 
     public Transition getEdge(int state1, int state2) {
         KRunState first = getState(state1);
@@ -231,9 +164,9 @@ public class ExecutorDebugger implements Debugger {
                 "have an stdin buffer");
         }
         KRunState newState = new GenericKRunState(result, counter);
-        Entry<Integer, KRunState> prevValue = containsValue(newState);
+        Entry<Integer, KRunState> prevValue = graph.containsValue(newState);
         if (prevValue!=null) {
-            KRunState canonicalNewState = canonicalizeState(newState);
+            KRunState canonicalNewState = graph.canonicalizeState(newState);
             Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
             if (edge == null) {
                 graph.addEdge(GenericTransition.stdin(s),
@@ -242,7 +175,6 @@ public class ExecutorDebugger implements Debugger {
             currentState = canonicalNewState.getStateId();
             return;
         }
-        putState(newState);
         graph.addVertex(newState);
         graph.addEdge(GenericTransition.stdin(s),
             getState(currentState), newState);
@@ -300,10 +232,6 @@ public class ExecutorDebugger implements Debugger {
 
     @Override
     public void setGraph(KRunGraph graph) {
-        this.graph = graph;
-        states.clear();
-        for (KRunState state : graph.getVertices()) {
-            putState(state);
-        }
+        this.graph = new KRunCompactGraph(graph);
     }
 }
