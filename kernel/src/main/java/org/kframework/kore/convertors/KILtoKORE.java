@@ -47,6 +47,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.parser.generator.SDFHelper;
 import scala.Enumeration.Value;
 import scala.Tuple2;
 import scala.collection.Seq;
@@ -246,7 +247,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().map(l -> Tag(l.getLabel())).collect(Collectors.toSet()));
+        return immutable(labels.stream().flatMap(l ->
+                SDFHelper.getProductionsForTag(l.getLabel(), context).stream().map(p -> Tag(p.getKLabel()))).collect(Collectors.toSet()));
     }
 
     public org.kframework.definition.Sentence apply(Import s) {
