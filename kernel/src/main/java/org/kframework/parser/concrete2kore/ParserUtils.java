@@ -5,6 +5,8 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Sources;
+import org.kframework.kil.loader.CollectProductionsVisitor;
+import org.kframework.kil.loader.Context;
 import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.parser.Term;
@@ -67,7 +69,10 @@ public class ParserUtils {
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
-        KILtoKORE kilToKore = new KILtoKORE(null);
+        Context context = new Context();
+        new CollectProductionsVisitor(context).visitNode(def);
+
+        KILtoKORE kilToKore = new KILtoKORE(context);
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 }
