@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import static org.kframework.Collections.stream;
 import org.kframework.kil.Sources;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kore.convertors.BubbleParsing;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.definition.*;
@@ -56,7 +58,10 @@ public class KoreDefinitionTest {
         def.setMainModule("SIMPLE-UNTYPED");
         def.setMainSyntaxModule("SIMPLE-UNTYPED-SYNTAX");
 
-        KILtoKORE kilToKore = new KILtoKORE(null);
+        org.kframework.kil.loader.Context context = new Context();
+        new CollectProductionsVisitor(context).visitNode(def);
+
+        KILtoKORE kilToKore = new KILtoKORE(context);
         Definition koreDef = kilToKore.apply(def);
 
         return koreDef;
