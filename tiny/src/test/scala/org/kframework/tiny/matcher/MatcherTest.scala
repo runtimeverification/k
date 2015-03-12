@@ -32,7 +32,7 @@ class MatcherTest extends AbstractTest {
 
   @Test def testSimpleWithTrueSideCondition() {
     val foo = 'foo()
-    Assert.assertEquals(And(X -> 'foo()), X.matchAll(foo, True))
+    Assert.assertEquals(X -> 'foo(), X.matchAll(foo, True))
   }
 
   @Test def testEmptyMatch() {
@@ -43,14 +43,14 @@ class MatcherTest extends AbstractTest {
   @Test def testKApply() {
     val foo = 'foo(5: K)
     val pattern = 'foo(X)
-    Assert.assertEquals(And(X -> ((5: K): K)),
+    Assert.assertEquals(X -> ((5: K): K),
       pattern.matchOne(foo, True))
   }
 
   @Test def testKApplyWithCondition() {
     val foo = 'foo(5: K)
     val pattern = 'foo(X)
-    assertEquals(And(X -> ((5: K): K)), pattern.matchOne(foo, Equals(X, 5: K)))
+    assertEquals(X -> ((5: K): K), pattern.matchOne(foo, Equals(X, 5: K)))
   }
 
   @Test def testKApplyWithFailingCondition() {
@@ -80,31 +80,31 @@ class MatcherTest extends AbstractTest {
   }
 
   @Test def testNested() {
-    assertEquals(And(X -> ((5: K): K)), 'foo('bar(X)).matchAll('foo('bar(5: K))))
+    assertEquals(X -> ((5: K): K), 'foo('bar(X)).matchAll('foo('bar(5: K))))
   }
 
   @Test def testAssocEntire() {
     val foo = (5: K) + 6
     val pattern = X
-    assertEquals(And(X -> foo), pattern.matchAll(foo))
+    assertEquals(X -> foo, pattern.matchAll(foo))
   }
 
   @Test def testAssocPrefix() {
     val foo = (5: K) + 6 + 7
     val pattern = X + 7
-    assertEquals(Or(And(X -> ((5: K) + 6))), pattern.matchAll(foo))
+    assertEquals(X -> ((5: K) + 6), pattern.matchAll(foo))
   }
 
   @Test def testAssocPostfix() {
     val foo = (5: K) + 6 + 7
     val pattern = (5: K) + X
-    assertEquals(Or(And(X -> ((6: K) + 7))), pattern.matchAll(foo))
+    assertEquals(X -> ((6: K) + 7), pattern.matchAll(foo))
   }
 
   @Test def testAssocMiddle() {
     val foo = (5: K) + 6 + 7 + 8
     val pattern = (5: K) + X + 8
-    assertEquals(Or(And(X -> ((6: K) + 7))), pattern.matchAll(foo))
+    assertEquals(X -> ((6: K) + 7), pattern.matchAll(foo))
   }
 
   @Test def testAssocMultivar() {
@@ -126,7 +126,7 @@ class MatcherTest extends AbstractTest {
   @Test def testAssocMultivar2() {
     val foo = (5: K) + 6 + 7
     val pattern = X + 6 + Y
-    assertEquals(Or(And(Y -> 7, X -> 5)), pattern.matchAll(foo))
+    assertEquals(And(Y -> 7, X -> 5), pattern.matchAll(foo))
   }
 
   @Test def testAssocMultivar3() {
@@ -142,15 +142,15 @@ class MatcherTest extends AbstractTest {
   @Test def testAssocMultivar3WithCond() {
     val foo = (5: K) + 5 + 5
     val pattern = X + 5 + Y
-    assertEquals(Or(
+    assertEquals(
       And(X -> 5, Y -> 5)
-    ), pattern.matchAll(foo, Equals(X, 5: K)))
+      , pattern.matchAll(foo, Equals(X, 5: K)))
   }
 
   @Test def testAssocMultipleVar() {
     val foo = '+(5: K, 5: K)
     val pattern = '+(X, X)
-    assertEquals(Or(And(X -> (5: K))),
+    assertEquals(X -> (5: K),
       pattern.matchAll(foo))
   }
 
@@ -163,7 +163,7 @@ class MatcherTest extends AbstractTest {
   @Test def testKApplyWithEmptySeq() {
     val foo = '+()
     val pattern = '+(X)
-    assertEquals(And(X -> '+()), pattern.matchOne(foo))
+    assertEquals(X -> '+(), pattern.matchOne(foo))
   }
 
   //  @Test def testKVariableMatchingKLabel() {
@@ -234,6 +234,12 @@ class MatcherTest extends AbstractTest {
         (X -> 'bar() && inner.TOPVariable -> 'foo(inner.HOLEVariable) && outer.TOPVariable -> outer.HOLEVariable) ||
         (X -> 'bar() && inner.TOPVariable -> inner.HOLEVariable && outer.TOPVariable -> 'foo(outer.HOLEVariable))),
       outer.matchAll(o))
+  }
+
+  @Test def testOrInMatch {
+    NormalizationCaching.cache.cleanUp()
+    val o = Or(1: K)
+    assertEquals(True, o.matchAll(o))
   }
 
 }

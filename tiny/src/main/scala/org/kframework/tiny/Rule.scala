@@ -33,6 +33,7 @@ object Rule {
             processAnd(and)
         }
         case and: And => Set(processAnd(and))
+        case b: Binding => Set(processAnd(And(b)))
       }
     }
   }

@@ -15,19 +15,7 @@ object Or extends KAssocAppLabel with EmptyAtt {
   override def apply(ks: K*): Or = super.apply(ks: _*).asInstanceOf[Or]
 }
 
-trait NormalizationCache {
-  self: K =>
-
-  val normalBy: Option[Theory]
-  def normalizeInner(implicit theory: Theory) = normalBy match {
-    case Some(`normalBy`) => this
-    case _ =>
-      if (this == True || this == False)
-        this
-      else
-        actualNormalize
   }
-  def actualNormalize(implicit theory: Theory): K
 }
 
 case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None)
@@ -44,6 +32,8 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
   override def toString =
     if (children.size == 0)
       "False"
+    else if (children.size == 1)
+      "||(" + children.head + ")"
     else
       "(" + children.mkString(" || ") + ")"
 
@@ -73,7 +63,10 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
     case or: Or =>
       val newMe = Or(or.children map { _.normalize }, att)
       if (EqualsMatcher(newMe, this).normalize == True)
-        Or(or.children, att, Some(theory))
+        if (or.children.size == 1)
+          or.head
+        else
+          Or(or.children, att, Some(theory))
       else
         newMe.normalize
     case x => x.normalize
@@ -98,15 +91,16 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   // Implementing K
   val klabel = And
 
-  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
-
-  def actualNormalize(implicit theory: Theory): K = {
+  override def normalizeInner(implicit theory: Theory): K = {
     val dnf = toDNF.eliminateGroundBooleans
     dnf match {
       case and: And =>
         val newMe = and.normalizeChildren
         if (EqualsMatcher(newMe, this).normalize == True)
-          And(and.children, att, Some(theory))
+          if (and.children.size == 1)
+            and.head
+          else
+            And(and.children, att, Some(theory))
         else
           newMe.normalize
       case x => x.normalize
@@ -183,10 +177,10 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
 
   override def eliminateGroundBooleans: Logic = children.foldLeft(True: Logic) {
     case (_, False) => False
-//    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
+    //    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
     case (False, _) => False
     case (sum, True) => sum
-//    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
+    //    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
     case (sum, Or(True, _, _)) => sum
     case (sum: And, p) => And(sum.children + p, sum.att)
   }
@@ -214,6 +208,8 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   override def toString =
     if (children.size == 0)
       "True"
+    else if (children.size == 1)
+      "&&(" + children.head + ")"
     else
       "(" + children.mkString(" && ") + ")"
 }

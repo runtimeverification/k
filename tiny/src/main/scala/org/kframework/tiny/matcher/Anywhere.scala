@@ -30,13 +30,14 @@ case class AnywhereMatcher(left: Anywhere, right: K) extends Matcher with KProdu
     val localSolution = And(left.k.matcher(right), Binding(TOPVariable, HOLEVariable))
     val childrenSolutions = right match {
       case k: KApp =>
-        Or(k.children.map { c: K => // we are generating distinct solutions for each child of the right
+        Or(k.children.map {c: K => // we are generating distinct solutions for each child of the right
           val solution: K = left.matcher(c).normalize
           val updatedSolution: K = solution match {
             case orSolution: Or => Or(orSolution.children map {
               case s: And => // for each distinct subsolution (a child c may have multiple subsolutions)
                 rewire(s, k, c)
             } toSeq: _*)
+            case oneSolution: And => rewire(oneSolution, k, c)
           }
           updatedSolution
         }.toSeq: _*)
@@ -46,7 +47,7 @@ case class AnywhereMatcher(left: Anywhere, right: K) extends Matcher with KProdu
   }
 
   private def rewire(toRewire: And, k: KApp, childOfK: K)(implicit theory: Theory): K = {
-    val newAnywhere: K = k.klabel(k.children map { childK: K =>
+    val newAnywhere: K = k.klabel(k.children map {childK: K =>
       childK match {
         case `childOfK` => toRewire.binding(TOPVariable)
         case t: K => t

@@ -71,7 +71,7 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
-      case Sorts.Bool => TypedKTok(sort, s.toBoolean)
+      case Sorts.Bool => val t = TypedKTok(sort, s.toBoolean); t.isNormal = false; t
       case _ => RegularKTok(sort, s)
     }
   }
