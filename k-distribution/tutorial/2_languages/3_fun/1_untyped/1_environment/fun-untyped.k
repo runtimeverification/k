@@ -295,7 +295,7 @@ it as a name instead of as an expression constant: */
 
   syntax Exp ::= "callcc"
                | "try" Exp "catch" "(" Name ")" Exp
-  syntax Name ::= "throw"
+  syntax Name ::= "throw" [token]
 
 /*@ Finally, FUN also allows polymorphic datatype declarations.  These
 will be useful when we define the type system later on. */

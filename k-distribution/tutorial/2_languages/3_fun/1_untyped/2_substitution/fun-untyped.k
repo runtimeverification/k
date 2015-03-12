@@ -79,7 +79,7 @@ module FUN-UNTYPED-SYNTAX
 
   syntax Exp ::= "callcc"
                | "try" Exp "catch" "(" Name ")" Exp
-  syntax Name ::= "throw"
+  syntax Name ::= "throw" [token]
 
   syntax Exp ::= "datatype" Type "=" TypeCases Exp
 
