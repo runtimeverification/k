@@ -51,29 +51,18 @@ yet concerned with proving) that the first two variables will always have the
 claimed sorts whenever we execute any expression that parses within our
 original grammar.
 
-Let us compile the definition and then run some programs.
-
-First, you will notice that a new cell has been automatically added to the
-default configuration.  For example,
+Let us compile the definition and then run some programs.  For example,
 
     krun closed-variable-capture.lambda
 
 yields the output
 
     <k>
-      lambda _id0 . ((lambda x . (lambda y . (x  y)))  _id0) 
+      lambda y . ((lambda x . (lambda y . (x  y))) y)
     </k> 
-    <nextId>
-      1 
-    </nextId> 
 
-The new cell `<nextId> ... </nextId>` has been added by the substitution,
-to keep track of the fresh variables that it needs to generate in order to
-avoid variable capture.  In our example above, it has already used a fresh
-identifier, `_id0`, and thus the counter has been incremented (from 0 to 1).
-
-Second, you will notice that only certain programs reduce (some even yield
-non-termination, such as `omega.lambda`), while others do not.  For example,
+Notice that only certain programs reduce (some even yield non-termination,
+such as `omega.lambda`), while others do not.  For example,
 `free-variable-capture.lambda` does not reduce its second argument expression
 to `y`, as we would expect.  This is because the K rewrite rules between syntactic
 terms do not apply anywhere they match.  They only apply where they have been
