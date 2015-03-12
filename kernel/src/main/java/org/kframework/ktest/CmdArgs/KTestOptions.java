@@ -188,6 +188,11 @@ public class KTestOptions {
      */
     private boolean debug = false;
 
+    /**
+     * Enable warnings to errors conversion. When enabled, KTest passes -w2e to spawned processes.
+     */
+    private boolean warnings2errors = false;
+
     public final long start = System.currentTimeMillis();
 
     public KTestOptions() {}
@@ -215,6 +220,7 @@ public class KTestOptions {
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
         this.debug = obj.debug;
+        this.warnings2errors = obj.warnings2errors;
     }
 
     /**
@@ -324,6 +330,14 @@ public class KTestOptions {
 
     public int getThreads() {
         return threads;
+    }
+
+    public boolean isWarnings2errors() {
+        return warnings2errors;
+    }
+
+    public void setWarnings2errors(boolean warnings2errors) {
+        this.warnings2errors = warnings2errors;
     }
 
     public void setDebug(boolean debug) {

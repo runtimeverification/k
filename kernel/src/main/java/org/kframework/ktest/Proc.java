@@ -143,16 +143,22 @@ public class Proc<T> implements Runnable {
 
     @Override
     public void run() {
+        // pass the --warnings-to-errors flag to all processes if specified to ktest
+        String[] warningsArgs = args;
+        if (options.isWarnings2errors()) {
+            warningsArgs = Arrays.copyOf(args, args.length + 1);
+            warningsArgs[args.length] = "--warnings-to-errors";
+        }
         if (options.getDebug()) {
-            String[] debugArgs = Arrays.copyOf(args, args.length + 1);
-            debugArgs[args.length] = "--debug";
+            String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
+            debugArgs[warningsArgs.length] = "--debug";
             if (expectedErr != null) {
                 // We want to use --debug and compare error outputs too. In this case we need to
                 // make two runs:
                 // 1) We pass --debug and collect output with stack trace.
                 // 2) We don't pass --debug and use output for comparison.
                 ProcOutput debugOutput = runProc(debugArgs);
-                procOutput = runProc(args);
+                procOutput = runProc(warningsArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, debugOutput);
                 }
@@ -164,7 +170,7 @@ public class Proc<T> implements Runnable {
                 }
             }
         } else {
-            procOutput = runProc(args);
+            procOutput = runProc(warningsArgs);
             if (!options.dry) {
                 handlePgmResult(procOutput, null);
             }

@@ -212,7 +212,7 @@ public class KExceptionManager {
             return;
         synchronized(exceptions) {
             exceptions.add(exception);
-            if (exception.type == ExceptionType.ERROR) {
+            if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
                 throw new KEMException(exception);
             }
         }
