@@ -62,11 +62,11 @@ public class BuiltinStringOperations {
         int codePoint = term.intValue();
         try {
             StringUtil.throwIfSurrogatePair(codePoint);
+            char[] chars = Character.toChars(codePoint);
+            return StringToken.of(new String(chars));
         } catch (IllegalArgumentException e) {
             return null;
         }
-        char[] chars = Character.toChars(codePoint);
-        return StringToken.of(new String(chars));
     }
 
     public static StringToken substr(StringToken term, IntToken start, IntToken end, TermContext context) {
