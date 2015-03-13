@@ -74,7 +74,7 @@ case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
           case (prefix, suffix) =>
             And(headL.matcher(left.klabel(prefix, right.att)), matchContents(tailL, suffix))
         }
-          .fold(False)({ (a, b) => Or(a, b) })
+          .fold(False: K)({ (a, b) => Or(a, b) })
 
       case other => False
     }

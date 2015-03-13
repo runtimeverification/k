@@ -24,10 +24,12 @@ trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher
   final def normalize(implicit theory: Theory): K = {
-    if (this.isNormal)
+//    println(this + " ... " + NormalizationCaching.cache.size())
+    if (this.isNormal) {
       this
-    else
-      NormalizationCaching.cache.get(this, new Callable[K] {
+    } else {
+//      println("normalizing")
+      val res = NormalizationCaching.cache.get(this, new Callable[K] {
         override def call(): K = {
           val inner = normalizeInner
           val res = theory.normalize(inner)
@@ -35,6 +37,8 @@ trait K extends kore.K {
           res
         }
       })
+      res
+    }
   }
   protected[this] def normalizeInner(implicit theory: Theory): K
 
@@ -94,6 +98,7 @@ trait PlainNormalization {
 trait KLeaf extends K {
   def copy(att: Att): KLeaf
   def normalizeInner(implicit theory: Theory): K = this
+  isNormal = true
 }
 
 /**
@@ -103,8 +108,8 @@ trait KAssocApp extends KApp with PlainNormalization {
   val klabel: KAssocAppLabel
 
   def head: K = children.head
-  def tail: KAssocApp = klabel.construct(children.tail, att)
-  def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
+  def tail: K = klabel.construct(children.tail, att)
+  def map(f: K => K): K = klabel.construct(children.map(f), att)
 
   override def matcher(right: K): Matcher = KAssocAppMatcher(this, right)
 }
@@ -118,7 +123,7 @@ trait KRegularApp extends KApp {
  * KApp with fixed arity. It is defined using a non-associative operator.
  */
 trait KProduct extends KRegularApp with Product {
-  val children = productIterator collect { case k: K => k } toIterable
+  val children = productIterator collect {case k: K => k } toList
 }
 
 /**
@@ -203,7 +208,7 @@ trait Label extends kore.KLabel {
   def apply(l: Seq[K], att: Att): K =
     construct(l, att)
 
-  def construct(l: Iterable[K], att: Att): KApp
+  def construct(l: Iterable[K], att: Att): K
   @annotation.varargs def apply(l: K*): K = apply(l, Att())
   def att: Att
 
@@ -221,21 +226,24 @@ trait KRegularAppLabel extends Label {
 trait KProduct1Label extends KRegularAppLabel {
   def apply(k: K, att: Att): KProduct
   def construct(l: Iterable[K], att: Att): KProduct =
-    l match {case Seq(k) => apply(k, att) }
+    l match { case Seq(k) => apply(k, att) }
 }
 
 trait KProduct2Label extends KRegularAppLabel {
   def apply(k1: K, k2: K, att: Att): KProduct
   def construct(l: Iterable[K], att: Att): KProduct =
-    l match {case Seq(k1, k2) => apply(k1, k2, att) }
+    l match { case Seq(k1, k2) => apply(k1, k2, att) }
 }
 
 trait KAssocAppLabel extends Label {
-  def construct(l: Iterable[K], att: Att): KAssocApp = {
-    val b = newBuilder(att)
-    l foreach b.+=
-    b.result()
-  }
+  def construct(l: Iterable[K], att: Att): K =
+    if (l.size == 1)
+      return l.head
+    else {
+      val b = newBuilder(att)
+      l foreach b.+=
+      b.result()
+    }
   def newBuilder(att: Att): mutable.Builder[K, KAssocApp] =
     new KAppAssocBuilder(ListBuffer[K](), this).mapResult { constructFromFlattened(_, att) }
   def constructFromFlattened(l: Seq[K], att: Att): KAssocApp

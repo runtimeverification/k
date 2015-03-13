@@ -48,9 +48,9 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     uniqueLabelCache.getOrElseUpdate(res.name, res)
   }
 
-  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): KApp = {
+  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): K = {
     val x: Label = convert(klabel)
-    x(klist.items.asScala.toSeq map convert, att).asInstanceOf[KApp]
+    x(klist.items.asScala.toSeq map convert, att)
   }
 
   def KApply(klabel: kore.KLabel, list: List[tiny.K], att: Att): KApp = {
@@ -60,8 +60,8 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
 
   def KApply(klabel: kore.KLabel, list: List[tiny.K]): KApp = KApply(klabel, list, Att())
 
-  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): KSeq =
-    KSeq(items.asScala.toSeq map convert, att).asInstanceOf[KSeq]
+  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): K =
+    KSeq(items.asScala.toSeq map convert, att)
 
   override def KVariable(name: String, att: Att): KVar = KVar(name, att)
 

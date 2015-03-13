@@ -31,5 +31,5 @@ trait ScalaSugar[K <: kore.K] {
   }
 
   def KList[KK <: K](ks: Seq[KK]): KList = KList(ks.asJava)
-  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): KApply = KApply(klabel, KList(ks), att)
+  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): K = KApply(klabel, KList(ks), att)
 }

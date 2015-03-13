@@ -1,25 +1,36 @@
 package org.kframework.tiny
 
 import org.kframework.attributes.Att
-import org.kframework.kore.{Unapply, Unparse}
+import org.kframework.kore.Unapply
 import org.kframework.tiny.matcher.EqualsMatcher
-
-trait Logic extends K {
-  def toDNF: Logic
-  def eliminateGroundBooleans: Logic
-}
 
 object Or extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
   override def name: String = "'_orBool_"
-  override def apply(ks: K*): Or = super.apply(ks: _*).asInstanceOf[Or]
+  override def apply(ks: K*): K = super.apply(ks: _*)
+  def apply(ks: Set[K], att: Att = Att()): K =
+    if (ks.size == 1)
+      ks.head
+    else
+      new Or(ks, att)
 }
 
+object OrChildren {
+  def unapply(k: K): Option[Set[K]] = k match {
+    case or: Or => Some(or.children)
+    case k => Some(Set(k))
   }
 }
 
-case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = None)
-  extends KAssocApp with Logic with NormalizationCache {
+object AndChildren {
+  def unapply(k: K): Option[Set[K]] = k match {
+    case and: And => Some(and.children)
+    case k => Some(Set(k))
+  }
+}
+
+class Or(val children: Set[K], val att: Att = Att(), normalBy: Option[Theory] = None)
+  extends KAssocApp {
   /** Estimate the time it takes to solve (up to available data) one of the child formulas  */
   def estimate(implicit t: Theory): Int = ???
 
@@ -37,36 +48,14 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
     else
       "(" + children.mkString(" || ") + ")"
 
-  override def normalizeInner(implicit theory: Theory) = super[NormalizationCache].normalizeInner
-
-  def toDNF: Logic = toDNF(False, children.toSeq).eliminateGroundBooleans
-
-  private def toDNF(start: Logic, children: Seq[K]): Logic = children.foldLeft(start: Logic) {
-    case (sum: Or, p: Or) => toDNF(sum, p.children.toSeq)
-    case (sum: Or, p: And) => p.toDNF match {
-      case or: Or => Or(sum.children ++ or.children)
-      case p: And => Or(sum.children + p)
-    }
-    case (sum: Or, p) => new Or(sum.children + And(p))
-  }
-
-  def eliminateGroundBooleans: Logic = children.foldLeft(False: Logic) {
-    case (_, True) => Or(True)
-//    case (sum, TypedKTok(Sorts.Bool, true, _)) => Or(True)
-    case (True, _) => Or(True)
-    case (sum: Or, False) => sum
-//    case (sum, TypedKTok(Sorts.Bool, false, _)) => sum
-    case (sum: Or, p) => Or(sum.children + p)
-  }
-
-  override def actualNormalize(implicit theory: Theory): K = toDNF.eliminateGroundBooleans match {
+  override def normalizeInner(implicit theory: Theory): K = this.toDNF.eliminateGroundBooleans match {
     case or: Or =>
       val newMe = Or(or.children map { _.normalize }, att)
       if (EqualsMatcher(newMe, this).normalize == True)
         if (or.children.size == 1)
           or.head
         else
-          Or(or.children, att, Some(theory))
+          Or(or.children, att)
       else
         newMe.normalize
     case x => x.normalize
@@ -76,11 +65,10 @@ case class Or(children: Set[K], att: Att = Att(), normalBy: Option[Theory] = Non
 object And extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new And(l.toSet, att)
   override def name: String = "'_andBool_"
-  override def apply(ks: K*): And = super.apply(ks: _*).asInstanceOf[And]
 }
 
 case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
-  extends KAssocApp with Logic with NormalizationCache {
+  extends KAssocApp {
 
   /** Estimate the time it takes to solve one variable in one formula */
   def estimate(implicit t: Theory): Int = ???
@@ -92,7 +80,7 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   val klabel = And
 
   override def normalizeInner(implicit theory: Theory): K = {
-    val dnf = toDNF.eliminateGroundBooleans
+    val dnf = this.toDNF.eliminateGroundBooleans
     dnf match {
       case and: And =>
         val newMe = and.normalizeChildren
@@ -107,7 +95,7 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
     }
   }
 
-  def normalizeChildren(implicit theory: Theory): Logic = {
+  def normalizeChildren(implicit theory: Theory): K = {
     if (children.toStream.exists(_.isFalse))
       False
     else {
@@ -135,7 +123,7 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
             c.substitute(newBindings).normalize
         }
 
-        childrenWithSubstitution.foldLeft(True: Logic) {
+        childrenWithSubstitution.foldLeft(True: K) {
           case (False, _) => False
           case (sum: And, b: Binding) => sum.addBinding(b)
           case (sum: And, c) => And(sum.children + c, sum.att)
@@ -144,60 +132,21 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
     }
   }
 
-  def toDNF: Logic = {
-    val res = toDNF(True, children.toSeq)
+  def eliminateGroundBooleans: K = if (children.contains(False)) False else this
 
-    res match {
-      case and: And => assert(!and.children.exists(c => c.isInstanceOf[And] || (c.isInstanceOf[Or] && c != False)),
-        Unparse(and))
-      case _ =>
-    }
-
-    res
-  }
-
-  def toDNF(start: Logic, c: Seq[K]): Logic =
-    c.foldLeft(start) {
-      case (sum: And, or: Or) =>
-        Or((for (m1 <- or.children) yield {
-          And(m1, sum).toDNF
-        }).toSeq: _*).toDNF
-      case (sum: And, p: And) => toDNF(sum, p.children.toSeq)
-      case (sum: And, p) => new And(sum.children + p, sum.att)
-
-      case (sum: Or, p: And) => toDNF(p, Seq(sum))
-      case (sum: Or, p: Or) =>
-        Or((for (m1 <- sum.children;
-                 m2 <- p.children) yield {
-          And(m1, m2).toDNF
-        }).toSeq: _*).toDNF
-      case (sum: Or, p) => toDNF(And(p), Seq(sum))
-    }
+  //    children.foldLeft(True: K) {
+  //    case (_, False) => False
+  //    //    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
+  //    case (False, _) => False
+  //    case (sum, True) => sum
+  //    //    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
+  //    case (sum, Or(True, _, _)) => sum
+  //    case (sum: And, p) => And(sum.children + p, sum.att)
+  //  }
 
 
-  override def eliminateGroundBooleans: Logic = children.foldLeft(True: Logic) {
-    case (_, False) => False
-    //    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
-    case (False, _) => False
-    case (sum, True) => sum
-    //    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
-    case (sum, Or(True, _, _)) => sum
-    case (sum: And, p) => And(sum.children + p, sum.att)
-  }
-
-
-  lazy val bindings = children collect {
-    case b: Binding => b
-  }
-
-  lazy val binding: Map[KVar, K] = bindings map {
-    case Binding(k, v, _) => (k, v)
-  } toMap
-
-  lazy val isPureSubsitution: Boolean = binding.size == children.size
-
-  def addBinding(b: Binding)(implicit theory: Theory): Logic = {
-    if (bindings.exists {
+  def addBinding(b: Binding)(implicit theory: Theory): K = {
+    if (this.bindings.exists {
       bb => bb.variable == b.variable && Equals(bb.value, b.value).normalize != True
     })
       False
