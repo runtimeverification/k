@@ -88,7 +88,6 @@
                   <arg value="-v" />
                   <arg value="--report" />
                   <arg value="--debug" />
-                  <env key="K_NAILGUN" value="true" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>

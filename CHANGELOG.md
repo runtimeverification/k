@@ -9,6 +9,8 @@
   Limited support for K 3.5 will continue until the release of K 4.0. We will
   backport bug fixes if necessary. K 4.0 will be released when the
   Java backend is deemed a suitable complete replacement for maude.
+- Removed the `K_NAILGUN` environment variable: K now uses nailgun whenever
+  it is able to connect to a K server.
 
 ## KRun ##
 
