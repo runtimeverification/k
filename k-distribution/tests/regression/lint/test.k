@@ -4,5 +4,6 @@ module TEST-SYNTAX
 endmodule
 
 module TEST
+  imports TEST-SYNTAX
 
 endmodule
