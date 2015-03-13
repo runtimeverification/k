@@ -85,7 +85,7 @@ public class RuleGrammarGenerator {
 
         // if no start symbol has been defined in the configuration, then use K
         for (Sort srt : iterable(mod.definedSorts())) {
-            if (!kSorts.contains(srt)) {
+            if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
                 // K ::= Sort
                 prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
             }

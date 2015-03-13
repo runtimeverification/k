@@ -70,6 +70,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val definedSorts: Set[Sort] = (productions map { _.sort }) ++ (sortDeclarations map { _.sort })
 
+  val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
+
   private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
   }
