@@ -16,7 +16,7 @@ package object tiny {
     def ins = { println(x); x }
   }
 
-  implicit class ToDNF(t: K) {
+  implicit class HasDNF(val t: K) extends AnyVal {
     def toDNF: K = t match {
       case and: And => and.children.map(_.toDNF).fold(True)({
         (or1: K, or2: K) =>
@@ -30,39 +30,28 @@ package object tiny {
     }
   }
 
-  implicit class AsAnd(thisAnd: K) {
+  implicit class AsAnd(val thisAnd: K) extends AnyVal {
     def children: Set[K] = thisAnd match {
-      case AndChildren(thisC) => thisC
+      case and: And => and.children
+      case k: K => Set(k)
     }
 
-    lazy val bindings = children collect {
-      case b: Binding => b
+    def binding: Map[KVar, K] = thisAnd match {
+      case and: And => and.binding
+      case k: Binding => Map(k.variable -> k.value)
+      case _ => Map()
     }
 
-    lazy val binding: Map[KVar, K] = bindings map {
-      case Binding(k, v, _) => (k, v)
-    } toMap
-
-    lazy val isPureSubsitution: Boolean = binding.size == children.size
+    def isPureSubsitution: Boolean = binding.size == children.size
   }
 
-  implicit class AsOr(thisOr: K) {
+  implicit class AsOr(val thisOr: K) extends AnyVal {
     def |(thatOr: K) = Or(children | AsOr(thatOr).children)
 
     def children: Set[K] = thisOr match {
-      case OrChildren(thisC) => thisC
+      case or: Or => or.children
+      case k: K => Set(k)
     }
-
-    def eliminateGroundBooleans: K = if (children.contains(True)) True else thisOr
-
-    //      children.foldLeft(False: K) {
-    //      case (_, True) => Or(True)
-    //      //    case (sum, TypedKTok(Sorts.Bool, true, _)) => Or(True)
-    //      case (True, _) => Or(True)
-    //      case (sum: Or, False) => sum
-    //      //    case (sum, TypedKTok(Sorts.Bool, false, _)) => sum
-    //      case (sum: Or, p) => Or(sum.children + p)
-    //    }
   }
 
 }

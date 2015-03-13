@@ -67,11 +67,14 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
 
   override def Sort(name: String): kore.Sort = KORE.Sort(name)
 
-  override def KToken(sort: kore.Sort, s: String, att: Att): KTok = {
+  override def KToken(sort: kore.Sort, s: String, att: Att): K = {
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
-      case Sorts.Bool => val t = TypedKTok(sort, s.toBoolean); t.isNormal = false; t
+      case Sorts.Bool => s match {
+        case "true" => And()
+        case "false" => Or()
+      }
       case _ => RegularKTok(sort, s)
     }
   }

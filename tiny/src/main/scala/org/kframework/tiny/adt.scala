@@ -5,6 +5,7 @@ import java.util.concurrent.Callable
 import com.google.common.cache.CacheBuilder
 import org.kframework._
 import org.kframework.attributes.Att
+import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT
 import org.kframework.tiny.matcher._
 
@@ -24,17 +25,17 @@ trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher
   final def normalize(implicit theory: Theory): K = {
-//    println(this + " ... " + NormalizationCaching.cache.size())
+    //    println(this + " ... " + NormalizationCaching.cache.size())
     if (this.isNormal) {
       this
     } else {
-//      println("normalizing")
+      //      println("normalizing")
       val res = NormalizationCaching.cache.get(this, new Callable[K] {
         override def call(): K = {
           val inner = normalizeInner
-          val res = theory.normalize(inner)
-          res.isNormal = true
-          res
+          //          val res = theory.normalize(inner)
+          inner.isNormal = true
+          inner
         }
       })
       res
@@ -168,7 +169,14 @@ case class NativeBinaryOp[T, R](val klabel: NativeBinaryOpLabel[T, R], val child
   extends KRegularApp {
   override def normalizeInner(implicit theory: Theory): K = children match {
     case Seq(TypedKTok(s1, v1: T, _), TypedKTok(s2, v2: T, _)) if s1 == s2 =>
-      TypedKTok(klabel.resSort, klabel.f(v1, v2))
+      // ugly hack
+      val res = klabel.f(v1, v2)
+      if (klabel.resSort != Sorts.Bool)
+        TypedKTok(klabel.resSort, res)
+      else res match {
+        case true => And()
+        case false => Or()
+      }
     case _ => this
   }
 }

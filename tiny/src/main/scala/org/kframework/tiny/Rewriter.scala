@@ -85,7 +85,7 @@ class Rewriter(module: definition.Module) {
     var prev: K = null
     do {
       steps += 1
-      if (steps % 100 == 0) {
+      if (steps % 1000 == 0) {
         println(steps +
           " runtime: " + (System.nanoTime() - time) / 1000000 +
           " cache size: " + NormalizationCaching.cache.size +

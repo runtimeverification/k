@@ -60,7 +60,7 @@ public class TstTinyOnKORE extends BaseTest {
                                 ))),
                 cons.KLabel("'<state>").apply(
                         cons.KLabel("'_Map_").apply(
-                                cons.KLabel("'_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(10)),
+                                cons.KLabel("'_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(200)),
                                 cons.KLabel("'_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
                 ),
                 cons.KLabel("'<s>").apply()

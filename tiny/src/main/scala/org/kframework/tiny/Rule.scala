@@ -24,15 +24,7 @@ object Rule {
       //      print(count);
       count = count + 1;
       val pmSolutions = And(left.matcher(t), sideConditions).normalize
-      pmSolutions match {
-        case OrChildren(children) if children.size == 0 =>
-          //          println(" tried and failed " + left + " => " + right)
-          Set()
-        case OrChildren(children) => children map {
-          case and =>
-            processAnd(and)
-        }
-      }
+      AsOr(pmSolutions).children map processAnd
     }
   }
 }
@@ -50,20 +42,10 @@ object ExecuteRule {
     }
 
     (t: K) => {
-
-
       //      print(count);
       count = count + 1;
       val pmSolutions = And(left.matcher(t), sideConditions).normalize
-      pmSolutions match {
-        case OrChildren(children) if children.size == 0 =>
-          //          println(" tried and failed " + left + " => " + right)
-          None
-        case OrChildren(children) => children.headOption map {
-          case and: K => substitute(and, t).normalize
-        }
-        case and: And => Some(substitute(and, t).normalize)
-      }
+      AsOr(pmSolutions).children.headOption map { substitute(_, t).normalize }
     }
   }
 }

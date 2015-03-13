@@ -15,20 +15,6 @@ object Or extends KAssocAppLabel with EmptyAtt {
       new Or(ks, att)
 }
 
-object OrChildren {
-  def unapply(k: K): Option[Set[K]] = k match {
-    case or: Or => Some(or.children)
-    case k => Some(Set(k))
-  }
-}
-
-object AndChildren {
-  def unapply(k: K): Option[Set[K]] = k match {
-    case and: And => Some(and.children)
-    case k => Some(Set(k))
-  }
-}
-
 class Or(val children: Set[K], val att: Att = Att(), normalBy: Option[Theory] = None)
   extends KAssocApp {
   /** Estimate the time it takes to solve (up to available data) one of the child formulas  */
@@ -48,18 +34,19 @@ class Or(val children: Set[K], val att: Att = Att(), normalBy: Option[Theory] = 
     else
       "(" + children.mkString(" || ") + ")"
 
-  override def normalizeInner(implicit theory: Theory): K = this.toDNF.eliminateGroundBooleans match {
-    case or: Or =>
-      val newMe = Or(or.children map { _.normalize }, att)
-      if (EqualsMatcher(newMe, this).normalize == True)
-        if (or.children.size == 1)
-          or.head
+  override def normalizeInner(implicit theory: Theory): K =
+    this.toDNF match {
+      case or: Or =>
+        val newMe = Or(or.children map { _.normalize }, att)
+        if (EqualsMatcher(newMe, this).normalize == True)
+          if (or.children.size == 1)
+            or.head
+          else
+            Or(or.children, att)
         else
-          Or(or.children, att)
-      else
-        newMe.normalize
-    case x => x.normalize
-  }
+          newMe.normalize
+      case x => x.normalize
+    }
 }
 
 object And extends KAssocAppLabel with EmptyAtt {
@@ -80,8 +67,7 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   val klabel = And
 
   override def normalizeInner(implicit theory: Theory): K = {
-    val dnf = this.toDNF.eliminateGroundBooleans
-    dnf match {
+    this.toDNF match {
       case and: And =>
         val newMe = and.normalizeChildren
         if (EqualsMatcher(newMe, this).normalize == True)
@@ -132,18 +118,13 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
     }
   }
 
-  def eliminateGroundBooleans: K = if (children.contains(False)) False else this
+  lazy val bindings = children collect {
+    case b: Binding => b
+  }
 
-  //    children.foldLeft(True: K) {
-  //    case (_, False) => False
-  //    //    case (sum, TypedKTok(Sorts.Bool, false, _)) => False
-  //    case (False, _) => False
-  //    case (sum, True) => sum
-  //    //    case (sum, TypedKTok(Sorts.Bool, true, _)) => sum
-  //    case (sum, Or(True, _, _)) => sum
-  //    case (sum: And, p) => And(sum.children + p, sum.att)
-  //  }
-
+  lazy val binding: Map[KVar, K] = bindings map {
+    case Binding(k, v, _) => (k, v)
+  } toMap
 
   def addBinding(b: Binding)(implicit theory: Theory): K = {
     if (this.bindings.exists {
