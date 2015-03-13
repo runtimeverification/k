@@ -25,10 +25,17 @@ SUBSTITUTION, which is defined in the required `substitution.k` file.
 
 Now we have all the substitution machinery available for our definition.
 However, since our substitution is generic, it cannot know which language
-constructs bind variables; however, this information is critical in order to
-correctly solve the variable capture problem.  Thus, you have to tell the
-substitution that your lambda construct is meant to be a binder.  This is
-simply done using the attribute `binder`.
+constructs bind variables, and what counts as a variable; however, this
+information is critical in order to correctly solve the variable capture
+problem.  Thus, you have to tell the substitution that your lambda construct
+is meant to be a binder, and that your `Id` terms should be treated as variables
+for substitution.  The former is done using the attribute `binder`.
+By default, `binder` binds all the variables occurring anywhere in the first 
+argument of the corresponding syntactic construct within its other arguments;
+you can configure which arguments are bound where, but that will be discussed
+in subsequent lectures.  To tell K which terms are meant to act as variables
+for binding and substitution, we have to explicitly subsort the desired syntactic 
+categories to the builtin `KVariable` sort.
 
 Now we are ready to define our first K rule.  Rules are introduced with the
 keyword `rule` and make use of the rewrite symbol, `=>`.  In our case,
