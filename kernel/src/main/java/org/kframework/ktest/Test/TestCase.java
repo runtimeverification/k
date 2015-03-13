@@ -564,6 +564,5 @@ public class TestCase {
 
     public void setWarnings2errors(boolean warnings2errors) {
         this.warnings2errors = warnings2errors;
-        System.out.println("warnings2errors = " + warnings2errors);
     }
 }

@@ -192,7 +192,6 @@ public class ConfigFileParser {
             overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
         if (includeAttrs.getNamedItem("skip") != null)
             overrideSkips(ret, skips);
-        System.out.println("ConfigFileParser.parseInclude");
         if (includeAttrs.getNamedItem("warnings2errors") != null) {
             overrideW2e(ret, Boolean.parseBoolean(includeAttrs.getNamedItem("warnings2errors").getNodeValue()));
         } else {
