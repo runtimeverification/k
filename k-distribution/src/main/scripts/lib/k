@@ -5,12 +5,14 @@ if [ -z "$K_OPTS" ];
   then export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation"
 fi
 if "$(dirname "$0")/checkJava"; then
-  if [ -n "$K_NAILGUN" ]; then
-    if [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
-      ng.exe org.kframework.main.Main "$@"
-    else
-      ng org.kframework.main.Main "$@"
-    fi
+  if [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
+    NG=ng.exe
+  else
+    NG=ng
+  fi
+  $NG ng-version > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    $NG org.kframework.main.Main "$@"
   else
     java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/java/*" org.kframework.main.Main "$@"
   fi

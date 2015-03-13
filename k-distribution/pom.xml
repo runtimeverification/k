@@ -89,7 +89,6 @@
                   <arg value="--report" />
                   <arg value="--debug" />
                   <arg value="--warnings-to-errors" />
-                  <env key="K_NAILGUN" value="true" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>

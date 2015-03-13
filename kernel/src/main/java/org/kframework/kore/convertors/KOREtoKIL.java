@@ -5,13 +5,39 @@ package org.kframework.kore.convertors;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.Associativity;
+import org.kframework.definition.Bubble;
+import org.kframework.definition.Configuration;
+import org.kframework.definition.Context;
+import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
+import org.kframework.definition.Module;
+import org.kframework.definition.ModuleComment;
+import org.kframework.definition.NonTerminal;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.Require;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
+import org.kframework.definition.SyntaxAssociativity;
+import org.kframework.definition.SyntaxPriority;
+import org.kframework.definition.SyntaxSort;
+import org.kframework.definition.Tag;
+import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
-import org.kframework.kore.*;
-import org.kframework.definition.*;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KList;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KToken;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 
@@ -23,12 +49,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.function.Function;
 
-import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.iterable;
+import static org.kframework.Collections.stream;
+import static org.kframework.kore.KORE.KLabel;
 
 public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
