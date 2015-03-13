@@ -40,6 +40,7 @@
           <xs:attribute name="results" type="xs:string" use="optional" />
           <xs:attribute name="skip" type="xs:string" use="optional" />
           <xs:attribute name="posixInitScript" type="xs:string" use="optional" />
+          <xs:attribute name="warnings2errors" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
       <xs:element name="include">
@@ -58,6 +59,7 @@
           <xs:attribute name="more-results" type="xs:string" use="optional" />
           <xs:attribute name="extension" type="xs:string" use="optional" />
           <xs:attribute name="exclude" type="xs:string" use="optional" />
+          <xs:attribute name="warnings2errors" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
     </xs:choice>
