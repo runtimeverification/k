@@ -91,6 +91,7 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
+      <krun-option name="--symbolic-execution" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="pretty" />
     </all-programs>
