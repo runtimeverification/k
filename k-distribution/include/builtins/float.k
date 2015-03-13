@@ -35,10 +35,12 @@ module FLOAT-HOOKS
 
   syntax Float ::= "--Float" Float             [function, smtlib(-), hook(#FLOAT:neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(#FLOAT:pow)]
-                 > Float "*Float" Float        [function, left, smtlib((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:mul)]
+                 > left:
+                   Float "*Float" Float        [function, left, smtlib((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:mul)]
                  | Float "/Float" Float        [function, left, smtlib((/ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:div)]
                  | Float "%Float" Float        [function, left, smtlib((remainder roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:rem)]
-                 > Float "+Float" Float        [function, left, smtlib((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:add)]
+                 > left:
+                   Float "+Float" Float        [function, left, smtlib((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:add)]
                  | Float "-Float" Float        [function, left, smtlib((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:sub)]
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(#FLOAT:root)]
