@@ -4,7 +4,7 @@ import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.{Constructors => basic, _}
 import org.kframework.meta.{Down, Up}
-import org.kframework.tiny.builtin.{KMapAppLabel, MapKeys, Tuple2Label}
+import org.kframework.tiny.builtin.{BagLabel, KMapAppLabel, MapKeys, Tuple2Label}
 import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
@@ -25,7 +25,8 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     case "Map:_|->_" => Tuple2Label
     case "Map:keys" => MapKeys
     case "Set:in" => RegularKAppLabel("???in???", Att())
-    case "#BOOL:_andBool_" =>  And //NativeBinaryOpLabel("_andBool_", Att(), (x: Boolean, y: Boolean) => x && y, Sorts.Bool)
+    case "#BOOL:_andBool_" => And //NativeBinaryOpLabel("_andBool_", Att(), (x: Boolean, y: Boolean) => x && y, Sorts
+    // .Bool)
     case "#BOOL:_orBool_" => Or //NativeBinaryOpLabel("_orBool_", Att(), (x: Boolean, y: Boolean) => x || y, Sorts.Int)
   }
 
@@ -40,7 +41,10 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     } else {
       val att = module.attributesFor(KORE.KLabel(name))
       if (att.contains("assoc"))
-        RegularKAssocAppLabel(name, att)
+        if (att.contains("comm"))
+          BagLabel(name, att)
+        else
+          RegularKAssocAppLabel(name, att)
       else
         att.get[String]("hook").map(hookMappings(_, name)).getOrElse { RegularKAppLabel(name, att) }
     }

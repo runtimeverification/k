@@ -225,7 +225,8 @@ class MatcherTest extends AbstractTest {
   }
 
 
-  @Test @Ignore def testTwoAnywheres() {
+  @Test
+  @Ignore def testTwoAnywheres() {
     val o = 'foo('foo('foo('bar())))
     val inner = Anywhere("inner", 'foo(X))
     val outer = Anywhere("outer", 'foo(inner))
@@ -269,5 +270,20 @@ class MatcherTest extends AbstractTest {
 
   @Test def testSmallOr: Unit = {
     assertEquals(X -> 1, And(X -> Or(1, 2), X -> 1).normalize)
+  }
+
+  @Test def testBag {
+    NormalizationCaching.cache.cleanUp()
+    val o = 'MyBag(1, 2, 3)
+    val p = 'MyBag(X, 2)
+    assertEquals(False, 'MyBag(X, 7).matchAll(o))
+    assertEquals(X -> 'MyBag(1, 3), p.matchAll(o))
+    assertEquals(Or(
+      And(X -> 'MyBag(), Y -> 'MyBag(1, 2)),
+      And(X -> 'MyBag(1), Y -> 'MyBag(2)),
+      And(X -> 'MyBag(2), Y -> 'MyBag(1)),
+      And(X -> 'MyBag(1, 2), Y -> 'MyBag())
+    ), 'MyBag(X, Y).matchAll('MyBag(1, 2)))
+
   }
 }

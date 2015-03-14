@@ -45,7 +45,7 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
   val klabel = KRegularAppMatcher
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
-    And(ksL.zip(ksR) map { case (k1, k2) => k1.matcher(k2) }: _*)
+    And(ksL.zip(ksR) map {case (k1, k2) => k1.matcher(k2) }: _*)
 
   override def isFalse = (left, right) match {
     case (KApp(label, _, _), KApp(label2, _, _)) => label != label2
@@ -58,8 +58,9 @@ object KRegularAppMatcher extends MatcherLabel {
     KRegularAppMatcher(k1.asInstanceOf[KRegularApp], k2)
 }
 
-case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
-  val klabel = KAssocAppMatcher
+trait AssocMatchContents {
+  val leftKLabel: Label
+  val rightAtt: Att
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K = {
     val res = (ksL, ksR) match {
@@ -67,20 +68,26 @@ case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
       case (headL +: tailL, headR +: tailR) if theory.equals(headL, headR) => matchContents(tailL, tailR)
       case (headL +: tailL, ksR) =>
         (0 to ksR.size)
-          .map { index => (ksR.take(index), ksR.drop(index)) }
+          .map {index => (ksR.take(index), ksR.drop(index)) }
           .map {
           case (List(oneElement), suffix) =>
             And(headL.matcher(oneElement), matchContents(tailL, suffix))
           case (prefix, suffix) =>
-            And(headL.matcher(left.klabel(prefix, right.att)), matchContents(tailL, suffix))
+            And(headL.matcher(leftKLabel(prefix, rightAtt)), matchContents(tailL, suffix))
         }
-          .fold(False: K)({ (a, b) => Or(a, b) })
+          .fold(False: K)({(a, b) => Or(a, b) })
 
       case other => False
     }
     res
   }
+}
 
+case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher with AssocMatchContents {
+  val klabel = KAssocAppMatcher
+  val leftKLabel = left.klabel
+
+  val rightAtt = right.att
   override def isFalse = (left, right) match {
     case (KApp(label, Seq(), _), KApp(label2, Seq(), _)) => label != label2
     case _ => false
