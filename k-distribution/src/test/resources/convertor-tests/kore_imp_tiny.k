@@ -24,7 +24,6 @@ module TEST
 
   syntax priority '_==K_ '_=/=K_ > 'notBool_ > '_andBool_
 
-
   syntax Int ::= Int "+Int" Int     [klabel('_+Int_), function, hook(#INT:_+Int_), left]
   syntax Int ::= Int "-Int" Int     [klabel('_-Int_), function, hook(#INT:_-Int_), left]
   syntax Int ::= Int "*Int" Int     [klabel('_*Int_), function, hook(#INT:_*Int_), left]
@@ -191,7 +190,7 @@ module TEST
       '<top>('<k>(C:KResult ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
     =>
       '<top>('<k>('if__else_(C,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
-  [heat]
+  [cool]
 
   // '_/_
   rule

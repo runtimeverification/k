@@ -43,7 +43,7 @@ class ADTTest extends AbstractTest {
   }
 
   @Test def AndMatcher {
-    assertEquals(And(), And().matcher(KToken(Sorts.Bool, "true", Att())).normalize)
+    assertEquals(True, And().matcher(KToken(Sorts.Bool, "true", Att())).normalize)
     assertEquals(And(), And().matcher(And()).normalize)
 
     assertEquals(Or(1: K, 2: K), (1: K) | 2)

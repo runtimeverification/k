@@ -2,7 +2,7 @@ package org.kframework.tiny
 
 import org.kframework.attributes.Att
 import org.kframework.kore.Unapply
-import org.kframework.tiny.matcher.EqualsMatcher
+import org.kframework.tiny.matcher.{MatcherLabel, EqualsMatcher, Matcher}
 
 object Or extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
@@ -47,6 +47,21 @@ class Or(val children: Set[K], val att: Att = Att(), normalBy: Option[Theory] = 
           newMe.normalize
       case x => x.normalize
     }
+
+  override def matcher(right: K): Matcher = OrMatcher(this, right)
+}
+
+case class OrMatcher(left: Or, right: K) extends Matcher {
+  override val klabel: MatcherLabel = OrMatcher
+  override protected[this] def normalizeInner(implicit theory: Theory): K = {
+    if (left == Or() && right == Or()) // TODO: understand this
+      True
+    else
+      left map { _.matcher(right) } normalize
+  }
+}
+object OrMatcher extends MatcherLabel {
+  override def apply(k1: K, k2: K, att: Att): KProduct = OrMatcher(k1.asInstanceOf[Or], k2)
 }
 
 object And extends KAssocAppLabel with EmptyAtt {
@@ -98,22 +113,28 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
         // of normalizedChildren.
         //    val newChildren = normalizedChildren -- children
 
-        val newBindings: Map[KVar, K] = normalizedChildren collect {
-          case c: Binding => (c.variable, c.value)
-        } toMap
+        val newBindings: Map[KVar, K] = normalizedChildren
+          .collect {case c: Binding => (c.variable, c.value) }
+          .toMap
 
         import org.kframework.tiny.Substitution._
 
-        val childrenWithSubstitution: Stream[K] = normalizedChildren map {
-          c =>
-            c.substitute(newBindings).normalize
-        }
+        val childrenWithSubstitution: Stream[K] = normalizedChildren map { _.substitute(newBindings).normalize }
 
-        childrenWithSubstitution.foldLeft(True: K) {
+        val madeSubstitutions = childrenWithSubstitution.foldLeft(True: K) {
           case (False, _) => False
           case (sum: And, b: Binding) => sum.addBinding(b)
           case (sum: And, c) => And(sum.children + c, sum.att)
         }
+
+        val groundChildren = AsAnd(madeSubstitutions).children filter { _.isGround }
+        val isFalse = (for (c1 <- groundChildren; c2 <- groundChildren) yield (c1, c2))
+          .toStream exists {case (c1, c2) => c1 != c2 }
+
+        if (isFalse)
+          False
+        else
+          madeSubstitutions
       }
     }
   }
@@ -127,12 +148,15 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
   } toMap
 
   def addBinding(b: Binding)(implicit theory: Theory): K = {
-    if (this.bindings.exists {
-      bb => bb.variable == b.variable && Equals(bb.value, b.value).normalize != True
-    })
-      False
-    else
-      And(children + b, att)
+    val newValue = this.binding.get(b.variable).map(existingValue => And(existingValue, b.value).normalize)
+
+    newValue match {
+      case None => And(children + b, att)
+      case Some(False) => False
+      case Some(intersection) => And(
+        children map {case Binding(v, _, _) if v == b.variable => Binding(b.variable, intersection)
+        }, att)
+    }
   }
 
   override def toString =
@@ -161,7 +185,7 @@ case class Equals(a: K, b: K, att: Att) extends KProduct {
   override val klabel = Equals
   override def toString = a + "=" + b
 
-  override def normalizeInner(implicit theory: Theory) = EqualsMatcher(a, b)
+  override def normalizeInner(implicit theory: Theory) = a.matcher(b)
 }
 
 object Equals extends KProduct2Label with EmptyAtt {

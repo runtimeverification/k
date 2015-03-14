@@ -181,6 +181,14 @@ case class NativeBinaryOp[T, R](val klabel: NativeBinaryOpLabel[T, R], val child
   }
 }
 
+case class NativeUnaryOp[T, R](val klabel: NativeUnaryOpLabel[T, R], val children: Seq[K], val att: Att = Att())
+  extends KRegularApp {
+  override def normalizeInner(implicit theory: Theory): K = children match {
+    case Seq(TypedKTok(s, v: T, _)) => TypedKTok(klabel.resSort, klabel.f(v))
+    case _ => this
+  }
+}
+
 final class RegularKApp(val klabel: RegularKAppLabel, val children: Seq[K], val att: Att = Att())
   extends KRegularApp with PlainNormalization
 
@@ -277,6 +285,10 @@ case class RegularKAppLabel(name: String, att: Att) extends KRegularAppLabel {
 
 case class NativeBinaryOpLabel[T, R](name: String, att: Att, f: (T, T) => R, resSort: Sort) extends KRegularAppLabel {
   override def construct(l: Iterable[K], att: Att): NativeBinaryOp[T, R] = new NativeBinaryOp(this, l.toSeq, att)
+}
+
+case class NativeUnaryOpLabel[T, R](name: String, att: Att, f: T => R, resSort: Sort) extends KRegularAppLabel {
+  override def construct(l: Iterable[K], att: Att): NativeUnaryOp[T, R] = new NativeUnaryOp(this, l.toSeq, att)
 }
 
 case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel {

@@ -1,7 +1,6 @@
 package org.kframework.tiny
 
 import org.junit.{Assert, Ignore, Test}
-import org.kframework.attributes._
 import org.kframework.tiny.matcher.Anywhere
 
 class TestRewriting extends AbstractTest {
@@ -61,12 +60,12 @@ class TestRewriting extends AbstractTest {
 
   @Test
   def testVarSubstitutionWithTrueSideCondition() {
-    assertEquals(Set('foo(5, 4)), 'foo(4).searchFor('foo(X) ==> 'foo(5: K, X), Equals(X, 4)))
+    assertEquals(Set('foo(5, 4)), 'foo(4).searchFor('foo(X) ==> 'foo(5: K, X), X -> 4))
   }
 
   @Test
   def testVarSubstitutionWithFalseSideCondition() {
-    assertEquals(Set(), 'foo(4).searchFor('foo(X) ==> 'foo(5, X), Equals(X, 7)))
+    assertEquals(Set(), 'foo(4).searchFor('foo(X) ==> 'foo(5, X), X -> 7))
   }
 
   @Test

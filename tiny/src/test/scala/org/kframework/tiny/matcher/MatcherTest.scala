@@ -50,13 +50,13 @@ class MatcherTest extends AbstractTest {
   @Test def testKApplyWithCondition() {
     val foo = 'foo(5: K)
     val pattern = 'foo(X)
-    assertEquals(X -> ((5: K): K), pattern.matchOne(foo, Equals(X, 5: K)))
+    assertEquals(X -> 5, pattern.matchOne(foo, X -> 5))
   }
 
   @Test def testKApplyWithFailingCondition() {
     val foo = 'foo(5: K)
     val pattern = 'foo(X)
-    assertEquals(False, pattern.matchAll(foo, Equals(X, 4: K)))
+    assertEquals(False, pattern.matchAll(foo, X -> 4))
   }
 
   @Test
@@ -225,7 +225,7 @@ class MatcherTest extends AbstractTest {
   }
 
 
-  @Test def testTwoAnywheres() {
+  @Test @Ignore def testTwoAnywheres() {
     val o = 'foo('foo('foo('bar())))
     val inner = Anywhere("inner", 'foo(X))
     val outer = Anywhere("outer", 'foo(inner))
@@ -242,4 +242,32 @@ class MatcherTest extends AbstractTest {
     assertEquals(True, o.matchAll(o))
   }
 
+  @Test def testOrInMatchWithVariable {
+    NormalizationCaching.cache.cleanUp()
+    val o = Or(1: K, 2: K)
+    val p = Or(1: K, X)
+    assertEquals(X -> Or(1, 2), p.matchAll(o))
+  }
+  @Test def testOrInMatchWithVariable1 {
+    NormalizationCaching.cache.cleanUp()
+    val o = Or(1: K, 2: K)
+    val p = X
+    assertEquals(X -> Or(1, 2), p.matchAll(o))
+  }
+  @Test def testOrInMatchWithVariable2 {
+    NormalizationCaching.cache.cleanUp()
+    val o = 'foo(Or(1: K, 2: K))
+    val p = 'foo(X)
+    assertEquals(X -> Or(1, 2), p.matchAll(o))
+  }
+  @Test def testOrInMatchWithVariable3 {
+    NormalizationCaching.cache.cleanUp()
+    val o = 'foo(Or(1: K, 2: K))
+    val p = 'foo(X)
+    assertEquals(X -> 2, p.matchAll(o, X -> 2))
+  }
+
+  @Test def testSmallOr: Unit = {
+    assertEquals(X -> 1, And(X -> Or(1, 2), X -> 1).normalize)
+  }
 }

@@ -16,7 +16,7 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
   // separate the hook mappings at some point
   def hookMappings(hook: String, labelString: String) = hook match {
     case "#K-EQUAL:_==K_" => Equals
-    case "#BOOL:notBool_" => Not
+    case "#BOOL:notBool_" => Not //NativeUnaryOpLabel("notBool_", Att(), (x: Boolean) => !x, Sorts.Bool)
     case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y, Sorts.Int)
     case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y, Sorts.Int)
     case "#INT:_<=Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x <= y, Sorts.Bool)
@@ -25,8 +25,8 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     case "Map:_|->_" => Tuple2Label
     case "Map:keys" => MapKeys
     case "Set:in" => RegularKAppLabel("???in???", Att())
-    case "#BOOL:_andBool_" => And
-    case "#BOOL:_orBool_" => Or
+    case "#BOOL:_andBool_" =>  And //NativeBinaryOpLabel("_andBool_", Att(), (x: Boolean, y: Boolean) => x && y, Sorts.Bool)
+    case "#BOOL:_orBool_" => Or //NativeBinaryOpLabel("_orBool_", Att(), (x: Boolean, y: Boolean) => x || y, Sorts.Int)
   }
 
   val uniqueLabelCache = collection.mutable.Map[String, Label]()
