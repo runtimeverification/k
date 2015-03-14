@@ -29,7 +29,7 @@ module REGRESSION
 
 
   // tokenconstants
-  syntax Id ::= "Main"
+  syntax Id ::= "Main" [token]
   rule K => . when K ==K Main
 
 
@@ -170,7 +170,7 @@ module REGRESSION
                | tuple(Exp) [atom, klabel('Tuple)]
                | Exp "." NAME [primary]
   syntax priorities atom > primary
-  syntax Id ::= "x"
+  syntax Id ::= "x" [token]
   syntax KItem ::= foo8(K)
   rule foo8(5) => foo8(isExp(x))
 
@@ -212,7 +212,7 @@ module REGRESSION
 
   //issue674
   syntax Exp ::= "`" Id
-  syntax Id ::= "foo12"
+  syntax Id ::= "foo12" [token]
   syntax KItem ::= "start"
   rule <k> start => ` a ...</k> <out>... .List => ListItem("ok") </out>
 
@@ -292,6 +292,6 @@ module REGRESSION
   rule foo1219(.Map) => 0
 
   // semantic casts shouldn't strictly type check terms
-  syntax Id ::= "foo25"
+  syntax Id ::= "foo25" [token]
   rule foo25:Exp => .K
 endmodule

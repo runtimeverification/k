@@ -550,6 +550,8 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             kAppLabel = org.kframework.kil.FloatBuiltin.of(value);
         } else if (labelSort.equals("Bool")) {
             kAppLabel = org.kframework.kil.BoolBuiltin.of(value);
+        } else if (labelSort.equals("KLabel")) {
+            kAppLabel = org.kframework.kil.KLabelConstant.of(value);
         } else {
             kAppLabel = org.kframework.kil.Token.of(org.kframework.kil.Sort.of(labelSort), value);
         }
