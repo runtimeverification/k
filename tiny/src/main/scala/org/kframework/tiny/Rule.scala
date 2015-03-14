@@ -29,23 +29,21 @@ object Rule {
   }
 }
 
-object ExecuteRule {
+case class ExecuteRule(termWithRewrite: K, sideConditions: K = True)(implicit theory: Theory) extends (K => Option[K]) {
+  val left = RewriteToTop.toLeft(termWithRewrite)
+  val right = RewriteToTop.toRight(termWithRewrite)
+
   var count = 0
-  def apply(termWithRewrite: K, sideConditions: K = True)(implicit theory: Theory): K => Option[K] = {
-    val left = RewriteToTop.toLeft(termWithRewrite)
-    val right = RewriteToTop.toRight(termWithRewrite)
 
-    def substitute(and: K, t: K): K = {
-      assert(and.isPureSubsitution,
-        "Invalid substitution when applying " + left + " to " + t + ":\n" + and)
-      Substitution(right).substitute(and.binding)
-    }
+  def substitute(and: K, t: K): K = {
+    assert(and.isPureSubsitution,
+      "Invalid substitution when applying " + left + " to " + t + ":\n" + and)
+    Substitution(right).substitute(and.binding)
+  }
 
-    (t: K) => {
-      //      print(count);
-      count = count + 1;
-      val pmSolutions = And(left.matcher(t), sideConditions).normalize
-      AsOr(pmSolutions).children.headOption map { substitute(_, t).normalize }
-    }
+  def apply(t: K) = {
+    //      print(count);F
+    val pmSolutions = And(left.matcher(t), sideConditions).normalize
+    AsOr(pmSolutions).children.headOption map { count += 1; substitute(_, t).normalize }
   }
 }
