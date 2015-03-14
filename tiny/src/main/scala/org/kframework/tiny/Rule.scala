@@ -1,6 +1,8 @@
 package org.kframework.tiny
 
-trait Rule extends (K => Set[K]) {
+trait Rule extends (K => Set[K])
+
+trait FromKDef {
   val termWithRewrite: K
   val sideConditions: K
   implicit val theory: Theory
@@ -17,18 +19,18 @@ trait Rule extends (K => Set[K]) {
   }
 
   def matchTerm(t: K) = And(left.matcher(t), sideConditions).normalize
-
 }
 
-case class RegularRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory) extends Rule {
-
+case class RegularRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory)
+  extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
     AsOr(pmSolutions).children map { count += 1; substitute(_, t).normalize }
   }
 }
 
-case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory) extends Rule {
+case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory)
+  extends Rule with FromKDef {
 
   val regularRule = RegularRule(termWithRewrite, sideConditions)
 
@@ -63,7 +65,8 @@ case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theo
   }
 }
 
-case class ExecuteRule(termWithRewrite: K, sideConditions: K = True)(implicit val theory: Theory) extends Rule {
+case class ExecuteRule(termWithRewrite: K, sideConditions: K = True)(implicit val theory: Theory)
+  extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
     AsOr(pmSolutions).children.headOption map { count += 1; substitute(_, t).normalize } toSet
