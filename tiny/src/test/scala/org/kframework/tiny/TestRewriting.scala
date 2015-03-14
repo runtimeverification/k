@@ -9,7 +9,7 @@ class TestRewriting extends AbstractTest {
 
   implicit class KToRewriting(self: K) {
     def searchFor(rewrite: K, sideConditions: K = True)(implicit theory: Theory): Set[K] = {
-      Rule(rewrite, sideConditions)(theory)(self)
+      RegularRule(rewrite, sideConditions)(theory)(self)
     }
   }
 
@@ -89,7 +89,8 @@ class TestRewriting extends AbstractTest {
     assertEquals(Set(), '+(4, 4, 4, 4, 4).searchFor('+(X, X) ==> '+(X)))
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore
   def testKLabelMatch() {
     assertEquals(Set('foo(4)), 'foo(4, 4).searchFor(KApply(X, List(4: K, 4: K)) ==> KApply(X, List(4: K), Att
       ())))
@@ -132,6 +133,20 @@ class TestRewriting extends AbstractTest {
   @Test def testAnywhere {
     assertEquals(Set('bar('foo(0)), 'foo('bar(0))),
       'foo('bar('foo(0))).searchFor(Anywhere("ONE", 'foo(X) ==> X)))
+  }
+
+  @Test def testAnywhereRule {
+    val r = AnywhereRule('foo(X) ==> X, True)
+
+    assertEquals(Set('bar('foo(0)), 'foo('bar(0))),
+      r('foo('bar('foo(0)))))
+  }
+
+  @Test def testAnywhereRuleAssoc {
+    val r = AnywhereRule(X + X ==> X, True)
+
+    assertEquals(Set('+(0, 0, 0), '+(0, 0)),
+      r((0: K) + 0 + 0))
   }
 
   @Test

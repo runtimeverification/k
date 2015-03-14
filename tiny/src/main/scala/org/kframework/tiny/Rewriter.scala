@@ -11,13 +11,13 @@ class Rewriter(module: definition.Module) {
 
   import cons._
 
-  val rules = module.rules map { r => Rule(convert(r.body), convert(r.requires)) }
+  val rules = module.rules map { r => RegularRule(convert(r.body), convert(r.requires)) }
 
   val executeRules = module.rules
     .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
     .seq.view.par
 
-  val indexedRules: Map[String, ParIterable[(K) => Option[K]]] = {
+  val indexedRules: Map[String, ParIterable[Rule]] = {
     module.rules
       .groupBy { r => index(convert(r.body)).get }
       .map { case (k, ruleSet) =>
@@ -72,8 +72,9 @@ class Rewriter(module: definition.Module) {
     })
 
     val res = prioritized
-      .map { r => totalTriedRules += 1; r(k) }
-      .find { _.isInstanceOf[Some[_]] }.getOrElse(None)
+      .map { r => totalTriedRules += 1; r(k).headOption }
+      .find { _.isInstanceOf[Some[_]] }
+      .getOrElse(None)
     //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
