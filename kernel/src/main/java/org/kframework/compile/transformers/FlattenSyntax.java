@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -62,8 +61,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         if (!isComputation)
             return super.visit(node, _void);
         if (node.isSubsort())
-            return null;
-        if (node.containsAttribute(Constants.BRACKET))
             return null;
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();
