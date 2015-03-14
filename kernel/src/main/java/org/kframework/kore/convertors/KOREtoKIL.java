@@ -25,6 +25,7 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
@@ -497,13 +498,13 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             // KORE KApply, we need to figure out every one of them and handle
             // here
             return convertKApply(kApply);
-        } else if (k instanceof KApply && ((KApply) k).klabel() == labels.KBag()) {
+        } else if (k instanceof KApply && ((KApply) k).klabel().equals(labels.KBag())) {
             KApply kBag = (KApply) k;
             List<K> bagItems = kBag.klist().items();
             org.kframework.kil.Bag kilBag = new org.kframework.kil.Bag();
             List<org.kframework.kil.Term> kilBagItems = new ArrayList<>();
             for (K bagItem : bagItems) {
-                if (k instanceof KApply && ((KApply) k).klabel() == labels.KBag()) {
+                if (k instanceof KApply && ((KApply) k).klabel().equals(labels.KBag())) {
                     KApply item = (KApply) bagItem;
                     List<K> kbagItems = item.klist().items();
                     kilBagItems.addAll(kbagItems.stream().map(this::convertK)
@@ -518,7 +519,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             return convertKVariable((KVariable) k);
         } else if (k instanceof KToken) {
             return convertKToken((KToken) k);
-        } else if (k instanceof KApply && ((KApply) k).klabel() == KLabel(KORE.injectedKListLabel())) {
+        } else if (k instanceof KApply && ((KApply) k).klabel().equals(KLabel(KORE.injectedKListLabel()))) {
             return convertKList(((KApply) k).klist());
 //        } else if (k instanceof KRewrite) {
 //
@@ -551,7 +552,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         } else if (labelSort.equals("Bool")) {
             kAppLabel = org.kframework.kil.BoolBuiltin.of(value);
         } else if (labelSort.equals("KLabel")) {
-            kAppLabel = org.kframework.kil.KLabelConstant.of(value);
+            kAppLabel = new KInjectedLabel(org.kframework.kil.KLabelConstant.of(value));
         } else {
             kAppLabel = org.kframework.kil.Token.of(org.kframework.kil.Sort.of(labelSort), value);
         }
@@ -581,7 +582,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.Term convertKBool(K k) {
-        if (k instanceof KToken && ((KToken) k).sort() == Sorts.Bool()) {
+        if (k instanceof KToken && ((KToken) k).sort().equals(Sorts.Bool())) {
             return null; // FIXME
             // throw new AssertionError("Unimplemented");
         }
@@ -591,7 +592,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     public org.kframework.kil.Term convertKApply(KApply kApply) {
         KLabel label = kApply.klabel();
         List<K> contents = kApply.klist().items();
-        if (label.name() == labels.Hole().name()) {
+        if (label.name().equals(labels.Hole().name())) {
             System.out.println("label = " + label);
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
