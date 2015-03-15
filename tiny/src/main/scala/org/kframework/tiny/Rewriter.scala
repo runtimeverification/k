@@ -6,7 +6,30 @@ import org.kframework.kore.Unapply.KLabel
 
 import scala.collection.parallel.ParIterable
 
-class Rewriter(module: definition.Module) {
+object KIndex extends (K => Option[String]) {
+  def apply(k: K): Option[String] = k match {
+    case KApp(KLabel("'<k>"), c, _) =>
+      val top = c.head match {
+        case s: KSeq => s.children.headOption.getOrElse(KSeq())
+        case x => x
+      }
+      SimpleIndex(top)
+    case KApp(_, l, _) =>
+      l.toStream map KIndex collectFirst {
+        case Some(s) => s
+      }
+    case _ => None
+  }
+}
+
+object SimpleIndex extends (K => Option[String]) {
+  def apply(k: K) = k match {
+    case KApp(l, _, _) => Some(l.toString)
+    case v => Some("")
+  }
+}
+
+class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   val cons = new Constructors(module)
 
   import cons._
@@ -20,11 +43,21 @@ class Rewriter(module: definition.Module) {
 
   val rules = module.rules map createRule
 
+  val indexedRules: Map[String, ParIterable[Rule]] = {
+    module.rules
+      .groupBy {r => index(convert(r.body)).getOrElse("NOINDEX") }
+      .map {case (k, ruleSet) =>
+      (k, ruleSet
+        .map(createRule)
+        .seq.view.par)
+    }
+  }
+
   val executeRules = module.rules
     .map {r => ExecuteRule(convert(r.body), convert(r.requires)) }
     .seq.view.par
 
-  val indexedRules: Map[String, ParIterable[Rule]] = {
+  val indexedExecuteRules: Map[String, ParIterable[Rule]] = {
     module.rules
       .groupBy {r => index(convert(r.body)).getOrElse("NOINDEX") }
       .map {case (k, ruleSet) =>
@@ -34,33 +67,19 @@ class Rewriter(module: definition.Module) {
     }
   }
 
-  def index(k: K): Option[String] = k match {
-    case KApp(KLabel("'<k>"), c, _) =>
-      val top = c.head match {
-        case s: KSeq => s.children.headOption.getOrElse(KSeq())
-        case x => x
-      }
-      innerIndex(top)
-    case KApp(_, l, _) =>
-      l.toStream map index collectFirst {
-        case Some(s) => s
-      }
-    case _ => None
-  }
-
-  def innerIndex(k: K) = k match {
-    case KApp(l, _, _) => Some(l.toString)
-    case v => Some("")
-  }
 
   def rewriteStep(k: K): Set[K] = {
-    //    println("\n\n MATCHING ON: " + k.normalize)
+    val i = index(k).get
 
-    val res = rules flatMap {
-      r => r(k)
-    }
-    //    println("RESULTS:\n    " + res.mkString("\n    "))
-    res
+    val prioritized = indexedRules.get(i).getOrElse({
+      indexFailures += 1;
+      rules
+    })
+
+    val res = prioritized
+      .flatMap {r => totalTriedRules += 1; r(k) }
+
+    res.seq.toSet
   }
 
   var totalTriedRules = 0
@@ -71,7 +90,7 @@ class Rewriter(module: definition.Module) {
 
     val i = index(k).get
 
-    val prioritized = indexedRules.get(i).getOrElse({
+    val prioritized = indexedExecuteRules.get(i).getOrElse({
       indexFailures += 1;
       executeRules
     })

@@ -60,7 +60,7 @@ class GrigoreChallange {
     Rule(X ~ Y ~ R ==> (X * Y) ~ R, argsAreInts, False)
   ))
 
-  val rewriter = new Rewriter(completeModule)
+  val rewriter = new Rewriter(completeModule, SimpleIndex)
 
   @Test
   def shortTest {
@@ -81,7 +81,7 @@ class GrigoreChallange {
     Rule(X ~ Y ==> (X * Y), argsAreInts, False, cons.Att() + "anywhere")
   ))
 
-  val rewriterWithAnywhere = new Rewriter(completeModuleWithAnywhere)
+  val rewriterWithAnywhere = new Rewriter(completeModuleWithAnywhere, SimpleIndex)
 
   @Test
   def shortTestWithAnywhere {
