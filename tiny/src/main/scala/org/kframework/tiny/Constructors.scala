@@ -18,6 +18,8 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     case "#K-EQUAL:_==K_" => Equals
     case "#BOOL:notBool_" => Not //NativeUnaryOpLabel("notBool_", Att(), (x: Boolean) => !x, Sorts.Bool)
     case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y, Sorts.Int)
+    case "#INT:_-Int_" => NativeBinaryOpLabel("_-Int_", Att(), (x: Int, y: Int) => x - y, Sorts.Int)
+    case "#INT:_*Int_" => NativeBinaryOpLabel("_*Int_", Att(), (x: Int, y: Int) => x * y, Sorts.Int)
     case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y, Sorts.Int)
     case "#INT:_<=Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x <= y, Sorts.Bool)
     case "Map:.Map" => KMapAppLabel("'_Map_")

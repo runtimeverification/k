@@ -6,28 +6,37 @@ import org.kframework.kore.Unapply.KLabel
 
 import scala.collection.parallel.ParIterable
 
+case class State(k: K) {
+  var from: Option[Seq[Rule]] = None
+}
+
 class Rewriter(module: definition.Module) {
   val cons = new Constructors(module)
 
   import cons._
 
-  val rules = module.rules map { r => RegularRule(convert(r.body), convert(r.requires)) }
+  def createRule(r: definition.Rule): Rule = {
+    if (r.att.contains("anywhere"))
+      AnywhereRule(convert(r.body), convert(r.requires))
+    else
+      RegularRule(convert(r.body), convert(r.requires))
+  }
+
+  val rules = module.rules map createRule
 
   val executeRules = module.rules
-    .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
+    .map {r => ExecuteRule(convert(r.body), convert(r.requires)) }
     .seq.view.par
 
   val indexedRules: Map[String, ParIterable[Rule]] = {
     module.rules
-      .groupBy { r => index(convert(r.body)).get }
-      .map { case (k, ruleSet) =>
+      .groupBy {r => index(convert(r.body)).getOrElse("NOINDEX") }
+      .map {case (k, ruleSet) =>
       (k, ruleSet
-        .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
+        .map {r => ExecuteRule(convert(r.body), convert(r.requires)) }
         .seq.view.par)
     }
   }
-
-  println(indexedRules.keys)
 
   def index(k: K): Option[String] = k match {
     case KApp(KLabel("'<k>"), c, _) =>
@@ -72,7 +81,7 @@ class Rewriter(module: definition.Module) {
     })
 
     val res = prioritized
-      .map { r => totalTriedRules += 1; r(k).headOption }
+      .map {r => totalTriedRules += 1; r(k).headOption }
       .find { _.isInstanceOf[Some[_]] }
       .getOrElse(None)
     //    println("RESULT:\n    " + res.mkString("\n    "))
@@ -109,9 +118,29 @@ class Rewriter(module: definition.Module) {
     if (newKs.size == 0)
       sofar
     else {
-      sofar | (newKs flatMap {
-        rewrite(_)(sofar | newKs)
-      })
+      val newSoFar = sofar | newKs
+      newKs flatMap {
+        rewrite(_)(newSoFar)
+      }
+    }
+  }
+
+  def search(k: K, pattern: K)(implicit sofar: Set[K] = Set()): Either[Set[K], K] = {
+    val newKs = (rewriteStep(k) &~ sofar).toStream
+
+    newKs find { pattern.matcher(_).normalize == True } map { Right(_) } getOrElse {
+      if (newKs.size == 0)
+        Left(Set[K]())
+      else {
+        val newSoFar = sofar | newKs.toSet
+        (newKs map {
+          search(_, pattern)(newSoFar)
+        }).fold(Left(Set[K]())) {
+          case (Left(sum), Left(n)) => Left(sum | n)
+          case (Left(sum), Right(k)) => Right(k)
+          case (Right(k), _) => Right(k)
+        }
+      }
     }
   }
 }

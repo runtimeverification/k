@@ -169,13 +169,17 @@ case class NativeBinaryOp[T, R](val klabel: NativeBinaryOpLabel[T, R], val child
   extends KRegularApp {
   override def normalizeInner(implicit theory: Theory): K = children match {
     case Seq(TypedKTok(s1, v1: T, _), TypedKTok(s2, v2: T, _)) if s1 == s2 =>
-      // ugly hack
-      val res = klabel.f(v1, v2)
-      if (klabel.resSort != Sorts.Bool)
-        TypedKTok(klabel.resSort, res)
-      else res match {
-        case true => And()
-        case false => Or()
+      try {
+        val res = klabel.f(v1, v2)
+        if (klabel.resSort != Sorts.Bool)
+          TypedKTok(klabel.resSort, res)
+        else res match {
+          // ugly hack
+          case true => And()
+          case false => Or()
+        }
+      } catch {
+        case e: ArithmeticException => False
       }
     case _ => this
   }

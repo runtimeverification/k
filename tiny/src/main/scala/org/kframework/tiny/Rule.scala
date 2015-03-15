@@ -1,5 +1,7 @@
 package org.kframework.tiny
 
+import org.kframework.tiny.builtin.Bag
+
 trait Rule extends (K => Set[K])
 
 trait FromKDef {
@@ -9,6 +11,8 @@ trait FromKDef {
 
   val left = RewriteToTop.toLeft(termWithRewrite)
   val right = RewriteToTop.toRight(termWithRewrite)
+
+  override def toString = "===[ rl " + termWithRewrite + " ]===>"
 
   var count = 0
 
@@ -34,30 +38,27 @@ case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theo
 
   val regularRule = RegularRule(termWithRewrite, sideConditions)
 
-  def recursiveResults(t: K): Set[K] = t match {
-    case kapp: KAssocApp => {
-      val childResults = kapp.children map recursiveResults
+  val ignorePrefixVar = KVar("IGNORED_PREFIX")
+  val ignoreSuffixVar = KVar("IGNORED_SUFFIX")
 
-      val resultsFromChldren = childResults
-        .foldLeft(Set(Seq[K]())) {(soFar, nextArg) => soFar flatMap {args => nextArg map { args :+ _ } } }
-        .map { kapp.klabel(_: _*) }
+  def recursiveResults(t: K): Set[K] = (left, t) match {
+    case (left: Bag, kapp: Bag) if kapp.klabel == left.klabel =>
+      val ruleWithJustOneSide = RegularRule(kapp.klabel(ignorePrefixVar, termWithRewrite), sideConditions)
+      process(kapp) | ruleWithJustOneSide(t)
 
-      val ignorePrefixVar = KVar("IGNORED_PREFIX")
-      val ignoreSuffixVar = KVar("IGNORED_SUFFIX")
-
-      val rule = RegularRule(kapp.klabel(ignorePrefixVar, termWithRewrite, ignoreSuffixVar), sideConditions)
-
-      resultsFromChldren | rule(t)
+    case (left: KAssocApp, kapp: KAssocApp) if kapp.klabel == left.klabel => {
+      val ruleWithSides = RegularRule(kapp.klabel(ignorePrefixVar, termWithRewrite, ignoreSuffixVar), sideConditions)
+      process(kapp) | ruleWithSides(t)
     }
-    case kapp: KApp =>
-      val childResults = kapp.children map recursiveResults
-
-      val resultsFromChldren = childResults
-        .foldLeft(Set(Seq[K]())) {(soFar, nextArg) => soFar flatMap {args => nextArg map { args :+ _ } } }
-        .map { kapp.klabel(_: _*) }
-
-      resultsFromChldren | regularRule(t)
+    case (left: K, kapp: KApp) => process(kapp) | regularRule(t)
     case other => regularRule(t)
+  }
+
+  def process(kapp: KApp): Set[K] = {
+    kapp.children
+      .map(recursiveResults)
+      .foldLeft(Set(Seq[K]())) {(soFar, nextArg) => soFar flatMap {args => nextArg map { args :+ _ } } }
+      .map { kapp.klabel(_: _*) }
   }
 
   def apply(t: K) = {

@@ -21,7 +21,7 @@ trait AbstractTest {
     Production("foo", String, Seq(), Att()),
     Production("bar", String, Seq(), Att()),
     Production("+", Int, Seq(), Att() + "assoc"),
-    Production("MyBag", Int, Seq(), Att() + "assoc" + "comm")
+    Production("MyBag", Sorts.K, Seq(), Att() + "assoc" + "comm")
   ), Att()))
 
   val X = KVar("X")

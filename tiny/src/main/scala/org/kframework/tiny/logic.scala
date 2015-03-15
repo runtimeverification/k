@@ -6,7 +6,7 @@ import org.kframework.tiny.matcher.{MatcherLabel, EqualsMatcher, Matcher}
 
 object Or extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new Or(l.toSet, att)
-  override def name: String = "'_orBool_"
+  override def name: String = "_orBool_"
   override def apply(ks: K*): K = super.apply(ks: _*)
   def apply(ks: Set[K], att: Att = Att()): K =
     if (ks.size == 1)
@@ -66,7 +66,7 @@ object OrMatcher extends MatcherLabel {
 
 object And extends KAssocAppLabel with EmptyAtt {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new And(l.toSet, att)
-  override def name: String = "'_andBool_"
+  override def name: String = "_andBool_"
 }
 
 case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
@@ -185,7 +185,7 @@ case class Equals(a: K, b: K, att: Att) extends KProduct {
   override val klabel = Equals
   override def toString = a + "=" + b
 
-  override def normalizeInner(implicit theory: Theory) = a.matcher(b)
+  override def normalizeInner(implicit theory: Theory) = a.matcher(b).normalize
 }
 
 object Equals extends KProduct2Label with EmptyAtt {

@@ -285,5 +285,16 @@ class MatcherTest extends AbstractTest {
       And(X -> 'MyBag(1, 2), Y -> 'MyBag())
     ), 'MyBag(X, Y).matchAll('MyBag(1, 2)))
 
+    assertEquals(Or(
+      And(X -> 1, Y -> 2, Z -> 3),
+      And(X -> 1, Y -> 3, Z -> 2),
+      And(X -> 2, Y -> 1, Z -> 3),
+      And(X -> 2, Y -> 3, Z -> 1),
+      And(X -> 3, Y -> 1, Z -> 2),
+      And(X -> 3, Y -> 2, Z -> 1)
+    ), 'MyBag(X, 'MyBag(Y, Z)).matchAll('MyBag(1, 2, 3), And('isInt(X), 'isInt(Y), 'isInt(Z))))
+
+    assertEquals(Or(), 'MyBag(X, Y).matchAll('MyBag(1)))
+
   }
 }
