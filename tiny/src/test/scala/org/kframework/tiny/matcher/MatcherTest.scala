@@ -1,6 +1,6 @@
 package org.kframework.tiny.matcher
 
-import org.junit.{Assert, Ignore, Test}
+import org.junit.{Before, Assert, Ignore, Test}
 import org.kframework.builtin.Sorts
 import org.kframework.tiny._
 

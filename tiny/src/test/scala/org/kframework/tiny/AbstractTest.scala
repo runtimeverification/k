@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.junit.Assert
+import org.junit.{Before, Assert}
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Module, Production}
@@ -36,5 +36,9 @@ trait AbstractTest {
   def assertNotEquals(k1: kore.K, k2: kore.K): Unit = {
     if (k1 == k2)
       Assert.assertNotEquals(Unparse(k1), Unparse(k2))
+  }
+
+  @Before def clearCache: Unit = {
+    NormalizationCaching.cache.invalidateAll()
   }
 }

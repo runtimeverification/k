@@ -172,5 +172,4 @@ class TestRewriting extends AbstractTest {
       Assert.assertEquals(expected.toString(), actual.toString())
     }
   }
-
 }
