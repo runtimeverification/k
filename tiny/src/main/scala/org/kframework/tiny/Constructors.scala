@@ -17,13 +17,13 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
   def hookMappings(hook: String, labelString: String) = hook match {
     case "#K-EQUAL:_==K_" => Equals
     case "#BOOL:notBool_" => Not //NativeUnaryOpLabel("notBool_", Att(), (x: Boolean) => !x, Sorts.Bool)
-    case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y, Sorts.Int)
-    case "#INT:_-Int_" => NativeBinaryOpLabel("_-Int_", Att(), (x: Int, y: Int) => x - y, Sorts.Int)
-    case "#INT:_*Int_" => NativeBinaryOpLabel("_*Int_", Att(), (x: Int, y: Int) => x * y, Sorts.Int)
-    case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y, Sorts.Int)
+    case "#INT:_+Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x + y, Sorts.Int)
+    case "#INT:_-Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x - y, Sorts.Int)
+    case "#INT:_*Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x * y, Sorts.Int)
+    case "#INT:_/Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x / y, Sorts.Int)
     case "#INT:_<=Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x <= y, Sorts.Bool)
-    case "Map:.Map" => KMapAppLabel("'_Map_")
-    case "Map:__" => KMapAppLabel("'_Map_")
+    case "Map:.Map" => KMapAppLabel(labelString)
+    case "Map:__" => KMapAppLabel(labelString)
     case "Map:_|->_" => Tuple2Label
     case "Map:keys" => MapKeys
     case "Set:in" => RegularKAppLabel("???in???", Att())

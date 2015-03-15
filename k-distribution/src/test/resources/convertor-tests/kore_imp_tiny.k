@@ -42,9 +42,9 @@ module TEST
 
 
   syntax Map ::= Map Map        [klabel('_Map_), function, hook(Map:__)]
-  syntax Map ::= ".Map"         [klabel('.Map),  function, hook(Map:.Map)]
+  syntax Map ::= ".Map"         [klabel('_Map_),  function, hook(Map:.Map)]
   syntax Map ::= K "|->" K      [klabel('_|->_), function, hook(Map:_|->_)]
-  syntax priorities '_|->_ > '_Map_ '.Map
+  syntax priorities '_|->_ > '_Map_
 
   syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]
   syntax Bool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
@@ -169,7 +169,7 @@ module TEST
 
   // Pgm
   rule
-    '<top>('<k>('int_;_('_`,_(X:Id,, Xs:Ids),, S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '.Map(.KList))))
+    '<top>('<k>('int_;_('_`,_(X:Id,, Xs:Ids),, S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '_Map_(.KList))))
   =>
     '<top>('<k>('int_;_(Xs:Ids,,               S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '_|->_(X:Id,, 0))))
   when 'notBool_('_in_(X:Id,, 'keys(Rho:Map)))

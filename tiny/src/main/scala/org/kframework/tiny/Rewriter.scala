@@ -8,7 +8,7 @@ import scala.collection.parallel.ParIterable
 
 object KIndex extends (K => Option[String]) {
   def apply(k: K): Option[String] = k match {
-    case KApp(KLabel("'<k>"), c, _) =>
+    case KApp(KLabel("<k>"), c, _) =>
       val top = c.head match {
         case s: KSeq => s.children.headOption.getOrElse(KSeq())
         case x => x
