@@ -6,10 +6,6 @@ import org.kframework.kore.Unapply.KLabel
 
 import scala.collection.parallel.ParIterable
 
-case class State(k: K) {
-  var from: Option[Seq[Rule]] = None
-}
-
 class Rewriter(module: definition.Module) {
   val cons = new Constructors(module)
 
