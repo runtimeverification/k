@@ -69,6 +69,11 @@ class GrigoreChallange {
     println(res.size + " states.")
   }
 
+  @Test
+  def shortTestWithSearch {
+    assertEquals(Right(24: K), rewriter.search((5: K) ~ 5 ~ 7 ~ 4, 24))
+  }
+
   val completeModuleWithAnywhere = Module("T-ANYWHERE", Set(syntaxModule, logicModule), Set(
     Rule(X ~ Y ==> (X + Y), argsAreInts, False, cons.Att() + "anywhere"),
     Rule(X ~ Y ==> (X - Y), argsAreInts, False, cons.Att() + "anywhere"),
@@ -83,11 +88,6 @@ class GrigoreChallange {
     val res = rewriterWithAnywhere.rewrite((5: K) ~ 5 ~ 7 ~ 4)
     println(res.mkString("\n"))
     println(res.size + " states.")
-  }
-
-  @Test
-  def shortTestWithSearch {
-    assertEquals(Right(24: K), rewriter.search((5: K) ~ 5 ~ 7 ~ 4, 24))
   }
 
   @Test
