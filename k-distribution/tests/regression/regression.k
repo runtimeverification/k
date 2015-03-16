@@ -95,7 +95,6 @@ module REGRESSION
         | "getInput"
   syntax Stmts ::= List{Common,";"}
   rule S:Common ; Ss:Stmts => S ~> Ss
-  syntax Start ::= Stmts
   rule <k> read S:String => getInput ...</k>
        <out>... .List => ListItem(S) </out>
   rule <k> getInput => . ...</k>

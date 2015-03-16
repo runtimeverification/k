@@ -60,6 +60,7 @@ public class KTestFrontEnd extends FrontEnd {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.options.setDebug(globalOptions.debug);
+        this.options.setWarnings2errors(globalOptions.warnings2errors);
         this.kem = kem;
         this.env = env;
         this.files = files;
