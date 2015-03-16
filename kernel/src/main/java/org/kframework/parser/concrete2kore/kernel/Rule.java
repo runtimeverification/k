@@ -73,24 +73,22 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        public final Pattern pattern;
-        public WrapLabelRule(Production label, Pattern pattern) {
+        public final Pattern rejectPattern;
+        public WrapLabelRule(Production label, Pattern rejectPattern) {
             assert label != null;
             this.label = label;
-            this.pattern = pattern;
+            this.rejectPattern = rejectPattern;
         }
         public WrapLabelRule(Production label) {
             assert label != null;
             this.label = label;
-            pattern = null;
+            rejectPattern = null;
         }
         protected KList apply(KList klist, MetaData metaData) {
-            //Term term = new KApp(label, klist);
             Term term;
             if (label.att().contains("token")) {
-                // TODO: radum, figure out how to reject constants from here.
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                if (pattern != null && pattern.matcher(value).matches()) {
+                if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
                     return null;
                 }
                 term = Constant.apply(value, label, Optional.empty());

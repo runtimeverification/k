@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.kernel;
 
 import org.kframework.Collection;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -137,12 +138,12 @@ public class KSyntax2GrammarStatesFilter {
         Pattern pattern = null;
         if (prd.att().contains("token")) {
             // TODO: calculate reject list
-            if (prd.att().contains("autoReject") && prd.att().contains("rejectt"))
-                pattern = Pattern.compile("(" + prd.att().get("rejectt").get().toString() + ")|(" + rejectPattern + ")");
-            else if (prd.att().contains("autoReject"))
+            if (prd.att().contains(Constants.AUTOREJECT) && prd.att().contains(Constants.REJECT2))
+                pattern = Pattern.compile("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")");
+            else if (prd.att().contains(Constants.AUTOREJECT))
                 pattern = Pattern.compile(rejectPattern);
-            else if (prd.att().contains("rejectt"))
-                pattern = Pattern.compile(prd.att().get("rejectt").get().toString());
+            else if (prd.att().contains(Constants.REJECT2))
+                pattern = Pattern.compile(prd.att().get(Constants.REJECT2).get().toString());
         }
         RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern));
         previous.next.add(labelRule);
