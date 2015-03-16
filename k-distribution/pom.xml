@@ -88,6 +88,7 @@
                   <arg value="-v" />
                   <arg value="--report" />
                   <arg value="--debug" />
+                  <arg value="--warnings-to-errors" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
