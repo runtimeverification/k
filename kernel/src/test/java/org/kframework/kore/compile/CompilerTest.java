@@ -84,6 +84,13 @@ public class CompilerTest {
 
     final Configuration cfg = new Configuration();
 
+    Stream<KApply> streamSideCells(K side) {
+        if (side instanceof KApply && ((KApply) side).klabel().equals(KLabel("#cells")))
+            return (Stream<KApply>) (Object) ((KApply) side).klist().stream();
+        else
+            return Stream.of((KApply) side);
+    }
+
     List<KApply> makeParents(KLabel parent, List<? extends K> allChildren) {
         // List<KRewrite> rewrites
 //        rewrites.stream().map(r -> r.left()).flatMap(t -> if(t.));
@@ -94,14 +101,14 @@ public class CompilerTest {
         boolean allFitTogether = true;
 
         Set<KLabel> usedCells = Sets.newHashSet();
-        BiFunction<List<? extends K>, Set<KLabel>, Boolean> useCells = (cells, used) -> {
-            for (KApply k : children) {
-                KLabel label = ((KApply) k).klabel();
+        BiFunction<List<KApply>, Set<KLabel>, Boolean> useCells = (cells, used) -> {
+            for (KApply k : cells) {
+                KLabel label = k.klabel();
                 if (cfg.getMultiplicity(label) != Configuration.Multiplicity.STAR) {
-                    if (usedCells.contains(label)) {
+                    if (used.contains(label)) {
                         return false;
                     } else {
-                        usedCells.add(label);
+                        used.add(label);
                     }
                 }
             }
@@ -110,31 +117,69 @@ public class CompilerTest {
 
         allFitTogether = useCells.apply(children, usedCells);
         if (allFitTogether) {
-            Function<Function<KRewrite, K>, List<K>> flattenRewrite = f -> rewrites.stream().map(f).flatMap(t -> {
-                if (t instanceof KApply && ((KApply) t).klabel().equals(KLabel("#cells")))
-                    return ((KApply) t).klist().stream();
-                else
-                    return Stream.of(t);
-            }).collect(Collectors.toList());
+            Function<Function<KRewrite, K>, List<KApply>> flattenRewrite = f -> rewrites.stream().map(f).flatMap
+                    (t -> streamSideCells(t)).collect(Collectors.toList());
 
-            List<K> leftChildren = flattenRewrite.apply(t -> t.left());
-            List<K> rightChildren = flattenRewrite.apply(t -> t.right());
-            allFitTogether =
-                    useCells.apply(leftChildren, Sets.newHashSet(usedCells))
-                            && useCells.apply(rightChildren, Sets.newHashSet(usedCells));
+            List<KApply> leftChildren = flattenRewrite.apply(t -> t.left());
+            Set<KLabel> usedLeft = Sets.newHashSet(usedCells);
+            boolean leftFit = useCells.apply(leftChildren, usedLeft);
+            List<KApply> rightChildren = flattenRewrite.apply(t -> t.right());
+            Set<KLabel> usedRight = Sets.newHashSet(usedCells);
+            boolean rightFit = useCells.apply(rightChildren, usedRight);
+            allFitTogether = leftFit && rightFit;
         }
         if (allFitTogether) {
-            return Lists.newArrayList(KApply(parent, KList(children)));
+            return Lists.newArrayList(KApply(parent, KList(allChildren)));
         }
 
         // Otherwise, see if they are forced to have separate parents...
 
+        boolean forcedSeparate = true;
+        if (!children.isEmpty()) {
+            KLabel label = children.get(0).klabel();
+            if (cfg.getMultiplicity(label) == Configuration.Multiplicity.STAR) {
+                forcedSeparate = false;
+            } else {
+                for (KApply child : children) {
+                    if (!child.klabel().equals(label)) {
+                        forcedSeparate = false;
+                        break;
+                    }
+                }
+            }
+            if (forcedSeparate) {
+                for (KRewrite rew : rewrites) {
+                    if (!(streamSideCells(rew.left()).anyMatch(l -> l.klabel().equals(label))
+                            || streamSideCells(rew.left()).anyMatch(l -> l.klabel().equals(label)))) {
+                        forcedSeparate = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (forcedSeparate) {
+            for (KRewrite rew1 : rewrites) {
+                for (KRewrite rew2 : rewrites) {
+                    Set<KLabel> left1NonRepeatable = streamSideCells(rew1.left()).map(t -> t.klabel())
+                            .filter(l -> cfg.getMultiplicity(l) != Configuration.Multiplicity.STAR)
+                            .collect(Collectors.toSet());
+                    boolean lhsConflict = streamSideCells(rew2.left()).map(t -> t.klabel())
+                            .filter(l -> left1NonRepeatable.contains(l)).count() >= 1;
 
-        Map<KLabel, Long> counts =
-                children.stream().map(KApply::klabel).filter(l -> cfg.getMultiplicity(l) != Configuration.Multiplicity.STAR)
-                        .collect(Collectors.groupingBy(k -> k, Collectors.counting()));
-        if (counts.values().stream().anyMatch(repetitions -> repetitions > 1) && counts.size() <= 1) {
-            return children.stream().map(k -> KApply(parent, k)).collect(Collectors.toList());
+                    Set<KLabel> right1NonRepeatable = streamSideCells(rew1.right()).map(t -> t.klabel())
+                            .filter(l -> cfg.getMultiplicity(l) != Configuration.Multiplicity.STAR)
+                            .collect(Collectors.toSet());
+                    boolean rhsConflict = streamSideCells(rew2.right()).map(t -> t.klabel())
+                            .filter(l -> right1NonRepeatable.contains(l)).count() >= 1;
+                    if (!(lhsConflict || rhsConflict)) {
+                        forcedSeparate = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (forcedSeparate) {
+            return allChildren.stream().map(k -> KApply(parent, k)).collect(Collectors.toList());
         }
 
         // They were also not forced to be separate
@@ -142,44 +187,51 @@ public class CompilerTest {
     }
 
     boolean isCompletionItem(K k) {
-        return k instanceof KApply || k instanceof KRewrite;
+        return (k instanceof KApply || k instanceof KRewrite)
+                && getLevel(k).isPresent();
     }
 
-    int getLevel(K k) {
+    Optional<Integer> getLevel(K k) {
         if (k instanceof KApply) {
             if (((KApply) k).klabel().equals(KLabel("#cells"))) {
                 List<K> items = ((KApply) k).klist().items();
                 if (items.isEmpty()) {
-                    throw new UnsupportedOperationException("Didn't implement empty #cells()");
+                    return Optional.empty();
                 }
-                int level = getLevel(items.get(0));
+                Optional<Integer> level = getLevel(items.get(0));
                 for (K item : items) {
-                    if (getLevel(item) != level) {
+                    if (!getLevel(item).equals(level)) {
                         throw new AssertionError("Can't mix cells at different levels under a rewrite");
                     }
                 }
                 return level;
             } else {
-                return cfg.getLevel(((KApply) k).klabel());
+                return Optional.of(cfg.getLevel(((KApply) k).klabel()));
             }
         } else {
-            int leftLevel = getLevel(((KRewrite) k).left());
-            int rightLevel = getLevel(((KRewrite) k).right());
-            if (leftLevel == rightLevel)
+            Optional<Integer> leftLevel = getLevel(((KRewrite) k).left());
+            Optional<Integer> rightLevel = getLevel(((KRewrite) k).right());
+            if (!leftLevel.isPresent()) {
+                return rightLevel;
+            }
+            if (!rightLevel.isPresent()) {
+                return leftLevel;
+            }
+            if (leftLevel.equals(rightLevel))
                 return leftLevel;
             else
                 throw new AssertionError("The left and right of a rewrite must have the same level: " + k);
         }
     }
 
-    KLabel getParent(K k) {
+    Optional<KLabel> getParent(K k) {
         if (k instanceof KApply) {
             if (((KApply) k).klabel().equals(KLabel("#cells"))) {
                 List<K> items = ((KApply) k).klist().items();
                 if (items.isEmpty()) {
-                    throw new UnsupportedOperationException("Didn't implement empty #cells()");
+                    return Optional.empty();
                 }
-                KLabel parent = getParent(items.get(0));
+                Optional<KLabel> parent = getParent(items.get(0));
                 for (K item : items) {
                     if (!parent.equals(getParent(item))) {
                         throw new AssertionError("Can't mix cells with different parents levels under a rewrite");
@@ -187,15 +239,22 @@ public class CompilerTest {
                 }
                 return parent;
             } else {
-                return cfg.getParent(((KApply) k).klabel());
+                return Optional.of(cfg.getParent(((KApply) k).klabel()));
             }
         } else {
-            KLabel leftParent = getParent(((KRewrite) k).left());
-            KLabel rightParent = getParent(((KRewrite) k).right());
-            if (!leftParent.equals(rightParent)) {
+            Optional<KLabel> leftParent = getParent(((KRewrite) k).left());
+            Optional<KLabel> rightParent = getParent(((KRewrite) k).right());
+            if (!leftParent.isPresent()) {
+                return rightParent;
+            }
+            if (!rightParent.isPresent()) {
+                return leftParent;
+            }
+            if (leftParent.equals(rightParent)) {
+                return leftParent;
+            } else {
                 throw new AssertionError("All cells on the left and right of a rewrite must have the same parent: " + k);
             }
-            return leftParent;
         }
     }
 
@@ -217,10 +276,10 @@ public class CompilerTest {
 
             int targetLevel = cfg.getLevel(target) + 1;
             TreeMap<Integer, List<K>> levels =
-                    new TreeMap(children.stream().collect(Collectors.groupingBy(this::getLevel)));
+                    new TreeMap(children.stream().collect(Collectors.groupingBy(t -> getLevel(t).get())));
             while (levels.lastKey() > targetLevel) {
                 List<K> level = levels.remove(levels.lastKey());
-                for (Map.Entry<KLabel, List<K>> e : level.stream().collect(Collectors.groupingBy(this::getParent)).entrySet()) {
+                for (Map.Entry<KLabel, List<K>> e : level.stream().collect(Collectors.groupingBy(t -> getParent(t).get())).entrySet()) {
                     KLabel parent = e.getKey();
                     List<KApply> newCells = makeParents(parent, e.getValue());
                     levels.compute(cfg.getLevel(parent),
@@ -307,15 +366,46 @@ public class CompilerTest {
         K term = cell("<T>", cell("<k>", intToToken(1)), KRewrite(cell("<k>", intToToken(2)), cell("<k>")));
         K expected = cell("<T>", cell("<ts>",
                 cell("<t>", cell("<k>", intToToken(1))),
-                cell("<t>", cell("<k>", KRewrite(cell("<k>", intToToken(2)), cell("<k>"))))));
+                cell("<t>", KRewrite(cell("<k>", intToToken(2)), cell("<k>")))));
         Assert.assertEquals(expected, concretize(term));
     }
 
     @Test
     public void testRewriteWithCells() {
         K term = cell("<T>", cell("<k>", intToToken(1)), KRewrite(cells(cell("<k>", intToToken(2)), cell("<msg>")), cell("<k>")));
-        K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>", intToToken(1))),
-                cell("<t>", cell("<k>", intToToken(2)))));
+        K expected = cell("<T>", cell("<ts>",
+                cell("<t>", cell("<k>", intToToken(1))),
+                cell("<t>", KRewrite(cells(cell("<k>", intToToken(2)), cell("<msg>")), cell("<k>")))));
+        Assert.assertEquals(expected, concretize(term));
+    }
+
+    @Test
+    public void testEmptySide() {
+        K term = cell("<T>", cell("<k>"), KRewrite(cell("<msg>"), cells()));
+        K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>"), KRewrite(cell("<msg>"), cells()))));
+        Assert.assertEquals(expected, concretize(term));
+    }
+
+    @Test
+    public void testTwoRewritesFit() {
+        K term = cell("<T>", KRewrite(cells(), cell("<k>", intToToken(1))),
+                KRewrite(cell("<k>", intToToken(2)), cells()));
+        K expected = cell("<T>", cell("<ts>", cell("<t>",
+                KRewrite(cells(), cell("<k>", intToToken(1))),
+                KRewrite(cell("<k>", intToToken(2)), cells()))));
+        Assert.assertEquals(expected, concretize(term));
+    }
+
+    @Test
+    public void testThreeRewritesSplit() {
+        K term = cell("<T>",
+                KRewrite(cells(cell("<k>"),cell("<env>")), cells()),
+                KRewrite(cell("<env>"), cell("<k>")),
+                KRewrite(cell("<k>"), cell("<k>")));
+        K expected = cell("<T>", cell("<ts>",
+                cell("<t>", KRewrite(cells(cell("<k>"),cell("<env>")), cells())),
+                cell("<t>", KRewrite(cell("<env>"), cell("<k>"))),
+                cell("<t>", KRewrite(cell("<k>"), cell("<k>")))));
         Assert.assertEquals(expected, concretize(term));
     }
 
