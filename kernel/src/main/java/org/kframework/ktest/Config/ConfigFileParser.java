@@ -192,11 +192,6 @@ public class ConfigFileParser {
             overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
         if (includeAttrs.getNamedItem("skip") != null)
             overrideSkips(ret, skips);
-        if (includeAttrs.getNamedItem("warnings2errors") != null) {
-            overrideW2e(ret, Boolean.parseBoolean(includeAttrs.getNamedItem("warnings2errors").getNodeValue()));
-        } else {
-            overrideW2e(ret, cmdArgs.isWarnings2errors());
-        }
         // note that we need to run `hasElement' because parse* methods will return containers
         // with 0 element when relevant elements are not found.
         if (hasElement(childNodes, "kompile-option"))
