@@ -12,5 +12,5 @@ endmodule
 
 module TEST [org.kframework.attributes.Location(#token(Int,"4"),#token(Int,"1"),#token(Int,"7"),#token(Int,"9"))]
   imports INCLUDE [org.kframework.attributes.Location(#token(Int,"5"),#token(Int,"3"),#token(Int,"5"),#token(Int,"17"))]
-  Configuration(t(KBag(k(.K),env('.Map()),stack(KBag()))),#token(Bool,"true"),[org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"17"),#token(Int,"6"),#token(Int,"108"))])
+  Configuration(t(KBag(k(.K),env(.Map()),stack(KBag()))),#token(Bool,"true"),[org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"17"),#token(Int,"6"),#token(Int,"108"))])
 endmodule
