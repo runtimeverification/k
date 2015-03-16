@@ -59,7 +59,6 @@
           <xs:attribute name="more-results" type="xs:string" use="optional" />
           <xs:attribute name="extension" type="xs:string" use="optional" />
           <xs:attribute name="exclude" type="xs:string" use="optional" />
-          <xs:attribute name="warnings2errors" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
     </xs:choice>
