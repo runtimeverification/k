@@ -69,15 +69,15 @@ public class KILtoKORE extends KILTransformation<Object> {
     public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote) {
         this.context = context;
         this.doDropQuote = doDropQuote;
-        inner = new KILtoInnerKORE(context);
+        inner = new KILtoInnerKORE(context, doDropQuote);
         this.syntactic = syntactic;
     }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
-        inner = new KILtoInnerKORE(context);
-        this.syntactic = false;
         this.doDropQuote = true;
+        inner = new KILtoInnerKORE(context, doDropQuote);
+        this.syntactic = false;
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -292,10 +292,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 // Handle a special case first: List productions have only
                 // one item.
                 if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
-                    if (syntactic)
-                        applyUserList(res, sort, p, (UserList) p.getItems().get(0), true);
-                    else
-                        applyUserList(res, sort, p, (UserList) p.getItems().get(0), false);
+                    applyUserList(res, sort, p, (UserList) p.getItems().get(0), syntactic);
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
