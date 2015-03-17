@@ -290,9 +290,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                 // one item.
                 if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
                     if (syntactic)
-                        applyUserList2(res, sort, p, (UserList) p.getItems().get(0));
+                        applyUserList(res, sort, p, (UserList) p.getItems().get(0), true);
                     else
-                        applyUserList(res, sort, p, (UserList) p.getItems().get(0));
+                        applyUserList(res, sort, p, (UserList) p.getItems().get(0), false);
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
@@ -343,56 +343,9 @@ public class KILtoKORE extends KILTransformation<Object> {
         return res;
     }
 
-    public void applyUserList2(Set<org.kframework.definition.Sentence> res,
-                              org.kframework.kore.Sort sort, Production p, UserList userList) {
-        boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
-
-        org.kframework.kore.Sort elementSort = apply(userList.getSort());
-
-        // TODO: we're splitting one syntax declaration into three, where to put
-        // attributes
-        // of original declaration?
-
-        // Using attributes to mark these three rules
-        // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
-
-        org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
-
-        String kilProductionId = "" + System.identityHashCode(p);
-
-        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
-        // IdsTerminator ::= "" [klabel('.Ids)]
-        prod1 = Production(p.getTerminatorKLabel(), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
-                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
-        // NeIds ::= Id "," NeIds [klabel('_,_)]
-        prod2 = Production(p.getKLabel(), Sort("Ne" + sort.name()),
-                Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(Sort("Ne" + sort.name()))),
-                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
-        // NeIds ::= Id IdsTerminator [klabel('_,_)]
-        prod3 = Production(p.getKLabel(), Sort("Ne" + sort.name()),
-                Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminator"))),
-                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
-        // Ids ::= NeIds
-        prod4 = Production(sort, Seq(NonTerminal(Sort("Ne" + sort.name()))),
-                attrsWithKilProductionId);
-        // Ids ::= IdsTerminator // if the list is *
-        prod5 = Production(sort, Seq(NonTerminal(Sort(sort.name() + "Terminator"))),
-                attrsWithKilProductionId);
-
-        res.add(prod1);
-        res.add(prod2);
-        res.add(prod3);
-        res.add(prod4);
-        res.add(SyntaxSort(Sort(sort.name() + "Terminator")));
-        res.add(SyntaxSort(Sort("Ne" + sort.name())));
-        if (!nonEmpty) {
-            res.add(prod5);
-        }
-    }
-
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-                              org.kframework.kore.Sort sort, Production p, UserList userList) {
+                              org.kframework.kore.Sort sort, Production p, UserList userList,
+                              boolean forPrograms) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
@@ -405,28 +358,63 @@ public class KILtoKORE extends KILTransformation<Object> {
         // (to be used when translating those back to single KIL declaration)
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
 
-        org.kframework.definition.Production prod1, prod2, prod3;
+        if (forPrograms) {
+            org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
 
-        String kilProductionId = "" + System.identityHashCode(p);
+            String kilProductionId = "" + System.identityHashCode(p);
 
-        // lst ::= lst sep lst
-        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
-                kilProductionId);
-        prod1 = Production(sort,
-                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+            Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
+            // IdsTerminator ::= "" [klabel('.Ids)]
+            prod1 = Production(p.getTerminatorKLabel(), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
+                    attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
+            // NeIds ::= Id "," NeIds [klabel('_,_)]
+            prod2 = Production(p.getKLabel(), Sort("Ne" + sort.name()),
+                    Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(Sort("Ne" + sort.name()))),
+                    attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+            // NeIds ::= Id IdsTerminator [klabel('_,_)]
+            prod3 = Production(p.getKLabel(), Sort("Ne" + sort.name()),
+                    Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminator"))),
+                    attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+            // Ids ::= NeIds
+            prod4 = Production(sort, Seq(NonTerminal(Sort("Ne" + sort.name()))),
+                    attrsWithKilProductionId);
+            // Ids ::= IdsTerminator // if the list is *
+            prod5 = Production(sort, Seq(NonTerminal(Sort(sort.name() + "Terminator"))),
+                    attrsWithKilProductionId);
 
-        // lst ::= elem
-        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
-
-        // lst ::= .UserList
-        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
-
-        res.add(prod1);
-        res.add(prod2);
-        if (!nonEmpty) {
+            res.add(prod1);
+            res.add(prod2);
             res.add(prod3);
+            res.add(prod4);
+            res.add(SyntaxSort(Sort(sort.name() + "Terminator")));
+            res.add(SyntaxSort(Sort("Ne" + sort.name())));
+            if (!nonEmpty) {
+                res.add(prod5);
+            }
+        } else {
+            org.kframework.definition.Production prod1, prod2, prod3;
+
+            String kilProductionId = "" + System.identityHashCode(p);
+
+            // lst ::= lst sep lst
+            Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                    kilProductionId);
+            prod1 = Production(sort,
+                    Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                    attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+
+            // lst ::= elem
+            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+
+            // lst ::= .UserList
+            prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
+                    attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
+
+            res.add(prod1);
+            res.add(prod2);
+            if (!nonEmpty) {
+                res.add(prod3);
+            }
         }
     }
 
