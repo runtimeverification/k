@@ -141,7 +141,7 @@ public class JavaSymbolicExecutor implements Executor {
     private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = getJavaKilTerm(cfg);
         TermContext termContext = getTermContext(term);
-        if (javaOptions.patternMatching) {
+        if (!javaOptions.symbolicExecution) {
             return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
         }
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
@@ -192,7 +192,7 @@ public class JavaSymbolicExecutor implements Executor {
         Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
         KRunGraph executionGraph = null;
-        if (javaOptions.patternMatching) {
+        if (!javaOptions.symbolicExecution) {
             if (computeGraph) {
                 KExceptionManager.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
             }

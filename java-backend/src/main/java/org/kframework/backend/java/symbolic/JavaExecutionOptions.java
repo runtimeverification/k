@@ -14,9 +14,9 @@ public final class JavaExecutionOptions {
         + "execution in the java backend if function definitions are not deterministic.")
     public boolean deterministicFunctions = false;
 
-    @Parameter(names="--pattern-matching", description="Use pattern-matching rather than "
-        + "unification to drive rewriting in the Java backend.")
-    public boolean patternMatching = false;
+    @Parameter(names="--symbolic-execution", description="Use unification rather than "
+        + "pattern matching to drive rewriting in the Java backend.")
+    public boolean symbolicExecution = false;
 
     @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table]. (Default: table). This only has effect with '--backend java'.")
     public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;
