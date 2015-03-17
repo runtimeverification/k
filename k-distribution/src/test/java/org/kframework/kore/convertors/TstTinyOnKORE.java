@@ -12,6 +12,7 @@ import org.kframework.tiny.Constructors;
 import org.kframework.tiny.FreeTheory;
 import org.kframework.tiny.K;
 import org.kframework.tiny.KApp;
+import org.kframework.tiny.KIndex$;
 import org.kframework.tiny.Rewriter;
 import org.kframework.tiny.Rule;
 import org.kframework.tiny.package$;
@@ -42,28 +43,27 @@ public class TstTinyOnKORE extends BaseTest {
 
         Constructors cons = new Constructors(module);
 
-        K program = cons.KLabel("'<top>").apply(
-                cons.KLabel("'<k>").apply(
-                        cons.KLabel("'while__").apply(
-                                cons.KLabel("'_<=_").apply((K) cons.intToToken(0),(K) cons.stringToId("n")),
-                                cons.KLabel("'__").apply(
-                                        cons.KLabel("'_=_;").apply(
+        K program = cons.KLabel("<top>").apply(
+                cons.KLabel("<k>").apply(
+                        cons.KLabel("while__").apply(
+                                cons.KLabel("_<=_").apply((K) cons.intToToken(0),(K) cons.stringToId("n")),
+                                cons.KLabel("__").apply(
+                                        cons.KLabel("_=_;").apply(
                                                 (K) cons.stringToId("s"),
-                                                cons.KLabel("'_+_").apply(
+                                                cons.KLabel("_+_").apply(
                                                         (K) cons.stringToId("s"),
                                                         (K) cons.stringToId("n"))),
-                                        cons.KLabel("'_=_;").apply(
+                                        cons.KLabel("_=_;").apply(
                                                 (K) cons.stringToId("n"),
-                                                cons.KLabel("'_+_").apply(
+                                                cons.KLabel("_+_").apply(
                                                         (K) cons.stringToId("n"),
                                                         (K) cons.intToToken(-1)))
                                 ))),
-                cons.KLabel("'<state>").apply(
-                        cons.KLabel("'_Map_").apply(
-                                cons.KLabel("'_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(100)),
-                                cons.KLabel("'_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
-                ),
-                cons.KLabel("'<s>").apply()
+                cons.KLabel("<state>").apply(
+                        cons.KLabel("_Map_").apply(
+                                cons.KLabel("_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(10)),
+                                cons.KLabel("_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
+                )
         );
 
 //        KApp program = cons.KApply(cons.KLabel("'<top>"),
@@ -78,7 +78,7 @@ public class TstTinyOnKORE extends BaseTest {
 
         System.out.println("module = " + module);
 
-        Rewriter rewriter = new Rewriter(module);
+        Rewriter rewriter = new Rewriter(module, KIndex$.MODULE$);
 
 //        long l = System.nanoTime();
 //        Set<K> results = rewriter.rewrite(program, Set());

@@ -187,7 +187,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         Set<Tuple2<K, Sort>> expSorts = gatherSorts.apply(body);
         System.out.println("gatherSorts = " + expSorts);
 
-        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel("'_andBool_"), KList(a, b));
+        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel("_andBool_"), KList(a, b));
         K sortPredicates = expSorts
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
@@ -229,7 +229,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().map(l -> Tag(l.getLabel())).collect(Collectors.toSet()));
+        return immutable(labels.stream().map(l -> Tag(dropQuote(l.getLabel()))).collect(Collectors.toSet()));
     }
 
     public org.kframework.definition.Sentence apply(Import s) {
@@ -323,20 +323,27 @@ public class KILtoKORE extends KILTransformation<Object> {
                 kilProductionId);
         prod1 = Production(sort,
                 Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+                attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
 
         // lst ::= elem
         prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
 
         // lst ::= .UserList
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
+                attrsWithKilProductionId.add("#klabel", dropQuote(p.getTerminatorKLabel())));
 
         res.add(prod1);
         res.add(prod2);
         if (!nonEmpty) {
             res.add(prod3);
         }
+    }
+
+    public String dropQuote(String s) {
+        if (s.startsWith("'"))
+            return s.substring(1);
+        else
+            return s;
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {

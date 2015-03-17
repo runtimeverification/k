@@ -4,7 +4,7 @@ import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.{Constructors => basic, _}
 import org.kframework.meta.{Down, Up}
-import org.kframework.tiny.builtin.{KMapAppLabel, MapKeys, Tuple2Label}
+import org.kframework.tiny.builtin.{BagLabel, KMapAppLabel, MapKeys, Tuple2Label}
 import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
@@ -16,17 +16,20 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
   // separate the hook mappings at some point
   def hookMappings(hook: String, labelString: String) = hook match {
     case "#K-EQUAL:_==K_" => Equals
-    case "#BOOL:notBool_" => Not
-    case "#INT:_+Int_" => NativeBinaryOpLabel("_+Int_", Att(), (x: Int, y: Int) => x + y, Sorts.Int)
-    case "#INT:_/Int_" => NativeBinaryOpLabel("_/Int_", Att(), (x: Int, y: Int) => x / y, Sorts.Int)
+    case "#BOOL:notBool_" => Not //NativeUnaryOpLabel("notBool_", Att(), (x: Boolean) => !x, Sorts.Bool)
+    case "#INT:_+Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x + y, Sorts.Int)
+    case "#INT:_-Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x - y, Sorts.Int)
+    case "#INT:_*Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x * y, Sorts.Int)
+    case "#INT:_/Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x / y, Sorts.Int)
     case "#INT:_<=Int_" => NativeBinaryOpLabel(labelString, Att(), (x: Int, y: Int) => x <= y, Sorts.Bool)
-    case "Map:.Map" => KMapAppLabel("'_Map_")
-    case "Map:__" => KMapAppLabel("'_Map_")
+    case "Map:.Map" => KMapAppLabel(labelString)
+    case "Map:__" => KMapAppLabel(labelString)
     case "Map:_|->_" => Tuple2Label
     case "Map:keys" => MapKeys
     case "Set:in" => RegularKAppLabel("???in???", Att())
-    case "#BOOL:_andBool_" => And
-    case "#BOOL:_orBool_" => Or
+    case "#BOOL:_andBool_" => And //NativeBinaryOpLabel("_andBool_", Att(), (x: Boolean, y: Boolean) => x && y, Sorts
+    // .Bool)
+    case "#BOOL:_orBool_" => Or //NativeBinaryOpLabel("_orBool_", Att(), (x: Boolean, y: Boolean) => x || y, Sorts.Int)
   }
 
   val uniqueLabelCache = collection.mutable.Map[String, Label]()
@@ -40,7 +43,10 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     } else {
       val att = module.attributesFor(KORE.KLabel(name))
       if (att.contains("assoc"))
-        RegularKAssocAppLabel(name, att)
+        if (att.contains("comm"))
+          BagLabel(name, att)
+        else
+          RegularKAssocAppLabel(name, att)
       else
         att.get[String]("hook").map(hookMappings(_, name)).getOrElse { RegularKAppLabel(name, att) }
     }
@@ -48,9 +54,9 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     uniqueLabelCache.getOrElseUpdate(res.name, res)
   }
 
-  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): KApp = {
+  override def KApply(klabel: kore.KLabel, klist: kore.KList, att: Att): K = {
     val x: Label = convert(klabel)
-    x(klist.items.asScala.toSeq map convert, att).asInstanceOf[KApp]
+    x(klist.items.asScala.toSeq map convert, att)
   }
 
   def KApply(klabel: kore.KLabel, list: List[tiny.K], att: Att): KApp = {
@@ -60,18 +66,21 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
 
   def KApply(klabel: kore.KLabel, list: List[tiny.K]): KApp = KApply(klabel, list, Att())
 
-  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): KSeq =
-    KSeq(items.asScala.toSeq map convert, att).asInstanceOf[KSeq]
+  override def KSequence[KK <: kore.K](items: java.util.List[KK], att: Att): K =
+    KSeq(items.asScala.toSeq map convert, att)
 
   override def KVariable(name: String, att: Att): KVar = KVar(name, att)
 
   override def Sort(name: String): kore.Sort = KORE.Sort(name)
 
-  override def KToken(sort: kore.Sort, s: String, att: Att): KTok = {
+  override def KToken(sort: kore.Sort, s: String, att: Att): K = {
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
-      case Sorts.Bool => TypedKTok(sort, s.toBoolean)
+      case Sorts.Bool => s match {
+        case "true" => And()
+        case "false" => Or()
+      }
       case _ => RegularKTok(sort, s)
     }
   }
