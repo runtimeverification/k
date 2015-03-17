@@ -10,6 +10,7 @@ import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVis
 import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
@@ -77,7 +78,8 @@ public class ParseInModule implements Serializable {
         Term rez3 = new PreferAvoidVisitor().apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         warn = new AmbFilter().mergeWarnings(rez2._2(), warn);
+        rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 
-        return new Tuple2<>(Right.apply(rez2._1().right().get()), warn);
+        return new Tuple2<>(Right.apply(rez3), warn);
     }
 }

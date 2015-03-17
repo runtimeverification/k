@@ -3,11 +3,11 @@ require "bool.k"
 require "int.k"
 module FLOAT-SYNTAX-HOOKS
   syntax #Float ::= Token{[\+\-]?[0-9]+"."[0-9]+([eE][\+\-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?}
-                 [regex("([\\+-]?\\d(\\.\\d*)?|\\.\\d+)([eE][\\+-]?(\\d(\\.\\d*)?|\\.\\d+))?([fFdD]|([pP]\\d+[xX]\\d+))?")]
+                 [regex("([\\+-]?\\d+(\\.\\d*)?|\\.\\d+)([eE][\\+-]?(\\d+(\\.\\d*)?|\\.\\d+))?([fFdD]|([pP]\\d+[xX]\\d+))?"), token]
   syntax #Float ::= Token{[\+\-]?"Infinity"([fFdD]|([pP][0-9]+[xX][0-9]+))?}
                  [regex("[\\+-]?Infinity([fFdD]|([pP]\\d+[xX]\\d+))?")]
   syntax #Float ::= Token{"NaN"([fFdD]|([pP][0-9]+[xX][0-9]+))?}
-                 [regex("NaN([fFdD]|([pP]\\d+[xX]\\d+))?")]
+                 [regex("NaN([fFdD]|([pP]\\d+[xX]\\d+))?"), token]
   //TODO(radumereuta): this needs to be made more general to reject NaNp24x8,
   //etc, once we switch to the new parser
   syntax #Float ::= "NaN" | "Infinity"

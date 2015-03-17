@@ -653,7 +653,7 @@ void Element(StringBuilder reg, StringBuilder follow) :
 void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 {
 ( <STRING>  { sb.append(specialAndImage()); follow.setLength(0); }
-| <ID>      { sb.append(specialAndImage()+"Dz"); follow.setLength(0); }
+| <ID>      { sb.append(StringUtil.escapeSort(specialAndImage())+"Dz"); follow.setLength(0); }
 | Group(sb, REGEX_STATE) { follow.append(sb); }
 | "{"       { sb.append(specialAndImage()); }
   Element(sb, follow)

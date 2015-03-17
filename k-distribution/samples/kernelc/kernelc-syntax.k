@@ -86,11 +86,11 @@ module KERNELC-SYNTAX
                     | String
   syntax Expressions ::= List{Expression, ","}          [seqstrict]
 
-  syntax Id ::= "main"
-              | "malloc"
-              | "free"
-              | "scanf"
-              | "printf"
+  syntax Id ::= "main"   [token]
+              | "malloc" [token]
+              | "free"   [token]
+              | "scanf"  [token]
+              | "printf" [token]
 
 
   /*
@@ -106,14 +106,18 @@ module KERNELC-SYNTAX
    * Verification specific stuff
    */
   syntax Statement ::= "breakpoint"
-  syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min" | "max" | "update_height"
-              | "average" | "minimum" | "maximum" | "multiplication_by_addition" | "comm_assoc"
-              | "left_rotate" | "right_rotate" | "balance"
-              | "head" | "tail" | "add" | "swap" | "deallocate" | "length_recursive" | "length_iterative" | "sum_recursive" | "sum_iterative" | "reverse" | "append" | "copy" | "filter"
-              | "height" | "compute_size" | "mirror" | "inorder" | "preorder" | "postorder" | "iter_deallocate" | "tree_to_list_iterative" | "tree_to_list_recursive"
-              | "quicksort" | "merge_sort" | "bubble_sort" | "insertion_sort"
-  syntax Id ::= "listNode" | "stackNode" | "val" | "next"
-  syntax Id ::= "treeNode" | "node" | "value" | "left" | "right"
-  syntax Id ::= "sqs" | "sqv" | "dot" | "tau_vv" | "horizontal_los" | "omega_vv" | "cd2d"
-  syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "n" | "s" | "l" | "ln" | "tn" | "sn" | "temp" | "min" | "iterx" | "itery" | "change"
+  syntax Id ::= "find" [token] | "insert" [token] | "delete" [token] | "new_node" [token] | "find_min" [token] | "max" [token] | "update_height" [token]
+              | "average" [token] | "minimum" [token] | "maximum" [token] | "multiplication_by_addition" [token] | "comm_assoc" [token]
+              | "left_rotate" [token] | "right_rotate" [token] | "balance" [token]
+              | "head" [token] | "tail" [token] | "add" [token] | "swap" [token] | "deallocate" [token] | "length_recursive" [token]
+              | "length_iterative" [token] | "sum_recursive" [token] | "sum_iterative" [token] | "reverse" [token] | "append" [token]
+              | "copy" [token] | "filter" [token] | "height" [token] | "compute_size" [token] | "mirror" [token] | "inorder" [token]
+              | "preorder" [token] | "postorder" [token] | "iter_deallocate" [token] | "tree_to_list_iterative" [token] | "tree_to_list_recursive" [token]
+              | "quicksort" [token] | "merge_sort" [token] | "bubble_sort" [token] | "insertion_sort" [token]
+  syntax Id ::= "listNode" [token] | "stackNode" [token] | "val" [token] | "next" [token]
+  syntax Id ::= "treeNode" [token] | "node" [token] | "value" [token] | "left" [token] | "right" [token]
+  syntax Id ::= "sqs" [token] | "sqv" [token] | "dot" [token] | "tau_vv" [token] | "horizontal_los" [token] | "omega_vv" [token] | "cd2d" [token]
+  syntax Id ::= "a" [token] | "b" [token] | "c" [token] | "x" [token] | "y" [token] | "z" [token] | "t" [token] | "u" [token] | "v" [token]
+              | "p" [token] | "n" [token] | "s" [token] | "l" [token] | "ln" [token] | "tn" [token] | "sn" [token] | "temp" [token]
+              | "min" [token] | "iterx" [token] | "itery" [token] | "change" [token]
 endmodule

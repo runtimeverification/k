@@ -24,6 +24,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
+import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
@@ -106,6 +107,7 @@ public class BubbleParsing {
                 }
 
                 Term cleaned = new TreeCleanerVisitor().apply(parsed).right().get();
+                cleaned = new RemoveBracketVisitor().apply(cleaned);
 
                 K kBody = TreeNodesToKORE.apply(cleaned);
 
