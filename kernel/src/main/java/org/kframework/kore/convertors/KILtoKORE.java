@@ -357,13 +357,13 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        String kilProductionId = "" + System.identityHashCode(p);
+        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
+        org.kframework.definition.Production prod1, prod2, prod3;
 
         if (forPrograms) {
-            org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
+            org.kframework.definition.Production prod4, prod5;
 
-            String kilProductionId = "" + System.identityHashCode(p);
-
-            Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
             // IdsTerminator ::= "" [klabel('.Ids)]
             prod1 = Production(p.getTerminatorKLabel(), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
                     attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
@@ -392,13 +392,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 res.add(prod5);
             }
         } else {
-            org.kframework.definition.Production prod1, prod2, prod3;
-
-            String kilProductionId = "" + System.identityHashCode(p);
-
             // lst ::= lst sep lst
-            Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
-                    kilProductionId);
             prod1 = Production(sort,
                     Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                     attrsWithKilProductionId.add("#klabel", p.getKLabel()));
