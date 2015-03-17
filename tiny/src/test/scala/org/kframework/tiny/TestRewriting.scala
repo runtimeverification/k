@@ -1,6 +1,7 @@
 package org.kframework.tiny
 
 import org.junit.{Assert, Ignore, Test}
+import org.kframework.attributes._
 import org.kframework.tiny.matcher.Anywhere
 
 class TestRewriting extends AbstractTest {
@@ -9,7 +10,7 @@ class TestRewriting extends AbstractTest {
 
   implicit class KToRewriting(self: K) {
     def searchFor(rewrite: K, sideConditions: K = True)(implicit theory: Theory): Set[K] = {
-      RegularRule(rewrite, sideConditions)(theory)(self)
+      Rule(rewrite, sideConditions)(theory)(self)
     }
   }
 
@@ -60,12 +61,12 @@ class TestRewriting extends AbstractTest {
 
   @Test
   def testVarSubstitutionWithTrueSideCondition() {
-    assertEquals(Set('foo(5, 4)), 'foo(4).searchFor('foo(X) ==> 'foo(5: K, X), X -> 4))
+    assertEquals(Set('foo(5, 4)), 'foo(4).searchFor('foo(X) ==> 'foo(5: K, X), Equals(X, 4)))
   }
 
   @Test
   def testVarSubstitutionWithFalseSideCondition() {
-    assertEquals(Set(), 'foo(4).searchFor('foo(X) ==> 'foo(5, X), X -> 7))
+    assertEquals(Set(), 'foo(4).searchFor('foo(X) ==> 'foo(5, X), Equals(X, 7)))
   }
 
   @Test
@@ -89,8 +90,7 @@ class TestRewriting extends AbstractTest {
     assertEquals(Set(), '+(4, 4, 4, 4, 4).searchFor('+(X, X) ==> '+(X)))
   }
 
-  @Test
-  @Ignore
+  @Test @Ignore
   def testKLabelMatch() {
     assertEquals(Set('foo(4)), 'foo(4, 4).searchFor(KApply(X, List(4: K, 4: K)) ==> KApply(X, List(4: K), Att
       ())))
@@ -135,20 +135,6 @@ class TestRewriting extends AbstractTest {
       'foo('bar('foo(0))).searchFor(Anywhere("ONE", 'foo(X) ==> X)))
   }
 
-  @Test def testAnywhereRule {
-    val r = AnywhereRule('foo(X) ==> X, True)
-
-    assertEquals(Set('bar('foo(0)), 'foo('bar(0))),
-      r('foo('bar('foo(0)))))
-  }
-
-  @Test def testAnywhereRuleAssoc {
-    val r = AnywhereRule(X + X ==> X, True)
-
-    assertEquals(Set('+(0, 0, 0), '+(0, 0)),
-      r((0: K) + 0 + 0))
-  }
-
   @Test
   @Ignore def testTwoAnywheres {
     val o = 'foo('foo('foo('foo())))
@@ -172,4 +158,5 @@ class TestRewriting extends AbstractTest {
       Assert.assertEquals(expected.toString(), actual.toString())
     }
   }
+
 }

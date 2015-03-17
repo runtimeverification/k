@@ -1,6 +1,6 @@
 package org.kframework.tiny
 
-import org.junit.{Before, Assert}
+import org.junit.Assert
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Module, Production}
@@ -20,8 +20,7 @@ trait AbstractTest {
     Production("~>", Sorts.KSeq, Seq(), Att() + "assoc"),
     Production("foo", String, Seq(), Att()),
     Production("bar", String, Seq(), Att()),
-    Production("+", Int, Seq(), Att() + "assoc"),
-    Production("MyBag", Sorts.K, Seq(), Att() + "assoc" + "comm")
+    Production("+", Int, Seq(), Att() + "assoc")
   ), Att()))
 
   val X = KVar("X")
@@ -36,9 +35,5 @@ trait AbstractTest {
   def assertNotEquals(k1: kore.K, k2: kore.K): Unit = {
     if (k1 == k2)
       Assert.assertNotEquals(Unparse(k1), Unparse(k2))
-  }
-
-  @Before def clearCache: Unit = {
-    NormalizationCaching.cache.invalidateAll()
   }
 }

@@ -8,7 +8,7 @@ class LogicTest extends AbstractTest {
 
   @Test def nestingOfAndOr {
     implicit val theory = FreeTheory
-    assertEquals(X, And(Or(And(Or(And(X))))).normalize)
+    assertEquals(Or(And(X)), And(Or(And(Or(And(X))))).normalize)
     assertEquals(Or(And(Binding(X, 'foo()))), And(Or(And(Or(Binding(X, 'foo()))))).normalize)
   }
 

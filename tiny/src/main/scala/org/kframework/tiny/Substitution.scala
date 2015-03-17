@@ -12,10 +12,7 @@ class Substitution(self: K) {
   import org.kframework.tiny.Substitution._
 
   def substitute(substitution: Map[KVar, K]): K = {
-    if (self.isGround || substitution.isEmpty)
-      self
-    else
-      doSubstitution(substitution)
+    doSubstitution(substitution)
   }
 
   private def doSubstitution(substitution: Map[KVar, K]) =
@@ -33,7 +30,7 @@ class Substitution(self: K) {
 
         k.klabel(newChildren.toSeq: _*)
       case KApp(l, ks, att) =>
-        l(ks map {x: K => x.substitute(substitution) }, att)
+        l(ks map { x: K => x.substitute(substitution) }, att)
       case e => e
     }
 }
