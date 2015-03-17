@@ -26,15 +26,10 @@ trait ScalaSugar[K <: kore.K] {
     def ~>(other: K) = KSequence(Seq(k, other).asJava, Att())
     def ==>(other: K) = KRewrite(k, other, Att())
     def +(other: K) = KLabel("+")(k, other)
-    def -(other: K) = KLabel("-")(k, other)
-    def *(other: K) = KLabel("*")(k, other)
-    def /(other: K) = KLabel("/")(k, other)
-    def &(other: K) = KLabel("&")(k, other)
-    def ~(other: K) = KLabel("~")(k, other)
     def &&(other: K) = KLabel(Labels.And)(k, other)
     def ||(other: K) = KLabel(Labels.Or)(k, other)
   }
 
   def KList[KK <: K](ks: Seq[KK]): KList = KList(ks.asJava)
-  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): K = KApply(klabel, KList(ks), att)
+  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): KApply = KApply(klabel, KList(ks), att)
 }

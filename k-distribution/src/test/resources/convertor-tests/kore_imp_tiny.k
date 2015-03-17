@@ -24,6 +24,7 @@ module TEST
 
   syntax priority '_==K_ '_=/=K_ > 'notBool_ > '_andBool_
 
+
   syntax Int ::= Int "+Int" Int     [klabel('_+Int_), function, hook(#INT:_+Int_), left]
   syntax Int ::= Int "-Int" Int     [klabel('_-Int_), function, hook(#INT:_-Int_), left]
   syntax Int ::= Int "*Int" Int     [klabel('_*Int_), function, hook(#INT:_*Int_), left]
@@ -42,9 +43,9 @@ module TEST
 
 
   syntax Map ::= Map Map        [klabel('_Map_), function, hook(Map:__)]
-  syntax Map ::= ".Map"         [klabel('_Map_),  function, hook(Map:.Map)]
+  syntax Map ::= ".Map"         [klabel('.Map),  function, hook(Map:.Map)]
   syntax Map ::= K "|->" K      [klabel('_|->_), function, hook(Map:_|->_)]
-  syntax priorities '_|->_ > '_Map_
+  syntax priorities '_|->_ > '_Map_ '.Map
 
   syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]
   syntax Bool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
@@ -169,7 +170,7 @@ module TEST
 
   // Pgm
   rule
-    '<top>('<k>('int_;_('_`,_(X:Id,, Xs:Ids),, S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '_Map_(.KList))))
+    '<top>('<k>('int_;_('_`,_(X:Id,, Xs:Ids),, S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '.Map(.KList))))
   =>
     '<top>('<k>('int_;_(Xs:Ids,,               S:Stmt) ~> K:K),, '<state>('_Map_(Rho:Map,, '_|->_(X:Id,, 0))))
   when 'notBool_('_in_(X:Id,, 'keys(Rho:Map)))
@@ -190,7 +191,7 @@ module TEST
       '<top>('<k>(C:KResult ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
     =>
       '<top>('<k>('if__else_(C,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
-  [cool]
+  [heat]
 
   // '_/_
   rule

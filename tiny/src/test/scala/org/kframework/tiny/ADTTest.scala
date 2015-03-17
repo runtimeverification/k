@@ -33,8 +33,8 @@ class ADTTest extends AbstractTest {
     assertEquals(5: K, divide(10, 2).normalize)
     assertEquals(KSequence(5: K), KSequence(divide(10, 2)).normalize)
     assertEquals('foo(KSequence(5: K)), 'foo(KSequence(divide(10, 2))).normalize)
-    assertEquals('foo(KSequence(5: K)), And('foo(divide(10, 2))).normalize)
-    assertEquals('+(KSequence(5: K)), And('+(KSequence(divide(10, 2)))).normalize)
+    assertEquals(And('foo(KSequence(5: K))), And('foo(divide(10, 2))).normalize)
+    assertEquals(And('+(KSequence(5: K))), And('+(KSequence(divide(10, 2)))).normalize)
     assertEquals('+('+(KSequence(5: K)), '+(KMapAppLabel("Map")())), '+('+(KSequence(divide(10, 2))), '+(KMapAppLabel
       ("Map")())
     ).normalize)
@@ -43,9 +43,7 @@ class ADTTest extends AbstractTest {
   }
 
   @Test def AndMatcher {
-    assertEquals(True, And().matcher(KToken(Sorts.Bool, "true", Att())).normalize)
-    assertEquals(And(), And().matcher(And()).normalize)
-
-    assertEquals(Or(1: K, 2: K), (1: K) | 2)
+    assertEquals(Or(And()), And().matcher(KToken(Sorts.Bool, "true", Att())).normalize)
+    assertEquals(Or(And()), And().matcher(And()).normalize)
   }
 }

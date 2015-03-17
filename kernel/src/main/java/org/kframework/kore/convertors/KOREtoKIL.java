@@ -390,7 +390,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.KLabelConstant convertTag(Tag tag) {
-        return new org.kframework.kil.KLabelConstant(addQuote(tag.name()));
+        return new org.kframework.kil.KLabelConstant(tag.name());
     }
 
     public org.kframework.kil.ProductionItem convertProdItem(ProductionItem prodItem) {
@@ -438,13 +438,6 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
 
         });
         return kilAttributes;
-    }
-
-    private String addQuote(String name) {
-        if (name.startsWith("is") || name.startsWith("'") || name == "HOLE")
-            return name;
-        else
-            return "'" + name;
     }
 
     public org.kframework.kil.Term convertConfBody(K k) {
@@ -566,9 +559,10 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     }
 
     public org.kframework.kil.Term convertKApply(KApply kApply) {
-        String label = addQuote(kApply.klabel().name());
+        KLabel label = kApply.klabel();
         List<K> contents = kApply.klist().items();
-        if (label == labels.Hole().name()) {
+        if (label.name() == labels.Hole().name()) {
+            System.out.println("label = " + label);
             Sort sort = ((KToken) contents.get(0)).sort();
             return new org.kframework.kil.Hole(org.kframework.kil.Sort.of(sort.name()));
         } else {
@@ -579,7 +573,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                     .collect(Collectors.toList());
 
             if (kilProductionIdP) {
-                KLabelConstant kAppLabel = KLabelConstant.of(label);
+                KLabelConstant kAppLabel = KLabelConstant.of(label.name());
                 return new org.kframework.kil.KApp(kAppLabel, new org.kframework.kil.KList(
                         kilTerms));
             } else {
@@ -591,7 +585,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                             + " with id: " + kilProductionId);
                 }
 
-                return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label),
+                return new org.kframework.kil.TermCons(org.kframework.kil.Sort.of(label.name()),
                         kilTerms, production);
             }
         }
