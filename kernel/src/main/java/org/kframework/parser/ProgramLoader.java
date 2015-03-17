@@ -139,7 +139,7 @@ public class ProgramLoader {
             }
         } else if (whatParser == ParserType.NEWPROGRAM) {
             Definition def = loader.loadOrDie(Definition.class, context.files.resolveKompiled("definition-concrete.bin"));
-            Module synMod = new KILtoKORE(context, true).apply(def).getModule(def.getMainSyntaxModule()).get();
+            Module synMod = new KILtoKORE(context, true, false).apply(def).getModule(def.getMainSyntaxModule()).get();
             ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName());

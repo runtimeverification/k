@@ -62,11 +62,13 @@ import static org.kframework.Collections.*;
 public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
+    private final boolean doDropQuote;
     private KILtoInnerKORE inner;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote) {
         this.context = context;
+        this.doDropQuote = doDropQuote;
         inner = new KILtoInnerKORE(context);
         this.syntactic = syntactic;
     }
@@ -75,6 +77,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         this.context = context;
         inner = new KILtoInnerKORE(context);
         this.syntactic = false;
+        this.doDropQuote = true;
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -413,10 +416,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public String dropQuote(String s) {
-        if (s.startsWith("'"))
-            return s.substring(1);
-        else
+        if (doDropQuote) {
+            if (s.startsWith("'"))
+                return s.substring(1);
+            else
+                return s;
+        } else {
             return s;
+        }
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
