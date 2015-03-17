@@ -137,7 +137,7 @@ public class ProgramLoader {
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
-        } else /*if (whatParser == ParserType.NEWPROGRAM)*/ {
+        } else if (whatParser == ParserType.NEWPROGRAM) {
             Definition def = loader.loadOrDie(Definition.class, context.files.resolveKompiled("definition-concrete.bin"));
             Module synMod = new KILtoKORE(context, true).apply(def).getModule(def.getMainSyntaxModule()).get();
             ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
@@ -152,10 +152,10 @@ public class ProgramLoader {
             }
 
             out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));
-        } /*else {
+        } else {
             out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
-        }*/
+        }
         sw.printIntermediate("Parsing Program");
 
         return (Term) out;
