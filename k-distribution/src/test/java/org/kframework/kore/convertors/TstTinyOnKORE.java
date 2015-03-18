@@ -2,17 +2,27 @@
 
 package org.kframework.kore.convertors;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.kframework.Collections;
+import org.kframework.definition.Bubble;
 import org.kframework.definition.Module;
 import org.kframework.kore.Unparse;
+import org.kframework.parser.TreeNodesToKORE;
+import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.ParserUtils;
+import org.kframework.parser.concrete2kore.RuleGrammarTest;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.tiny.And;
 import org.kframework.tiny.Constructors;
 import org.kframework.tiny.FreeTheory;
 import org.kframework.tiny.K;
 import org.kframework.tiny.KApp;
 import org.kframework.tiny.KIndex$;
+import org.kframework.tiny.Or;
 import org.kframework.tiny.Rewriter;
 import org.kframework.tiny.Rule;
 import org.kframework.tiny.package$;
@@ -22,31 +32,87 @@ import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
-public class TstTinyOnKORE extends BaseTest {
+public class TstTinyOnKORE {
 
+    @org.junit.Rule
+    public TestName name = new TestName();
 
-    @Test
-    public void kore_imp_tiny() throws IOException {
-        sdfTest();
+    protected File testResource(String baseName) {
+        return new File(new File("k-distribution/src/test/resources" + baseName)
+                .getAbsoluteFile().toString().replace("k-distribution" + File.separator + "k-distribution", "k-distribution"));
+        // a bit of a hack to get around not having a clear working directory
+        // Eclipse runs tests within k/k-distribution, IntelliJ within /k
     }
 
-    protected String convert(DefinitionWithContext defWithContext) {
-        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
-        Module moduleWithoutK = kilToKore.apply(defWithContext.definition).getModule("TEST").get();
+    public RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException {
+        File definitionFile = new File(RuleGrammarTest.class.getResource
+                ("/kast.k").toURI()).getAbsoluteFile();
+        String definitionText;
+        try {
+            definitionText = FileUtils.readFileToString(definitionFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String mainModule = "K";
+        String startSymbol = "KList";
 
-        Module module = Module("IMP", Set(moduleWithoutK), Set(
-                Production(Sort("K"), Seq(NonTerminal(Sort("KSequence"))))
-        ), Att());
+        Module baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, "K");
+        return new RuleGrammarGenerator(baseK);
+    }
 
-        Constructors cons = new Constructors(module);
+    @Test
+    public void kore_imp_tiny() throws IOException, URISyntaxException {
+//        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context);
+//        Module moduleWithoutK = kilToKore.apply(defWithContext.definition).getModule("TEST").get();
+//
+//        Module module = Module("IMP", Set(moduleWithoutK), Set(
+//                Production(Sort("K"), Seq(NonTerminal(Sort("KSequence"))))
+//        ), Att());
+
+        File definitionFile = testResource("/convertor-tests/" + name.getMethodName() + ".k");
+        String definitionString = FileUtils.readFileToString(definitionFile);
+
+        RuleGrammarGenerator gen = makeRuleGrammarGenerator();
+        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
+        ParseInModule ruleParser = gen.getRuleGrammar(mainModuleWithBubble);
+
+        scala.collection.immutable.Set<org.kframework.definition.Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
+                .filter(s -> s instanceof Bubble)
+                .map(b -> ((Bubble) b).contents())
+                .map(s -> ruleParser.parseString(s, "K"))
+                .map(result -> {
+                    System.out.println("warning = " + result._2());
+                    if (result._1().isRight())
+                        return result._1().right().get();
+                    else {
+                        System.out.println("result._1().left().get() = " + result._1().left().get());
+                        return null;
+                    }
+                })
+                .filter(s -> s != null)
+                .map(TreeNodesToKORE::apply)
+                .map(contents -> Rule(contents, And.apply(), Or.apply()))
+                .collect(Collections.toSet());
+
+
+        Module mainModule = Module("TEST", Set(),
+                (scala.collection.immutable.Set<org.kframework.definition.Sentence>) mainModuleWithBubble.sentences().$bar(ruleSet), Att());
+
+//        return parser.parseString(input, startSymbol);
+
+        Constructors cons = new Constructors(mainModule);
 
         K program = cons.KLabel("<top>").apply(
                 cons.KLabel("<k>").apply(
                         cons.KLabel("while__").apply(
-                                cons.KLabel("_<=_").apply((K) cons.intToToken(0),(K) cons.stringToId("n")),
+                                cons.KLabel("_<=_").apply((K) cons.intToToken(0), (K) cons.stringToId("n")),
                                 cons.KLabel("__").apply(
                                         cons.KLabel("_=_;").apply(
                                                 (K) cons.stringToId("s"),
@@ -76,9 +142,9 @@ public class TstTinyOnKORE extends BaseTest {
 //                        ));
 
 
-        System.out.println("module = " + module);
+//        System.out.println("module = " + mainModule);
 
-        Rewriter rewriter = new Rewriter(module, KIndex$.MODULE$);
+        Rewriter rewriter = new Rewriter(mainModule, KIndex$.MODULE$);
 
 //        long l = System.nanoTime();
 //        Set<K> results = rewriter.rewrite(program, Set());
@@ -90,11 +156,6 @@ public class TstTinyOnKORE extends BaseTest {
         K result = rewriter.execute(program);
         System.out.println("time = " + (System.nanoTime() - l) / 1000000);
 
-        return result.toString();
-    }
-
-    @Override
-    protected String expectedFilePostfix() {
-        return "-tiny-expected.txt";
+//        System.out.println("result = " + result.toString());
     }
 }

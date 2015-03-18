@@ -100,7 +100,12 @@ module TEST
   syntax Bool ::= "isKResult" "(" KItem ")"     [klabel(isKResult), function]
   syntax Bool ::= "isInt" "(" KItem ")"     [klabel(isKResult), function]
 
+  rule
+    `<top>`(`<k>`(while(BE) S ~> K), SC:StateCell)
+  =>
+    `<top>`(`<k>`(if(BE) { S:Stmt while (BE:BExp) S } ~> K), SC:StateCell)
 
+/*
   // AExp
   rule
     '<top>('<k>(X:Id  ~> K:K),, '<state>('_Map_('_|->_(X:Id,, I:Int),, M:Map)))
@@ -285,5 +290,5 @@ module TEST
     '<top>('<k>('_=_;(V,, R) ~> K:K),, SC:StateCell)
   when isKResult(R)
   //[cool]
-
+*/
 endmodule
