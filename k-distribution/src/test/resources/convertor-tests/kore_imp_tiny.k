@@ -1,26 +1,24 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module TEST
-  syntax K ::= KItem
   syntax KResult
-  syntax KItem ::= Id
 
-  syntax HOLE ::= "[]"   [klabel('HOLE)]
-//  syntax UserList ::= KItem "," KItem    [klabel('_,_), assoc]
-//  syntax UserList ::= KItem              [klabel('.EmptyUserList)]
+//  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
 
-  syntax KSequence ::= K "~>" K   [ klabel(~>), left, assoc, unit(#EmptyK), hook(org.kframework.koreimplementation.KSequence) ]
+  syntax KItem
+  syntax K
+  syntax KBott  ::= "[]"           [klabel('HOLE)]
 
   syntax Bool ::= "true"           [klabel('_andBool_), function, hook(#BOOL:_andBool_)]
   syntax Bool ::= "false"          [klabel('_orBool_), function, hook(#BOOL:_orBool_)]
-  syntax Int ::= Token{[\-\+]? [0-9]+}     [regex("[\\+-]?\\d+"), prefer]
-  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
+  syntax Int ::= r"[\\+-]?\\d+"    [prefer]
+  syntax Id
 
-  syntax Bool ::= "notBool" "(" Bool ")"        [klabel('notBool_),  function, hook(#BOOL:notBool_)]
-  syntax Bool ::= Bool "andBool" Bool           [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
+  syntax Bool ::= "notBool" "(" Bool ")"    [klabel('notBool_),  function, hook(#BOOL:notBool_)]
+  syntax Bool ::= Bool "andBool" Bool       [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
 
-  syntax Bool ::= K "==K" K         [klabel('_==K_),  function, hook(#K-EQUAL:_==K_), left]
-  syntax Bool ::= K "=/=K" K        [klabel('_=/=K_), function, hook(#K-EQUAL:_=/=K_), left]
+  syntax Bool ::= K "==K" K                 [klabel('_==K_),  function, hook(#K-EQUAL:_==K_), left]
+  syntax Bool ::= K "=/=K" K                [klabel('_=/=K_), function, hook(#K-EQUAL:_=/=K_), left]
 
   syntax priority '_==K_ '_=/=K_ > 'notBool_ > '_andBool_
 
@@ -50,60 +48,81 @@ module TEST
   syntax Bool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
 
 
-  syntax KItem ::= AExp
   syntax AExp ::= Int
   syntax AExp ::= Id
   syntax AExp ::= AExp "+" AExp     [klabel('_+_), strict, left]
   syntax AExp ::= AExp "/" AExp     [klabel('_/_), strict, left]
   syntax AExp ::= "(" AExp ")"      [bracket]
 
-  syntax KItem ::= BExp
   syntax BExp ::= Bool
-  syntax BExp ::= AExp "<=" AExp        [klabel('_<=_), seqstrict]
-  syntax BExp ::= "!" BExp              [klabel('!_), strict]
-  syntax BExp ::= BExp "&&" BExp        [klabel('_&&_), strict(1), left]
-  syntax BExp ::= "(" BExp ")"          [bracket]
+  syntax BExp ::= AExp "<=" AExp    [klabel('_<=_), seqstrict]
+  syntax BExp ::= "!" BExp          [klabel('!_), strict]
+  syntax BExp ::= BExp "&&" BExp    [klabel('_&&_), strict(1), left]
+  syntax BExp ::= "(" BExp ")"      [bracket]
 
   syntax Block ::= "{" "}"          [klabel('empty-block)]
   syntax Block ::= "{" Stmt "}"     [klabel('block_)]
 
-  syntax KItem ::= Stmt
   syntax Stmt ::= Block
   syntax Stmt ::= Id "=" AExp ";"                           [klabel('_=_;), strict(2)]
   syntax Stmt ::= "if" "(" BExp ")" Block "else" Block      [klabel('if__else_), strict(1)]
   syntax Stmt ::= "while" "(" BExp ")" Block                [klabel('while__)]
   syntax Stmt ::= Stmt Stmt                                 [klabel('__), left]
 
-  syntax KItem ::= Pgm
   syntax Pgm ::= "int" Ids ";" Stmt     [klabel('int_;_)]
 
-  syntax KItem ::= Ids
   syntax Ids ::= List{Id, ","}
 
   syntax priority '_/_ > '_+_
   syntax priority '!_ > '_&&_
 
-
-  syntax KItem ::= KCell
-  syntax KCell ::= "<k>" K "</k>"       [klabel('<k>),       maincell]
-  syntax KCell ::= "initKCell"          [klabel('initKCell), initializer]
-  syntax KItem ::= StateCell
-  syntax StateCell ::= "<state>" Map "</state>"     [klabel('<state>),       cell]
-  syntax StateCell ::= "initStateCell"              [klabel('initStateCell), initializer]
-  syntax KItem ::= TopCell
-  syntax TopCell ::= "<top>" KCell StateCell "</top>"       [klabel('<top>), cell]
-  syntax TopCell ::= "initTopCell"                          [initializer, klabel(initThread)]
+  syntax KCell ::= "<k>" K "</k>"                       [klabel('<k>),       maincell]
+  syntax KCell ::= "initKCell"                          [klabel('initKCell), initializer]
+  syntax StateCell ::= "<state>" Map "</state>"         [klabel('<state>),       cell]
+  syntax StateCell ::= "initStateCell"                  [klabel('initStateCell), initializer]
+  syntax TopCell ::= "<top>" KCell StateCell "</top>"   [klabel('<top>), cell]
+  syntax TopCell ::= "initTopCell"                      [klabel(initThread), initializer]
 
 
   syntax KResult ::= Bool
   syntax KResult ::= Int
-  syntax Bool ::= "isKResult" "(" KItem ")"     [klabel(isKResult), function]
-  syntax Bool ::= "isInt" "(" KItem ")"     [klabel(isKResult), function]
+  syntax Bool ::= "isKResult" "(" K ")"     [klabel(isKResult), function]
+  syntax Bool ::= "isInt" "(" K ")"         [klabel(isKResult), function]
+
+  rule <top><k> `while(BE) S => if(BE) { S while (BE) S } else {}` ~> R </k> SC </top>
+
+  rule <top><k> `if(COND) THEN else ELSE => COND ~> if([]) THEN else ELSE` ~> R </k> SC </top>
+    requires notBool(isKResult(COND))
+
+  rule <top><k> `COND ~> if([]) THEN else ELSE => if(COND) THEN else ELSE` ~> R </k> SC </top>
+      requires isKResult(COND)
+
+  rule <top><k> `A <= B => A ~> [] <= B` ~> R </k> SC </top>
+    requires notBool(isKResult(A))
+
+  rule <top><k> `A ~> [] <= B => A <= B` ~> R </k> SC </top>
+    requires isKResult(A)
+
+  rule <top><k> `A <= B => B ~> A <= []` ~> R </k> SC </top>
+    requires notBool(isKResult(B))
+
+  rule <top><k> `B ~> A <= [] => A <= B` ~> R </k> SC </top>
+    requires isKResult(B)
+
+
+/*
+  rule
+    '<top>('<k>('if__else_(C:BExp,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+  =>
+    '<top>('<k>(C ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+    when 'notBool_(isKResult(C))
+  [heat]
 
   rule
-    `<top>`(`<k>`(while(BE) S ~> K), SC:StateCell)
-  =>
-    `<top>`(`<k>`(if(BE) { S:Stmt while (BE:BExp) S } ~> K), SC:StateCell)
+      '<top>('<k>(C:KResult ~> 'if__else_([],,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+    =>
+      '<top>('<k>('if__else_(C,,  S:Stmt,, _:Stmt) ~> K:K),, SC:StateCell)
+  [cool]
 
 /*
   // AExp

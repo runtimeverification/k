@@ -10,6 +10,7 @@ import org.junit.rules.TestName;
 import org.kframework.Collections;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Module;
+import org.kframework.kore.KApply;
 import org.kframework.kore.Unparse;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
@@ -35,6 +36,7 @@ import static org.kframework.kore.KORE.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -86,7 +88,7 @@ public class TstTinyOnKORE {
         scala.collection.immutable.Set<org.kframework.definition.Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> ((Bubble) b).contents())
-                .map(s -> ruleParser.parseString(s, "K"))
+                .map(s -> ruleParser.parseString(s, "RuleContent"))
                 .map(result -> {
                     System.out.println("warning = " + result._2());
                     if (result._1().isRight())
@@ -98,7 +100,23 @@ public class TstTinyOnKORE {
                 })
                 .filter(s -> s != null)
                 .map(TreeNodesToKORE::apply)
-                .map(contents -> Rule(contents, And.apply(), Or.apply()))
+                .map(TreeNodesToKORE::down)
+                .map(contents -> {
+                    KApply ruleContents = (KApply) contents;
+                    List<org.kframework.kore.K> items = ruleContents.klist().items();
+                    switch (ruleContents.klabel().name()) {
+                        case "#ruleNoConditions":
+                            return Rule(items.get(0), And.apply(), Or.apply());
+                        case "#ruleRequires":
+                            return Rule(items.get(0), items.get(1), Or.apply());
+                        case "#ruleEnsures":
+                            return Rule(items.get(0), And.apply(), items.get(1));
+                        case "#ruleRequiresEnsures":
+                            return Rule(items.get(0), items.get(1), items.get(2));
+                        default:
+                            throw new AssertionError("Wrong KLabel for rule content");
+                    }
+                })
                 .collect(Collections.toSet());
 
 
@@ -144,6 +162,9 @@ public class TstTinyOnKORE {
 
 //        System.out.println("module = " + mainModule);
 
+
+        System.out.println(">>>>>\n" + mainModule.rules().mkString("\n"));
+
         Rewriter rewriter = new Rewriter(mainModule, KIndex$.MODULE$);
 
 //        long l = System.nanoTime();
@@ -156,6 +177,6 @@ public class TstTinyOnKORE {
         K result = rewriter.execute(program);
         System.out.println("time = " + (System.nanoTime() - l) / 1000000);
 
-//        System.out.println("result = " + result.toString());
+        System.out.println("result = " + result.toString());
     }
 }

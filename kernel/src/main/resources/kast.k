@@ -16,9 +16,10 @@ module KAST
   syntax KBott ::= "#token" "(" KString "," KString ")"  [klabel(#KToken), hook(org.kframework.kore.KToken)]
                  | "#klabel" "(" KLabel ")"              [klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel)]
                  | KLabel "(" KList ")"                  [klabel(#KApply), hook(org.kframework.kore.KApply)]
+  syntax KItem ::= KBott
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`" [token, hook(org.kframework.kore.KLabel)]
-                  | r"[#a-z][a-zA-Z0-9]*"              [token, hook(org.kframework.kore.KLabel)]
+                  | r"[#a-z][a-zA-Z0-9]*"              [token, hook(org.kframework.kore.KLabel), autoReject]
                        // something that doesn't collide with meta-variables
 
   syntax KList ::= K
@@ -48,8 +49,17 @@ endmodule
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
+  imports REQUIRES-ENSURES
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "`" K "`"    [bracket]
 
+endmodule
+
+module REQUIRES-ENSURES
+  imports BASIC-K
+  syntax RuleContent ::= K                                  [klabel("#ruleNoConditions")]
+                       | K "requires" K                    [klabel("#ruleRequires")]
+                       | K "ensures" K                     [klabel("#ruleEnsures")]
+                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures")]
 endmodule
