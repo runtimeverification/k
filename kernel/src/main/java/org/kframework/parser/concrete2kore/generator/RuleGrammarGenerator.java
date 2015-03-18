@@ -28,13 +28,16 @@ public class RuleGrammarGenerator {
     private final Module baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
+    private static final Sort KLabel = Sort("KLabel");
+    private static final Sort KList = Sort("KList");
+    private static final Sort KItem = Sort("KItem");
     private static final Set<Sort> kSorts = new HashSet<>();
     static {
         kSorts.add(KBott);
         kSorts.add(KTop);
-        kSorts.add(Sort("KLabel"));
-        kSorts.add(Sort("KList"));
-        kSorts.add(Sort("KItem"));
+        kSorts.add(KLabel);
+        kSorts.add(KList);
+        kSorts.add(KItem);
     }
 
     public RuleGrammarGenerator(Module baseK) {
@@ -65,19 +68,25 @@ public class RuleGrammarGenerator {
                 // K ::= Sort
                 prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
                 // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-                Att attrs1 = Att().add("sort", srt.name());
-                prods.add(Production("#SyntacticCast", KBott, Seq(NonTerminal(KTop), RegexTerminal("::" + srt.name() + "(?![a-zA-Z0-9])")), attrs1));
-                Att attrs2 = Att().add("sort", srt.name());
-                prods.add(Production("#SemanticCast", KBott, Seq(NonTerminal(KTop), RegexTerminal(":" + srt.name() + "(?![a-zA-Z0-9])")), attrs2));
-                Att attrs3 = Att().add("sort", srt.name());
-                prods.add(Production("#InnerCast", KBott, Seq(NonTerminal(KTop), RegexTerminal("<:" + srt.name() + "(?![a-zA-Z0-9])")), attrs3));
-                Att attrs4 = Att().add("sort", srt.name());
-                prods.add(Production("#OuterCast", KBott, Seq(NonTerminal(KTop), RegexTerminal(":>" + srt.name() + "(?![a-zA-Z0-9])")), attrs4));
+                prods.addAll(makeCasts(KBott, KTop, srt));
             }
         }
+        prods.addAll(makeCasts(KLabel, KLabel, KLabel));
+        prods.addAll(makeCasts(KList, KList, KList));
+        prods.addAll(makeCasts(KBott, KTop, KItem));
 
         Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);
         return new ParseInModule(newM);
+    }
+
+    private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
+        Set<Sentence> prods = new HashSet<>();
+        Att attrs1 = Att().add("sort", castSort.name());
+        prods.add(Production("#SyntacticCast", outerSort, Seq(NonTerminal(innerSort), RegexTerminal("::" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#SemanticCast",  outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":"  + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal("<:" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#OuterCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":>" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        return prods;
     }
 
     public static ParseInModule getProgramsGrammar(Module mod) {
