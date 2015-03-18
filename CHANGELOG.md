@@ -28,6 +28,10 @@
   the class by dependency injection (i.e. via a 0-args or `@Inject`-annotated
   constructor)
 
+## Java Backend ##
+
+- Removed `--pattern-matching` flag and made this behavior the default. Added
+  `--symbolic-execution` flag, preserving old behavior.
 
 # K Framework 3.5 (released 2014-12-19) #
 

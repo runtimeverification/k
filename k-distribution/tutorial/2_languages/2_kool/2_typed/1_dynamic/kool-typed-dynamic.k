@@ -37,7 +37,7 @@ strict in the first argument anymore due to dynamic method dispatch).
 The KOOL-specific syntactic extensions are identical to those in
 untyped KOOL.  */
 
-  syntax Id ::= "Object" | "Main"
+  syntax Id ::= "Object" [token] | "Main" [token]
 
 //@ \subsection{Types}
 

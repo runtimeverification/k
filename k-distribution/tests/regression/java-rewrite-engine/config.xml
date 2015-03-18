@@ -10,6 +10,7 @@
       programs="io/test1/programs"
       results="io/test1/tests"
       posixInitScript="io/test1/prepare.sh"
+      warnings2errors="false"
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
@@ -91,6 +92,7 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
+      <krun-option name="--symbolic-execution" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="pretty" />
     </all-programs>
@@ -136,7 +138,8 @@
       definition="visitor/test2/test.k"
       programs="visitor/test2"
       results="visitor/test2"
-      extension="test" >
+      extension="test"
+      warnings2errors="false" >
     <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--smt" value="none" />

@@ -2,8 +2,8 @@
 require "../k-prelude.k"
 
 module BOOL-SYNTAX-HOOKS
-  syntax #Bool ::= "true"
-  syntax #Bool ::= "false"
+  syntax #Bool ::= "true"  [token]
+  syntax #Bool ::= "false" [token]
   syntax Bool ::= #Bool
 endmodule
 

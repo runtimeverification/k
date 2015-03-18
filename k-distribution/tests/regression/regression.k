@@ -29,7 +29,7 @@ module REGRESSION
 
 
   // tokenconstants
-  syntax Id ::= "Main"
+  syntax Id ::= "Main" [token]
   rule K => . when K ==K Main
 
 
@@ -95,7 +95,6 @@ module REGRESSION
         | "getInput"
   syntax Stmts ::= List{Common,";"}
   rule S:Common ; Ss:Stmts => S ~> Ss
-  syntax Start ::= Stmts
   rule <k> read S:String => getInput ...</k>
        <out>... .List => ListItem(S) </out>
   rule <k> getInput => . ...</k>
@@ -125,7 +124,7 @@ module REGRESSION
 
 
   //issue#313
-  syntax KLabel ::= "#foo" [function]
+  syntax KLabel ::= "#foo" [function, token]
   syntax K ::= foo6(K)  [function, klabel(#foo)]
   rule #foo(1) => 0
   rule #foo(0) => -1
@@ -139,8 +138,8 @@ module REGRESSION
                | foo15(Foo, Foo)
                | Int
                | "print"
-  syntax KLabel ::= "'lbar" [strict, arity(2)]
-                  | "'lbaz" [seqstrict, arity(2)]
+  syntax KLabel ::= "'lbar" [strict, arity(2), token]
+                  | "'lbaz" [seqstrict, arity(2), token]
   syntax KResult ::= Int
   rule <k> foo15(I:Int, I2:Int) => I +Int I2 ...</k>
        <sum> _ => I +Int I2 </sum>
@@ -171,7 +170,7 @@ module REGRESSION
                | tuple(Exp) [atom, klabel('Tuple)]
                | Exp "." NAME [primary]
   syntax priorities atom > primary
-  syntax Id ::= "x"
+  syntax Id ::= "x" [token]
   syntax KItem ::= foo8(K)
   rule foo8(5) => foo8(isExp(x))
 
@@ -192,7 +191,7 @@ module REGRESSION
 
   //unparsing
   syntax Exp ::= foo(Bool, KLabel, Id, Exps)
-  syntax KLabel ::= "'()"
+  syntax KLabel ::= "'()" [token]
   syntax Exp ::= "foo9"
   syntax Exps ::= List{Exp,","}
 
@@ -213,7 +212,7 @@ module REGRESSION
 
   //issue674
   syntax Exp ::= "`" Id
-  syntax Id ::= "foo12"
+  syntax Id ::= "foo12" [token]
   syntax KItem ::= "start"
   rule <k> start => ` a ...</k> <out>... .List => ListItem("ok") </out>
 
@@ -224,7 +223,7 @@ module REGRESSION
 
 
   //issue#36
-  syntax KLabel ::= "'L" [arity(1)] | "'A"
+  syntax KLabel ::= "'L" [arity(1), token] | "'A"
   syntax KItem ::= "dummy"
   syntax KResult ::= "res" "(" Id ")"
   context 'L(HOLE)
@@ -293,6 +292,6 @@ module REGRESSION
   rule foo1219(.Map) => 0
 
   // semantic casts shouldn't strictly type check terms
-  syntax Id ::= "foo25"
+  syntax Id ::= "foo25" [token]
   rule foo25:Exp => .K
 endmodule

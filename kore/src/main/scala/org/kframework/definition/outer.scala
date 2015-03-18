@@ -43,8 +43,6 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
 
-  println(sortFor)
-
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   val rules: Set[Rule] = sentences collect {case r: Rule => r }
@@ -71,6 +69,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val sortDeclarations: Set[SyntaxSort] = sentences.collect({case s: SyntaxSort => s })
 
   val definedSorts: Set[Sort] = (productions map { _.sort }) ++ (sortDeclarations map { _.sort })
+
+  val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
 
   private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)

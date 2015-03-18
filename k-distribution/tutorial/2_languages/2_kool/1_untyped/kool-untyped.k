@@ -155,7 +155,7 @@ into \texttt{strict(2)}.
 for the KOOL object-oriented constructs.
 \end{itemize} */
 
-  syntax Id ::= "Object" | "Main"
+  syntax Id ::= "Object" [token] | "Main" [token]
 
   syntax Decl ::= "var" Exps ";"
                 | "method" Id "(" Ids ")" Block  // called "function" in SIMPLE

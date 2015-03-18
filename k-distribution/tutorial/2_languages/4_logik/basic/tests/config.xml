@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <tests>
 
   <test
@@ -10,35 +10,41 @@
       results="." >
       <kompile-option name="--backend" value="java" />
       <all-programs>
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
       </all-programs>
       <program name="append-4.logik">
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--bound" value="5" />
         <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
       </program> 
       <program name="reverse-slow-palindromes-1.logik">
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--bound" value="5" />
         <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
       </program> 
       <program name="reverse-fast-palindromes-1.logik">
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--bound" value="5" />
         <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
       </program> 
       <program name="reverse-slow-2.logik">
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--bound" value="1" />
         <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
       </program> 
       <program name="reverse-fast-2.logik">
+        <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
         <krun-option name="--output" value="no-wrap" />
         <krun-option name="--bound" value="1" />
