@@ -134,7 +134,7 @@ public interface Executor {
                 @Main Context context,
                 KExceptionManager kem,
                 @Main Executor executor,
-                TermLoader loader) {
+                @Main TermLoader loader) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
@@ -255,8 +255,7 @@ public interface Executor {
             return loader.parsePattern(
                     patternToParse,
                     null,
-                    Sort.BAG,
-                    context);
+                    Sort.BAG);
         }
 
         @Override

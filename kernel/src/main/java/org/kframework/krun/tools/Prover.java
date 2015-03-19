@@ -57,7 +57,7 @@ public interface Prover {
                 @Main Term initialConfiguration,
                 @Main Prover prover,
                 @Main FileUtil files,
-                TermLoader termLoader) {
+                @Main TermLoader termLoader) {
             this.options = options;
             this.context = context;
             this.sw = sw;
@@ -74,7 +74,7 @@ public interface Prover {
                 String proofFile = options.experimental.prove;
                 String content = files.loadFromWorkingDirectory(proofFile);
                 Definition parsed = termLoader.parseString(content,
-                        Sources.fromFile(files.resolveWorkingDirectory(proofFile)), context);
+                        Sources.fromFile(files.resolveWorkingDirectory(proofFile)));
                 Module mod = parsed.getSingletonModule();
                 mod = prover.preprocess(mod, initialConfiguration);
                 sw.printIntermediate("Preprocess specification rules");

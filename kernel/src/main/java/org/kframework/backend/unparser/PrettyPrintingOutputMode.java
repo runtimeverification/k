@@ -10,9 +10,12 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.transformation.Transformation;
+import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
 
+// TODO(dwightguth): if we add simulation, make sure to create a separate pretty printer which separates
+// each definition.
 public class PrettyPrintingOutputMode  {
 
     private PrettyPrintingOutputMode() {}
@@ -22,7 +25,7 @@ public class PrettyPrintingOutputMode  {
         private final ConcretizeTerm concretizer;
 
         @Inject
-        public PrintKRunState(ConcretizeTerm concretizer) {
+        public PrintKRunState(@Main ConcretizeTerm concretizer) {
             this.concretizer = concretizer;
         }
 
@@ -42,7 +45,7 @@ public class PrettyPrintingOutputMode  {
         private final ConcretizeTerm concretizer;
 
         @Inject
-        public PrintSearchResult(ConcretizeTerm concretizer) {
+        public PrintSearchResult(@Main ConcretizeTerm concretizer) {
             this.concretizer = concretizer;
         }
 

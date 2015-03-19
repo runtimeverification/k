@@ -1,13 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.unparser.BinaryOutputMode;
+import org.kframework.backend.unparser.ConcretizeTerm;
 import org.kframework.backend.unparser.KASTOutputMode;
 import org.kframework.backend.unparser.NoOutputMode;
 import org.kframework.backend.unparser.OutputModes;
@@ -41,6 +41,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.Tool;
+import org.kframework.parser.TermLoader;
 import org.kframework.transformation.ActivatedTransformationProvider;
 import org.kframework.transformation.BasicTransformationProvider;
 import org.kframework.transformation.ToolActivation;
@@ -204,6 +205,8 @@ public class KRunModule extends AbstractModule {
             bind(Term.class).toProvider(InitialConfigurationProvider.class).in(RequestScoped.class);
 
             bind(FileUtil.class);
+            bind(TermLoader.class);
+            bind(ConcretizeTerm.class);
 
             bind(FileSystem.class).to(PortableFileSystem.class);
 
