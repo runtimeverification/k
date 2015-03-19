@@ -45,7 +45,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<Context> contextProvider;
     private final Stopwatch sw;
     private final Map<String, String> env;
-    private final ProgramLoader loader;
+    private final Provider<ProgramLoader> loader;
     private final Provider<File> kompiledDir;
     private final DefinitionScope scope;
 
@@ -59,7 +59,7 @@ public class KastFrontEnd extends FrontEnd {
             KExceptionManager kem,
             JarInfo jarInfo,
             @Environment Map<String, String> env,
-            ProgramLoader loader,
+            Provider<ProgramLoader> loader,
             FileUtil files,
             @KompiledDir Provider<File> kompiledDir,
             DefinitionScope scope) {
@@ -87,7 +87,7 @@ public class KastFrontEnd extends FrontEnd {
             Context context = contextProvider.get();
             Sort sort = sort(options.sort, context);
 
-            ASTNode out = loader.processPgm(stringToParse, source, sort, context, options.parser);
+            ASTNode out = loader.get().processPgm(stringToParse, source, sort, context, options.parser);
             StringBuilder kast;
             KoreFilter koreFilter = new KoreFilter(context);
             StringBuilder sb = new StringBuilder();
