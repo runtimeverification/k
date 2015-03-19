@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
-import com.google.inject.Provider;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -12,7 +11,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.kil.Sort;
-import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.RunProcess;
@@ -132,7 +130,7 @@ public class BuiltinIOOperations {
         try {
             org.kframework.kil.Term kast = rp.runParser(
                     ccOptions.parser(def.context()),
-                    term1.stringValue(), true, Sort.of(term2.stringValue()), def.context());
+                    term1.stringValue(), true, Sort.of(term2.stringValue()));
             Term term = kilTransformer.transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {

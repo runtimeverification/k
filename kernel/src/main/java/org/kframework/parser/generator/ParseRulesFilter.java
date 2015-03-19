@@ -9,14 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Configuration;
 import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -28,6 +26,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -35,18 +34,21 @@ import org.w3c.dom.Node;
 public class ParseRulesFilter extends ParseForestTransformer {
     final Map<String, CachedSentence> cachedDef;
     private final KExceptionManager kem;
+    private final FileUtil files;
 
 
-    public ParseRulesFilter(Context context, KExceptionManager kem) {
+    public ParseRulesFilter(Context context, KExceptionManager kem, FileUtil files) {
         super("Parse Rules", context);
         cachedDef = new HashMap<>();
         this.kem = kem;
+        this.files = files;
     }
 
-    public ParseRulesFilter(Context context, Map<String, CachedSentence> cachedDef, KExceptionManager kem) {
+    public ParseRulesFilter(Context context, Map<String, CachedSentence> cachedDef, KExceptionManager kem, FileUtil files) {
         super("Parse Rules", context);
         this.cachedDef = cachedDef;
         this.kem = kem;
+        this.files = files;
     }
 
     String localModule = null;
@@ -67,12 +69,12 @@ public class ParseRulesFilter extends ParseForestTransformer {
             if (ss.containsAttribute("koreimplementation")) {
 
                 long koreStartTime = System.currentTimeMillis();
-                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
+                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), files.resolveKompiled("."));
                 if (context.globalOptions.verbose)
                     System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
             } else {
                 try {
-                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
+                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), files.resolveKompiled("."));
                 // DISABLE EXCEPTION CHECKSTYLE
                 } catch (RuntimeException e) {
                     String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
@@ -114,7 +116,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             cachedDef.put(key, new CachedSentence(sentence, ss.getContentStartLine(), ss.getContentStartColumn()));
 
             if (context.globalOptions.debug) {
-                File file = context.files.resolveTemp("timing.log");
+                File file = files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                     throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());
                 }

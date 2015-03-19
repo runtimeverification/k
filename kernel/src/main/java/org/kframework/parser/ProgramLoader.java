@@ -2,6 +2,7 @@
 package org.kframework.parser;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -21,7 +22,6 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.kore.convertors.KOREtoKIL;
-import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
@@ -37,8 +37,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Concrete;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -52,21 +54,24 @@ public class ProgramLoader {
     private final BinaryLoader loader;
     private final Stopwatch sw;
     private final KExceptionManager kem;
-    private final GlobalOptions globalOptions;
     private final TermLoader termLoader;
+    private final FileUtil files;
+    private final Definition definition;
 
     @Inject
     ProgramLoader(
             BinaryLoader loader,
             Stopwatch sw,
             KExceptionManager kem,
-            GlobalOptions globalOptions,
-            TermLoader termLoader) {
+            TermLoader termLoader,
+            FileUtil files,
+            @Concrete Definition definition) {
         this.loader = loader;
         this.sw = sw;
         this.kem = kem;
-        this.globalOptions = globalOptions;
         this.termLoader = termLoader;
+        this.files = files;
+        this.definition = definition;
     }
 
     /**
@@ -80,7 +85,7 @@ public class ProgramLoader {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseProgramString(content, startSymbol.toString(), context.files.resolveKompiled("."));
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseProgramString(content, startSymbol.toString(), files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -118,13 +123,13 @@ public class ProgramLoader {
 
         ASTNode out;
         if (whatParser == ParserType.GROUND) {
-            out = termLoader.parseCmdString(FileUtil.read(content), source, startSymbol, context);
+            out = termLoader.parseCmdString(FileUtil.read(content), source, startSymbol);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context, kem).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
         } else if (whatParser == ParserType.RULES) {
-            out = termLoader.parsePattern(FileUtil.read(content), source, startSymbol, context);
+            out = termLoader.parsePattern(FileUtil.read(content), source, startSymbol);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context, kem).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
@@ -138,8 +143,7 @@ public class ProgramLoader {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
         } else if (whatParser == ParserType.NEWPROGRAM) {
-            Definition def = loader.loadOrDie(Definition.class, context.files.resolveKompiled("definition-concrete.bin"));
-            Module synMod = new KILtoKORE(context, true, false).apply(def).getModule(def.getMainSyntaxModule()).get();
+            Module synMod = new KILtoKORE(context, true, false).apply(definition).getModule(definition.getMainSyntaxModule()).get();
             ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName());
