@@ -2,6 +2,7 @@
 package org.kframework.parser;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -36,8 +37,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Concrete;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -53,6 +56,7 @@ public class ProgramLoader {
     private final KExceptionManager kem;
     private final TermLoader termLoader;
     private final FileUtil files;
+    private final Definition definition;
 
     @Inject
     ProgramLoader(
@@ -60,12 +64,14 @@ public class ProgramLoader {
             Stopwatch sw,
             KExceptionManager kem,
             TermLoader termLoader,
-            FileUtil files) {
+            FileUtil files,
+            @Concrete Definition definition) {
         this.loader = loader;
         this.sw = sw;
         this.kem = kem;
         this.termLoader = termLoader;
         this.files = files;
+        this.definition = definition;
     }
 
     /**
@@ -137,8 +143,7 @@ public class ProgramLoader {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
         } else if (whatParser == ParserType.NEWPROGRAM) {
-            Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
-            Module synMod = new KILtoKORE(context, true, false).apply(def).getModule(def.getMainSyntaxModule()).get();
+            Module synMod = new KILtoKORE(context, true, false).apply(definition).getModule(definition.getMainSyntaxModule()).get();
             ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName());
