@@ -8,6 +8,7 @@ module TEST
   syntax KItem
   syntax K
   syntax KBott  ::= "[]"           [klabel('HOLE)]
+  syntax KBott ::= K "~>" K        [klabel(~>)]
 
   syntax Bool ::= "true"           [klabel('_andBool_), function, hook(#BOOL:_andBool_)]
   syntax Bool ::= "false"          [klabel('_orBool_), function, hook(#BOOL:_orBool_)]
