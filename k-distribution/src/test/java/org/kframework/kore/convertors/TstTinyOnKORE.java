@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.Collections;
+import org.kframework.compiler.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Module;
 import org.kframework.kore.KApply;
