@@ -119,21 +119,8 @@ public class KItem extends Term implements KItemRepresentation {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
             /* at runtime, checks if the result has been cached */
-            CacheTableColKey cacheTabColKey = null;
-            CacheTableValue cacheTabVal = null;
             enableCache = (tool != Tool.KOMPILE)
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
-            if (enableCache) {
-                cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
-                cacheTabVal = definition.getSortCacheValue(cacheTabColKey);
-                if (cacheTabVal != null) {
-                    sort = cacheTabVal.sort;
-                    isExactSort = cacheTabVal.isExactSort;
-                    possibleSorts = cacheTabVal.possibleSorts;
-                    this.termContext = null;
-                    return;
-                }
-            }
 
             sort = null;
             isExactSort = false;
@@ -159,6 +146,19 @@ public class KItem extends Term implements KItemRepresentation {
         if (sort != null) {
             //computed already
             return;
+        }
+        if (enableCache) {
+            CacheTableColKey cacheTabColKey = null;
+            CacheTableValue cacheTabVal = null;
+            cacheTabColKey = new CacheTableColKey((KLabelConstant) kLabel, (KList) kList);
+            cacheTabVal = termContext.definition().getSortCacheValue(cacheTabColKey);
+            if (cacheTabVal != null) {
+                sort = cacheTabVal.sort;
+                isExactSort = cacheTabVal.isExactSort;
+                possibleSorts = cacheTabVal.possibleSorts;
+                this.termContext = null;
+                return;
+            }
         }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
         KList kList = (KList) this.kList;
