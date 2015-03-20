@@ -190,9 +190,9 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
 
-        for (Require r : iterable(definition.requires())) {
-            items.add(convertRequire(r));
-        }
+//        for (Require r : iterable(definition.requires())) {
+//            items.add(convertRequire(r));
+//        }
 
         for (Module m : iterable(definition.modules())) {
             items.add(convertModule(m));
@@ -203,9 +203,9 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         return def;
     }
 
-    public org.kframework.kil.Require convertRequire(Require require) {
-        return new org.kframework.kil.Require(require.file().getPath());
-    }
+//    public org.kframework.kil.Require convertRequire(Require require) {
+//        return new org.kframework.kil.Require(require.file().getPath());
+//    }
 
     public org.kframework.kil.Module convertModule(Module module) {
         org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());

@@ -8,8 +8,7 @@ trait Transformer extends Function1[Definition, Definition] {
 
   import org.kframework.definition;
 
-  def apply(d: Definition): Definition = definition.Definition(d.requires map apply, d.modules map apply)
-  def apply(r: Require): Require = r
+  def apply(d: Definition): Definition = definition.Definition(d.modules map apply)
   def apply(m: Module): Module = definition.Module(m.name, m.imports map apply, m.sentences map apply, m.att)
   def apply(s: Sentence): Sentence = s match {
     case i: Import => apply(i)

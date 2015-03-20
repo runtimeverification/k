@@ -1,14 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
+require "thekstuff.k"
 
 module TEST
+  import THEKSTUFF
+
   syntax KResult
 
 //  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
-
-  syntax KItem
-  syntax K
-  syntax KBott  ::= "[]"           [klabel([])]
-  syntax KBott ::= K "~>" K        [klabel(#KSequence), left]
 
   syntax Bool ::= "true"           [klabel(_andBool_), function, hook(#BOOL:_andBool_)]
   syntax Bool ::= "false"          [klabel(_orBool_), function, hook(#BOOL:_orBool_)]

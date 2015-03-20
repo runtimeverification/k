@@ -130,7 +130,6 @@ public class BubbleParsing {
      */
     public Definition parseBubbles(Definition d) {
         return new Definition(
-                d.requires(),
                 stream(d.modules()).map(this::parseBubbles).collect(Collections.toSet()),
                 d.att());
     }

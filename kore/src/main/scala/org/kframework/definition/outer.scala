@@ -20,32 +20,33 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 //
 //}
 
-case class Definition(requires: Set[Require], modules: Set[Module], att: Att = Att())
+case class Definition(modules: Set[Module], att: Att = Att())
   extends DefinitionToString with OuterKORE {
 
-  def getModule(name: String): Option[Module] = modules find {case Module(`name`, _, _, _) => true; case _ => false }
-}
+//  assert(modules.contains(mainModule))
+//  assert(modules.contains(mainSyntaxModule))
 
-case class Require(file: java.io.File) extends OuterKORE
+  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
+}
 
 case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
 
-  val productions: Set[Production] = sentences collect {case p: Production => p }
+  val productions: Set[Production] = sentences collect { case p: Production => p }
 
   val productionsFor: Map[KLabel, Set[Production]] =
     productions
-      .collect({case p if p.klabel != None => p })
+      .collect({ case p if p.klabel != None => p })
       .groupBy(_.klabel.get)
-      .map {case (l, ps) => (l, ps) }
+      .map { case (l, ps) => (l, ps) }
 
   val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
-  val rules: Set[Rule] = sentences collect {case r: Rule => r }
+  val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
   // Check that productions with the same #klabel have identical attributes
   //  productionsFor.foreach {
@@ -61,12 +62,12 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       ps: Set[Production] =>
         ps.map {
           p: Production =>
-            val params: Seq[Sort] = p.items collect {case NonTerminal(sort) => sort }
+            val params: Seq[Sort] = p.items collect { case NonTerminal(sort) => sort }
             (params, p.sort)
         }
     }
 
-  val sortDeclarations: Set[SyntaxSort] = sentences.collect({case s: SyntaxSort => s })
+  val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
 
   val definedSorts: Set[Sort] = (productions map { _.sort }) ++ (sortDeclarations map { _.sort })
 
@@ -78,7 +79,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
-      .collect({case SyntaxPriority(ps, _) => ps })
+      .collect({ case SyntaxPriority(ps, _) => ps })
       .map {ps: Seq[Set[Tag]] =>
       val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
         case ((all, prev), current) =>
@@ -94,7 +95,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   private def buildAssoc(side: Associativity.Value): Set[(Tag, Tag)] = {
     sentences
-      .collect({case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
+      .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
       .map {ps: Set[Tag] =>
       for (a <- ps; b <- ps) yield (a, b)
     }.flatten
@@ -105,7 +106,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
     case Production(_, items, _) =>
-      items collect {case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+      items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
     case _ => Set()
   }
   if (!nonTerminalsWithUndefinedSort.isEmpty)

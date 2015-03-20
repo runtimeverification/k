@@ -10,10 +10,7 @@ trait ModuleToString {
 
 trait DefinitionToString {
   self: Definition =>
-  override def toString =
-    requires.mkString("\n") +
-      "\n\n" +
-      modules.toList.map(_.toString).sorted.mkString("\n\n\n")
+  override def toString = modules.toList.map(_.toString).sorted.mkString("\n\n\n")
 }
 
 trait RuleToString {

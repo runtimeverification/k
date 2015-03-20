@@ -14,10 +14,9 @@ import org.kframework.kore._
 
 object Constructors {
 
-  def Definition(requires: Set[Require], modules: Set[Module]) =
-    definition.Definition(requires, modules)
+  def Definition(modules: Set[Module]) =
+    definition.Definition(modules)
 
-  def Require(file: java.io.File) = definition.Require(file)
   def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)
 

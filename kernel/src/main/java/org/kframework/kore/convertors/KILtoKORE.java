@@ -81,9 +81,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
-        Set<org.kframework.definition.Require> requires = d.getItems().stream()
-                .filter(i -> i instanceof Require).map(i -> apply((Require) i))
-                .collect(Collectors.toSet());
+//        Set<org.kframework.definition.Require> requires = d.getItems().stream()
+//                .filter(i -> i instanceof Require).map(i -> apply((Require) i))
+//                .collect(Collectors.toSet());
 
         Set<Module> kilModules = d.getItems().stream().filter(i -> i instanceof Module)
                 .map(mod -> (Module) mod).collect(Collectors.toSet());
@@ -100,16 +100,12 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // TODO: handle LiterateDefinitionComments
 
-        return Definition(immutable(requires), immutable(new HashSet<>(koreModules.values())));
+        return Definition(immutable(new HashSet<>(koreModules.values())));
     }
 
-    public org.kframework.definition.Require apply(Require i) {
-        return Require(new File(i.getValue()));
-    }
-
-    public org.kframework.definition.Module apply(Module i, Set<Module> allKilModules,
+    public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
-        Set<org.kframework.definition.Sentence> items = i.getItems().stream()
+        Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
         Set<String> importedModuleNames = items.stream()
@@ -126,8 +122,8 @@ public class KILtoKORE extends KILTransformation<Object> {
                     return result;
                 }).collect(Collectors.toSet());
 
-        org.kframework.definition.Module newModule = Module(i.getName(), immutable(importedModules), immutable(items),
-                inner.convertAttributes(i));
+        org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(items),
+                inner.convertAttributes(mainModule));
         koreModules.put(newModule.name(), newModule);
         return newModule;
     }

@@ -2,6 +2,7 @@
 
 package org.kframework.kore.convertors;
 
+import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -11,6 +12,7 @@ import org.kframework.Collections;
 import org.kframework.compiler.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Module;
+import org.kframework.kil.Sources;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Unparse;
 import org.kframework.parser.TreeNodesToKORE;
@@ -83,7 +85,15 @@ public class TstTinyOnKORE {
         String definitionString = FileUtils.readFileToString(definitionFile);
 
         RuleGrammarGenerator gen = makeRuleGrammarGenerator();
-        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
+
+//        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
+        java.util.Set<Module> modules =
+                ParserUtils.loadModules(definitionString, Sources.fromFile(definitionFile),
+                        definitionFile.getParentFile(),
+                        Lists.newArrayList(new File("kore/src/main/k").getAbsoluteFile()));
+
+        Module mainModuleWithBubble = modules.stream().filter(m -> m.name().equals("TEST")).findFirst().get();
+
         ParseInModule ruleParser = gen.getRuleGrammar(mainModuleWithBubble);
 
         scala.collection.immutable.Set<org.kframework.definition.Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
