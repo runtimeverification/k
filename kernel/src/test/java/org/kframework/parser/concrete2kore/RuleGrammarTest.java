@@ -30,7 +30,7 @@ public class RuleGrammarTest {
     @Before
     public void setUp() throws  Exception{
         definitionFile = new File(RuleGrammarTest.class.getResource
-                ("/kast.k").toURI()).getAbsoluteFile();
+                ("/src/main/k/kast.k").toURI()).getAbsoluteFile();
         String definitionText;
         try {
             definitionText = FileUtils.readFileToString(definitionFile);

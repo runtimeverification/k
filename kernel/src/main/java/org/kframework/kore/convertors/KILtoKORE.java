@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -49,6 +50,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.generator.SDFHelper;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
 import scala.collection.Seq;
@@ -106,21 +108,32 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
+                .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
-        Set<String> importedModuleNames = items.stream()
-                .filter(imp -> imp instanceof org.kframework.definition.Import)
-                .map(imp -> ((org.kframework.definition.Import) imp).moduleName())
+        Set<Import> importedModuleNames = mainModule.getItems().stream()
+                .filter(imp -> imp instanceof Import)
+                .map(imp -> (Import) imp)
                 .collect(Collectors.toSet());
 
-        Set<org.kframework.definition.Module> importedModules = allKilModules.stream()
-                .filter(mod -> importedModuleNames.contains(mod.getName())).map(mod -> {
+        Set<org.kframework.definition.Module> importedModules = importedModuleNames.stream()
+                .map(imp -> {
+                    Optional<Module> theModule = allKilModules.stream()
+                            .filter(m -> m.getName().equals(imp.getName()))
+                            .findFirst();
+                    if (theModule.isPresent())
+                        return theModule.get();
+                    else
+                        throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
+                })
+                .map(mod -> {
                     org.kframework.definition.Module result = koreModules.get(mod.getName());
                     if (result == null) {
                         result = apply(mod, allKilModules, koreModules);
                     }
                     return result;
                 }).collect(Collectors.toSet());
+
 
         org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(items),
                 inner.convertAttributes(mainModule));
@@ -251,10 +264,6 @@ public class KILtoKORE extends KILTransformation<Object> {
     public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
         return immutable(labels.stream().flatMap(l ->
                 SDFHelper.getProductionsForTag(l.getLabel(), context).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
-    }
-
-    public org.kframework.definition.Sentence apply(Import s) {
-        return new org.kframework.definition.Import(s.getName(), inner.convertAttributes(s));
     }
 
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {

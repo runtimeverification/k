@@ -28,11 +28,6 @@ trait SyntaxSortToString {
   override def toString() = "syntax " + sort + att.postfixString
 }
 
-trait ImportToString {
-  self: Import =>
-  override def toString() = "imports " + moduleName + att.postfixString
-}
-
 trait TerminalToString {
   self: Terminal =>
   override def toString = "\"" + value + "\""

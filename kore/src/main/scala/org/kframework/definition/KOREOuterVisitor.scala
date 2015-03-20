@@ -16,7 +16,6 @@ trait KOREOuterTransformer[T] extends ((OuterKORE) => T) with java.util.function
     case s: SyntaxPriority => apply(s)
     case s: SyntaxAssociativity => apply(s)
     case r: Rule => apply(r)
-    case i: Import => apply(i)
     case c: ModuleComment => apply(c)
   }
 
@@ -31,7 +30,6 @@ trait KOREOuterTransformer[T] extends ((OuterKORE) => T) with java.util.function
   def apply(s: SyntaxPriority): T
   def apply(s: SyntaxAssociativity): T
   def apply(r: Rule): T
-  def apply(i: Import): T
   def apply(c: ModuleComment): T
 
 }

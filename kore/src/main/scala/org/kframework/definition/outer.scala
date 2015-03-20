@@ -23,8 +23,8 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 case class Definition(modules: Set[Module], att: Att = Att())
   extends DefinitionToString with OuterKORE {
 
-//  assert(modules.contains(mainModule))
-//  assert(modules.contains(mainSyntaxModule))
+  //  assert(modules.contains(mainModule))
+  //  assert(modules.contains(mainSyntaxModule))
 
   def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
 }
@@ -73,7 +73,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
 
-  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
+  private val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
   }
 
@@ -105,8 +105,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
-    case Production(_, items, _) =>
-      items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+    case p@Production(_, items, _) =>
+      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+      if (!res.isEmpty)
+        throw new AssertionError("Could not find sort: " + res + " in production " + p + " in module " + this.name)
+      res
     case _ => Set()
   }
   if (!nonTerminalsWithUndefinedSort.isEmpty)
@@ -127,8 +130,6 @@ case class Context(body: K, requires: K, att: Att = Att()) extends Sentence with
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att()) extends Sentence with RuleToString with OuterKORE
 
 case class ModuleComment(comment: String, att: Att = Att()) extends Sentence with OuterKORE
-
-case class Import(moduleName: String, att: Att = Att()) extends Sentence with ImportToString with OuterKORE
 
 // hooked
 

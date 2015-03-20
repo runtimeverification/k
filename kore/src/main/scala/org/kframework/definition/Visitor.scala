@@ -11,7 +11,6 @@ trait Transformer extends Function1[Definition, Definition] {
   def apply(d: Definition): Definition = definition.Definition(d.modules map apply)
   def apply(m: Module): Module = definition.Module(m.name, m.imports map apply, m.sentences map apply, m.att)
   def apply(s: Sentence): Sentence = s match {
-    case i: Import => apply(i)
     case c: Context => apply(c)
     case r: Rule => apply(r)
     case mc: ModuleComment => apply(mc)
@@ -21,7 +20,6 @@ trait Transformer extends Function1[Definition, Definition] {
     case sp: Production => apply(sp)
   }
   def apply(c: Context): Context = definition.Context(apply(c.body), apply(c.requires), c.att)
-  def apply(i: Import): Import
   def apply(r: Rule): Rule
   def apply(c: ModuleComment): ModuleComment
   def apply(s: SyntaxPriority): SyntaxPriority

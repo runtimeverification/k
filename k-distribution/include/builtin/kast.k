@@ -58,6 +58,7 @@ endmodule
 
 module REQUIRES-ENSURES
   imports BASIC-K
+
   syntax RuleContent ::= K                                  [klabel("#ruleNoConditions")]
                        | K "requires" K                    [klabel("#ruleRequires")]
                        | K "ensures" K                     [klabel("#ruleEnsures")]

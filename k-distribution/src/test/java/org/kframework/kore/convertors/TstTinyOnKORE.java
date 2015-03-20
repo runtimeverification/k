@@ -11,7 +11,9 @@ import org.junit.rules.TestName;
 import org.kframework.Collections;
 import org.kframework.compiler.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Unparse;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 
 public class TstTinyOnKORE {
 
+    public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
     @org.junit.Rule
     public TestName name = new TestName();
 
@@ -57,11 +60,9 @@ public class TstTinyOnKORE {
     }
 
     public RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException {
-        File definitionFile = new File(RuleGrammarTest.class.getResource
-                ("/kast.k").toURI()).getAbsoluteFile();
         String definitionText;
         try {
-            definitionText = FileUtils.readFileToString(definitionFile);
+            definitionText = FileUtils.readFileToString(new File(BUILTIN_DIRECTORY.toString() + "/kast.k"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -87,10 +88,16 @@ public class TstTinyOnKORE {
         RuleGrammarGenerator gen = makeRuleGrammarGenerator();
 
 //        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
+
+        Definition kastDefintion = Definition(immutable(ParserUtils.loadModules(definitionString,
+                Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
+                definitionFile.getParentFile(),
+                Lists.newArrayList(BUILTIN_DIRECTORY))));
+
         java.util.Set<Module> modules =
                 ParserUtils.loadModules(definitionString, Sources.fromFile(definitionFile),
                         definitionFile.getParentFile(),
-                        Lists.newArrayList(new File("kore/src/main/k").getAbsoluteFile()));
+                        Lists.newArrayList(BUILTIN_DIRECTORY));
 
         Module mainModuleWithBubble = modules.stream().filter(m -> m.name().equals("TEST")).findFirst().get();
 
@@ -173,9 +180,13 @@ public class TstTinyOnKORE {
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
+        Module withKSeq = Module("EXECUTION",
+                Set(afterHeatingCooling, kastDefintion.getModule("KSEQ").get()),
+                Collections.<Sentence>Set(), Att());
+
         System.out.println(">>>>>\n" + afterHeatingCooling.rules().mkString("\n"));
 
-        Rewriter rewriter = new Rewriter(afterHeatingCooling, KIndex$.MODULE$);
+        Rewriter rewriter = new Rewriter(withKSeq, KIndex$.MODULE$);
 
 //        long l = System.nanoTime();
 //        Set<K> results = rewriter.rewrite(program, Set());

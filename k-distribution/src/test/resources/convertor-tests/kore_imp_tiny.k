@@ -1,51 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-require "thekstuff.k"
+require "kast.k"
+require "misc.k"
 
 module TEST
-  import THEKSTUFF
-
-  syntax KResult
-
-//  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
-
-  syntax Bool ::= "true"           [klabel(_andBool_), function, hook(#BOOL:_andBool_)]
-  syntax Bool ::= "false"          [klabel(_orBool_), function, hook(#BOOL:_orBool_)]
-  syntax Int ::= r"[\\+-]?\\d+"    [prefer]
-  syntax Id
-
-  syntax Bool ::= "notBool" "(" Bool ")"    [klabel(notBool_),  function, hook(#BOOL:notBool_)]
-  syntax Bool ::= Bool "andBool" Bool       [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
-
-  syntax Bool ::= K "==K" K                 [klabel('_==K_),  function, hook(#K-EQUAL:_==K_), left]
-  syntax Bool ::= K "=/=K" K                [klabel('_=/=K_), function, hook(#K-EQUAL:_=/=K_), left]
-
-  syntax priority '_==K_ '_=/=K_ > 'notBool_ > '_andBool_
-
-  syntax Int ::= Int "+Int" Int     [klabel('_+Int_), function, hook(#INT:_+Int_), left]
-  syntax Int ::= Int "-Int" Int     [klabel('_-Int_), function, hook(#INT:_-Int_), left]
-  syntax Int ::= Int "*Int" Int     [klabel('_*Int_), function, hook(#INT:_*Int_), left]
-  syntax Int ::= Int "/Int" Int     [klabel('_/Int_), function, hook(#INT:_/Int_), left]
-  syntax Int ::= Int "%Int" Int     [klabel('_%Int_), function, hook(#INT:_%Int_), left]
-
-  syntax Bool ::= Int "<=Int" Int       [klabel('_<=Int_), function, hook(#INT:_<=Int_), left]
-  syntax Bool ::= Int "<Int" Int        [klabel('_<Int_),  function, hook(#INT:_<Int_),  left]
-  syntax Bool ::= Int ">=Int" Int       [klabel('_>=Int_), function, hook(#INT:_>=Int_), left]
-  syntax Bool ::= Int ">Int" Int        [klabel('_>Int_),  function, hook(#INT:_>Int_),  left]
-
-  syntax priority '_*Int_ '_/Int_ '_%Int_ > '_+Int_ '_-Int_
-
-  syntax Int ::= "freshInt" "(" Int ")" [klabel('freshInt), function, freshGenerator]
-//  rule 'freshInt(I:Int) => I:Int
-
-
-  syntax Map ::= Map Map        [klabel('_Map_), function, hook(Map:__)]
-  syntax Map ::= ".Map"         [klabel('_Map_),  function, hook(Map:.Map)]
-  syntax Map ::= Id "|->" Int   [klabel('_|->_), function, hook(Map:_|->_)]
-  syntax priorities '_|->_ > '_Map_
-
-  syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]
-  syntax Bool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
-
+  import BASIC-K
+  import STRICTNESS
+  import BOOL
+  import INT
+  import EMPTY-ID
+  import MAP
+  import K-RESULT
 
   syntax AExp ::= Int
   syntax AExp ::= Id
@@ -82,13 +46,9 @@ module TEST
   syntax TopCell ::= "<top>" KCell StateCell "</top>"   [klabel(<top>), cell]
   syntax TopCell ::= "initTopCell"                      [klabel(initThread), initializer]
 
-
   syntax KResult ::= Bool
   syntax KResult ::= Int
-  syntax Bool ::= "isKResult" "(" K ")"     [klabel(isKResult), function]
-  syntax Bool ::= "isInt" "(" K ")"         [klabel(isKResult), function]
   syntax Bool ::= "isStmt" "(" K ")"         [klabel(isStmt), function]
-  syntax Bool ::= "isId" "(" K ")"         [klabel(isId), function]
 
   rule <top><k> `while(BE) S => if(BE) { S while (BE) S } else {}` ~> R </k> SC </top>
 

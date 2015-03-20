@@ -254,9 +254,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 .filter(s -> !(s instanceof org.kframework.definition.Production)).collect(Collectors.toSet());
 
         for (Sentence sentence : allTheRest) {
-            if (sentence instanceof Import) {
-                ret.add(convertModuleItem((Import) sentence));
-            } else if (sentence instanceof Bubble) {
+            if (sentence instanceof Bubble) {
                 ret.add(convertModuleItem((Bubble) sentence));
             } else if (sentence instanceof ModuleComment) {
                 ret.add(convertModuleItem((ModuleComment) sentence));
@@ -281,12 +279,6 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         }
 
         return ret;
-    }
-
-    public org.kframework.kil.ModuleItem convertModuleItem(Import anImport) {
-        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.moduleName());
-        kilImport.setAttributes(convertAttributes(anImport.att()));
-        return kilImport;
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Bubble bubble) {
