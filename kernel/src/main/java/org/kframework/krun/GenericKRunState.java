@@ -37,4 +37,9 @@ public class GenericKRunState extends KRunState{
     public int compareTo(KRunState arg0) {
         return Integer.compare(stateId, arg0.getStateId());
     }
+
+    @Override
+    public Term toBackendTerm() {
+        return rawResult;
+    }
 }

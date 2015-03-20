@@ -125,9 +125,9 @@ public class ExecutorDebugger implements Debugger {
         }
         RewriteRelation finalRelation;
         if (steps >= 0) {
-            finalRelation = executor.step(getState(currentState), steps, true);
+            finalRelation = executor.step(getState(currentState).toBackendTerm(), steps, true);
         } else {
-            finalRelation = executor.run(getState(currentState), true);
+            finalRelation = executor.run(getState(currentState).toBackendTerm(), true);
         }
         KRunGraph currentGraph = finalRelation.getExecutionGraph().get();
         //merge the new graph into the current graph
