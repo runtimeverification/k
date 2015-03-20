@@ -36,8 +36,8 @@ object TreeNodesToKORE {
 
 
     case t@KApply(KLabel("#KApply"), items) =>
-      KApply(KLabel(items(0).asInstanceOf[KToken].s), KList(downList(items.tail)), t.att)
-      ??? // should only see it if writing meta-level -- kill it for now
+      KApply(KLabel(unquote(items)),
+        KList(downList(items.tail.head.asInstanceOf[KApply].klist.items.asScala)), t.att)
 
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1)
@@ -49,7 +49,11 @@ object TreeNodesToKORE {
       KApply(l, KList((items map down _).asJava), t.att)
   }
 
-  def downList(items: List[K]): List[K] = {
+  def unquote(items: List[K]): String = {
+    items(0).asInstanceOf[KToken].s.stripPrefix("`").stripSuffix("`")
+  }
+
+  def downList(items: Seq[K]): Seq[K] = {
     items map down _
   }
   val up = new Up(KORE)

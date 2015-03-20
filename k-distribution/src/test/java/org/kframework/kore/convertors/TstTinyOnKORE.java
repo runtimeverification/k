@@ -94,11 +94,9 @@ public class TstTinyOnKORE {
                     if (result._1().isRight())
                         return result._1().right().get();
                     else {
-                        System.out.println("result._1().left().get() = " + result._1().left().get());
-                        return null;
+                        throw new AssertionError("Found error: " + result._1().left().get());
                     }
                 })
-                .filter(s -> s != null)
                 .map(TreeNodesToKORE::apply)
                 .map(TreeNodesToKORE::down)
                 .map(contents -> {
@@ -145,7 +143,7 @@ public class TstTinyOnKORE {
                                 ))),
                 cons.KLabel("<state>").apply(
                         cons.KLabel("_Map_").apply(
-                                cons.KLabel("_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(10)),
+                                cons.KLabel("_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(1000)),
                                 cons.KLabel("_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
                 )
         );
@@ -162,10 +160,11 @@ public class TstTinyOnKORE {
 
 //        System.out.println("module = " + mainModule);
 
+        Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
-        System.out.println(">>>>>\n" + mainModule.rules().mkString("\n"));
+        System.out.println(">>>>>\n" + afterHeatingCooling.rules().mkString("\n"));
 
-        Rewriter rewriter = new Rewriter(mainModule, KIndex$.MODULE$);
+        Rewriter rewriter = new Rewriter(afterHeatingCooling, KIndex$.MODULE$);
 
 //        long l = System.nanoTime();
 //        Set<K> results = rewriter.rewrite(program, Set());

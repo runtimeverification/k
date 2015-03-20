@@ -31,7 +31,7 @@ endmodule
 // To be used when parsing/pretty-printing ground configurations
 module KSEQ
   imports KAST
-  syntax KBott ::= ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
+  syntax KBott ::= ".::K"    [klabel(#KSequence), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
 endmodule

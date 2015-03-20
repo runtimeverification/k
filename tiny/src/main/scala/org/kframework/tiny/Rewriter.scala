@@ -45,7 +45,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
 
   val indexedRules: Map[String, ParIterable[Rule]] = {
     module.rules
-      .groupBy {r => index(convert(r.body)).getOrElse("NOINDEX") }
+      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
       .map {case (k, ruleSet) =>
       (k, ruleSet
         .map(createRule)
@@ -54,15 +54,15 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   }
 
   val executeRules = module.rules
-    .map {r => ExecuteRule(convert(r.body), convert(r.requires)) }
+    .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
     .seq.view.par
 
   val indexedExecuteRules: Map[String, ParIterable[Rule]] = {
     module.rules
-      .groupBy {r => index(convert(r.body)).getOrElse("NOINDEX") }
+      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
       .map {case (k, ruleSet) =>
       (k, ruleSet
-        .map {r => ExecuteRule(convert(r.body), convert(r.requires)) }
+        .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
         .seq.view.par)
     }
   }
@@ -77,7 +77,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
     })
 
     val res = prioritized
-      .flatMap {r => totalTriedRules += 1; r(k) }
+      .flatMap { r => totalTriedRules += 1; r(k) }
 
     res.seq.toSet
   }
@@ -96,7 +96,16 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
     })
 
     val res = prioritized
-      .map {r => totalTriedRules += 1; r(k).headOption }
+      .map {r =>
+      totalTriedRules += 1
+      val res = r(k).headOption
+      res match {
+        case Some(res) =>
+          //println(r + "\n" + res);
+          Some(res)
+        case None => None
+      }
+    }
       .find { _.isInstanceOf[Some[_]] }
       .getOrElse(None)
     //    println("RESULT:\n    " + res.mkString("\n    "))
