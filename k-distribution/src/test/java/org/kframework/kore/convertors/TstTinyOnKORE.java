@@ -144,7 +144,7 @@ public class TstTinyOnKORE {
                                 ))),
                 cons.KLabel("<state>").apply(
                         cons.KLabel("_Map_").apply(
-                                cons.KLabel("_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(1000)),
+                                cons.KLabel("_|->_").apply((K) cons.stringToId("n"), (K) cons.intToToken(10)),
                                 cons.KLabel("_|->_").apply((K) cons.stringToId("s"), (K) cons.intToToken(0)))
                 )
         );
