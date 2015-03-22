@@ -23,14 +23,15 @@ public class RuleGrammarTest {
     private File definitionFile = null;
     private Module baseK = null;
     private final static String mainModule = "K";
-    private final static String startSymbol = "KList";
+    private final static String startSymbol = "RuleContent";
     private RuleGrammarGenerator gen;
     private final boolean printout = false;
+    public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
 
     @Before
     public void setUp() throws  Exception{
-        definitionFile = new File(RuleGrammarTest.class.getResource
-                ("/src/main/k/kast.k").toURI()).getAbsoluteFile();
+        definitionFile = new File(BUILTIN_DIRECTORY.toString() + "/kast.k");
+
         String definitionText;
         try {
             definitionText = FileUtils.readFileToString(definitionFile);

@@ -101,7 +101,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     }.flatten
   }
 
-  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
+  val subsorts: POSet[Sort] = POSet(subsortRelations)
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {

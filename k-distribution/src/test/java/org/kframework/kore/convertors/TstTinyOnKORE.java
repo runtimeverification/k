@@ -51,6 +51,9 @@ public class TstTinyOnKORE {
     public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
     @org.junit.Rule
     public TestName name = new TestName();
+    private static final String mainModule = "K";
+    private static final String startSymbol = "RuleContent";
+
 
     protected File testResource(String baseName) {
         return new File(new File("k-distribution/src/test/resources" + baseName)
@@ -66,10 +69,8 @@ public class TstTinyOnKORE {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String mainModule = "K";
-        String startSymbol = "KList";
 
-        Module baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, "K");
+        Module baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
         return new RuleGrammarGenerator(baseK);
     }
 
@@ -106,7 +107,7 @@ public class TstTinyOnKORE {
         scala.collection.immutable.Set<org.kframework.definition.Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> ((Bubble) b).contents())
-                .map(s -> ruleParser.parseString(s, "RuleContent"))
+                .map(s -> ruleParser.parseString(s, startSymbol))
                 .map(result -> {
                     System.out.println("warning = " + result._2());
                     if (result._1().isRight())

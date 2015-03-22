@@ -45,6 +45,15 @@ module KSEQ-SYMBOLIC
   syntax KLabel    ::= KVariable
 endmodule
 
+module REQUIRES-ENSURES
+  imports BASIC-K
+
+  syntax RuleContent ::= K                                  [klabel("#ruleNoConditions")]
+                       | K "requires" K                    [klabel("#ruleRequires")]
+                       | K "ensures" K                     [klabel("#ruleEnsures")]
+                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures")]
+endmodule
+
 
 // To be used to parse semantic rules
 module K
@@ -56,11 +65,3 @@ module K
 
 endmodule
 
-module REQUIRES-ENSURES
-  imports BASIC-K
-
-  syntax RuleContent ::= K                                  [klabel("#ruleNoConditions")]
-                       | K "requires" K                    [klabel("#ruleRequires")]
-                       | K "ensures" K                     [klabel("#ruleEnsures")]
-                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures")]
-endmodule

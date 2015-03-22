@@ -38,6 +38,8 @@ public class RuleGrammarGenerator {
         kSorts.add(KLabel);
         kSorts.add(KList);
         kSorts.add(KItem);
+        kSorts.add(Sort("RuleContent"));
+        kSorts.add(Sort("KVariable"));
     }
 
     public RuleGrammarGenerator(Module baseK) {
