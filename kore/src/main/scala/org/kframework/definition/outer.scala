@@ -168,6 +168,12 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
   def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
 
+  override def equals(that: Any) = that match {
+    case Production(`sort`, `items`, _) => true
+    case _ => false
+  }
+
+  override def hashCode = sort.hashCode
 
   def isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
