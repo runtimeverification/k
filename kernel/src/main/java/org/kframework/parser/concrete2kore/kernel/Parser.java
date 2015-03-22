@@ -376,7 +376,7 @@ public class Parser {
         AutoVivifyingBiMap<StateCall.Key, StateCall> stateCalls = new AutoVivifyingBiMap<>();
         AutoVivifyingBiMap<StateReturn.Key, StateReturn> stateReturns = new AutoVivifyingBiMap<>();
 
-        public ParseState(CharSequence input) {
+        public ParseState(CharSequence input, int startLine, int startColumn) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
              * column in the text. Tab counts as one.
@@ -388,8 +388,8 @@ public class Parser {
             this.input = input;
             lines = new int[input.length()+1];
             columns = new int[input.length()+1];
-            int l = 1;
-            int c = 1;
+            int l = startLine;
+            int c = startColumn;
             for (int i = 0; i < input.length(); i++) {
                 lines[i] = l;
                 columns[i] = c;
@@ -670,7 +670,11 @@ public class Parser {
     private final ParseState s;
 
     public Parser(CharSequence input) {
-        s = new ParseState(input);
+        s = new ParseState(input, 1, 1);
+    }
+
+    public Parser(CharSequence input, int startLine, int startColumn) {
+        s = new ParseState(input, startLine, startColumn);
     }
 
     /**

@@ -45,7 +45,13 @@ public class ParseInModule implements Serializable {
      */
     // TODO: require source location to this call
     // TODO: figure out how to handle parsing errors
-    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> parseString(CharSequence input, String startSymbol) {
+    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
+            parseString(CharSequence input, String startSymbol) {
+        return parseString(input, startSymbol, 1, 1);
+    }
+
+    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
+            parseString(CharSequence input, String startSymbol, int startLine, int startColumn) {
         Parser parser = new Parser(input);
         Term parsed = parser.parse(grammar.get(startSymbol), 0);
 

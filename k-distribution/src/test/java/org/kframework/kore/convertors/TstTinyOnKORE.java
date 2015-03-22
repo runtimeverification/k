@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.Collections;
+import org.kframework.attributes.Location;
 import org.kframework.compiler.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
@@ -106,8 +107,11 @@ public class TstTinyOnKORE {
 
         scala.collection.immutable.Set<org.kframework.definition.Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
                 .filter(s -> s instanceof Bubble)
-                .map(b -> ((Bubble) b).contents())
-                .map(s -> ruleParser.parseString(s, startSymbol))
+                .map(b -> (Bubble) b)
+                .map(b -> {
+                    Location loc = b.att().<Location>get("location").get();
+                    return ruleParser.parseString(b.contents(), startSymbol, loc.startLine(), loc.startColumn());
+                })
                 .map(result -> {
                     System.out.println("warning = " + result._2());
                     if (result._1().isRight())
