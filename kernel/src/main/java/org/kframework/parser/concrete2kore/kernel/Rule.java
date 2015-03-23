@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.beust.jcommander.internal.Lists;
 import org.kframework.attributes.Location;
@@ -72,16 +73,24 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
+        public final Pattern rejectPattern;
+        public WrapLabelRule(Production label, Pattern rejectPattern) {
+            assert label != null;
+            this.label = label;
+            this.rejectPattern = rejectPattern;
+        }
         public WrapLabelRule(Production label) {
             assert label != null;
             this.label = label;
+            rejectPattern = null;
         }
         protected KList apply(KList klist, MetaData metaData) {
-            //Term term = new KApp(label, klist);
             Term term;
             if (label.att().contains("token")) {
-                // TODO: radum, figure out how to reject constants from here.
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
+                if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
+                    return null;
+                }
                 term = Constant.apply(value, label, Optional.empty());
             } else {
                 term = TermCons.apply(klist.items(), label, Optional.empty());

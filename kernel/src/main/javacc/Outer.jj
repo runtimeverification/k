@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
@@ -438,6 +438,7 @@ PARSER_END(Outer)
 | <MODULE: "module"> : MODNAME_STATE
 | <INTERFACE: "interface"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
+| <IMPORTS2: "import"> : MODNAME_STATE
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
@@ -469,6 +470,7 @@ PARSER_END(Outer)
 | "Token"
 
 | "require"
+| "requires"
 
 | <UPPER_ID: ("#")?["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
 | <LOWER_ID: ("#")?["a"-"z"](["a"-"z", "A"-"Z", "0"-"9"])*>
@@ -651,7 +653,7 @@ void Element(StringBuilder reg, StringBuilder follow) :
 void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 {
 ( <STRING>  { sb.append(specialAndImage()); follow.setLength(0); }
-| <ID>      { sb.append(specialAndImage()+"Dz"); follow.setLength(0); }
+| <ID>      { sb.append(StringUtil.escapeSort(specialAndImage())+"Dz"); follow.setLength(0); }
 | Group(sb, REGEX_STATE) { follow.append(sb); }
 | "{"       { sb.append(specialAndImage()); }
   Element(sb, follow)
@@ -773,7 +775,7 @@ List<DefinitionItem> Start() : {}
 void Require(List<DefinitionItem> items) :
 { Location loc = startLoc(); String str; }
 {
-  "require" str = String() { items.add(markLoc(loc, new Require(str))); }
+  ("require" | "requires") str = String() { items.add(markLoc(loc, new Require(str))); }
 }
 
 /** Parses a Module and adds it to items */
@@ -792,7 +794,7 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 /** Parses an Import and adds it to module */
 void Import(Module module): { Location loc = startLoc(); }
 {
-  "imports" <MODNAME>
+  ("imports" | "import") <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image()))); }
 }
 

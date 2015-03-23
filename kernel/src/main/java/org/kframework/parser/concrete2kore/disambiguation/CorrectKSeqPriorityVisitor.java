@@ -22,7 +22,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
     @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
-        if (!tc.production().isSyntacticSubsort()
+        if (!tc.production().isSyntacticSubsort() && tc.production().klabel().isDefined()
                 && !tc.production().klabel().get().name().equals("#KRewrite")
                 && !tc.production().klabel().get().name().equals("#KSequence")) {
             // match only on the outermost elements

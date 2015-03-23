@@ -135,7 +135,7 @@ with the former category.  We prefer the names of variables and functions
 to start with lower case letters.  We take the freedom to tacitly introduce
 syntactic lists/sequences for each nonterminal for which we need them: */
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules]
+  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules, autoReject, token, regex("[a-z][\\_a-zA-Z0-9]*")]
   syntax Names ::= List{Name,","}
 
 /*@ Expression constructs will be defined throughtout the syntax module.
@@ -209,7 +209,7 @@ to the expression {\tt a}.  Also, note that the constructor is strict
 in its second argument, because we want to evaluate its arguments but
 not the constuctor name itsef. */
 
-  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [notInRules]
+  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [notInRules, token, autoReject]
   syntax Exp ::= ConstructorName
                | ConstructorName "(" Exps ")"    [prefer, strict(2)]
 
@@ -295,7 +295,7 @@ it as a name instead of as an expression constant: */
 
   syntax Exp ::= "callcc"
                | "try" Exp "catch" "(" Name ")" Exp
-  syntax Name ::= "throw"
+  syntax Name ::= "throw" [token]
 
 /*@ Finally, FUN also allows polymorphic datatype declarations.  These
 will be useful when we define the type system later on. */
@@ -313,7 +313,7 @@ in datatype declarations.
 Like in many functional languages, type parameters/variables in
 user-defined types are quoted identifiers. */
 
-  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [notInRules]
+  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [notInRules, autoReject, token, regex("[\\'][a-z][\\_a-zA-Z0-9]*")]
   syntax TypeVars ::= List{TypeVar,","}
 
 /*@ Types can be basic types, function types, or user-defined
@@ -323,7 +323,7 @@ for generating the desired parser.  To avoid syntactic ambiguities with
 the arrow construct for function cases, we use the symbol \verb|-->| as
 a constructor for function types:  */
 
-  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [notInRules]
+  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [notInRules, autoReject, token, regex("[a-z][\\_a-zA-Z0-9]*")]
   syntax Type ::= "int" | "bool" | "string"
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
@@ -656,7 +656,7 @@ language in the \K tutorial and many other languages provided with the
 way to achieve the benefits of tail recursion in \K.  */
 
   syntax KItem ::= env(Map)  // TODO: get rid of env
-  rule (env(_) => .) ~> env(_)  [anywhere]
+  //rule (env(_) => .) ~> env(_)  [anywhere]
   rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
     [structural]
 

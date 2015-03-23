@@ -28,15 +28,17 @@ public class RuleGrammarGenerator {
     private final Module baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
-    private static final Set<Sort> kSorts = new HashSet<>();;
-
-    public RuleGrammarGenerator(Module baseK) {
-        this.baseK = renameKItem2Bottom(baseK);
+    private static final Set<Sort> kSorts = new HashSet<>();
+    static {
         kSorts.add(KBott);
         kSorts.add(KTop);
         kSorts.add(Sort("KLabel"));
         kSorts.add(Sort("KList"));
         kSorts.add(Sort("KItem"));
+    }
+
+    public RuleGrammarGenerator(Module baseK) {
+        this.baseK = renameKItem2Bottom(baseK);
     }
 
     private Module renameKItem2Bottom(Module def) {
@@ -75,6 +77,21 @@ public class RuleGrammarGenerator {
         }
 
         Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);
+        return new ParseInModule(newM);
+    }
+
+    public static ParseInModule getProgramsGrammar(Module mod) {
+        Set<Sentence> prods = new HashSet<>();
+
+        // if no start symbol has been defined in the configuration, then use K
+        for (Sort srt : iterable(mod.definedSorts())) {
+            if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
+                // K ::= Sort
+                prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
+            }
+        }
+
+        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
         return new ParseInModule(newM);
     }
 }

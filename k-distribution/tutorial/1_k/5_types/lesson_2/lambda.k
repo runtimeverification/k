@@ -48,5 +48,5 @@ module LAMBDA
                | "mu" Id ":" Type "." Exp                             [binder]
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule mu X : T . E => (T -> T) E[T/X]
+  rule mu X : T . E => (T -> T) (E[T/X])
 endmodule

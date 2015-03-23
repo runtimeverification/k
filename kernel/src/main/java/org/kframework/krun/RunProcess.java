@@ -14,6 +14,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.kastparser.KastParser;
 
 import com.google.inject.Inject;
@@ -47,12 +48,16 @@ public class RunProcess {
     private final KExceptionManager kem;
     private final ProgramLoader loader;
     private final Provider<ProcessBuilder> pb;
+    private final Context context;
+    private final FileUtil files;
 
     @Inject
-    public RunProcess(KExceptionManager kem, ProgramLoader loader, Provider<ProcessBuilder> pb) {
+    public RunProcess(KExceptionManager kem, ProgramLoader loader, Provider<ProcessBuilder> pb, Context context, FileUtil files) {
         this.kem = kem;
         this.loader = loader;
         this.pb = pb;
+        this.context = context;
+        this.files = files;
     }
 
     public KExceptionManager getKem() {
@@ -112,7 +117,7 @@ public class RunProcess {
     /*
      * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
      */
-    public Term runParser(String parser, String value, boolean isNotFile, Sort startSymbol, Context context) throws ParseFailedException {
+    public Term runParser(String parser, String value, boolean isNotFile, Sort startSymbol) throws ParseFailedException {
         Term term;
 
         if (startSymbol == null) {
@@ -124,31 +129,31 @@ public class RunProcess {
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = context.files.readFromWorkingDirectory(value);
-                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
+                    content = files.readFromWorkingDirectory(value);
+                    source = Sources.fromFile(files.resolveWorkingDirectory(value));
                 }
             case "kast -e":
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
-                    content = context.files.readFromWorkingDirectory(value);
-                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
+                    content = files.readFromWorkingDirectory(value);
+                    source = Sources.fromFile(files.resolveWorkingDirectory(value));
                 }
             case "kast --parser ground -e":
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
-                    content = context.files.readFromWorkingDirectory(value);
-                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
+                    content = files.readFromWorkingDirectory(value);
+                    source = Sources.fromFile(files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
-                    content = context.files.readFromWorkingDirectory(value);
-                    source = Sources.fromFile(context.files.resolveWorkingDirectory(value));
+                    content = files.readFromWorkingDirectory(value);
+                    source = Sources.fromFile(files.resolveWorkingDirectory(value));
                 }
                 term = loader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;
@@ -157,7 +162,7 @@ public class RunProcess {
                 tokens.add(value);
                 Map<String, String> environment = new HashMap<>();
                 environment.put("KRUN_SORT", startSymbol.toString());
-                environment.put("KRUN_COMPILED_DEF", context.files.resolveDefinitionDirectory(".").getAbsolutePath());
+                environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }

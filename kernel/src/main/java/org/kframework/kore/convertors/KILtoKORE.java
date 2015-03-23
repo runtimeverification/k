@@ -31,6 +31,7 @@ import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Require;
+import org.kframework.kil.Restrictions;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -47,6 +48,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.parser.generator.SDFHelper;
 import scala.Enumeration.Value;
 import scala.Tuple2;
 import scala.collection.Seq;
@@ -60,11 +62,22 @@ import static org.kframework.Collections.*;
 public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
+    private final boolean doDropQuote;
     private KILtoInnerKORE inner;
+    private final boolean syntactic;
+
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote) {
+        this.context = context;
+        this.doDropQuote = doDropQuote;
+        inner = new KILtoInnerKORE(context, doDropQuote);
+        this.syntactic = syntactic;
+    }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
-        inner = new KILtoInnerKORE(context);
+        this.doDropQuote = true;
+        inner = new KILtoInnerKORE(context, doDropQuote);
+        this.syntactic = false;
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -123,6 +136,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(ModuleItem i) {
         if (i instanceof Syntax || i instanceof PriorityExtended) {
             return (Set<org.kframework.definition.Sentence>) apply((ASTNode) i);
+        } else if (i instanceof Restrictions) {
+            return Sets.newHashSet();
         } else {
             return Sets.newHashSet((org.kframework.definition.Sentence) apply((ASTNode) i));
         }
@@ -133,6 +148,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Context apply(org.kframework.kil.Context c) {
+        if (syntactic)
+            return Context(KApply(KLabel("'context")), KToken(Sorts.Bool(), "true"),
+                    inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
 
@@ -142,12 +160,18 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
+        if (syntactic)
+            return Configuration(KApply(KLabel("'configuration")), KToken(Sorts.Bool(), "true"),
+                    inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
                 inner.convertAttributes(kilConfiguration));
     }
 
     public Rule apply(org.kframework.kil.Rule r) {
+        if (syntactic)
+            return Rule(KApply(KLabel("'rule")), KToken(Sorts.Bool(), "true"),
+                    KToken(Sorts.Bool(), "true"), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
 
         AbstractKORETransformer<Set<Tuple2<K, Sort>>> gatherSorts = new AbstractKORETransformer<Set<Tuple2<K, Sort>>>() {
@@ -185,9 +209,9 @@ public class KILtoKORE extends KILTransformation<Object> {
         };
 
         Set<Tuple2<K, Sort>> expSorts = gatherSorts.apply(body);
-        System.out.println("gatherSorts = " + expSorts);
+        //System.out.println("gatherSorts = " + expSorts);
 
-        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel("'_andBool_"), KList(a, b));
+        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel(dropQuote("'_andBool_")), KList(a, b));
         K sortPredicates = expSorts
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
@@ -209,14 +233,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
-        case "left":
-            return Associativity.Left();
-        case "right":
-            return Associativity.Right();
-        case "non-assoc":
-            return Associativity.NonAssoc();
-        default:
-            throw new AssertionError("Incorrect assoc string: " + assocOrig);
+            case "left":
+                return Associativity.Left();
+            case "right":
+                return Associativity.Right();
+            case "non-assoc":
+                return Associativity.NonAssoc();
+            default:
+                throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
@@ -229,7 +253,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().map(l -> Tag(l.getLabel())).collect(Collectors.toSet()));
+        return immutable(labels.stream().flatMap(l ->
+                SDFHelper.getProductionsForTag(l.getLabel(), context).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
     }
 
     public org.kframework.definition.Sentence apply(Import s) {
@@ -267,17 +292,19 @@ public class KILtoKORE extends KILTransformation<Object> {
                 // Handle a special case first: List productions have only
                 // one item.
                 if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
-                    applyUserList(res, sort, p, (UserList) p.getItems().get(0));
+                    applyUserList(res, sort, p, (UserList) p.getItems().get(0), syntactic);
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
-                    // TODO: when to use RegexTerminal?
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
                             items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
                         } else if (it instanceof UserList) {
-                            throw new AssertionError("Lists should have applyed before.");
+                            throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
-                            items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
+                            if (p.containsAttribute("regex"))
+                                items.add(RegexTerminal(p.getAttribute("regex")));
+                            else
+                                items.add(RegexTerminal(((Lexical) it).getLexicalRule()));
                         } else if (it instanceof Terminal) {
                             items.add(Terminal(((Terminal) it).getTerminal()));
                         } else {
@@ -287,13 +314,29 @@ public class KILtoKORE extends KILTransformation<Object> {
 
                     org.kframework.attributes.Att attrs = inner.convertAttributes(p);
 
-                    org.kframework.definition.Production prod = Production(
-                            sort,
-                            immutable(items),
-                            attrs.add(KILtoInnerKORE.PRODUCTION_ID,
-                                    "" + System.identityHashCode(p)));
+                    org.kframework.definition.Production prod;
+                    if (p.getKLabel() == null)
+                        prod = Production(
+                                sort,
+                                immutable(items),
+                                attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                        "" + System.identityHashCode(p)));
+                    else
+                        prod = Production(
+                                dropQuote(p.getKLabel()),
+                                sort,
+                                immutable(items),
+                                attrs.add(KILtoInnerKORE.PRODUCTION_ID,
+                                        "" + System.identityHashCode(p)));
 
                     res.add(prod);
+                    // handle associativity for the production
+                    if (p.containsAttribute("left"))
+                        res.add(SyntaxAssociativity(applyAssoc("left"), Set(Tag(dropQuote(p.getKLabel())))));
+                    else if (p.containsAttribute("right"))
+                        res.add(SyntaxAssociativity(applyAssoc("right"), Set(Tag(dropQuote(p.getKLabel())))));
+                    else if (p.containsAttribute("non-assoc"))
+                        res.add(SyntaxAssociativity(applyAssoc("non-assoc"), Set(Tag(dropQuote(p.getKLabel())))));
                 }
             }
         }
@@ -301,7 +344,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-                              org.kframework.kore.Sort sort, Production p, UserList userList) {
+                              org.kframework.kore.Sort sort, Production p, UserList userList,
+                              boolean forPrograms) {
         boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
@@ -313,29 +357,69 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
-
+        String kilProductionId = "" + System.identityHashCode(p);
+        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod2, prod3;
 
-        String kilProductionId = "" + System.identityHashCode(p);
+        if (forPrograms) {
+            org.kframework.definition.Production prod4, prod5;
 
-        // lst ::= lst sep lst
-        Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID,
-                kilProductionId);
-        prod1 = Production(sort,
-                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+            // IdsTerminator ::= "" [klabel('.Ids)]
+            prod1 = Production(dropQuote(p.getTerminatorKLabel()), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
+                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getTerminatorKLabel())));
+            // NeIds ::= Id "," NeIds [klabel('_,_)]
+            prod2 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
+                    Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(Sort("Ne" + sort.name()))),
+                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
+            // NeIds ::= Id IdsTerminator [klabel('_,_)]
+            prod3 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
+                    Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminator"))),
+                    attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+            // Ids ::= NeIds
+            prod4 = Production(sort, Seq(NonTerminal(Sort("Ne" + sort.name()))),
+                    attrsWithKilProductionId);
+            // Ids ::= IdsTerminator // if the list is *
+            prod5 = Production(sort, Seq(NonTerminal(Sort(sort.name() + "Terminator"))),
+                    attrsWithKilProductionId);
 
-        // lst ::= elem
-        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
-
-        // lst ::= .UserList
-        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.add("#klabel", p.getTerminatorKLabel()));
-
-        res.add(prod1);
-        res.add(prod2);
-        if (!nonEmpty) {
+            res.add(prod1);
+            res.add(prod2);
             res.add(prod3);
+            res.add(prod4);
+            res.add(SyntaxSort(Sort(sort.name() + "Terminator")));
+            res.add(SyntaxSort(Sort("Ne" + sort.name())));
+            if (!nonEmpty) {
+                res.add(prod5);
+            }
+        } else {
+            // lst ::= lst sep lst
+            prod1 = Production(sort,
+                    Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
+
+            // lst ::= elem
+            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+
+            // lst ::= .UserList
+            prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
+                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getTerminatorKLabel())));
+
+            res.add(prod1);
+            res.add(prod2);
+            if (!nonEmpty) {
+                res.add(prod3);
+            }
+        }
+    }
+
+    public String dropQuote(String s) {
+        if (doDropQuote) {
+            if (s.startsWith("'"))
+                return s.substring(1);
+            else
+                return s;
+        } else {
+            return s;
         }
     }
 

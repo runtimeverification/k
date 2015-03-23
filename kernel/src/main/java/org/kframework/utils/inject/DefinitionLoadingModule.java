@@ -39,7 +39,6 @@ public class DefinitionLoadingModule extends AbstractModule {
             KExceptionManager kem,
             FileUtil files) {
         Context context = loader.loadOrDie(Context.class, files.resolveKompiled("context.bin"));
-        context.files = files;
 
         sw.printIntermediate("Loading serialized context");
 

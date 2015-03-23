@@ -10,6 +10,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -146,9 +147,11 @@ public class CellCollection extends Collection {
                 if (definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     count++;
                 } else {
-                    assert cells.get(cellLabel).size() == 1:
-                            "cell label " + cellLabel + " does not have multiplicity='*', "
-                            + "but multiple cells found " + cells;
+                    if (cells.get(cellLabel).size() != 1) {
+                        throw KExceptionManager.criticalError("Cell label " + cellLabel + " does not have "
+                                + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
+                                + "\nExamine the last rule applied to determine the source of the error.");
+                    }
                 }
             }
         }

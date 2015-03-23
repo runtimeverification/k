@@ -79,7 +79,7 @@ are only included in the parser generated to parse programs (and used by the
 concrete identifiers that play a special role in the semantics, like
 \texttt{main} below. */
 
-  syntax Id ::= "main"
+  syntax Id ::= "main" [token]
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and

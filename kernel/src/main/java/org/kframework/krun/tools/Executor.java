@@ -2,7 +2,6 @@
 package org.kframework.krun.tools;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.kframework.backend.unparser.PrintSearchResult;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -32,8 +31,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
-
-import com.google.inject.Inject;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -137,7 +134,7 @@ public interface Executor {
                 @Main Context context,
                 KExceptionManager kem,
                 @Main Executor executor,
-                TermLoader loader) {
+                @Main TermLoader loader) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
@@ -209,7 +206,7 @@ public interface Executor {
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
                 Term res = result.getRawResult();
-                return executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
+                return executor.search(0, 0, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
             }
             return result;
         }
@@ -217,7 +214,7 @@ public interface Executor {
         private int getExitCode(Term res) throws KRunExecutionException {
             ASTNode exitCodePattern = pattern(options.exitCodePattern);
             SearchPattern searchPattern = new SearchPattern(exitCodePattern);
-            SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
+            SearchResults results = executor.search(0, 0, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
             if (results.getSolutions().size() != 1) {
                 kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 112.");
                 return 112;
@@ -258,8 +255,7 @@ public interface Executor {
             return loader.parsePattern(
                     patternToParse,
                     null,
-                    Sort.BAG,
-                    context);
+                    Sort.BAG);
         }
 
         @Override

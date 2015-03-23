@@ -67,8 +67,7 @@ module BUBBLE
 
   syntax Bubble ::= Bubble BubbleItem [token]
                   | BubbleItem        [token]
-  syntax BubbleItem ::= r"((?!rule|syntax|endmodule|configuration|context)\\S+)" [token]
-                         // the proper way to reject would be: reject("rule|syntax|endmodule|configuration|context")
+  syntax BubbleItem ::= r"\\S+" [token, reject2("rule|syntax|endmodule|configuration|context")]
 
 endmodule
 

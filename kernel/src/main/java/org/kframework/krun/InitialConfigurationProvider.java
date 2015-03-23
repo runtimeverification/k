@@ -72,7 +72,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
         if (options.term()) {
             sw.printIntermediate("Parse term");
             return rp.runParser(options.parser(context),
-                    options.pgm(), false, null, context);
+                    options.pgm(), false, null);
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
@@ -86,7 +86,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                         "User specified configuration variable " + name + " which does not exist.");
             }
             Sort sort = context.configVarSorts.get(name);
-            Term parsed = rp.runParser(parser, value, false, sort, context);
+            Term parsed = rp.runParser(parser, value, false, sort);
             parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
             output.put("$" + name, parsed);
         }

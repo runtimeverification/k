@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 require "k-equal.k"
 module INT-SYNTAX-HOOKS
-  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
+  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer, token]
   syntax Int ::= #Int
 endmodule
 
@@ -20,7 +20,8 @@ module INT-HOOKS
                | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
                | Int "%Int" Int                 [function, left, smtlib(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
                /* divInt and modInt implement e-division */
-               | Int "divInt" Int               [function, left, smtlib(div), hook(#INT:_divInt_)]
+               //| Int "divInt" Int               [function, left, smtlib(div), hook(#INT:_divInt_)] // TODO: (andreis) link me
+               | Int "divInt" Int               [function, left, smtlib(div)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(#INT:_modInt_)]
                > left:
                  Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_)]

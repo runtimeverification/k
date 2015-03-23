@@ -26,6 +26,7 @@
       programs="lint"
       results="lint"
       extension="test"
+      skip="pdf"
       >
     <kompile-option name="-w" value="all" />
       <all-programs>

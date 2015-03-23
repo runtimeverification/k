@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <tests>
 
   <test
@@ -11,10 +11,12 @@
      <kompile-option name="--backend" value="java" />
      <all-programs>
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--symbolic-execution" />
       </all-programs>
       <program name="references-5.fun">
         <krun-option name="--search" />
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--symbolic-execution" />
       </program>
   </test>
 
@@ -26,12 +28,10 @@
      <kompile-option name="--superheat" value="strict" />
      <kompile-option name="--backend" value="java" />
      <all-programs>
-        <krun-option name="--pattern-matching" />
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
       </all-programs>
       <program name="references-5.fun">
         <krun-option name="--search" />
-        <krun-option name="--pattern-matching" />
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
       </program>
   </test>

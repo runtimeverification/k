@@ -78,6 +78,8 @@ public class Proc<T> implements Runnable {
      */
     private final File newOutputFile;
 
+    private final boolean warnings2errors;
+
     /**
      * Whether the process succeeded or not.
      */
@@ -119,7 +121,7 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, File inputFile, String procInput,
                 Annotated<String, File> expectedOut, Annotated<String, File> expectedErr,
                 StringMatcher strComparator, File workingDir, KTestOptions options,
-                File outputFile, File newOutputFile, KExceptionManager kem, Map<String, String> env) {
+                File outputFile, File newOutputFile, KExceptionManager kem, Map<String, String> env, boolean warnings2errors) {
         this.obj = obj;
         this.args = args;
         this.inputFile = inputFile;
@@ -134,25 +136,32 @@ public class Proc<T> implements Runnable {
         this.kem = kem;
         this.env = env;
         success = options.dry;
+        this.warnings2errors = warnings2errors;
     }
 
-    public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem, Map<String, String> env) {
+    public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem, Map<String, String> env, boolean warnings2errors) {
         this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), workingDir,
-                options, null, null, kem, env);
+                options, null, null, kem, env, warnings2errors);
     }
 
     @Override
     public void run() {
+        // pass the --warnings-to-errors flag to all processes if specified to ktest
+        String[] warningsArgs = args;
+        if (warnings2errors) {
+            warningsArgs = Arrays.copyOf(args, args.length + 1);
+            warningsArgs[args.length] = "--warnings-to-errors";
+        }
         if (options.getDebug()) {
-            String[] debugArgs = Arrays.copyOf(args, args.length + 1);
-            debugArgs[args.length] = "--debug";
+            String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
+            debugArgs[warningsArgs.length] = "--debug";
             if (expectedErr != null) {
                 // We want to use --debug and compare error outputs too. In this case we need to
                 // make two runs:
                 // 1) We pass --debug and collect output with stack trace.
                 // 2) We don't pass --debug and use output for comparison.
                 ProcOutput debugOutput = runProc(debugArgs);
-                procOutput = runProc(args);
+                procOutput = runProc(warningsArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, debugOutput);
                 }
@@ -164,7 +173,7 @@ public class Proc<T> implements Runnable {
                 }
             }
         } else {
-            procOutput = runProc(args);
+            procOutput = runProc(warningsArgs);
             if (!options.dry) {
                 handlePgmResult(procOutput, null);
             }

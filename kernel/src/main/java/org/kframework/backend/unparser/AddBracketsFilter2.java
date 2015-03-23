@@ -115,7 +115,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         }
         String unparsed = new Unparser(context, ColorSetting.OFF, Color.BLACK, true, true).print(ast);
         try {
-            ASTNode rule = loader.parsePatternAmbiguous(unparsed, context);
+            ASTNode rule = loader.parsePatternAmbiguous(unparsed);
             Term reparsed = ((Sentence)rule).getBody();
             if (!reparsed.contains(ast)) {
                 return replaceWithVar(ast);

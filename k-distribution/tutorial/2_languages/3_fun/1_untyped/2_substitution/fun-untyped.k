@@ -21,7 +21,7 @@ module FUN-UNTYPED-SYNTAX
 
 //@ \subsection{The Syntactic Constructs}
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules]
+  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules, autoReject, token]
   syntax Names ::= List{Name,","}
 
   syntax Exp ::= Int | Bool | String | Name
@@ -53,7 +53,7 @@ module FUN-UNTYPED-SYNTAX
                | "cons" |  "head" | "tail" | "null?"
                | "[" Exps "|" Exp "]"
 
-  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [notInRules]
+  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [notInRules, autoReject, token]
   syntax Exp ::= ConstructorName
                | ConstructorName "(" Exps ")"      [prefer, strict(2)]
 
@@ -79,14 +79,14 @@ module FUN-UNTYPED-SYNTAX
 
   syntax Exp ::= "callcc"
                | "try" Exp "catch" "(" Name ")" Exp
-  syntax Name ::= "throw"
+  syntax Name ::= "throw" [token]
 
   syntax Exp ::= "datatype" Type "=" TypeCases Exp
 
-  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [notInRules]
+  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [notInRules, token, autoReject]
   syntax TypeVars ::= List{TypeVar,","}
 
-  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [notInRules]
+  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [notInRules, token, autoReject]
   syntax Type ::= "int" | "bool" | "string"
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]

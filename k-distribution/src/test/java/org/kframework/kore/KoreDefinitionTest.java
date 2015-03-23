@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import static org.kframework.Collections.stream;
 import org.kframework.kil.Sources;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kore.convertors.BubbleParsing;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.definition.*;
@@ -35,7 +37,7 @@ public class KoreDefinitionTest {
         Definition def = parse(KoreDefinitionTest.class.getResourceAsStream("/kore/simple-untyped-1.kore"));
         // mostly just care that it parses, check a few counts for a tiny bit of sanity-checking.
         assertEquals(9, stream(def.modules()).count());
-        assertEquals(323, stream(def.modules()).flatMap(m -> stream(m.localSentences())).count());
+        assertEquals(358, stream(def.modules()).flatMap(m -> stream(m.localSentences())).count());
     }
 
     // TODO(radu): generalize this function, and eliminate duplicates
@@ -56,7 +58,10 @@ public class KoreDefinitionTest {
         def.setMainModule("SIMPLE-UNTYPED");
         def.setMainSyntaxModule("SIMPLE-UNTYPED-SYNTAX");
 
-        KILtoKORE kilToKore = new KILtoKORE(null);
+        org.kframework.kil.loader.Context context = new Context();
+        new CollectProductionsVisitor(context).visitNode(def);
+
+        KILtoKORE kilToKore = new KILtoKORE(context);
         Definition koreDef = kilToKore.apply(def);
 
         return koreDef;

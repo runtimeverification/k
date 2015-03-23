@@ -38,9 +38,15 @@ import static org.kframework.Collections.*;
 public class KILtoInnerKORE extends KILTransformation<K> {
 
     private Context context;
+    private final boolean doDropQuote;
 
-    public KILtoInnerKORE(org.kframework.kil.loader.Context context) {
+    private KLabel KLabel(String name) {
+        return KORE.KLabel(dropQuote(name));
+    }
+
+    public KILtoInnerKORE(org.kframework.kil.loader.Context context, boolean doDropQuote) {
         this.context = context;
+        this.doDropQuote = doDropQuote;
     }
 
     public static final String PRODUCTION_ID = "productionID";
@@ -108,6 +114,13 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         return KApply(KLabel(terminatorKLabel), KList(), Attributes().add(LIST_TERMINATOR));
     }
 
+    public String dropQuote(String s) {
+        if (doDropQuote && s.startsWith("'"))
+            return s.substring(1);
+        else
+            return s;
+    }
+
     public K apply(KApp kApp) {
         Term label = kApp.getLabel();
 
@@ -129,7 +142,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     public KLabel applyToLabel(Term label) {
         if (label instanceof KLabelConstant) {
-            return KLabel(((KLabelConstant) label).getLabel());
+            return KLabel(dropQuote(((KLabelConstant) label).getLabel()));
         } else if (label instanceof KApp) {
             throw new RuntimeException(label.toString());
         } else if (label instanceof Variable) {
@@ -196,10 +209,14 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 .map(key -> {
                     String keyString = key.toString();
                     String valueString = attributes.get(key).getValue().toString();
-                    keyString = keyString.equals("klabel") ? "#klabel" : keyString;
+                    if (keyString.equals("klabel")) {
+                        return (K) KApply(KLabel("#klabel"),
+                                KList(KToken(Sort("AttributeValue"), dropQuote(valueString))));
+                    } else {
+                        return (K) KApply(KLabel(keyString),
+                                KList(KToken(Sort("AttributeValue"), valueString)));
+                    }
 
-                    return (K) KApply(KLabel(keyString),
-                            KList(KToken(Sort("AttributeValue"), valueString)));
                 }).collect(Collectors.toSet());
 
         return Attributes(immutable(attributesSet))

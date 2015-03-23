@@ -59,8 +59,7 @@ public class ExecutorDebugger implements Debugger {
             ASTNode pattern = loader.parsePattern(
                     KRunOptions.DEFAULT_PATTERN,
                     null,
-                    Sort.BAG,
-                    context);
+                    Sort.BAG);
             defaultPatternInfo = new RuleCompilerSteps(context, kem);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
