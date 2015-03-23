@@ -799,7 +799,7 @@ public class Unparser implements Comparator<ASTNode> {
 
         @Override
         public Void visit(BackendTerm term, Void _void) {
-            string(term.getValue());
+            string(term.toString());
             return null;
         }
 

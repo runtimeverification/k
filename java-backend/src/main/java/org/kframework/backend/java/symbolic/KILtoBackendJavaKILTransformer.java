@@ -36,6 +36,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.BackendTerm;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.FloatBuiltin;
@@ -124,6 +125,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     public Term transformAndEval(org.kframework.kil.Term node) {
+        if (node instanceof BackendTerm) {
+            return (Term)((BackendTerm)node).getValue();
+        }
         Term term = null;
         term = new MacroExpander(TermContext.of(globalContext), kem).processTerm((Term) this.visitNode(node));
         term = term.evaluate(TermContext.of(globalContext));

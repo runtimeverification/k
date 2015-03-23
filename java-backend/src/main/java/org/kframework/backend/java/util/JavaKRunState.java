@@ -3,6 +3,7 @@ package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.symbolic.BackendJavaKILtoKILTransformer;
+import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunState;
@@ -66,5 +67,10 @@ public class JavaKRunState extends KRunState {
     @Override
     public int hashCode() {
         return javaTerm.hashCode();
+    }
+
+    @Override
+    public Term toBackendTerm() {
+        return new BackendTerm(javaTerm.sort().toFrontEnd(), javaTerm);
     }
 }
