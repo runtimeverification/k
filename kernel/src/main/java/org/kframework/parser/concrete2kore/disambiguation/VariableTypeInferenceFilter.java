@@ -160,7 +160,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         Sort sort = sol1.get(key).iterator().next();
                         decl.put(key, sort);
                         String msg = "Variable '" + key + "' was not declared. Assuming sort " + sort + ".";
-                        warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, null, t.location().orElse(new Location(-1,-1,-1,-1))))));
+                        warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(
+                                new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, null, t.location().get()))));
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!decl.isEmpty()) {

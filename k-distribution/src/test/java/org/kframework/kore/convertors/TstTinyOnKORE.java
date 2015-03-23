@@ -109,8 +109,9 @@ public class TstTinyOnKORE {
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .map(b -> {
-                    Location loc = b.att().<Location>get("Location").get();
-                    return ruleParser.parseString(b.contents(), startSymbol, loc.startLine(), loc.startColumn());
+                    int startLine = b.att().<Integer>get("contentStartLine").get();
+                    int startColumn = b.att().<Integer>get("contentStartColumn").get();
+                    return ruleParser.parseString(b.contents(), startSymbol, startLine, startColumn);
                 })
                 .map(result -> {
                     System.out.println("warning = " + result._2());

@@ -565,7 +565,7 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed.
          */
         boolean addToken(Function that, String string, Production prd) {
-            final Constant token =  Constant.apply(string, prd, Optional.empty());
+            final Constant token =  Constant.apply(string, prd);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
@@ -605,7 +605,7 @@ public class Parser {
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             KList newKList = KList.apply(context);
-                            newKList.add(Ambiguity.apply(new ArrayList<Term>(matches)));
+                            newKList.add(Ambiguity.apply(new HashSet<Term>(matches)));
                             result.add(newKList);
                         }
                     }
@@ -694,10 +694,10 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = Ambiguity.apply(new ArrayList<Term>());
+        Ambiguity result = Ambiguity.apply(new HashSet<Term>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull(), Optional.empty())));
+                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull())));
             }
         }
 

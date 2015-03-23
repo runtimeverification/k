@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.Sorts;
@@ -78,7 +79,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(new Constant("asdfAAA1", null, Optional.empty())))));
+        Term expected = amb(klist(amb(klist(new Constant("asdfAAA1", null)))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -104,7 +105,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1 adfsf");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(kapp("seq", new Constant("asdfAAA1 ", null, Optional.empty()), new Constant("adfsf", null, Optional.empty()))))));
+        Term expected = amb(klist(amb(klist(kapp("seq", new Constant("asdfAAA1 ", null), new Constant("adfsf", null))))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -138,19 +139,19 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("abc", null, Optional.empty()))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("abc", null))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("ABC").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s3", new Constant("ABC", null, Optional.empty()), new Constant("", null, Optional.empty()))))));
+            Term expected = amb(klist(amb(klist(kapp("s3", new Constant("ABC", null), new Constant("", null))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("123").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("123", null, Optional.empty()))), klist(kapp("s3", new Constant("12", null, Optional.empty()), new Constant("3", null, Optional.empty()))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", new Constant("123", null))), klist(kapp("s3", new Constant("12", null), new Constant("3", null))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -178,7 +179,7 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", new Constant("a", null, Optional.empty()), new Constant("b", null, Optional.empty()), new Constant("c", null, Optional.empty()))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", new Constant("a", null), new Constant("b", null), new Constant("c", null))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
@@ -249,12 +250,12 @@ public class ParserTest {
             Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
-                    new Constant("x", null, Optional.empty()),
+                    new Constant("x", null),
                     amb(klist(kapp("xAy",
-                        new Constant("x", null, Optional.empty()),
+                        new Constant("x", null),
                         amb(klist(kapp("epsilon"))),
-                            new Constant("y", null, Optional.empty())))),
-                        new Constant("y", null, Optional.empty()))))));
+                            new Constant("y", null)))),
+                        new Constant("y", null))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -296,8 +297,8 @@ public class ParserTest {
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
                         amb(klist(kapp("epsilon"))),
-                            new Constant("y", null, Optional.empty())))),
-                        new Constant("y", null, Optional.empty()))))));
+                            new Constant("y", null)))),
+                        new Constant("y", null))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -338,9 +339,9 @@ public class ParserTest {
             Term result = new Parser("xx").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xA",
-                        new Constant("x", null, Optional.empty()),
+                        new Constant("x", null),
                         amb(klist(kapp("xA",
-                                new Constant("x", null, Optional.empty()),
+                                new Constant("x", null),
                                 amb(klist(kapp("epsilon")))))))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
@@ -380,16 +381,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("x").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("x", new Constant("x", null, Optional.empty()))))));
+            Term expected = amb(klist(amb(klist(kapp("x", new Constant("x", null))))));
             Assert.assertEquals("Single char check: ", expected, result);
         }
 
         {
             Term result = new Parser("xx").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", new Constant("x", null, Optional.empty())))), amb(klist(kapp("x", new Constant("x", null, Optional.empty())))))))));
+            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", new Constant("x", null)))), amb(klist(kapp("x", new Constant("x", null)))))))));
             Assert.assertEquals("AA check: ", expected, result);
         }
-        Term X = kapp("x", new Constant("x", null, Optional.empty()));
+        Term X = kapp("x", new Constant("x", null));
         {
             Term result = new Parser("xxx").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
@@ -425,7 +426,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", new Constant("x", null, Optional.empty()))));
+        Term expected = amb(klist(kapp("x", new Constant("x", null))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -467,7 +468,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", new Constant("", null, Optional.empty()))));
+        Term expected = amb(klist(kapp("x", new Constant("", null))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -763,8 +764,8 @@ public class ParserTest {
         Term result2 = new TreeCleanerVisitor().apply(result).right().get();
         //System.out.println(result2);
 
-        Term one = Constant.apply("1", intProd09, Optional.empty());
-        Term mone = Constant.apply("-1", intProd09, Optional.empty());
+        Term one = Constant.apply("1", intProd09);
+        Term mone = Constant.apply("-1", intProd09);
         Term mexp = TermCons.apply(Arrays.asList(one), p1);
         Term expected = TermCons.apply(Arrays.<Term>asList(amb(mone, mexp)), p2);
 
@@ -772,11 +773,11 @@ public class ParserTest {
     }
 
     public static Ambiguity amb(Term ... terms) {
-        return Ambiguity.apply(Arrays.asList(terms));
+        return Ambiguity.apply(Sets.newHashSet(terms));
     }
 
     public static Constant token(String x) {
-        return Constant.apply(x, null, Optional.empty());
+        return Constant.apply(x, null);
     }
 
     public static Production prod(Sort sort, ProductionItem... pi) {
@@ -784,7 +785,7 @@ public class ParserTest {
     }
 
     public static TermCons kapp(String label, Term ... terms) {
-        return TermCons.apply(Arrays.asList(terms), label(label), Optional.empty());
+        return TermCons.apply(Arrays.asList(terms), label(label));
     }
 
     public static KList klist(Term ... terms) {

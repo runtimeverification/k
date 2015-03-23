@@ -27,8 +27,8 @@ public class TreeCleanerVisitorTest {
 
     TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
     org.kframework.definition.Production fooProduction = Production(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
-    Constant foo = Constant.apply("foo", fooProduction, Optional.empty());
-    Constant bar = Constant.apply("bar", fooProduction, Optional.empty());
+    Constant foo = Constant.apply("foo", fooProduction);
+    Constant bar = Constant.apply("bar", fooProduction);
 
     org.kframework.definition.Production noKLabelProduction = Production(Sort("NoKLabelProd"), Seq(NonTerminal(Sort("Foo")), NonTerminal(Sort("Foo"))));
 
@@ -50,7 +50,7 @@ public class TreeCleanerVisitorTest {
 
     @Test(expected = ParseFailedException.class)
     public void testNoKLabel() throws Exception {
-        throwFirstLeftException(new TermCons(Arrays.asList(foo, bar), noKLabelProduction, Optional.of(new Location(0, 0, 0, 0))));
+        throwFirstLeftException(TermCons.apply(Arrays.asList(foo, bar), noKLabelProduction, new Location(0, 0, 0, 0)));
     }
 
     @Test

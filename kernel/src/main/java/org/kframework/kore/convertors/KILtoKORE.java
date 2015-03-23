@@ -153,7 +153,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
-        return Bubble(sentence.getType(), sentence.getContent(), inner.convertAttributes(sentence));
+        return Bubble(sentence.getType(), sentence.getContent(), inner.convertAttributes(sentence)
+                .add("contentStartLine", sentence.getContentStartLine())
+                .add("contentStartColumn", sentence.getContentStartColumn()));
     }
 
     public Context apply(org.kframework.kil.Context c) {

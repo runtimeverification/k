@@ -52,7 +52,7 @@ public class ParseInModule implements Serializable {
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(CharSequence input, String startSymbol, int startLine, int startColumn) {
-        Parser parser = new Parser(input);
+        Parser parser = new Parser(input, startLine, startColumn);
         Term parsed = parser.parse(grammar.get(startSymbol), 0);
 
         if (parsed.equals(Ambiguity.apply())) {

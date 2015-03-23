@@ -86,16 +86,17 @@ public abstract class Rule implements Serializable {
         }
         protected KList apply(KList klist, MetaData metaData) {
             Term term;
+            Location loc = new Location(metaData.start.line, metaData.start.column, metaData.end.line, metaData.end.column);
             if (label.att().contains("token")) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
                 if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
                     return null;
                 }
-                term = Constant.apply(value, label, Optional.empty());
+                term = Constant.apply(value, label, loc);
             } else {
-                term = TermCons.apply(klist.items(), label, Optional.empty());
+                term = TermCons.apply(klist.items(), label, loc);
             }
-            return new KList(Lists.newArrayList(term), Optional.empty());
+            return new KList(Lists.newArrayList(term));
         }
     }
 
