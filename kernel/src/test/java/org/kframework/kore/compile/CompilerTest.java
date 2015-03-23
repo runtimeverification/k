@@ -5,22 +5,20 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.kframework.kil.KApp;
 import org.kframework.kore.*;
 
-import java.io.FileFilter;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,24 +39,30 @@ public class CompilerTest {
         ;
         Map<KLabel, Multiplicity> multiplicities = new HashMap();
 
-        private void addCell(String parent, String child, int level, Multiplicity m) {
+        private void addCell(String parent, String child) {
+            addCell(parent, child, Multiplicity.ONE);
+        }
+        private void addCell(String parent, String child, Multiplicity m) {
             if (parent != null) {
                 parents.put(KLabel(child), KLabel(parent));
                 children.put(KLabel(parent), KLabel(child));
+                levels.put(KLabel(child), 1 + levels.get(KLabel(parent)));
+            } else {
+                levels.put(KLabel(child), 0);
             }
-            levels.put(KLabel(child), level);
             multiplicities.put(KLabel(child), m);
         }
 
         Configuration() {
-            addCell(null, "<T>", 0, Multiplicity.ONE);
-            addCell("<T>", "<ts>", 1, Multiplicity.ONE);
-            addCell("<T>", "<state>", 1, Multiplicity.ONE);
-            addCell("<ts>", "<t>", 2, Multiplicity.STAR);
-            addCell("<ts>", "<scheduler>", 2, Multiplicity.ONE);
-            addCell("<t>", "<k>", 3, Multiplicity.ONE);
-            addCell("<t>", "<env>", 3, Multiplicity.ONE);
-            addCell("<t>", "<msg>", 3, Multiplicity.STAR);
+            addCell(null, "<T>");
+            addCell("<T>", "<ts>");
+            addCell("<T>", "<state>");
+            addCell("<ts>", "<t>", Multiplicity.STAR);
+            addCell("<ts>", "<scheduler>");
+            addCell("<t>", "<k>");
+            addCell("<t>", "<env>");
+            addCell("<t>", "<msg>", Multiplicity.STAR);
+            addCell("<msg>", "<msgId>");
         }
 
         Comparator<KLabel> comparator() {
@@ -77,8 +81,14 @@ public class CompilerTest {
             return multiplicities.get(k);
         }
 
+        boolean isCell(KLabel k) {
+            return levels.containsKey(k);
+        }
         boolean isLeafCell(KLabel k) {
-            return !parents.values().contains(k);
+            return !children.containsKey(k) && isCell(k);
+        }
+        boolean isParentCell(KLabel k) {
+            return children.containsKey(k);
         }
     }
 
@@ -285,7 +295,7 @@ public class CompilerTest {
         }
     }
 
-    K concretize(K k) {
+    K concretizeCell(K k) {
         if (!(k instanceof KApply)) {
             return k;
         } else {
@@ -315,6 +325,9 @@ public class CompilerTest {
                 }
                 ++ix;
             }
+            if (children.isEmpty()) {
+                return k;
+            }
 
             int targetLevel = cfg.getLevel(target) + 1;
             TreeMap<Integer, List<K>> levels =
@@ -341,25 +354,46 @@ public class CompilerTest {
         }
     }
 
+    K concretize (K term) {
+        if (term instanceof KApply) {
+            KApply app = (KApply)term;
+            KApply newTerm =KApply(app.klabel(),KList(app.klist().stream()
+                    .map(this::concretize).collect(Collectors.toList())));
+            if (cfg.isParentCell(newTerm.klabel())) {
+                return concretizeCell(newTerm);
+            } else {
+                return newTerm;
+            }
+        } else if (term instanceof KRewrite) {
+            KRewrite rew = (KRewrite)term;
+            return KRewrite(concretize(rew.left()), concretize(rew.right()));
+        } else if (term instanceof KSequence) {
+            return KSequence(((KSequence) term).stream()
+                    .map(this::concretize).collect(Collectors.toList()));
+        } else {
+            return term;
+        }
+    }
+
     @Test
     public void testOneLeafCellNoCompletion() {
         K term = cell("<k>", intToToken(2));
         K expected = cell("<k>", intToToken(2));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
     public void testTwoCellsNoCompletion() {
         K term = cell("<t>", cell("<k>", intToToken(2)));
         K expected = cell("<t>", cell("<k>", intToToken(2)));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
     public void testTwoCellsCompletion() {
         K term = cell("<ts>", cell("<k>", intToToken(2)));
         K expected = cell("<ts>", cell("<t>", cell("<k>", intToToken(2))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -367,20 +401,20 @@ public class CompilerTest {
         K term = cell("<ts>", cell("<k>", intToToken(1)), cell("<k>", intToToken(2)));
         K expected = cell("<ts>", cell("<t>", cell("<k>", intToToken(1))),
                 cell("<t>", cell("<k>", intToToken(2))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
     public void testMultiplicityShared() {
         K term = cell("<ts>", cell("<k>", intToToken(1)), cell("<env>", intToToken(2)));
         K expected = cell("<ts>", cell("<t>", cell("<k>", intToToken(1)), cell("<env>", intToToken(2))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAmbiguityError() {
         K term = cell("<ts>", cell("<k>", intToToken(1)), cell("<k>", intToToken(2)), cell("<env>", intToToken(2)));
-        concretize(term);
+        concretizeCell(term);
     }
 
     @Test
@@ -394,7 +428,7 @@ public class CompilerTest {
         K term = cell("<T>", cell("<k>", intToToken(1)), cell("<k>", intToToken(2)));
         K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>", intToToken(1))),
                 cell("<t>", cell("<k>", intToToken(2)))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -409,7 +443,7 @@ public class CompilerTest {
         K expected = cell("<T>", cell("<ts>",
                 cell("<t>", cell("<k>", intToToken(1))),
                 cell("<t>", KRewrite(cell("<k>", intToToken(2)), cell("<k>")))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -418,14 +452,14 @@ public class CompilerTest {
         K expected = cell("<T>", cell("<ts>",
                 cell("<t>", cell("<k>", intToToken(1))),
                 cell("<t>", KRewrite(cells(cell("<k>", intToToken(2)), cell("<msg>")), cell("<k>")))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
     public void testEmptySide() {
         K term = cell("<T>", cell("<k>"), KRewrite(cell("<msg>"), cells()));
         K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>"), KRewrite(cell("<msg>"), cells()))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -435,7 +469,7 @@ public class CompilerTest {
         K expected = cell("<T>", cell("<ts>", cell("<t>",
                 KRewrite(cells(), cell("<k>", intToToken(1))),
                 KRewrite(cell("<k>", intToToken(2)), cells()))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -448,7 +482,7 @@ public class CompilerTest {
                 cell("<t>", KRewrite(cells(cell("<k>"),cell("<env>")), cells())),
                 cell("<t>", KRewrite(cell("<env>"), cell("<k>"))),
                 cell("<t>", KRewrite(cell("<k>"), cell("<k>")))));
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -458,7 +492,7 @@ public class CompilerTest {
                 cell("<t>", dots, cell("<k>", intToToken(1)), dots),
                 cell("<t>", dots, cell("<k>", intToToken(2)), dots)
                 , dots), dots);
-        Assert.assertEquals(expected, concretize(term));
+        Assert.assertEquals(expected, concretizeCell(term));
     }
 
     @Test
@@ -467,6 +501,37 @@ public class CompilerTest {
         K expected = cell("<ts>", dots, cell("<t>", dots,
                 cell("<k>", intToToken(0)), cell("<env>",intToToken(2)),
                 dots), dots);
+        Assert.assertEquals(expected, concretizeCell(term));
+    }
+
+    @Test
+    public void testNestedCompletion() {
+        K term = cell("<T>",
+                cell("<t>", cell("<msg>", intToToken(0)), cell("<msgId>", intToToken(1))),
+                cell("<k>", intToToken(2)),
+                cell("<env>", intToToken(3)),
+                cell("<msgId>", intToToken(4)),
+                cell("<msgId>", intToToken(5)),
+                cell("<t>", cell("<k>", intToToken(6))));
+        K expected = cell("<T>",cell("<ts>",
+                cell("<t>", cell("<msg>", intToToken(0)), cell("<msg>", cell("<msgId>", intToToken(1)))),
+                cell("<t>", cell("<k>", intToToken(6))),
+                cell("<t>", cell("<k>", intToToken(2)), cell("<env>", intToToken(3)),
+                    cell("<msg>", cell("<msgId>", intToToken(4))),
+                    cell("<msg>", cell("<msgId>", intToToken(5))))
+                ));
+        Assert.assertEquals(expected, concretize(term));
+
+    }
+
+    @Test
+    public void testLeafContent() {
+        K term = cell("<T>", cell("<k>",
+                KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
+                        KVariable("Rest"))));
+        K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>",
+                KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
+                                KVariable("Rest"))))));
         Assert.assertEquals(expected, concretize(term));
     }
 
