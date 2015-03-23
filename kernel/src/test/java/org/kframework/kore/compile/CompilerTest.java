@@ -66,7 +66,7 @@ public class CompilerTest {
         }
 
         int getLevel(KLabel k) {
-            return levels.get(k);
+            return levels.getOrDefault(k, -1);
         }
 
         KLabel getParent(KLabel k) {
@@ -91,7 +91,29 @@ public class CompilerTest {
             return Stream.of((KApply) side);
     }
 
-    List<KApply> makeParents(KLabel parent, List<? extends K> allChildren) {
+    final KApply dots = KApply(KLabel("#dots"));
+    KApply makeCell(KLabel label, boolean ellipses, K item) {
+        if (ellipses) {
+            return KApply(label, KList(dots,item,dots));
+        } else {
+            return KApply(label, KList(item));
+        }
+    }
+
+    KApply makeCell(KLabel label, boolean ellipses, List<? extends K> children) {
+        if (!ellipses) {
+            return KApply(label, KList(children));
+        } else {
+            List<K> newChildren = Lists.newArrayListWithCapacity(children.size()+2);
+            newChildren.add(dots);
+            newChildren.addAll(children);
+            newChildren.add(dots);
+            return KApply(label, KList(newChildren));
+        }
+    }
+
+    List<KApply> makeParents(KLabel parent, boolean ellipses,
+                             List<? extends K> allChildren) {
         // List<KRewrite> rewrites
 //        rewrites.stream().map(r -> r.left()).flatMap(t -> if(t.));
 
@@ -129,7 +151,7 @@ public class CompilerTest {
             allFitTogether = leftFit && rightFit;
         }
         if (allFitTogether) {
-            return Lists.newArrayList(KApply(parent, KList(allChildren)));
+            return Lists.newArrayList(makeCell(parent, ellipses, allChildren));
         }
 
         // Otherwise, see if they are forced to have separate parents...
@@ -179,7 +201,7 @@ public class CompilerTest {
             }
         }
         if (forcedSeparate) {
-            return allChildren.stream().map(k -> KApply(parent, k)).collect(Collectors.toList());
+            return allChildren.stream().map(k -> makeCell(parent, ellipses, k)).collect(Collectors.toList());
         }
 
         // They were also not forced to be separate
@@ -206,7 +228,12 @@ public class CompilerTest {
                 }
                 return level;
             } else {
-                return Optional.of(cfg.getLevel(((KApply) k).klabel()));
+                int level = cfg.getLevel(((KApply) k).klabel());
+                if (level >= 0) {
+                    return Optional.of(level);
+                } else {
+                    return Optional.empty();
+                }
             }
         } else {
             Optional<Integer> leftLevel = getLevel(((KRewrite) k).left());
@@ -258,10 +285,6 @@ public class CompilerTest {
         }
     }
 
-    Optional<KLabel> getParent2(K k) {
-        return Optional.of(null);
-    }
-
     K concretize(K k) {
         if (!(k instanceof KApply)) {
             return k;
@@ -271,8 +294,27 @@ public class CompilerTest {
             if (cfg.isLeafCell(target)) {
                 return k;
             }
-            List<K> children = app.klist().stream().filter(this::isCompletionItem).collect(Collectors.toList());
-            List<K> otherChildren = app.klist().stream().filter(kk -> !isCompletionItem(kk)).collect(Collectors.toList());
+            List<K> children = Lists.newArrayList();
+            List<K> otherChildren = Lists.newArrayList();
+            boolean ellipses = false;
+            int ix = 0;
+            for (K item : app.klist().items()) {
+                if (isCompletionItem(item)) {
+                    children.add(item);
+                } else if (item instanceof  KApply
+                        &&((KApply) item).klabel().equals(KLabel("#dots"))) {
+                    if (ix == 0 || ix == app.klist().size() - 1) {
+                        ellipses = true;
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Ellipses only allowed at beginning or end of a cell, "
+                                +"but found #dots as child "+ix+" of term "+k);
+                    }
+                } else {
+                    otherChildren.add(item);
+                }
+                ++ix;
+            }
 
             int targetLevel = cfg.getLevel(target) + 1;
             TreeMap<Integer, List<K>> levels =
@@ -281,7 +323,7 @@ public class CompilerTest {
                 List<K> level = levels.remove(levels.lastKey());
                 for (Map.Entry<KLabel, List<K>> e : level.stream().collect(Collectors.groupingBy(t -> getParent(t).get())).entrySet()) {
                     KLabel parent = e.getKey();
-                    List<KApply> newCells = makeParents(parent, e.getValue());
+                    List<KApply> newCells = makeParents(parent, ellipses, e.getValue());
                     levels.compute(cfg.getLevel(parent),
                             (kk, v) -> {
                                 if (v == null) {
@@ -295,7 +337,7 @@ public class CompilerTest {
             }
             List<K> wrappedChildren = levels.remove(levels.lastKey());
             otherChildren.addAll(wrappedChildren);
-            return KApply(target, KList(otherChildren));
+            return makeCell(target, ellipses, otherChildren);
         }
     }
 
@@ -344,7 +386,7 @@ public class CompilerTest {
     @Test
     public void testDeep2() {
         Assert.assertEquals(Lists.newArrayList(cell("<ts>", cell("<t>", intToToken(1)), cell("<t>", intToToken(2)))),
-                makeParents(KLabel("<ts>"), Lists.newArrayList(cell("<t>", intToToken(1)), cell("<t>", intToToken(2)))));
+                makeParents(KLabel("<ts>"), false, Lists.newArrayList(cell("<t>", intToToken(1)), cell("<t>", intToToken(2)))));
     }
 
     @Test
@@ -406,6 +448,25 @@ public class CompilerTest {
                 cell("<t>", KRewrite(cells(cell("<k>"),cell("<env>")), cells())),
                 cell("<t>", KRewrite(cell("<env>"), cell("<k>"))),
                 cell("<t>", KRewrite(cell("<k>"), cell("<k>")))));
+        Assert.assertEquals(expected, concretize(term));
+    }
+
+    @Test
+    public void testDotsApart() {
+        K term = cell("<T>", dots, cell("<k>", intToToken(1)), cell("<k>", intToToken(2)));
+        K expected = cell("<T>", dots, cell("<ts>", dots,
+                cell("<t>", dots, cell("<k>", intToToken(1)), dots),
+                cell("<t>", dots, cell("<k>", intToToken(2)), dots)
+                , dots), dots);
+        Assert.assertEquals(expected, concretize(term));
+    }
+
+    @Test
+    public void testDotsTogether() {
+        K term = cell("<ts>", dots, cell("<k>", intToToken(0)), cell("<env>",intToToken(2)));
+        K expected = cell("<ts>", dots, cell("<t>", dots,
+                cell("<k>", intToToken(0)), cell("<env>",intToToken(2)),
+                dots), dots);
         Assert.assertEquals(expected, concretize(term));
     }
 
