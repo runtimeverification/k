@@ -56,7 +56,7 @@ object TreeNodesToKORE {
   def downList(items: Seq[K]): Seq[K] = {
     items map down _
   }
-  val up = new Up(KORE)
+  val up = new Up(KORE, Set())
 
   def locationToAtt(l: Location): Att =
     Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))

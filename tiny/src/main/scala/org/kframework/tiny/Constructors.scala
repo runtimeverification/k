@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 
 class Constructors(module: definition.Module) extends kore.Constructors[K] with ScalaSugar[K] {
 
-  implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()), module)
+  implicit val theory = new TheoryWithUpDown(new Up(this, Set()), new Down(Set()), module)
 
   // separate the hook mappings at some point
   def hookMappings(hook: String, labelString: String) = hook match {

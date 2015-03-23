@@ -109,7 +109,7 @@ public class TstTinyOnKORE {
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .map(b -> {
-                    Location loc = b.att().<Location>get("location").get();
+                    Location loc = b.att().<Location>get("Location").get();
                     return ruleParser.parseString(b.contents(), startSymbol, loc.startLine(), loc.startColumn());
                 })
                 .map(result -> {

@@ -4,20 +4,23 @@ import org.kframework.Collections._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{K, KORE}
-import org.kframework.meta.Down
+import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
 
 case class Att(att: Set[K]) extends AttributesToString {
-  def getK(key: String): Option[K] = {
-    att.collectFirst({
-      case t@KApply(KLabel(`key`), List(v)) => v
-    })
-  }
+  def getKValue(key: String): Option[K] = att.collectFirst({ case t@KApply(KLabel(key), List(v)) => v })
 
-  val down = Down(Set("scala.collection.immutable"))
+  def getK(key: String): Option[K] = att.collectFirst({ case t@KApply(KLabel(key), _) => t })
 
-  def get[T](key: String): Option[T] = getK(key) map down map { _.asInstanceOf[T] }
+  val includes = Set("scala.collection.immutable", "org.kframework.attributes")
+  val down = Down(includes)
+  val up = new Up(KORE, includes)
+
+  def get[T](key: String): Option[T] =
+    getKValue(key).orElse(getK(key))
+      .map(down)
+      .map { _.asInstanceOf[T] }
 
   def getOptional[T](label: String): java.util.Optional[T] =
     get[T](label) match {
@@ -31,6 +34,7 @@ case class Att(att: Set[K]) extends AttributesToString {
       case z => false
     }
 
+  def +(o: Any) = new Att(att + up(o))
   def +(k: K): Att = new Att(att + k)
   def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
   def +(kv: (String, String)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(KORE.KToken(Sorts.KString, kv._2,
@@ -38,6 +42,7 @@ case class Att(att: Set[K]) extends AttributesToString {
   def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
+  def add(o: Any): Att = this + o
   def add(k: K): Att = this + k
   def add(k: String): Att = this + k
   def add(key: String, value: String): Att = this + (key -> value)
