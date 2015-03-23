@@ -72,7 +72,6 @@ public class KRunCompactGraph extends KRunGraph {
             //check if graph already contains state
             Entry<Integer, KRunState> prevValue = containsValue(state);
             if (prevValue==null) {
-                putState(state);
                 addVertex(state);
             }
         }

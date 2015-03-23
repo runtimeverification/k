@@ -70,7 +70,7 @@ public class ExecutorDebugger implements Debugger {
         }
         KRunState reduced = executor.step(initialConfiguration, 0, false).getFinalState();
         graph = new KRunCompactGraph();
-        graph.putState(reduced);
+        graph.addVertex(reduced);
         currentState = reduced.getStateId();
     }
 
