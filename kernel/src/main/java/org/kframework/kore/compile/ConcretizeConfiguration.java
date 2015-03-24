@@ -324,8 +324,7 @@ public class ConcretizeConfiguration {
     }
 
     Definition concretize(Definition d) {
-        return new Definition(d.requires(),
-                Collections.stream(d.modules())
+        return new Definition(Collections.stream(d.modules())
                         .map(this::concretize).collect(Collections.toSet()),
                 d.att());
     }

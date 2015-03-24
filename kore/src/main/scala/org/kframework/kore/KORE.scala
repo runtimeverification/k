@@ -72,4 +72,6 @@ object KORE extends Constructors[K] with ScalaSugar[K] {
   @annotation.varargs def Att(ks: K*) = org.kframework.attributes.Att(ks: _*)
 
   def self = this
+
+  @annotation.varargs override def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att())
 }
