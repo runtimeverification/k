@@ -5,8 +5,10 @@ import org.kframework.kore.K
 import org.kframework.kore.KORE._
 
 class ModuleTransformation(f: Module => Module) extends (Module => Module) {
+  val memoization = collection.mutable.HashMap[Module, Module]()
+
   override def apply(input: Module): Module = {
-    f(Module(input.name, input.imports map this, input.localSentences, input.att))
+    memoization.getOrElseUpdate(input, f(Module(input.name, input.imports map this, input.localSentences, input.att)))
   }
 }
 
@@ -18,7 +20,7 @@ object StrictToHeatingCooling extends ModuleTransformation({m: Module =>
   // TODO: remove hack once configuration concretization is working
   def concretize(k: K) = KLabel("<top>")(KLabel("<k>")(k), KVariable("SC"))
 
-  def makeVar(pos: Int) = KVariable("A"+(pos+1))
+  def makeVar(pos: Int) = KVariable("A" + (pos + 1))
 
   val heatingCoolingRules = m.productions
     .filter { _.att.contains("strict") }
