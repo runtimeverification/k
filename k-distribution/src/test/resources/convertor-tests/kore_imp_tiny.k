@@ -2,6 +2,11 @@
 require "kast.k"
 require "misc.k"
 
+module TEST-PROGRAMS
+  import TEST
+  import ID
+endmodule
+
 module TEST
   import BASIC-K
   import STRICTNESS

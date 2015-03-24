@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 
 module ID
-  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}     [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
+  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoreject]
 endmodule
 
 module EMPTY-ID
@@ -26,7 +26,7 @@ module INT
   imports BOOL
   imports K
 
-  syntax Int ::= r"[\\+-]?\\d+"    [prefer]
+  syntax Int ::= r"[\\+-]?\\d+"     [prefer, token]
 
   syntax Int ::= Int "+Int" Int     [klabel('_+Int_), function, hook(#INT:_+Int_), left]
   syntax Int ::= Int "-Int" Int     [klabel('_-Int_), function, hook(#INT:_-Int_), left]

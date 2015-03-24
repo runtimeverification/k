@@ -3,6 +3,7 @@ package org.kframework.tiny
 
 import org.kframework.definition
 import org.kframework.kore.Unapply.KLabel
+import org.kframework.kore
 
 import scala.collection.parallel.ParIterable
 
@@ -111,6 +112,8 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
     //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
+
+  def execute(k: kore.K): kore.K = execute(cons.convert(k))
 
   def execute(k: K): K = {
     var steps = 0
