@@ -1,3 +1,5 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+
 package org.kframework.kore.compile;
 
 
@@ -9,6 +11,8 @@ import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.kframework.Collections;
+import org.kframework.definition.*;
 import org.kframework.kil.KApp;
 import org.kframework.kore.*;
 
@@ -373,6 +377,35 @@ public class CompilerTest {
         } else {
             return term;
         }
+    }
+
+    Sentence concretize (Sentence m) {
+        if (m instanceof Rule) {
+            Rule r = (Rule)m;
+            return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
+        } else if (m instanceof Context) {
+            Context c = (Context)m;
+            return new Context(c.body(), c.requires(), c.att());
+        } else {
+            return m;
+        }
+    }
+
+    Module concretize(Module m) {
+        return new Module(
+                m.name(),
+                m.imports(),
+                Collections.stream(m.localSentences())
+                        .map(this::concretize).collect(Collections.toSet()),
+                m.att()
+            );
+    }
+
+    Definition concretize(Definition d) {
+        return new Definition(d.requires(),
+                Collections.stream(d.modules())
+                    .map(this::concretize).collect(Collections.toSet()),
+                d.att());
     }
 
     @Test
