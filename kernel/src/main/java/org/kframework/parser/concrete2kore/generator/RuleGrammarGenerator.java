@@ -1,11 +1,14 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.definition.Production;
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import scala.Function1;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -77,8 +80,12 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KLabel, KLabel, KLabel));
         prods.addAll(makeCasts(KList, KList, KList));
         prods.addAll(makeCasts(KBott, KTop, KItem));
+        prods.addAll(makeCasts(KBott, KTop, KTop));
 
-        Module newM = new Module(mod.name() + "-RULES", Set(mod, baseK), immutable(prods), null);
+        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).filter(p -> !(p instanceof Production && p.att().contains("cell"))).collect(Collections.toSet());
+        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(), prods2, null);
+
+        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK), immutable(prods), null);
         return new ParseInModule(newM);
     }
 
