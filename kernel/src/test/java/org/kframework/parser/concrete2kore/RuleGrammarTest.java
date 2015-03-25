@@ -25,7 +25,7 @@ public class RuleGrammarTest {
     private final static String mainModule = "K";
     private final static String startSymbol = "RuleContent";
     private RuleGrammarGenerator gen;
-    private final boolean printout = false;
+    private final boolean printout = true;
     public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
 
     @Before

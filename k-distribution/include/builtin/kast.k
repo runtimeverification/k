@@ -73,7 +73,7 @@ endmodule
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
-  imports KCELLS
+//  imports KCELLS
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "`" K "`"    [bracket]
