@@ -45,6 +45,20 @@ module KSEQ-SYMBOLIC
   syntax KLabel    ::= KVariable
 endmodule
 
+module KCELLS
+  imports KSEQ-SYMBOLIC
+  syntax #CellName ::= r"[a-zA-Z0-9]+"  [token]
+  syntax Cell ::= "<" #CellName r">(?![.])" K r"(?<![.])</" #CellName ">" [klabel(#closedCell)]
+                | "<" #CellName  ">..."     K r"(?<![.])</" #CellName ">" [klabel(#leftCell)]
+                | "<" #CellName r">(?![.])" K       "...</" #CellName ">" [klabel(#rightCell)]
+                | "<" #CellName  ">..."     K       "...</" #CellName ">" [klabel(#bothCell)]
+  syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells)]
+               | ".::Bag" [klabel(#cells)]
+               | Cell
+  syntax K ::= Bag
+  syntax Bag ::= KBott
+endmodule
+
 module REQUIRES-ENSURES
   imports BASIC-K
 
@@ -59,6 +73,7 @@ endmodule
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
+  imports KCELLS
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "`" K "`"    [bracket]
