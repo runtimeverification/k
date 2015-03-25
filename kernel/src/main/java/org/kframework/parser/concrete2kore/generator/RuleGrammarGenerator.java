@@ -80,6 +80,7 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KLabel, KLabel, KLabel));
         prods.addAll(makeCasts(KList, KList, KList));
         prods.addAll(makeCasts(KBott, KTop, KItem));
+        prods.addAll(makeCasts(KBott, KTop, KTop));
 
         scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).filter(p -> !(p instanceof Production && p.att().contains("cell"))).collect(Collections.toSet());
         Module noCells = new Module(mod.name() + "-NO-CELLS", Set(), prods2, null);

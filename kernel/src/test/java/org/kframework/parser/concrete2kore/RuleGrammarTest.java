@@ -197,4 +197,19 @@ public class RuleGrammarTest {
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
     }
+
+    // test cells
+    @Test
+    public void test10() {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= Exp \",\" Exp [klabel('Plus), prefer] " +
+                "| Exp \"*\" Exp [klabel('Mul)] " +
+                "| r\"[0-9]+\" [token] " +
+                "endmodule";
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "A::KLabel(B::K, C::K, D::K)");
+        printout(rule);
+        Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
+        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+    }
 }
