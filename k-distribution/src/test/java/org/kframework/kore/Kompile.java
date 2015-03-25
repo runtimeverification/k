@@ -3,21 +3,19 @@ package org.kframework.kore;
 import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
-import org.kframework.compiler.StrictToHeatingCooling;
+import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
-import org.kframework.kore.*;
 import org.kframework.kore.K;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.tiny.*;
-import org.kframework.tiny.Rewriter;
-import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
 
@@ -53,6 +51,7 @@ public class Kompile {
         return new org.kframework.tiny.Rewriter(module, KIndex$.MODULE$);
     }
 
+    // todo: rename and refactor this
     public static Tuple2<Module, Function<String, K>> getStuff(File definitionFile, String mainModuleName, String mainProgramsModule) throws IOException, URISyntaxException {
         String definitionString = FileUtils.readFileToString(definitionFile);
 
@@ -117,6 +116,9 @@ public class Kompile {
                         Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
+
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+
 
         Module withKSeq = Module("EXECUTION",
                 Set(afterHeatingCooling, kastDefintion.getModule("KSEQ").get()),

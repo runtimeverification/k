@@ -1,4 +1,4 @@
-package org.kframework.compiler
+package org.kframework.compile
 
 import org.kframework.definition._
 import org.kframework.kore.K

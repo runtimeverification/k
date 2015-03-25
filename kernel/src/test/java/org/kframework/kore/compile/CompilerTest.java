@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.junit.Assert;
 import org.junit.Test;
+import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kore.*;
 
 import java.util.Map;

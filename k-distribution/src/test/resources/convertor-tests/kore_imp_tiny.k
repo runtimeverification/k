@@ -44,7 +44,7 @@ module TEST
   syntax priority '_/_ > '_+_
   syntax priority '!_ > '_&&_
 
-  syntax KCell ::= "<k>" K "</k>"                       [klabel(<k>),       maincell]
+  syntax KCell ::= "<k>" K "</k>"                       [klabel(<k>), cell, maincell]
   syntax KCell ::= "initKCell"                          [klabel(initKCell), initializer]
   syntax StateCell ::= "<state>" Map "</state>"         [klabel(<state>),       cell]
   syntax StateCell ::= "initStateCell"                  [klabel(initStateCell), initializer]

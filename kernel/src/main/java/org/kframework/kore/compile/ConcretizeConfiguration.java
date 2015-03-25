@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.Collections;
+import org.kframework.compile.ConfigurationInfo;
 import org.kframework.definition.*;
 import org.kframework.kore.*;
 
