@@ -39,6 +39,7 @@ public class RuleGrammarGenerator {
         kSorts.add(KList);
         kSorts.add(KItem);
         kSorts.add(Sort("RuleContent"));
+        kSorts.add(Sort("#CellName"));
         kSorts.add(Sort("KVariable"));
     }
 
