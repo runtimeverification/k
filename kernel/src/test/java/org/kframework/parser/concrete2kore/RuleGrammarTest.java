@@ -197,6 +197,10 @@ public class RuleGrammarTest {
                 "syntax Exp ::= Exp \"+\" Exp [klabel('Plus), prefer] " +
                 "| Exp \"*\" Exp [klabel('Mul)] " +
                 "| r\"[0-9]+\" [token] " +
+                "syntax K " +
+                "syntax TopCell ::= \"<T>\" KCell StateCell \"</T>\" [klabel(<T>), cell] " +
+                "syntax KCell ::= \"<k>\" K \"</k>\" [klabel(<k>), cell] " +
+                "syntax StateCell ::= \"<state>\" K \"</state>\" [klabel(<state>), cell] " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "<T> <k>...1+2*3...</k> `<state> A => .::K ...</state> => .::Bag` ...</T>");
         printout(rule, 1, false);

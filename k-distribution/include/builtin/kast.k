@@ -47,11 +47,12 @@ endmodule
 
 module KCELLS
   imports KSEQ-SYMBOLIC
-  syntax #CellName ::= r"[a-zA-Z0-9]+"  [token]
-  syntax Cell ::= "<" #CellName r">(?![.])" K r"(?<![.])</" #CellName ">" [klabel(#closedCell)]
-                | "<" #CellName  ">..."     K r"(?<![.])</" #CellName ">" [klabel(#leftCell)]
-                | "<" #CellName r">(?![.])" K       "...</" #CellName ">" [klabel(#rightCell)]
-                | "<" #CellName  ">..."     K       "...</" #CellName ">" [klabel(#bothCell)]
+  // something like this will be generated from productions that have the attribute 'cell'
+  //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
+  
+  syntax #OptionalDots ::= "..." [klabel(#dots)]
+                         | ""    [klabel(#noDots)]
+  syntax Cell
   syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells)]
                | ".::Bag" [klabel(#cells)]
                | Cell
@@ -73,7 +74,6 @@ endmodule
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
-//  imports KCELLS
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "`" K "`"    [bracket]

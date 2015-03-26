@@ -5,11 +5,15 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.Terminal;
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.Function1;
+import scala.collection.immutable.Seq;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +47,6 @@ public class RuleGrammarGenerator {
         kSorts.add(KList);
         kSorts.add(KItem);
         kSorts.add(Sort("RuleContent"));
-        kSorts.add(Sort("#CellName"));
         kSorts.add(Sort("KVariable"));
     }
 
@@ -69,7 +72,7 @@ public class RuleGrammarGenerator {
 
         // create the diamond
         for (Sort srt : iterable(mod.definedSorts())) {
-            if (!kSorts.contains(srt)) {
+            if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                 // Sort ::= KBott
                 prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
                 // K ::= Sort
@@ -83,8 +86,18 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KBott, KTop, KItem));
         prods.addAll(makeCasts(KBott, KTop, KTop));
 
-        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).filter(p -> !(p instanceof Production && p.att().contains("cell"))).collect(Collections.toSet());
-        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(), prods2, null);
+        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
+            if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
+                Production p = (Production) s;
+                // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
+                assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
+                assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
+                Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
+                return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+            }
+            return s;
+        }).collect(Collections.toSet());
+        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule("KCELLS").get()), prods2, null);
 
         Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule("KCELLS").get()), immutable(prods), null);
         return new ParseInModule(newM);
