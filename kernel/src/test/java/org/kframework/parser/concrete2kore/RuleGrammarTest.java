@@ -1,11 +1,14 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.kil.Sources;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.parser.Term;
@@ -19,13 +22,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+
 public class RuleGrammarTest {
     private File definitionFile = null;
-    private Module baseK = null;
-    private final static String mainModule = "K";
+    private Definition baseK = null;
     private final static String startSymbol = "RuleContent";
     private RuleGrammarGenerator gen;
-    private final boolean printout = true;
+    private final boolean printout = false;
     public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
 
     @Before
@@ -38,11 +43,17 @@ public class RuleGrammarTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
+        java.util.Set<Module> modules =
+                ParserUtils.loadModules(definitionText,
+                        Sources.fromFile(definitionFile),
+                        definitionFile.getParentFile(),
+                        Lists.newArrayList(BUILTIN_DIRECTORY));
+
+        baseK = Definition(immutable(modules));
         gen = new RuleGrammarGenerator(baseK);
     }
 
-    private void printout(Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule) {
+    private void printout(Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule, int warnings, boolean error) {
         if (printout) {
             KExceptionManager kem = new KExceptionManager(new GlobalOptions(true, Warnings.ALL, true));
             if (rule._1().isLeft()) {
@@ -57,6 +68,11 @@ public class RuleGrammarTest {
             }
             kem.print();
         }
+        Assert.assertEquals("Expected " + warnings + " warnings: ", warnings, rule._2().size());
+        if (error)
+            Assert.assertTrue("Expected error here: ", rule._1().isLeft());
+        else
+            Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
     }
 
     private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> parseRule(String def, String input) {
@@ -80,9 +96,7 @@ public class RuleGrammarTest {
                 "syntax left 'Plus " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2=>A:Exp~>B:>Exp");
-        Assert.assertEquals("Expected 0 warnings: ", 1, rule._2().size());
-        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        printout(rule);
+        printout(rule, 1, false);
     }
 
     // test variable disambiguation when a variable is declared by the user
@@ -100,9 +114,7 @@ public class RuleGrammarTest {
                 "syntax K " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "val X ; S:Stmt => (X, S)");
-        Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
-        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        printout(rule);
+        printout(rule, 1, false);
     }
 
     // test variable disambiguation when all variables are being inferred
@@ -120,9 +132,7 @@ public class RuleGrammarTest {
                 "syntax K " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "val X ; S => (X, S)");
-        Assert.assertEquals("Expected 2 warnings: ", 2, rule._2().size());
-        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        printout(rule);
+        printout(rule, 2, false);
     }
 
     // test error reporting when + is non-associative
@@ -135,9 +145,7 @@ public class RuleGrammarTest {
                 "syntax non-assoc 'Plus " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2+3");
-        Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
-        Assert.assertTrue("Expected error here: ", rule._1().isLeft());
-        printout(rule);
+        printout(rule, 0, true);
     }
 
     // test AmbFilter which should report ambiguities and return a clean term
@@ -151,7 +159,7 @@ public class RuleGrammarTest {
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2+3");
         Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        printout(rule);
+        printout(rule, 1, false);
     }
 
     // test error reporting when rewrite priority is not met
@@ -163,9 +171,7 @@ public class RuleGrammarTest {
                 "syntax B ::= \"bar\"   [klabel('bar)] " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "foo bar => X");
-        Assert.assertEquals("Expected 0 warning: ", 0, rule._2().size());
-        Assert.assertTrue("Expected errors here: ", rule._1().isLeft());
-        printout(rule);
+        printout(rule, 0, true);
     }
 
     // test prefer and avoid
@@ -180,7 +186,7 @@ public class RuleGrammarTest {
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "1+2*3");
         Assert.assertEquals("Expected 0 warnings: ", 0, rule._2().size());
         Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
-        printout(rule);
+        printout(rule, 0, false);
     }
 
     // test cells
@@ -193,9 +199,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "<T> <k>...1+2*3...</k> `<state> A => .::K ...</state> => .::Bag` ...</T>");
-        printout(rule);
-        Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
-        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+        printout(rule, 1, false);
     }
 
     // test cells
@@ -208,8 +212,6 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rule = parseRule(def, "A::KLabel(B::K, C::K, D::K)");
-        printout(rule);
-        Assert.assertEquals("Expected 1 warning: ", 1, rule._2().size());
-        Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+        printout(rule, 1, false);
     }
 }

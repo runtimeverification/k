@@ -3,6 +3,7 @@ package org.kframework.parser.concrete2kore.generator;
 
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Production;
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
@@ -28,7 +29,7 @@ import static org.kframework.definition.Constructors.*;
  */
 public class RuleGrammarGenerator {
 
-    private final Module baseK;
+    private final Definition baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
     private static final Sort KLabel = Sort("KLabel");
@@ -46,11 +47,11 @@ public class RuleGrammarGenerator {
         kSorts.add(Sort("KVariable"));
     }
 
-    public RuleGrammarGenerator(Module baseK) {
+    public RuleGrammarGenerator(Definition baseK) {
         this.baseK = renameKItem2Bottom(baseK);
     }
 
-    private Module renameKItem2Bottom(Module def) {
+    private Definition renameKItem2Bottom(Definition def) {
         // TODO: do renaming of KItem and K in the LHS to KBott
         return def;
     }
@@ -85,7 +86,7 @@ public class RuleGrammarGenerator {
         scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).filter(p -> !(p instanceof Production && p.att().contains("cell"))).collect(Collections.toSet());
         Module noCells = new Module(mod.name() + "-NO-CELLS", Set(), prods2, null);
 
-        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK), immutable(prods), null);
+        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule("KCELLS").get()), immutable(prods), null);
         return new ParseInModule(newM);
     }
 

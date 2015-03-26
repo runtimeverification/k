@@ -34,15 +34,23 @@ public class Kompile {
     private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
 
-    private static RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException {
+    private static RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException, IOException {
         String definitionText;
+        File definitionFile = new File(BUILTIN_DIRECTORY.toString() + "/kast.k");
         try {
-            definitionText = FileUtils.readFileToString(new File(BUILTIN_DIRECTORY.toString() + "/kast.k"));
+            definitionText = FileUtils.readFileToString(definitionFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        Module baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
+        //Definition baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
+        java.util.Set<Module> modules =
+                ParserUtils.loadModules(definitionText,
+                        Sources.fromFile(definitionFile),
+                        definitionFile.getParentFile(),
+                        Lists.newArrayList(BUILTIN_DIRECTORY));
+
+        Definition baseK = Definition(immutable(modules));
         return new RuleGrammarGenerator(baseK);
     }
 
