@@ -298,7 +298,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable")) {
+                if (c.production().sort().name().equals("KVariable") && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
                     return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c.value(), this.sort, c.location().get(), varType)));
                 }
                 return new Tuple2<>(Right.apply(c), this.warningUnit());

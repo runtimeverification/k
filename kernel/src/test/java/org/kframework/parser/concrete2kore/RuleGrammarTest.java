@@ -225,4 +225,16 @@ public class RuleGrammarTest {
                 "endmodule";
         parseConfig("<T multiplicity=\"*\"> <k> 1+2*3 </k> `<state> A => .::K </state> => .::Bag` </T>", def, 1, false);
     }
+
+    // test variable disambiguation when all variables are being inferred
+    @Test
+    public void test12() {
+        String def = "" +
+                "module TEST " +
+                "syntax Stmt ::= \"val\" Exp \";\" Stmt [klabel('Decl)] " +
+                "syntax Exp " +
+                "syntax Stmt " +
+                "endmodule";
+        parseRule("val _:Exp ; _", def, 0, false);
+    }
 }
