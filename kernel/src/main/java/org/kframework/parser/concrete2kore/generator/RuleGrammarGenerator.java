@@ -59,6 +59,14 @@ public class RuleGrammarGenerator {
         return def;
     }
 
+    public ParseInModule getRuleGrammar(Module mod) {
+        return getCombinedGrammar(mod, "RULE-CELLS");
+    }
+
+    public ParseInModule getConfigGrammar(Module mod) {
+        return getCombinedGrammar(mod, "CONFIG-CELLS");
+    }
+
     /**
      * Create the rule parser for the given module.
      * It creates a module which includes the given module and the base K module given to the
@@ -67,7 +75,7 @@ public class RuleGrammarGenerator {
      * @param mod    module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public ParseInModule getRuleGrammar(Module mod) {
+    public ParseInModule getCombinedGrammar(Module mod, String cellModule) {
         Set<Sentence> prods = new HashSet<>();
 
         // create the diamond
@@ -97,9 +105,9 @@ public class RuleGrammarGenerator {
             }
             return s;
         }).collect(Collections.toSet());
-        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule("KCELLS").get()), prods2, null);
+        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule(cellModule).get()), prods2, null);
 
-        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule("KCELLS").get()), immutable(prods), null);
+        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
         return new ParseInModule(newM);
     }
 

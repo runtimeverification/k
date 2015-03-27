@@ -34,6 +34,7 @@ module KSEQ
   syntax KBott ::= ".::K"    [klabel(#KSequence), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
+  syntax KBott     ::= "`" K "`"    [bracket]
 endmodule
 
 
@@ -46,12 +47,8 @@ module KSEQ-SYMBOLIC
 endmodule
 
 module KCELLS
-  imports KSEQ-SYMBOLIC
-  // something like this will be generated from productions that have the attribute 'cell'
-  //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
-  
-  syntax #OptionalDots ::= "..." [klabel(#dots)]
-                         | ""    [klabel(#noDots)]
+  imports KAST
+
   syntax Cell
   syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells)]
                | ".::Bag" [klabel(#cells)]
@@ -60,12 +57,32 @@ module KCELLS
   syntax Bag ::= KBott
 endmodule
 
+module RULE-CELLS
+  imports KCELLS
+  // something like this will be generated from productions that have the attribute 'cell'
+  //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
+  
+  syntax #OptionalDots ::= "..." [klabel(#dots)]
+                         | ""    [klabel(#noDots)]
+endmodule
+
+module CONFIG-CELLS
+  imports KCELLS
+  syntax #CellName ::= r"[a-zA-Z0-9]+"  [token]
+  syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
+  syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
+                           | ""                            [klabel(#cellPropertyListTerminator)]
+  syntax #CellProperty ::= #CellName "=" KString    [klabel(#cellProperty)]
+
+endmodule
+
+
 module REQUIRES-ENSURES
   imports BASIC-K
 
   syntax RuleContent ::= K                                 [klabel("#ruleNoConditions")]
                        | K "requires" K                    [klabel("#ruleRequires")]
-                       | K "ensures" K                     [klabel("#ruleEnsures")]
+                       | K "ensures"  K                    [klabel("#ruleEnsures")]
                        | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures")]
 endmodule
 
@@ -76,7 +93,6 @@ module K
   imports REQUIRES-ENSURES
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
-  syntax KBott     ::= "`" K "`"    [bracket]
 
 endmodule
 
