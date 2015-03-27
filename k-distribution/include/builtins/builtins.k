@@ -6,7 +6,7 @@ require "float.k"
 require "string.k"
 require "id.k"
 require "k-equal.k"
-//require "random.k"
+require "random.k"
 //require "counter.k"
 require "map.k"
 require "list.k"
@@ -34,7 +34,7 @@ module BUILTIN-HOOKS
   imports FLOAT-HOOKS
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS
-  //imports RANDOM-HOOKS // TODO: (andreis) fix the hook.
+  imports RANDOM-HOOKS
   //imports COUNTER-HOOKS
   imports ID-HOOKS
   imports FRESH-HOOKS
