@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
-
-import jline.ANSIBuffer;
 import org.kframework.backend.java.kil.TermContext;
 
 import java.math.BigInteger;
