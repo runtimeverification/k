@@ -142,6 +142,34 @@ class TestRewriting extends AbstractTest {
       r('foo('bar('foo(0)))))
   }
 
+  @Test def testEverywhereRule {
+    val r = EverywhereRule('foo(X) ==> X, True)
+
+    assertEquals(Set('bar(0)),
+      r('foo('bar('foo(0)))))
+  }
+
+  @Test def testEverywhereRuleAssoc {
+    val r = EverywhereRule(X + Y ==> X, True)
+
+    assertEquals(Set(1: K),
+      r((1: K) + 2 + 3 + 4))
+  }
+
+  @Test def testEverywhereRuleAssoc1 {
+    val r = EverywhereRule((3: K) ==> 7: K, True)
+
+    assertEquals(Set((1: K) + 2 + 7 + 4),
+      r((1: K) + 2 + 3 + 4))
+  }
+
+  @Test def testEverywhereRuleAC {
+    val r = EverywhereRule('MyBag(2, 4) ==> 7: K, True)
+
+    assertEquals(Set('MyBag(1, 3, 7, 5)),
+      r('MyBag(1, 2, 3, 4, 5)))
+  }
+
   @Test def testAnywhereRuleAssoc {
     val r = AnywhereRule(X + X ==> X, True)
 
