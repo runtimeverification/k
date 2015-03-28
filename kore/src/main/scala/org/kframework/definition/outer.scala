@@ -169,7 +169,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
 
   override def equals(that: Any) = that match {
-    case Production(`sort`, `items`, _) => true
+    case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
     case _ => false
   }
 
