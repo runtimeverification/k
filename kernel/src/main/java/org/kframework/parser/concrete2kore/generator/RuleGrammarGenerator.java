@@ -107,17 +107,17 @@ public class RuleGrammarGenerator {
         }).collect(Collections.toSet());
         Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule(cellModule).get()), prods2, null);
 
-        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
+        Module newM = new Module(mod.name() + "-" + cellModule, Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
         return new ParseInModule(newM);
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add("sort", castSort.name());
-        prods.add(Production("#SyntacticCast", outerSort, Seq(NonTerminal(innerSort), RegexTerminal("::" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#SemanticCast",  outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":"  + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal("<:" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#OuterCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":>" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), RegexTerminal("::" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#SemanticCast",  castSort, Seq(NonTerminal(castSort), RegexTerminal(":"  + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort), RegexTerminal("<:" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#OuterCast",     castSort, Seq(NonTerminal(innerSort), RegexTerminal(":>" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
         return prods;
     }
 
