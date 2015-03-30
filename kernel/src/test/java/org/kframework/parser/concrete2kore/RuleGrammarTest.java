@@ -210,7 +210,7 @@ public class RuleGrammarTest {
                 "| Exp \"*\" Exp [klabel('Mul)] " +
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
-        parseRule("A::KLabel(B::K, C::K, D::K)", def, 1, false);
+        parseRule("A::KLabel(B::K, C::K, D::K)", def, 0, false);
     }
 
     // test config cells
