@@ -237,4 +237,13 @@ public class RuleGrammarTest {
                 "endmodule";
         parseRule("val _:Exp ; _", def, 0, false);
     }
+
+    // test priority exceptions (requires and ensures)
+    @Test
+    public void test13() {
+        String def = "" +
+                "module TEST " +
+                "endmodule";
+        parseRule(".::K => .::K requires .::K", def, 0, false);
+    }
 }
