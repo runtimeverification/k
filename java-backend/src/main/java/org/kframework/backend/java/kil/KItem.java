@@ -440,7 +440,8 @@ public class KItem extends Term implements KItemRepresentation {
 
 
                             Map<Variable, Term> solution;
-                            if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null) {
+                            if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null ||
+                                    rule.getAttribute(Attribute.COMMUTATIVE_KEY) == null) {
                                     /* Use the non-assoc pattern matcher unless explicitely specified*/
                                 solution = NonACPatternMatcher.match(kItem, rule, context);
                                 if (solution == null) {
@@ -494,8 +495,9 @@ public class KItem extends Term implements KItemRepresentation {
                                 }
                             } else {
                                 if (tool == Tool.KRUN) {
-                                    assert result == null || result.equals(rightHandSide):
-                                            "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                                    if (result != null && !result.equals(rightHandSide)) {
+                                        throw KExceptionManager.criticalError("[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem);
+                                    }
                                 }
                                 RuleAuditing.succeed(rule);
                                 result = rightHandSide;
