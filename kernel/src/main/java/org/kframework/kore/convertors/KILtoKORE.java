@@ -38,15 +38,7 @@ import org.kframework.kil.UserList;
 import org.kframework.attributes.Att;
 import org.kframework.definition.*;
 
-import org.kframework.kore.AbstractKORETransformer;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KCollection;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KToken;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 import scala.Enumeration.Value;
 import scala.Tuple2;
 import scala.collection.Seq;
@@ -163,6 +155,11 @@ public class KILtoKORE extends KILTransformation<Object> {
 
             @Override
             public Set<Tuple2<K, Sort>> apply(KToken k) {
+                return Sets.newHashSet();
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(InjectedKLabel k) {
                 return Sets.newHashSet();
             }
 
