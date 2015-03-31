@@ -9,25 +9,27 @@ import org.kframework.kore.Sort;
  * Information about the configuration structure used
  * in the configuration concretiziation passes.
  */
-import java.util.Collection;
+import java.util.List;
 
 public interface ConfigurationInfo {
-    int getLevel(KLabel k);
+    int getLevel(Sort k);
 
-    KLabel getParent(KLabel k);
-    Collection<KLabel> getChildren(KLabel k);
+    Sort getParent(Sort k);
+    List<Sort> getChildren(Sort k);
 
-    Multiplicity getMultiplicity(KLabel k);
+    Multiplicity getMultiplicity(Sort k);
 
-    boolean isCell(KLabel k);
+    boolean isCell(Sort k);
 
-    boolean isLeafCell(KLabel k);
+    boolean isLeafCell(Sort k);
 
-    boolean isParentCell(KLabel k);
+    boolean isParentCell(Sort k);
 
-    Sort leafCellType(KLabel k);
+    Sort leafCellType(Sort k);
 
-    K getDefaultCell(KLabel k);
+    KLabel getCellLabel(Sort k);
 
-    public enum Multiplicity {ONE, OPTIONAL, STAR}
+    K getDefaultCell(Sort k);
+
+    enum Multiplicity {ONE, OPTIONAL, STAR}
 }

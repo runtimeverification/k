@@ -20,20 +20,23 @@ public class CloseCellsTest {
         addOp("List", "'_List_");
     }};
 
-    final ConfigurationInfo cfg = new TestConfiguration() {{
-        addCell(null, "<thread>", Multiplicity.STAR);
-        addCell("<thread>", "<k>", Sort("K"));
-        addCell("<thread>", "<env>", Sort("Map"));
-        addCell(null, "<list>", Multiplicity.STAR, Sort("List"));
-        addDefault("<env>", cell("<env>",KApply(KLabel(".Map"))));
-        addDefault("<k>", cell("<k>",stringToToken("defaultK")));
+    final TestConfiguration cfgInfo = new TestConfiguration() {{
+        addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
+        addCell("ThreadCell", "KCell", "<k>", Sort("K"));
+        addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
+        addCell(null, "ListCell", "<list>", Multiplicity.STAR, Sort("List"));
+        addDefault("EnvCell", cell("<env>", KApply(KLabel(".Map"))));
+        addDefault("KCell", cell("<k>",stringToToken("defaultK")));
     }};
     final LabelInfo labelInfo = new LabelInfo() {{
         addLabel("KCell", "<k>");
         addLabel("EnvCell", "<env>");
+        addLabel("ThreadCell", "<thread>");
+        addLabel("ListCell", "<list>");
         addLabel("Map", "'_Map_", true, true);
         addLabel("List", "'_List_", true);
     }};
+    final ConcretizationInfo cfg = new ConcretizationInfo(cfgInfo, labelInfo);
 
     final static K dots = KApply(KLabel("#dots"));
 
@@ -106,15 +109,15 @@ public class CloseCellsTest {
                     openRight ? items.size() - 1 : items.size());
 
             if (cfg.isParentCell(label)) {
-                Set<KLabel> required = new HashSet<>();
-                for (KLabel child : cfg.getChildren(label)) {
+                Set<Sort> required = new HashSet<>();
+                for (Sort child : cfg.getChildren(label)) {
                     if (cfg.getMultiplicity(child) == ConfigurationInfo.Multiplicity.ONE) {
                         required.add(child);
                     }
                 }
                 for (K item : contents) {
                     if (item instanceof KApply) {
-                        required.remove(((KApply) item).klabel());
+                        required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
                     }
                 }
 
@@ -137,7 +140,7 @@ public class CloseCellsTest {
                     // close by adding default cells
                     List<K> newContents = new ArrayList<>(contents.size() + required.size());
                     newContents.addAll(contents);
-                    for (KLabel reqChild : required) {
+                    for (Sort reqChild : required) {
                         newContents.add(cfg.getDefaultCell(reqChild));
                     }
                     return (KApply(label, KList(newContents)));
@@ -261,7 +264,7 @@ public class CloseCellsTest {
     public void testClosedCellError1() {
         K term = cell("<thread>",cell("<k>"));
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Closed parent cell missing required children [<env>] <thread>(<k>())");
+        exception.expectMessage("Closed parent cell missing required children [EnvCell] <thread>(<k>())");
         new CloseTerm().close(term);
     }
 

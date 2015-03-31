@@ -18,86 +18,93 @@ import java.util.Map;
  */
 class TestConfiguration implements ConfigurationInfo {
 
-    Map<KLabel, Integer> levels = Maps.newHashMap();
-    Map<KLabel, KLabel> parents = Maps.newHashMap();
-    Map<KLabel, Sort> leafCellTypes = Maps.newHashMap();
-    ListMultimap<KLabel, KLabel> children = ArrayListMultimap.create();
+    Map<Sort, Integer> levels = Maps.newHashMap();
+    Map<Sort, Sort> parents = Maps.newHashMap();
+    Map<Sort, Sort> leafCellTypes = Maps.newHashMap();
+    ListMultimap<Sort, Sort> children = ArrayListMultimap.create();
 
-    Map<KLabel, Multiplicity> multiplicities = Maps.newHashMap();
-    Map<KLabel, K> defaultCells = Maps.newHashMap();
+    Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
+    Map<Sort, K> defaultCells = Maps.newHashMap();
+    Map<Sort, KLabel> cellLabels = Maps.newHashMap();
 
-    public void addCell(String parent, String child) {
-        addCell(parent, child, Multiplicity.ONE);
+    public void addCell(String parent, String child, String label) {
+        addCell(parent, child, label, Multiplicity.ONE);
     }
-    public void addCell(String parent, String child, Sort contents) {
-        addCell(parent, child, Multiplicity.ONE, contents);
+    public void addCell(String parent, String child, String label, Sort contents) {
+        addCell(parent, child, label, Multiplicity.ONE, contents);
     }
-    public void addCell(String parent, String child, Multiplicity m) {
-        addCell(parent, child, m, null);
+    public void addCell(String parent, String child, String label, Multiplicity m) {
+        addCell(parent, child, label, m, null);
     }
-    public void addCell(String parent, String child, Multiplicity m, Sort contents) {
+    public void addCell(String parent, String child, String label, Multiplicity m, Sort contents) {
         if (parent != null) {
-            parents.put(KLabel(child), KLabel(parent));
-            children.put(KLabel(parent), KLabel(child));
-            levels.put(KLabel(child), 1 + levels.get(KLabel(parent)));
+            parents.put(Sort(child), Sort(parent));
+            children.put(Sort(parent), Sort(child));
+            levels.put(Sort(child), 1 + levels.get(Sort(parent)));
         } else {
-            levels.put(KLabel(child), 0);
+            levels.put(Sort(child), 0);
         }
         if (contents != null) {
-            leafCellTypes.put(KLabel(child), contents);
+            leafCellTypes.put(Sort(child), contents);
         }
-        multiplicities.put(KLabel(child), m);
+        multiplicities.put(Sort(child), m);
+        cellLabels.put(Sort(child),KLabel(label));
     }
 
     public void addDefault(String cell, K term) {
-        defaultCells.put(KLabel(cell),term);
+        defaultCells.put(Sort(cell),term);
     }
 
     public TestConfiguration() {
     }
 
     @Override
-    public int getLevel(KLabel k) {
+    public int getLevel(Sort k) {
         return levels.getOrDefault(k, -1);
     }
 
     @Override
-    public KLabel getParent(KLabel k) {
+    public Sort getParent(Sort k) {
         return parents.get(k);
     }
 
     @Override
-    public List<KLabel> getChildren(KLabel k) {
+    public List<Sort> getChildren(Sort k) {
         return children.get(k);
     }
 
     @Override
-    public Multiplicity getMultiplicity(KLabel k) {
+    public Multiplicity getMultiplicity(Sort k) {
         return multiplicities.get(k);
     }
 
     @Override
-    public boolean isCell(KLabel k) {
+    public boolean isCell(Sort k) {
         return levels.containsKey(k);
     }
 
     @Override
-    public boolean isLeafCell(KLabel k) {
+    public boolean isLeafCell(Sort k) {
         return !children.containsKey(k) && isCell(k);
     }
 
     @Override
-    public boolean isParentCell(KLabel k) {
+    public boolean isParentCell(Sort k) {
         return children.containsKey(k);
     }
 
     @Override
-    public Sort leafCellType(KLabel k) {
+    public Sort leafCellType(Sort k) {
         return leafCellTypes.get(k);
     }
 
     @Override
-    public K getDefaultCell(KLabel k) {
+    public KLabel getCellLabel(Sort k) {
+        return cellLabels.get(k);
+    }
+
+    @Override
+    public K getDefaultCell(Sort k) {
         return defaultCells.get(k);
     }
 }

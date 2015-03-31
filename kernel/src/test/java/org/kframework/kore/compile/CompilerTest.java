@@ -12,17 +12,30 @@ import static org.kframework.kore.KORE.*;
 import static org.kframework.kore.compile.ConfigurationInfo.Multiplicity.*;
 
 public class CompilerTest {
-    final ConcretizeConfiguration pass = new ConcretizeConfiguration(new TestConfiguration() {{
-        addCell(null, "<T>");
-        addCell("<T>", "<ts>");
-        addCell("<T>", "<state>");
-        addCell("<ts>", "<t>", STAR);
-        addCell("<ts>", "<scheduler>");
-        addCell("<t>", "<k>");
-        addCell("<t>", "<env>");
-        addCell("<t>", "<msg>", STAR);
-        addCell("<msg>", "<msgId>");
-    }});
+    final ConfigurationInfo cfgInfo = new TestConfiguration() {{
+        addCell(null, "TCell", "<T>");
+        addCell("TCell", "TSCell", "<ts>");
+        addCell("TCell", "StateCell", "<state>");
+        addCell("TSCell", "tCell", "<t>", STAR);
+        addCell("TSCell", "SchedulerCell", "<scheduler>");
+        addCell("tCell", "KCell", "<k>");
+        addCell("tCell", "EnvCell", "<env>");
+        addCell("tCell", "MsgCell", "<msg>", STAR);
+        addCell("MsgCell", "MsgIdCell", "<msgId>");
+    }};
+    final LabelInfo labelInfo = new LabelInfo() {{
+        addLabel("TCell","<T>");
+        addLabel("TSCell","<ts>");
+        addLabel("tCell","<t>");
+        addLabel("StateCell","<state>");
+        addLabel("SchedulerCell","<scheduler>");
+        addLabel("KCell","<k>");
+        addLabel("EnvCell","<env>");
+        addLabel("MsgCell","<msg>");
+        addLabel("MsgIdCell","<msgId>");
+    }};
+    final ConcretizationInfo info = new ConcretizationInfo(cfgInfo, labelInfo);
+    final ConcretizeConfiguration pass = new ConcretizeConfiguration(info);
 
     @Test
     public void testOneLeafCellNoCompletion() {

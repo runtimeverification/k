@@ -21,8 +21,8 @@ import static org.kframework.kore.KORE.*;
 
 public class ConcretizeConfiguration {
 
-    private final ConfigurationInfo cfg;
-    public ConcretizeConfiguration(ConfigurationInfo cfg) {
+    private final ConcretizationInfo cfg;
+    public ConcretizeConfiguration(ConcretizationInfo cfg) {
         this.cfg = cfg;
     }
 
