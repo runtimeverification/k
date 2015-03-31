@@ -4,7 +4,8 @@ package org.kframework.kore.compile;
 import org.kframework.kore.KLabel;
 
 /**
- * Created by brandon on 3/23/15.
+ * Information about the configuration structure used
+ * in the configuration concretiziation passes.
  */
 public interface ConfigurationInfo {
     int getLevel(KLabel k);

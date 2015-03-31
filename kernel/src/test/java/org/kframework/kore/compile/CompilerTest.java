@@ -3,83 +3,26 @@
 package org.kframework.kore.compile;
 
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.kore.*;
 
-import java.util.Map;
-
 import static org.kframework.kore.KORE.*;
+import static org.kframework.kore.compile.ConfigurationInfo.Multiplicity.*;
 
 public class CompilerTest {
-    static class TestConfiguration implements ConfigurationInfo {
-
-        Map<KLabel, Integer> levels = Maps.newHashMap();
-        Map<KLabel, KLabel> parents = Maps.newHashMap();
-        Multimap<KLabel, KLabel> children = HashMultimap.create();
-
-        Map<KLabel, Multiplicity> multiplicities = Maps.newHashMap();
-
-        protected void addCell(String parent, String child) {
-            addCell(parent, child, Multiplicity.ONE);
-        }
-        protected void addCell(String parent, String child, Multiplicity m) {
-            if (parent != null) {
-                parents.put(KLabel(child), KLabel(parent));
-                children.put(KLabel(parent), KLabel(child));
-                levels.put(KLabel(child), 1 + levels.get(KLabel(parent)));
-            } else {
-                levels.put(KLabel(child), 0);
-            }
-            multiplicities.put(KLabel(child), m);
-        }
-
-        public TestConfiguration() {
-            addCell(null, "<T>");
-            addCell("<T>", "<ts>");
-            addCell("<T>", "<state>");
-            addCell("<ts>", "<t>", ConfigurationInfo.Multiplicity.STAR);
-            addCell("<ts>", "<scheduler>");
-            addCell("<t>", "<k>");
-            addCell("<t>", "<env>");
-            addCell("<t>", "<msg>", ConfigurationInfo.Multiplicity.STAR);
-            addCell("<msg>", "<msgId>");
-        }
-
-        @Override
-        public int getLevel(KLabel k) {
-            return levels.getOrDefault(k, -1);
-        }
-
-        @Override
-        public KLabel getParent(KLabel k) {
-            return parents.get(k);
-        }
-
-        @Override
-        public Multiplicity getMultiplicity(KLabel k) {
-            return multiplicities.get(k);
-        }
-
-        @Override
-        public boolean isCell(KLabel k) {
-            return levels.containsKey(k);
-        }
-        @Override
-        public boolean isLeafCell(KLabel k) {
-            return !children.containsKey(k) && isCell(k);
-        }
-        @Override
-        public boolean isParentCell(KLabel k) {
-            return children.containsKey(k);
-        }
-    }
-
-    final ConcretizeConfiguration pass = new ConcretizeConfiguration(new TestConfiguration());
+    final ConcretizeConfiguration pass = new ConcretizeConfiguration(new TestConfiguration() {{
+        addCell(null, "<T>");
+        addCell("<T>", "<ts>");
+        addCell("<T>", "<state>");
+        addCell("<ts>", "<t>", STAR);
+        addCell("<ts>", "<scheduler>");
+        addCell("<t>", "<k>");
+        addCell("<t>", "<env>");
+        addCell("<t>", "<msg>", STAR);
+        addCell("<msg>", "<msgId>");
+    }});
 
     @Test
     public void testOneLeafCellNoCompletion() {
