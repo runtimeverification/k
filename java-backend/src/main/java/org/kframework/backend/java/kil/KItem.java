@@ -431,7 +431,7 @@ public class KItem extends Term implements KItemRepresentation {
                     Term owiseResult = null;
 
                     for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                            try {
+                        try {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
                             } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
@@ -439,29 +439,29 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
 
-                                Map<Variable, Term> solution;
-                                if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null) {
+                            Map<Variable, Term> solution;
+                            if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null) {
                                     /* Use the non-assoc pattern matcher unless explicitely specified*/
-                                    solution = NonACPatternMatcher.match(kItem, rule, context);
-                                    if (solution == null) {
-                                        continue;
-                                    }
-                                } else {
-                                    List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
-                                    if (matches.isEmpty()) {
-                                        continue;
-                                    } else {
-                                        if (matches.size() > 1) {
-                                            if (javaOptions.deterministicFunctions) {
-                                               throw KExceptionManager.criticalError("More than one possible match. " +
-                                                       "Function " + kLabelConstant + " might be non-deterministic.");
-                                            }
-                                            kem.registerInternalWarning("More than one possible match. " +
-                                                    "Behaviors might be lost.");
-                                        }
-                                        solution = matches.get(0);
-                                    }
+                                solution = NonACPatternMatcher.match(kItem, rule, context);
+                                if (solution == null) {
+                                    continue;
                                 }
+                            } else {
+                                List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
+                                if (matches.isEmpty()) {
+                                    continue;
+                                } else {
+                                    if (matches.size() > 1) {
+                                        if (javaOptions.deterministicFunctions) {
+                                            throw KExceptionManager.criticalError("More than one possible match. " +
+                                                    "Function " + kLabelConstant + " might be non-deterministic.");
+                                        }
+                                        kem.registerInternalWarning("More than one possible match. " +
+                                                "Behaviors might be lost.");
+                                    }
+                                    solution = matches.get(0);
+                                }
+                            }
 
                             Term rightHandSide = rule.rightHandSide();
                             if (!rule.freshVariables().isEmpty()) {
@@ -475,7 +475,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                             }
                             rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
-                                        context, false);
+                                    context, false);
 
                             if (rule.containsAttribute("owise")) {
                                 /*
@@ -495,7 +495,7 @@ public class KItem extends Term implements KItemRepresentation {
                             } else {
                                 if (tool == Tool.KRUN) {
                                     assert result == null || result.equals(rightHandSide):
-                                        "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                                            "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
                                 }
                                 RuleAuditing.succeed(rule);
                                 result = rightHandSide;
