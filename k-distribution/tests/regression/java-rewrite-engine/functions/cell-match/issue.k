@@ -43,7 +43,7 @@ module ISSUE
        ...</philosopher> ...</philosophers> ...</generatedTop>
        |=
        idStatePair(S, N)
-       => true [assoc comm]
+       => true [assoc, comm]
 
   rule <generatedTop> B </generatedTop> |= K:K => false [owise]
 
