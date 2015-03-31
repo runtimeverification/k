@@ -1,0 +1,5 @@
+init(1,eats);
+init(3,thinks);
+check(1,eats);
+check(2,hungry);
+check(3,thinks)

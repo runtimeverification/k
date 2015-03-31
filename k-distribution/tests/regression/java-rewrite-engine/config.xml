@@ -299,5 +299,18 @@
     </all-programs>
   </test>
 
+  <test
+      definition="functions/cell-match/issue.k"
+      programs="functions/cell-match"
+      results="functions/cell-match"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
 <!-- end Java Rewrite Engine tests -->
 </tests>
