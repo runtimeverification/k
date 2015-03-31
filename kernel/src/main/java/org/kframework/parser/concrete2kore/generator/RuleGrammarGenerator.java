@@ -13,10 +13,13 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.Function1;
+import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -94,14 +97,44 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KBott, KTop, KItem));
         prods.addAll(makeCasts(KBott, KTop, KTop));
 
+        Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
+        stream(mod.productions()).forEach(p -> stream(p.items()).forEach(i -> {
+            if (i instanceof Terminal) terminals.add(((Terminal) i).value());
+        }));
+
+        String varid = "[A-Z][a-zA-Z0-9\\']*"; // TODO: replace this with the actual regex found in kast.k
+        Pattern pattern = Pattern.compile(varid);
         scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
-            if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
+            if (s instanceof Production) {
                 Production p = (Production) s;
-                // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
-                assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
-                assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
-                return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                if (s.att().contains("cell") || s.att().contains("maincell")) {
+                    // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
+                    assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
+                    assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
+                    Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
+                    p = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                }
+                // rewrite productions to contain follow restrictions for prefix terminals
+                List<ProductionItem> items = stream(p.items()).map(pi -> {
+                    if (pi instanceof Terminal) {
+                        Terminal t = (Terminal) pi;
+                        for (String biggerString : terminals) {
+                            if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
+                                String ending = biggerString.substring(t.value().length());
+                                if (pattern.matcher(ending).matches()) {
+                                    System.out.println("ending = " + (t.value() + "(?![\\$|\\!|\\?A-Z])"));
+                                    return RegexTerminal(t.value() + "(?![\\$|\\!|\\?A-Z])"); // should be enough
+                                }
+                            }
+                        }
+                    }
+                    return pi;
+                }).collect(Collections.toList());
+                if (p.klabel().isDefined())
+                    p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
+                else
+                    p = Production(p.sort(), Seq(items), p.att());
+                return p;
             }
             return s;
         }).collect(Collections.toSet());
