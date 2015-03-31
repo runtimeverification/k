@@ -5,14 +5,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.NonACPatternMatcher;
-import org.kframework.backend.java.symbolic.RuleAuditing;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
@@ -438,16 +431,37 @@ public class KItem extends Term implements KItemRepresentation {
                     Term owiseResult = null;
 
                     for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                            try {
+                        try {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
                             } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
                                 System.err.println("\nAuditing " + rule + "...\n");
                             }
-                            /* function rules should be applied by pattern match rather than unification */
-                            Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
-                            if (solution == null) {
-                                continue;
+
+
+                            Map<Variable, Term> solution;
+                            if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null ||
+                                    rule.getAttribute(Attribute.COMMUTATIVE_KEY) == null) {
+                                    /* Use the non-assoc pattern matcher unless explicitely specified*/
+                                solution = NonACPatternMatcher.match(kItem, rule, context);
+                                if (solution == null) {
+                                    continue;
+                                }
+                            } else {
+                                List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
+                                if (matches.isEmpty()) {
+                                    continue;
+                                } else {
+                                    if (matches.size() > 1) {
+                                        if (javaOptions.deterministicFunctions) {
+                                            throw KExceptionManager.criticalError("More than one possible match. " +
+                                                    "Function " + kLabelConstant + " might be non-deterministic.");
+                                        }
+                                        kem.registerInternalWarning("More than one possible match. " +
+                                                "Behaviors might be lost.");
+                                    }
+                                    solution = matches.get(0);
+                                }
                             }
 
                             Term rightHandSide = rule.rightHandSide();
@@ -462,7 +476,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                             }
                             rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
-                                        context, false);
+                                    context, false);
 
                             if (rule.containsAttribute("owise")) {
                                 /*
@@ -481,8 +495,9 @@ public class KItem extends Term implements KItemRepresentation {
                                 }
                             } else {
                                 if (tool == Tool.KRUN) {
-                                    assert result == null || result.equals(rightHandSide):
-                                        "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                                    if (result != null && !result.equals(rightHandSide)) {
+                                        throw KExceptionManager.criticalError("[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem);
+                                    }
                                 }
                                 RuleAuditing.succeed(rule);
                                 result = rightHandSide;
