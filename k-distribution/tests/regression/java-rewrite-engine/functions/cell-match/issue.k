@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2015 K Team. All Rights Reserved.
 module ISSUE
   syntax State ::= "thinks" | "hungry" | "eats"
 
@@ -27,7 +28,9 @@ module ISSUE
        <philosophers> B </philosophers>
 
   syntax Bool ::= checkBag(Bag,Int,State) [function]
-  rule checkBag(B,N,S) => <generatedTop> <k>.K</k> <philosophers> B </philosophers> </generatedTop> |= idStatePair(S, N)
+  rule checkBag(B,N,S)
+    => <generatedTop> <k>.K</k> <philosophers> B </philosophers>
+       </generatedTop> |= idStatePair(S, N)
 
   rule <k> init(N,S) => .K ...</k>
        (.  => <philosopher> <id> N </id> <state> S </state> </philosopher>)
