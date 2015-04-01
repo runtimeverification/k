@@ -13,6 +13,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.JavaConversions;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -101,19 +102,8 @@ public class Subsorts implements Serializable {
         if (subset.size() == 1) {
             return subset.iterator().next();
         }
-        Set<Sort> lowerBounds = new HashSet<>();
-        for (Sort elem : sorts) {
-            boolean isLowerBound = true;
-            for (Sort subsetElem : subset) {
-                if (!(isSubsorted(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLowerBound = false;
-                    break;
-                }
-            }
-            if (isLowerBound) {
-                lowerBounds.add(elem);
-            }
-        }
+
+        Set<Sort> lowerBounds = getLowerBounds(subset);
         if (lowerBounds.size() == 0) {
             return null;
         }
@@ -143,9 +133,38 @@ public class Subsorts implements Serializable {
         return candidate;
     }
 
+    public Set<Sort> getLowerBounds(Sort... sorts) {
+        return getLowerBounds(Sets.newHashSet(sorts));
+    }
+
+    private Set<Sort> getLowerBounds(Set<Sort> subset) {
+        if (subset == null || subset.size() == 0) {
+            return Collections.emptySet();
+        }
+        if (subset.size() == 1) {
+            return Collections.singleton(subset.iterator().next());
+        }
+
+        Set<Sort> lowerBounds = new HashSet<>();
+        for (Sort elem : sorts) {
+            boolean isLowerBound = true;
+            for (Sort subsetElem : subset) {
+                if (!(isSubsorted(subsetElem, elem) || elem.equals(subsetElem))) {
+                    isLowerBound = false;
+                    break;
+                }
+            }
+            if (isLowerBound) {
+                lowerBounds.add(elem);
+            }
+        }
+
+        return lowerBounds;
+    }
+
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        Sort glbSort = getGLBSort(sort1, sort2);
-        return glbSort != null && !glbSort.equals(Sort.BOTTOM);
+        Set<Sort> lowerBounds = getLowerBounds(sort1, sort2);
+        return !lowerBounds.isEmpty() && !lowerBounds.equals(Collections.singleton(Sort.BOTTOM));
     }
 
 }
