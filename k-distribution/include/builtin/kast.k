@@ -60,7 +60,9 @@ endmodule
 
 module RULE-CELLS
   imports KCELLS
-  // something like this will be generated from productions that have the attribute 'cell'
+  // if this module is imported, the parser automatically
+  // generates, for all productions that have the attribute 'cell' or 'maincell',
+  // a production like below:
   //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
 
   syntax #OptionalDots ::= "..." [klabel(#dots)]
@@ -87,11 +89,23 @@ module REQUIRES-ENSURES
                        | K r"(requires)|(when)" K "ensures" K        [klabel("#ruleRequiresEnsures")]
 endmodule
 
+module CAST-AUTO-GEN
+  // if this module is imported, the parser automatically
+  // generates, for all sorts, productions of the form:
+  // Sort ::= KBott
+  // K ::= Sort
+  // Sort ::= Sort "::Sort"
+  // Sort ::= Sort ":Sort"
+  // K    ::= Sort "<:Sort"
+  // Sort ::= K    ":>Sort"
+  // this is part of the mechanism that allows concrete user syntax in K
+endmodule
 
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
+  imports CAST-AUTO-GEN
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "HOLE"         [klabel([])]

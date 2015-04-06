@@ -53,6 +53,11 @@ public class RuleGrammarGenerator {
         kSorts.add(Sort("RuleContent"));
         kSorts.add(Sort("KVariable"));
     }
+    /// modules that have a meaning:
+    public static final String RULE_CELLS = "RULE-CELLS";
+    public static final String CONFIG_CELLS = "CONFIG-CELLS";
+    public static final String K = "K";
+    public static final String CAST_AUTO_GEN = "CAST-AUTO-GEN";
 
     public RuleGrammarGenerator(Set<Module> baseK) {
         this.baseK = new HashMap<>();
@@ -65,11 +70,13 @@ public class RuleGrammarGenerator {
     }
 
     public ParseInModule getRuleGrammar(Module mod) {
-        return getCombinedGrammar(mod, "RULE-CELLS");
+        Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
+        return getCombinedGrammar(newM);
     }
 
     public ParseInModule getConfigGrammar(Module mod) {
-        return getCombinedGrammar(mod, "CONFIG-CELLS");
+        Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
+        return getCombinedGrammar(newM);
     }
 
     /**
@@ -81,39 +88,41 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public ParseInModule getCombinedGrammar(Module mod, String cellModule) {
+    public ParseInModule getCombinedGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 
-        // create the diamond
-        for (Sort srt : iterable(mod.definedSorts())) {
-            if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
-                // Sort ::= KBott
-                prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
-                // K ::= Sort
-                prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
-                // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-                prods.addAll(makeCasts(KBott, KTop, srt));
+        if (mod.importedModules().contains(baseK.getModule(CAST_AUTO_GEN).get())) { // create the diamond
+            for (Sort srt : iterable(mod.definedSorts())) {
+                if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
+                    // Sort ::= KBott
+                    prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
+                    // K ::= Sort
+                    prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
+                    // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
+                    prods.addAll(makeCasts(KBott, KTop, srt));
+                }
             }
+            prods.addAll(makeCasts(KLabel, KLabel, KLabel));
+            prods.addAll(makeCasts(KList, KList, KList));
+            prods.addAll(makeCasts(KBott, KTop, KItem));
+            prods.addAll(makeCasts(KBott, KTop, KTop));
         }
-        prods.addAll(makeCasts(KLabel, KLabel, KLabel));
-        prods.addAll(makeCasts(KList, KList, KList));
-        prods.addAll(makeCasts(KBott, KTop, KItem));
-        prods.addAll(makeCasts(KBott, KTop, KTop));
-
-        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
-            if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
-                Production p = (Production) s;
-                // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
-                assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
-                assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
-                return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
-            }
-            return s;
-        }).collect(Collections.toSet());
-        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule(cellModule).get()), prods2, null);
-
-        Module newM = new Module(mod.name() + "-" + cellModule, Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
+        if (mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
+            scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
+                if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
+                    Production p = (Production) s;
+                    // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
+                    assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
+                    assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
+                    Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
+                    return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                }
+                return s;
+            }).collect(Collections.toSet());
+            prods.addAll(mutable(prods2));
+        } else
+            prods.addAll(mutable(mod.sentences()));
+        Module newM = new Module(mod.name() + "-PARSER", Set(), immutable(prods), null);
         return new ParseInModule(newM);
     }
 

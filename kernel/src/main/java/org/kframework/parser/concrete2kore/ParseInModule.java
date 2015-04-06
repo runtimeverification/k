@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
@@ -17,6 +18,7 @@ import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceF
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 import scala.util.Either;
@@ -58,10 +60,18 @@ public class ParseInModule implements Serializable {
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(CharSequence input, String startSymbol, Source source, int startLine, int startColumn) {
+        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol);
+        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
+        if (startSymbolNT == null) {
+            String msg = "Could not find start symbol: " + startSymbol;
+            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
+            return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
+        }
+
         Parser parser = new Parser(input, source, startLine, startColumn);
         Term parsed;
         try {
-            parsed = parser.parse(grammar.get(startSymbol), 0);
+            parsed = parser.parse(startSymbolNT, 0);
         } catch (ParseFailedException e) {
             return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
         }
@@ -70,7 +80,6 @@ public class ParseInModule implements Serializable {
             Parser.ParseError errors = parser.getErrors();
             throw new AssertionError("There are parsing errors: " + errors.toString());
         }
-        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
 
         Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
         if (rez.isLeft())

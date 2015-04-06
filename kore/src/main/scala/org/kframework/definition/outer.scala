@@ -42,6 +42,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
 
+  /** All the imported modules, calculated recursively. */
+  val importedModules: Set[Module] = imports | (imports flatMap { _.importedModules })
+
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
   val productionsFor: Map[KLabel, Set[Production]] =
