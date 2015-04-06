@@ -92,12 +92,12 @@ endmodule
 module CAST-AUTO-GEN
   // if this module is imported, the parser automatically
   // generates, for all sorts, productions of the form:
-  // Sort ::= KBott
-  // K ::= Sort
-  // Sort ::= Sort "::Sort"
-  // Sort ::= Sort ":Sort"
-  // K    ::= Sort "<:Sort"
-  // Sort ::= K    ":>Sort"
+  // Sort  ::= KBott
+  // K     ::= Sort
+  // Sort  ::= Sort "::Sort"
+  // Sort  ::= Sort ":Sort"
+  // KBott ::= Sort "<:Sort"
+  // Sort  ::= K    ":>Sort"
   // this is part of the mechanism that allows concrete user syntax in K
 endmodule
 
