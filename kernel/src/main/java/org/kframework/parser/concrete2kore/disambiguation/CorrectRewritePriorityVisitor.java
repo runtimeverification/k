@@ -13,16 +13,29 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * Make sure that the rewrite binds greedy (has least priority).
  */
 public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
 
+    private final static Set<String> exceptions;
+    static {
+        exceptions = new HashSet<>();
+        exceptions.add("#ruleRequires");
+        exceptions.add("#ruleEnsures");
+        exceptions.add("#ruleRequiresEnsures");
+        exceptions.add("#KRewrite");
+    }
+
     @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
-        if (!tc.production().isSyntacticSubsort()) {
+        if (!tc.production().isSyntacticSubsort() && tc.production().klabel().isDefined()
+                && !exceptions.contains(tc.production().klabel().get().name())) {
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
                 Either<java.util.Set<ParseFailedException>, Term> rez =

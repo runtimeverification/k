@@ -210,7 +210,7 @@ public class RuleGrammarTest {
                 "| Exp \"*\" Exp [klabel('Mul)] " +
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
-        parseRule("A::KLabel(B::K, C::K, D::K)", def, 1, false);
+        parseRule("A::KLabel(B::K, C::K, D::K)", def, 0, false);
     }
 
     // test config cells
@@ -236,5 +236,31 @@ public class RuleGrammarTest {
                 "syntax Stmt " +
                 "endmodule";
         parseRule("val _:Exp ; _", def, 0, false);
+    }
+
+    // test priority exceptions (requires and ensures)
+    @Test
+    public void test13() {
+        String def = "" +
+                "module TEST " +
+                "endmodule";
+        parseRule(".::K => .::K requires .::K", def, 0, false);
+    }
+
+    // test automatic follow restriction for terminals
+    @Test
+    public void test14() {
+        String def = "" +
+                "module TEST " +
+                "syntax Stmt ::= Stmt Stmt [klabel('Stmt)] " +
+                "syntax Exp ::= K \"==\" K [klabel('Eq)] " +
+                "syntax Exp ::= K \":\" K [klabel('Colon)] " +
+                "syntax K " +
+                "syntax Exp ::= K \"==K\" K [klabel('EqK)] " +
+                "endmodule";
+        parseRule("A::K ==K A", def, 0, false);
+        parseRule("A::K == K A", def, 0, true);
+        parseRule("A:K", def, 0, false);
+        parseRule("A: K", def, 2, false);
     }
 }

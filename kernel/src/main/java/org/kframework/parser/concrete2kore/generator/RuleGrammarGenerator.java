@@ -1,6 +1,8 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
@@ -13,10 +15,14 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.Function1;
+import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -94,30 +100,95 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KBott, KTop, KItem));
         prods.addAll(makeCasts(KBott, KTop, KTop));
 
-        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
-            if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
+        Module tempWithCasts = new Module(mod.name() + "-TEMPORARY-WITH-CASTS", Set(baseK.getModule(cellModule).get(), baseK.getModule("K").get(), mod), immutable(prods), null);
+
+        Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
+        stream(tempWithCasts.productions()).forEach(p -> stream(p.items()).forEach(i -> {
+            if (i instanceof Terminal) terminals.add(((Terminal) i).value());
+        }));
+
+        // Most of the problems with ensuring greedy match of tokens comes from __ productions combined
+        // with variables. Find the variable declarations inside the definition and look for prefix terminals
+        String varid = "(?<![A-Za-z0-9_])(\\$|!|\\?)?([A-Z][A-Za-z0-9']*|_)";
+        Optional<Sentence> varIdProd = stream(tempWithCasts.sentences()).filter(sent -> {
+                    if (sent instanceof Production) {
+                        Production p = (Production) sent;
+                        if (p.sort().name().equals("KVariable")
+                                && p.items().size() == 1
+                                && p.items().head() instanceof RegexTerminal
+                                && p.att().contains("token"))
+                            return true;
+                    }
+                    return false;
+                }
+        ).findFirst();
+        if (varIdProd.isPresent())
+            varid = ((RegexTerminal)((Production) varIdProd.get()).items().head()).regex();
+
+        Pattern pattern = Pattern.compile(varid);
+        scala.collection.immutable.Set<Sentence> prods2 = stream(tempWithCasts.sentences()).map(s -> {
+            if (s instanceof Production) {
                 Production p = (Production) s;
-                // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
-                assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
-                assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
-                return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                // rewrite productions that are supposed to be cells into something more permissive
+                // TCell ::= "<T>" ACell BCell... "</T>" // goes to
+                // Cell  ::= "<T>" #OptionalDots K #OptionalDots "</T>"
+                if (s.att().contains("cell") || s.att().contains("maincell")) {
+                    // assuming that productions tagged with 'cell' start and end with terminals,
+                    // and only have non-terminals in the middle
+                    assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
+                    assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
+                    Seq<ProductionItem> pi = Seq(
+                            p.items().head(),
+                            NonTerminal(Sort("#OptionalDots")),
+                            NonTerminal(Sort("K")),
+                            NonTerminal(Sort("#OptionalDots")),
+                            p.items().last());
+                    p = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                }
+                // rewrite productions to contain follow restrictions for prefix terminals
+                // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
+                // this also takes care of casting and productions that have ":"
+                List<ProductionItem> items = stream(p.items()).map(pi -> {
+                    if (pi instanceof Terminal) {
+                        Terminal t = (Terminal) pi;
+                        Set<String> follow = new HashSet<>();
+                        for (String biggerString : terminals) {
+                            if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
+                                String ending = biggerString.substring(t.value().length());
+                                if (pattern.matcher(ending).matches()) {
+                                    follow.add(ending.substring(0, 1));
+                                }
+                            }
+                        }
+                        // add follow restrictions for the characters that might produce ambiguities
+                        if (!follow.isEmpty()) {
+                            StringBuilder sb = new StringBuilder();
+                            follow.stream().forEach(ch -> sb.append(StringUtils.isAlphanumeric(ch) ? ch : "\\" + ch));
+                            return RegexTerminal(Pattern.quote(t.value()) + "(?![" + sb.toString() + "])");
+                        }
+                    }
+                    return pi;
+                }).collect(Collections.toList());
+                if (p.klabel().isDefined())
+                    p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
+                else
+                    p = Production(p.sort(), Seq(items), p.att());
+                return p;
             }
             return s;
         }).collect(Collections.toSet());
-        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule(cellModule).get()), prods2, null);
 
-        Module newM = new Module(mod.name() + "-RULES", Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
-        return new ParseInModule(newM);
+        Module parsingModule = new Module(mod.name() + "-" + cellModule, Set(), prods2, null);
+        return new ParseInModule(parsingModule);
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add("sort", castSort.name());
-        prods.add(Production("#SyntacticCast", outerSort, Seq(NonTerminal(innerSort), RegexTerminal("::" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#SemanticCast",  outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":"  + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal("<:" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
-        prods.add(Production("#OuterCast",     outerSort, Seq(NonTerminal(innerSort), RegexTerminal(":>" + castSort.name() + "(?![a-zA-Z0-9])")), attrs1));
+        prods.add(Production("#SyntacticCast", castSort,  Seq(NonTerminal(castSort),  Terminal("::" + castSort.name())), attrs1));
+        prods.add(Production("#SemanticCast",  castSort,  Seq(NonTerminal(castSort),  Terminal(":"  + castSort.name())), attrs1));
+        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort),  Terminal("<:" + castSort.name())), attrs1));
+        prods.add(Production("#OuterCast",     castSort,  Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
         return prods;
     }
 
