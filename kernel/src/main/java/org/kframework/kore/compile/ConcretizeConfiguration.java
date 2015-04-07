@@ -15,6 +15,9 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.*;
 import org.kframework.kore.*;
 
@@ -23,9 +26,16 @@ import static org.kframework.kore.KORE.*;
 public class ConcretizeConfiguration {
 
     private final ConcretizationInfo cfg;
+    CloseTerm closeTerm;
 
-    public ConcretizeConfiguration(ConcretizationInfo cfg) {
-        this.cfg = cfg;
+    public ConcretizeConfiguration(ConfigurationInfo configInfo) {
+        LabelInfo labelInfo = new LabelInfoFromModule((ConfigurationInfoFromModule) configInfo);
+        cfg = new ConcretizationInfo(configInfo, labelInfo);
+        SortInfo sortInfo = new SortInfo() {{
+            addOp("Map", "'_Map_");
+            addOp("List", "'_List_");
+        }};
+        closeTerm = new CloseTerm(cfg, sortInfo, labelInfo);
     }
 
     Stream<KApply> streamSideCells(K side) {
@@ -337,5 +347,4 @@ public class ConcretizeConfiguration {
                 .map(this::concretize).collect(Collections.toSet()),
                 d.att());
     }
-
 }

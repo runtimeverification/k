@@ -13,7 +13,7 @@ import java.util.List;
  * Created by brandon on 3/31/15.
  */
 public class ConcretizationInfo {
-    private final ConfigurationInfo cfg;
+    public final ConfigurationInfo cfg;
     private final LabelInfo labels;
 
     public ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {

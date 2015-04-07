@@ -12,9 +12,11 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
+import org.kframework.kore.compile.CloseTerm;
 import org.kframework.kore.compile.ConcretizationInfo;
 import org.kframework.kore.compile.ConcretizeConfiguration;
 import org.kframework.compile.LabelInfo;
+import org.kframework.kore.compile.SortInfo;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -130,10 +132,9 @@ public class Kompile {
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
-        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
+        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo);
         Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
+
 
 
         Module withKSeq = Module("EXECUTION",
