@@ -22,12 +22,10 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     m.productions.filter(p => cellSorts(p.sort) && p.att.contains("initializer"))
       .map(p => (p.sort, KApply(p.klabel.get,KList(List.empty)))).toMap
 
-  private val edges: Set[(Sort, Sort)] = cellProductions.flatMap { case (s,p) =>
-    p.items.collect{ case NonTerminal(n) if cellSorts.contains(n) => (s, n)}}.toSet
+  private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
+    p.items.collect{ case NonTerminal(n) if cellSorts.contains(n) => println(s,n); (s, n)}}.toSet
 
   private val topCells = cellSorts.filter (l => !edges.map(_._2).contains(l))
-
-  println(edges)
 
   if (topCells.size > 1)
     throw new AssertionError("Too many top cells:" + topCells)

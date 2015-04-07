@@ -129,11 +129,11 @@ public class Kompile {
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
-//        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-//        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
-//        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
-//        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
-//        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
+        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
+        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
+        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
 
 
         Module withKSeq = Module("EXECUTION",

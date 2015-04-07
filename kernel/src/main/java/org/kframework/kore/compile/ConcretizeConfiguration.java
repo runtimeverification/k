@@ -23,6 +23,7 @@ import static org.kframework.kore.KORE.*;
 public class ConcretizeConfiguration {
 
     private final ConcretizationInfo cfg;
+
     public ConcretizeConfiguration(ConcretizationInfo cfg) {
         this.cfg = cfg;
     }
@@ -36,9 +37,10 @@ public class ConcretizeConfiguration {
     }
 
     protected final static KApply dots = KApply(KLabel("#dots"));
+
     KApply makeCell(KLabel label, boolean ellipses, K item) {
         if (ellipses) {
-            return KApply(label, KList(dots,item,dots));
+            return KApply(label, KList(dots, item, dots));
         } else {
             return KApply(label, KList(item));
         }
@@ -57,7 +59,7 @@ public class ConcretizeConfiguration {
     }
 
     protected List<KApply> makeParents(KLabel parent, boolean ellipses,
-                             List<? extends K> allChildren) {
+                                       List<? extends K> allChildren) {
         // List<KRewrite> rewrites
 //        rewrites.stream().map(r -> r.left()).flatMap(t -> if(t.));
 
@@ -153,7 +155,7 @@ public class ConcretizeConfiguration {
 
     boolean isCompletionItem(K k) {
         return (k instanceof KApply || k instanceof KRewrite)
-                && getLevel(k).isPresent();
+                && !(k instanceof KVariable) && getLevel(k).isPresent();
     }
 
     Optional<Integer> getLevel(K k) {
@@ -165,20 +167,26 @@ public class ConcretizeConfiguration {
                 }
                 Optional<Integer> level = getLevel(items.get(0));
                 for (K item : items) {
-                    if (!getLevel(item).equals(level)) {
+                    if (!(item instanceof KVariable) && !getLevel(item).equals(level)) {
                         throw new AssertionError("Can't mix cells at different levels under a rewrite");
                     }
                 }
                 return level;
             } else {
-                int level = cfg.getLevel(((KApply) k).klabel());
-                if (level >= 0) {
-                    return Optional.of(level);
+                if (!(((KApply) k).klabel().equals(KLabel("#noDots")))) {
+                    int level = cfg.getLevel(((KApply) k).klabel());
+                    if (level >= 0) {
+                        return Optional.of(level);
+                    } else {
+                        return Optional.empty();
+                    }
                 } else {
                     return Optional.empty();
                 }
             }
-        } else {
+        } else if (k instanceof KVariable)
+            return Optional.empty();
+        else {
             Optional<Integer> leftLevel = getLevel(((KRewrite) k).left());
             Optional<Integer> rightLevel = getLevel(((KRewrite) k).right());
             if (!leftLevel.isPresent()) {
@@ -244,14 +252,14 @@ public class ConcretizeConfiguration {
             for (K item : app.klist().items()) {
                 if (isCompletionItem(item)) {
                     children.add(item);
-                } else if (item instanceof  KApply
-                        &&((KApply) item).klabel().equals(KLabel("#dots"))) {
+                } else if (item instanceof KApply
+                        && ((KApply) item).klabel().equals(KLabel("#dots"))) {
                     if (ix == 0 || ix == app.klist().size() - 1) {
                         ellipses = true;
                     } else {
                         throw new IllegalArgumentException(
                                 "Ellipses only allowed at beginning or end of a cell, "
-                                        +"but found #dots as child "+ix+" of term "+k);
+                                        + "but found #dots as child " + ix + " of term " + k);
                     }
                 } else {
                     otherChildren.add(item);
@@ -281,10 +289,10 @@ public class ConcretizeConfiguration {
         }
     }
 
-    K concretize (K term) {
+    K concretize(K term) {
         if (term instanceof KApply) {
-            KApply app = (KApply)term;
-            KApply newTerm =KApply(app.klabel(),KList(app.klist().stream()
+            KApply app = (KApply) term;
+            KApply newTerm = KApply(app.klabel(), KList(app.klist().stream()
                     .map(this::concretize).collect(Collectors.toList())));
             if (cfg.isParentCell(newTerm.klabel())) {
                 return concretizeCell(newTerm);
@@ -292,7 +300,7 @@ public class ConcretizeConfiguration {
                 return newTerm;
             }
         } else if (term instanceof KRewrite) {
-            KRewrite rew = (KRewrite)term;
+            KRewrite rew = (KRewrite) term;
             return KRewrite(concretize(rew.left()), concretize(rew.right()));
         } else if (term instanceof KSequence) {
             return KSequence(((KSequence) term).stream()
@@ -302,12 +310,12 @@ public class ConcretizeConfiguration {
         }
     }
 
-    public Sentence concretize (Sentence m) {
+    public Sentence concretize(Sentence m) {
         if (m instanceof Rule) {
-            Rule r = (Rule)m;
+            Rule r = (Rule) m;
             return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
         } else if (m instanceof Context) {
-            Context c = (Context)m;
+            Context c = (Context) m;
             return new Context(c.body(), c.requires(), c.att());
         } else {
             return m;
@@ -326,7 +334,7 @@ public class ConcretizeConfiguration {
 
     public Definition concretize(Definition d) {
         return new Definition(Collections.stream(d.modules())
-                        .map(this::concretize).collect(Collections.toSet()),
+                .map(this::concretize).collect(Collections.toSet()),
                 d.att());
     }
 
