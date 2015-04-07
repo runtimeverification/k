@@ -4,6 +4,7 @@ import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
@@ -11,7 +12,9 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
+import org.kframework.kore.compile.ConcretizationInfo;
 import org.kframework.kore.compile.ConcretizeConfiguration;
+import org.kframework.compile.LabelInfo;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -127,7 +130,9 @@ public class Kompile {
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo);
+        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
+        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
+        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
         Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
 
 
