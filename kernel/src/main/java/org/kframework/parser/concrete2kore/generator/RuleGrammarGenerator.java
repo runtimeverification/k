@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
@@ -12,7 +13,7 @@ import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
-import scala.Function1;
+import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -122,6 +124,45 @@ public class RuleGrammarGenerator {
             prods.addAll(mutable(prods2));
         } else
             prods.addAll(mutable(mod.sentences()));
+
+        Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
+        prods.stream().filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
+            if (i instanceof Terminal) terminals.add(((Terminal) i).value());
+        }));
+        prods = mutable(prods.stream().map(s -> {
+            if (s instanceof Production) {
+                Production p = (Production) s;
+                // rewrite productions to contain follow restrictions for prefix terminals
+                // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
+                // this also takes care of casting and productions that have ":"
+                List<ProductionItem> items = stream(p.items()).map(pi -> {
+                    if (pi instanceof Terminal) {
+                        Terminal t = (Terminal) pi;
+                        Set<String> follow = new HashSet<>();
+                        for (String biggerString : terminals) {
+                            if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
+                                String ending = biggerString.substring(t.value().length());
+                                follow.add(ending.substring(0, 1));
+                            }
+                        }
+                        // add follow restrictions for the characters that might produce ambiguities
+                        if (!follow.isEmpty()) {
+                            StringBuilder sb = new StringBuilder();
+                            follow.stream().forEach(ch -> sb.append(StringUtils.isAlphanumeric(ch) ? ch : "\\" + ch));
+                            return RegexTerminal(Pattern.quote(t.value()) + "(?![" + sb.toString() + "])");
+                        }
+                    }
+                    return pi;
+                }).collect(Collections.toList());
+                if (p.klabel().isDefined())
+                    p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
+                else
+                    p = Production(p.sort(), Seq(items), p.att());
+                return p;
+            }
+            return s;
+        }).collect(Collections.toSet()));
+
         Module newM = new Module(mod.name() + "-PARSER", Set(), immutable(prods), null);
         return new ParseInModule(newM);
     }
@@ -130,9 +171,9 @@ public class RuleGrammarGenerator {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add("sort", castSort.name());
         prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.name())), attrs1));
-        prods.add(Production("#SemanticCast", castSort, Seq(NonTerminal(castSort), Terminal(":" + castSort.name())), attrs1));
-        prods.add(Production("#InnerCast", outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));
-        prods.add(Production("#OuterCast", castSort, Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
+        prods.add(Production("#SemanticCast",  castSort, Seq(NonTerminal(castSort), Terminal(":"  + castSort.name())), attrs1));
+        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));
+        prods.add(Production("#OuterCast",     castSort, Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
         return prods;
     }
 

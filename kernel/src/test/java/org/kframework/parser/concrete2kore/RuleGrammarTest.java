@@ -245,4 +245,24 @@ public class RuleGrammarTest {
                 "endmodule";
         parseRule(".::K => .::K requires .::K", def, 0, false);
     }
+
+    // test automatic follow restriction for terminals
+    @Test
+    public void test14() {
+        String def = "" +
+                "module TEST " +
+                "syntax Stmt ::= Stmt Stmt [klabel('Stmt)] " +
+                "syntax Exp ::= K \"==\" K [klabel('Eq)] " +
+                "syntax Exp ::= K \":\" K [klabel('Colon)] " +
+                "syntax K " +
+                "syntax Exp ::= K \"==K\" K [klabel('EqK)] " +
+                "syntax Exp ::= K \"?\" K \":\" K " +
+                "endmodule";
+        parseRule("A::K ==K A", def, 0, false);
+        parseRule("A::K == K A", def, 0, true);
+        parseRule("A:K", def, 0, false);
+        parseRule("A: K", def, 2, false);
+        parseRule("A:Stmt ?F : Stmt", def, 2, false);
+        parseRule("A:Stmt ? F : Stmt", def, 2, false);
+    }
 }
