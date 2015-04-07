@@ -129,15 +129,15 @@ public class Kompile {
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
-        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
-        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
+//        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+//        LabelInfo labelInfo = new LabelInfoFromModule(configInfo);
+//        ConcretizationInfo concretizationInfo = new ConcretizationInfo(configInfo, labelInfo);
+//        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(concretizationInfo);
+//        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
 
 
         Module withKSeq = Module("EXECUTION",
-                Set(concretized, kastDefintion.getModule("KSEQ").get()),
+                Set(afterHeatingCooling, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();
