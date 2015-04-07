@@ -3,6 +3,8 @@ package org.kframework.compile
 import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
 import org.kframework.kore.{KLabel, Sort}
+import org.kframework.kore.KORE._
+
 
 class ConfigurationInfoFromModule(m: Module) extends ConfigurationInfo {
 
@@ -30,7 +32,7 @@ class ConfigurationInfoFromModule(m: Module) extends ConfigurationInfo {
   val levels: Map[KLabel, Int] = edges.foldLeft(Map(topCell -> 0)) {
     case (m: Map[KLabel, Int], (from: KLabel, to: KLabel)) =>
       m + (to -> (m(from) + 1))
-  }
+  } + (KLabel("#noDots") -> -1)
 
 
   println("\n<<<<<<\n")

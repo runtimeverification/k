@@ -11,6 +11,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
+import org.kframework.kore.compile.ConcretizeConfiguration;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -126,10 +127,12 @@ public class Kompile {
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo);
+        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
 
 
         Module withKSeq = Module("EXECUTION",
-                Set(afterHeatingCooling, kastDefintion.getModule("KSEQ").get()),
+                Set(concretized, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();

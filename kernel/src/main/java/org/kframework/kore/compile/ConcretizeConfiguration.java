@@ -302,7 +302,7 @@ public class ConcretizeConfiguration {
         }
     }
 
-    Sentence concretize (Sentence m) {
+    public Sentence concretize (Sentence m) {
         if (m instanceof Rule) {
             Rule r = (Rule)m;
             return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
@@ -314,7 +314,7 @@ public class ConcretizeConfiguration {
         }
     }
 
-    Module concretize(Module m) {
+    public Module concretize(Module m) {
         return new Module(
                 m.name(),
                 m.imports(),
@@ -324,7 +324,7 @@ public class ConcretizeConfiguration {
         );
     }
 
-    Definition concretize(Definition d) {
+    public Definition concretize(Definition d) {
         return new Definition(Collections.stream(d.modules())
                         .map(this::concretize).collect(Collections.toSet()),
                 d.att());

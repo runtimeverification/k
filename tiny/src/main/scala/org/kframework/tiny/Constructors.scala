@@ -9,7 +9,7 @@ import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
 
-class Constructors(module: definition.Module) extends kore.Constructors[K] with ScalaSugar[K] {
+class Constructors(val module: definition.Module) extends kore.Constructors[K] with ScalaSugar[K] {
 
   implicit val theory = new TheoryWithUpDown(new Up(this, Set()), new Down(Set()), module)
 
