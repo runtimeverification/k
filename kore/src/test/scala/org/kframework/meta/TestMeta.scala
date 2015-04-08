@@ -12,7 +12,8 @@ class TestMeta {
   val down = Down(Set(
     "org.kframework.definition",
     "scala.collection.immutable",
-    "org.kframework.kore.ADT"))
+    "org.kframework.kore.ADT",
+    "org.kframework.attributes"))
 
   import org.kframework.kore.KORE._
 
@@ -31,9 +32,10 @@ class TestMeta {
   val d = Definition(Set(Module("TEST", Set(),
     Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar")))))))
 
-  val metad = 'Definition('Set(),
+  val metad = 'Definition(
     'Set('Module("TEST", 'Set(),
-      'Set('Production("Foo", 'Sort("Foo"), 'List('Terminal("Bar")))))))
+      'Set('Production("Foo", 'Sort("Foo"), 'List('Terminal("Bar")))))),
+    'Att('Set()))
 
 
   @Ignore
