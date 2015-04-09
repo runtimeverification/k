@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore;
 
 import com.beust.jcommander.internal.Lists;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Function;
-import static scala.compat.java8.JFunction.*;
 
 public class Kompile {
 
