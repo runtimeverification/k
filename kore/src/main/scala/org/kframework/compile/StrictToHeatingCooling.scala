@@ -18,7 +18,9 @@ object StrictToHeatingCooling extends ModuleTransformation({m: Module =>
   val hole = KLabel("[]")()
 
   // TODO: remove hack once configuration concretization is working
-  def concretize(k: K) = KLabel("<top>")(KLabel("<k>")(k), KVariable("SC"))
+  def concretize(k: K) = KLabel("<top>")(KLabel("#dots")(),
+      KLabel("<k>")(KLabel("#noDots")(),k,KLabel("#noDots")()),
+                                         KLabel("#dots")())
 
   def makeVar(pos: Int) = KVariable("A" + (pos + 1))
 
