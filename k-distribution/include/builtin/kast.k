@@ -61,7 +61,7 @@ module RULE-CELLS
   imports KCELLS
   // something like this will be generated from productions that have the attribute 'cell'
   //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
-  
+
   syntax #OptionalDots ::= "..." [klabel(#dots)]
                          | ""    [klabel(#noDots)]
 endmodule
@@ -95,4 +95,3 @@ module K
   syntax non-assoc #KRewrite
 
 endmodule
-
