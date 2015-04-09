@@ -27,6 +27,8 @@ object TreeNodesToKORE {
 
     case t@KApply(KLabel("#KSequence"), items) =>
       KSequence(downList(items).asJava, t.att)
+    case KApply(KLabel("#EmptyK"), items) if items.isEmpty =>
+      KSequence(List.empty[K].asJava, t.att)
 
     case t@KApply(KLabel("#KRewrite"), items) =>
       val it = items.iterator
