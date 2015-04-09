@@ -11,10 +11,8 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
-import org.kframework.kore.compile.CloseCells;
-import org.kframework.kore.compile.ConcretizeConfiguration;
+import org.kframework.kore.compile.*;
 import org.kframework.compile.LabelInfo;
-import org.kframework.kore.compile.SortInfo;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -136,9 +134,10 @@ public class Kompile {
         SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
         Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
         Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
+        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
 
         Module withKSeq = Module("EXECUTION",
-                Set(closed, kastDefintion.getModule("KSEQ").get()),
+                Set(sorted, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();

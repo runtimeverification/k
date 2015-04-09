@@ -33,20 +33,19 @@ public class SortCellsTest {
         addLabel("KCell", "<k>");
         addLabel("EnvCell", "<env>");
     }};
-    ConcretizationInfo cfg = new ConcretizationInfo(cfgInfo, labelInfo);
 
     @Test
     public void testSimpleSplitting() {
         K term = KRewrite(cell("<t>",cell("<env>"),KVariable("X")),KVariable("X"));
         K expected = KRewrite(cell("<t>",KVariable("X"),cell("<env>")),KVariable("X"));
-        Assert.assertEquals(expected, new SortCells(cfg).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
     }
 
     @Test
     public void testUselessVariable() {
         K term = cell("<t>",cell("<env>"),cell("<k>"),KVariable("X"));
         K expected = cell("<t>",cell("<k>"),cell("<env>"));
-        Assert.assertEquals(expected, new SortCells(cfg).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
     }
 
     KApply cell(String name, K... ks) {
