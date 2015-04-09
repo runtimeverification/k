@@ -17,5 +17,5 @@ object Sorts {
   val KToken = Sort("KToken")
 
   val Id = ADT.Sort("Id")
-  val KSeq = ADT.Sort("~>")
+  val KSeq = ADT.Sort("KSequence")
 }
