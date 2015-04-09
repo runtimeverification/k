@@ -9,6 +9,8 @@ import org.kframework.kore.*;
 import org.junit.Test;
 import org.junit.Assert;
 
+import java.util.Arrays;
+
 import static org.kframework.kore.KORE.*;
 
 public class CloseCellsTest {
@@ -34,46 +36,44 @@ public class CloseCellsTest {
         addLabel("List", "'_List_", true);
     }};
 
-    final static K dots = KApply(KLabel("#dots"));
-
     @Test
     public void testSimpleClosure() {
-        K term = cell("<k>", KApply(KLabel("_+_"), KVariable("I"), KVariable("J")), dots);
-        K expected = cell("<k>", KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
+        K term = cell("<k>", false, true, KApply(KLabel("_+_"), KVariable("I"), KVariable("J")));
+        K expected = ccell("<k>", KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
                 KVariable("DotVar0")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
     public void testCloseMap() {
-        K term = cell("<env>",dots,KApply(KLabel("'_|=>_"),intToToken(1),intToToken(2)));
-        K expected = cell("<env>", KApply(KLabel("'_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
+        K term = cell("<env>", true, false, KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)));
+        K expected = ccell("<env>", KApply(KLabel("'_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
     public void testCloseList() {
         K term = KApply(KLabel("#cells"),
-                cell("<list>", dots, intToToken(1)),
-                cell("<list>", intToToken(2), dots),
-                cell("<list>", dots, intToToken(3), dots));
+                cell("<list>", true, false, intToToken(1)),
+                cell("<list>", false, true, intToToken(2)),
+                cell("<list>", true, true, intToToken(3)));
         K expected = KApply(KLabel("#cells"),
-                cell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar0"), intToToken(1))),
-                cell("<list>", KApply(KLabel("'_List_"), intToToken(2), KVariable("DotVar1"))),
-                cell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar2"), KApply(KLabel("'_List_"), intToToken(3), KVariable("DotVar3")))));
+                ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar0"), intToToken(1))),
+                ccell("<list>", KApply(KLabel("'_List_"), intToToken(2), KVariable("DotVar1"))),
+                ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar2"), KApply(KLabel("'_List_"), intToToken(3), KVariable("DotVar3")))));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
     public void testCloseCellVar() {
         K term = KApply(KLabel("#cells"),
-                cell("<thread>",dots,cell("<k>", intToToken(1))),
-                cell("<thread>",cell("<k>", intToToken(2)),dots),
-                cell("<thread>",dots,cell("<k>", intToToken(2)),dots));
+                cell("<thread>", true, false, cell("<k>", intToToken(1))),
+                cell("<thread>", false, true, cell("<k>", intToToken(2))),
+                cell("<thread>", true, true, cell("<k>", intToToken(2))));
         K expected = KApply(KLabel("#cells"),
-                cell("<thread>",cell("<k>",intToToken(1)),KVariable("DotVar0")),
-                cell("<thread>",cell("<k>",intToToken(2)),KVariable("DotVar1")),
-                cell("<thread>",cell("<k>",intToToken(2)),KVariable("DotVar2")));
+                ccell("<thread>", ccell("<k>", intToToken(1)), KVariable("DotVar0")),
+                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar1")),
+                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar2")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
@@ -82,30 +82,36 @@ public class CloseCellsTest {
 
     @Test
     public void testClosedCellError1() {
-        K term = cell("<thread>",cell("<k>"));
+        K term = cell("<thread>", cell("<k>"));
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Closed parent cell missing required children [EnvCell] <thread>(<k>())");
+        exception.expectMessage("Closed parent cell missing required children [EnvCell] <thread>(#noDots(),<k>(#noDots(),#cells(),#noDots()),#noDots())");
         new CloseCells(cfgInfo, sortInfo, labelInfo).close(term);
     }
 
     @Test
     public void testCloseCellTerm() {
-        K term = KRewrite(KApply(KLabel("#cells")),
-                KApply(KLabel("#cells"),
-                        cell("<thread>", dots, cell("<k>", intToToken(1))),
-                        cell("<thread>", cell("<k>", intToToken(2)), dots),
-                        cell("<thread>", dots, cell("<env>", intToToken(2)), dots)));
-        K expected = KRewrite(KApply(KLabel("#cells")),
-                KApply(KLabel("#cells"),
-                cell("<thread>", cell("<k>", intToToken(1)), cell("<env>",KApply(KLabel(".Map")))),
-                cell("<thread>", cell("<k>", intToToken(2)), cell("<env>",KApply(KLabel(".Map")))),
-                cell("<thread>", cell("<env>", intToToken(2)), cell("<k>",stringToToken("defaultK")))));
+        K term = KRewrite(cells(),
+                  cells(cell("<thread>", true, false, cell("<k>", intToToken(1))),
+                        cell("<thread>", false, true, cell("<k>", intToToken(2))),
+                        cell("<thread>", true, true, cell("<env>", intToToken(2)))));
+        K expected = KRewrite(cells(),
+                  cells(ccell("<thread>", ccell("<k>", intToToken(1)), ccell("<env>", KApply(KLabel(".Map")))),
+                        ccell("<thread>", ccell("<k>", intToToken(2)), ccell("<env>", KApply(KLabel(".Map")))),
+                        ccell("<thread>", ccell("<env>", intToToken(2)), ccell("<k>", stringToToken("defaultK")))));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     KApply cell(String name, K... ks) {
+        return cell(name, false, false, ks);
+    }
+    KApply cell(String name, boolean openLeft, boolean openRight, K... ks) {
+        return IncompleteCellUtils.make(KLabel(name), openLeft, Arrays.asList(ks), openRight);
+    }
+
+    KApply ccell(String name, K... ks) {
         return KApply(KLabel(name), ks);
     }
+
 
     KApply cells(K... ks) {
         return KApply(KLabel("#cells"), ks);

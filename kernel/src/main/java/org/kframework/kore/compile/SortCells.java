@@ -15,15 +15,17 @@ import static org.kframework.kore.KORE.*;
  * In Full K, cell contents can be written in any order, and variables can
  * be written that match multiple cells.
  *
- * In the input to this pass, cells are represented by applying the corresponding
- * label to a single argument which is an unordered bag of cells,
- * in the output each cell label will be applied to arguments matching the
- * production declaring it.
+ * In the input to this pass, parent cells are represented by appling the label directly
+ * to a klist of all the children, variables, and rewrites under the cell.
+ * Left cells should already be in their final form.
+ * In the output each cell will be represented by using the cell labels in agreement
+ * with the production declaring it, so parent cells will have a fixed arity with separate
+ * argument positions reserved for different types of child cell.
  *
  * The most complicated part of the transformation is dealing with variables
- * in cells. An occurance in a cell that might match child cells of different
+ * in cells. An occurrence in a cell that might match child cells of different
  * sorts has to be split into several variables in different arguments, and any
- * occurance of the variable outside of a cell replaced by a suitable
+ * occurrence of the variable outside of a cell replaced by a suitable
  * expression involving the split variables.
  *
  * This is currently not implemented in general, just the analysis to identify
@@ -31,6 +33,7 @@ import static org.kframework.kore.KORE.*;
  * that a variable can bind, so it can be handled by either doing nothing,
  * or just deleting it from under cells and replacing it with an empty collection elsewhere.
  */
+// TODO handle cell rewrites
 public class SortCells {
     private final ConcretizationInfo cfg;
 

@@ -26,6 +26,12 @@ import static org.kframework.kore.KORE.*;
 /**
  * Remove any use of dots in cells, by replacing them with variables and appropriate connectives.
  * This expects parent cells to have been added by earlier passes, it will only add variables
+ *
+ * The input to this pass is represents cells as described by {@link IncompleteCellUtils}.
+ * In the output cells no longer have dots. Leaf cells have a single argument which is
+ * the body, and parent cells are applied directly to the child cells and variables
+ * as arguments of the KApply (though not necessarily in the right order) as
+ * expected by {@link SortCells}.
  */
 public class CloseCells {
     private int counter = 0;
@@ -71,11 +77,7 @@ public class CloseCells {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
-                if (!cfg.isCell(k.klabel())) {
-                    return super.apply(k);
-                } else {
-                    return closeCell(k);
-                }
+                return super.apply(closeCell(k));
             }
 
             @Override
@@ -138,21 +140,18 @@ public class CloseCells {
                 m.att());
     }
 
-    protected K closeCell(K term) {
-        if (!(term instanceof KApply)) {
-            return term;
-        }
-        KLabel label = ((KApply) term).klabel();
-
+    /**
+     * Close an individual cell.
+     */
+    protected KApply closeCell(KApply cell) {
+        KLabel label = cell.klabel();
         if (!cfg.isCell(label)) {
-            return term;
+            return cell;
         }
 
-        List<K> items = ((KApply) term).klist().items();
-        boolean openLeft = items.size() > 0 && items.get(0).equals(dots);
-        boolean openRight = items.size() > 1 && items.get(items.size() - 1).equals(dots);
-        List<K> contents = items.subList(openLeft ? 1 : 0,
-                openRight ? items.size() - 1 : items.size());
+        boolean openLeft = IncompleteCellUtils.isOpenLeft(cell);
+        boolean openRight = IncompleteCellUtils.isOpenRight(cell);
+        List<K> contents = IncompleteCellUtils.getChildren(cell);
 
         if (cfg.isParentCell(label)) {
             Set<Sort> required = new HashSet<>();
@@ -164,15 +163,18 @@ public class CloseCells {
             for (K item : contents) {
                 if (item instanceof KApply) {
                     required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
+                } else if (item instanceof KVariable) {
+                    // TODO: should consider variable sorts
+                    required.clear();
                 }
             }
 
             if (!openLeft && !openRight) {
                 if (required.isEmpty()) {
-                    return term;
+                    return KApply(label, KList(contents));
                 } else {
                     throw new IllegalArgumentException("Closed parent cell missing " +
-                            "required children " + required.toString() + " " + term.toString());
+                            "required children " + required.toString() + " " + cell.toString());
                 }
             }
 
@@ -196,15 +198,15 @@ public class CloseCells {
         // Is a leaf cell
         if (contents.size() != 1) {
             throw new IllegalArgumentException("Leaf cells should contain exactly 1 body term,"
-                    + " but there are " + contents.size() + " in " + term.toString());
+                    + " but there are " + contents.size() + " in " + cell.toString());
         }
 
         if (!openLeft && !openRight) {
-            return term;
+            return KApply(label, KList(contents.get(0)));
         }
         if (rhsOf != null) {
             throw new IllegalArgumentException("Leaf cells on right hand side of a rewrite" +
-                    " may not be open, but " + term.toString() + " is right of " + rhsOf.toString());
+                    " may not be open, but " + cell.toString() + " is right of " + rhsOf.toString());
         }
 
         K body = contents.get(0);
@@ -234,14 +236,14 @@ public class CloseCells {
             KLabel closeOperator = sortInfo.getCloseOperator(cellType);
             if (closeOperator == null) {
                 throw new IllegalArgumentException("No operator registered for closing cells of sort "
-                        + cellType.name() + " when closing cell " + term.toString());
+                        + cellType.name() + " when closing cell " + cell.toString());
             }
             LabelInfo.AssocInfo info = labelInfo.getAssocInfo(closeOperator);
             if (!info.isAssoc() && openLeft && openRight) {
                 throw new IllegalArgumentException(
                         "Ambiguity closing a cell. Operator " + closeOperator.toString()
                                 + " for sort " + cellType.name() + " is not associative, "
-                                + "but the cell has ellipses on both sides " + term.toString());
+                                + "but the cell has ellipses on both sides " + cell.toString());
             }
             if (info.isComm() && (!openLeft || !openRight || info.isAssoc())) {
                 openLeft = false;

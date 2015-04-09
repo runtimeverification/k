@@ -10,6 +10,8 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.*;
 
+import java.util.Arrays;
+
 import static org.kframework.kore.KORE.*;
 import static org.kframework.compile.ConfigurationInfo.Multiplicity.*;
 
@@ -142,24 +144,20 @@ public class CompilerTest {
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
-    final KApply dots = KApply(KLabel("#dots"));
-
     @Test
     public void testDotsApart() {
-        K term = cell("<T>", dots, cell("<k>", intToToken(1)), cell("<k>", intToToken(2)));
-        K expected = cell("<T>", dots, cell("<ts>", dots,
-                cell("<t>", dots, cell("<k>", intToToken(1)), dots),
-                cell("<t>", dots, cell("<k>", intToToken(2)), dots)
-                , dots), dots);
+        K term = cell("<T>", true, false, cell("<k>", intToToken(1)), cell("<k>", intToToken(2)));
+        K expected = cell("<T>", true, true, cell("<ts>", true, true,
+                cell("<t>", true, true, cell("<k>", intToToken(1))),
+                cell("<t>", true, true, cell("<k>", intToToken(2)))));
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
     @Test
     public void testDotsTogether() {
-        K term = cell("<ts>", dots, cell("<k>", intToToken(0)), cell("<env>",intToToken(2)));
-        K expected = cell("<ts>", dots, cell("<t>", dots,
-                cell("<k>", intToToken(0)), cell("<env>",intToToken(2)),
-                dots), dots);
+        K term = cell("<ts>", true, false, cell("<k>", intToToken(0)), cell("<env>",intToToken(2)));
+        K expected = cell("<ts>", true, true, cell("<t>", true, true,
+                cell("<k>", intToToken(0)), cell("<env>",intToToken(2))));
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
@@ -190,12 +188,15 @@ public class CompilerTest {
                         KVariable("Rest"))));
         K expected = cell("<T>", cell("<ts>", cell("<t>", cell("<k>",
                 KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
-                                KVariable("Rest"))))));
+                        KVariable("Rest"))))));
         Assert.assertEquals(expected, pass.concretize(term));
     }
 
     KApply cell(String name, K... ks) {
-        return KApply(KLabel(name), ks);
+        return cell(name, false, false, ks);
+    }
+    KApply cell(String name, boolean openLeft, boolean openRight, K... ks) {
+        return IncompleteCellUtils.make(KLabel(name), openLeft, Arrays.asList(ks), openRight);
     }
 
     KApply cells(K... ks) {

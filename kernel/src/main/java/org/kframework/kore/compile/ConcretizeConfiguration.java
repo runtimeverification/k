@@ -36,33 +36,19 @@ public class ConcretizeConfiguration {
     }
 
     Stream<KApply> streamSideCells(K side) {
-        if (side instanceof KApply && ((KApply) side).klabel().equals(KLabel("#cells")))
-            return (Stream<KApply>) (Object) ((KApply) side).klist().stream();
-        else {
-            return Stream.of((KApply) side);
-        }
+        List<K> cells = IncompleteCellUtils.flattenCells(side);
+        // TODO error handling
+        return (Stream<KApply>)(Object)cells.stream();
     }
 
     protected final static KApply dots = KApply(KLabel("#dots"));
 
     KApply makeCell(KLabel label, boolean ellipses, K item) {
-        if (ellipses) {
-            return KApply(label, KList(dots, item, dots));
-        } else {
-            return KApply(label, KList(item));
-        }
+        return IncompleteCellUtils.make(label, ellipses, item, ellipses);
     }
 
     KApply makeCell(KLabel label, boolean ellipses, List<? extends K> children) {
-        if (!ellipses) {
-            return KApply(label, KList(children));
-        } else {
-            List<K> newChildren = Lists.newArrayListWithCapacity(children.size() + 2);
-            newChildren.add(dots);
-            newChildren.addAll(children);
-            newChildren.add(dots);
-            return KApply(label, KList(newChildren));
-        }
+        return IncompleteCellUtils.make(label, ellipses, children, ellipses);
     }
 
     protected List<KApply> makeParents(KLabel parent, boolean ellipses,
@@ -165,47 +151,36 @@ public class ConcretizeConfiguration {
                 && !(k instanceof KVariable) && getLevel(k).isPresent();
     }
 
+    Optional<Integer> getLevel(KApply k) {
+        int level = cfg.getLevel(k.klabel());
+        if (level >= 0) {
+            return Optional.of(level);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     Optional<Integer> getLevel(K k) {
         if (k instanceof KApply) {
-            if (((KApply) k).klabel().equals(KLabel("#cells"))) {
-                List<K> items = ((KApply) k).klist().items();
-                if (items.isEmpty()) {
-                    return Optional.empty();
+            return getLevel((KApply) k);
+        } else {
+            KRewrite rew = (KRewrite)k;
+            List<K> cells = IncompleteCellUtils.flattenCells(rew.left());
+            cells.addAll(IncompleteCellUtils.flattenCells(rew.right()));
+            Optional<Integer> level = Optional.empty();
+            for (K item : cells) {
+                if (item instanceof KVariable) {
+                    continue;
                 }
-                Optional<Integer> level = getLevel(items.get(0));
-                for (K item : items) {
-                    if (!(item instanceof KVariable) && !getLevel(item).equals(level)) {
-                        throw new AssertionError("Can't mix cells at different levels under a rewrite");
-                    }
+                Optional<Integer> level2 = getLevel(item);
+                if (!level.isPresent()) {
+                    level = level2;
+                } else if (!level.equals(level2)) {
+                    throw new AssertionError("Can't mix cells at different levels under a rewrite");
                 }
-                return level;
-            } else {
-                if (!(((KApply) k).klabel().equals(KLabel("#noDots")))) {
-                    int level = cfg.getLevel(((KApply) k).klabel());
-                    if (level >= 0) {
-                        return Optional.of(level);
-                    } else {
-                        return Optional.empty();
-                    }
-                } else {
-                    return Optional.empty();
-                }
+                // else level is already correct
             }
-        } else if (k instanceof KVariable)
-            return Optional.empty();
-        else {
-            Optional<Integer> leftLevel = getLevel(((KRewrite) k).left());
-            Optional<Integer> rightLevel = getLevel(((KRewrite) k).right());
-            if (!leftLevel.isPresent()) {
-                return rightLevel;
-            }
-            if (!rightLevel.isPresent()) {
-                return leftLevel;
-            }
-            if (leftLevel.equals(rightLevel))
-                return leftLevel;
-            else
-                throw new AssertionError("The left and right of a rewrite must have the same level: " + k);
+            return level;
         }
     }
 
@@ -254,20 +229,12 @@ public class ConcretizeConfiguration {
             }
             List<K> children = Lists.newArrayList();
             List<K> otherChildren = Lists.newArrayList();
-            boolean ellipses = false;
+            boolean ellipses = IncompleteCellUtils.isOpenLeft(app)
+                    || IncompleteCellUtils.isOpenRight(app);
             int ix = 0;
-            for (K item : app.klist().items()) {
+            for (K item : IncompleteCellUtils.getChildren(app)) {
                 if (isCompletionItem(item)) {
                     children.add(item);
-                } else if (item instanceof KApply
-                        && ((KApply) item).klabel().equals(KLabel("#dots"))) {
-                    if (ix == 0 || ix == app.klist().size() - 1) {
-                        ellipses = true;
-                    } else {
-                        throw new IllegalArgumentException(
-                                "Ellipses only allowed at beginning or end of a cell, "
-                                        + "but found #dots as child " + ix + " of term " + k);
-                    }
                 } else {
                     otherChildren.add(item);
                 }
