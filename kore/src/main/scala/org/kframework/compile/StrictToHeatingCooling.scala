@@ -19,7 +19,7 @@ object StrictToHeatingCooling extends ModuleTransformation({m: Module =>
 
   // TODO: remove hack once configuration concretization is working
   def concretize(k: K) = KLabel("<top>")(KLabel("#dots")(),
-      KLabel("<k>")(KLabel("#noDots")(),k,KLabel("#noDots")()),
+      KLabel("<k>")(KLabel("#noDots")(),k,KLabel("#dots")()),
                                          KLabel("#dots")())
 
   def makeVar(pos: Int) = KVariable("A" + (pos + 1))
@@ -52,14 +52,13 @@ object StrictToHeatingCooling extends ModuleTransformation({m: Module =>
       .map(_._2)
       .filter { strictIn.contains(_) }
       .flatMap {i: Int =>
-      val restVar = KVariable("R")
       Set(
         Rule(
-          concretize(KSequence(KRewrite(cooled, heated(i)), restVar)),
+          concretize(KSequence(KRewrite(cooled, heated(i)))),
           KLabel("notBool_")(isKResult(i)),
           False, Att() + "heat"),
         Rule(
-          concretize(KSequence(KRewrite(heated(i), cooled), restVar)),
+          concretize(KSequence(KRewrite(heated(i), cooled))),
           isKResult(i),
           False, Att() + "cool")
       )
