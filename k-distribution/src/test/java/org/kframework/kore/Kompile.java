@@ -22,6 +22,7 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.tiny.*;
+import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
 
@@ -36,7 +37,7 @@ import java.util.function.Function;
 
 public class Kompile {
 
-    public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
+    public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
 

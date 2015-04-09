@@ -15,6 +15,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -30,7 +31,7 @@ public class RuleGrammarTest {
     private Definition baseK = null;
     private final static String startSymbol = "RuleContent";
     private RuleGrammarGenerator gen;
-    public static final File BUILTIN_DIRECTORY = new File("k-distribution/include/builtin").getAbsoluteFile();
+    public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
 
     @Before
     public void setUp() throws  Exception{
