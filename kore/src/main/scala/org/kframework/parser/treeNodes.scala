@@ -9,6 +9,8 @@ import java.lang.Iterable
 import collection.JavaConverters._
 import org.apache.commons.lang3.StringEscapeUtils
 
+import scala.collection.mutable;
+
 trait Term {
   // TODO: add source
   var location: Optional[Location] = Optional.empty()
@@ -101,7 +103,7 @@ object KList {
 }
 
 object Ambiguity {
-  @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toSet.asJava)
+  @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.to[mutable.Set].asJava)
   def apply(items: Set[Term], location: Location):Ambiguity = {
     val res = Ambiguity(items)
     res.location = Optional.of(location)
