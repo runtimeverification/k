@@ -3,15 +3,20 @@ package org.kframework.attributes
 import org.kframework.Collections._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{K, KORE}
+import org.kframework.kore.{KApply, K, KORE}
 import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
 
 case class Att(att: Set[K]) extends AttributesToString {
-  def getKValue(key: String): Option[K] = att.collectFirst({ case t@KApply(KLabel(`key`), List(v)) => v })
 
-  def getK(key: String): Option[K] = att.collectFirst({ case t@KApply(KLabel(`key`), _) => t })
+  val attMap: Map[String, KApply] = att map {
+    case t@KApply(KLabel(key), _) => (key, t)
+  } toMap
+
+  def getKValue(key: String): Option[K] = attMap.get(key) collect { case t@KApply(KLabel(`key`), List(v)) => v }
+
+  def getK(key: String): Option[K] = attMap.get(key) map { case t@KApply(KLabel(`key`), _) => t }
 
   val includes = Set("scala.collection.immutable", "org.kframework.attributes")
   val down = Down(includes)
@@ -20,7 +25,7 @@ case class Att(att: Set[K]) extends AttributesToString {
   def get[T](key: String): Option[T] =
     getKValue(key).orElse(getK(key))
       .map(down)
-      .map { _.asInstanceOf[T] }
+      .map {_.asInstanceOf[T]}
 
   def getOptional[T](label: String): java.util.Optional[T] =
     get[T](label) match {
@@ -75,6 +80,6 @@ trait AttributesToString {
   }
 
   lazy val filteredAtt: List[K] =
-    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy { _.toString }
+    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy {_.toString}
   // TODO: remove along with KIL to KORE to KIL convertors
 }
