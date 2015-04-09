@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 
 import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
-import org.kframework.kore.{K, KLabel, Sort}
+import org.kframework.kore.{ADT, K, KLabel, Sort}
 
 object ConfigurationInfoFromModule
 
@@ -57,4 +57,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getDefaultCell(k: Sort): K = cellInitializer(k)
 
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
+
+  override def getRootCell(): Sort = topCell
+  override def getComputationCell(): Sort = ADT.Sort("KCell") // TODO: read from attributes
 }

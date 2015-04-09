@@ -23,6 +23,8 @@ class TestConfiguration implements ConfigurationInfo {
     Map<Sort, Sort> parents = Maps.newHashMap();
     Map<Sort, Sort> leafCellTypes = Maps.newHashMap();
     ListMultimap<Sort, Sort> children = ArrayListMultimap.create();
+    Sort topCell = null;
+    Sort computationCell = null;
 
     Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
     Map<Sort, K> defaultCells = Maps.newHashMap();
@@ -107,5 +109,15 @@ class TestConfiguration implements ConfigurationInfo {
     @Override
     public K getDefaultCell(Sort k) {
         return defaultCells.get(k);
+    }
+
+    @Override
+    public Sort getRootCell() {
+        return topCell;
+    }
+
+    @Override
+    public Sort getComputationCell() {
+        return computationCell;
     }
 }

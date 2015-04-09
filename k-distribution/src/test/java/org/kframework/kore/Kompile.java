@@ -122,20 +122,20 @@ public class Kompile {
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
+        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
+
+        Module withTopCells = new AddImplicitCells(configInfo, labelInfo).addImplicitCells(afterHeatingCooling);
+        Module concretized = new ConcretizeConfiguration(configInfo, labelInfo).concretize(withTopCells);
+        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
+        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
+
         Definition kastDefintion = Definition(immutable(
                 ParserUtils.loadModules("requires \"kast.k\"",
                         Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
-
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo, labelInfo);
-        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
-        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
-        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
-        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
-
         Module withKSeq = Module("EXECUTION",
                 Set(sorted, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
