@@ -17,14 +17,13 @@ public class CloseCellsTest {
         addOp("Map", "'_Map_");
         addOp("List", "'_List_");
     }};
-
     final TestConfiguration cfgInfo = new TestConfiguration() {{
         addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
         addCell("ThreadCell", "KCell", "<k>", Sort("K"));
         addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
         addCell(null, "ListCell", "<list>", Multiplicity.STAR, Sort("List"));
         addDefault("EnvCell", cell("<env>", KApply(KLabel(".Map"))));
-        addDefault("KCell", cell("<k>",stringToToken("defaultK")));
+        addDefault("KCell", cell("<k>", stringToToken("defaultK")));
     }};
     final LabelInfo labelInfo = new LabelInfo() {{
         addLabel("KCell", "<k>");
@@ -34,7 +33,6 @@ public class CloseCellsTest {
         addLabel("Map", "'_Map_", true, true);
         addLabel("List", "'_List_", true);
     }};
-    final ConcretizationInfo cfg = new ConcretizationInfo(cfgInfo, labelInfo);
 
     final static K dots = KApply(KLabel("#dots"));
 
@@ -43,14 +41,14 @@ public class CloseCellsTest {
         K term = cell("<k>", KApply(KLabel("_+_"), KVariable("I"), KVariable("J")), dots);
         K expected = cell("<k>", KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
                 KVariable("DotVar0")));
-        Assert.assertEquals(expected, new CloseTerm(cfg, sortInfo, labelInfo).close(term));
+        Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
     public void testCloseMap() {
         K term = cell("<env>",dots,KApply(KLabel("'_|=>_"),intToToken(1),intToToken(2)));
         K expected = cell("<env>", KApply(KLabel("'_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
-        Assert.assertEquals(expected, new CloseTerm(cfg, sortInfo, labelInfo).close(term));
+        Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
@@ -63,7 +61,7 @@ public class CloseCellsTest {
                 cell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar0"), intToToken(1))),
                 cell("<list>", KApply(KLabel("'_List_"), intToToken(2), KVariable("DotVar1"))),
                 cell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar2"), KApply(KLabel("'_List_"), intToToken(3), KVariable("DotVar3")))));
-        Assert.assertEquals(expected, new CloseTerm(cfg, sortInfo, labelInfo).close(term));
+        Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
@@ -76,7 +74,7 @@ public class CloseCellsTest {
                 cell("<thread>",cell("<k>",intToToken(1)),KVariable("DotVar0")),
                 cell("<thread>",cell("<k>",intToToken(2)),KVariable("DotVar1")),
                 cell("<thread>",cell("<k>",intToToken(2)),KVariable("DotVar2")));
-        Assert.assertEquals(expected, new CloseTerm(cfg, sortInfo, labelInfo).close(term));
+        Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Rule
@@ -87,7 +85,7 @@ public class CloseCellsTest {
         K term = cell("<thread>",cell("<k>"));
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Closed parent cell missing required children [EnvCell] <thread>(<k>())");
-        new CloseTerm(cfg, sortInfo, labelInfo).close(term);
+        new CloseCells(cfgInfo, sortInfo, labelInfo).close(term);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class CloseCellsTest {
                 cell("<thread>", cell("<k>", intToToken(1)), cell("<env>",KApply(KLabel(".Map")))),
                 cell("<thread>", cell("<k>", intToToken(2)), cell("<env>",KApply(KLabel(".Map")))),
                 cell("<thread>", cell("<env>", intToToken(2)), cell("<k>",stringToToken("defaultK")))));
-        Assert.assertEquals(expected, new CloseTerm(cfg, sortInfo, labelInfo).close(term));
+        Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     KApply cell(String name, K... ks) {

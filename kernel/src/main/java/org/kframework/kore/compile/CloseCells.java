@@ -1,12 +1,16 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Sets;
+import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.definition.Context;
+import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KORE$;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
@@ -19,7 +23,11 @@ import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
 
-public class CloseTerm {
+/**
+ * Remove any use of dots in cells, by replacing them with variables and appropriate connectives.
+ * This expects parent cells to have been added by earlier passes, it will only add variables
+ */
+public class CloseCells {
     private int counter = 0;
     private Set<KVariable> vars = Sets.newHashSet();
     private KRewrite rhsOf = null;
@@ -28,8 +36,8 @@ public class CloseTerm {
     private LabelInfo labelInfo;
     final static K dots = KApply(KLabel("#dots"));
 
-    public CloseTerm(ConcretizationInfo cfg, SortInfo sortInfo, LabelInfo labelInfo) {
-        this.cfg = cfg;
+    public CloseCells(ConfigurationInfo cfg, SortInfo sortInfo, LabelInfo labelInfo) {
+        this.cfg = new ConcretizationInfo(cfg, labelInfo);
         this.sortInfo = sortInfo;
         this.labelInfo = labelInfo;
     }
@@ -43,10 +51,13 @@ public class CloseTerm {
         return newLabel;
     }
 
-    public K close(K term) {
+    protected void resetVars() {
         counter = 0;
-        vars = Sets.newHashSet();
+        vars.clear();
         rhsOf = null;
+    }
+
+    protected void gatherVars(K term) {
         new VisitKORE() {
             @Override
             public Void apply(KVariable v) {
@@ -54,7 +65,9 @@ public class CloseTerm {
                 return super.apply(v);
             }
         }.apply(term);
+    }
 
+    protected K transform(K term) {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
@@ -78,6 +91,51 @@ public class CloseTerm {
                 }
             }
         }.apply(term);
+    }
+
+    public K close(K term) {
+        resetVars();
+        gatherVars(term);
+        return transform(term);
+    }
+
+    public Rule close(Rule rule) {
+        resetVars();
+        gatherVars(rule.body());
+        gatherVars(rule.requires());
+        gatherVars(rule.ensures());
+        return new Rule(
+                transform(rule.body()),
+                transform(rule.requires()),
+                transform(rule.ensures()),
+                rule.att());
+    }
+
+    public Context close(Context context) {
+        resetVars();
+        gatherVars(context.body());
+        gatherVars(context.requires());
+        return new Context(
+                transform(context.body()),
+                transform(context.requires()),
+                context.att());
+    }
+
+    public Sentence close(Sentence s) {
+        if (s instanceof Rule) {
+            return close((Rule)s);
+        } else if (s instanceof Context) {
+            return close((Context)s);
+        } else {
+            return s;
+        }
+    }
+
+    public Module close(Module m) {
+        return new Module(m.name(),
+                m.imports(),
+                Collections.map(m.localSentences(), this::close),
+                m.att());
     }
 
     protected K closeCell(K term) {

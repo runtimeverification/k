@@ -11,9 +11,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
-import org.kframework.kore.K;
-import org.kframework.kore.compile.CloseTerm;
-import org.kframework.kore.compile.ConcretizationInfo;
+import org.kframework.kore.compile.CloseCells;
 import org.kframework.kore.compile.ConcretizeConfiguration;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.compile.SortInfo;
@@ -133,13 +131,14 @@ public class Kompile {
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo);
+        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
+        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo, labelInfo);
+        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
         Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
-
-
+        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
 
         Module withKSeq = Module("EXECUTION",
-                Set(afterHeatingCooling, kastDefintion.getModule("KSEQ").get()),
+                Set(closed, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();

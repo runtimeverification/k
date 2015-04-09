@@ -36,8 +36,7 @@ public class CompilerTest {
         addLabel("MsgCell","<msg>");
         addLabel("MsgIdCell","<msgId>");
     }};
-//    final ConcretizationInfo info = new ConcretizationInfo(cfgInfo, labelInfo);
-    final ConcretizeConfiguration pass = new ConcretizeConfiguration(cfgInfo);
+    final ConcretizeConfiguration pass = new ConcretizeConfiguration(cfgInfo, labelInfo);
 
     @Test
     public void testOneLeafCellNoCompletion() {
