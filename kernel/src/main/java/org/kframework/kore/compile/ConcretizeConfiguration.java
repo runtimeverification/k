@@ -336,15 +336,12 @@ public class ConcretizeConfiguration {
         return new Module(
                 m.name(),
                 m.imports(),
-                org.kframework.Collections.stream(m.localSentences())
-                        .map(this::concretize).collect(Collections.toSet()),
+                Collections.map(m.localSentences(), this::concretize),
                 m.att()
         );
     }
 
     public Definition concretize(Definition d) {
-        return new Definition(Collections.stream(d.modules())
-                .map(this::concretize).collect(Collections.toSet()),
-                d.att());
+        return new Definition(Collections.map(d.modules(),this::concretize), d.att());
     }
 }
