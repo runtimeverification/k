@@ -23,11 +23,8 @@ public class TstTinyOnKORE {
     public TestName name = new TestName();
 
 
-    protected File testResource(String baseName) {
-        return new File(new File("k-distribution/src/test/resources" + baseName)
-                .getAbsoluteFile().toString().replace("k-distribution" + File.separator + "k-distribution", "k-distribution"));
-        // a bit of a hack to get around not having a clear working directory
-        // Eclipse runs tests within k/k-distribution, IntelliJ within /k
+    protected File testResource(String baseName) throws URISyntaxException {
+        return new File(TstTinyOnKORE.class.getResource(baseName).toURI());
     }
 
 
