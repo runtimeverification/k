@@ -68,7 +68,7 @@ module MAP
   imports SET
   imports K
 
-  syntax Map ::= Map Map        [klabel('_Map_), function, hook(Map:__)]
+  syntax Map ::= Map Map        [klabel('_Map_), function, assoc, comm, hook(Map:__)]
   syntax Map ::= ".Map"         [klabel('_Map_),  function, hook(Map:.Map)]
   syntax Map ::= K "|->" K   [klabel('_|->_), function, hook(Map:_|->_)]
   syntax priorities '_|->_ > '_Map_

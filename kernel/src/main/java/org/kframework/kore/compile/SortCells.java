@@ -4,9 +4,15 @@ package org.kframework.kore.compile;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.LabelInfo;
+import org.kframework.definition.Context;
+import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 
 import java.util.*;
+import java.util.Collections;
 
 import static org.kframework.kore.KORE.*;
 
@@ -37,8 +43,8 @@ import static org.kframework.kore.KORE.*;
 public class SortCells {
     private final ConcretizationInfo cfg;
 
-    public SortCells(ConcretizationInfo cfg) {
-        this.cfg = cfg;
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
+        this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
     }
 
     // Information on uses of a particular variable
@@ -91,7 +97,11 @@ public class SortCells {
 
     private Map<KVariable, VarInfo> variables = new HashMap<>();
 
-    public K sortCells(K term) {
+    protected void resetVars() {
+        variables.clear();
+    }
+
+    protected void analyzeVars(K term) {
         new VisitKORE(){
             @Override
             public Void apply(KApply k) {
@@ -122,11 +132,13 @@ public class SortCells {
                 return super.apply(k);
             }
         }.apply(term);
+    }
 
+    private K processVars(K term) {
         return new TransformKORE(){
             @Override
             public K apply(KApply k) {
-                if (!cfg.isCell(k.klabel())) {
+                if (!cfg.isParentCell(k.klabel())) {
                     return super.apply(k);
                 } else {
                     List<Sort> order = cfg.getChildren(k.klabel());
@@ -157,5 +169,52 @@ public class SortCells {
                 }
             }
         }.apply(term);
+    }
+
+    public K sortCells(K term) {
+        resetVars();
+        analyzeVars(term);
+        return processVars(term);
+
+    }
+
+
+    public Rule sortCells(Rule rule) {
+        resetVars();
+        analyzeVars(rule.body());
+        analyzeVars(rule.requires());
+        analyzeVars(rule.ensures());
+        return new Rule(
+                processVars(rule.body()),
+                processVars(rule.requires()),
+                processVars(rule.ensures()),
+                rule.att());
+    }
+
+    public Context sortCells(Context context) {
+        resetVars();
+        analyzeVars(context.body());
+        analyzeVars(context.requires());
+        return new Context(
+                processVars(context.body()),
+                processVars(context.requires()),
+                context.att());
+    }
+
+    public Sentence sortCells(Sentence s) {
+        if (s instanceof Rule) {
+            return sortCells((Rule) s);
+        } else if (s instanceof Context) {
+            return sortCells((Context)s);
+        } else {
+            return s;
+        }
+    }
+
+    public Module sortCells(Module m) {
+        return new Module(m.name(),
+                m.imports(),
+                org.kframework.Collections.map(m.localSentences(), this::sortCells),
+                m.att());
     }
 }

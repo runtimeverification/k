@@ -12,10 +12,8 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
-import org.kframework.kore.compile.CloseCells;
-import org.kframework.kore.compile.ConcretizeConfiguration;
+import org.kframework.kore.compile.*;
 import org.kframework.compile.LabelInfo;
-import org.kframework.kore.compile.SortInfo;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -127,24 +125,22 @@ public class Kompile {
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
+        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
+
+        Module withTopCells = new AddImplicitCells(configInfo, labelInfo).addImplicitCells(afterHeatingCooling);
+        Module concretized = new ConcretizeConfiguration(configInfo, labelInfo).concretize(withTopCells);
+        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
+        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
+
         Definition kastDefintion = Definition(immutable(
                 ParserUtils.loadModules("requires \"kast.k\"",
                         Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
-
-        // example module transformation
-        new ModuleTransformation(func(m -> m));
-
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
-        ConcretizeConfiguration concretizeConfiguration = new ConcretizeConfiguration(configInfo, labelInfo);
-        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
-        Module concretized = concretizeConfiguration.concretize(afterHeatingCooling);
-        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
-
         Module withKSeq = Module("EXECUTION",
-                Set(closed, kastDefintion.getModule("KSEQ").get()),
+                Set(sorted, kastDefintion.getModule("KSEQ").get()),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();

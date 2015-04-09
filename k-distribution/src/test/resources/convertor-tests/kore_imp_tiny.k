@@ -55,21 +55,21 @@ module TEST
   syntax KResult ::= Int
   syntax Bool ::= "isStmt" "(" K ")"         [klabel(isStmt), function]
 
-  rule <top><k> `while(BE) S => if(BE) { S while (BE) S } else {}` ~> R </k> SC </top>
+  rule while(BE) S => if(BE) { S while (BE) S } else {}
 
-  rule <top><k> `{} => .::K` ~> R </k> SC </top>
-  rule <top><k> `{ S } => S` ~> R </k> SC </top> requires isStmt(S)
+  rule {} => .::K
+  rule { S } => S requires isStmt(S)
 
-  rule <top><k> `X => I::Int` ~> R </k> <state> X |-> I M </state> </top> requires isId(X)
-  rule <top><k> `X = I; => .::K` ~> R </k> <state> X |-> `_ => I` M </state> </top> requires isId(X) andBool isInt(I)
+  rule <k> `X => I::Int` ...</k> <state> X |-> I ...</state> requires isId(X)
+  rule <k> X = I; => .::K ...</k> <state> X |-> `_ => I` ...</state> requires isId(X) andBool isInt(I)
 
-  rule <top><k> `A <= B => A <=Int B` ~> R </k> SC </top> requires isInt(A) andBool isInt(B)
-  rule <top><k> `A + B => A +Int B` ~> R </k> SC </top> requires isInt(A) andBool isInt(B)
+  rule A <= B => A <=Int B requires isInt(A) andBool isInt(B)
+  rule A + B => A +Int B requires isInt(A) andBool isInt(B)
 
-  rule <top><k> `if(true) S1 else S2 => S1` ~> R </k> SC </top>
-  rule <top><k> `if(false) S1 else S2 => S2` ~> R </k> SC </top>
+  rule if(true) S1 else S2 => S1
+  rule if(false) S1 else S2 => S2
 
   // todo: Radu, check why the extra cast is needed
-  rule <top><k> ``__`(S1::Stmt, S2::Stmt) => S1 ~> S2` ~> R </k> SC </top> requires isStmt(S1) andBool isStmt(S2)
+  rule `__`(S1::Stmt, S2::Stmt) => S1 ~> S2 requires isStmt(S1) andBool isStmt(S2)
 
 endmodule

@@ -31,5 +31,8 @@ public interface ConfigurationInfo {
 
     K getDefaultCell(Sort k);
 
+    Sort getRootCell();
+    Sort getComputationCell();
+
     enum Multiplicity {ONE, OPTIONAL, STAR}
 }

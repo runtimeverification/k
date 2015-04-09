@@ -300,7 +300,7 @@ case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel 
 }
 
 object KSeq extends {
-  val name = "~>";
+  val name = "#KSequence";
   val att = Att()
 } with KAssocAppLabel {
   /* required */

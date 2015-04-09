@@ -149,11 +149,10 @@ class TestRewriting extends AbstractTest {
       r('foo('bar('foo(0)))))
   }
 
-  @Ignore // associative matching seems to currently imply a unit, so this currently give Set('+())
   @Test def testEverywhereRuleAssoc {
     val r = EverywhereRule(X + Y ==> X, True)
 
-    assertEquals(Set(1: K),
+    assertEquals(Set('+()),
       r((1: K) + 2 + 3 + 4))
   }
 
