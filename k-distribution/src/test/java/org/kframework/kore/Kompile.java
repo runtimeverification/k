@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.compile.ModuleTransformation;
 import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Function;
+import static scala.compat.java8.JFunction.*;
 
 public class Kompile {
 
@@ -119,6 +121,7 @@ public class Kompile {
                 })
                 .collect(Collections.toSet());
 
+        // todo: Cosmin: fix as this effectively flattens the module
         Module mainModule = Module(mainModuleName, Set(),
                 (Set<Sentence>) mainModuleWithBubble.sentences().$bar(ruleSet), Att());
 
@@ -129,6 +132,9 @@ public class Kompile {
                         Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY))));
+
+        // example module transformation
+        new ModuleTransformation(func(m -> m));
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
         LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
