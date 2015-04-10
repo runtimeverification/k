@@ -4,8 +4,15 @@ import org.apache.commons.lang3.StringEscapeUtils
 
 trait ModuleToString {
   self: Module =>
-  override def toString = "module " + name + att.postfixString +
-    "\n" + localSentences.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") + "\nendmodule"
+  override def toString = "module " + name + att.postfixString + "\n" +
+    prettyPrintSet(imports map {"imports " + _.name}) +
+    prettyPrintSet(localSentences) +
+    "endmodule"
+
+  def prettyPrintSet(s: Set[_]) = {
+    s.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") +
+      (if (s.size > 0) "\n" else "")
+  }
 }
 
 trait DefinitionToString {
@@ -64,7 +71,7 @@ trait ContextToString {
 
 trait SyntaxPriorityToString {
   self: SyntaxPriority =>
-  override def toString = "syntax priority " + priorities.map { _.mkString(" ") }.mkString(" > ")
+  override def toString = "syntax priority " + priorities.map {_.mkString(" ")}.mkString(" > ")
 }
 
 trait TagToString {
