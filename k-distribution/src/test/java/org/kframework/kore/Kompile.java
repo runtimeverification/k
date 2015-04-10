@@ -103,6 +103,8 @@ public class Kompile {
             return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, "K")._1().right().get()));
         };
 
+        System.out.println(concretized);
+
         return Tuple2.apply(withKSeq, pp);
     }
 

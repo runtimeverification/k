@@ -37,7 +37,7 @@ class Or(val children: Set[K], val att: Att = Att(), normalBy: Option[Theory] = 
   override def normalizeInner(implicit theory: Theory): K =
     this.toDNF match {
       case or: Or =>
-        val newMe = Or(or.children map { _.normalize }, att)
+        val newMe = Or(or.children map {_.normalize}, att)
         if (EqualsMatcher(newMe, this).normalize == True)
           if (or.children.size == 1)
             or.head
@@ -57,7 +57,7 @@ case class OrMatcher(left: Or, right: K) extends Matcher {
     if (left == Or() && right == Or()) // TODO: understand this
       True
     else
-      left map { _.matcher(right) } normalize
+      left map {_.matcher(right)} normalize
   }
 }
 object OrMatcher extends MatcherLabel {
@@ -114,12 +114,12 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
         //    val newChildren = normalizedChildren -- children
 
         val newBindings: Map[KVar, K] = normalizedChildren
-          .collect {case c: Binding => (c.variable, c.value) }
+          .collect { case c: Binding => (c.variable, c.value) }
           .toMap
 
         import org.kframework.tiny.Substitution._
 
-        val childrenWithSubstitution: Stream[K] = normalizedChildren map { _.substitute(newBindings).normalize }
+        val childrenWithSubstitution: Stream[K] = normalizedChildren map {_.substitute(newBindings).normalize}
 
         val madeSubstitutions = childrenWithSubstitution.foldLeft(True: K) {
           case (False, _) => False
@@ -127,9 +127,9 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
           case (sum: And, c) => And(sum.children + c, sum.att)
         }
 
-        val groundChildren = AsAnd(madeSubstitutions).children filter { _.isGround }
+        val groundChildren = AsAnd(madeSubstitutions).children filter {_.isGround}
         val isFalse = (for (c1 <- groundChildren; c2 <- groundChildren) yield (c1, c2))
-          .toStream exists {case (c1, c2) => c1 != c2 }
+          .toStream exists { case (c1, c2) => c1 != c2 }
 
         if (isFalse)
           False
@@ -154,7 +154,9 @@ case class And(children: Set[K], att: Att, normalBy: Option[Theory] = None)
       case None => And(children + b, att)
       case Some(False) => False
       case Some(intersection) => And(
-        children map {case Binding(v, _, _) if v == b.variable => Binding(b.variable, intersection)
+        children map {
+          case Binding(v, _, _) if v == b.variable => Binding(b.variable, intersection)
+          case x => x
         }, att)
     }
   }

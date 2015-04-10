@@ -47,7 +47,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   val indexedRules: Map[String, ParIterable[Rule]] = {
     module.rules
       .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
-      .map {case (k, ruleSet) =>
+      .map { case (k, ruleSet) =>
       (k, ruleSet
         .map(createRule)
         .seq.view.par)
@@ -61,7 +61,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   val indexedExecuteRules: Map[String, ParIterable[Rule]] = {
     module.rules
       .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
-      .map {case (k, ruleSet) =>
+      .map { case (k, ruleSet) =>
       (k, ruleSet
         .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
         .seq.view.par)
@@ -87,7 +87,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   var indexFailures = 0
 
   def executeStep(k: K): Option[K] = {
-    //    println("\n\n MATCHING ON: " + k)
+    println("\n\n MATCHING ON: " + k)
 
     val i = index(k).get
 
@@ -97,19 +97,19 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
     })
 
     val res = prioritized
-      .map {r =>
+      .map { r =>
       totalTriedRules += 1
       val res = r(k).headOption
       res match {
         case Some(res) =>
-          //println(r + "\n" + res);
+          println(r + "\n" + res + "\n");
           Some(res)
         case None => None
       }
     }
-      .find { _.isInstanceOf[Some[_]] }
+      .find {_.isInstanceOf[Some[_]]}
       .getOrElse(None)
-    //    println("RESULT:\n    " + res.mkString("\n    "))
+    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
 
@@ -155,7 +155,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   def search(k: K, pattern: K)(implicit sofar: Set[K] = Set()): Either[Set[K], K] = {
     val newKs = (rewriteStep(k) &~ sofar).toStream
 
-    newKs find { pattern.matcher(_).normalize == True } map { Right(_) } getOrElse {
+    newKs find {pattern.matcher(_).normalize == True} map {Right(_)} getOrElse {
       if (newKs.size == 0)
         Left(Set[K]())
       else {

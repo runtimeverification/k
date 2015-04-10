@@ -11,6 +11,7 @@ module TEST
   import BASIC-K
   import STRICTNESS
   import BOOL
+  import LOGIC
   import INT
   import EMPTY-ID
   import MAP
@@ -53,7 +54,7 @@ module TEST
 
   syntax KResult ::= Bool
   syntax KResult ::= Int
-  syntax Bool ::= "isStmt" "(" K ")"         [klabel(isStmt), function]
+  syntax KBool ::= "isStmt" "(" K ")"                   [klabel(isStmt), function]
 
   rule while(BE) S => if(BE) { S while (BE) S } else {}
 
