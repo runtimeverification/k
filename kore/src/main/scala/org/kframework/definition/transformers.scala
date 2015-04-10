@@ -12,6 +12,10 @@ case class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   }
 }
 
+object DefinitionTransformer {
+  def from(f: java.util.function.UnaryOperator[Module]): DefinitionTransformer = DefinitionTransformer(f(_))
+}
+
 case class DefinitionTransformer(f: Module => Module) extends (Definition => Definition) {
   val moduleTransformer = ModuleTransformer(f)
 

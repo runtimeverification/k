@@ -307,9 +307,6 @@ public class ConcretizeConfiguration {
     }
 
     public Definition concretize(Definition d) {
-        return new Definition(
-                concretize(d.mainModule()),
-                concretize(d.mainSyntaxModule()),
-                Collections.map(d.modules(), this::concretize), d.att());
+        return DefinitionTransformer.from(this::concretize).apply(d);
     }
 }

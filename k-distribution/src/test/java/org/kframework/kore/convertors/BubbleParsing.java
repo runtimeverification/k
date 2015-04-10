@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.kframework.Collections;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.kil.Sources;
 import org.kframework.kore.K;
 import org.kframework.definition.Bubble;
@@ -132,10 +132,6 @@ public class BubbleParsing {
      * Parse bubbles in all modules of d.
      */
     public Definition parseBubbles(Definition d) {
-        return new Definition(
-                parseBubbles(d.mainModule()),
-                parseBubbles(d.mainSyntaxModule()),
-                stream(d.modules()).map(this::parseBubbles).collect(Collections.toSet()),
-                d.att());
+        return DefinitionTransformer.from(this::parseBubbles).apply(d);
     }
 }
