@@ -211,7 +211,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
 
         List<Sentence> sentences = scala.collection.JavaConversions.seqAsJavaList(module
-                .localSentences().toList());
+                .sentences().toList());
         mod = mod.addModuleItems(convertSentences(sentences));
 
         mod.setAttributes(convertAttributes(module.att()));
@@ -412,7 +412,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                if (!key.equals(KLabel("org.kframework.attributes.Location"))) { // ignoring location
+                if (!key.equals(KLabel("Location"))) { // ignoring location
                     // information
                     KList klist = attr.klist();
                     if (klist.size() == 1 && klist.items().get(0) instanceof KToken) {
