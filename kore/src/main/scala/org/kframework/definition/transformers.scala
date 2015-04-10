@@ -9,7 +9,7 @@ object ModuleTransformer {
 }
 
 case class ModuleTransformer(f: Module => Module) extends (Module => Module) {
-  val memoization = collection.mutable.HashMap[Module, Module]()
+  val memoization = collection.concurrent.TrieMap[Module, Module]()
 
   override def apply(input: Module): Module = {
     memoization.getOrElseUpdate(input, f(Module(input.name, input.imports map this, input.localSentences, input.att)))
