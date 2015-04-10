@@ -165,7 +165,7 @@ public class ParserUtils {
             List<File> lookupDirectories) throws IOException {
         Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories);
         Module mainModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
-        Module syntaxModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
+        Module syntaxModule = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst().get();
         return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());
     }
 }

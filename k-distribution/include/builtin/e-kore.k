@@ -127,8 +127,7 @@ module OUTER-KORE
 endmodule
 
 
-module KORE
+module E-KORE
   imports OUTER-KORE
-  imports K
   imports BUBBLE
 endmodule
