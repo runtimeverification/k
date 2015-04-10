@@ -20,11 +20,19 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 //
 //}
 
-case class Definition(modules: Set[Module], att: Att = Att())
+case class Definition(
+  mainModule: Module,
+  mainSyntaxModule: Module,
+  entryModules: Set[Module],
+  att: Att = Att())
   extends DefinitionToString with OuterKORE {
 
-  //  assert(modules.contains(mainModule))
-  //  assert(modules.contains(mainSyntaxModule))
+  private def allModules(m: Module): Set[Module] = m.imports | (m.imports flatMap allModules) + m
+
+  val modules = entryModules flatMap allModules
+
+  assert(modules.contains(mainModule))
+  assert(modules.contains(mainSyntaxModule))
 
   def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
 }
@@ -32,7 +40,7 @@ case class Definition(modules: Set[Module], att: Att = Att())
 case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
 
-  val sentences: Set[Sentence] = localSentences | (imports flatMap { _.sentences })
+  val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
@@ -42,7 +50,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
-  val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
+  val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
@@ -55,7 +63,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
-  val attributesFor: Map[KLabel, Att] = productionsFor mapValues { _.head.att }
+  val attributesFor: Map[KLabel, Att] = productionsFor mapValues {_.head.att}
 
   val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
@@ -69,7 +77,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
 
-  val definedSorts: Set[Sort] = (productions map { _.sort }) ++ (sortDeclarations map { _.sort })
+  val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
 
   val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
 
@@ -80,7 +88,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
       .collect({ case SyntaxPriority(ps, _) => ps })
-      .map {ps: Seq[Set[Tag]] =>
+      .map { ps: Seq[Set[Tag]] =>
       val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
         case ((all, prev), current) =>
           val newPairs = for (a <- prev; b <- current) yield (a, b)
@@ -96,7 +104,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   private def buildAssoc(side: Associativity.Value): Set[(Tag, Tag)] = {
     sentences
       .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
-      .map {ps: Set[Tag] =>
+      .map { ps: Set[Tag] =>
       for (a <- ps; b <- ps) yield (a, b)
     }.flatten
   }
@@ -166,7 +174,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  def klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
+  def klabel: Option[KLabel] = att.get[String]("#klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel

@@ -35,9 +35,9 @@ import org.kframework.parser.outer.Outer;
 /**
  * Takes a KORE module with bubble and returns a new KORE module with all
  * the bubbles parsed.
- *
+ * <p/>
  * Works for KORE bubbles for now.
- *
+ * <p/>
  * TODO: WORK IN PROGRESS
  */
 
@@ -54,8 +54,9 @@ public class BubbleParsing {
 
     /**
      * Cusomize start sort and module within the default kore.k.
+     *
      * @param mainModule Module containing desired start sort
-     * @param startSort Sort to parse bubbles as
+     * @param startSort  Sort to parse bubbles as
      */
     public BubbleParsing(String mainModule, String startSort) {
         this(BubbleParsing.class.getResource("/convertor-tests/kore.k"), mainModule, startSort);
@@ -63,9 +64,10 @@ public class BubbleParsing {
 
     /**
      * Take grammar from a custom file.
+     *
      * @param koreSyntax URL of the file defining the syntax of kore
      * @param mainModule Moudule containing the start sort.
-     * @param startSort Sort to parse the bubble as
+     * @param startSort  Sort to parse the bubble as
      */
     public BubbleParsing(URL koreSyntax, String mainModule, String startSort) {
         org.kframework.kil.Definition kilDefinitionOfKORE = parseUsingOuter(koreSyntax);
@@ -89,7 +91,8 @@ public class BubbleParsing {
         return def;
     }
 
-    /** TODO(radu): generalize this function, and eliminate duplicates
+    /**
+     * TODO(radu): generalize this function, and eliminate duplicates
      * Replaces the bubbles in m with their parsing.
      */
     public Module parseBubbles(Module m) {
@@ -102,7 +105,7 @@ public class BubbleParsing {
                 Parser parser = new Parser(bubble.contents());
                 Term parsed = parser.parse(startNonterminal, 0);
 
-                if(parsed.equals(Ambiguity.apply())) {
+                if (parsed.equals(Ambiguity.apply())) {
                     ParseError errors = parser.getErrors();
                 }
 
@@ -112,10 +115,10 @@ public class BubbleParsing {
                 K kBody = TreeNodesToKORE.apply(cleaned);
 
                 switch (bubble.sentenceType()) {
-                case "rule":
-                    return Rule(kBody, null, null, bubble.att());
-                default:
-                    return bubble;
+                    case "rule":
+                        return Rule(kBody, null, null, bubble.att());
+                    default:
+                        return bubble;
                 }
             } else {
                 return s;
@@ -130,6 +133,8 @@ public class BubbleParsing {
      */
     public Definition parseBubbles(Definition d) {
         return new Definition(
+                parseBubbles(d.mainModule()),
+                parseBubbles(d.mainSyntaxModule()),
                 stream(d.modules()).map(this::parseBubbles).collect(Collections.toSet()),
                 d.att());
     }

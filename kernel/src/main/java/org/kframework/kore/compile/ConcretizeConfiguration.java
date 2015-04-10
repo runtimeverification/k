@@ -31,6 +31,7 @@ import static org.kframework.kore.KORE.*;
 public class ConcretizeConfiguration {
 
     private final ConcretizationInfo cfg;
+
     public ConcretizeConfiguration(ConfigurationInfo configInfo, LabelInfo labelInfo) {
         cfg = new ConcretizationInfo(configInfo, labelInfo);
     }
@@ -38,7 +39,7 @@ public class ConcretizeConfiguration {
     Stream<KApply> streamSideCells(K side) {
         List<K> cells = IncompleteCellUtils.flattenCells(side);
         // TODO error handling
-        return (Stream<KApply>)(Object)cells.stream();
+        return (Stream<KApply>) (Object) cells.stream();
     }
 
     protected final static KApply dots = KApply(KLabel("#dots"));
@@ -164,7 +165,7 @@ public class ConcretizeConfiguration {
         if (k instanceof KApply) {
             return getLevel((KApply) k);
         } else {
-            KRewrite rew = (KRewrite)k;
+            KRewrite rew = (KRewrite) k;
             List<K> cells = IncompleteCellUtils.flattenCells(rew.left());
             cells.addAll(IncompleteCellUtils.flattenCells(rew.right()));
             Optional<Integer> level = Optional.empty();
@@ -306,6 +307,9 @@ public class ConcretizeConfiguration {
     }
 
     public Definition concretize(Definition d) {
-        return new Definition(Collections.map(d.modules(),this::concretize), d.att());
+        return new Definition(
+                concretize(d.mainModule()),
+                concretize(d.mainSyntaxModule()),
+                Collections.map(d.modules(), this::concretize), d.att());
     }
 }

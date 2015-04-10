@@ -55,8 +55,7 @@ public class Kompile {
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY));
 
-        Definition baseK = Definition(immutable(modules));
-        return new RuleGrammarGenerator(baseK);
+        return new RuleGrammarGenerator(modules);
     }
 
     public static org.kframework.tiny.Rewriter getRewriter(Module module) throws IOException, URISyntaxException {
@@ -70,13 +69,12 @@ public class Kompile {
 
 //        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
 
-        java.util.Set<Module> modules =
-                ParserUtils.loadModules(definitionString,
-                        Sources.fromFile(definitionFile),
-                        definitionFile.getParentFile(),
-                        Lists.newArrayList(BUILTIN_DIRECTORY));
-
-        Definition definition = Definition(immutable(modules));
+        Definition definition = ParserUtils.loadDefinition(
+                mainModuleName,
+                mainProgramsModule, definitionString,
+                Sources.fromFile(definitionFile),
+                definitionFile.getParentFile(),
+                Lists.newArrayList(BUILTIN_DIRECTORY));
 
         Module mainModuleWithBubble = stream(definition.modules()).filter(m -> m.name().equals(mainModuleName)).findFirst().get();
 
@@ -134,13 +132,13 @@ public class Kompile {
         Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
         Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
 
-        Definition kastDefintion = Definition(immutable(
-                ParserUtils.loadModules("requires \"kast.k\"",
-                        Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
-                        definitionFile.getParentFile(),
-                        Lists.newArrayList(BUILTIN_DIRECTORY))));
+        Module kseqModule = ParserUtils.loadModules("requires \"kast.k\"",
+                Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
+                definitionFile.getParentFile(),
+                Lists.newArrayList(BUILTIN_DIRECTORY)).stream().filter(m -> m.name().equals("KSEQ")).findFirst().get();
+
         Module withKSeq = Module("EXECUTION",
-                Set(sorted, kastDefintion.getModule("KSEQ").get()),
+                Set(sorted, kseqModule),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();

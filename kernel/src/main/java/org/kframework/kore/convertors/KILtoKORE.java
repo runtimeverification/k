@@ -94,7 +94,10 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // TODO: handle LiterateDefinitionComments
 
-        return Definition(immutable(new HashSet<>(koreModules.values())));
+        return Definition(
+                koreModules.get(mainModule.getName()),
+                koreModules.get(mainModule.getName()),
+                immutable(new HashSet<>(koreModules.values())));
     }
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,

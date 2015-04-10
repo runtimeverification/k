@@ -18,7 +18,9 @@ import scala.Function1;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -33,19 +35,20 @@ import static org.kframework.definition.Constructors.*;
  * Takes as input a reference to a definition containing all the base syntax of K
  * and uses it to generate a grammar by connecting all users sorts in a lattice with
  * the top sort KItem#Top and the bottom sort KItem#Bottom.
- *
+ * <p/>
  * The instances of the non-terminal KItem is renamed in KItem#Top if found in the right
  * hand side of a production, and into KItem#Bottom if found in the left hand side.
  */
 public class RuleGrammarGenerator {
 
-    private final Definition baseK;
+    private final Map<String, Module> baseK;
     private static final Sort KBott = Sort("KBott");
     private static final Sort KTop = Sort("K");
     private static final Sort KLabel = Sort("KLabel");
     private static final Sort KList = Sort("KList");
     private static final Sort KItem = Sort("KItem");
     private static final Set<Sort> kSorts = new HashSet<>();
+
     static {
         kSorts.add(KBott);
         kSorts.add(KTop);
@@ -56,11 +59,12 @@ public class RuleGrammarGenerator {
         kSorts.add(Sort("KVariable"));
     }
 
-    public RuleGrammarGenerator(Definition baseK) {
-        this.baseK = renameKItem2Bottom(baseK);
+    public RuleGrammarGenerator(Set<Module> baseK) {
+        this.baseK = new HashMap<>();
+        renameKItem2Bottom(baseK).stream().forEach(m -> this.baseK.put(m.name(), m));
     }
 
-    private Definition renameKItem2Bottom(Definition def) {
+    private Set<Module> renameKItem2Bottom(Set<Module> def) {
         // TODO: do renaming of KItem and K in the LHS to KBott
         return def;
     }
@@ -78,7 +82,8 @@ public class RuleGrammarGenerator {
      * It creates a module which includes the given module and the base K module given to the
      * constructor. The new module contains syntax declaration for Casts and the diamond
      * which connects the user concrete syntax with K syntax.
-     * @param mod    module for which to create the parser.
+     *
+     * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
     public ParseInModule getCombinedGrammar(Module mod, String cellModule) {
@@ -100,7 +105,7 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KBott, KTop, KItem));
         prods.addAll(makeCasts(KBott, KTop, KTop));
 
-        Module tempWithCasts = new Module(mod.name() + "-TEMPORARY-WITH-CASTS", Set(baseK.getModule(cellModule).get(), baseK.getModule("K").get(), mod), immutable(prods), null);
+        Module tempWithCasts = new Module(mod.name() + "-TEMPORARY-WITH-CASTS", Set(baseK.get(cellModule), baseK.get("K"), mod), immutable(prods), null);
 
         Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
         stream(tempWithCasts.productions()).forEach(p -> stream(p.items()).forEach(i -> {
@@ -123,7 +128,7 @@ public class RuleGrammarGenerator {
                 }
         ).findFirst();
         if (varIdProd.isPresent())
-            varid = ((RegexTerminal)((Production) varIdProd.get()).items().head()).regex();
+            varid = ((RegexTerminal) ((Production) varIdProd.get()).items().head()).regex();
 
         Pattern pattern = Pattern.compile(varid);
         scala.collection.immutable.Set<Sentence> prods2 = stream(tempWithCasts.sentences()).map(s -> {
@@ -185,10 +190,10 @@ public class RuleGrammarGenerator {
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add("sort", castSort.name());
-        prods.add(Production("#SyntacticCast", castSort,  Seq(NonTerminal(castSort),  Terminal("::" + castSort.name())), attrs1));
-        prods.add(Production("#SemanticCast",  castSort,  Seq(NonTerminal(castSort),  Terminal(":"  + castSort.name())), attrs1));
-        prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort),  Terminal("<:" + castSort.name())), attrs1));
-        prods.add(Production("#OuterCast",     castSort,  Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
+        prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.name())), attrs1));
+        prods.add(Production("#SemanticCast", castSort, Seq(NonTerminal(castSort), Terminal(":" + castSort.name())), attrs1));
+        prods.add(Production("#InnerCast", outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));
+        prods.add(Production("#OuterCast", castSort, Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
         return prods;
     }
 

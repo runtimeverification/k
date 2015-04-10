@@ -28,7 +28,6 @@ import static org.kframework.definition.Constructors.*;
 
 public class RuleGrammarTest {
     private File definitionFile = null;
-    private Definition baseK = null;
     private final static String startSymbol = "RuleContent";
     private RuleGrammarGenerator gen;
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
@@ -49,8 +48,7 @@ public class RuleGrammarTest {
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY));
 
-        baseK = Definition(immutable(modules));
-        gen = new RuleGrammarGenerator(baseK);
+        gen = new RuleGrammarGenerator(modules);
     }
 
     private void parseRule(String input, String def, int warnings, boolean expectedError) {

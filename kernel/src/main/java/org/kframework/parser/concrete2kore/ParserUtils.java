@@ -30,6 +30,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+
 /**
  * A few functions that are a common pattern when calling the new parser.
  */
@@ -151,5 +154,18 @@ public class ParserUtils {
         kilModules.stream().forEach(m -> kilToKore.apply(m, kilModulesSet, koreModules));
 
         return new HashSet<>(koreModules.values());
+    }
+
+    public static org.kframework.definition.Definition loadDefinition(
+            String mainModuleName,
+            String syntaxModuleName,
+            String definitionText,
+            Source source,
+            File currentDirectory,
+            List<File> lookupDirectories) throws IOException {
+        Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories);
+        Module mainModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
+        Module syntaxModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
+        return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());
     }
 }
