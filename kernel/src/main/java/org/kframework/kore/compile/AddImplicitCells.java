@@ -83,11 +83,4 @@ public class AddImplicitCells {
             return s;
         }
     }
-
-    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::addImplicitCells);
-
-    public Module addImplicitCells(Module m) {
-        return moduleTransormer.apply(m);
-    }
-
 }

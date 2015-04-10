@@ -43,13 +43,51 @@ import static org.kframework.kore.KORE.*;
 // TODO handle cell rewrites
 public class SortCells {
     private final ConcretizationInfo cfg;
-
     public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
     }
 
+    public synchronized K sortCells(K term) {
+        resetVars();
+        analyzeVars(term);
+        return processVars(term);
+
+    }
+
+    private Rule sortCells(Rule rule) {
+        resetVars();
+        analyzeVars(rule.body());
+        analyzeVars(rule.requires());
+        analyzeVars(rule.ensures());
+        return new Rule(
+                processVars(rule.body()),
+                processVars(rule.requires()),
+                processVars(rule.ensures()),
+                rule.att());
+    }
+
+    private Context sortCells(Context context) {
+        resetVars();
+        analyzeVars(context.body());
+        analyzeVars(context.requires());
+        return new Context(
+                processVars(context.body()),
+                processVars(context.requires()),
+                context.att());
+    }
+
+    public synchronized Sentence sortCells(Sentence s) {
+        if (s instanceof Rule) {
+            return sortCells((Rule) s);
+        } else if (s instanceof Context) {
+            return sortCells((Context) s);
+        } else {
+            return s;
+        }
+    }
+
     // Information on uses of a particular variable
-    static class VarInfo {
+    private static class VarInfo {
         KVariable var;
         KLabel parentCell;
         Set<Sort> remainingCells;
@@ -98,11 +136,11 @@ public class SortCells {
 
     private Map<KVariable, VarInfo> variables = new HashMap<>();
 
-    protected void resetVars() {
+    private void resetVars() {
         variables.clear();
     }
 
-    protected void analyzeVars(K term) {
+    private void analyzeVars(K term) {
         new VisitKORE() {
             @Override
             public Void apply(KApply k) {
@@ -171,51 +209,5 @@ public class SortCells {
                 }
             }
         }.apply(term);
-    }
-
-    public K sortCells(K term) {
-        resetVars();
-        analyzeVars(term);
-        return processVars(term);
-
-    }
-
-
-    public Rule sortCells(Rule rule) {
-        resetVars();
-        analyzeVars(rule.body());
-        analyzeVars(rule.requires());
-        analyzeVars(rule.ensures());
-        return new Rule(
-                processVars(rule.body()),
-                processVars(rule.requires()),
-                processVars(rule.ensures()),
-                rule.att());
-    }
-
-    public Context sortCells(Context context) {
-        resetVars();
-        analyzeVars(context.body());
-        analyzeVars(context.requires());
-        return new Context(
-                processVars(context.body()),
-                processVars(context.requires()),
-                context.att());
-    }
-
-    public Sentence sortCells(Sentence s) {
-        if (s instanceof Rule) {
-            return sortCells((Rule) s);
-        } else if (s instanceof Context) {
-            return sortCells((Context) s);
-        } else {
-            return s;
-        }
-    }
-
-    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::sortCells);
-
-    public Module sortCells(Module m) {
-        return moduleTransormer.apply(m);
     }
 }

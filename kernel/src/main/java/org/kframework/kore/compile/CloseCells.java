@@ -35,13 +35,10 @@ import static org.kframework.kore.KORE.*;
  * expected by {@link SortCells}.
  */
 public class CloseCells {
-    private int counter = 0;
-    private Set<KVariable> vars = Sets.newHashSet();
-    private KRewrite rhsOf = null;
-    private ConcretizationInfo cfg;
-    private SortInfo sortInfo;
-    private LabelInfo labelInfo;
-    final static K dots = KApply(KLabel("#dots"));
+
+    private final ConcretizationInfo cfg;
+    private final SortInfo sortInfo;
+    private final LabelInfo labelInfo;
 
     public CloseCells(ConfigurationInfo cfg, SortInfo sortInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfg, labelInfo);
@@ -49,7 +46,55 @@ public class CloseCells {
         this.labelInfo = labelInfo;
     }
 
-    public KVariable newDotVariable() {
+    public synchronized K close(K term) {
+        resetVars();
+        gatherVars(term);
+        return transform(term);
+    }
+
+    private Rule close(Rule rule) {
+        resetVars();
+        gatherVars(rule.body());
+        gatherVars(rule.requires());
+        gatherVars(rule.ensures());
+        return new Rule(
+                transform(rule.body()),
+                transform(rule.requires()),
+                transform(rule.ensures()),
+                rule.att());
+    }
+
+    private Context close(Context context) {
+        resetVars();
+        gatherVars(context.body());
+        gatherVars(context.requires());
+        return new Context(
+                transform(context.body()),
+                transform(context.requires()),
+                context.att());
+    }
+
+    public synchronized Sentence close(Sentence s) {
+        if (s instanceof Rule) {
+            return close((Rule)s);
+        } else if (s instanceof Context) {
+            return close((Context)s);
+        } else {
+            return s;
+        }
+    }
+
+    private int counter = 0;
+    private Set<KVariable> vars = Sets.newHashSet();
+    private KRewrite rhsOf = null;
+
+    void resetVars() {
+        counter = 0;
+        vars.clear();
+        rhsOf = null;
+    }
+
+    KVariable newDotVariable() {
         KVariable newLabel;
         do {
             newLabel = KVariable("DotVar" + (counter++));
@@ -58,13 +103,7 @@ public class CloseCells {
         return newLabel;
     }
 
-    protected void resetVars() {
-        counter = 0;
-        vars.clear();
-        rhsOf = null;
-    }
-
-    protected void gatherVars(K term) {
+    void gatherVars(K term) {
         new VisitKORE() {
             @Override
             public Void apply(KVariable v) {
@@ -74,7 +113,7 @@ public class CloseCells {
         }.apply(term);
     }
 
-    protected K transform(K term) {
+    K transform(K term) {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
@@ -94,50 +133,6 @@ public class CloseCells {
                 }
             }
         }.apply(term);
-    }
-
-    public K close(K term) {
-        resetVars();
-        gatherVars(term);
-        return transform(term);
-    }
-
-    public Rule close(Rule rule) {
-        resetVars();
-        gatherVars(rule.body());
-        gatherVars(rule.requires());
-        gatherVars(rule.ensures());
-        return new Rule(
-                transform(rule.body()),
-                transform(rule.requires()),
-                transform(rule.ensures()),
-                rule.att());
-    }
-
-    public Context close(Context context) {
-        resetVars();
-        gatherVars(context.body());
-        gatherVars(context.requires());
-        return new Context(
-                transform(context.body()),
-                transform(context.requires()),
-                context.att());
-    }
-
-    public Sentence close(Sentence s) {
-        if (s instanceof Rule) {
-            return close((Rule)s);
-        } else if (s instanceof Context) {
-            return close((Context)s);
-        } else {
-            return s;
-        }
-    }
-
-    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::close);
-
-    public Module close(Module m) {
-        return moduleTransormer.apply(m);
     }
 
     /**

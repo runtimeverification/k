@@ -15,7 +15,7 @@ import java.util.Arrays;
 import static org.kframework.kore.KORE.*;
 import static org.kframework.compile.ConfigurationInfo.Multiplicity.*;
 
-public class CompilerTest {
+public class AddParentsCellsTest {
     final ConfigurationInfo cfgInfo = new TestConfiguration() {{
         addCell(null, "TCell", "<T>");
         addCell("TCell", "TSCell", "<ts>");
@@ -38,7 +38,7 @@ public class CompilerTest {
         addLabel("MsgCell","<msg>");
         addLabel("MsgIdCell","<msgId>");
     }};
-    final ConcretizeConfiguration pass = new ConcretizeConfiguration(cfgInfo, labelInfo);
+    final AddParentCells pass = new AddParentCells(cfgInfo, labelInfo);
 
     @Test
     public void testOneLeafCellNoCompletion() {

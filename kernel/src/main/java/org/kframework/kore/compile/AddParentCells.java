@@ -27,11 +27,11 @@ import static org.kframework.kore.KORE.*;
  * Newly inserted cells have dots if and only if the parent cell they were added under did
  * (dots are elimiinated in the {@link CloseCells} pass).
  */
-public class ConcretizeConfiguration {
+public class AddParentCells {
 
     private final ConcretizationInfo cfg;
 
-    public ConcretizeConfiguration(ConfigurationInfo configInfo, LabelInfo labelInfo) {
+    public AddParentCells(ConfigurationInfo configInfo, LabelInfo labelInfo) {
         cfg = new ConcretizationInfo(configInfo, labelInfo);
     }
 
@@ -39,16 +39,6 @@ public class ConcretizeConfiguration {
         List<K> cells = IncompleteCellUtils.flattenCells(side);
         // TODO error handling
         return (Stream<KApply>) (Object) cells.stream();
-    }
-
-    protected final static KApply dots = KApply(KLabel("#dots"));
-
-    KApply makeCell(KLabel label, boolean ellipses, K item) {
-        return IncompleteCellUtils.make(label, ellipses, item, ellipses);
-    }
-
-    KApply makeCell(KLabel label, boolean ellipses, List<? extends K> children) {
-        return IncompleteCellUtils.make(label, ellipses, children, ellipses);
     }
 
     protected List<KApply> makeParents(KLabel parent, boolean ellipses,
@@ -89,7 +79,7 @@ public class ConcretizeConfiguration {
             allFitTogether = leftFit && rightFit;
         }
         if (allFitTogether) {
-            return Lists.newArrayList(makeCell(parent, ellipses, allChildren));
+            return Lists.newArrayList(IncompleteCellUtils.make(parent, ellipses, allChildren, ellipses));
         }
 
         // Otherwise, see if they are forced to have separate parents...
@@ -139,7 +129,9 @@ public class ConcretizeConfiguration {
             }
         }
         if (forcedSeparate) {
-            return allChildren.stream().map(k -> makeCell(parent, ellipses, k)).collect(Collectors.toList());
+            return allChildren.stream()
+                    .map(k -> IncompleteCellUtils.make(parent, ellipses, k, ellipses))
+                    .collect(Collectors.toList());
         }
 
         // They were also not forced to be separate
@@ -259,7 +251,7 @@ public class ConcretizeConfiguration {
                 }
             }
             otherChildren.addAll(levels.removeAll(levelMap.lastKey()));
-            return makeCell(target, ellipses, otherChildren);
+            return IncompleteCellUtils.make(target, ellipses, otherChildren, ellipses);
         }
     }
 
@@ -295,11 +287,4 @@ public class ConcretizeConfiguration {
             return m;
         }
     }
-
-    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::concretize);
-
-    public Module concretize(Module m) {
-        return moduleTransormer.apply(m);
-    }
-
 }

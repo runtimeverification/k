@@ -85,10 +85,7 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
         SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
 
-        Module withTopCells = new AddImplicitCells(configInfo, labelInfo).addImplicitCells(afterHeatingCooling);
-        Module concretized = new ConcretizeConfiguration(configInfo, labelInfo).concretize(withTopCells);
-        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
-        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
+        Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo).concretize(afterHeatingCooling);
 
         Module kseqModule = ParserUtils.loadModules("requires \"kast.k\"",
                 Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
@@ -96,7 +93,7 @@ public class Kompile {
                 Lists.newArrayList(BUILTIN_DIRECTORY)).stream().filter(m -> m.name().equals("KSEQ")).findFirst().get();
 
         Module withKSeq = Module("EXECUTION",
-                Set(sorted, kseqModule),
+                Set(concretized, kseqModule),
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();
