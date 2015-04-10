@@ -6,9 +6,10 @@ import org.kframework.definition
 
 object ModuleTransformer {
   def from(f: java.util.function.UnaryOperator[Module]): ModuleTransformer = ModuleTransformer(f(_))
+  def apply(f: Module => Module): ModuleTransformer = new ModuleTransformer(f)
 }
 
-case class ModuleTransformer(f: Module => Module) extends (Module => Module) {
+class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
 
   override def apply(input: Module): Module = {
@@ -18,11 +19,10 @@ case class ModuleTransformer(f: Module => Module) extends (Module => Module) {
 
 object DefinitionTransformer {
   def from(f: java.util.function.UnaryOperator[Module]): DefinitionTransformer = DefinitionTransformer(f(_))
+  def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(ModuleTransformer(f))
 }
 
-case class DefinitionTransformer(f: Module => Module) extends (Definition => Definition) {
-  val moduleTransformer = ModuleTransformer(f)
-
+class DefinitionTransformer(moduleTransformer: ModuleTransformer) extends (Definition => Definition) {
   override def apply(d: Definition): Definition = {
     definition.Definition(
       moduleTransformer(d.mainModule),

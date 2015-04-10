@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
-import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
@@ -12,12 +11,8 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KRewrite;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static org.kframework.kore.KORE.*;
 
 /**
  * Wrap a top cell around rules without an explicit top cell,
