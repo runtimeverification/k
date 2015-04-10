@@ -13,6 +13,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KApply;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * Wrap a top cell around rules without an explicit top cell,
@@ -83,9 +84,10 @@ public class AddImplicitCells {
         }
     }
 
-    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::addImplicitCells);
+    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::addImplicitCells);
 
     public Module addImplicitCells(Module m) {
         return moduleTransormer.apply(m);
     }
+
 }

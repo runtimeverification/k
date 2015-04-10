@@ -296,13 +296,10 @@ public class ConcretizeConfiguration {
         }
     }
 
-    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::concretize);
+    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::concretize);
 
     public Module concretize(Module m) {
         return moduleTransormer.apply(m);
     }
 
-    public Definition concretize(Definition d) {
-        return new DefinitionTransformer(moduleTransormer).apply(d);
-    }
 }

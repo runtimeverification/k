@@ -134,7 +134,7 @@ public class CloseCells {
         }
     }
 
-    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::close);
+    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::close);
 
     public Module close(Module m) {
         return moduleTransormer.apply(m);

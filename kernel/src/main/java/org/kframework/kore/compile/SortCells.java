@@ -213,7 +213,7 @@ public class SortCells {
         }
     }
 
-    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::sortCells);
+    ModuleTransformer moduleTransormer = ModuleTransformer.fromSentenceTransformer(this::sortCells);
 
     public Module sortCells(Module m) {
         return moduleTransormer.apply(m);

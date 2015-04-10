@@ -6,6 +6,9 @@ import org.kframework.definition
 
 object ModuleTransformer {
   def from(f: java.util.function.UnaryOperator[Module]): ModuleTransformer = ModuleTransformer(f(_))
+  def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence]): ModuleTransformer =
+    ModuleTransformer(m => Module(m.name, m.imports, m.localSentences map {f(_)}))
+
   def apply(f: Module => Module): ModuleTransformer = new ModuleTransformer(f)
 }
 

@@ -77,6 +77,39 @@ public class Kompile {
 
         Module mainModuleWithBubble = stream(definition.modules()).filter(m -> m.name().equals(mainModuleName)).findFirst().get();
 
+        Module mainModule = resolveBubbles(mainModuleWithBubble);
+
+        Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
+
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
+        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
+        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
+
+        Module withTopCells = new AddImplicitCells(configInfo, labelInfo).addImplicitCells(afterHeatingCooling);
+        Module concretized = new ConcretizeConfiguration(configInfo, labelInfo).concretize(withTopCells);
+        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
+        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
+
+        Module kseqModule = ParserUtils.loadModules("requires \"kast.k\"",
+                Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
+                definitionFile.getParentFile(),
+                Lists.newArrayList(BUILTIN_DIRECTORY)).stream().filter(m -> m.name().equals("KSEQ")).findFirst().get();
+
+        Module withKSeq = Module("EXECUTION",
+                Set(sorted, kseqModule),
+                Collections.<Sentence>Set(), Att());
+
+        Module moduleForPrograms = definition.getModule(mainProgramsModule).get();
+        ParseInModule parseInModule = RuleGrammarGenerator.getProgramsGrammar(moduleForPrograms);
+
+        final Function<String, K> pp = s -> {
+            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, "K")._1().right().get()));
+        };
+
+        return Tuple2.apply(withKSeq, pp);
+    }
+
+    private static Module resolveBubbles(Module mainModuleWithBubble) throws IOException, URISyntaxException {
         RuleGrammarGenerator gen = makeRuleGrammarGenerator();
         ParseInModule ruleParser = gen.getRuleGrammar(mainModuleWithBubble);
 
@@ -117,36 +150,7 @@ public class Kompile {
                 .collect(Collections.toSet());
 
         // todo: Cosmin: fix as this effectively flattens the module
-        Module mainModule = Module(mainModuleName, Set(),
+        return Module(mainModuleWithBubble.name(), Set(),
                 (Set<Sentence>) mainModuleWithBubble.sentences().$bar(ruleSet), Att());
-
-        Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
-
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterHeatingCooling);
-        LabelInfo labelInfo = new LabelInfoFromModule(afterHeatingCooling);
-        SortInfo sortInfo = SortInfo.fromModule(afterHeatingCooling);
-
-        Module withTopCells = new AddImplicitCells(configInfo, labelInfo).addImplicitCells(afterHeatingCooling);
-        Module concretized = new ConcretizeConfiguration(configInfo, labelInfo).concretize(withTopCells);
-        Module closed = new CloseCells(configInfo, sortInfo, labelInfo).close(concretized);
-        Module sorted = new SortCells(configInfo, labelInfo).sortCells(closed);
-
-        Module kseqModule = ParserUtils.loadModules("requires \"kast.k\"",
-                Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
-                definitionFile.getParentFile(),
-                Lists.newArrayList(BUILTIN_DIRECTORY)).stream().filter(m -> m.name().equals("KSEQ")).findFirst().get();
-
-        Module withKSeq = Module("EXECUTION",
-                Set(sorted, kseqModule),
-                Collections.<Sentence>Set(), Att());
-
-        Module moduleForPrograms = definition.getModule(mainProgramsModule).get();
-        ParseInModule parseInModule = RuleGrammarGenerator.getProgramsGrammar(moduleForPrograms);
-
-        final Function<String, K> pp = s -> {
-            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, "K")._1().right().get()));
-        };
-
-        return Tuple2.apply(withKSeq, pp);
     }
 }
