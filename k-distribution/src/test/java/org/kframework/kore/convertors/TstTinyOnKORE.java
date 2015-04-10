@@ -2,6 +2,7 @@
 
 package org.kframework.kore.convertors;
 
+import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.kore.Kompile;
@@ -48,6 +49,8 @@ public class TstTinyOnKORE {
         System.out.println("time = " + (System.nanoTime() - l) / 1000000);
 
         System.out.println("result = " + result.toString());
+
+        Assert.assertEquals("<top>(<k>(#KSequence()),<state>(_Map_(Tuple2(n:Id,-1),Tuple2(s:Id,55))))", result.toString());
     }
 
 }
