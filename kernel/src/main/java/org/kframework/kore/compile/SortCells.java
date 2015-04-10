@@ -7,6 +7,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
@@ -20,20 +21,20 @@ import static org.kframework.kore.KORE.*;
  * Arrange cell contents and variables to match the klabels declared for cells.
  * In Full K, cell contents can be written in any order, and variables can
  * be written that match multiple cells.
- *
+ * <p/>
  * In the input to this pass, parent cells are represented by appling the label directly
  * to a klist of all the children, variables, and rewrites under the cell.
  * Left cells should already be in their final form.
  * In the output each cell will be represented by using the cell labels in agreement
  * with the production declaring it, so parent cells will have a fixed arity with separate
  * argument positions reserved for different types of child cell.
- *
+ * <p/>
  * The most complicated part of the transformation is dealing with variables
  * in cells. An occurrence in a cell that might match child cells of different
  * sorts has to be split into several variables in different arguments, and any
  * occurrence of the variable outside of a cell replaced by a suitable
  * expression involving the split variables.
- *
+ * <p/>
  * This is currently not implemented in general, just the analysis to identify
  * the simple cases where there is in fact only one or zero (types of) cells
  * that a variable can bind, so it can be handled by either doing nothing,
@@ -59,7 +60,7 @@ public class SortCells {
                 parentCell = cell;
             } else if (!parentCell.equals(cell)) {
                 throw new IllegalArgumentException("Cell variable used under two cells, "
-                        +parentCell+" and "+cell);
+                        + parentCell + " and " + cell);
             }
             if (remainingCells == null) {
                 remainingCells = new HashSet<>(cfg.getChildren(cell));
@@ -102,7 +103,7 @@ public class SortCells {
     }
 
     protected void analyzeVars(K term) {
-        new VisitKORE(){
+        new VisitKORE() {
             @Override
             public Void apply(KApply k) {
                 if (cfg.isParentCell(k.klabel())) {
@@ -113,10 +114,10 @@ public class SortCells {
                             if (var != null) {
                                 throw new UnsupportedOperationException(
                                         "AC matching of multiple cell variables not yet supported. "
-                                                +"encountered variables "+var.toString()+" and "
-                                                +item.toString()+" in cell "+k);
+                                                + "encountered variables " + var.toString() + " and "
+                                                + item.toString() + " in cell " + k);
                             } else {
-                                var = (KVariable)item;
+                                var = (KVariable) item;
                             }
                         } else {
                             items.add(item);
@@ -124,7 +125,7 @@ public class SortCells {
                     }
                     if (var != null) {
                         if (!variables.containsKey(var)) {
-                            variables.put(var,new VarInfo());
+                            variables.put(var, new VarInfo());
                         }
                         variables.get(var).addOccurances(cfg, k.klabel(), var, items);
                     }
@@ -135,7 +136,7 @@ public class SortCells {
     }
 
     private K processVars(K term) {
-        return new TransformKORE(){
+        return new TransformKORE() {
             @Override
             public K apply(KApply k) {
                 if (!cfg.isParentCell(k.klabel())) {
@@ -146,11 +147,11 @@ public class SortCells {
                     for (K item : k.klist().items()) {
                         if (item instanceof KVariable) {
                             VarInfo info = variables.get(item);
-                            Map<Sort, K> split = info.getSplit((KVariable)item);
-                            for (Map.Entry<Sort,K> e : split.entrySet()) {
+                            Map<Sort, K> split = info.getSplit((KVariable) item);
+                            for (Map.Entry<Sort, K> e : split.entrySet()) {
                                 ordered.set(order.indexOf(e.getKey()), e.getValue());
                             }
-                        } else if (item instanceof KApply){
+                        } else if (item instanceof KApply) {
                             ordered.set(order.indexOf(cfg.getCellSort(((KApply) item).klabel())), apply(item));
                         } else {
                             assert false;
@@ -159,6 +160,7 @@ public class SortCells {
                     return KApply(k.klabel(), KList(ordered), k.att());
                 }
             }
+
             @Override
             public K apply(KVariable v) {
                 VarInfo info = variables.get(v);
@@ -205,16 +207,15 @@ public class SortCells {
         if (s instanceof Rule) {
             return sortCells((Rule) s);
         } else if (s instanceof Context) {
-            return sortCells((Context)s);
+            return sortCells((Context) s);
         } else {
             return s;
         }
     }
 
+    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::sortCells);
+
     public Module sortCells(Module m) {
-        return new Module(m.name(),
-                m.imports(),
-                org.kframework.Collections.map(m.localSentences(), this::sortCells),
-                m.att());
+        return moduleTransormer.apply(m);
     }
 }

@@ -6,6 +6,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -45,7 +46,7 @@ public class AddImplicitCells {
             return term;
         }
         K item = items.get(0);
-        if (item instanceof KApply && cfg.isCell(labelInfo.getCodomain(((KApply)item).klabel()))) {
+        if (item instanceof KApply && cfg.isCell(labelInfo.getCodomain(((KApply) item).klabel()))) {
             return term;
         } else {
             return IncompleteCellUtils.make(computation, false, item, true);
@@ -79,19 +80,17 @@ public class AddImplicitCells {
 
     public Sentence addImplicitCells(Sentence s) {
         if (s instanceof Rule) {
-            return addImplicitCells((Rule)s);
+            return addImplicitCells((Rule) s);
         } else if (s instanceof Context) {
-            return addImplicitCells((Context)s);
+            return addImplicitCells((Context) s);
         } else {
             return s;
         }
     }
 
+    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::addImplicitCells);
+
     public Module addImplicitCells(Module m) {
-        return new Module(
-                m.name(),
-                m.imports(),
-                Collections.map(m.localSentences(), this::addImplicitCells),
-                m.att());
+        return moduleTransormer.apply(m);
     }
 }

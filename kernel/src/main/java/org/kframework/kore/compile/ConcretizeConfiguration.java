@@ -297,13 +297,10 @@ public class ConcretizeConfiguration {
         }
     }
 
+    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::concretize);
+
     public Module concretize(Module m) {
-        return new Module(
-                m.name(),
-                m.imports(),
-                Collections.map(m.localSentences(), this::concretize),
-                m.att()
-        );
+        return moduleTransormer.apply(m);
     }
 
     public Definition concretize(Definition d) {

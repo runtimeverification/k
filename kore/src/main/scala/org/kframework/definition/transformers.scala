@@ -4,6 +4,10 @@ package org.kframework.definition
 
 import org.kframework.definition
 
+object ModuleTransformer {
+  def from(f: java.util.function.UnaryOperator[Module]): ModuleTransformer = ModuleTransformer(f(_))
+}
+
 case class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   val memoization = collection.mutable.HashMap[Module, Module]()
 

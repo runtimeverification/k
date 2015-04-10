@@ -7,6 +7,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -134,11 +135,10 @@ public class CloseCells {
         }
     }
 
+    ModuleTransformer moduleTransormer = ModuleTransformer.from(this::close);
+
     public Module close(Module m) {
-        return new Module(m.name(),
-                m.imports(),
-                Collections.map(m.localSentences(), this::close),
-                m.att());
+        return moduleTransormer.apply(m);
     }
 
     /**
