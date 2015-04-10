@@ -4,22 +4,26 @@ package org.kframework.kore.compile;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
-import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 
 import java.util.List;
-import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
- * Wrap a top cell around rules without an explicit top cell,
- * and wrap a k cell around a top-level rewrite
+ * This pass adds the implicit top and k cells to
+ * the bodies of rules and contexts.
+ * A K cell is added only if the body is a single item,
+ * which is not already a cell or a rewrite on cells.
+ * The top cell is added unless the body is already an
+ * instance of the top cell.
+ * Rules with the anywhere attribute are not modified.
  */
-// TODO anywhere rules and rules defining functions shouldn't be wrapped
+// TODO: rules defining functions shouldn't be wrapped
 public class AddImplicitCells {
 
     private final ConfigurationInfo cfg;
@@ -34,19 +38,30 @@ public class AddImplicitCells {
         return addRootCell(addComputationCells(term));
     }
 
-    protected K addComputationCells(K term) {
-        KLabel computation = cfg.getCellLabel(cfg.getComputationCell());
+    protected boolean isCell(K k) {
+        return k instanceof KApply
+          && cfg.isCell(labelInfo.getCodomain(((KApply) k).klabel()));
+    }
 
+    protected K addComputationCells(K term) {
         List<K> items = IncompleteCellUtils.flattenCells(term);
         if (items.size() != 1) {
             return term;
         }
         K item = items.get(0);
-        if (item instanceof KApply && cfg.isCell(labelInfo.getCodomain(((KApply) item).klabel()))) {
+        if (isCell(item)) {
             return term;
-        } else {
-            return IncompleteCellUtils.make(computation, false, item, true);
+        } else if (item instanceof KRewrite) {
+            final KRewrite rew = (KRewrite) item;
+            if (Stream.concat(
+                    IncompleteCellUtils.flattenCells(rew.left()).stream(),
+                    IncompleteCellUtils.flattenCells(rew.right()).stream())
+                    .anyMatch(this::isCell)) {
+                return term;
+            }
         }
+        KLabel computation = cfg.getCellLabel(cfg.getComputationCell());
+        return IncompleteCellUtils.make(computation, false, item, true);
     }
 
     protected K addRootCell(K term) {
@@ -60,6 +75,9 @@ public class AddImplicitCells {
     }
 
     public Rule addImplicitCells(Rule rule) {
+        if (rule.att().contains("anywhere")) {
+            return rule;
+        }
         return new Rule(
                 addImplicitCells(rule.body()),
                 rule.requires(),

@@ -12,6 +12,9 @@ object ModuleTransformer {
   def apply(f: Module => Module): ModuleTransformer = new ModuleTransformer(f)
 }
 
+/**
+ * Transform all modules, transforming each module after its imports.
+ */
 class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
 
