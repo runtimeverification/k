@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.compile.ModuleTransformation;
 import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;

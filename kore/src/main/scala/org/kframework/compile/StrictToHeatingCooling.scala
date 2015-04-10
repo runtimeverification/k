@@ -1,18 +1,9 @@
 package org.kframework.compile
 
 import org.kframework.definition._
-import org.kframework.kore.K
 import org.kframework.kore.KORE._
 
-class ModuleTransformation(f: Module => Module) extends (Module => Module) {
-  val memoization = collection.mutable.HashMap[Module, Module]()
-
-  override def apply(input: Module): Module = {
-    memoization.getOrElseUpdate(input, f(Module(input.name, input.imports map this, input.localSentences, input.att)))
-  }
-}
-
-object StrictToHeatingCooling extends ModuleTransformation({m: Module =>
+object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
   val True = KLabel("_andBool_")()
   val False = KLabel("_orBool_")()
   val hole = KLabel("[]")()
