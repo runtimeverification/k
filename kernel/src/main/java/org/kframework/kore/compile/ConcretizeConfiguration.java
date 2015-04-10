@@ -303,6 +303,6 @@ public class ConcretizeConfiguration {
     }
 
     public Definition concretize(Definition d) {
-        return DefinitionTransformer.from(this::concretize).apply(d);
+        return new DefinitionTransformer(moduleTransormer).apply(d);
     }
 }
