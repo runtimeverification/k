@@ -64,7 +64,8 @@ module TEST
   rule <k> `X => I::Int` ...</k> <state> X |-> I ...</state> requires isId(X)
   rule <k> X = I; => .::K ...</k> <state> X |-> `_ => I` ...</state> requires isId(X) andBool isInt(I)
 
-  rule A <= B => A <=Int B requires isInt(A) andBool isInt(B)
+  rule A <= B => true requires isInt(A) andBool isInt(B) andBool A <=Int B
+  rule A <= B => false requires isInt(A) andBool isInt(B) andBool notBool(A <=Int B)
   rule A + B => A +Int B requires isInt(A) andBool isInt(B)
 
   rule if(true) S1 else S2 => S1

@@ -87,7 +87,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   var indexFailures = 0
 
   def executeStep(k: K): Option[K] = {
-    println("\n\n MATCHING ON: " + k)
+//    println("\n\n MATCHING ON: " + k)
 
     val i = index(k).get
 
@@ -102,14 +102,14 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
       val res = r(k).headOption
       res match {
         case Some(res) =>
-          println(r + "\n" + res + "\n");
+//          println(r + "\n" + res + "\n");
           Some(res)
         case None => None
       }
     }
       .find {_.isInstanceOf[Some[_]]}
       .getOrElse(None)
-    println("RESULT:\n    " + res.mkString("\n    "))
+//    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
 

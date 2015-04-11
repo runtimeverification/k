@@ -77,9 +77,9 @@ class Constructors(val module: definition.Module) extends kore.Constructors[K] w
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
-      case Sorts.Bool => s match {
-        case "true" => And()
-        case "false" => Or()
+      case Sorts.KBool => s match {
+        case "KTrue" => And()
+        case "KFalse" => Or()
       }
       case _ => RegularKTok(sort, s)
     }

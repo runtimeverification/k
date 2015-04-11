@@ -25,11 +25,11 @@ module LOGIC
   syntax KBool ::= KBool "andBool" KBool    [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
 
   syntax priority 'notBool_ > '_andBool_
-end
+endmodule
 
 module INT
-  imports LOGIC
   imports K
+  imports LOGIC
 
   syntax Int ::= r"[\\+-]?\\d+"     [prefer, token]
 

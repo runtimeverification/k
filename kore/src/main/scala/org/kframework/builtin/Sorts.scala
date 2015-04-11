@@ -8,7 +8,10 @@ import org.kframework.kore.KORE.Sort
 object Sorts {
   val KString = Sort("KString")
   val String = Sort("String")
+
+  val KBool = Sort("KBool")
   val Bool = Sort("Bool")
+
   val Int = Sort("Int")
 
   val K = Sort("K")
