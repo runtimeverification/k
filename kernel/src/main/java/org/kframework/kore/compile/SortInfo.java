@@ -12,6 +12,9 @@ import static org.kframework.kore.KORE.*;
 
 import java.util.Map;
 
+/**
+ * Information about sorts which is used in cell completion
+ */
 public class SortInfo {
     private final Map<Sort, KLabel> closeOperators = Maps.newHashMap();
 
@@ -22,10 +25,18 @@ public class SortInfo {
     public SortInfo() {
     }
 
+    /**
+     * If s is the sort of the contents of a leaf cell, this returns the label to be used as
+     * the union/append operator when turning dots into an explicit variable
+     */
     public KLabel getCloseOperator(Sort s) {
         return closeOperators.get(s);
     }
 
+    /**
+     * Gather sort information from a module.
+     * Populates the close operators only for sorts which only have a single associative production.
+     */
     public static SortInfo fromModule(Module module) {
         Multimap<Sort, KLabel> joinOps = HashMultimap.create();
         Collections.stream(module.productionsFor()).forEach(x -> {
