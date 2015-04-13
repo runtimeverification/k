@@ -5,6 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Location;
 import org.kframework.kil.Source;
+import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -12,6 +13,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.inject.RequestScoped;
 
 import com.google.inject.Inject;
+
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +43,7 @@ public class KExceptionManager {
                 }
                 exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                         "Uncaught exception thrown of type " + e.getClass().getSimpleName()
-                        + ".\nPlease file a bug report at https://github.com/kframework/k/issues", e));
+                                + ".\nPlease file a bug report at https://github.com/kframework/k/issues", e));
                 print();
             }
         });
@@ -57,6 +59,12 @@ public class KExceptionManager {
 
     public static KEMException criticalError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, null, null);
+    }
+
+    public static KEMException criticalErrorForK(String message, K k) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null,
+                k.att().<Location>getOptional("Location").orElseGet(null),
+                k.att().<Source>getOptional("Source").orElseGet(null));
     }
 
     public static KEMException criticalError(String message, ASTNode node) {
@@ -193,12 +201,12 @@ public class KExceptionManager {
     }
 
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
-            AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
+                                       AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
     }
 
     private void register(ExceptionType type, KExceptionGroup group, String message,
-            AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
+                          AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
         registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
     }
 
@@ -210,7 +218,7 @@ public class KExceptionManager {
     private void registerInternal(KException exception) {
         if (!options.warnings.includesExceptionType(exception.type))
             return;
-        synchronized(exceptions) {
+        synchronized (exceptions) {
             exceptions.add(exception);
             if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
                 throw new KEMException(exception);
@@ -219,7 +227,7 @@ public class KExceptionManager {
     }
 
     public void print() {
-        synchronized(exceptions) {
+        synchronized (exceptions) {
             Collections.sort(exceptions, new Comparator<KException>() {
                 @Override
                 public int compare(KException arg0, KException arg1) {
@@ -240,10 +248,12 @@ public class KExceptionManager {
 
     /**
      * Thrown to indicate that the K Exception manager has terminated the application due to an error.
+     *
      * @author dwightguth
      */
     public static class KEMException extends RuntimeException {
         public final KException exception;
+
         KEMException(KException e) {
             super(e.toString(), e.getException());
             this.exception = e;
@@ -255,7 +265,7 @@ public class KExceptionManager {
         }
 
         public void register(KExceptionManager kem) {
-            synchronized(kem.getExceptions()) {
+            synchronized (kem.getExceptions()) {
                 kem.getExceptions().add(exception);
             }
         }

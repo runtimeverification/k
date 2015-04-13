@@ -17,6 +17,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.*;
 import org.kframework.kore.*;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import static org.kframework.kore.KORE.*;
 
@@ -135,7 +136,7 @@ public class AddParentCells {
         }
 
         // They were also not forced to be separate
-        throw new IllegalArgumentException("Ambiguous completion");
+        throw KExceptionManager.criticalError("Ambiguous completion");
     }
 
     boolean isCompletionItem(K k) {
@@ -186,7 +187,7 @@ public class AddParentCells {
                 Optional<KLabel> parent = getParent(items.get(0));
                 for (K item : items) {
                     if (!parent.equals(getParent(item))) {
-                        throw new AssertionError("Can't mix cells with different parents levels under a rewrite");
+                        throw KExceptionManager.criticalError("Can't mix cells with different parents levels under a rewrite");
                     }
                 }
                 return parent;
@@ -205,7 +206,7 @@ public class AddParentCells {
             if (leftParent.equals(rightParent)) {
                 return leftParent;
             } else {
-                throw new AssertionError("All cells on the left and right of a rewrite must have the same parent: " + k);
+                throw KExceptionManager.criticalError("All cells on the left and right of a rewrite must have the same parent: " + k);
             }
         }
     }

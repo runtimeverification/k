@@ -16,6 +16,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -168,7 +169,7 @@ public class CloseCells {
                 if (required.isEmpty()) {
                     return KApply(label, KList(contents));
                 } else {
-                    throw new IllegalArgumentException("Closed parent cell missing " +
+                    throw KExceptionManager.criticalError("Closed parent cell missing " +
                             "required children " + required.toString() + " " + cell.toString());
                 }
             }
@@ -192,7 +193,7 @@ public class CloseCells {
 
         // Is a leaf cell
         if (contents.size() != 1) {
-            throw new IllegalArgumentException("Leaf cells should contain exactly 1 body term,"
+            throw KExceptionManager.criticalError("Leaf cells should contain exactly 1 body term,"
                     + " but there are " + contents.size() + " in " + cell.toString());
         }
 
@@ -200,7 +201,7 @@ public class CloseCells {
             return KApply(label, KList(contents.get(0)));
         }
         if (rhsOf != null) {
-            throw new IllegalArgumentException("Leaf cells on right hand side of a rewrite" +
+            throw KExceptionManager.criticalError("Leaf cells on right hand side of a rewrite" +
                     " may not be open, but " + cell.toString() + " is right of " + rhsOf.toString());
         }
 
@@ -230,12 +231,12 @@ public class CloseCells {
         } else {
             KLabel closeOperator = sortInfo.getCloseOperator(cellType);
             if (closeOperator == null) {
-                throw new IllegalArgumentException("No operator registered for closing cells of sort "
+                throw KExceptionManager.criticalError("No operator registered for closing cells of sort "
                         + cellType.name() + " when closing cell " + cell.toString());
             }
             LabelInfo.AssocInfo info = labelInfo.getAssocInfo(closeOperator);
             if (!info.isAssoc() && openLeft && openRight) {
-                throw new IllegalArgumentException(
+                throw KExceptionManager.criticalError(
                         "Ambiguity closing a cell. Operator " + closeOperator.toString()
                                 + " for sort " + cellType.name() + " is not associative, "
                                 + "but the cell has ellipses on both sides " + cell.toString());

@@ -11,6 +11,7 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.*;
 import java.util.Collections;
@@ -97,7 +98,7 @@ public class SortCells {
             if (parentCell == null) {
                 parentCell = cell;
             } else if (!parentCell.equals(cell)) {
-                throw new IllegalArgumentException("Cell variable used under two cells, "
+                throw KExceptionManager.criticalError("Cell variable used under two cells, "
                         + parentCell + " and " + cell);
             }
             if (remainingCells == null) {
@@ -150,7 +151,7 @@ public class SortCells {
                     for (K item : k.klist().items()) {
                         if (item instanceof KVariable) {
                             if (var != null) {
-                                throw new UnsupportedOperationException(
+                                throw KExceptionManager.criticalError(
                                         "AC matching of multiple cell variables not yet supported. "
                                                 + "encountered variables " + var.toString() + " and "
                                                 + item.toString() + " in cell " + k);

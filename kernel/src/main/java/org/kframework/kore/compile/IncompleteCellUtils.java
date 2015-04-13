@@ -4,6 +4,7 @@ package org.kframework.kore.compile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class IncompleteCellUtils {
         } else if (noDots.equals(flag)) {
             return false;
         } else {
-            throw new IllegalArgumentException("Instead of #dots() or #noDots(), got "+flag);
+            throw KExceptionManager.criticalError("Instead of #dots() or #noDots(), got " + flag);
         }
     }
 
