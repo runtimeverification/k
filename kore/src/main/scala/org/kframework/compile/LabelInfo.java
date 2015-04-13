@@ -39,13 +39,20 @@ public class LabelInfo {
         }
     }
 
-    public LabelInfo() {}
+    public LabelInfo() {
+    }
 
+    /**
+     * Get the sort for the KLabel. Could be moved to module eventually.
+     */
     public Sort getCodomain(KLabel l) {
         Collection<Sort> sorts = codomain.get(l);
         return Iterables.getOnlyElement(sorts, null);
     }
 
+    /**
+     * Get the AC status of the KLabel. Could be moved to module eventually.
+     */
     public AssocInfo getAssocInfo(KLabel l) {
         return assocInfo.get(l);
     }
