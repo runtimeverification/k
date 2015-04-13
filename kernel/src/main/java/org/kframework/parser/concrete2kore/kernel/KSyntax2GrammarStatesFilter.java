@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 import static org.kframework.Collections.iterable;
 import static org.kframework.Collections.stream;
@@ -48,8 +47,8 @@ public class KSyntax2GrammarStatesFilter {
         }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        String rejectPattern = mkString(rejects, p -> "(" + Pattern.quote(p) + ")", "|");
-        stream(module.productions()).forEach(p -> processProduction(p, grammar, rejectPattern, rejects));
+        String rejectPattern = mkString(rejects, p -> "(" + p + ")", "|");
+        stream(module.productions()).forEach(p -> processProduction(p, grammar, rejectPattern));
 
         grammar.addWhiteSpace();
         grammar.compile();
@@ -72,7 +71,7 @@ public class KSyntax2GrammarStatesFilter {
             String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
-                    pattern = ((Terminal) prdItem).value();
+                    pattern = Pattern.quote(((Terminal) prdItem).value());
                     rejects.add(pattern);
                 }
             } else if (prdItem instanceof RegexTerminal && false) {
@@ -87,7 +86,7 @@ public class KSyntax2GrammarStatesFilter {
         }
     }
 
-    public static void processProduction(Production prd, Grammar grammar, String rejectPattern, Set<String> rejects) {
+    public static void processProduction(Production prd, Grammar grammar, String rejectPattern) {
         if(prd.att().contains("notInPrograms") || prd.att().contains("reject"))
             return;
 
@@ -138,17 +137,11 @@ public class KSyntax2GrammarStatesFilter {
         }
         Pattern pattern = null;
         if (prd.att().contains("token")) {
-            String rejectPattern2 = rejectPattern;
-            // if there is only one regular expression, optimize rejects by testing which would be able to match
-            if (prd.items().size() == 1 && prd.items().head() instanceof RegexTerminal) {
-                Pattern token = Pattern.compile(((RegexTerminal) prd.items().head()).regex());
-                Set<String> machingTerminals = rejects.stream().filter(s -> token.matcher(s).matches()).collect(Collectors.toSet());
-                rejectPattern2 = mkString(machingTerminals, p -> "(" + Pattern.quote(p) + ")", "|");
-            }
+            // TODO: calculate reject list
             if (prd.att().contains(Constants.AUTOREJECT) && prd.att().contains(Constants.REJECT2))
-                pattern = Pattern.compile("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern2 + ")");
+                pattern = Pattern.compile("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")");
             else if (prd.att().contains(Constants.AUTOREJECT))
-                pattern = Pattern.compile(rejectPattern2);
+                pattern = Pattern.compile(rejectPattern);
             else if (prd.att().contains(Constants.REJECT2))
                 pattern = Pattern.compile(prd.att().get(Constants.REJECT2).get().toString());
         }
