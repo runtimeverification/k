@@ -35,7 +35,7 @@ public class TstTinyOnKORE {
         String filename = "/convertor-tests/" + name.getMethodName() + ".k";
 
         File definitionFile = testResource(filename);
-        Tuple2<Module, Function<String, K>> rwModuleAndProgramParser = Kompile.getStuff(definitionFile, "TEST", "TEST-PROGRAMS");
+        Tuple2<Module, Function<String, K>> rwModuleAndProgramParser = new Kompile().getStuff(definitionFile, "TEST", "TEST-PROGRAMS");
 
         Module module = rwModuleAndProgramParser._1();
         Function<String, K> programParser = rwModuleAndProgramParser._2();

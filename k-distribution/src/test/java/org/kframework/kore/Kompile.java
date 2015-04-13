@@ -10,6 +10,7 @@ import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Sources;
 import org.kframework.kore.compile.*;
@@ -31,12 +32,17 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
+
+    public Kompile() throws IOException, URISyntaxException {
+        gen = makeRuleGrammarGenerator();
+    }
 
     private static RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException, IOException {
         String definitionText;
@@ -58,12 +64,11 @@ public class Kompile {
     }
 
     public static org.kframework.tiny.Rewriter getRewriter(Module module) throws IOException, URISyntaxException {
-
         return new org.kframework.tiny.Rewriter(module, KIndex$.MODULE$);
     }
 
     // todo: rename and refactor this
-    public static Tuple2<Module, Function<String, K>> getStuff(File definitionFile, String mainModuleName, String mainProgramsModule) throws IOException, URISyntaxException {
+    public Tuple2<Module, Function<String, K>> getStuff(File definitionFile, String mainModuleName, String mainProgramsModule) throws IOException, URISyntaxException {
         String definitionString = FileUtils.readFileToString(definitionFile);
 
 //        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
@@ -77,7 +82,9 @@ public class Kompile {
 
         Module mainModuleWithBubble = stream(definition.modules()).filter(m -> m.name().equals(mainModuleName)).findFirst().get();
 
-        Module mainModule = resolveBubbles(mainModuleWithBubble);
+        Kompile kompile = new Kompile();
+
+        Module mainModule = ModuleTransformer.from(kompile::resolveBubbles).apply(mainModuleWithBubble);
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
@@ -108,8 +115,10 @@ public class Kompile {
         return Tuple2.apply(withKSeq, pp);
     }
 
-    private static Module resolveBubbles(Module mainModuleWithBubble) throws IOException, URISyntaxException {
-        RuleGrammarGenerator gen = makeRuleGrammarGenerator();
+    RuleGrammarGenerator gen;
+
+    private Module resolveBubbles(Module mainModuleWithBubble) {
+
         ParseInModule ruleParser = gen.getRuleGrammar(mainModuleWithBubble);
 
         Set<Sentence> ruleSet = stream(mainModuleWithBubble.localSentences())
@@ -149,7 +158,7 @@ public class Kompile {
                 .collect(Collections.toSet());
 
         // todo: Cosmin: fix as this effectively flattens the module
-        return Module(mainModuleWithBubble.name(), Set(),
-                (Set<Sentence>) mainModuleWithBubble.sentences().$bar(ruleSet), Att());
+        return Module(mainModuleWithBubble.name(), mainModuleWithBubble.imports(),
+                (Set<Sentence>) mainModuleWithBubble.localSentences().$bar(ruleSet), mainModuleWithBubble.att());
     }
 }

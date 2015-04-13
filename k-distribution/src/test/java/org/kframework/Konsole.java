@@ -22,7 +22,7 @@ public class Konsole {
         String programModuleName = args[2];
 
         Tuple2<Module, Function<String, K>> stuff =
-                Kompile.getStuff(new File(definitionFilename), mainModuleName, programModuleName);
+                new Kompile().getStuff(new File(definitionFilename), mainModuleName, programModuleName);
 
         Module module = stuff._1();
         Function<String, K> programParser = stuff._2();
