@@ -34,6 +34,11 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+/**
+ * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
+ * Tracked by #1442.
+ */
+
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();

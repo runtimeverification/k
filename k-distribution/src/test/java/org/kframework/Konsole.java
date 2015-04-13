@@ -15,6 +15,10 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.function.Function;
 
+/**
+ * A small console stub. Will need development. Tracked by #1441.
+ */
+
 public class Konsole {
     public static void main(String[] args) throws IOException, URISyntaxException {
         String definitionFilename = args[0];
