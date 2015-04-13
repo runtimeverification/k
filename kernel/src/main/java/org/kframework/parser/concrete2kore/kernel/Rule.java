@@ -74,27 +74,24 @@ public abstract class Rule implements Serializable {
     public static class WrapLabelRule extends KListRule {
         private final Production label;
         public final Pattern rejectPattern;
-        public final Set<String> rejectTokens;
-        public WrapLabelRule(Production label, Pattern rejectPattern, Set<String> rejectTokens) {
+        public WrapLabelRule(Production label, Pattern rejectPattern) {
             assert label != null;
             this.label = label;
             this.rejectPattern = rejectPattern;
-            assert rejectTokens != null;
-            this.rejectTokens = rejectTokens;
         }
         public WrapLabelRule(Production label) {
             assert label != null;
             this.label = label;
             rejectPattern = null;
-            rejectTokens = new HashSet<>();
         }
         protected KList apply(KList klist, MetaData metaData) {
             Term term;
             Location loc = new Location(metaData.start.line, metaData.start.column, metaData.end.line, metaData.end.column);
             if (label.att().contains("token")) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                if (rejectTokens.contains(value)) return null;
-                if (rejectPattern != null && rejectPattern.matcher(value).matches()) return null;
+                if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
+                    return null;
+                }
                 term = Constant.apply(value, label, loc);
             } else {
                 term = TermCons.apply(klist.items(), label, loc);
