@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import static org.kframework.kore.KORE.*;
 
 /**
- * Created by brandon on 3/30/15.
+ * Abstract K to K transformer.
  */
 public class TransformKORE extends AbstractKORETransformer<K> {
 

@@ -4,7 +4,7 @@ package org.kframework.kore.compile;
 import org.kframework.kore.*;
 
 /**
- * Created by brandon on 3/30/15.
+ * Abstract visitor for K.
  */
 public class VisitKORE extends AbstractKORETransformer<Void> {
 

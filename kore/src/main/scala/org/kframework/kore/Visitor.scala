@@ -30,4 +30,3 @@ trait KOREVisitor extends KORETransformer[Nothing] {
 /* Java interfaces */
 
 abstract class AbstractKORETransformer[T] extends KORETransformer[T]
-abstract class AbstractKOREVisitor extends KOREVisitor
