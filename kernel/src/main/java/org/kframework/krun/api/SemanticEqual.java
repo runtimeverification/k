@@ -73,7 +73,7 @@ public class SemanticEqual {
         // here we know that the instances are from the same class
         else if (t1 instanceof BackendTerm) {
             // TODO check equality for BackendTerm
-            return ((BackendTerm) t1).getValue().length() == ((BackendTerm) t2).getValue()
+            return ((BackendTerm) t1).toString().length() == ((BackendTerm) t2).toString()
                     .length();
         } else if (t1 instanceof IntBuiltin) {
             return areEqual((IntBuiltin) t1, (IntBuiltin) t2);

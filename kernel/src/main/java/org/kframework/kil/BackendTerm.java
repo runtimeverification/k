@@ -13,23 +13,23 @@ public class BackendTerm extends Term {
         this.value = term.value;
     }
 
-    String value;
+    Object value;
 
-    public BackendTerm(Sort sort, String value) {
+    public BackendTerm(Sort sort, Object value) {
         super(sort);
         this.value = value;
     }
 
     @Override
     public String toString() {
-        return this.value;
+        return this.value.toString();
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

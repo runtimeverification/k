@@ -38,6 +38,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -46,10 +47,14 @@ import com.google.inject.Inject;
 public class TermLoader {
 
     private final KExceptionManager kem;
+    private final FileUtil files;
+    private final Context context;
 
     @Inject
-    public TermLoader(KExceptionManager kem) {
+    public TermLoader(KExceptionManager kem, FileUtil files, Context context) {
         this.kem = kem;
+        this.context = context;
+        this.files = files;
     }
 
     /**
@@ -63,25 +68,25 @@ public class TermLoader {
      *            - the context for disambiguation purposes.
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
-    public Definition parseString(String content, Source source, Context context) throws ParseFailedException {
+    public Definition parseString(String content, Source source) throws ParseFailedException {
         List<DefinitionItem> di = Outer.parse(source, content, context);
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         def.setItems(di);
 
         // ------------------------------------- parse configs
-        def = (Definition) new ParseConfigsFilter(context, false, kem).visitNode(def);
+        def = (Definition) new ParseConfigsFilter(context, false, kem, files).visitNode(def);
 
         // ----------------------------------- parse rules
-        def = (Definition) new ParseRulesFilter(context, kem).visitNode(def);
+        def = (Definition) new ParseRulesFilter(context, kem, files).visitNode(def);
         def = (Definition) new DisambiguateRulesFilter(context, false, kem).visitNode(def);
         def = (Definition) new NormalizeASTTransformer(context, kem).visitNode(def);
 
         return def;
     }
 
-    public Term parseCmdString(String content, Source source, Sort startSymbol, Context context) throws ParseFailedException {
-        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKCmdString(content, context.files.resolveKompiled("."));
+    public Term parseCmdString(String content, Source source, Sort startSymbol) throws ParseFailedException {
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKCmdString(content, files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
         XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
@@ -119,8 +124,8 @@ public class TermLoader {
         return (Term) config;
     }
 
-    public ASTNode parsePattern(String pattern, Source source, Sort startSymbol, Context context) throws ParseFailedException {
-        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
+    public ASTNode parsePattern(String pattern, Source source, Sort startSymbol) throws ParseFailedException {
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -159,8 +164,8 @@ public class TermLoader {
         return config;
     }
 
-    public ASTNode parsePatternAmbiguous(String pattern, Context context) throws ParseFailedException {
-        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
+    public ASTNode parsePatternAmbiguous(String pattern) throws ParseFailedException {
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         // XmlLoader.addFilename(doc.getFirstChild(), filename);

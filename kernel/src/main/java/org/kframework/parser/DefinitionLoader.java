@@ -209,7 +209,7 @@ public class DefinitionLoader {
             sw.printIntermediate("Generate TBLDef");
         }
 
-        def = (Definition) new ParseConfigsFilter(context, kem).visitNode(def);
+        def = (Definition) new ParseConfigsFilter(context, kem, files).visitNode(def);
         new CollectConfigCellsVisitor(context).visitNode(def);
 
         // sort List in streaming cells
@@ -235,7 +235,7 @@ public class DefinitionLoader {
         try {
             def = (Definition) clf.visitNode(def);
             cachedSentences = clf.getKept().size();
-            prf = new ParseRulesFilter(context, clf.getKept(), kem);
+            prf = new ParseRulesFilter(context, clf.getKept(), kem, files);
             def = (Definition) prf.visitNode(def);
         } finally {
             // save definition

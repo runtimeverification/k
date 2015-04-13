@@ -77,7 +77,6 @@ public class KompileFrontEnd extends FrontEnd {
                     options.mainDefinitionFile().getAbsolutePath());
         }
 
-        context.files = files;
         context.kompileOptions = options;
 
         Definition def = genericCompile(options.experimental.step);

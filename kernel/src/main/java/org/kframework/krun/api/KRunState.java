@@ -57,4 +57,6 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
     public int compareTo(KRunState arg0) {
         return Integer.compare(stateId, arg0.stateId);
     }
+
+    public abstract Term toBackendTerm();
 }

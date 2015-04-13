@@ -17,7 +17,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
@@ -77,8 +76,6 @@ public class Context implements Serializable {
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
     public Map<String, Sort> configVarSorts = new HashMap<>();
-    @Deprecated
-    public transient FileUtil files;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();

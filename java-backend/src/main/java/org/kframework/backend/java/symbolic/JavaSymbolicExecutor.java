@@ -73,17 +73,6 @@ public class JavaSymbolicExecutor implements Executor {
         return javaRewriteEngineRun(cfg, -1, computeGraph);
     }
 
-
-    @Override
-    public RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException {
-
-        if (!(initialState instanceof JavaKRunState)) {
-            KExceptionManager.criticalError("Term received not instance of java backend");
-        }
-        JavaKRunState javaKRunState = (JavaKRunState) initialState;
-        return javaRewriteEngineRun(javaKRunState, -1, computeGraph);
-    }
-
     /**
      * private method to convert a generic kil term to java kil.1
      *
@@ -238,17 +227,6 @@ public class JavaSymbolicExecutor implements Executor {
     public RewriteRelation step(org.kframework.kil.Term cfg, int steps, boolean computeGraph)
             throws KRunExecutionException {
         return javaRewriteEngineRun(cfg, steps, computeGraph);
-    }
-
-    @Override
-    public RewriteRelation step(KRunState initialState, int steps, boolean computeGraph)
-            throws KRunExecutionException {
-
-        if (!(initialState instanceof JavaKRunState)) {
-            KExceptionManager.criticalError("Term received not instance of java backend");
-        }
-        JavaKRunState javaKRunState = (JavaKRunState) initialState;
-        return javaRewriteEngineRun(javaKRunState, steps, computeGraph);
     }
 
     public SymbolicRewriter getSymbolicRewriter() {
