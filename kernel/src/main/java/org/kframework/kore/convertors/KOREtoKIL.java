@@ -190,9 +190,9 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     public org.kframework.kil.Definition convertDefinition(Definition definition) {
         List<org.kframework.kil.DefinitionItem> items = new ArrayList<>();
 
-        for (Require r : iterable(definition.requires())) {
-            items.add(convertRequire(r));
-        }
+//        for (Require r : iterable(definition.requires())) {
+//            items.add(convertRequire(r));
+//        }
 
         for (Module m : iterable(definition.modules())) {
             items.add(convertModule(m));
@@ -203,15 +203,15 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         return def;
     }
 
-    public org.kframework.kil.Require convertRequire(Require require) {
-        return new org.kframework.kil.Require(require.file().getPath());
-    }
+//    public org.kframework.kil.Require convertRequire(Require require) {
+//        return new org.kframework.kil.Require(require.file().getPath());
+//    }
 
     public org.kframework.kil.Module convertModule(Module module) {
         org.kframework.kil.Module mod = new org.kframework.kil.Module(module.name());
 
         List<Sentence> sentences = scala.collection.JavaConversions.seqAsJavaList(module
-                .localSentences().toList());
+                .sentences().toList());
         mod = mod.addModuleItems(convertSentences(sentences));
 
         mod.setAttributes(convertAttributes(module.att()));
@@ -254,9 +254,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 .filter(s -> !(s instanceof org.kframework.definition.Production)).collect(Collectors.toSet());
 
         for (Sentence sentence : allTheRest) {
-            if (sentence instanceof Import) {
-                ret.add(convertModuleItem((Import) sentence));
-            } else if (sentence instanceof Bubble) {
+            if (sentence instanceof Bubble) {
                 ret.add(convertModuleItem((Bubble) sentence));
             } else if (sentence instanceof ModuleComment) {
                 ret.add(convertModuleItem((ModuleComment) sentence));
@@ -281,12 +279,6 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         }
 
         return ret;
-    }
-
-    public org.kframework.kil.ModuleItem convertModuleItem(Import anImport) {
-        org.kframework.kil.Import kilImport = new org.kframework.kil.Import(anImport.moduleName());
-        kilImport.setAttributes(convertAttributes(anImport.att()));
-        return kilImport;
     }
 
     public org.kframework.kil.ModuleItem convertModuleItem(Bubble bubble) {
@@ -420,7 +412,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                if (!key.equals(KLabel("org.kframework.attributes.Location"))) { // ignoring location
+                if (!key.equals(KLabel("Location"))) { // ignoring location
                     // information
                     KList klist = attr.klist();
                     if (klist.size() == 1 && klist.items().get(0) instanceof KToken) {

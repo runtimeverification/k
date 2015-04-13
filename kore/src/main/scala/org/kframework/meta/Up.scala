@@ -7,7 +7,7 @@ import org.kframework.kore._
 import collection.JavaConverters._
 import org.kframework.kore
 
-class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K]) extends (Any => K) {
+class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[String]) extends (Any => K) {
 
   import cons._
 
@@ -46,6 +46,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K]) extends (Any => 
   }
 
   def processName(arg: String) = {
-    arg.replace("org.kframework.definition.", "").replace("org.kframework.koreimplementation.", "")
+    imports.foldLeft(arg) { (klabel, theImport) => klabel.replaceAll(theImport + ".", "") }
+    //    arg.replace("org.kframework.definition.", "").replace("org.kframework.koreimplementation.", "")
   }
 }

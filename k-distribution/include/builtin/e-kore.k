@@ -1,67 +1,5 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
-
-// Module defining only the sorts K and KString, useful for modularity
-module BASIC-K
-  syntax K
-  syntax KString ::= r"[\\\"]([^\\\"\\n\\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"
-                         [token, hook(org.kframework.kore.KString)]
-    // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
-  syntax KLabel
-endmodule
-
-
-module KAST
-  imports BASIC-K
-  syntax K     ::= KItem
-  syntax KItem ::= "#token" "(" KString "," KString ")"
-                       [klabel(#KToken), hook(org.kframework.kore.KToken)]
-                 | "#klabel" "(" KLabel ")"
-                       [klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel)]
-                 | KLabel "(" KList ")" [klabel(#KApply), hook(org.kframework.kore.KApply)]
-
-  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`" [token, hook(org.kframework.kore.KLabel)]
-                  | r"[#a-z][a-zA-Z0-9]*"
-                       [token, hook(org.kframework.kore.KLabel)]
-                       // something that doesn't collide with meta-variables
-
-  syntax KList ::= K
-                 | ".::KList" [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
-                 | KList "," KList
-                       [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList)]
-endmodule
-
-
-// To be used when parsing/pretty-printing ground configurations
-module KSEQ
-  imports KAST
-  syntax K     ::= ".::K" [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
-                  | K "~>" K
-                       [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
-endmodule
-
-
-// To be used when parsing/pretty-printing symbolic configurations
-module KSEQ-SYMBOLIC
-  imports KSEQ
-  syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)"
-                           [token, hook(org.kframework.kore.KVariable)]
-  syntax KItem     ::= KVariable
-  syntax KLabel    ::= KVariable
-endmodule
-
-
-
-// To be used to parse semantic rules
-module K
-  imports KSEQ-SYMBOLIC
-  syntax K         ::= K "=>" K [klabel(#KRewrite), hook(org.kframework.kore.KRewrite)]
-  // K bracket needed, e.g., Cxt[V ~> `env(E) => .`]
-  syntax K         ::= "`" K "`"        [bracket]
-
-// Sort membership not needed anymore, as we can use requires/ensures
-//  syntax KItem     ::= KItem ":" KSort  [hook]
-endmodule
-
+requires "kast.k"
 
 module BUBBLE
 
@@ -189,8 +127,7 @@ module OUTER-KORE
 endmodule
 
 
-module KORE
+module E-KORE
   imports OUTER-KORE
-  imports K
   imports BUBBLE
 endmodule

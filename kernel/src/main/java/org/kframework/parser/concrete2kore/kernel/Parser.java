@@ -376,7 +376,7 @@ public class Parser {
         AutoVivifyingBiMap<StateCall.Key, StateCall> stateCalls = new AutoVivifyingBiMap<>();
         AutoVivifyingBiMap<StateReturn.Key, StateReturn> stateReturns = new AutoVivifyingBiMap<>();
 
-        public ParseState(CharSequence input) {
+        public ParseState(CharSequence input, int startLine, int startColumn) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
              * column in the text. Tab counts as one.
@@ -388,8 +388,8 @@ public class Parser {
             this.input = input;
             lines = new int[input.length()+1];
             columns = new int[input.length()+1];
-            int l = 1;
-            int c = 1;
+            int l = startLine;
+            int c = startColumn;
             for (int i = 0; i < input.length(); i++) {
                 lines[i] = l;
                 columns[i] = c;
@@ -565,7 +565,7 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed.
          */
         boolean addToken(Function that, String string, Production prd) {
-            final Constant token =  Constant.apply(string, prd, Optional.empty());
+            final Constant token =  Constant.apply(string, prd);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
@@ -605,7 +605,7 @@ public class Parser {
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             KList newKList = KList.apply(context);
-                            newKList.add(Ambiguity.apply(new ArrayList<Term>(matches)));
+                            newKList.add(Ambiguity.apply(new HashSet<Term>(matches)));
                             result.add(newKList);
                         }
                     }
@@ -670,7 +670,11 @@ public class Parser {
     private final ParseState s;
 
     public Parser(CharSequence input) {
-        s = new ParseState(input);
+        s = new ParseState(input, 1, 1);
+    }
+
+    public Parser(CharSequence input, int startLine, int startColumn) {
+        s = new ParseState(input, startLine, startColumn);
     }
 
     /**
@@ -690,10 +694,10 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = Ambiguity.apply(new ArrayList<Term>());
+        Ambiguity result = Ambiguity.apply(new HashSet<Term>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull(), Optional.empty())));
+                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull())));
             }
         }
 

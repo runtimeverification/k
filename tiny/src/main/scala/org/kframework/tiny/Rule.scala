@@ -29,7 +29,7 @@ case class RegularRule(termWithRewrite: K, sideConditions: K)(implicit val theor
   extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
-    AsOr(pmSolutions).children map { count += 1; substitute(_, t).normalize }
+    AsOr(pmSolutions).children map {count += 1; substitute(_, t).normalize}
   }
 }
 
@@ -57,8 +57,8 @@ case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theo
   def process(kapp: KApp): Set[K] = {
     kapp.children
       .map(recursiveResults)
-      .foldLeft(Set(Seq[K]())) {(soFar, nextArg) => soFar flatMap {args => nextArg map { args :+ _ } } }
-      .map { kapp.klabel(_: _*) }
+      .foldLeft(Set(Seq[K]())) { (soFar, nextArg) => soFar flatMap { args => nextArg map {args :+ _} } }
+      .map {kapp.klabel(_: _*)}
   }
 
   def apply(t: K) = {
@@ -66,10 +66,40 @@ case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theo
   }
 }
 
+case class EverywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory)
+  extends Rule with FromKDef {
+
+  val regularRule = RegularRule(termWithRewrite, sideConditions)
+  val ignorePrefixVar = KVar("IGNORED_PREFIX")
+  val ignoreSuffixVar = KVar("IGNORED_SUFFIX")
+
+  def recursiveResults(t: K): K = (left, t) match {
+    case (left: Bag, kapp: Bag) if kapp.klabel == left.klabel =>
+      val ruleWithJustOneSide = RegularRule(kapp.klabel(ignorePrefixVar, termWithRewrite), sideConditions)
+      process(ruleWithJustOneSide(t).head.asInstanceOf[KApp])
+
+    case (left: KAssocApp, kapp: KAssocApp) if kapp.klabel == left.klabel => {
+      val ruleWithSides = RegularRule(kapp.klabel(ignorePrefixVar, termWithRewrite, ignoreSuffixVar), sideConditions)
+      process(ruleWithSides(t).head.asInstanceOf[KApp])
+    }
+    case (left: K, kapp: KApp) => process(kapp)
+    case other => regularRule(t).headOption.getOrElse(t)
+  }
+
+  def process(kapp: KApp): K = {
+    val partialResult = kapp.klabel(kapp.children.map(recursiveResults).toSeq: _*)
+    regularRule(partialResult).headOption.getOrElse(partialResult)
+  }
+
+  def apply(t: K): Set[K] = {
+    Set(recursiveResults(t))
+  }
+}
+
 case class ExecuteRule(termWithRewrite: K, sideConditions: K = True)(implicit val theory: Theory)
   extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
-    AsOr(pmSolutions).children.headOption map { count += 1; substitute(_, t).normalize } toSet
+    AsOr(pmSolutions).children.headOption map {count += 1; substitute(_, t).normalize} toSet
   }
 }

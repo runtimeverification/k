@@ -66,6 +66,11 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-java8-compat_2.11</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-reflect</artifactId>
         <version>${scala.version}</version>

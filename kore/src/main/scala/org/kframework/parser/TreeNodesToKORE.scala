@@ -14,9 +14,9 @@ object TreeNodesToKORE {
   import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
-    case Constant(s, p, l) => KToken(p.sort, s, locationToAtt(l.get()))
-    case TermCons(items, p, l) => KApply(p.klabel.get, KList(items.asScala map apply asJava), locationToAtt(l.get()))
-    case Ambiguity(items, l) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
+    case c@Constant(s, p) => KToken(p.sort, s, locationToAtt(c.location.get()))
+    case t@TermCons(items, p) => KApply(p.klabel.get, KList(items.asScala map apply asJava), locationToAtt(t.location.get()))
+    case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
   }
 
   def down(t: K): K = t match {
@@ -24,20 +24,22 @@ object TreeNodesToKORE {
       KVariable(s.trim, t.att)
 
     case t: kore.KToken => t
-    case t@KApply(KLabel("#KRewrite"), items: kore.KList) =>
-      val it = items.items.iterator
+
+    case t@KApply(KLabel("#KSequence"), items) =>
+      KSequence(downList(items).asJava, t.att)
+    case KApply(KLabel("#EmptyK"), items) if items.isEmpty =>
+      KSequence(List.empty[K].asJava, t.att)
+
+    case t@KApply(KLabel("#KRewrite"), items) =>
+      val it = items.iterator
       val res = KRewrite(down(it.next()), down(it.next()), t.att)
       assert(!it.hasNext)
       res
 
+
     case t@KApply(KLabel("#KApply"), items) =>
-      val theKList = items.tail.head match {
-        case t@KApply(KLabel("#KList"), items) => KList((items map down _).asJava)
-        case c: KToken => KList(down(c))
-      }
-      KApply(
-        KLabel(items(0).asInstanceOf[KToken].s),
-        theKList, t.att)
+      KApply(KLabel(unquote(items)),
+        KList(downList(items.tail.head.asInstanceOf[KApply].klist.items.asScala)), t.att)
 
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1)
@@ -45,10 +47,18 @@ object TreeNodesToKORE {
       KToken(Sort(removeQuotes(items(0).asInstanceOf[Constant].value)),
         removeQuotes(items.tail.head.asInstanceOf[Constant].value))
 
-    case t@KApply(l, items) => KApply(l, KList((items map down _).asJava), t.att)
+    case t@KApply(l, items) =>
+      KApply(l, KList((items map down _).asJava), t.att)
   }
 
-  val up = new Up(KORE)
+  def unquote(items: List[K]): String = {
+    items(0).asInstanceOf[KToken].s.stripPrefix("`").stripSuffix("`")
+  }
+
+  def downList(items: Seq[K]): Seq[K] = {
+    items map down _
+  }
+  val up = new Up(KORE, Set())
 
   def locationToAtt(l: Location): Att =
     Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))

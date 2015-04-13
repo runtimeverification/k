@@ -45,7 +45,10 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
   val klabel = KRegularAppMatcher
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
-    And(ksL.zip(ksR) map {case (k1, k2) => k1.matcher(k2) }: _*)
+    And(ksL.zip(ksR) map {case (k1, k2) =>
+      assert(k2.isGround, "Trying to create KRegularAppMatcher(...(" + k1 + "    ,    " + k2 + ")...)")
+      k1.matcher(k2)
+    }: _*)
 
   override def isFalse = (left, right) match {
     case (KApp(label, _, _), KApp(label2, _, _)) => label != label2
@@ -68,14 +71,14 @@ trait AssocMatchContents {
       case (headL +: tailL, headR +: tailR) if theory.equals(headL, headR) => matchContents(tailL, tailR)
       case (headL +: tailL, ksR) =>
         (0 to ksR.size)
-          .map {index => (ksR.take(index), ksR.drop(index)) }
+          .map { index => (ksR.take(index), ksR.drop(index)) }
           .map {
           case (List(oneElement), suffix) =>
             And(headL.matcher(oneElement), matchContents(tailL, suffix))
           case (prefix, suffix) =>
             And(headL.matcher(leftKLabel(prefix, rightAtt)), matchContents(tailL, suffix))
         }
-          .fold(False: K)({(a, b) => Or(a, b) })
+          .fold(False: K)({ (a, b) => Or(a, b) })
 
       case other => False
     }
@@ -102,7 +105,7 @@ object KAssocAppMatcher extends MatcherLabel {
 case class KVarMatcher(left: KVar, right: K) extends Matcher {
   val klabel = KVarMatcher
 
-  assert(!right.isInstanceOf[KVar])
+  assert(!right.isInstanceOf[KVar], "Trying to create KVarMatcher(" + left + "," + right + ")")
 
   override def normalizeInner(implicit theory: Theory): K =
     Binding(left, right.normalize)

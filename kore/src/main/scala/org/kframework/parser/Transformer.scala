@@ -46,7 +46,7 @@ trait ChildrenMapping[E, W] {
   def mapChildren(t: HasChildren): (Either[E, Term], W) = {
     val allResults1 = t.items.asScala.map(applyTerm) // visit all children
     val allResults = allResults1 flatMap {
-        case (Right(Ambiguity(items, _)), warns) => immutable(items) map { t => (Right(t): Either[E, Term], warns) }
+        case (Right(Ambiguity(items)), warns) => immutable(items) map { t => (Right(t): Either[E, Term], warns) }
         case x => Set(x)
       }
 

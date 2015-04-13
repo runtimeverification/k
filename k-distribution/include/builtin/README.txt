@@ -1,0 +1,1 @@
+The files in this directory are used by the new KORE-based implementation only.

@@ -37,7 +37,7 @@ case class KMapAppLabel(name: String, att: Att = Att()) extends Label {
 
   def newBuilder(att: Att): mutable.Builder[K, KMapApp] =
     new KMapAppBuilder(
-      new mutable.MapBuilder[K, K, Map[K, K]](Map()), this).mapResult {
+      new mutable.MapBuilder[K, K, Map[K, K]](collection.immutable.ListMap()), this).mapResult {
       constructFromFlattened(_, att)
     }
 }

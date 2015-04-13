@@ -9,9 +9,9 @@ import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
 
-class Constructors(module: definition.Module) extends kore.Constructors[K] with ScalaSugar[K] {
+class Constructors(val module: definition.Module) extends kore.Constructors[K] with ScalaSugar[K] {
 
-  implicit val theory = new TheoryWithUpDown(new Up(this), new Down(Set()), module)
+  implicit val theory = new TheoryWithUpDown(new Up(this, Set()), new Down(Set()), module)
 
   // separate the hook mappings at some point
   def hookMappings(hook: String, labelString: String) = hook match {
@@ -77,9 +77,9 @@ class Constructors(module: definition.Module) extends kore.Constructors[K] with 
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
-      case Sorts.Bool => s match {
-        case "true" => And()
-        case "false" => Or()
+      case Sorts.KBool => s match {
+        case "KTrue" => And()
+        case "KFalse" => Or()
       }
       case _ => RegularKTok(sort, s)
     }

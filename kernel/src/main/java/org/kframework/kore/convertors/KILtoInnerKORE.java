@@ -224,7 +224,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     private org.kframework.attributes.Att attributesFromLocation(Location location) {
-        Up up = new Up(KORE.self());
+        Up up = new Up(KORE.self(), Set("org.kframework.attributes"));
 
         if (location != null) {
             org.kframework.attributes.Location koreLocation = org.kframework.attributes.Location.apply(location.lineStart, location.columnStart, location.lineEnd, location.columnEnd);

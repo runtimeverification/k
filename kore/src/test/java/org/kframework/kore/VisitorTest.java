@@ -40,6 +40,11 @@ public class VisitorTest {
             List<K> newItems = k.items().stream().map(this).collect(Collectors.toList());
             return KORE.KSequence(newItems, k.att());
         }
+
+        @Override
+        public K apply(InjectedKLabel k) {
+            return k;
+        }
     }
 
     @Test

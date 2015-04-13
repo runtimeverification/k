@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import org.kframework.Collection;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.definition.Module;
@@ -18,15 +17,13 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.AddLocationRule;
 import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
-import org.kframework.parser.generator.CollectTerminalsVisitor;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.iterable;
 import static org.kframework.Collections.stream;
@@ -46,47 +43,27 @@ public class KSyntax2GrammarStatesFilter {
             grammar.add(new NonTerminal(sort.name()));
         }
 
-        stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        String rejectPattern = mkString(rejects, p -> "(" + p + ")", "|");
-        stream(module.productions()).forEach(p -> processProduction(p, grammar, rejectPattern));
+        stream(module.productions()).forEach(p -> collectTokens(p, rejects));
+        stream(module.productions()).forEach(p -> processProduction(p, grammar, rejects));
 
         grammar.addWhiteSpace();
         grammar.compile();
         return grammar;
     }
 
-    static public <E> String mkString(Iterable<E> list, Function<E,String> stringify, String delimiter) {
-        int i = 0;
-        StringBuilder s = new StringBuilder();
-        for (E e : list) {
-            if (i != 0) { s.append(delimiter); }
-            s.append(stringify.apply(e));
-            i++;
-        }
-        return s.toString();
-    }
-
-    private static void collectRejects(Production prd, Set<String> rejects) {
+    private static void collectTokens(Production prd, Set<String> rejects) {
         for (ProductionItem prdItem : iterable(prd.items())) {
             String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
-                    pattern = Pattern.quote(((Terminal) prdItem).value());
+                    pattern = ((Terminal) prdItem).value();
                     rejects.add(pattern);
                 }
-            } else if (prdItem instanceof RegexTerminal && false) {
-                // TODO: (radum) properly handle regex terminals once SDF is gone
-                if (prd.att().contains("regex"))
-                    pattern = prd.att().get("regex").get().toString();
-                else
-                    pattern = ((RegexTerminal) prdItem).regex();
-                if (!pattern.equals(""))
-                    rejects.add(pattern);
             }
         }
     }
 
-    public static void processProduction(Production prd, Grammar grammar, String rejectPattern) {
+    public static void processProduction(Production prd, Grammar grammar, Set<String> rejects) {
         if(prd.att().contains("notInPrograms") || prd.att().contains("reject"))
             return;
 
@@ -136,16 +113,20 @@ public class KSyntax2GrammarStatesFilter {
             }
         }
         Pattern pattern = null;
+        Set<String> rejectTokens = new HashSet<>();
         if (prd.att().contains("token")) {
-            // TODO: calculate reject list
-            if (prd.att().contains(Constants.AUTOREJECT) && prd.att().contains(Constants.REJECT2))
-                pattern = Pattern.compile("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")");
-            else if (prd.att().contains(Constants.AUTOREJECT))
-                pattern = Pattern.compile(rejectPattern);
-            else if (prd.att().contains(Constants.REJECT2))
+            // if there is only one regular expression, optimize rejects by testing which would be able to match
+            if (prd.att().contains(Constants.AUTOREJECT)) {
+                rejectTokens = rejects;
+                if (prd.items().size() == 1 && prd.items().head() instanceof RegexTerminal) {
+                    Pattern token = Pattern.compile(((RegexTerminal) prd.items().head()).regex());
+                    rejectTokens = rejects.stream().filter(s -> token.matcher(s).matches()).collect(Collectors.toSet());
+                }
+            }
+            if (prd.att().contains(Constants.REJECT2))
                 pattern = Pattern.compile(prd.att().get(Constants.REJECT2).get().toString());
         }
-        RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern));
+        RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern, rejectTokens));
         previous.next.add(labelRule);
         previous = labelRule;
 

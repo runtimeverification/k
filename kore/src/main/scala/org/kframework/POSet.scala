@@ -40,7 +40,7 @@ class POSet[T](directRelations: Set[(T, T)]) {
    */
   private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
     val currentPath = path :+ current
-    val succs = directRelationsMap(current)
+    val succs = directRelationsMap.getOrElse(current, Set())
     if (succs.contains(start))
       throw new CircularityException(currentPath :+ start)
 

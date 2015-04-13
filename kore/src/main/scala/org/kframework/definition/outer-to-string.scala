@@ -4,16 +4,20 @@ import org.apache.commons.lang3.StringEscapeUtils
 
 trait ModuleToString {
   self: Module =>
-  override def toString = "module " + name + att.postfixString +
-    "\n" + localSentences.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") + "\nendmodule"
+  override def toString = "module " + name + att.postfixString + "\n" +
+    prettyPrintSet(imports map {"imports " + _.name}) +
+    prettyPrintSet(localSentences) +
+    "endmodule"
+
+  def prettyPrintSet(s: Set[_]) = {
+    s.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") +
+      (if (s.size > 0) "\n" else "")
+  }
 }
 
 trait DefinitionToString {
   self: Definition =>
-  override def toString =
-    requires.mkString("\n") +
-      "\n\n" +
-      modules.toList.map(_.toString).sorted.mkString("\n\n\n")
+  override def toString = modules.toList.map(_.toString).sorted.mkString("\n\n\n")
 }
 
 trait RuleToString {
@@ -29,11 +33,6 @@ trait ProductionToString {
 trait SyntaxSortToString {
   self: SyntaxSort =>
   override def toString() = "syntax " + sort + att.postfixString
-}
-
-trait ImportToString {
-  self: Import =>
-  override def toString() = "imports " + moduleName + att.postfixString
 }
 
 trait TerminalToString {
@@ -72,7 +71,7 @@ trait ContextToString {
 
 trait SyntaxPriorityToString {
   self: SyntaxPriority =>
-  override def toString = "syntax priority " + priorities.map { _.mkString(" ") }.mkString(" > ")
+  override def toString = "syntax priority " + priorities.map {_.mkString(" ")}.mkString(" > ")
 }
 
 trait TagToString {
