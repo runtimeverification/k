@@ -50,7 +50,7 @@ public class RuleAuditing {
                     continue;
                 }
                 if (rule.getSource().toString().contains(options.auditingFile)
-                        && rule.getLocation().lineStart == options.auditingLine) {
+                        && rule.getLocation().startLine() == options.auditingLine) {
                     matchedRules.add(rule);
                 }
             }

@@ -3,10 +3,10 @@ package org.kframework.krun.tools;
 
 import java.util.Set;
 
+import org.kframework.attributes.Source;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
-import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
@@ -74,7 +74,7 @@ public interface Prover {
                 String proofFile = options.experimental.prove;
                 String content = files.loadFromWorkingDirectory(proofFile);
                 Definition parsed = termLoader.parseString(content,
-                        Sources.fromFile(files.resolveWorkingDirectory(proofFile)));
+                        Source.apply(files.resolveWorkingDirectory(proofFile).getAbsolutePath()));
                 Module mod = parsed.getSingletonModule();
                 mod = prover.preprocess(mod, initialConfiguration);
                 sw.printIntermediate("Preprocess specification rules");

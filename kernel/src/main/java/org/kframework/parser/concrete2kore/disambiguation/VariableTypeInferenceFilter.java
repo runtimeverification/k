@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kore.Sort;
 import org.kframework.definition.NonTerminal;
@@ -60,7 +61,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 } else if (!s.equals(vi.sort)) {
                     String msg = vi.varName + " declared with two different sorts: " + s + " and " + vi.sort;
                     //System.out.println(msg);
-                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
@@ -138,7 +139,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (solutions.size() == 0) {
                     if (fails != null) {
                         String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
 
                     } else {
@@ -148,7 +149,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         for (Sort vv1 : failsAmb)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
 
                     }
@@ -161,7 +162,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         decl.put(key, sort);
                         String msg = "Variable '" + key + "' was not declared. Assuming sort " + sort + ".";
                         warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(
-                                new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, null, t.location().get()))));
+                                new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, t.source().get(), t.location().get()))));
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!decl.isEmpty()) {
@@ -180,7 +181,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             for (Sort vv1 : values)
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
-                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
                             return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                         }
                     }
@@ -193,7 +194,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     // This makes it that I can't disambiguate properly
                     // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
                     String msg = "Parser: failed to infer sorts for variables.\n    Please file a bug report at https://github.com/kframework/k/issues.";
-                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
@@ -214,7 +215,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         public Location loc;
         public VarType varType;
 
-        public VarInfo(String varName, Sort sort, Location loc, VarType varType) {
+        public VarInfo(String varName, Sort sort, Source source, Location loc, VarType varType) {
             this.varName = varName;
             this.sort = sort;
             this.loc = loc;
@@ -256,6 +257,19 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
+    private static Sort getSortOfCast(TermCons tc) {
+        switch (tc.production().klabel().get().name()) {
+        case "#SyntacticCast":
+        case "#SemanticCast":
+        case "#OuterCast":
+            return tc.production().sort();
+        case "#InnerCast":
+            return ((NonTerminal)tc.production().items().apply(0)).sort();
+        default:
+            throw new AssertionError("Unexpected cast type");
+        }
+    }
+
     private class CollectVariables extends SetsGeneralTransformer<ParseFailedException, VarInfo> {
         public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(TermCons tc) {
             // TODO: (Radu) if this is cast, take the sort from annotations?
@@ -264,12 +278,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().equals("#SemanticCast")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                collector = new CollectVariables2(Sort(tc.production().att().<String>get("sort").get()), VarType.USER).apply(t)._2();
+                Term t = tc.get(0);
+                collector = new CollectVariables2(getSortOfCast(tc), VarType.USER).apply(t)._2();
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
                         collector = mergeWarnings(collector, vars);
                         j++;
@@ -299,7 +313,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(Constant c) {
                 if (c.production().sort().name().equals("KVariable") && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
-                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c.value(), this.sort, c.location().get(), varType)));
+                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c.value(), this.sort, c.source().get(), c.location().get(), varType)));
                 }
                 return new Tuple2<>(Right.apply(c), this.warningUnit());
             }
@@ -318,20 +332,20 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().equals("#SemanticCast")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(Sort(tc.production().att().<String>get("sort").get())).apply(t);
+                Term t = tc.get(0);
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc)).apply(t);
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(0, rez.right().get());
+                tc = tc.with(0, rez.right().get());
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
                         Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
                         if (rez.isLeft())
                             return rez;
-                        tc.items().set(j, rez.right().get());
+                        tc = tc.with(j, rez.right().get());
                         j++;
                     }
                 }
@@ -367,7 +381,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             // TODO: location information
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
                             //System.out.println(msg);
-                            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, c.location().get());
+                            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().get(), c.location().get());
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
                         }
                     }
@@ -418,12 +432,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().equals("#SemanticCast")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                new CollectUndeclaredVariables2(Sort(tc.production().att().<String>get("sort").get())).apply(t);
+                Term t = tc.get(0);
+                new CollectUndeclaredVariables2(getSortOfCast(tc)).apply(t);
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         new CollectUndeclaredVariables2(((NonTerminal) tc.production().items().apply(i)).sort()).apply(t);
                         j++;
                     }

@@ -1,6 +1,8 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.w3c.dom.Element;
 
 /** Subclasses wrap a term as an item in the corresponding collection */

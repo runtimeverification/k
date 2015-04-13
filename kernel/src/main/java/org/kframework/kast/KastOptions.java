@@ -7,9 +7,8 @@ import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
 
+import org.kframework.attributes.Source;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
-import org.kframework.kil.Sources;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -59,9 +58,9 @@ public final class KastOptions {
      */
     public Source source() {
         if (expression != null) {
-            return Sources.fromCommandLine("-e");
+            return Source.apply("<command line: -e>");
         } else {
-            return Sources.fromFile(files.get().resolveWorkingDirectory(parameters.get(0)));
+            return Source.apply(files.get().resolveWorkingDirectory(parameters.get(0)).getAbsolutePath());
         }
     }
 

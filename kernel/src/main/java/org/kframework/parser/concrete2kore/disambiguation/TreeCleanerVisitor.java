@@ -1,9 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
 import org.kframework.parser.KList;
 import org.kframework.parser.SetsTransformerWithErrors;
@@ -26,15 +23,14 @@ public class TreeCleanerVisitor extends SetsTransformerWithErrors<ParseFailedExc
         Either<Set<ParseFailedException>, Term> vis;
         if (tc.production().isSyntacticSubsort() && tc.production().klabel().isEmpty()) {
             // eliminating syntactic subsort
-            vis = apply(tc.items().get(0));
+            vis = apply(tc.get(0));
         } else if (!tc.production().att().contains("bracket") && tc.production().klabel().isEmpty()) {
             return Left.apply(Sets.newHashSet(new ParseFailedException(new KException(
                     KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
-                    "Only subsort productions are allowed to have no #klabel attribute", null, tc.location().get()))));
+                    "Only subsort productions are allowed to have no #klabel attribute", tc.source().get(), tc.location().get()))));
             //TODO: add source and location to error
         } else {
             // invalidate the hashCode cache
-            tc.invalidateHashCode();
             vis = super.apply(tc);
         }
         return vis;

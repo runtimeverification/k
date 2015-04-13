@@ -39,7 +39,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
         }
         // TODO: add location information
         ParseFailedException w = new ParseFailedException(
-                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, null, amb.items().iterator().next().location().get()));
+                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
 
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = this.apply(amb.items().iterator().next());
         return new Tuple2<>(Right.apply(rez._1().right().get()), this.mergeWarnings(this.makeWarningSet(w), rez._2()));

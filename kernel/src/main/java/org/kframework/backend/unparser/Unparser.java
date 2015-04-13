@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.kframework.attributes.Location;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
@@ -40,7 +41,6 @@ import org.kframework.kil.KSequence;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.Location;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -193,8 +193,8 @@ public class Unparser implements Comparator<ASTNode> {
                 break;
             case END_TERM:
                 if (annotateLocation) {
-                    format.term.getLocation().lineEnd = string.getLineNo();
-                    format.term.getLocation().columnEnd = string.getColNo();
+                    Location start = format.term.getLocation();
+                    format.term.setLocation(Location.apply(start.startLine(), start.startColumn(), string.getLineNo(), string.getColNo()));
                 }
                 break;
             }

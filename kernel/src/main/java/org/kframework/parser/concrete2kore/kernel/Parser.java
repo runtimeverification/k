@@ -3,8 +3,8 @@ package org.kframework.parser.concrete2kore.kernel;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
@@ -26,15 +26,15 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.pcollections.ConsPStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This is the main code for running the parser.
@@ -116,10 +116,13 @@ public class Parser {
             /** The {@link State} that this StateCall is for */
             final State state;
 
+            private final int hashCode;
+
             //***************************** Start Boilerplate *****************************
             public Key(NonTerminalCall ntCall, int stateBegin, State state) {
                 assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
+                this.hashCode = computeHash();
             }
 
             public StateCall create() { return new StateCall(this); }
@@ -140,6 +143,9 @@ public class Parser {
 
             @Override
             public int hashCode() {
+                return hashCode;
+            }
+            public int computeHash() {
                 int result = ntCall.key.hashCode();
                 result = 31 * result + stateBegin;
                 result = 31 * result + state.hashCode();
@@ -167,28 +173,27 @@ public class Parser {
         /** The {@link Function} storing the AST parsed so far */
         final Function function = Function.empty();
 
+        private final int[] orderingInfo = new int[5];
+
         public int compareTo(StateReturn that) {
-            int x;
-            return
-                // The following idiom is a short-circuiting, integer "and"
-                // that does a lexicographic ordering over:
-                //  - ntBegin (contravariently),
-                //  - nt.orderingInfo (not used until we get lookaheads fixed)
-                //  - stateEnd,
-                //  - state.orderingInfo,
-                //  - stateBegin and
-                //  - state.
-                ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
-                                      this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x :
-                // TODO: ((x = this.key.stateCall.key.ntCall.key.nt.orderingInfo.compareTo(
-                //             that.key.stateCall.key.ntCall.key.nt.orderingInfo)) != 0) ? x :
-                ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
-                ((x = this.key.stateCall.key.state.orderingInfo.compareTo(
-                      that.key.stateCall.key.state.orderingInfo)) != 0) ? x :
-                // NOTE: these last two comparisons are just so we don't conflate distinct values
-                ((x = Integer.compare(this.key.stateCall.key.stateBegin,
-                                      that.key.stateCall.key.stateBegin)) != 0) ? x :
-                this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
+            int v1[] = orderingInfo;
+            int v2[] = that.orderingInfo;
+
+            int k = 1;
+            int c1 = v2[0];
+            int c2 = v1[0];
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            while (k < 5) {
+                c1 = v1[k];
+                c2 = v2[k];
+                if (c1 != c2) {
+                    return c1 - c2;
+                }
+                k++;
+            }
+            return 0;
         }
 
         private static class Key implements AutoVivifyingBiMap.Create<StateReturn> {
@@ -196,6 +201,7 @@ public class Parser {
             public final StateCall stateCall;
             /** The end position of the parse */
             public final int stateEnd;
+            private final int hashCode;
             public Key(StateCall stateCall, int stateEnd) {
                 assert stateCall != null;
                 // if we are a lookahead, then force the the state end to be equal to the state begin
@@ -205,6 +211,7 @@ public class Parser {
                 }
                 //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
+                this.hashCode = computeHash();
             }
 
             public StateReturn create() { return new StateReturn(this); }
@@ -224,6 +231,10 @@ public class Parser {
 
             @Override
             public int hashCode() {
+                return hashCode;
+            }
+
+            public int computeHash() {
                 int result = stateCall.key.hashCode();
                 result = 31 * result + stateEnd;
                 return result;
@@ -233,6 +244,11 @@ public class Parser {
         final Key key;
         StateReturn(Key key) {
             this.key = key;
+            this.orderingInfo[0] = this.key.stateCall.key.ntCall.key.ntBegin;
+            this.orderingInfo[1] = this.key.stateEnd;
+            this.orderingInfo[2] = this.key.stateCall.key.state.orderingInfo.key;
+            this.orderingInfo[3] = this.key.stateCall.key.stateBegin;
+            this.orderingInfo[4] = this.key.stateCall.key.state.unique;
             //// NON-BOILERPLATE CODE: ////
             // update the NonTerminalCalls set of ExitStateReturns
             if (this.key.stateCall.key.state instanceof ExitState) {
@@ -241,10 +257,7 @@ public class Parser {
         }
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            return result;
+            return key.hashCode;
         }
         @Override
         public boolean equals(Object obj) {
@@ -270,7 +283,7 @@ public class Parser {
      * See NonTerminalCall for an explanation of Context.
      */
     private static class Context {
-        final Set<KList> contexts = new HashSet<>();
+        final Set<Term> contexts = new HashSet<>();
     }
 
     /**
@@ -314,11 +327,13 @@ public class Parser {
             public final NonTerminal nt;
             /** The start position for parsing the {@link NonTerminal} */
             public final int ntBegin;
+            private final int hashCode;
             //***************************** Start Boilerplate *****************************
             public Key(NonTerminal nt, int ntBegin) {
                 assert nt != null;
                 // assert ntBegin == c.stateBegin for c in callers
                 this.nt = nt; this.ntBegin = ntBegin;
+                this.hashCode = computeHash();
             }
 
             public NonTerminalCall create() { return new NonTerminalCall(this); }
@@ -338,6 +353,10 @@ public class Parser {
 
             @Override
             public int hashCode() {
+                return hashCode;
+            }
+
+            public int computeHash() {
                 int result = nt.hashCode();
                 result = 31 * result + ntBegin;
                 return result;
@@ -354,9 +373,22 @@ public class Parser {
 
     ////////////////
 
-    private static class StateReturnWorkList extends TreeSet<StateReturn> {
-        public void enqueue(StateReturn stateReturn) { this.add(stateReturn); }
-        public StateReturn dequeue() { return this.pollFirst(); }
+    private static class StateReturnWorkList {
+        private final HashSet<StateReturn> contains = new HashSet<>();
+        private final TreeSet<StateReturn> ordering = new TreeSet<>();
+        public void enqueue(StateReturn stateReturn) {
+            if (!contains.add(stateReturn)) return;
+            ordering.add(stateReturn);
+        }
+        public void addAll(Set<? extends StateReturn> c) {
+            if (!contains.addAll(c)) return;
+            ordering.addAll(c);
+        }
+        public StateReturn dequeue() {
+            StateReturn next = ordering.pollFirst();
+            contains.remove(next);
+            return next;
+        }
     }
 
     /**
@@ -447,8 +479,8 @@ public class Parser {
          * of the *().
          */
         private abstract class Mapping {}
-        private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
-        private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
+        private class Nil extends Mapping { Set<Term> values = new HashSet<>(); }
+        private class One extends Mapping { Map<Term, Set<Term>> values = new HashMap<>(); }
 
         /** The mapping that this Function represents */
         private Mapping mapping = new Nil();
@@ -463,7 +495,7 @@ public class Parser {
          */
         static final Function IDENTITY = new Function();
         static {
-            ((Nil) IDENTITY.mapping).values.add(KList.apply());
+            ((Nil) IDENTITY.mapping).values.add(KList.apply(ConsPStack.empty()));
         }
 
         /**
@@ -477,15 +509,15 @@ public class Parser {
          * a {@link One} mapping for the given contexts
          * @param contexts The contexts for which the {@link One} should have mappings
          */
-        private void promote(Set<KList> contexts) {
+        private void promote(Set<Term> contexts) {
             assert this.mapping instanceof Nil;
-            Set<KList> oldValues = ((Nil) this.mapping).values;
+            Set<Term> oldValues = ((Nil) this.mapping).values;
             this.mapping = new One();
-            for (KList key : contexts) {
+            for (Term key : contexts) {
                 // Java, why you no have copy constructor?!
-                Set<KList> value = new HashSet<>();
+                Set<Term> value = new HashSet<>();
                 value.addAll(oldValues);
-                ((One) this.mapping).values.put(key, value);
+                ((One) this.mapping).values.put((KList)key, value);
             }
         }
 
@@ -495,7 +527,7 @@ public class Parser {
          * @param adder    The function to be applied to each value that a particular context is mapped to.
          * @return 'true' iff new mappings were added to this
          */
-        private boolean addAux(Function that, com.google.common.base.Function<Set<KList>, Set<KList>> adder) {
+        private boolean addAux(Function that, com.google.common.base.Function<Set<Term>, Set<Term>> adder) {
             if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
                 return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
             } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
@@ -503,16 +535,16 @@ public class Parser {
                 return this.addAux(that, adder);
             } else if (this.mapping instanceof One && that.mapping instanceof Nil) {
                 boolean result = false;
-                Set<KList> newValues = adder.apply(((Nil) that.mapping).values);
-                for (Set<KList> values : ((One) this.mapping).values.values()) {
+                Set<Term> newValues = adder.apply(((Nil) that.mapping).values);
+                for (Set<Term> values : ((One) this.mapping).values.values()) {
                     result |= values.addAll(newValues);
                 }
                 return result;
             } else if (this.mapping instanceof One && that.mapping instanceof One) {
                 boolean result = false;
-                for (KList key : ((One) that.mapping).values.keySet()) {
+                for (Term key : ((One) that.mapping).values.keySet()) {
                     if (!((One) this.mapping).values.containsKey(key)) {
-                        ((One) this.mapping).values.put(key, new HashSet<KList>());
+                        ((One) this.mapping).values.put(key, new HashSet<Term>());
                     }
                     result |= ((One) this.mapping).values.get(key).addAll(
                         adder.apply(((One) that.mapping).values.get(key)));
@@ -525,11 +557,11 @@ public class Parser {
          * Get the set of {@link KList}s that this function maps to regardless of input (i.e., the range of this function).
          * @return The set of {@link KList}s that this function maps to
          */
-        Set<KList> results() {
+        Set<Term> results() {
             if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
             else if (this.mapping instanceof One) {
-                Set<KList> result = new HashSet<>();
-                for (Set<KList> value: ((One) this.mapping).values.values()) {
+                Set<Term> result = new HashSet<>();
+                for (Set<Term> value: ((One) this.mapping).values.values()) {
                     result.addAll(value);
                 }
                 return result;
@@ -540,7 +572,7 @@ public class Parser {
          * Returns the output of this function if it were applied to an empty (i.e., zero depth) context.
          * @return The output of this function applied to an empty context
          */
-        Set<KList> applyToNull() {
+        Set<Term> applyToNull() {
             if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
             else { assert false : "unimplemented"; return null; } // TODO
         }
@@ -551,9 +583,7 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed
          */
         public boolean add(Function that) {
-            return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-                public Set<KList> apply(Set<KList> set) { return set; }
-            });
+            return addAux(that, set -> set);
         }
 
         /**
@@ -564,18 +594,14 @@ public class Parser {
          * @param prd      The production of the token. 'null' if intermediate token
          * @return 'true' iff the mappings in this function changed.
          */
-        boolean addToken(Function that, String string, Production prd) {
-            final Constant token =  Constant.apply(string, prd);
-            return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-                public Set<KList> apply(Set<KList> set) {
-                    Set<KList> result = new HashSet<>();
-                    for (KList klist : set) {
-                        KList newKList = KList.apply(klist);
-                        newKList.add(token);
-                        result.add(newKList);
-                    }
-                    return result;
+        boolean addToken(Function that, String string) {
+            final Constant token =  Constant.apply(string, null);
+            return addAux(that, set -> {
+                Set<Term> result = new HashSet<>();
+                for (Term klist : set) {
+                    result.add(((KList)klist).add(token));
                 }
+                return result;
             });
         }
 
@@ -591,26 +617,22 @@ public class Parser {
          * @return 'true' iff the mapping in this function changed
          */
         boolean addNTCall(Function call, final Function exit) {
-            return addAux(call, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-                public Set<KList> apply(Set<KList> set) {
-                    Set<KList> result = new HashSet<>();
-                    for (KList context : set) {
-                        // find subset of exit that matches
-                        Set<KList> matches;
-                        if (exit.mapping instanceof Nil) {
-                            matches = ((Nil) exit.mapping).values;
-                        } else if (exit.mapping instanceof One) {
-                            matches = ((One) exit.mapping).values.get(context);
-                        } else { throw unknownMappingType(); }
-                        // if we found some, make an amb node and append them to the KList
-                        if (!matches.isEmpty()) {
-                            KList newKList = KList.apply(context);
-                            newKList.add(Ambiguity.apply(new HashSet<Term>(matches)));
-                            result.add(newKList);
-                        }
+            return addAux(call, set -> {
+                Set<Term> result = new HashSet<>();
+                for (Term context : set) {
+                    // find subset of exit that matches
+                    Set<Term> matches;
+                    if (exit.mapping instanceof Nil) {
+                        matches = ((Nil) exit.mapping).values;
+                    } else if (exit.mapping instanceof One) {
+                        matches = ((One) exit.mapping).values.get(context);
+                    } else { throw unknownMappingType(); }
+                    // if we found some, make an amb node and append them to the KList
+                    if (!matches.isEmpty()) {
+                        result.add(((KList)context).add(Ambiguity.apply(matches)));
                     }
-                    return result;
                 }
+                return result;
             });
         }
 
@@ -628,13 +650,9 @@ public class Parser {
          */
         boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
             if (rule instanceof ContextFreeRule) {
-                return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-                    public Set<KList> apply(Set<KList> set) {
-                        return ((ContextFreeRule) rule).apply(set, metaData);
-                    }
-                });
+                return addAux(that, set -> ((ContextFreeRule) rule).apply(set, metaData));
             } else if (rule instanceof ContextSensitiveRule) {
-                Set<KList> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
+                Set<Term> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
 
                 if (this.mapping instanceof Nil) { promote(ntCallContexts); }
 
@@ -642,7 +660,7 @@ public class Parser {
                 One promotedThat;
                 if (that.mapping instanceof Nil) {
                     promotedThat = new One();
-                    for (KList context : ntCallContexts) {
+                    for (Term context : ntCallContexts) {
                         promotedThat.values.put(context, ((Nil) that.mapping).values);
                     }
                 } else if (that.mapping instanceof One) {
@@ -650,12 +668,12 @@ public class Parser {
                 } else { throw unknownMappingType(); }
 
                 boolean result = false;
-                for (KList key : promotedThat.values.keySet()) {
+                for (Term key : promotedThat.values.keySet()) {
                     if (((One) this.mapping).values.get(key) == null) {
-                        ((One) this.mapping).values.put(key, new HashSet<KList>());
+                        ((One) this.mapping).values.put(key, new HashSet<>());
                     }
                     result |= ((One) this.mapping).values.get(key).
-                        addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key), metaData));
+                        addAll(((ContextSensitiveRule) rule).apply((KList)key, promotedThat.values.get(key), metaData));
                 }
 
                 stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
@@ -668,13 +686,16 @@ public class Parser {
     ////////////////
 
     private final ParseState s;
+    private final Source source;
 
     public Parser(CharSequence input) {
         s = new ParseState(input, 1, 1);
+        this.source = null;
     }
 
-    public Parser(CharSequence input, int startLine, int startColumn) {
+    public Parser(CharSequence input, Source source, int startLine, int startColumn) {
         s = new ParseState(input, startLine, startColumn);
+        this.source = source;
     }
 
     /**
@@ -694,10 +715,10 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = Ambiguity.apply(new HashSet<Term>());
+        Ambiguity result = Ambiguity.apply(new HashSet<>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                result.items().add(KList.apply(Ambiguity.apply((Set<Term>)(Object)stateReturn.function.applyToNull())));
+                result.items().add(KList.apply(ConsPStack.singleton(Ambiguity.apply(stateReturn.function.applyToNull()))));
             }
         }
 
@@ -710,8 +731,9 @@ public class Parser {
                     "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
             Location loc = new Location(perror.line, perror.column,
                     perror.line, perror.column + 1);
+            Source source = perror.source;
             throw new ParseFailedException(new KException(
-                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, (Source) null, loc));
+                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
         }
 
         return result;
@@ -733,10 +755,10 @@ public class Parser {
         for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof RegExState && key.stateBegin == current) {
                 tokens.add(new ImmutablePair<>(
-                    ((RegExState) key.state).prd, ((RegExState) key.state).pattern));
+                    null, ((RegExState) key.state).pattern));
             }
         }
-        return new ParseError(current, s.lines[current], s.columns[current], tokens);
+        return new ParseError(source, current, s.lines[current], s.columns[current], tokens);
     }
 
     /**
@@ -745,6 +767,7 @@ public class Parser {
     public static class ParseError {
         // TODO: replace the fields below with Location class
         /// The character offset of the error
+        public final Source source;
         public final int position;
         /// The column of the error
         public final int column;
@@ -753,8 +776,9 @@ public class Parser {
         /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
         public final Set<Pair<Production, Pattern>> tokens;
 
-        public ParseError(int position, int line, int column, Set<Pair<Production, Pattern>> tokens) {
+        public ParseError(Source source, int position, int line, int column, Set<Pair<Production, Pattern>> tokens) {
             assert tokens != null;
+            this.source = source;
             this.position = position;
             this.tokens = tokens;
             this.column = column;
@@ -794,14 +818,13 @@ public class Parser {
         } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
             return stateReturn.function.addToken(stateReturn.key.stateCall.function,
                 s.input.subSequence(stateReturn.key.stateCall.key.stateBegin,
-                    stateReturn.key.stateEnd).toString(),
-                ((PrimitiveState) stateReturn.key.stateCall.key.state).prd);
+                    stateReturn.key.stateEnd).toString());
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             int startPosition = stateReturn.key.stateCall.key.ntCall.key.ntBegin;
             int endPosition = stateReturn.key.stateEnd;
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
                 ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,
-                new Rule.MetaData(
+                new Rule.MetaData(source,
                     new Rule.MetaData.Location(startPosition, s.lines[startPosition], s.columns[startPosition]),
                     new Rule.MetaData.Location(endPosition, s.lines[endPosition], s.columns[endPosition]),
                     s.input));

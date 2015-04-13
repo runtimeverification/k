@@ -2,6 +2,8 @@
 
 package org.kframework.parser
 
+import java.util
+
 import com.google.common.collect.Sets
 
 import collection.JavaConverters._
@@ -90,17 +92,23 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
-  val cache = mutable.Map[Term, (Either[E, Term], W)]()
+  val cache = new util.IdentityHashMap[Term, (Either[E, Term], W)]()
 
   def applyTerm(t: Term): (Either[E, Term], W) = apply(t)
 
-  def apply(t: Term): (Either[E, Term], W) =
-    cache.getOrElseUpdate(t,
+  def apply(t: Term): (Either[E, Term], W) = {
+    if (cache.containsKey(t)) {
+      return cache.get(t);
+    }
+    val res =
       t match {
         case a: Ambiguity => apply(a)
         case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
-      })
+      }
+    cache.put(t, res)
+    res
+  }
 
   def apply(p: ProductionReference): (Either[E, Term], W) = p match {
     case tc: TermCons => apply(tc)
@@ -149,15 +157,21 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
-  val cache = mutable.Map[Term, Either[E, Term]]()
+  val cache = new util.IdentityHashMap[Term, Either[E, Term]]
 
-  def apply(t: Term): Either[E, Term] =
-    cache.getOrElseUpdate(t,
+  def apply(t: Term): Either[E, Term] = {
+    if (cache.containsKey(t)) {
+      return cache.get(t);
+    }
+    val res =
       t match {
         case a: Ambiguity => apply(a)
         case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
-      })
+      }
+    cache.put(t, res)
+    res
+  }
 
   def apply(p: ProductionReference): Either[E, Term] = p match {
     case tc: TermCons => apply(tc)
@@ -187,15 +201,21 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
   import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
-  val cache = mutable.Map[Term, Term]()
+  val cache = new util.IdentityHashMap[Term, Term]
 
-  def apply(t: Term): Term =
-    cache.getOrElseUpdate(t,
+  def apply(t: Term): Term = {
+    if (cache.containsKey(t)) {
+      return cache.get(t);
+    }
+    val res =
       t match {
         case a: Ambiguity => apply(a)
         case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
-      })
+      }
+    cache.put(t, res)
+    res
+  }
 
   def apply(p: ProductionReference): Term = p match {
     case tc: TermCons => apply(tc)

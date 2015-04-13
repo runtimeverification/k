@@ -164,9 +164,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new AddOptionalTags(context));
         steps.add(new DeclareCellLabels(context));
 
-        /* remove rules that are from k dist */
-        steps.add(new RemovePreincludedRules(context));
-
         steps.add(new AddLocalRewritesUnderCells(context));
         steps.add(new GenerateKRewriteMachineInstructions(context));
 

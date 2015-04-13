@@ -174,7 +174,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  def klabel: Option[KLabel] = att.get[String]("#klabel") map {org.kframework.kore.KORE.KLabel(_)}
+  lazy val klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel

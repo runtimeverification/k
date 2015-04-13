@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Source;
 import org.kframework.backend.Backend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Require;
-import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
@@ -92,7 +92,7 @@ public class OuterParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Outer.parse(Sources.fromFile(file), FileUtils.readFileToString(file), context);
+            List<DefinitionItem> defItemList = Outer.parse(Source.apply(file.getAbsolutePath()), FileUtils.readFileToString(file), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {

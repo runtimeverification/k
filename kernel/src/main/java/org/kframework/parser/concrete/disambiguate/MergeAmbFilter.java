@@ -4,9 +4,9 @@ package org.kframework.parser.concrete.disambiguate;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.kframework.attributes.Location;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Location;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;

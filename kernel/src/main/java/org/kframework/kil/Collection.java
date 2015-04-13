@@ -4,6 +4,8 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;

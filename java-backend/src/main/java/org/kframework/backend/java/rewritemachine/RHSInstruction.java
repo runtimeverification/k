@@ -8,8 +8,8 @@ import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Source;
+import org.kframework.attributes.Location;
 
 public final class RHSInstruction implements Serializable {
 

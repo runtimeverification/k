@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.parser.utils;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Location;
 import org.kframework.kil.ParseError;
-import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.utils.errorsystem.ParseFailedException;

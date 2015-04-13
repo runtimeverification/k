@@ -30,10 +30,10 @@ public class CorrectCastPriorityVisitor extends SetsTransformerWithErrors<ParseF
                     || tc.production().klabel().get().name().equals("#OuterCast"))) {
             // match only on the outermost elements
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2(tc).apply(tc.items().get(0));
+                        new PriorityVisitor2(tc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(0, rez.right().get());
+                tc = tc.with(0, rez.right().get());
         }
         return super.apply(tc);
     }
@@ -49,7 +49,7 @@ public class CorrectCastPriorityVisitor extends SetsTransformerWithErrors<ParseF
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 String msg = parent.production().klabel().get() + " is not allowed to be an immediate child of cast." +
                         "    Use parentheses: (x):Sort to set the proper scope of the operations.";
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
             return Right.apply(tc);

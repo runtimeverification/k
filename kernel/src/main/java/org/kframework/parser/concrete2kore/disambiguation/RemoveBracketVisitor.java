@@ -13,7 +13,7 @@ public class RemoveBracketVisitor extends SafeTransformer {
                 tc.production().klabel().get().name().equals("#InnerCast") ||
                 tc.production().klabel().get().name().equals("#OuterCast"))
         {
-            return apply(tc.items().get(0));
+            return apply(tc.get(0));
         }
         return super.apply(tc);
     }

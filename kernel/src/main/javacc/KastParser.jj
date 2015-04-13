@@ -14,9 +14,9 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.Location;
+import org.kframework.attributes.Location;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
@@ -93,7 +93,8 @@ MORE :
 }
 
 <ID_KLABEL_STATE > MORE :
-{    <["a"-"z", "A"-"Z", "0"-"9"]>
+{
+    <["a"-"z", "A"-"Z", "0"-"9"]>
 }
 
 <ID_KLABEL_STATE> TOKEN :

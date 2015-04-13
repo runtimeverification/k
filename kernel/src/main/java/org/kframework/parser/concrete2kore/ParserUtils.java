@@ -2,12 +2,11 @@
 package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
-import org.kframework.kil.Source;
-import org.kframework.kil.Sources;
 import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.K;
@@ -16,10 +15,8 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -48,28 +43,31 @@ public class ParserUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return parseWithString(theTextToParse, mainModule, startSymbol, definitionText);
+        return parseWithString(theTextToParse, mainModule, startSymbol, Source.apply(definitionFile.getAbsolutePath()), definitionText);
     }
 
     public static K parseWithString(CharSequence theTextToParse,
                                     String mainModule,
                                     String startSymbol,
+                                    Source source,
                                     String definitionText) {
-        Module kastModule = parseMainModuleOuterSyntax(definitionText, mainModule);
-        return parseWithModule(theTextToParse, startSymbol, kastModule);
+        Module kastModule = parseMainModuleOuterSyntax(definitionText, source, mainModule);
+        return parseWithModule(theTextToParse, startSymbol, source, kastModule);
     }
 
     public static K parseWithModule(CharSequence theTextToParse,
                                     String startSymbol,
+                                    Source source,
                                     org.kframework.definition.Module kastModule) {
         ParseInModule parser = new ParseInModule(kastModule);
-        return parseWithModule(theTextToParse, startSymbol, parser);
+        return parseWithModule(theTextToParse, startSymbol, source, parser);
     }
 
     public static K parseWithModule(CharSequence theTextToParse,
                                     String startSymbol,
+                                    Source source,
                                     ParseInModule kastModule) {
-        Term cleaned = kastModule.parseString(theTextToParse, startSymbol)._1().right().get();
+        Term cleaned = kastModule.parseString(theTextToParse, startSymbol, source)._1().right().get();
         return TreeNodesToKORE.apply(cleaned);
     }
 
@@ -81,9 +79,9 @@ public class ParserUtils {
      * @param mainModule     main module name.
      * @return KORE representation of the main module.
      */
-    public static Module parseMainModuleOuterSyntax(String definitionText, String mainModule) {
+    public static Module parseMainModuleOuterSyntax(String definitionText, Source source, String mainModule) {
         Definition def = new Definition();
-        def.setItems(Outer.parse(Sources.generatedBy(ParserUtils.class), definitionText, null));
+        def.setItems(Outer.parse(source, definitionText, null));
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
@@ -120,7 +118,7 @@ public class ParserUtils {
 
                 if (definitionFile.isPresent())
                     results.addAll(slurp(FileUtils.readFileToString(definitionFile.get()),
-                            Sources.fromFile(definitionFile.get()),
+                            Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
                 else
@@ -146,7 +144,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, false);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);

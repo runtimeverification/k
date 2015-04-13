@@ -16,6 +16,8 @@ import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.attributes.Source;
+import org.kframework.attributes.Location;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

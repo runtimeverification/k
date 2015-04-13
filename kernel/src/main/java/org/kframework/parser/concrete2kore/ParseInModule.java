@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
@@ -19,9 +20,11 @@ import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 import scala.util.Either;
+import scala.util.Left;
 import scala.util.Right;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -37,23 +40,31 @@ public class ParseInModule implements Serializable {
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(module);
     }
 
+    public Module module() {
+        return module;
+    }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.
      * @param startSymbol    the start symbol from which to parse.
      * @return the Term representation of the parsed input.
      */
-    // TODO: require source location to this call
     // TODO: figure out how to handle parsing errors
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol) {
-        return parseString(input, startSymbol, 1, 1);
+            parseString(CharSequence input, String startSymbol, Source source) {
+        return parseString(input, startSymbol, source, 1, 1);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol, int startLine, int startColumn) {
-        Parser parser = new Parser(input, startLine, startColumn);
-        Term parsed = parser.parse(grammar.get(startSymbol), 0);
+            parseString(CharSequence input, String startSymbol, Source source, int startLine, int startColumn) {
+        Parser parser = new Parser(input, source, startLine, startColumn);
+        Term parsed;
+        try {
+            parsed = parser.parse(grammar.get(startSymbol), 0);
+        } catch (ParseFailedException e) {
+            return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
+        }
 
         if (parsed.equals(Ambiguity.apply())) {
             Parser.ParseError errors = parser.getErrors();

@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.KoreFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.ProgramLoader;

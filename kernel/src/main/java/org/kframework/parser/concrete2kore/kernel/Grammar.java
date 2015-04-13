@@ -1,9 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
+import org.kframework.utils.algorithms.SCCTarjan;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,13 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.kframework.definition.Production;
-import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
-import org.kframework.utils.algorithms.SCCTarjan;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 
 /**
@@ -154,9 +153,9 @@ public class Grammar implements Serializable {
             start = (NextableState) start.next.iterator().next();
         }
         PrimitiveState whitespace = new RegExState(
-            "whitespace", start.nt, pattern, null);
+            "whitespace", start.nt, pattern);
         RuleState deleteToken = new RuleState(
-            "whitespace-D", start.nt, new DeleteRule(1, true));
+            "whitespace-D", start.nt, new DeleteRule(1));
         whitespace.next.add(deleteToken);
         deleteToken.next.addAll(start.next);
         start.next.clear();
@@ -370,7 +369,7 @@ public class Grammar implements Serializable {
         /** Counter for generating unique ids for the state. */
         private static int counter = 0;
         /** The unique id of this state. */
-        private final int unique = counter++;
+        public final int unique = counter++;
 
         /** A back reference to the NonTerminal that this state is part of. */
         public final NonTerminal nt;
@@ -509,8 +508,6 @@ public class Grammar implements Serializable {
      * TODO: revisit this description once we get the new KORE
      */
     public abstract static class PrimitiveState extends NextableState {
-        /** The production of the Constant. Used as a reference for trace back */
-        public final Production prd;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -524,9 +521,8 @@ public class Grammar implements Serializable {
          */
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(String name, NonTerminal nt, Production prd) {
+        public PrimitiveState(String name, NonTerminal nt) {
             super(name, nt, true);
-            this.prd = prd;
         }
 
         /**
@@ -549,16 +545,16 @@ public class Grammar implements Serializable {
         /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
         public final Set<String> rejects;
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd) {
-            super(name, nt, prd);
+        public RegExState(String name, NonTerminal nt, Pattern pattern) {
+            super(name, nt);
             assert pattern != null;
             this.pattern = pattern;
             this.rejects = new HashSet<>();
         }
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd, Set<String> rejects) {
-            super(name, nt, prd);
-            assert pattern != null;
+        public RegExState(String name, NonTerminal nt, Pattern pattern, Set<String> rejects) {
+            super(name, nt);
+            assert pattern != null && rejects != null;
             this.pattern = pattern;
             this.rejects = rejects;
         }
@@ -569,11 +565,11 @@ public class Grammar implements Serializable {
             matcher.region(startPosition, text.length());
             matcher.useAnchoringBounds(false);
             matcher.useTransparentBounds(true);
-            Set<MatchResult> results = new HashSet<>();
+            Set<MatchResult> results = Collections.emptySet();
             if (matcher.lookingAt()) {
                 // reject keywords
                 if (!rejects.contains(matcher.group()))
-                    results.add(new MatchResult(matcher.end()));
+                    results = Collections.singleton(new MatchResult(matcher.end()));
             }
             return results;
         }
