@@ -13,7 +13,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.Function1;
-import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
 import java.util.HashMap;
@@ -21,8 +20,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -103,63 +100,14 @@ public class RuleGrammarGenerator {
         prods.addAll(makeCasts(KBott, KTop, KItem));
         prods.addAll(makeCasts(KBott, KTop, KTop));
 
-        Module tempWithCasts = new Module(mod.name() + "-TEMPORARY-WITH-CASTS", Set(baseK.get(cellModule), baseK.get("K"), mod), immutable(prods), null);
-
-        Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
-        stream(mod.productions()).forEach(p -> stream(p.items()).forEach(i -> {
-            if (i instanceof Terminal) terminals.add(((Terminal) i).value());
-        }));
-
-        // Most of the problems with ensuring greedy match of tokens comes from __ productions combined
-        // with variables. Find the variable declarations inside the definition and look for prefix terminals
-        String varid = "(?<![A-Za-z0-9_])(\\$|!|\\?)?([A-Z][A-Za-z0-9']*|_)";
-        Optional<Sentence> varIdProd = stream(tempWithCasts.sentences()).filter(sent -> {
-                    if (sent instanceof Production) {
-                        Production p = (Production) sent;
-                        if (p.sort().name().equals("KVariable")
-                                && p.items().size() == 1
-                                && p.items().head() instanceof RegexTerminal
-                                && p.att().contains("token"))
-                            return true;
-                    }
-                    return false;
-                }
-        ).findFirst();
-        if (varIdProd.isPresent())
-            varid = ((RegexTerminal) ((Production) varIdProd.get()).items().head()).regex();
-
-        Pattern pattern = Pattern.compile(varid);
         scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
-            if (s instanceof Production) {
+            if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
                 Production p = (Production) s;
-                if (s.att().contains("cell") || s.att().contains("maincell")) {
-                    // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
-                    assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
-                    assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                    Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
-                    p = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
-                }
-                // rewrite productions to contain follow restrictions for prefix terminals
-                List<ProductionItem> items = stream(p.items()).map(pi -> {
-                    if (pi instanceof Terminal) {
-                        Terminal t = (Terminal) pi;
-                        for (String biggerString : terminals) {
-                            if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
-                                String ending = biggerString.substring(t.value().length());
-                                if (pattern.matcher(ending).matches()) {
-                                    System.out.println("ending = " + (t.value() + "(?![\\$|\\!|\\?A-Z])"));
-                                    return RegexTerminal(t.value() + "(?![\\$|\\!|\\?A-Z])"); // should be enough
-                                }
-                            }
-                        }
-                    }
-                    return pi;
-                }).collect(Collections.toList());
-                if (p.klabel().isDefined())
-                    p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
-                else
-                    p = Production(p.sort(), Seq(items), p.att());
-                return p;
+                // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
+                assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
+                assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
+                Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
+                return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
             }
             return s;
         }).collect(Collections.toSet());
