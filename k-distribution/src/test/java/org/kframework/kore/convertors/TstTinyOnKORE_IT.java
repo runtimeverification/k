@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
 import java.util.function.Function;
 
 
-public class TstTinyOnKORE {
+public class TstTinyOnKORE_IT {
 
 
     @org.junit.Rule
@@ -25,7 +25,7 @@ public class TstTinyOnKORE {
 
 
     protected File testResource(String baseName) throws URISyntaxException {
-        return new File(TstTinyOnKORE.class.getResource(baseName).toURI());
+        return new File(TstTinyOnKORE_IT.class.getResource(baseName).toURI());
     }
 
 
