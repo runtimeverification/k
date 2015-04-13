@@ -1,8 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
@@ -108,7 +106,7 @@ public class RuleGrammarGenerator {
         Module tempWithCasts = new Module(mod.name() + "-TEMPORARY-WITH-CASTS", Set(baseK.get(cellModule), baseK.get("K"), mod), immutable(prods), null);
 
         Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
-        stream(tempWithCasts.productions()).forEach(p -> stream(p.items()).forEach(i -> {
+        stream(mod.productions()).forEach(p -> stream(p.items()).forEach(i -> {
             if (i instanceof Terminal) terminals.add(((Terminal) i).value());
         }));
 
@@ -131,45 +129,28 @@ public class RuleGrammarGenerator {
             varid = ((RegexTerminal) ((Production) varIdProd.get()).items().head()).regex();
 
         Pattern pattern = Pattern.compile(varid);
-        scala.collection.immutable.Set<Sentence> prods2 = stream(tempWithCasts.sentences()).map(s -> {
+        scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
             if (s instanceof Production) {
                 Production p = (Production) s;
-                // rewrite productions that are supposed to be cells into something more permissive
-                // TCell ::= "<T>" ACell BCell... "</T>" // goes to
-                // Cell  ::= "<T>" #OptionalDots K #OptionalDots "</T>"
                 if (s.att().contains("cell") || s.att().contains("maincell")) {
-                    // assuming that productions tagged with 'cell' start and end with terminals,
-                    // and only have non-terminals in the middle
+                    // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
                     assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                    Seq<ProductionItem> pi = Seq(
-                            p.items().head(),
-                            NonTerminal(Sort("#OptionalDots")),
-                            NonTerminal(Sort("K")),
-                            NonTerminal(Sort("#OptionalDots")),
-                            p.items().last());
+                    Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
                     p = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
                 }
                 // rewrite productions to contain follow restrictions for prefix terminals
-                // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
-                // this also takes care of casting and productions that have ":"
                 List<ProductionItem> items = stream(p.items()).map(pi -> {
                     if (pi instanceof Terminal) {
                         Terminal t = (Terminal) pi;
-                        Set<String> follow = new HashSet<>();
                         for (String biggerString : terminals) {
                             if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
                                 String ending = biggerString.substring(t.value().length());
                                 if (pattern.matcher(ending).matches()) {
-                                    follow.add(ending.substring(0, 1));
+                                    System.out.println("ending = " + (t.value() + "(?![\\$|\\!|\\?A-Z])"));
+                                    return RegexTerminal(t.value() + "(?![\\$|\\!|\\?A-Z])"); // should be enough
                                 }
                             }
-                        }
-                        // add follow restrictions for the characters that might produce ambiguities
-                        if (!follow.isEmpty()) {
-                            StringBuilder sb = new StringBuilder();
-                            follow.stream().forEach(ch -> sb.append(StringUtils.isAlphanumeric(ch) ? ch : "\\" + ch));
-                            return RegexTerminal(Pattern.quote(t.value()) + "(?![" + sb.toString() + "])");
                         }
                     }
                     return pi;
@@ -182,9 +163,10 @@ public class RuleGrammarGenerator {
             }
             return s;
         }).collect(Collections.toSet());
+        Module noCells = new Module(mod.name() + "-NO-CELLS", Set(baseK.getModule(cellModule).get()), prods2, null);
 
-        Module parsingModule = new Module(mod.name() + "-" + cellModule, Set(), prods2, null);
-        return new ParseInModule(parsingModule);
+        Module newM = new Module(mod.name() + "-" + cellModule, Set(noCells, baseK.getModule("K").get(), baseK.getModule(cellModule).get()), immutable(prods), null);
+        return new ParseInModule(newM);
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {

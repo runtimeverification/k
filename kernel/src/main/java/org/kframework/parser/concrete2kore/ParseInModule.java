@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import com.google.common.collect.Sets;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
@@ -17,11 +16,9 @@ import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceF
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 import scala.util.Either;
-import scala.util.Left;
 import scala.util.Right;
 
 import java.io.Serializable;
@@ -55,20 +52,14 @@ public class ParseInModule implements Serializable {
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(CharSequence input, String startSymbol, int startLine, int startColumn) {
-        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
-        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol);
-        if (startSymbolNT == null) {
-            String msg = "Could not find start symbol: " + startSymbol;
-            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
-            return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
-        }
         Parser parser = new Parser(input, startLine, startColumn);
-        Term parsed = parser.parse(startSymbolNT, 0);
+        Term parsed = parser.parse(grammar.get(startSymbol), 0);
 
         if (parsed.equals(Ambiguity.apply())) {
             Parser.ParseError errors = parser.getErrors();
             throw new AssertionError("There are parsing errors: " + errors.toString());
         }
+        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
 
         Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
         if (rez.isLeft())

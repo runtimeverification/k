@@ -253,13 +253,9 @@ public class RuleGrammarTest {
                 "module TEST " +
                 "syntax Stmt ::= Stmt Stmt [klabel('Stmt)] " +
                 "syntax Exp ::= K \"==\" K [klabel('Eq)] " +
-                "syntax Exp ::= K \":\" K [klabel('Colon)] " +
                 "syntax K " +
                 "syntax Exp ::= K \"==K\" K [klabel('EqK)] " +
                 "endmodule";
-        parseRule("A::K ==K A", def, 0, false);
-        parseRule("A::K == K A", def, 0, true);
-        parseRule("A:K", def, 0, false);
-        parseRule("A: K", def, 2, false);
+        parseRule("A::K == K A", def, 0, false);
     }
 }
