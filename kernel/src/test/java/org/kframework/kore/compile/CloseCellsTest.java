@@ -83,7 +83,7 @@ public class CloseCellsTest {
     @Test
     public void testClosedCellError1() {
         K term = cell("<thread>", cell("<k>"));
-        exception.expect(IllegalArgumentException.class);
+        exception.expect(org.kframework.utils.errorsystem.KExceptionManager.KEMException.class);
         exception.expectMessage("Closed parent cell missing required children [EnvCell] <thread>(#noDots(),<k>(#noDots(),#cells(),#noDots()),#noDots())");
         new CloseCells(cfgInfo, sortInfo, labelInfo).close(term);
     }

@@ -76,7 +76,7 @@ public class AddParentsCellsTest {
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = org.kframework.utils.errorsystem.KExceptionManager.KEMException.class)
     public void testAmbiguityError() {
         K term = cell("<ts>", cell("<k>", intToToken(1)), cell("<k>", intToToken(2)), cell("<env>", intToToken(2)));
         pass.concretizeCell(term);
