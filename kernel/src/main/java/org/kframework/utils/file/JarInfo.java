@@ -56,9 +56,9 @@ public class JarInfo {
             return null;
         }
         if (!path.endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
-            return path.resolve("../../../k-distribution/include");
+            return path.getParent().resolve("../../k-distribution/include");
         } else {
-            return path.resolve("../../include");
+            return path.getParent().resolve("../../include");
         }
     }
 
