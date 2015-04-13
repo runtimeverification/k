@@ -169,7 +169,7 @@ public class AddParentCells {
                 if (!level.isPresent()) {
                     level = level2;
                 } else if (!level.equals(level2)) {
-                    throw new AssertionError("Can't mix cells at different levels under a rewrite");
+                    throw KExceptionManager.criticalError("Can't mix cells at different levels under a rewrite");
                 }
                 // else level is already correct
             }
