@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import dk.brics.automaton.BasicAutomata;
+import dk.brics.automaton.RegExp;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -22,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.iterable;
@@ -103,33 +104,29 @@ public class KSyntax2GrammarStatesFilter {
                 NextableState previous = pair.getValue();
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
-                    Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + "-T", nt,
-                            Pattern.compile(terminal.value(), Pattern.LITERAL));
+                    Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + ": " + terminal.value(), nt,
+                            BasicAutomata.makeString(terminal.value()), BasicAutomata.makeEmpty());
                     previous.next.add(pstate);
                     RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
                     pstate.next.add(del);
                     previous = del;
                 } else if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
-                    Grammar.NonTerminalState nts = new Grammar.NonTerminalState(sort + "-S", nt,
+                    Grammar.NonTerminalState nts = new Grammar.NonTerminalState(sort + " ::= " + srt.sort(), nt,
                             grammar.get(srt.sort().name()), false);
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof RegexTerminal) {
                     RegexTerminal lx = (RegexTerminal) prdItem;
-                    Pattern p;
                     try {
-                        p = Pattern.compile(lx.regex());
-                    } catch (PatternSyntaxException ex) {
-                        p = Pattern.compile("NoMatch");
-                        String msg = "Lexical pattern not compatible with the new parser.";
-                        throw KExceptionManager.compilerError(msg, ex); // TODO: add location
+                        Grammar.PrimitiveState pstate = new Grammar.RegExState(sort.name() + ":" + lx.regex() + "(?!" + lx.followPattern() + ")", nt, new RegExp(lx.regex()).toAutomaton(), new RegExp(lx.followPattern()).toAutomaton());
+                        RuleState del = new RuleState("DelRegexTerminalRS", nt, new Rule.DeleteRule(1));
+                        previous.next.add(pstate);
+                        pstate.next.add(del);
+                        previous = del;
+                    } catch (IllegalArgumentException e) {
+                        throw KExceptionManager.criticalError("Could not compile regex: " + lx.regex(), e);
                     }
-                    Grammar.PrimitiveState pstate = new Grammar.RegExState(sort.name() + "-T", nt, p);
-                    RuleState del = new RuleState("DelRegexTerminalRS", nt, new Rule.DeleteRule(1));
-                    previous.next.add(pstate);
-                    pstate.next.add(del);
-                    previous = del;
                 } else {
                     assert false : "Didn't expect this ProductionItem type: "
                             + prdItem.getClass().getName();

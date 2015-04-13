@@ -3,6 +3,10 @@ package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.BasicAutomata;
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 
@@ -15,8 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -134,10 +136,10 @@ public class Grammar implements Serializable {
         }
     }
 
-    static final String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
-    static final String singleLine = "(//.*)";
-    static final String whites = "([ \n\r\t])";
-    static final Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
+    static final String multiLine = "(/\\*([^\\*]|(\\*+([^\\*/])))*\\*+/)";
+    static final String singleLine = "(//[^\n\r]*)";
+    static final String whites = "([\\ \n\r\t])";
+    static final Automaton pattern = new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton();
 
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
@@ -430,6 +432,11 @@ public class Grammar implements Serializable {
         public int hashCode() {
             return unique;
         }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     /**
@@ -541,37 +548,51 @@ public class Grammar implements Serializable {
      */
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
-        public final Pattern pattern;
-        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
-        public final Set<String> rejects;
+        public final RunAutomaton pattern;
+        public final RunAutomaton followPattern;
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern) {
-            super(name, nt);
-            assert pattern != null;
-            this.pattern = pattern;
-            this.rejects = new HashSet<>();
+        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
+
+        public RegExState(String name, NonTerminal nt, Automaton pattern) {
+            this(name, nt, pattern, BasicAutomata.makeEmpty());
         }
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, Set<String> rejects) {
+        public RegExState(String name, NonTerminal nt, Automaton pattern, Automaton followPattern) {
             super(name, nt);
-            assert pattern != null && rejects != null;
-            this.pattern = pattern;
-            this.rejects = rejects;
+            assert pattern != null;
+            this.pattern = new RunAutomaton(pattern, false);
+            this.followPattern = new RunAutomaton(followPattern, false);
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
         Set<MatchResult> matches(CharSequence text, int startPosition) {
-            Matcher matcher = pattern.matcher(text);
-            matcher.region(startPosition, text.length());
-            matcher.useAnchoringBounds(false);
-            matcher.useTransparentBounds(true);
-            Set<MatchResult> results = Collections.emptySet();
-            if (matcher.lookingAt()) {
-                // reject keywords
-                if (!rejects.contains(matcher.group()))
-                    results = Collections.singleton(new MatchResult(matcher.end()));
+            int i = lookingAt(text, startPosition, pattern);
+            if (i >= 0) {
+                int j = lookingAt(text, i, followPattern);
+                if (j < 0) {
+                    return Collections.singleton(new MatchResult(i));
+                }
             }
-            return results;
+            return Collections.emptySet();
+        }
+
+        int lookingAt(CharSequence text, int startPosition, RunAutomaton pattern) {
+            int state = pattern.getInitialState();
+            int len = text.length();
+
+            int acceptIdx = pattern.isAccept(state) ? startPosition : -1;
+            for(int i = startPosition; i < len; ++i) {
+                int nextState = pattern.step(state, text.charAt(i));
+                if(nextState == -1) {
+                    break;
+                }
+                if (pattern.isAccept(nextState)) {
+                    acceptIdx = i + 1;
+                }
+                state = nextState;
+            }
+
+            return acceptIdx;
         }
     }
 }

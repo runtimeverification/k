@@ -15,6 +15,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,11 @@ import static org.kframework.definition.Constructors.*;
  */
 public class ParserUtils {
 
+    private final FileUtil files;
+
+    public ParserUtils(FileUtil files) {
+        this.files = files;
+    }
     public static K parseWithFile(CharSequence theTextToParse,
                                   String mainModule,
                                   String startSymbol,
@@ -92,11 +98,11 @@ public class ParserUtils {
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 
-    private static List<org.kframework.kil.Module> slurp(
+    private List<org.kframework.kil.Module> slurp(
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) throws IOException {
+            List<File> lookupDirectories) {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
 
         List<org.kframework.kil.Module> results = new ArrayList<>();
@@ -117,7 +123,7 @@ public class ParserUtils {
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent())
-                    results.addAll(slurp(FileUtils.readFileToString(definitionFile.get()),
+                    results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
                             Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
@@ -129,11 +135,11 @@ public class ParserUtils {
         return results;
     }
 
-    public static Set<Module> loadModules(
+    public Set<Module> loadModules(
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) throws IOException {
+            List<File> lookupDirectories) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -154,13 +160,13 @@ public class ParserUtils {
         return new HashSet<>(koreModules.values());
     }
 
-    public static org.kframework.definition.Definition loadDefinition(
+    public org.kframework.definition.Definition loadDefinition(
             String mainModuleName,
             String syntaxModuleName,
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) throws IOException {
+            List<File> lookupDirectories) {
         Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories);
         Module mainModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
         Module syntaxModule = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst().get();

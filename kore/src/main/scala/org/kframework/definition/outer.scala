@@ -53,7 +53,13 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
-  val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
+  val tokenProductionsFor: Map[Sort, Set[Production]] =
+    productions
+      .collect({ case p if p.att.contains("token") => p})
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps) }
+
+  val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
@@ -206,7 +212,7 @@ sealed trait ProductionItem extends OuterKORE
 case class NonTerminal(sort: Sort) extends ProductionItem
 with NonTerminalToString
 
-case class RegexTerminal(regex: String) extends ProductionItem with RegexTerminalToString
+case class RegexTerminal(regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
 
 case class Terminal(value: String) extends ProductionItem // hooked
 with TerminalToString

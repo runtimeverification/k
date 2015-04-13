@@ -2,6 +2,7 @@ package org.kframework.kore
 
 import Unapply._
 import org.apache.commons.lang3.StringEscapeUtils
+import collection.JavaConverters._
 
 /**
  * Pretty prints inner KORE structures to labeled form.
@@ -19,7 +20,7 @@ object Unparse extends {
     //        l.map("(" + apply(_) + ")").mkString("~>")
     case KRewrite(left, right) => "=>(" + apply(left) + "," + apply(right) + ")"
     // apply(left) + "=>" + apply(right)
-    case KApply(klabel, list) => klabel.name + "(" + list.map(apply).mkString(",") + ")"
+    case kapp: KApply => kapp.klabel.name + "(" + kapp.klist.items.asScala.map(apply).mkString(",") + ")"
     case KVariable(name) => name
   }
 }

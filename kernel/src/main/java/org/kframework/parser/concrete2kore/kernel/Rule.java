@@ -12,6 +12,7 @@ import org.pcollections.ConsPStack;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -96,7 +97,7 @@ public abstract class Rule implements Serializable {
                 if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
                     return null;
                 }
-                term = Constant.apply(value, label, loc, source);
+                term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
             } else {
                 term = TermCons.apply(klist.items(), label, loc, source);
             }

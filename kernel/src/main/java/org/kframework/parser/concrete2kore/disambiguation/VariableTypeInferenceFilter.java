@@ -260,12 +260,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     private static Sort getSortOfCast(TermCons tc) {
         switch (tc.production().klabel().get().name()) {
         case "#SyntacticCast":
-        case "#SemanticCast":
         case "#OuterCast":
             return tc.production().sort();
         case "#InnerCast":
             return ((NonTerminal)tc.production().items().apply(0)).sort();
         default:
+            if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
+                return tc.production().sort();
+            }
             throw new AssertionError("Unexpected cast type");
         }
     }
@@ -276,7 +278,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             Set<VarInfo> collector = this.makeWarningSet();
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
                 collector = new CollectVariables2(getSortOfCast(tc), VarType.USER).apply(t)._2();
@@ -330,7 +332,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
                 Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc)).apply(t);
@@ -430,7 +432,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
                 new CollectUndeclaredVariables2(getSortOfCast(tc)).apply(t);

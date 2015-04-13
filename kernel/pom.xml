@@ -80,6 +80,11 @@
       <version>2.0.1</version>
     </dependency>
     <dependency>
+      <groupId>dk.brics.automaton</groupId>
+      <artifactId>automaton</artifactId>
+      <version>1.11-8</version>
+    </dependency>
+    <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
       <version>1.0.1</version>

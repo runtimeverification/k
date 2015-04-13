@@ -68,7 +68,7 @@ object TreeNodesToKORE {
     case t@KToken(sort, s) if sort == Sorts.KLabel =>
       KLabel(unquote(t))
 
-    case t@KApply(KLabel("#SemanticCast"), items) =>
+    case t@KApply(KLabel(s), items) if s.startsWith("#SemanticCastTo") =>
       downKLabel(items.head)
   }
 

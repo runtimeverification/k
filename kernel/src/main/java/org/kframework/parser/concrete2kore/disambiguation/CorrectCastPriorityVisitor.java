@@ -25,7 +25,7 @@ public class CorrectCastPriorityVisitor extends SetsTransformerWithErrors<ParseF
         if (!tc.production().isSyntacticSubsort()
                 && tc.production().klabel().isDefined()
                 && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast")
                     || tc.production().klabel().get().name().equals("#OuterCast"))) {
             // match only on the outermost elements

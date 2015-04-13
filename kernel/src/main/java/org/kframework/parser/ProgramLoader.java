@@ -48,6 +48,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.kframework.Collections.stream;
 
 public class ProgramLoader {
 
@@ -143,8 +146,10 @@ public class ProgramLoader {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
         } else if (whatParser == ParserType.NEWPROGRAM) {
-            Module synMod = new KILtoKORE(context, true, false).apply(definition).getModule(definition.getMainSyntaxModule()).get();
-            ParseInModule parser = RuleGrammarGenerator.getProgramsGrammar(synMod);
+            Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
+            org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
+            Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
+            ParseInModule parser = new RuleGrammarGenerator(stream(koreDef.modules()).collect(Collectors.toSet())).getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName(), source);
             if (parsed._1().isLeft()) {

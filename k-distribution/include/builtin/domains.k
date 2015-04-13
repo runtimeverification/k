@@ -213,7 +213,7 @@ module BOOL
 endmodule
 
 module INT-SYNTAX
-  syntax Int ::= r"[\\+-]?\\d+" [prefer, token]
+  syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token]
 endmodule
 
 module INT
@@ -272,9 +272,9 @@ module INT
 endmodule
 
 module FLOAT-SYNTAX
-  syntax Float ::= r"([\\+-]?\\d+(\\.\\d*)?|\\.\\d+)([eE][\\+-]?(\\d+(\\.\\d*)?|\\.\\d+))?([fFdD]|([pP]\\d+[xX]\\d+))?" [token]
-  syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP]\\d+[xX]\\d+))?" [token]
-  syntax Float ::= r"NaN([fFdD]|([pP]\\d+[xX]\\d+))?" [token]
+  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]d+))?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
+  syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
+  syntax Float ::= r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
 endmodule
 
 module FLOAT
@@ -355,7 +355,7 @@ module STRING-SYNTAX
   //              | [\\][u] 4*Hex // "\uFFFF"     Backslash 'u' followed by four  hexadecimal characters
   //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
   //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
-  syntax String ::= KString
+  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fa-f]{2})|([\\\\][u][0-9a-fa-f]{4})|([\\\\][u][0-9a-fa-f]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
 endmodule
 
 module STRING

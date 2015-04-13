@@ -67,10 +67,10 @@ case class KList(items: PStack[Term])
 }
 
 object Constant {
-  def apply(value: String, production: Production, location: Location, source: Source):Constant = {
+  def apply(value: String, production: Production, location: Optional[Location], source: Optional[Source]):Constant = {
     val res = Constant(value, production)
-    res.location = Optional.of(location)
-    res.source = Optional.of(source)
+    res.location = location
+    res.source = source
     res
   }
 }

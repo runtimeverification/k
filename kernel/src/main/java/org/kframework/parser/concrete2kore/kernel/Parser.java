@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Location;
@@ -34,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is the main code for running the parser.
@@ -151,6 +152,11 @@ public class Parser {
                 result = 31 * result + state.hashCode();
                 return result;
             }
+
+            @Override
+            public String toString() {
+                return ntCall.key.nt.name + "." + state.name + " @ "+ stateBegin;
+            }
         }
         final Key key;
         StateCall(Key key) { assert key != null; this.key = key; }
@@ -238,6 +244,11 @@ public class Parser {
                 int result = stateCall.key.hashCode();
                 result = 31 * result + stateEnd;
                 return result;
+            }
+
+            @Override
+            public String toString() {
+                return stateCall.key.toString() + "-" + stateEnd;
             }
         }
 
@@ -361,6 +372,11 @@ public class Parser {
                 result = 31 * result + ntBegin;
                 return result;
             }
+
+            @Override
+            public String toString() {
+                return nt.name + " @ " + ntBegin;
+            }
         }
         final Key key;
         NonTerminalCall(Key key) { assert key != null; this.key = key; }
@@ -478,9 +494,9 @@ public class Parser {
          * In other words, we are trying to parse a +() or -() that will become children
          * of the *().
          */
-        private abstract class Mapping {}
-        private class Nil extends Mapping { Set<Term> values = new HashSet<>(); }
-        private class One extends Mapping { Map<Term, Set<Term>> values = new HashMap<>(); }
+        private static abstract class Mapping {}
+        private static class Nil extends Mapping { Set<Term> values = new HashSet<>(); }
+        private static class One extends Mapping { Map<Term, Set<Term>> values = new HashMap<>(); }
 
         /** The mapping that this Function represents */
         private Mapping mapping = new Nil();
@@ -751,11 +767,11 @@ public class Parser {
             if (key.state instanceof PrimitiveState)
                 current = Math.max(current, key.stateBegin);
         }
-        Set<Pair<Production, Pattern>> tokens = new HashSet<>();
+        Set<Pair<Production, RegExState>> tokens = new HashSet<>();
         for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof RegExState && key.stateBegin == current) {
                 tokens.add(new ImmutablePair<>(
-                    null, ((RegExState) key.state).pattern));
+                    null, ((RegExState) key.state)));
             }
         }
         return new ParseError(source, current, s.lines[current], s.columns[current], tokens);
@@ -774,9 +790,9 @@ public class Parser {
         /// The line of the error
         public final int line;
         /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
-        public final Set<Pair<Production, Pattern>> tokens;
+        public final Set<Pair<Production, RegExState>> tokens;
 
-        public ParseError(Source source, int position, int line, int column, Set<Pair<Production, Pattern>> tokens) {
+        public ParseError(Source source, int position, int line, int column, Set<Pair<Production, RegExState>> tokens) {
             assert tokens != null;
             this.source = source;
             this.position = position;

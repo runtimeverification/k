@@ -30,7 +30,7 @@ object Constructors {
 
   def Terminal(s: String) = definition.Terminal(s)
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort)
-  def RegexTerminal(regexString: String) = definition.RegexTerminal(regexString)
+  def RegexTerminal(regexString: String) = definition.RegexTerminal(regexString, "#")
 
   def Tag(s: String) = definition.Tag(s)
 
