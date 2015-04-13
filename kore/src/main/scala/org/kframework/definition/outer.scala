@@ -132,6 +132,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   if (!nonTerminalsWithUndefinedSort.isEmpty)
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Module.this);
 }
 
 // hooked but different from core, Import is a sentence here

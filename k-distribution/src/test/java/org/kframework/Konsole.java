@@ -2,12 +2,15 @@
 package org.kframework;
 
 import org.kframework.attributes.Source;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
-import org.kframework.kore.Kompile;
+import org.kframework.main.GlobalOptions;
 import org.kframework.tiny.Rewriter;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.Tuple2;
+import scala.Tuple3;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,12 +29,14 @@ public class Konsole {
         String mainModuleName = args[1];
         String programModuleName = args[2];
 
-        Tuple2<Module, BiFunction<String, Source, K>> stuff =
-                new Kompile(FileUtil.testFileUtil()).getStuff(new File(definitionFilename), mainModuleName, programModuleName);
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+
+        Tuple3<Module, Definition, BiFunction<String, Source, K>> stuff =
+                new Kompile(FileUtil.testFileUtil(), kem).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
 
         Module module = stuff._1();
-        BiFunction<String, Source, K> programParser = stuff._2();
-        Rewriter rewriter = Kompile.getRewriter(module);
+        BiFunction<String, Source, K> programParser = stuff._3();
+        Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
         String cmd;
 
         do {
@@ -45,6 +50,8 @@ public class Konsole {
                 break;
             } else
                 System.out.println("Unknown command.");
+            kem.print();
+            kem.getExceptions().clear();
         } while (true);
         System.out.println("Bye!");
     }

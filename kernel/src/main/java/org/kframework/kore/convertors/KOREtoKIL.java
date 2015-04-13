@@ -412,12 +412,14 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             if (a instanceof KApply) {
                 KApply attr = (KApply) a;
                 KLabel key = attr.klabel();
-                if (!key.equals(KLabel("Location"))) { // ignoring location
+                if (!key.equals(KLabel("Location")) && !key.equals(KLabel("Source"))) { // ignoring location
                     // information
                     KList klist = attr.klist();
                     if (klist.size() == 1 && klist.items().get(0) instanceof KToken) {
                         String value = ((KToken) klist.items().get(0)).s();
                         kilAttributes.add(Attribute.of(key.name(), value));
+                    } else if (klist.size() == 0) {
+                        kilAttributes.add(Attribute.of(key.name(), ""));
                     } else {
                         throw NOT_IMPLEMENTED();
                     }

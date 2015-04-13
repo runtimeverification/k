@@ -2,7 +2,33 @@
 
 package org.kframework.kore.convertors;
 
-import java.io.File;
+import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
+import org.kframework.builtin.Sorts;
+import org.kframework.definition.Associativity;
+import org.kframework.definition.Context;
+import org.kframework.definition.ModuleComment;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Tag;
+import org.kframework.kil.*;
+import org.kframework.kore.AbstractKORETransformer;
+import org.kframework.kore.InjectedKLabel;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KCollection;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KToken;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
+import org.kframework.parser.generator.SDFHelper;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import scala.Enumeration.Value;
+import scala.Tuple2;
+import scala.collection.Seq;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,44 +40,11 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.kframework.Collections;
-import org.kframework.builtin.Sorts;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Import;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.Lexical;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.PriorityExtendedAssoc;
-import org.kframework.kil.Production;
-import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.attributes.Att;
-import org.kframework.definition.*;
-
-import org.kframework.kore.*;
-import org.kframework.parser.generator.SDFHelper;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import scala.Enumeration.Value;
-import scala.Tuple2;
-import scala.collection.Seq;
-
-import com.google.common.collect.Sets;
-
+import static org.kframework.Collections.Seq;
+import static org.kframework.Collections.Set;
+import static org.kframework.Collections.immutable;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static org.kframework.Collections.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
@@ -438,11 +431,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
 
             // lst ::= elem
-            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId);
+            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict"));
 
             // lst ::= .UserList
             prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getTerminatorKLabel())));
+                    attrsWithKilProductionId.remove("strict").add("#klabel", dropQuote(p.getTerminatorKLabel())));
 
             res.add(prod1);
             res.add(prod2);

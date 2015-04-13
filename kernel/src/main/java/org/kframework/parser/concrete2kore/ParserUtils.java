@@ -139,7 +139,8 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) {
+            List<File> lookupDirectories,
+            boolean dropQuote) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -150,7 +151,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, true);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
@@ -166,8 +167,9 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) {
-        Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories);
+            List<File> lookupDirectories,
+            boolean dropQuote) {
+        Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories, dropQuote);
         Module mainModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
         Module syntaxModule = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst().get();
         return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());

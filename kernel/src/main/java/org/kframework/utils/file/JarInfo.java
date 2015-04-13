@@ -55,7 +55,7 @@ public class JarInfo {
         } catch (URISyntaxException e) {
             return null;
         }
-        if (!path.endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
+        if (!path.toFile().getAbsolutePath().endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
             return path.getParent().resolve("../../k-distribution/include");
         } else {
             return path.getParent().resolve("../../include");
