@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Module;
@@ -12,6 +11,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
@@ -157,15 +157,8 @@ public class RuleGrammarGenerator {
                         }
                         // add follow restrictions for the characters that might produce ambiguities
                         if (!follow.isEmpty()) {
-                            String restriction = follow.stream().map(str -> {
-                                StringBuilder sb = new StringBuilder();
-                                for (char c : str.toCharArray()) {
-                                    sb.append('\\');
-                                    sb.append(c);
-                                }
-                                return sb.toString();
-                            }).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
-                            return RegexTerminal.apply("#", "\"" + StringEscapeUtils.escapeJava(t.value()) + "\"", restriction);
+                            String restriction = follow.stream().map(StringUtil::escapeAutomatonRegex).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
+                            return RegexTerminal.apply("#", StringUtil.escapeAutomatonRegex(t.value()), restriction);
                         }
                     }
                     return pi;

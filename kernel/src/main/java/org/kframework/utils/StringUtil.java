@@ -671,4 +671,13 @@ public class StringUtil {
         result.append(delimiter);
         return result.toString();
     }
+
+    public static String escapeAutomatonRegex(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            sb.append('\\');
+            sb.append(c);
+        }
+        return sb.toString();
+    }
 }

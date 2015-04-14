@@ -31,7 +31,7 @@ module INT
   imports K
   imports LOGIC
 
-  syntax Int ::= r"[\\+-]?\\d+"     [prefer, token]
+  syntax Int ::= r"[\\+-]?[0-9]+"     [prefer, token]
 
   syntax Int ::= Int "+Int" Int     [klabel('_+Int_), function, hook(#INT:_+Int_), left]
   syntax Int ::= Int "-Int" Int     [klabel('_-Int_), function, hook(#INT:_-Int_), left]

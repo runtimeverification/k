@@ -6,6 +6,7 @@ import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Kompile;
 import org.kframework.tiny.Rewriter;
+import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
@@ -26,7 +27,7 @@ public class Konsole {
         String programModuleName = args[2];
 
         Tuple2<Module, BiFunction<String, Source, K>> stuff =
-                new Kompile().getStuff(new File(definitionFilename), mainModuleName, programModuleName);
+                new Kompile(FileUtil.testFileUtil()).getStuff(new File(definitionFilename), mainModuleName, programModuleName);
 
         Module module = stuff._1();
         BiFunction<String, Source, K> programParser = stuff._2();

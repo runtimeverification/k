@@ -4,6 +4,7 @@ package org.kframework.parser.concrete2kore.kernel;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.RegExp;
+import dk.brics.automaton.SpecialOperations;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -16,6 +17,7 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.HashSet;
@@ -24,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.iterable;
@@ -70,7 +71,7 @@ public class KSyntax2GrammarStatesFilter {
             String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
-                    pattern = Pattern.quote(((Terminal) prdItem).value());
+                    pattern = StringUtil.escapeAutomatonRegex(((Terminal) prdItem).value());
                     rejects.add(pattern);
                 }
             } else if (prdItem instanceof RegexTerminal) {
@@ -123,6 +124,7 @@ public class KSyntax2GrammarStatesFilter {
                     try {
                         pattern = lx.precedePattern();
                         Automaton precedeAuto = new RegExp(lx.precedePattern()).toAutomaton();
+                        SpecialOperations.reverse(precedeAuto);
                         pattern = lx.regex();
                         Automaton patternAuto = new RegExp(lx.regex()).toAutomaton();
                         pattern = lx.followPattern();
@@ -154,15 +156,15 @@ public class KSyntax2GrammarStatesFilter {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Pattern pattern = null;
+                    Automaton pattern = null;
                     if (prd.att().contains("token")) {
                         // TODO: calculate reject list
                         if (prd.att().contains(Constants.AUTOREJECT) && prd.att().contains(Constants.REJECT2))
-                            pattern = Pattern.compile("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")");
+                            pattern = new RegExp("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")").toAutomaton();
                         else if (prd.att().contains(Constants.AUTOREJECT))
-                            pattern = Pattern.compile(rejectPattern);
+                            pattern = new RegExp(rejectPattern).toAutomaton();
                         else if (prd.att().contains(Constants.REJECT2))
-                            pattern = Pattern.compile(prd.att().get(Constants.REJECT2).get().toString());
+                            pattern = new RegExp(prd.att().get(Constants.REJECT2).get().toString()).toAutomaton();
                     }
                     RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern));
                     previous.next.add(labelRule);

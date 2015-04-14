@@ -150,7 +150,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, false);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, true);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);

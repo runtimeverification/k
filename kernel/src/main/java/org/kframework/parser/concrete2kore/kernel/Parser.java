@@ -709,7 +709,7 @@ public class Parser {
 
     public Parser(String input) {
         s = new ParseState(input, 1, 1);
-        this.source = null;
+        this.source = Source.apply("<unknown>");
     }
 
     public Parser(String input, Source source, int startLine, int startColumn) {

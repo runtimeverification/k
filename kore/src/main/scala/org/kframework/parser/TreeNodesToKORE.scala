@@ -41,7 +41,7 @@ object TreeNodesToKORE {
 
     case t@KApply(KLabel("#KApply"), items) =>
       KApply(downKLabel(items(0)),
-        KList(downList(Assoc.flatten(KLabel("#KList"), items, KLabel("#EmptyKList")))), t.att)
+        KList(downList(Assoc.flatten(KLabel("#KList"), items.tail, KLabel("#EmptyKList")))), t.att)
 
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1)

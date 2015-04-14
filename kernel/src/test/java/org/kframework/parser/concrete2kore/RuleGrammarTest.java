@@ -253,6 +253,7 @@ public class RuleGrammarTest {
                 "syntax Exp ::= K \":\" K [klabel('Colon)] " +
                 "syntax K " +
                 "syntax Exp ::= K \"==K\" K [klabel('EqK)] " +
+                "syntax Exp ::= K \"?\" K \":\" K " +
                 "endmodule";
         parseRule("A::K ==K A", def, 0, false);
         parseRule("A::K == K A", def, 0, true);

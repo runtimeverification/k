@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import dk.brics.automaton.Automaton;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
@@ -14,7 +15,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * An action that transforms an AST into another AST
@@ -77,8 +77,8 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        public final Pattern rejectPattern;
-        public WrapLabelRule(Production label, Pattern rejectPattern) {
+        public final Automaton rejectPattern;
+        public WrapLabelRule(Production label, Automaton rejectPattern) {
             assert label != null;
             this.label = label;
             this.rejectPattern = rejectPattern;
@@ -94,7 +94,7 @@ public abstract class Rule implements Serializable {
             Source source = metaData.source;
             if (label.att().contains("token")) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                if (rejectPattern != null && rejectPattern.matcher(value).matches()) {
+                if (rejectPattern != null && rejectPattern.run(value)) {
                     return null;
                 }
                 term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
