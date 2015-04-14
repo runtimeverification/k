@@ -67,9 +67,8 @@ public class TstBackendOnKORE extends BaseTest {
             GetSymbolicRewriter getSymbolicRewriter = new GetSymbolicRewriter(rwModuleAndProgramParser._1()).invoke();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(getSymbolicRewriter.termContext);
             getSymbolicRewriter.getRewriter().rewrite(new ConstrainedTerm(converter.convert(program), getSymbolicRewriter.termContext), getSymbolicRewriter.termContext.definition().context(), -1, false);
-        } catch (KExceptionManager.KEMException e) {
+        } finally {
             kem.print();
-            throw e;
         }
     }
 
