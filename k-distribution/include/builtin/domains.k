@@ -219,7 +219,7 @@ endmodule
 
 module INT
   imports INT-SYNTAX
-  imports BOOL-SYNTAX
+  imports BOOL
 
   syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(#INT:~Int_)]
                > left:
@@ -280,7 +280,7 @@ endmodule
 
 module FLOAT
   imports FLOAT-SYNTAX
-  imports BOOL-SYNTAX
+  imports BOOL
   imports INT-SYNTAX
 
   syntax Int ::= precisionFloat(Float) [function, hook(#FLOAT:precision)]
@@ -334,7 +334,7 @@ module FLOAT
                 | Float "=/=Float" Float      [function, left, smtlib((not (== #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
-  rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)
+  rule F1:Float =/=Float F2:Float => notBool `F1 ==Float F2`
 
   syntax Float ::= Int2Float(Int, Int, Int)    [function, klabel(Int2Float), latex({\\it{}Int2Float}), hook(#CONVERSION:int2Float)]
   syntax Int ::= Float2Int(Float)    [function, klabel(Float2Int), latex({\\it{}Float2Int}), hook(#CONVERSION:float2Int)]
@@ -361,8 +361,9 @@ endmodule
 
 module STRING
   imports STRING-SYNTAX
-  imports INT-SYNTAX
+  imports INT
   imports FLOAT-SYNTAX
+  imports K-EQUAL
 
   syntax String ::= String "+String" String    [function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(#STRING:_+String_)]
 
@@ -392,7 +393,7 @@ module STRING
   syntax Int ::= "countAllOccurences" "(" String "," String ")" [function, hook(#STRING:countAllOccurences)]
 
   syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
-  rule S1:String =/=String S2:String => notBool(S1 ==String S2)
+  rule S1:String =/=String S2:String => notBool `S1 ==String S2`
 
   syntax Bool ::= String "<String" String [function, hook(#STRING:_<String_)]
                 | String "<=String" String [function, hook(#STRING:_<=String_)]
@@ -402,9 +403,9 @@ module STRING
   syntax String ::= categoryChar(String) [function, hook(#STRING:categoryChar)]
                   | directionalityChar(String) [function, hook(#STRING:directionalityChar)]
 
-  rule S1:String <=String S2:String => notBool(S2 <String S1)
+  rule S1:String <=String S2:String => notBool `S2 <String S1`
   rule S1:String >String S2:String => S2 <String S1
-  rule S1:String >=String S2:String => notBool(S1 <String S2)
+  rule S1:String >=String S2:String => notBool `S1 <String S2`
 
   rule findChar(S1:String, S2:String, I:Int) => #if findString(S1, substrString(S2, 0, 1), I) ==Int -1 #then findChar(S1, substrString(S2, 1, lengthString(S2)), I) #else #if findChar(S1, substrString(S2, 1, lengthString(S2)), I) ==Int -1 #then findString(S1, substrString(S2, 0, 1), I) #else minInt(findString(S1, substrString(S2, 0, 1), I), findChar(S1, substrString(S2, 1, lengthString(S2)), I)) #fi #fi requires S2 =/=String ""
   rule findChar(_, "", _) => -1
@@ -441,7 +442,7 @@ module EMPTY-ID
 endmodule
 
 module K-EQUAL
-  imports BOOL-SYNTAX
+  imports BOOL
   imports BASIC-K
 
   syntax Bool ::= left:
@@ -505,30 +506,30 @@ module K-IO
 
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
-       (ListItem(F:Float) => .List)
+       `ListItem(F:Float) => .List`
        _:List [stdout, stderr]
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
-       (ListItem(I:Int) => .List)
+       `ListItem(I:Int) => .List`
        _:List [stdout, stderr]
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String S))
-       (ListItem(S:String) => .List)
+       `ListItem(S:String) => .List`
        _:List [stdout, stderr]
 
   rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
-       (ListItem(F:Float) => .List)
+       `ListItem(F:Float) => .List`
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
-       (ListItem(I:Int) => .List)
+       `ListItem(I:Int) => .List`
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String S))
-       (ListItem(S:String) => .List)
+       `ListItem(S:String) => .List`
        _:List [stdout, stderr]
 
 
   // Send first char from the buffer to the server
-  rule ListItem(#ostream((.K => #write(N, S)) ~> N:Int))
+  rule ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
        ListItem(#buffer(S:String => ""))
        _:List
     requires S =/=String "" [stdout, stderr]
@@ -540,20 +541,20 @@ module K-IO
     requires findChar(S, Delimiters, 0) ==Int -1 [stdin]
 
   // when we reach whitespace, if it parses create a ListItem
-  rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S))
+  rule `ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)`
        ListItem(#buffer(S:String => ""))
        _:List
     requires findChar(S, Delimiters, 0) =/=Int -1 [stdin]
 
   // a hack: handle the case when we read integers without the help of the IO server
-  rule (ListItem(#parseInput("Int", Delimiters:String))
-       => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1))))
+  rule `ListItem(#parseInput("Int", Delimiters:String))
+       => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1)))`
        ListItem(#buffer(S:String => ""))
     requires findChar(S, Delimiters, 0) =/=Int -1
        andBool lengthString(S) >Int 1 [stdin]
 
-  rule (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort)))
+  rule `ListItem(#parseInput(Sort:String, Delimiters:String))
+       => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))`
        ListItem(#buffer(S:String => ""))
        ListItem(#istream(_))
     requires findChar(S, Delimiters, 0) =/=Int -1
@@ -568,9 +569,9 @@ module K-IO
        andBool lengthString(S) <=Int 1 [stdin]
 
   rule ListItem(#buffer(_))
-       (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
+       `ListItem(#noIO) ListItem(#istream(_:Int)) => .List` [stdin]
 
-  rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
+  rule `ListItem(#ostream(_:Int)) ListItem(#noIO) => .List`
        ListItem(#buffer(_))
        _:List [stdout, stderr]
 
