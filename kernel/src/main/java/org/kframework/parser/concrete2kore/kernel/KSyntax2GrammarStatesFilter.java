@@ -17,9 +17,9 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -47,8 +47,7 @@ public class KSyntax2GrammarStatesFilter {
         }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        String rejectPattern = mkString(rejects, p -> "(" + p + ")", "|");
-        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).forEach((sort, prods) -> processProductions(sort, prods, grammar, rejectPattern));
+        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).forEach((sort, prods) -> processProductions(sort, prods, grammar, rejects));
 
         grammar.addWhiteSpace();
         grammar.compile();
@@ -71,18 +70,13 @@ public class KSyntax2GrammarStatesFilter {
             String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
-                    pattern = StringUtil.escapeAutomatonRegex(((Terminal) prdItem).value());
-                    rejects.add(pattern);
+                    rejects.add(((Terminal) prdItem).value());
                 }
-            } else if (prdItem instanceof RegexTerminal) {
-                pattern = ((RegexTerminal) prdItem).regex();
-                if (!pattern.equals("") && !prd.att().contains("token"))
-                    rejects.add(pattern);
             }
         }
     }
 
-    public static void processProductions(Sort sort, List<Production> prods, Grammar grammar, String rejectPattern) {
+    public static void processProductions(Sort sort, List<Production> prods, Grammar grammar, Set<String> autoRejects) {
         NonTerminal nt = grammar.get(sort.name());
         assert nt != null : "Could not find in the grammar the required sort: " + sort;
         // all types of production follow pretty much the same pattern
@@ -107,7 +101,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
                     Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + ": " + terminal.value(), nt,
-                            BasicAutomata.makeString(terminal.value()));
+                            BasicAutomata.makeEmpty(), BasicAutomata.makeString(terminal.value()), getAutomaton(terminal.followPattern()));
                     previous.next.add(pstate);
                     RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
                     pstate.next.add(del);
@@ -123,12 +117,12 @@ public class KSyntax2GrammarStatesFilter {
                     String pattern = null;
                     try {
                         pattern = lx.precedePattern();
-                        Automaton precedeAuto = new RegExp(lx.precedePattern()).toAutomaton();
+                        Automaton precedeAuto = getAutomaton(lx.precedePattern());
                         SpecialOperations.reverse(precedeAuto);
                         pattern = lx.regex();
-                        Automaton patternAuto = new RegExp(lx.regex()).toAutomaton();
+                        Automaton patternAuto = getAutomaton(lx.regex());
                         pattern = lx.followPattern();
-                        Automaton followsAuto = new RegExp(lx.followPattern()).toAutomaton();
+                        Automaton followsAuto = getAutomaton(lx.followPattern());
                         Grammar.PrimitiveState pstate = new Grammar.RegExState(
                                 sort.name() + ":" + lx.regex() + "(?!" + lx.followPattern() + ")",
                                 nt,
@@ -157,24 +151,38 @@ public class KSyntax2GrammarStatesFilter {
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
                     Automaton pattern = null;
+                    Set<String> rejects = new HashSet<>();
                     if (prd.att().contains("token")) {
                         // TODO: calculate reject list
-                        if (prd.att().contains(Constants.AUTOREJECT) && prd.att().contains(Constants.REJECT2))
-                            pattern = new RegExp("(" + prd.att().get(Constants.REJECT2).get().toString() + ")|(" + rejectPattern + ")").toAutomaton();
-                        else if (prd.att().contains(Constants.AUTOREJECT))
-                            pattern = new RegExp(rejectPattern).toAutomaton();
-                        else if (prd.att().contains(Constants.REJECT2))
-                            pattern = new RegExp(prd.att().get(Constants.REJECT2).get().toString()).toAutomaton();
+                        if (prd.att().contains(Constants.AUTOREJECT))
+                            rejects = autoRejects;
+                        if (prd.att().contains(Constants.REJECT2))
+                            pattern = getAutomaton(prd.att().get(Constants.REJECT2).get().toString());
                     }
-                    RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern));
+                    RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern, rejects));
                     previous.next.add(labelRule);
                     previous = labelRule;
 
                     previous.next.add(nt.exitState);
 
-                    iter.remove();;
+                    iter.remove();
                 }
             }
         }
+    }
+
+    public static void clearCache() {
+        cache.clear();
+    }
+
+    private static Map<String, Automaton> cache = new HashMap<>();
+
+    private static Automaton getAutomaton(String regex) {
+        Automaton res = cache.get(regex);
+        if (res == null) {
+            res = new RegExp(regex).toAutomaton();
+            cache.put(regex, res);
+        }
+        return res;
     }
 }

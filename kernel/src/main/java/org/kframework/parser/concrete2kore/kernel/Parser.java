@@ -1,8 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import dk.brics.automaton.RegExp;
-import dk.brics.automaton.RunAutomaton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Location;
@@ -35,7 +33,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 /**
  * This is the main code for running the parser.
@@ -182,6 +179,16 @@ public class Parser {
         private final int[] orderingInfo = new int[5];
 
         public int compareTo(StateReturn that) {
+            // The following idiom is a short-circuiting, integer "and
+            // that does a lexicographic ordering over:
+            //  - ntBegin (contravariently),
+            //  - nt.orderingInfo (not used until we get lookaheads fixed)
+            //  - stateEnd,
+            //  - state.orderingInfo,
+            //  - stateBegin and
+            //  - state.
+            // NOTE: these last two comparisons are just so we don't conflate distinct values
+
             int v1[] = orderingInfo;
             int v2[] = that.orderingInfo;
 

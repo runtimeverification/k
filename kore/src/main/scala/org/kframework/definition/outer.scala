@@ -214,7 +214,7 @@ with NonTerminalToString
 
 case class RegexTerminal(precedePattern: String, regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
 
-case class Terminal(value: String) extends ProductionItem // hooked
+case class Terminal(value: String, followPattern: String) extends ProductionItem // hooked
 with TerminalToString
 
 /* Helper constructors */

@@ -29,7 +29,7 @@ class TestMeta {
 
   def assertEquals(x: Any, y: Any) { if (x != y) Assert.assertEquals(x.toString, y.toString) }
 
-  val m = Module("TEST", Set(), Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar")))))
+  val m = Module("TEST", Set(), Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar", "#")))))
   val d = Definition(m, m, Set(m))
 
   val metamodule = 'Module("TEST", 'Set(),

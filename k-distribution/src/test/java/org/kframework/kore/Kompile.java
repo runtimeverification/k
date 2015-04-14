@@ -20,6 +20,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.tiny.*;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -93,6 +94,8 @@ public class Kompile {
         Module mainModuleWithBubble = stream(definition.modules()).filter(m -> m.name().equals(mainModuleName)).findFirst().get();
 
         Module mainModule = ModuleTransformer.from(this::resolveBubbles).apply(mainModuleWithBubble);
+
+        KSyntax2GrammarStatesFilter.clearCache();
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 

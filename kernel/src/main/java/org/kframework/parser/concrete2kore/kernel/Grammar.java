@@ -562,7 +562,6 @@ public class Grammar implements Serializable {
             super(name, nt);
             assert pattern != null;
             this.precedePattern = new RunAutomaton(precedePattern != null ? precedePattern : BasicAutomata.makeEmpty(), false);
-            //this.precedePattern = new RunAutomaton()
             this.pattern = new RunAutomaton(pattern, false);
             this.followPattern = new RunAutomaton(followPattern != null ? followPattern : BasicAutomata.makeEmpty(), false);
         }

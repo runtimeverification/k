@@ -49,6 +49,10 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
     @Override
     public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> apply(Term t) {
+        Term loc = t;
+        if (loc instanceof Ambiguity) {
+            loc = ((Ambiguity)loc).items().iterator().next();
+        }
 
         Set<VarInfo> vis = new CollectVariables().apply(t)._2();
         //System.out.println("vis = " + vis);
@@ -61,7 +65,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 } else if (!s.equals(vi.sort)) {
                     String msg = vi.varName + " declared with two different sorts: " + s + " and " + vi.sort;
                     //System.out.println(msg);
-                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
+                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
@@ -139,7 +143,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (solutions.size() == 0) {
                     if (fails != null) {
                         String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
 
                     } else {
@@ -149,7 +153,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         for (Sort vv1 : failsAmb)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
 
                     }
@@ -162,7 +166,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         decl.put(key, sort);
                         String msg = "Variable '" + key + "' was not declared. Assuming sort " + sort + ".";
                         warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(
-                                new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, t.source().get(), t.location().get()))));
+                                new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, loc.source().get(), loc.location().get()))));
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!decl.isEmpty()) {
@@ -181,7 +185,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             for (Sort vv1 : values)
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
-                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
+                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                             return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                         }
                     }
@@ -194,7 +198,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     // This makes it that I can't disambiguate properly
                     // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
                     String msg = "Parser: failed to infer sorts for variables.\n    Please file a bug report at https://github.com/kframework/k/issues.";
-                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, t.source().get(), t.location().get());
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
