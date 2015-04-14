@@ -45,7 +45,7 @@ object KOREToTreeNodes {
     case t@TermCons(items, p) => {
       var i = 0
       val unparsedItems = p.items map {
-        case Terminal(s, _) => s
+        case Terminal(s) => s
         case NonTerminal(sort) => {
           i = i + 1
           toString(t.get(i - 1))

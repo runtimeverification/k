@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -258,5 +258,19 @@ public class RuleGrammarTest {
         parseRule("A::K == K A", def, 0, true);
         parseRule("A:K", def, 0, false);
         parseRule("A: K", def, 2, false);
+        parseRule("A:Stmt ?F : Stmt", def, 2, false);
+        parseRule("A:Stmt ? F : Stmt", def, 2, false);
+    }
+
+    // test whitespace
+    @Test
+    public void test15() {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= Divide(K, K) [klabel('Divide)] " +
+                "syntax Exp ::= K \"/\" K [klabel('Div)] " +
+                "syntax K " +
+                "endmodule";
+        parseRule("Divide(K1:K, K2:K) => K1:K / K2:K", def, 0, false);
     }
 }

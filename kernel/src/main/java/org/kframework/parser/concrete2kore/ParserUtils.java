@@ -39,7 +39,7 @@ public class ParserUtils {
     public ParserUtils(FileUtil files) {
         this.files = files;
     }
-    public static K parseWithFile(CharSequence theTextToParse,
+    public static K parseWithFile(String theTextToParse,
                                   String mainModule,
                                   String startSymbol,
                                   File definitionFile) {
@@ -52,7 +52,7 @@ public class ParserUtils {
         return parseWithString(theTextToParse, mainModule, startSymbol, Source.apply(definitionFile.getAbsolutePath()), definitionText);
     }
 
-    public static K parseWithString(CharSequence theTextToParse,
+    public static K parseWithString(String theTextToParse,
                                     String mainModule,
                                     String startSymbol,
                                     Source source,
@@ -61,7 +61,7 @@ public class ParserUtils {
         return parseWithModule(theTextToParse, startSymbol, source, kastModule);
     }
 
-    public static K parseWithModule(CharSequence theTextToParse,
+    public static K parseWithModule(String theTextToParse,
                                     String startSymbol,
                                     Source source,
                                     org.kframework.definition.Module kastModule) {
@@ -69,7 +69,7 @@ public class ParserUtils {
         return parseWithModule(theTextToParse, startSymbol, source, parser);
     }
 
-    public static K parseWithModule(CharSequence theTextToParse,
+    public static K parseWithModule(String theTextToParse,
                                     String startSymbol,
                                     Source source,
                                     ParseInModule kastModule) {

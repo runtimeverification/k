@@ -412,7 +412,9 @@ public class Parser {
      */
     private static class ParseState {
         // the input string which needs parsing
-        final CharSequence input;
+        final String input;
+        // the reverse input used for precede restrictions
+        final String reverseInput;
         // a priority queue containing the return states to be processed
         final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
         // a preprocessed correspondence from index to line and column in the input string
@@ -424,7 +426,7 @@ public class Parser {
         AutoVivifyingBiMap<StateCall.Key, StateCall> stateCalls = new AutoVivifyingBiMap<>();
         AutoVivifyingBiMap<StateReturn.Key, StateReturn> stateReturns = new AutoVivifyingBiMap<>();
 
-        public ParseState(CharSequence input, int startLine, int startColumn) {
+        public ParseState(String input, int startLine, int startColumn) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
              * column in the text. Tab counts as one.
@@ -434,6 +436,7 @@ public class Parser {
              * http://www.unicode.org/reports/tr18/#Line_Boundaries
              */
             this.input = input;
+            this.reverseInput = new StringBuilder(input).reverse().toString();
             lines = new int[input.length()+1];
             columns = new int[input.length()+1];
             int l = startLine;
@@ -704,12 +707,12 @@ public class Parser {
     private final ParseState s;
     private final Source source;
 
-    public Parser(CharSequence input) {
+    public Parser(String input) {
         s = new ParseState(input, 1, 1);
         this.source = null;
     }
 
-    public Parser(CharSequence input, Source source, int startLine, int startColumn) {
+    public Parser(String input, Source source, int startLine, int startColumn) {
         s = new ParseState(input, startLine, startColumn);
         this.source = source;
     }
@@ -872,7 +875,7 @@ public class Parser {
                     new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
         } else if (nextState instanceof PrimitiveState) {
             for (PrimitiveState.MatchResult matchResult :
-                    ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin)) {
+                    ((PrimitiveState)nextState).matches(s.input, s.reverseInput, stateCall.key.stateBegin)) {
                 s.stateReturnWorkList.enqueue(
                     s.stateReturns.get(
                         new StateReturn.Key(stateCall, matchResult.matchEnd)));

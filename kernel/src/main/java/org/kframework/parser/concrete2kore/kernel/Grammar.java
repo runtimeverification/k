@@ -526,7 +526,7 @@ public class Grammar implements Serializable {
          *  Returns a set of matches at the given position in the given string.
          *  If there are no matches, the returned set will be empty.
          */
-        abstract Set<MatchResult> matches(CharSequence text, int startPosition);
+        abstract Set<MatchResult> matches(String text, String reverseText, int startPosition);
 
         public PrimitiveState(String name, NonTerminal nt) {
             super(name, nt, true);
@@ -537,7 +537,7 @@ public class Grammar implements Serializable {
          * @return true if it can parse without consuming any tokens.
          */
         public boolean isNullable() {
-            Set<MatchResult> matchResults = this.matches("", 0);
+            Set<MatchResult> matchResults = this.matches("", "", 0);
             return matchResults.size() != 0;
         }
     }
@@ -549,50 +549,35 @@ public class Grammar implements Serializable {
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
         public final RunAutomaton pattern;
+        public final RunAutomaton precedePattern;
         public final RunAutomaton followPattern;
 
         /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
 
         public RegExState(String name, NonTerminal nt, Automaton pattern) {
-            this(name, nt, pattern, BasicAutomata.makeEmpty());
+            this(name, nt, BasicAutomata.makeEmpty(), pattern, BasicAutomata.makeEmpty());
         }
 
-        public RegExState(String name, NonTerminal nt, Automaton pattern, Automaton followPattern) {
+        public RegExState(String name, NonTerminal nt, Automaton precedePattern, Automaton pattern, Automaton followPattern) {
             super(name, nt);
             assert pattern != null;
+            this.precedePattern = new RunAutomaton(precedePattern != null ? precedePattern : BasicAutomata.makeEmpty(), false);
+            //this.precedePattern = new RunAutomaton()
             this.pattern = new RunAutomaton(pattern, false);
-            this.followPattern = new RunAutomaton(followPattern, false);
+            this.followPattern = new RunAutomaton(followPattern != null ? followPattern : BasicAutomata.makeEmpty(), false);
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
-        Set<MatchResult> matches(CharSequence text, int startPosition) {
-            int i = lookingAt(text, startPosition, pattern);
-            if (i >= 0) {
-                int j = lookingAt(text, i, followPattern);
-                if (j < 0) {
-                    return Collections.singleton(new MatchResult(i));
-                }
-            }
-            return Collections.emptySet();
-        }
+        Set<MatchResult> matches(String text, String reverseText, int startPosition) {
+            int matchedLength = pattern.run(text, startPosition);
+            if (matchedLength == -1)
+                return Collections.emptySet();
+            if (followPattern.run(text, startPosition + matchedLength) != -1)
+                return Collections.emptySet();
+            if (precedePattern.run(reverseText, text.length() - startPosition) != -1)
+                return Collections.emptySet();
 
-        int lookingAt(CharSequence text, int startPosition, RunAutomaton pattern) {
-            int state = pattern.getInitialState();
-            int len = text.length();
-
-            int acceptIdx = pattern.isAccept(state) ? startPosition : -1;
-            for(int i = startPosition; i < len; ++i) {
-                int nextState = pattern.step(state, text.charAt(i));
-                if(nextState == -1) {
-                    break;
-                }
-                if (pattern.isAccept(nextState)) {
-                    acceptIdx = i + 1;
-                }
-                state = nextState;
-            }
-
-            return acceptIdx;
+            return Collections.singleton(new MatchResult(startPosition + matchedLength));
         }
     }
 }

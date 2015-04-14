@@ -22,7 +22,7 @@ public class NewOuterParserTest {
 
     @Test
     public void testKOREOuter() throws Exception {
-        CharSequence theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
+        String theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModuleName = "E-KORE";
         String mainProgramsModule = "E-KORE";
         String startSymbol = "KDefinition";

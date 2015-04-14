@@ -54,12 +54,12 @@ public class ParseInModule implements Serializable {
      */
     // TODO: figure out how to handle parsing errors
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol, Source source) {
+            parseString(String input, String startSymbol, Source source) {
         return parseString(input, startSymbol, source, 1, 1);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol, Source source, int startLine, int startColumn) {
+            parseString(String input, String startSymbol, Source source, int startLine, int startColumn) {
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol);
         Set<ParseFailedException> warn = new AmbFilter().warningUnit();
         if (startSymbolNT == null) {

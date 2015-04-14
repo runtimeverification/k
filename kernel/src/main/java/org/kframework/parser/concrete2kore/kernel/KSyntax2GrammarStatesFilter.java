@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.RegExp;
 import org.apache.commons.lang3.tuple.Pair;
@@ -105,7 +106,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
                     Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + ": " + terminal.value(), nt,
-                            BasicAutomata.makeString(terminal.value()), BasicAutomata.makeEmpty());
+                            BasicAutomata.makeString(terminal.value()));
                     previous.next.add(pstate);
                     RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
                     pstate.next.add(del);
@@ -118,14 +119,26 @@ public class KSyntax2GrammarStatesFilter {
                     previous = nts;
                 } else if (prdItem instanceof RegexTerminal) {
                     RegexTerminal lx = (RegexTerminal) prdItem;
+                    String pattern = null;
                     try {
-                        Grammar.PrimitiveState pstate = new Grammar.RegExState(sort.name() + ":" + lx.regex() + "(?!" + lx.followPattern() + ")", nt, new RegExp(lx.regex()).toAutomaton(), new RegExp(lx.followPattern()).toAutomaton());
+                        pattern = lx.precedePattern();
+                        Automaton precedeAuto = new RegExp(lx.precedePattern()).toAutomaton();
+                        pattern = lx.regex();
+                        Automaton patternAuto = new RegExp(lx.regex()).toAutomaton();
+                        pattern = lx.followPattern();
+                        Automaton followsAuto = new RegExp(lx.followPattern()).toAutomaton();
+                        Grammar.PrimitiveState pstate = new Grammar.RegExState(
+                                sort.name() + ":" + lx.regex() + "(?!" + lx.followPattern() + ")",
+                                nt,
+                                precedeAuto,
+                                patternAuto,
+                                followsAuto);
                         RuleState del = new RuleState("DelRegexTerminalRS", nt, new Rule.DeleteRule(1));
                         previous.next.add(pstate);
                         pstate.next.add(del);
                         previous = del;
                     } catch (IllegalArgumentException e) {
-                        throw KExceptionManager.criticalError("Could not compile regex: " + lx.regex(), e);
+                        throw KExceptionManager.criticalError("Could not compile regex: " + pattern + ", " + e.getMessage(), e);
                     }
                 } else {
                     assert false : "Didn't expect this ProductionItem type: "

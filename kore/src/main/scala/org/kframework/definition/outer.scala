@@ -212,7 +212,7 @@ sealed trait ProductionItem extends OuterKORE
 case class NonTerminal(sort: Sort) extends ProductionItem
 with NonTerminalToString
 
-case class RegexTerminal(regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
+case class RegexTerminal(precedePattern: String, regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
 
 case class Terminal(value: String) extends ProductionItem // hooked
 with TerminalToString
