@@ -19,21 +19,21 @@ module KAST
   syntax KItem ::= KBott
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\n\r])+`" [token, hook(org.kframework.kore.KLabel)]
-                  | r"[#a-z][a-zA-Z0-9]*"              [token, hook(org.kframework.kore.KLabel), autoReject]
+                  | r"[#a-z][a-zA-Z0-9]*"               [token, hook(org.kframework.kore.KLabel), autoReject]
                        // something that doesn't collide with meta-variables
 
   syntax KList ::= K
-                 | ".KList"           [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
-                 | ".::KList"           [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
+                 | ".KList"          [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
+                 | ".::KList"        [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
-                 | KList ",," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
+                 | KList ",," KList  [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
 endmodule
 
 
 // To be used when parsing/pretty-printing ground configurations
 module KSEQ
   imports KAST
-  syntax KBott ::= ".K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
+  syntax KBott ::= ".K"      [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
@@ -54,7 +54,7 @@ module KCELLS
 
   syntax Cell
   syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells), unit(#EmptyBag)]
-               | ".Bag" [klabel(#EmptyBag)]
+               | ".Bag"   [klabel(#EmptyBag)]
                | ".::Bag" [klabel(#EmptyBag)]
                | Cell
   syntax K ::= Bag
