@@ -222,7 +222,7 @@ public class Kompile {
                 .collect(Collections.toSet());
         return Module(module.name(), module.imports(), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
     }
-    
+
     private Module resolveBubbles(Module mainModuleWithBubble) {
         ParseInModule ruleParser = gen.getRuleGrammar(mainModuleWithBubble);
 
