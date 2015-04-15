@@ -11,6 +11,8 @@ import org.kframework.attributes._
 trait K {
   def att: Att
   override def toString = Unparse.apply(this)
+  def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
+  def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
 }
 
 trait KItem extends K

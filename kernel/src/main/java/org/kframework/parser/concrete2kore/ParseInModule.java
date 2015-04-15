@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore;
 
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
@@ -25,6 +26,7 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -40,30 +42,39 @@ public class ParseInModule implements Serializable {
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(module);
     }
 
+    public Module module() {
+        return module;
+    }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.
      * @param startSymbol    the start symbol from which to parse.
      * @return the Term representation of the parsed input.
      */
-    // TODO: require source location to this call
     // TODO: figure out how to handle parsing errors
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol) {
-        return parseString(input, startSymbol, 1, 1);
+            parseString(String input, String startSymbol, Source source) {
+        return parseString(input, startSymbol, source, 1, 1);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(CharSequence input, String startSymbol, int startLine, int startColumn) {
-        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
+            parseString(String input, String startSymbol, Source source, int startLine, int startColumn) {
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol);
+        Set<ParseFailedException> warn = new AmbFilter().warningUnit();
         if (startSymbolNT == null) {
             String msg = "Could not find start symbol: " + startSymbol;
             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
             return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
         }
-        Parser parser = new Parser(input, startLine, startColumn);
-        Term parsed = parser.parse(startSymbolNT, 0);
+
+        Parser parser = new Parser(input, source, startLine, startColumn);
+        Term parsed;
+        try {
+            parsed = parser.parse(startSymbolNT, 0);
+        } catch (ParseFailedException e) {
+            return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
+        }
 
         if (parsed.equals(Ambiguity.apply())) {
             Parser.ParseError errors = parser.getErrors();

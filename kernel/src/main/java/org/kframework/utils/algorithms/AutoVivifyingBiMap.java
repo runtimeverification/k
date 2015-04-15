@@ -4,6 +4,7 @@ package org.kframework.utils.algorithms;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import java.util.Map;
 import java.util.Set;
 
 /** A BiMap in which values are automatically added to the map
@@ -55,4 +56,6 @@ public class AutoVivifyingBiMap<K extends AutoVivifyingBiMap.Create<V>,V> {
      * @return The set of keys that have already been autovivified
      */
     public Set<K> keySet() { return map.keySet(); }
+
+    public Set<Map.Entry<K, V>> entrySet() { return map.entrySet(); }
 }

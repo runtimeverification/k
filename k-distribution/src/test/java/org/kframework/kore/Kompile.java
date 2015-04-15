@@ -4,6 +4,7 @@ package org.kframework.kore;
 import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
+import org.kframework.attributes.Source;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.StrictToHeatingCooling;
@@ -12,17 +13,21 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Sources;
 import org.kframework.kore.compile.*;
 import org.kframework.compile.LabelInfo;
+import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.tiny.*;
+import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
+import scala.util.Either;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -31,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -45,23 +51,23 @@ public class Kompile {
     private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
 
-    public Kompile() throws IOException, URISyntaxException {
+    private final FileUtil files;
+    private final ParserUtils parser;
+
+    public Kompile(FileUtil files) {
+        this.files = files;
+        this.parser = new ParserUtils(files);
         gen = makeRuleGrammarGenerator();
     }
 
-    private static RuleGrammarGenerator makeRuleGrammarGenerator() throws URISyntaxException, IOException {
-        String definitionText;
+    private RuleGrammarGenerator makeRuleGrammarGenerator() {
         File definitionFile = new File(BUILTIN_DIRECTORY.toString() + "/kast.k");
-        try {
-            definitionText = FileUtils.readFileToString(definitionFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
         //Definition baseK = ParserUtils.parseMainModuleOuterSyntax(definitionText, mainModule);
         java.util.Set<Module> modules =
-                ParserUtils.loadModules(definitionText,
-                        Sources.fromFile(definitionFile),
+                parser.loadModules(definitionText,
+                        Source.apply(definitionFile.getPath()),
                         definitionFile.getParentFile(),
                         Lists.newArrayList(BUILTIN_DIRECTORY));
 
@@ -73,23 +79,23 @@ public class Kompile {
     }
 
     // todo: rename and refactor this
-    public Tuple2<Module, Function<String, K>> getStuff(File definitionFile, String mainModuleName, String mainProgramsModule) throws IOException, URISyntaxException {
+    public Tuple2<Module, BiFunction<String, Source, K>> getStuff(File definitionFile, String mainModuleName, String mainProgramsModule) throws IOException, URISyntaxException {
         String definitionString = FileUtils.readFileToString(definitionFile);
 
 //        Module mainModuleWithBubble = ParserUtils.parseMainModuleOuterSyntax(definitionString, "TEST");
 
-        Definition definition = ParserUtils.loadDefinition(
+        Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, definitionString,
-                Sources.fromFile(definitionFile),
+                Source.apply(definitionFile.getPath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY));
 
         Module mainModuleWithBubble = stream(definition.modules()).filter(m -> m.name().equals(mainModuleName)).findFirst().get();
 
-        Kompile kompile = new Kompile();
+        Module mainModule = ModuleTransformer.from(this::resolveBubbles).apply(mainModuleWithBubble);
 
-        Module mainModule = ModuleTransformer.from(kompile::resolveBubbles).apply(mainModuleWithBubble);
+        KSyntax2GrammarStatesFilter.clearCache();
 
         Module afterHeatingCooling = StrictToHeatingCooling.apply(mainModule);
 
@@ -99,8 +105,8 @@ public class Kompile {
 
         Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo).concretize(afterHeatingCooling);
 
-        Module kseqModule = ParserUtils.loadModules("requires \"kast.k\"",
-                Sources.fromFile(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile()),
+        Module kseqModule = parser.loadModules("requires \"kast.k\"",
+                Source.apply(BUILTIN_DIRECTORY.toPath().resolve("kast.k").toFile().getPath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY)).stream().filter(m -> m.name().equals("KSEQ")).findFirst().get();
 
@@ -109,10 +115,11 @@ public class Kompile {
                 Collections.<Sentence>Set(), Att());
 
         Module moduleForPrograms = definition.getModule(mainProgramsModule).get();
-        ParseInModule parseInModule = RuleGrammarGenerator.getProgramsGrammar(moduleForPrograms);
+        ParseInModule parseInModule = gen.getProgramsGrammar(moduleForPrograms);
 
-        final Function<String, K> pp = s -> {
-            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, "K")._1().right().get()));
+        final BiFunction<String, Source, K> pp = (s, source) -> {
+            Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> result = parseInModule.parseString(s, "K", source);
+            return TreeNodesToKORE.down(TreeNodesToKORE.apply(result._1().right().get()));
         };
 
         System.out.println(concretized);
@@ -132,7 +139,8 @@ public class Kompile {
                 .map(b -> {
                     int startLine = b.att().<Integer>get("contentStartLine").get();
                     int startColumn = b.att().<Integer>get("contentStartColumn").get();
-                    return ruleParser.parseString(b.contents(), startSymbol, startLine, startColumn);
+                    String source = b.att().<String>get("Source").get();
+                    return ruleParser.parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
                 })
                 .map(result -> {
                     System.out.println("warning = " + result._2());

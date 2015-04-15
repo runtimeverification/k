@@ -1,6 +1,9 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.util.Providers;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -9,17 +12,21 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import java.io.*;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.Reader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @RequestScoped
 public class FileUtil {
@@ -42,6 +49,11 @@ public class FileUtil {
         this.workingDir = workingDir;
         this.kompiledDir = kompiledDir;
         this.options = options;
+    }
+
+    public static FileUtil testFileUtil() {
+        File workingDir = new File(".");
+        return new FileUtil(workingDir, Providers.of(workingDir), workingDir, Providers.of(workingDir), new GlobalOptions());
     }
 
     public void deleteTempDir() {

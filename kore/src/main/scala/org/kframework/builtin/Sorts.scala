@@ -13,9 +13,11 @@ object Sorts {
   val Bool = Sort("Bool")
 
   val Int = Sort("Int")
+  val File = Sort("File")
 
   val K = Sort("K")
   val KVariable = Sort("KVariable")
+  val KLabel = Sort("KLabel")
   val KList = Sort("KList")
   val KToken = Sort("KToken")
 

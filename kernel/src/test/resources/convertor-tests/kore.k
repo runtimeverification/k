@@ -38,7 +38,7 @@ We selected this core of K based on the following two criteria:
 // Module defining only the sorts K and KString, useful for modularity
 module BASIC-K
   syntax K   //[...]   // no constructors at this stage
-  syntax KString ::= r"[\\\"]([^\\\"\\n\\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"   [token, noAutoReject, onlyLabel]
+  syntax KString ::= r"[\\\"]([^\\\"\n\r\\\\]|[\\\\][nrtf\\\"\\\\])*[\\\"]"   [token, noAutoReject, onlyLabel]
          // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
   syntax KLabel
 endmodule
@@ -58,7 +58,7 @@ module KAST //[ hookNamespace(org.kframework.koreimplementation) ]  // the hook 
   syntax KItem ::= "#klabel" "(" KLabel ")"              [ klabel(#KLabel), hook(org.kframework.koreimplementation.KItem) ]
   syntax KItem ::= KLabel "(" KList ")"                  [ klabel(#KApply), hook(org.kframework.koreimplementation.KItem) ]
 
-  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\s])+`"   [ token, hook ] // everything except `, unless escaped \`
+  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\n\r])+`"   [ token, hook ] // everything except `, unless escaped \`
   syntax KLabel ::= r"[#a-z][a-zA-Z0-9]*"                [ token, hook ] // something that doesn't collide with meta-variables
 // KLabel brackets not needed if @cos' approach above works
 //  syntax KLabel ::= "`" KLabel "`"   [ bracket, hook ]

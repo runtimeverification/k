@@ -671,4 +671,8 @@ public class StringUtil {
         result.append(delimiter);
         return result.toString();
     }
+
+    public static String escapeAutomatonRegex(String str) {
+        return "\"" + str.replace("\"", "\"\\\"\"") + "\"";
+    }
 }

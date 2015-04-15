@@ -4,6 +4,7 @@ package org.kframework.compile.transformers;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import org.kframework.attributes.Source;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -19,7 +20,6 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -103,8 +103,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod, context)),
                     BoolBuiltin.TRUE, context);
             rule.addAttribute(Attribute.ANYWHERE);
-            rule.setSource(Sources.generatedBy(ResolveBinder.class));
-            items.add(rule);
 
             Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
 
@@ -114,8 +112,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bndIdx + 1));
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
-                rule.setSource(Sources.generatedBy(ResolveBinder.class));
-                items.add(rule);
                 //String bndSort = prod.getChildSort(bndIdx - 1);
                 // (AndreiS): the bounded sort is no longer automatically
                 // considered to be subsorted to Variable; Variable must be
@@ -131,8 +127,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bodyIdx + 1));
                 rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
-                rule.setSource(Sources.generatedBy(ResolveBinder.class));
-                items.add(rule);
             }
         }
 

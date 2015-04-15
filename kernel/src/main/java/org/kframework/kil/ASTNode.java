@@ -6,6 +6,8 @@ import java.lang.annotation.Annotation;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.Constants;

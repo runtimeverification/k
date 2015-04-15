@@ -42,6 +42,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
 
+  /** All the imported modules, calculated recursively. */
+  val importedModules: Set[Module] = imports | (imports flatMap { _.importedModules })
+
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
   val productionsFor: Map[KLabel, Set[Production]] =
@@ -50,7 +53,13 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
-  val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
+  val tokenProductionsFor: Map[Sort, Set[Production]] =
+    productions
+      .collect({ case p if p.att.contains("token") => p})
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps) }
+
+  val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
@@ -174,7 +183,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  def klabel: Option[KLabel] = att.get[String]("#klabel") map {org.kframework.kore.KORE.KLabel(_)}
+  lazy val klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
@@ -203,9 +212,9 @@ sealed trait ProductionItem extends OuterKORE
 case class NonTerminal(sort: Sort) extends ProductionItem
 with NonTerminalToString
 
-case class RegexTerminal(regex: String) extends ProductionItem with RegexTerminalToString
+case class RegexTerminal(precedePattern: String, regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
 
-case class Terminal(value: String) extends ProductionItem // hooked
+case class Terminal(value: String, followPattern: String) extends ProductionItem // hooked
 with TerminalToString
 
 /* Helper constructors */

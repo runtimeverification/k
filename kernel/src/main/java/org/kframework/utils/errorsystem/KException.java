@@ -1,11 +1,11 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
 
 public class KException {
     protected final ExceptionType type;
@@ -50,8 +50,8 @@ public class KException {
         this(type, label, message, null, source, location, null);
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, Source source, org.kframework.attributes.Location location) {
-        this(type, label, message, null, source, location, null);
+    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
+        this(type, label, message, compilationPhase, source, location, null);
     }
 
     public KException(
@@ -81,24 +81,6 @@ public class KException {
         this.location = location;
         this.exception = exception;
     }
-    public KException(
-            ExceptionType type,
-            KExceptionGroup label,
-            String message,
-            String compilationPhase,
-            Source source,
-            org.kframework.attributes.Location location,
-            Throwable exception) {
-        this(type, label, message, compilationPhase, source, new Location(location.startLine(), location.startColumn(), location.endLine(), location.endColumn()), exception);
-    }
-
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
-        this(type,label,message,compilationPhase,source,location, null);
-    }
-
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, org.kframework.attributes.Location location) {
-        this(type,label,message,compilationPhase,source,location, null);
-    }
 
     public enum KExceptionGroup {
         OUTER_PARSER, INNER_PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
@@ -116,8 +98,8 @@ public class KException {
     public String toString(boolean verbose) {
         return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
                 + trace.toString() + traceTail()
-                + (source == null ? "" : "\n\tSource: " + source)
-                + (location == null ? "" : "\n\tLocation: " + location)
+                + (source == null ? "" : "\n\t" + source)
+                + (location == null ? "" : "\n\t" + location)
                 + (compilationPhase == null || !verbose ? "" : "\n\tCompilation Phase: " + compilationPhase);
     }
 

@@ -13,14 +13,14 @@ module TEST
 
   syntax Foo ::= "z"
 
-  syntax left 'm 't
+  syntax left t m
 
-  syntax priorities'x
-> 'y 'z
-> 'm 't
-> 'u
+  syntax prioritiesx
+> y z
+> t m
+> u
 
-  syntax right 'u
+  syntax right u
 
 
 endmodule

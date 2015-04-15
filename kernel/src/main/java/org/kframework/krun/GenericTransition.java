@@ -1,9 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.krun.api.Transition;

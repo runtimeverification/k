@@ -2,15 +2,7 @@
 
 package org.kframework.kore.convertors;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-
+import com.google.inject.util.Providers;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
@@ -26,9 +18,16 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-
-import com.google.inject.util.Providers;
 import org.kframework.utils.file.JarInfo;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class SDFCompilerTest extends BaseTestCase {
 

@@ -1,11 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.compile.checks.CheckListDecl;
@@ -21,11 +17,11 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.RemoveUnusedModules;
 import org.kframework.parser.concrete.DefinitionLocalKParser;
 import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
-import org.kframework.parser.generator.OuterParser;
 import org.kframework.parser.generator.CacheLookupFilter;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.DisambiguateRulesFilter;
+import org.kframework.parser.generator.OuterParser;
 import org.kframework.parser.generator.ParseConfigsFilter;
 import org.kframework.parser.generator.ParseRulesFilter;
 import org.kframework.parser.generator.ProgramSDF;
@@ -40,7 +36,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefinitionLoader {
 
@@ -101,7 +100,7 @@ public class DefinitionLoader {
         // for now just use this file as main argument
         // ------------------------------------- outer parsing
 
-        outer.slurp(mainFile.getPath(), context);
+        outer.slurp(mainFile, context);
 
         // transfer information from the OuterParser object, to the Definition object
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();

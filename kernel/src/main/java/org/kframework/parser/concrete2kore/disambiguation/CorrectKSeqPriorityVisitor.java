@@ -40,18 +40,18 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2(tc).apply(tc.items().get(0));
+                        new PriorityVisitor2(tc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(0, rez.right().get());
+                tc = tc.with(0, rez.right().get());
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2(tc).apply(tc.items().get(last));
+                        new PriorityVisitor2(tc).apply(tc.get(last));
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(last, rez.right().get());
+                tc = tc.with(last, rez.right().get());
             }
         }
         return super.apply(tc);
@@ -68,7 +68,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KSequence")) {
                 String msg = "~> is not allowed to be an immediate child of " + parent.production().klabel().get() +
                         "    Use parentheses: (x)~>(y) to set the proper scope of the operations.";
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
             return Right.apply(tc);
