@@ -45,12 +45,11 @@ module TEST
   syntax priority '_/_ > '_+_
   syntax priority '!_ > '_&&_
 
-  syntax KCell ::= "<k>" K "</k>"                       [klabel(<k>), cell, maincell]
-  syntax KCell ::= "initKCell"                          [klabel(initKCell), initializer]
-  syntax StateCell ::= "<state>" Map "</state>"         [klabel(<state>),       cell]
-  syntax StateCell ::= "initStateCell"                  [klabel(initStateCell), initializer]
-  syntax TopCell ::= "<top>" KCell StateCell "</top>"   [klabel(<top>), cell]
-  syntax TopCell ::= "initTopCell"                      [klabel(initThread), initializer]
+  configuration
+    <top>
+      <k> $PGM:Pgm </k>
+      <state> .Map </state>
+    </top>
 
   syntax KResult ::= Bool
   syntax KResult ::= Int
