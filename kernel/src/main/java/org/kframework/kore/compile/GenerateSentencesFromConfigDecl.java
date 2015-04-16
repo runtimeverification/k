@@ -65,7 +65,7 @@ public class GenerateSentencesFromConfigDecl {
                                         cellProperties);
                                 if (multiplicity == ConfigurationInfo.Multiplicity.STAR) {
                                     Sort bagSort = Sort(sortName + "Bag");
-                                    Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
+                                    Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att().add("cellbag"));
                                     Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
                                     Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                                             Att().add("assoc").add("unit", "." + bagSort.name()));
