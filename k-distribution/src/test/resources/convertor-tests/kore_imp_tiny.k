@@ -47,7 +47,7 @@ module TEST
 
   configuration
     <top>
-      <k> $PGM:Pgm </k>
+      <k> $PGM:Pgm:K </k>
       <state> .Map </state>
     </top>
 
