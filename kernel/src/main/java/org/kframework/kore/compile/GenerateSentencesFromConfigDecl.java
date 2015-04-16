@@ -56,23 +56,23 @@ public class GenerateSentencesFromConfigDecl {
                                         cellProperties.<String>get("multiplicity"), body);
                                 Tuple2<Set<Sentence>, List<Sort>> childResult = gen(
                                         kapp.klist().items().get(2), null, att, m);
-                                Sentence initializer = Production(sort, Seq(Terminal("init" + sort)), Att().add("initializer"));
+                                Sentence initializer = Production("init" + sort.name(), sort, Seq(Terminal("init" + sort.name())), Att().add("initializer"));
                                 List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
                                         Terminal("<" + cellName + ">")), childResult._2().stream()
                                         .map(s -> NonTerminal(s))), Stream.of(Terminal("</" + cellName + ">")))
                                         .collect(Collectors.toList());
-                                Sentence cellProduction = Production(sort, items.stream().collect(Collections.toList()),
+                                Sentence cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
                                         cellProperties);
                                 if (multiplicity == ConfigurationInfo.Multiplicity.STAR) {
                                     Sort bagSort = Sort(sortName + "Bag");
                                     Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
-                                    Sentence bagUnit = Production(bagSort, Seq(Terminal("." + bagSort.name())));
-                                    Sentence bag = Production(bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
+                                    Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
+                                    Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                                             Att().add("assoc").add("unit", "." + bagSort.name()));
                                     return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction,
                                             bagSubsort, bagUnit, bag)), Lists.newArrayList(bagSort));
                                 } else if (multiplicity == ConfigurationInfo.Multiplicity.OPTIONAL) {
-                                    Sentence cellUnit = Production(sort, Seq(Terminal("." + sortName)));
+                                    Sentence cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
                                     return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction, cellUnit)),
                                             Lists.newArrayList(sort));
                                 } else {
