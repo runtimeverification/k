@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 
 module ID
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoreject]
+  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [token, autoReject]
 endmodule
 
 module EMPTY-ID
@@ -18,8 +18,8 @@ module BOOL
 endmodule
 
 module LOGIC
-  syntax KBool ::= "KTrue"                      [klabel(_andBool_), function, hook(#BOOL:_andBool_)]
-  syntax KBool ::= "KFalse"                      [klabel(_orBool_), function, hook(#BOOL:_orBool_)]
+  syntax KBool ::= "KTrue"                  [klabel(_andBool_), function, hook(#BOOL:_andBool_)]
+  syntax KBool ::= "KFalse"                 [klabel(_orBool_), function, hook(#BOOL:_orBool_)]
 
   syntax KBool ::= "notBool" "(" KBool ")"  [klabel(notBool_),  function, hook(#BOOL:notBool_)]
   syntax KBool ::= KBool "andBool" KBool    [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
@@ -46,7 +46,7 @@ module INT
 
   syntax priority '_*Int_ '_/Int_ '_%Int_ > '_+Int_ '_-Int_
 
-  syntax KBool ::= "isInt" "(" K ")"         [klabel(isKResult), function]
+  syntax KBool ::= "isInt" "(" K ")"     [klabel(isKResult), function]
 endmodule
 
 module K-RESULT
@@ -67,7 +67,7 @@ module MAP
 
   syntax Map ::= Map Map        [klabel('_Map_), function, assoc, comm, hook(Map:__)]
   syntax Map ::= ".Map"         [klabel('_Map_),  function, hook(Map:.Map)]
-  syntax Map ::= K "|->" K   [klabel('_|->_), function, hook(Map:_|->_)]
+  syntax Map ::= K "|->" K      [klabel('_|->_), function, hook(Map:_|->_)]
   syntax priorities '_|->_ > '_Map_
 
   syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]

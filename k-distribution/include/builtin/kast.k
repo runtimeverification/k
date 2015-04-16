@@ -19,7 +19,7 @@ module KAST
   syntax KItem ::= KBott
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\n\r])+`" [token, hook(org.kframework.kore.KLabel)]
-                  | r"[#a-z][a-zA-Z0-9]*"               [token, hook(org.kframework.kore.KLabel), autoReject]
+                  | r"(?<![a-zA-Z0-9])[#a-z][a-zA-Z0-9]*"               [token, hook(org.kframework.kore.KLabel), autoReject]
                        // something that doesn't collide with meta-variables
 
   syntax KList ::= K
@@ -78,7 +78,7 @@ module CONFIG-CELLS
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
   syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
                            | ""                            [klabel(#cellPropertyListTerminator)]
-  syntax #CellProperty ::= #CellName "=" KString    [klabel(#cellProperty)]
+  syntax #CellProperty ::= #CellName "=" KString           [klabel(#cellProperty)]
 
 endmodule
 
@@ -126,6 +126,6 @@ module K
   imports AUTO-CASTS
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
-  syntax KBott     ::= "HOLE"         [klabel([])]
+  syntax KBott     ::= "HOLE"       [klabel([])]
 
 endmodule

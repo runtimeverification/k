@@ -1,12 +1,11 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
@@ -18,6 +17,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
+import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -150,10 +150,15 @@ public class ProgramSDF {
             if (!p.containsAttribute("noAutoReject")) {
                 // reject all terminals that match the regular expression of the lexical production
                 if (p.containsAttribute("regex")) {
-                    Pattern pat = Pattern.compile(p.getAttribute("regex"));
+                    RunAutomaton auto = null;
+                    try {
+                        auto = new RunAutomaton(new RegExp(KILtoKORE.getRegexTerminal(p.getAttribute("regex")).regex()).toAutomaton());
+                    } catch (IllegalArgumentException e) {
+                        String msg = "Could not compile regex pattern: " + e.getMessage();
+                        throw KExceptionManager.compilerError(msg, p);
+                    }
                     for (Terminal t : ctv.terminals) {
-                        Matcher m = pat.matcher(t.getTerminal());
-                        if (m.matches())
+                        if (auto.run(t.getTerminal()))
                             sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz {reject}\n");
                     }
                 } else {
