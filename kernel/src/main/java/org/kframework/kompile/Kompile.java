@@ -168,27 +168,13 @@ public class Kompile {
     K _true = KToken(Sort("KBool"), "KTrue");
 
     private Module resolveConfig(Module module) {
-        boolean hasConfigDecl = stream(module.localSentences())
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals("config"))
-                .findFirst().isPresent();
-
-        if (!hasConfigDecl) {
-            return module;
-        }
-
         ParseInModule configParser = gen.getConfigGrammar(module);
 
-        java.util.Set<Bubble> configBubbles = stream(module.localSentences())
+        Set<Sentence> configDeclProductions = stream(module.localSentences())
+                .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
-                .collect(Collectors.toSet());
-
-        java.util.Set<ParseFailedException> errors = Sets.newHashSet();
-
-        Set<Sentence> configDeclProductions = configBubbles.parallelStream()
                 .map(b -> {
                     int startLine = b.att().<Integer>get("contentStartLine").get();
                     int startColumn = b.att().<Integer>get("contentStartColumn").get();
