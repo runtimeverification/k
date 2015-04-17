@@ -38,7 +38,7 @@ public class NewOuterParserTest {
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 true);
 
-        K kBody = parser.parseWithModule(theTextToParse, startSymbol, source, definition.mainSyntaxModule());
+        K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.mainSyntaxModule());
         //System.out.println(kBody);
     }
 }

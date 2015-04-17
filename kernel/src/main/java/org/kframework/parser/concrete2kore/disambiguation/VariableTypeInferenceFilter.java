@@ -95,11 +95,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     Collection<Sort> values = variant.get(key);
                     Set<Sort> mins = new HashSet<>();
                     for (Sort sort : iterable(sortSet)) { // for every declared sort
-                        if (subsorts.lessThenEq(sort, Sort("KBott")))
+                        if (subsorts.lessThanEq(sort, Sort("KBott")))
                             continue;
                         boolean min = true;
                         for (Sort var : values) {
-                            if (!subsorts.greaterThenEq(var, sort)) {
+                            if (!subsorts.greaterThanEq(var, sort)) {
                                 min = false;
                                 break;
                             }
@@ -117,7 +117,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         for (Sort vv1 : mins) {
                             boolean maxSort = true;
                             for (Sort vv2 : mins)
-                                if (subsorts.lessThen(vv1, vv2))
+                                if (subsorts.lessThan(vv1, vv2))
                                     maxSort = false;
                             if (maxSort)
                                 maxSorts.add(vv1);
@@ -383,7 +383,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sort("K"))) {
                         //System.out.println("c = " + c.value() + ", " + declared + " < " + sort);
-                        if (!subsorts.lessThenEq(declared, sort)) {
+                        if (!subsorts.lessThanEq(declared, sort)) {
                             // TODO: location information
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
                             //System.out.println(msg);

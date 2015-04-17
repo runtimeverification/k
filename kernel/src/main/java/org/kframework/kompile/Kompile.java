@@ -79,7 +79,15 @@ public class Kompile {
         this.parser = new ParserUtils(files);
     }
 
-    public Tuple3<Module, Definition, BiFunction<String, Source, K>> run(File definitionFile, String mainModuleName, String mainProgramsModule, String programStartSymbol) {
+    /**
+     * Executes the Kompile tool. This tool accesses a
+     * @param definitionFile
+     * @param mainModuleName
+     * @param mainProgramsModule
+     * @param programStartSymbol
+     * @return
+     */
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModule, String programStartSymbol) {
         Definition defWithConfig = parseDefinition(definitionFile, mainModuleName, mainProgramsModule, true);
 
         Module mainModule = ModuleTransformer.from(this::resolveBubbles).apply(defWithConfig.mainModule());
@@ -101,7 +109,7 @@ public class Kompile {
 
         System.out.println(concretized);
 
-        return Tuple3.apply(withKSeq, defWithConfig, pp);
+        return new CompiledDefinition(withKSeq, defWithConfig, pp);
     }
 
     public BiFunction<String, Source, K> getProgramParser(Module moduleForPrograms, String programStartSymbol) {
@@ -178,14 +186,9 @@ public class Kompile {
                 .filter(b -> b.sentenceType().equals("config"))
                 .collect(Collectors.toSet());
 
-        if (configBubbles.size() > 1) {
-            throw KExceptionManager.compilerError("Found more than one configuration in definition: " + configBubbles);
-        }
-
         java.util.Set<ParseFailedException> errors = Sets.newHashSet();
 
-        Set<Configuration> configDecls = configBubbles.stream()
-                .parallel()
+        Set<Sentence> configDeclProductions = configBubbles.stream()
                 .map(b -> {
                     int startLine = b.att().<Integer>get("contentStartLine").get();
                     int startColumn = b.att().<Integer>get("contentStartColumn").get();
@@ -204,9 +207,9 @@ public class Kompile {
                 .map(TreeNodesToKORE::apply)
                 .map(TreeNodesToKORE::down)
                 .map(contents -> {
-                    KApply ruleContents = (KApply) contents;
-                    List<org.kframework.kore.K> items = ruleContents.klist().items();
-                    switch (ruleContents.klabel().name()) {
+                    KApply configContents = (KApply) contents;
+                    List<org.kframework.kore.K> items = configContents.klist().items();
+                    switch (configContents.klabel().name()) {
                     case "#ruleNoConditions":
                         return Configuration(items.get(0), _true, Att.apply());
                     case "#ruleEnsures":
@@ -215,10 +218,8 @@ public class Kompile {
                         throw new AssertionError("Wrong KLabel for rule content");
                     }
                 })
-                .collect(Collections.toSet());
-
-        Set<Sentence> configDeclProductions = stream(configDecls).flatMap(
-                configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParser.module())._1()))
+                .flatMap(
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParser.module())))
                 .collect(Collections.toSet());
         return Module(module.name(), module.imports(), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
     }

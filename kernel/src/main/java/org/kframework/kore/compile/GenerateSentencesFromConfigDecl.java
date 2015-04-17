@@ -37,7 +37,27 @@ import static org.kframework.kore.KORE.*;
  */
 public class GenerateSentencesFromConfigDecl {
 
-    public static Tuple2<Set<Sentence>, List<Sort>> gen(K body, K ensures, Att att, Module m) {
+    /**
+     * Takes a configuration declaration and returns the sentences that it desugars into.
+     *
+     * Cells of multiplicity 1 desugar into an initializer production, an initializer rule, and a cell production.
+     * Cells of multiplicity * desugar into an initializer production, an initializer rule, a cell production, and a bag
+     * sort to represent a bag of those cells.
+     * Cells of multiplicity ? desugar into an initializer production, an initializer rule, a cell production, and an
+     * empty production indicating the absence of that cell.
+     *
+     * Currently the implementation does not handle initializer rules; we will address this eventually.
+     * @param body The body of the configuration declaration.
+     * @param ensures The ensures clause of the configuration declaration.
+     * @param att The attributes of the configuration declaration.
+     * @param m The module the configuration declaration exists in.
+     * @return A set of sentences representing the configuration declaration.
+     */
+    public static Set<Sentence> gen(K body, K ensures, Att att, Module m) {
+        return genInternal(body, ensures, att, m)._1();
+    }
+
+    private static Tuple2<Set<Sentence>, List<Sort>> genInternal(K body, K ensures, Att att, Module m) {
         if (body instanceof KApply) {
             KApply kapp = (KApply) body;
             if (kapp.klabel().name().equals("#configCell")) {
@@ -54,7 +74,7 @@ public class GenerateSentencesFromConfigDecl {
                                 Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
                                 ConfigurationInfo.Multiplicity multiplicity = convertStringMultiplicity(
                                         cellProperties.<String>get("multiplicity"), body);
-                                Tuple2<Set<Sentence>, List<Sort>> childResult = gen(
+                                Tuple2<Set<Sentence>, List<Sort>> childResult = genInternal(
                                         kapp.klist().items().get(2), null, att, m);
                                 Sentence initializer = Production("init" + sort.name(), sort, Seq(Terminal("init" + sort.name())), Att().add("initializer"));
                                 List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
@@ -88,13 +108,13 @@ public class GenerateSentencesFromConfigDecl {
                 if (ensures != null) {
                     KToken cellLabel = KToken(Sort("#CellName"), "generatedTop");
                     K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), body, cellLabel);
-                    return gen(generatedTop, ensures, att, m);
+                    return genInternal(generatedTop, ensures, att, m);
                 }
                 List<K> cells = Assoc.flatten(kapp.klabel(), kapp.klist().items(), m);
                 Set<Sentence> accumSentences = Set();
                 List<Sort> sorts = Lists.newArrayList();
                 for (K cell : cells) {
-                    Tuple2<Set<Sentence>, List<Sort>> childResult = gen(cell, null, att, m);
+                    Tuple2<Set<Sentence>, List<Sort>> childResult = genInternal(cell, null, att, m);
                     accumSentences = (Set<Sentence>)accumSentences.$bar(childResult._1());
                     sorts.addAll(childResult._2());
                 }

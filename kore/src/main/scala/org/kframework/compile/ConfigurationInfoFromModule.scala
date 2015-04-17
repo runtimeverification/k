@@ -28,7 +28,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
     p.items.flatMap{
       case NonTerminal(n) if cellSorts.contains(n) => List((s, n))
-      case NonTerminal(n) if cellBagSorts.contains(n) => m.definedSorts.filter(m.subsorts.greaterThen(n, _)).map(subsort => (s, subsort))
+      case NonTerminal(n) if cellBagSorts.contains(n) => m.definedSorts.filter(m.subsorts.directlyGreaterThan(n, _)).map(subsort => (s, subsort))
       case _ => List()
     }}.toSet
 
