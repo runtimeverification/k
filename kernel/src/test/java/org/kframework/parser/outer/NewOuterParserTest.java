@@ -30,11 +30,13 @@ public class NewOuterParserTest {
         String definitionString = FileUtils.readFileToString(definitionFile);
         Source source = Source.apply(definitionFile.getPath());
 
-        Definition definition = new ParserUtils(FileUtil.testFileUtil()).loadDefinition(
+        ParserUtils parser = new ParserUtils(FileUtil.testFileUtil());
+        Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, definitionString, source,
                 definitionFile.getParentFile(),
-                Lists.newArrayList(BUILTIN_DIRECTORY));
+                Lists.newArrayList(BUILTIN_DIRECTORY),
+                true);
 
         K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.mainSyntaxModule());
         //System.out.println(kBody);

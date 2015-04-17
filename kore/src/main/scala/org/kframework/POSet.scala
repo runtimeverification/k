@@ -59,13 +59,15 @@ class POSet[T](directRelations: Set[(T, T)]) {
   /**
    * Returns true if x < y
    */
-  def lessThen(x: T, y: T): Boolean = <(x, y)
-  def lessThenEq(x: T, y: T): Boolean = <(x, y) | x == y
+  def lessThan(x: T, y: T): Boolean = <(x, y)
+  def lessThanEq(x: T, y: T): Boolean = <(x, y) | x == y
+  def directlyLessThan(x: T, y: T): Boolean = directRelationsMap.get(x).exists(_.contains(y))
   /**
    * Returns true if y < x
    */
-  def greaterThen(x: T, y: T): Boolean = >(x, y)
-  def greaterThenEq(x: T, y: T): Boolean = >(x, y) | x == y
+  def greaterThan(x: T, y: T): Boolean = >(x, y)
+  def greaterThanEq(x: T, y: T): Boolean = >(x, y) | x == y
+  def directlyGreaterThan(x: T, y: T): Boolean = directRelationsMap.get(y).exists(_.contains(x))
   /**
    * Returns true if y < x or y < x
    */

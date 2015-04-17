@@ -2,7 +2,6 @@
 package org.kframework.parser;
 
 import com.google.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.kframework.attributes.Source;
@@ -40,7 +39,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Concrete;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -48,9 +46,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.kframework.Collections.stream;
 
 public class ProgramLoader {
 
@@ -149,7 +144,7 @@ public class ProgramLoader {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
             org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
-            ParseInModule parser = new RuleGrammarGenerator(stream(koreDef.modules()).collect(Collectors.toSet())).getProgramsGrammar(synMod);
+            ParseInModule parser = new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName(), source);
             if (parsed._1().isLeft()) {

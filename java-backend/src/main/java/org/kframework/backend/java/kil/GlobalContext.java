@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class GlobalContext implements Serializable {
     private Definition def;
     public final transient FileSystem fs;
-    public final transient Tool tool;
+    public final Tool tool;
     @Deprecated
     public final transient EqualityOperations equalityOps;
     @Deprecated

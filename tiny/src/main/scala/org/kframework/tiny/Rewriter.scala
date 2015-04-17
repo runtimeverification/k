@@ -31,6 +31,8 @@ object SimpleIndex extends (K => Option[String]) {
 }
 
 class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
+  def this(module: definition.Module) = this(module, KIndex)
+
   val cons = new Constructors(module)
 
   import cons._

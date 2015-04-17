@@ -1,6 +1,11 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
@@ -10,14 +15,13 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
-import org.kframework.attributes.Source;
-import org.kframework.attributes.Location;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -26,10 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 
 /**
@@ -73,7 +73,7 @@ public class KItem extends Term implements KItemRepresentation {
         kList = KCollection.upKind(kList, Kind.KLIST);
 
         // TODO(yilongli): break the dependency on the Tool object
-        return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool, source, location);
+        return new KItem(kLabel, kList, termContext, termContext.global().tool, source, location);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
