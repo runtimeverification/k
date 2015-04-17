@@ -66,7 +66,7 @@ public class GenerateSentencesFromConfigDecl {
      *             its parent is treated as a leaf cell.
      * @param ensures The ensures clause from the configuration declaration. This is appended to the initializer of
      *                the top cell, but not any other cells. The algorithm assumes this will be null if and only if
-     *                it is the top cell of a configuration declaration.
+     *                it is not the top cell of a configuration declaration.
      * @param att The attributes of the configuration declaration. Appended to all cell productions generated.
      * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
      * @return A tuple of the sentences generated and a list of the sorts of the children of the cell.
