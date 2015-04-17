@@ -188,7 +188,7 @@ public class Kompile {
 
         java.util.Set<ParseFailedException> errors = Sets.newHashSet();
 
-        Set<Sentence> configDeclProductions = configBubbles.stream()
+        Set<Sentence> configDeclProductions = configBubbles.parallelStream()
                 .map(b -> {
                     int startLine = b.att().<Integer>get("contentStartLine").get();
                     int startColumn = b.att().<Integer>get("contentStartColumn").get();
