@@ -6,6 +6,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.definition.Constructors;
 import org.kframework.definition.Module;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
@@ -57,10 +58,24 @@ public class GenerateSentencesFromConfigDecl {
         return genInternal(body, ensures, att, m)._1();
     }
 
-    private static Tuple2<Set<Sentence>, List<Sort>> genInternal(K body, K ensures, Att att, Module m) {
-        if (body instanceof KApply) {
-            KApply kapp = (KApply) body;
+    /**
+     * Recurses over a cell and computes all the sentences corresponding to its children, and then generates
+     * the sentences for itself.
+     * @param term The term to be processed. Can be either a cell, in which case it processes that cell,
+     *             a list of cells, in which case it processes each of those cells, or a noncell, in which case
+     *             its parent is treated as a leaf cell.
+     * @param ensures The ensures clause from the configuration declaration. This is appended to the initializer of
+     *                the top cell, but not any other cells. The algorithm assumes this will be null if and only if
+     *                it is the top cell of a configuration declaration.
+     * @param att The attributes of the configuration declaration. Appended to all cell productions generated.
+     * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
+     * @return A tuple of the sentences generated and a list of the sorts of the children of the cell.
+     */
+    private static Tuple2<Set<Sentence>, List<Sort>> genInternal(K term, K ensures, Att att, Module m) {
+        if (term instanceof KApply) {
+            KApply kapp = (KApply) term;
             if (kapp.klabel().name().equals("#configCell")) {
+                // is a single cell
                 if (kapp.klist().size() == 4) {
                     K startLabel = kapp.klist().items().get(0);
                     K endLabel = kapp.klist().items().get(3);
@@ -69,51 +84,29 @@ public class GenerateSentencesFromConfigDecl {
                             KToken label = (KToken) startLabel;
                             if (label.sort().equals(Sort("#CellName"))) {
                                 String cellName = label.s();
-                                String sortName = getSortOfCell(cellName);
-                                Sort sort = Sort(sortName);
-                                Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
-                                ConfigurationInfo.Multiplicity multiplicity = convertStringMultiplicity(
-                                        cellProperties.<String>get("multiplicity"), body);
-                                Tuple2<Set<Sentence>, List<Sort>> childResult = genInternal(
-                                        kapp.klist().items().get(2), null, att, m);
-                                Sentence initializer = Production("init" + sort.name(), sort, Seq(Terminal("init" + sort.name())), Att().add("initializer"));
-                                List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
-                                        Terminal("<" + cellName + ">")), childResult._2().stream()
-                                        .map(s -> NonTerminal(s))), Stream.of(Terminal("</" + cellName + ">")))
-                                        .collect(Collectors.toList());
-                                Sentence cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
-                                        cellProperties);
-                                if (multiplicity == ConfigurationInfo.Multiplicity.STAR) {
-                                    Sort bagSort = Sort(sortName + "Bag");
-                                    Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att().add("cellbag"));
-                                    Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
-                                    Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
-                                            Att().add("assoc").add("unit", "." + bagSort.name()));
-                                    return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction,
-                                            bagSubsort, bagUnit, bag)), Lists.newArrayList(bagSort));
-                                } else if (multiplicity == ConfigurationInfo.Multiplicity.OPTIONAL) {
-                                    Sentence cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
-                                    return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction, cellUnit)),
-                                            Lists.newArrayList(sort));
-                                } else {
-                                    return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction)),
-                                            Lists.newArrayList(sort));
-                                }
+                                K cellPropertiesTerm = kapp.klist().items().get(1);
+                                K cellContents = kapp.klist().items().get(2);
+                                return computeSentencesOfWellFormedCell(term, att, m, cellName,
+                                        getCellPropertiesAsAtt(cellPropertiesTerm, cellName, ensures),
+                                        cellContents);
                             }
                         }
                     }
                 }
-                throw KExceptionManager.compilerError("Malformed cell in configuration declaration.", body);
+                throw KExceptionManager.compilerError("Malformed cell in configuration declaration.", term);
             } else if (kapp.klabel().name().equals("#cells")) {
+                //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
+                    //top level cell, therefore, should be the children of the generatedTop cell
                     KToken cellLabel = KToken(Sort("#CellName"), "generatedTop");
-                    K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), body, cellLabel);
+                    K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), term, cellLabel);
                     return genInternal(generatedTop, ensures, att, m);
                 }
                 List<K> cells = Assoc.flatten(kapp.klabel(), kapp.klist().items(), m);
                 Set<Sentence> accumSentences = Set();
                 List<Sort> sorts = Lists.newArrayList();
                 for (K cell : cells) {
+                    //for each cell, generate the child and inform the parent of the children it contains
                     Tuple2<Set<Sentence>, List<Sort>> childResult = genInternal(cell, null, att, m);
                     accumSentences = (Set<Sentence>)accumSentences.$bar(childResult._1());
                     sorts.addAll(childResult._2());
@@ -121,14 +114,60 @@ public class GenerateSentencesFromConfigDecl {
                 return Tuple2.apply(accumSentences, sorts);
             }
             //TODO: call generic getSort method of some kind
+            // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             return Tuple2.apply(Set(), Lists.newArrayList(m.sortFor().get(kapp.klabel()).get()));
-        } else if (body instanceof KToken) {
-            KToken ktoken = (KToken) body;
+        } else if (term instanceof KToken) {
+            // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
+            KToken ktoken = (KToken) term;
             return Tuple2.apply(Set(), Lists.newArrayList(ktoken.sort()));
-        } else if (body instanceof KSequence) {
+        } else if (term instanceof KSequence) {
+            // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             return Tuple2.apply(Set(), Lists.newArrayList(Sorts.K()));
         } else {
-            throw KExceptionManager.compilerError("Unexpected value found in configuration declaration, expected KToken or KApply", body);
+            throw KExceptionManager.compilerError("Unexpected value found in configuration declaration, expected KToken or KApply", term);
+        }
+    }
+
+    private static Tuple2<Set<Sentence>, List<Sort>> computeSentencesOfWellFormedCell(K cell, Att configAtt, Module m, String cellName, Att cellProperties, K cellContents) {
+        String sortName = getSortOfCell(cellName);
+        Sort sort = Sort(sortName);
+        ConfigurationInfo.Multiplicity multiplicity = convertStringMultiplicity(
+                cellProperties.<String>get("multiplicity"), cell);
+
+        Tuple2<Set<Sentence>, List<Sort>> childResult = genInternal(
+                cellContents, null, configAtt, m);
+        List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
+                Terminal("<" + cellName + ">")), childResult._2().stream()
+                .map(Constructors::NonTerminal)), Stream.of(Terminal("</" + cellName + ">")))
+                .collect(Collectors.toList());
+
+        // syntax Cell ::= "initCell" [initializer]
+        // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
+        Sentence initializer = Production("init" + sort.name(), sort, Seq(Terminal("init" + sort.name())), Att().add("initializer"));
+        Sentence cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
+                cellProperties.addAll(configAtt));
+
+        if (multiplicity == ConfigurationInfo.Multiplicity.STAR) {
+            // syntax CellBag ::= Cell [cellbag]
+            // syntax CellBag ::= ".CellBag"
+            // syntax CellBag  ::= CellBag CellBag [assoc, unit(.CellBag)]
+            Sort bagSort = Sort(sortName + "Bag");
+            Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att().add("cellbag"));
+            Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
+            Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
+                    Att().add("assoc").add("unit", "." + bagSort.name()));
+
+            return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction,
+                    bagSubsort, bagUnit, bag)), Lists.newArrayList(bagSort));
+        } else if (multiplicity == ConfigurationInfo.Multiplicity.OPTIONAL) {
+            // syntax Cell ::= ".Cell"
+            Sentence cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
+
+            return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction, cellUnit)),
+                    Lists.newArrayList(sort));
+        } else {
+            return Tuple2.apply((Set<Sentence>)childResult._1().$bar(Set(initializer, cellProduction)),
+                    Lists.newArrayList(sort));
         }
     }
 
