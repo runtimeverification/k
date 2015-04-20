@@ -1,28 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-
-import org.fusesource.jansi.AnsiConsole;
-import org.kframework.kast.KastFrontEnd;
-import org.kframework.kdoc.KDocFrontEnd;
-import org.kframework.kompile.KompileFrontEnd;
-import org.kframework.krun.KRunFrontEnd;
-import org.kframework.kserver.KServerFrontEnd;
-import org.kframework.ktest.KTestFrontEnd;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
-import org.kframework.utils.file.Environment;
-import org.kframework.utils.file.WorkingDir;
-import org.kframework.utils.inject.Options;
-import org.kframework.utils.inject.SimpleScope;
-
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -34,6 +12,27 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Message;
 import com.martiansoftware.nailgun.NGContext;
+import org.fusesource.jansi.AnsiConsole;
+import org.kframework.kast.KastFrontEnd;
+import org.kframework.kdoc.KDocFrontEnd;
+import org.kframework.kompile.KompileFrontEnd;
+import org.kframework.krun.KRunFrontEnd;
+import org.kframework.kserver.KServerFrontEnd;
+import org.kframework.ktest.KTestFrontEnd;
+import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.WorkingDir;
+import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.SimpleScope;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 
 public class Main {
 
@@ -115,7 +114,7 @@ public class Main {
                     throw e;
                 } else {
                     KEMException ex = (KEMException) m.getCause();
-                    ex.register(kem);
+                    ex.register(kem.getExceptions());
                 }
             }
             kem.print();

@@ -35,6 +35,13 @@ public class AddImplicitCells {
     }
 
     public K addImplicitCells(K term) {
+        if (term instanceof KApply && labelInfo.isFunction(((KApply) term).klabel())) {
+            return term;
+        }
+        if (term instanceof KRewrite && ((KRewrite) term).left() instanceof KApply
+                && labelInfo.isFunction(((KApply) ((KRewrite) term).left()).klabel())) {
+            return term;
+        }
         return addRootCell(addComputationCells(term));
     }
 

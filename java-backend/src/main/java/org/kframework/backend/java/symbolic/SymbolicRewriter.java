@@ -21,7 +21,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.*;
 import java.util.stream.Collectors;

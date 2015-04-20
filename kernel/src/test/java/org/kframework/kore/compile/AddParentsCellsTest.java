@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.*;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.Arrays;
 
@@ -76,7 +77,7 @@ public class AddParentsCellsTest {
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
-    @Test(expected = org.kframework.utils.errorsystem.KExceptionManager.KEMException.class)
+    @Test(expected = KEMException.class)
     public void testAmbiguityError() {
         K term = cell("<ts>", cell("<k>", intToToken(1)), cell("<k>", intToToken(2)), cell("<env>", intToToken(2)));
         pass.concretizeCell(term);
@@ -111,6 +112,14 @@ public class AddParentsCellsTest {
         K expected = cell("<T>", cell("<ts>",
                 cell("<t>", cell("<k>", intToToken(1))),
                 cell("<t>", KRewrite(cells(cell("<k>", intToToken(2)), cell("<msg>")), cell("<k>")))));
+        Assert.assertEquals(expected, pass.concretizeCell(term));
+    }
+
+    @Test
+    public void testRewriteWithCellVariable() {
+        K term = cell("<T>", KRewrite(KVariable("KCell", Att().add("sort", "KCell")), cell("<k>", intToToken(1))));
+        K expected = cell("<T>", cell("<ts>",
+                cell("<t>", KRewrite(KVariable("KCell", Att().add("sort", "KCell")), cell("<k>", intToToken(1))))));
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 

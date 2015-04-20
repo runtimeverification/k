@@ -51,6 +51,12 @@ public interface ConfigurationInfo {
     /** Return the declared computation cell, by default the k cell */
     Sort getComputationCell();
 
+    /** Returns the unit of a * or ? cell. */
+    K getUnit(Sort k);
+
+    /** Returns the concatenation operation of a multiplicity * cell. */
+    KLabel getConcat(Sort k);
+
     /** Declared mulitplicitly of a cell */
     enum Multiplicity {
         /** Exactly one instance of this cell is required */

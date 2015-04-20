@@ -2,6 +2,7 @@
 package org.kframework.main;
 
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -56,13 +57,13 @@ public abstract class FrontEnd {
                 }
                 kem.print();
             }
-        } catch (KExceptionManager.KEMException e) {
+        } catch (KEMException e) {
             // terminated with errors, so we need to return nonzero error code.
             retval = 113;
             if (globalOptions.debug) {
                 e.printStackTrace();
             }
-            e.register(kem);
+            e.register(kem.getExceptions());
             kem.print();
         }
         return retval;

@@ -4,7 +4,8 @@ package org.kframework.definition
 
 import dk.brics.automaton.{SpecialOperations, BasicAutomata, RegExp, RunAutomaton}
 import org.kframework.POSet
-import org.kframework.attributes.Att
+import org.kframework.attributes.{Source, Location, Att}
+import org.kframework.kore.Unapply.{KLabel, KApply}
 import org.kframework.kore._
 
 trait OuterKORE
@@ -73,7 +74,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
-  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {_.head.att}
+  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {p => {
+    val union = p.map(_.att.att).reduce(_ ++ _)
+    val attMap = union.collect({case t@KApply(KLabel(key), _) => t}).groupBy(_.klabel).map { case (l, as) => (l, as) }
+    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
+  }}
 
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
@@ -141,6 +146,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 trait Sentence {
   // marker
   val att: Att
+  def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
+  def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
 }
 
 // deprecated

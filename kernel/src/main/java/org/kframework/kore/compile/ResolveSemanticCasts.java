@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
-import com.google.common.collect.Sets;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -12,6 +11,9 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -21,7 +23,8 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveSemanticCasts {
 
-    private Set<KApply> casts = Sets.newHashSet();
+    private Set<KApply> casts = new HashSet<>();
+    private Map<String, String> varSorts = new HashMap<>();
 
     void resetCasts() {
         casts.clear();
@@ -50,7 +53,7 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        return casts.stream().map(kapp -> (K)KApply(KLabel("is" + getSortNameOfCast(kapp)), kapp.klist()))
+        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), kapp.klist(), kapp.att()))
                 .reduce(requires, BooleanUtils::and);
     }
 
@@ -62,8 +65,14 @@ public class ResolveSemanticCasts {
         new VisitKORE() {
             @Override
             public Void apply(KApply v) {
-                if (v.klabel().name().startsWith("#SemanticCastTo"))
+                if (v.klabel().name().startsWith("#SemanticCastTo")) {
                     casts.add(v);
+                    K child = v.klist().items().get(0);
+                    if (child instanceof KVariable) {
+                        KVariable var = (KVariable) child;
+                        varSorts.put(var.name(), getSortNameOfCast(v));
+                    }
+                }
                 return super.apply(v);
             }
         }.apply(term);
@@ -74,12 +83,15 @@ public class ResolveSemanticCasts {
             @Override
             public K apply(KApply k) {
                 if (casts.contains(k)) {
-                    K child = k.klist().items().get(0);
-                    if (child instanceof KVariable) {
-                        KVariable var = (KVariable) child;
-                        return KVariable(var.name(), var.att().add("sort", getSortNameOfCast(k)));
-                    }
                     return super.apply(k.klist().items().get(0));
+                }
+                return super.apply(k);
+            }
+
+            @Override
+            public K apply(KVariable k) {
+                if (varSorts.containsKey(k.name())) {
+                    return KVariable(k.name(), k.att().add("sort", varSorts.get(k.name())));
                 }
                 return super.apply(k);
             }

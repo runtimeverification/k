@@ -25,7 +25,7 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.SearchType;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;

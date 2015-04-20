@@ -103,7 +103,7 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(afterResolvingCasts);
         SortInfo sortInfo = SortInfo.fromModule(afterResolvingCasts);
 
-        Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo).concretize(afterResolvingCasts);
+        Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(afterResolvingCasts);
 
         Module kseqModule = parsedDef.getModule("KSEQ").get();
 
@@ -254,7 +254,7 @@ public class Kompile {
                 .collect(Collections.toSet());
 
         return Module(module.name(), module.imports(),
-                (Set<Sentence>) module.localSentences().$bar(ruleSet), module.att());
+                stream((Set<Sentence>) module.localSentences().$bar(ruleSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
     }
 
     private ParseCache loadCache(Module parser) {

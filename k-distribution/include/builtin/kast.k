@@ -53,9 +53,9 @@ module KCELLS
   imports KAST
 
   syntax Cell
-  syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells), unit(#EmptyBag)]
-               | ".Bag"   [klabel(#EmptyBag)]
-               | ".::Bag" [klabel(#EmptyBag)]
+  syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells), unit(#cells)]
+               | ".Bag"   [klabel(#cells)]
+               | ".::Bag" [klabel(#cells)]
                | Cell
   syntax K ::= Bag
   syntax Bag ::= KBott

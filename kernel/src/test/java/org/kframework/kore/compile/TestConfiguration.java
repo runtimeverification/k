@@ -2,17 +2,17 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 
-import static org.kframework.kore.KORE.*;
-
 import java.util.List;
 import java.util.Map;
+
+import static org.kframework.kore.KORE.*;
 
 /**
  * Created by brandon on 3/24/15.
@@ -28,6 +28,8 @@ class TestConfiguration implements ConfigurationInfo {
 
     Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
     Map<Sort, K> defaultCells = Maps.newHashMap();
+    Map<Sort, K> units = Maps.newHashMap();
+    Map<Sort, KLabel> concats = Maps.newHashMap();
     Map<Sort, KLabel> cellLabels = Maps.newHashMap();
 
     public void addCell(String parent, String child, String label) {
@@ -51,12 +53,16 @@ class TestConfiguration implements ConfigurationInfo {
             leafCellTypes.put(Sort(child), contents);
         }
         multiplicities.put(Sort(child), m);
-        cellLabels.put(Sort(child),KLabel(label));
+        cellLabels.put(Sort(child), KLabel(label));
     }
 
     public void addDefault(String cell, K term) {
         defaultCells.put(Sort(cell),term);
     }
+
+    public void addUnit(String cell, K term) { units.put(Sort(cell), term); }
+
+    public void addConcat(String cell, KLabel label) { concats.put(Sort(cell), label); }
 
     public TestConfiguration() {
     }
@@ -120,4 +126,10 @@ class TestConfiguration implements ConfigurationInfo {
     public Sort getComputationCell() {
         return computationCell;
     }
+
+    @Override
+    public K getUnit(Sort k) { return units.get(k); }
+
+    @Override
+    public KLabel getConcat(Sort k) { return concats.get(k); }
 }

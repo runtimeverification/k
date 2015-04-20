@@ -36,6 +36,7 @@ import org.kframework.kore.K;
 import org.kframework.krun.api.KRunState;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
@@ -64,6 +65,9 @@ public class TstBackendOnKORE extends BaseTest {
             GetSymbolicRewriter getSymbolicRewriter = new GetSymbolicRewriter(rwModuleAndProgramParser.getCompiledExecutionModule()).invoke();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(getSymbolicRewriter.termContext);
             getSymbolicRewriter.getRewriter().rewrite(new ConstrainedTerm(converter.convert(program), getSymbolicRewriter.termContext), getSymbolicRewriter.termContext.definition().context(), -1, false);
+        } catch (KEMException e) {
+            kem.addKException(e.exception);
+            throw e;
         } finally {
             kem.print();
         }

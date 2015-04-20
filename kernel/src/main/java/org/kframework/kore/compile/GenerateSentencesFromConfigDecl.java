@@ -8,6 +8,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.Assoc;
@@ -146,7 +147,7 @@ public class GenerateSentencesFromConfigDecl {
         // syntax Cell ::= "initCell" [initializer]
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         Sentence initializer = Production("init" + sort.name(), sort, Seq(Terminal("init" + sort.name())), Att().add("initializer"));
-        Sentence cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
+        Production cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
                 cellProperties.addAll(configAtt));
 
         if (multiplicity == Multiplicity.STAR) {
@@ -154,15 +155,16 @@ public class GenerateSentencesFromConfigDecl {
             // syntax CellBag ::= ".CellBag"
             // syntax CellBag  ::= CellBag CellBag [assoc, unit(.CellBag)]
             Sort bagSort = Sort(sortName + "Bag");
-            Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att().add("cellbag"));
+            Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att());
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
-                    Att().add("assoc").add("unit", "." + bagSort.name()));
+                    Att().add("assoc").add("unit", "." + bagSort.name()).add("cellbag"));
 
             return Tuple2.apply(Set(initializer, cellProduction, bagSubsort, bagUnit, bag), bagSort);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
-            Sentence cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
+            Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
+            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add("unit", cellUnit.klabel().get().name()));
 
             return Tuple2.apply(Set(initializer, cellProduction, cellUnit), sort);
         } else {

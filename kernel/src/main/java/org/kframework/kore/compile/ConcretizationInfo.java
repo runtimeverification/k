@@ -4,10 +4,14 @@ package org.kframework.kore.compile;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 
 import java.util.List;
+
+import static org.kframework.kore.KORE.*;
 
 /**
  * Created by brandon on 3/31/15.
@@ -22,6 +26,16 @@ public class ConcretizationInfo {
     }
 
 
+    public Sort getCellSort(K k) {
+        if (k instanceof KApply) {
+            return labels.getCodomain(((KApply) k).klabel());
+        } else if (k instanceof KVariable) {
+            return Sort(k.att().<String>get("sort").get());
+        } else {
+            throw new AssertionError("expected KApply or KVariable, found " + k.getClass().getSimpleName());
+        }
+    }
+
     public ConfigurationInfo.Multiplicity getMultiplicity(KLabel label) {
         return cfg.getMultiplicity(labels.getCodomain(label));
     }
@@ -34,7 +48,11 @@ public class ConcretizationInfo {
     }
 
     public KLabel getParent(KLabel klabel) {
-        return cfg.getCellLabel(cfg.getParent(labels.getCodomain(klabel)));
+        return getParent(labels.getCodomain(klabel));
+    }
+
+    public KLabel getParent(Sort sort) {
+        return cfg.getCellLabel(cfg.getParent(sort));
     }
 
     public Sort getCellSort(KLabel cellLabel) {
@@ -43,7 +61,8 @@ public class ConcretizationInfo {
     }
 
     public boolean isCell(KLabel klabel) {
-        return cfg.isCell(labels.getCodomain(klabel));
+        Sort s = labels.getCodomain(klabel);
+        return cfg.isCell(s) && cfg.getCellLabel(s).equals(klabel);
     }
     public boolean isLeafCell(KLabel klabel) {
         return cfg.isLeafCell(labels.getCodomain(klabel));
