@@ -84,7 +84,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
         kompileOptions.experimental = new Experimental();
         kompileOptions.experimental.legacyKast = false;
 
-        BinaryLoader binaryLoader = new BinaryLoader(kem, null);
+        BinaryLoader binaryLoader = new BinaryLoader(kem);
 
         Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
                 kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),

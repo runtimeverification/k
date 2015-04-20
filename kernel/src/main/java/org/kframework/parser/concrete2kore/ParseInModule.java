@@ -4,7 +4,6 @@ package org.kframework.parser.concrete2kore;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
-import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
@@ -52,7 +51,6 @@ public class ParseInModule implements Serializable {
      * @param startSymbol    the start symbol from which to parse.
      * @return the Term representation of the parsed input.
      */
-    // TODO: figure out how to handle parsing errors
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(String input, String startSymbol, Source source) {
         return parseString(input, startSymbol, source, 1, 1);
@@ -68,17 +66,12 @@ public class ParseInModule implements Serializable {
             return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
         }
 
-        Parser parser = new Parser(input, source, startLine, startColumn);
+        Parser parser = new Parser(input, grammar, source, startLine, startColumn);
         Term parsed;
         try {
             parsed = parser.parse(startSymbolNT, 0);
         } catch (ParseFailedException e) {
             return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
-        }
-
-        if (parsed.equals(Ambiguity.apply())) {
-            Parser.ParseError errors = parser.getErrors();
-            throw new AssertionError("There are parsing errors: " + errors.toString());
         }
 
         Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);

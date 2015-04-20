@@ -25,11 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.iterable;
-import static org.kframework.Collections.stream;
+import static org.kframework.Collections.*;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the
@@ -54,20 +52,8 @@ public class KSyntax2GrammarStatesFilter {
         return grammar;
     }
 
-    static public <E> String mkString(Iterable<E> list, Function<E,String> stringify, String delimiter) {
-        int i = 0;
-        StringBuilder s = new StringBuilder();
-        for (E e : list) {
-            if (i != 0) { s.append(delimiter); }
-            s.append(stringify.apply(e));
-            i++;
-        }
-        return s.toString();
-    }
-
     private static void collectRejects(Production prd, Set<String> rejects) {
         for (ProductionItem prdItem : iterable(prd.items())) {
-            String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
                     rejects.add(((Terminal) prdItem).value());
@@ -100,8 +86,14 @@ public class KSyntax2GrammarStatesFilter {
                 NextableState previous = pair.getValue();
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
+                    Automaton autoFollow;
+                    if (terminal.value().isEmpty()) {
+                        autoFollow = BasicAutomata.makeEmpty();
+                    } else {
+                        autoFollow = getAutomaton(terminal.followPattern());
+                    }
                     Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + ": " + terminal.value(), nt,
-                            BasicAutomata.makeEmpty(), BasicAutomata.makeString(terminal.value()), getAutomaton(terminal.followPattern()));
+                            BasicAutomata.makeEmpty(), BasicAutomata.makeString(terminal.value()), autoFollow);
                     previous.next.add(pstate);
                     RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
                     pstate.next.add(del);
@@ -150,7 +142,7 @@ public class KSyntax2GrammarStatesFilter {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Automaton pattern = null;
+                    Automaton pattern = BasicAutomata.makeEmpty();
                     Set<String> rejects = new HashSet<>();
                     if (prd.att().contains("token")) {
                         // TODO: calculate reject list

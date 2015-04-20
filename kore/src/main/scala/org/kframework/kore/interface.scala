@@ -8,7 +8,7 @@ import org.kframework.attributes._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  */
 
-trait K {
+trait K extends Serializable {
   def att: Att
   override def toString = Unparse.apply(this)
   def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull

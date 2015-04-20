@@ -119,7 +119,13 @@ public class ParserUtils {
                 allLookupDirectoris.add(0, currentDirectory);
 
                 Optional<File> definitionFile = allLookupDirectoris.stream()
-                        .map(lookupDirectory -> new File(lookupDirectory.getAbsolutePath() + "/" + definitionFileName))
+                        .map(lookupDirectory -> {
+                            if (new File(definitionFileName).isAbsolute()) {
+                                return new File(definitionFileName);
+                            } else {
+                                return new File(lookupDirectory, definitionFileName);
+                            }
+                        })
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent())

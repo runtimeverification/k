@@ -712,15 +712,16 @@ public class Parser {
     ////////////////
 
     private final ParseState s;
+    private final Grammar g;
     private final Source source;
 
-    public Parser(String input) {
-        s = new ParseState(input, 1, 1);
-        this.source = Source.apply("<unknown>");
+    public Parser(String input, Grammar g) {
+        this(input, g, Source.apply("<unknown>"), 1, 1);
     }
 
-    public Parser(String input, Source source, int startLine, int startColumn) {
+    public Parser(String input, Grammar g, Source source, int startLine, int startColumn) {
         s = new ParseState(input, startLine, startColumn);
+        this.g = g;
         this.source = source;
     }
 
@@ -860,10 +861,10 @@ public class Parser {
                 s.stateReturns.get(new StateReturn.Key(
                     s.stateCalls.get(new StateCall.Key(
                         s.ntCalls.get(new NonTerminalCall.Key(
-                            ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child,
+                            g.get(((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child),
                             stateReturn.key.stateCall.key.stateBegin)),
                         stateReturn.key.stateEnd,
-                        ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child.exitState)),
+                        g.get(((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child).exitState)),
                     stateReturn.key.stateEnd)).function);
         } else { throw unknownStateType(); }
     }
@@ -897,7 +898,7 @@ public class Parser {
             }
             // add to the ntCall
             NonTerminalCall ntCall = s.ntCalls.get(new NonTerminalCall.Key(
-                ((NonTerminalState) nextState).child, stateCall.key.stateBegin));
+                g.get(((NonTerminalState) nextState).child), stateCall.key.stateBegin));
             ntCall.callers.add(stateCall);
             if (ntCall.context.contexts.addAll(stateCall.function.results())) {
                 // enqueues anything sensitive

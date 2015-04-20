@@ -112,6 +112,19 @@ module AUTO-CASTS
   // this is part of the mechanism that allows concrete user syntax in K
 endmodule
 
+module AUTO-FOLLOW
+  // if this module is imported, the parser automatically
+  // generates a follow restriction for every terminal which is a prefix
+  // of another terminal. This is useful to prevent ambiguities such as:
+  // syntax K ::= "a"
+  // syntax K ::= "b"
+  // syntax K ::= "ab"
+  // syntax K ::= K K
+  // #parse("ab", "K")
+  // In the above example, the terminal "a" is not allowed to be followed by a "b"
+  // because it would turn the terminal into the terminal "ab".
+endmodule
+
 module DEFAULT-CONFIGURATION
   imports BASIC-K
 
@@ -124,6 +137,7 @@ module K
   imports REQUIRES-ENSURES
   imports K-SORT-LATTICE
   imports AUTO-CASTS
+  imports AUTO-FOLLOW
   syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
   syntax non-assoc #KRewrite
   syntax KBott     ::= "HOLE"       [klabel([])]

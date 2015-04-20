@@ -1,9 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.inject.Inject;
+import com.google.inject.Module;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -18,13 +17,13 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
-import org.kframework.utils.inject.CommonModule;
 
-import com.google.inject.Inject;
-import com.google.inject.Module;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KompileFrontEnd extends FrontEnd {
 
@@ -77,14 +76,22 @@ public class KompileFrontEnd extends FrontEnd {
                     options.mainDefinitionFile().getAbsolutePath());
         }
 
-        context.kompileOptions = options;
+        if (options.experimental.kore) {
+            Kompile kompile = new Kompile(files, kem);
+            //TODO(dwightguth): handle start symbols
+            CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), "K");
+            //TODO(dwightguth): store definition for use by krun
+            System.out.println(def.getCompiledExecutionModule());
+        } else {
 
-        Definition def = genericCompile(options.experimental.step);
+            context.kompileOptions = options;
 
-        loader.saveOrDie(files.resolveKompiled("context.bin"), context);
-        loader.saveOrDie(files.resolveKompiled("definition.bin"), def);
+            Definition def = genericCompile(options.experimental.step);
 
-        verbose(def);
+            loader.saveOrDie(files.resolveKompiled("context.bin"), context);
+            loader.saveOrDie(files.resolveKompiled("definition.bin"), def);
+            verbose(def);
+        }
         return 0;
     }
 

@@ -43,27 +43,27 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
 
   /** All the imported modules, calculated recursively. */
-  val importedModules: Set[Module] = imports | (imports flatMap { _.importedModules })
+  lazy val importedModules: Set[Module] = imports | (imports flatMap { _.importedModules })
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  val productionsFor: Map[KLabel, Set[Production]] =
+  lazy val productionsFor: Map[KLabel, Set[Production]] =
     productions
       .collect({ case p if p.klabel != None => p })
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
-  val tokenProductionsFor: Map[Sort, Set[Production]] =
+  lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
       .collect({ case p if p.att.contains("token") => p})
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
-  val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
+  @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
-  val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
   // Check that productions with the same #klabel have identical attributes
   //  productionsFor.foreach {
@@ -72,9 +72,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
-  val attributesFor: Map[KLabel, Att] = productionsFor mapValues {_.head.att}
+  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {_.head.att}
 
-  val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
+  @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
       ps: Set[Production] =>
         ps.map {
@@ -88,9 +88,9 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
 
-  val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
+  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
 
-  private val subsortRelations: Set[(Sort, Sort)] = sentences collect {
+  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
   }
 
@@ -118,7 +118,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     }.flatten
   }
 
-  val subsorts: POSet[Sort] = POSet(subsortRelations)
+  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
@@ -191,7 +191,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
     case _ => false
   }
 
-  override def hashCode = sort.hashCode
+  override lazy val hashCode: Int = (sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode()
 
   def isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
