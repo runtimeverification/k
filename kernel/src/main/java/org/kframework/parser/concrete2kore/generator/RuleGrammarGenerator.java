@@ -196,6 +196,6 @@ public class RuleGrammarGenerator {
         }
 
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
-        return getCombinedGrammar(newM);
+        return new ParseInModule(newM);
     }
 }

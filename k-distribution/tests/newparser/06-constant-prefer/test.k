@@ -4,6 +4,6 @@ module TEST
   configuration <k> $PGM:Exp </k>
   syntax Exp  ::= Int
                 | "-" Exp
-                | Exp "-" Exp
+                > Exp "-" Exp
 
 endmodule
