@@ -2,8 +2,8 @@
 package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.Sets;
-import dk.brics.automaton.Automaton;
 import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.attributes.Att;
@@ -61,7 +61,7 @@ public class ParserTest {
 
         grammar.compile();
 
-        Parser parser = new Parser("", grammar);
+        Parser parser = new Parser("");
         Term result = parser.parse(grammar.get("startNt"), 0);
         Term expected = amb(klist(amb(KList.apply(ConsPStack.empty()))));
 
@@ -85,7 +85,7 @@ public class ParserTest {
         rs.next.add(nt1.exitState);
 
         grammar.compile();
-        Parser parser = new Parser("asdfAAA1", grammar);
+        Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
         Term expected = amb(klist(amb(klist(Constant.apply("asdfAAA1", constant("seq"))))));
@@ -115,13 +115,13 @@ public class ParserTest {
         grammar.compile();
 
         {
-            Term result = new Parser("abc", grammar).parse(nt1, 0);
+            Term result = new Parser("abc").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(Constant.apply("abc", prd)))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
-            Term result = new Parser("", grammar).parse(nt1, 0);
+            Term result = new Parser("").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(Constant.apply("", prd)))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
@@ -182,13 +182,13 @@ public class ParserTest {
         grammar.compile();
 
         {
-            Term result = new Parser("", grammar).parse(nt1, 0);
+            Term result = new Parser("").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
-            Term result = new Parser("xxyy", grammar).parse(nt1, 0);
+            Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
                     amb(klist(kapp("xAy",
@@ -225,13 +225,13 @@ public class ParserTest {
         grammar.compile();
 
         {
-            Term result = new Parser("", grammar).parse(nt1, 0);
+            Term result = new Parser("").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
-            Term result = new Parser("yy", grammar).parse(nt1, 0);
+            Term result = new Parser("yy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
@@ -269,13 +269,13 @@ public class ParserTest {
         grammar.compile();
 
         {
-            Term result = new Parser("", grammar).parse(nt1, 0);
+            Term result = new Parser("").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
-            Term result = new Parser("xx", grammar).parse(nt1, 0);
+            Term result = new Parser("xx").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xA",
                         amb(klist(kapp("xA",
@@ -319,25 +319,25 @@ public class ParserTest {
         grammar.compile();
 
         {
-            Term result = new Parser("x", grammar).parse(nt1, 0);
+            Term result = new Parser("x").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("x")))));
             Assert.assertEquals("Single char check: ", expected, result);
         }
 
         {
-            Term result = new Parser("xx", grammar).parse(nt1, 0);
+            Term result = new Parser("xx").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x"))), amb(klist(kapp("x"))))))));
             Assert.assertEquals("AA check: ", expected, result);
         }
         Term X = kapp("x");
         {
-            Term result = new Parser("xxx", grammar).parse(nt1, 0);
+            Term result = new Parser("xxx").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
                                           klist(kapp("AA", amb(klist(X)), amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))))))));
             Assert.assertEquals("AAA check: ", expected, result);
         }
         {
-            Term result = new Parser("xxxx", grammar).parse(nt1, 0);
+            Term result = new Parser("xxxx").parse(nt1, 0);
             Term t1 = amb(klist(X));
             Term t2 = amb(klist(kapp("AA", t1, t1)));
             Term t3 = amb(klist(kapp("AA", t2, t1)), klist(kapp("AA", t1, t2)));
@@ -369,8 +369,6 @@ public class ParserTest {
 
         Term expected = amb(klist(kapp("x")));
 
-        Grammar grammar = new Grammar();
-        grammar.add(baseCase);
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
             NonTerminalState state = new NonTerminalState("S"+i, nt, baseCase, false);
@@ -380,12 +378,13 @@ public class ParserTest {
             rs2.next.add(nt.exitState);
             baseCase = nt;
             expected = amb(klist(kapp("n" + i, expected)));
-            grammar.add(nt);
         }
+        Grammar grammar = new Grammar();
+        grammar.add(baseCase);
         grammar.compile();
 
         {
-            Term result = new Parser("x", grammar).parse(baseCase, 0);
+            Term result = new Parser("x").parse(baseCase, 0);
             expected = amb(klist(expected));
             Assert.assertEquals("Single char check: ", expected, result);
         }
@@ -414,8 +413,6 @@ public class ParserTest {
 
         Term expected = amb(klist(kapp("x")));
 
-        Grammar grammar = new Grammar();
-        grammar.add(baseCase);
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
             NonTerminalState state = new NonTerminalState("S"+i, nt, baseCase, false);
@@ -425,12 +422,13 @@ public class ParserTest {
             rs2.next.add(nt.exitState);
             baseCase = nt;
             expected = amb(klist(kapp("n" + i, expected)));
-            grammar.add(nt);
         }
+        Grammar grammar = new Grammar();
+        grammar.add(baseCase);
         grammar.compile();
 
         {
-            Term result = new Parser("", grammar).parse(baseCase, 0);
+            Term result = new Parser("").parse(baseCase, 0);
             expected = amb(klist(expected));
             Assert.assertEquals("Single char check: ", expected, result);
         }
@@ -516,11 +514,9 @@ public class ParserTest {
 
         Grammar grammar = new Grammar();
         grammar.add(exp);
-        grammar.add(lit);
-        grammar.add(trm);
         grammar.compile();
         {
-            Term result = new Parser("1+2*3", grammar).parse(exp, 0);
+            Term result = new Parser("1+2*3").parse(exp, 0);
             Term expected = amb(klist(amb(klist(kapp("plus", amb(klist(amb(klist(amb(klist(Constant.apply("1", litPrd))))))),
                                                 amb(klist(kapp("mul", amb(klist(amb(klist(Constant.apply("2", litPrd))))),
                                                           amb(klist(Constant.apply("3", litPrd)))))))))));
@@ -591,11 +587,9 @@ public class ParserTest {
 
         Grammar grammar = new Grammar();
         grammar.add(expsNt);
-        grammar.add(expNt);
-        grammar.add(intNt);
         grammar.compile();
 
-        Term result = new Parser("-1", grammar).parse(expsNt, 0);
+        Term result = new Parser("-1").parse(expsNt, 0);
         //System.out.println(result);
         Term result2 = new TreeCleanerVisitor().apply(result).right().get();
         //System.out.println(result2);
@@ -638,7 +632,7 @@ public class ParserTest {
         return Production(x, Sorts.K(), Seq(NonTerminal(Sorts.K())));
     }
 
-    public static Automaton regex(String x) {
-        return new RegExp(x).toAutomaton();
+    public static RunAutomaton regex(String x) {
+        return new RunAutomaton(new RegExp(x).toAutomaton(), false);
     }
 }

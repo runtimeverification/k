@@ -45,28 +45,25 @@ public class Nullability {
      */
     public Nullability(Grammar grammar) {
         assert grammar != null;
-        this.grammar = grammar;
         // 1. get all entryNullable states
         // list NonTerminals reachable from the start symbol.
         // the value of the map keeps a reference to all the states which call NonTerminals
-        Map<String, Set<NonTerminalState>> nonTerminalCallers = grammar.getNonTerminalCallers();
+        Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers = grammar.getNonTerminalCallers();
 
         // A state is entryNullable iff the *start* of it is reachable from the entry of its nt without consuming input
         // A non-terminal is entryNullable if its exit state is entryNullable
-        for (NonTerminal entry : grammar.getAllNonTerminals()) {
+        for (NonTerminal entry : nonTerminalCallers.keySet()) {
             // there are hidden NonTerminals (like List{...} special)
             // the only way to get to them is with the full traversal
             mark(entry.entryState, nonTerminalCallers);
         }
     }
 
-    private final Grammar grammar;
-
     /**
      * marks a state as entryNullable if it is not already, and calls mark on any
      * states that should be entryNullable as a result.
      */
-    private void mark(State state, Map<String, Set<NonTerminalState>> nonTerminalCallers) {
+    private void mark(State state, Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers) {
         if (!entryNullable.contains(state)) {
             entryNullable.add(state);
             if (state instanceof NextableState) {
@@ -98,7 +95,7 @@ public class Nullability {
                 (state instanceof ExitState) ||
                 (state instanceof RuleState) ||
                ((state instanceof PrimitiveState) && ((PrimitiveState)state).isNullable()) ||
-               ((state instanceof NonTerminalState) && isNullable(grammar.get(((NonTerminalState) state).child)));
+               ((state instanceof NonTerminalState) && isNullable(((NonTerminalState) state).child));
     }
 
     public boolean isNullable(NonTerminal nt) { return entryNullable.contains(nt.exitState); }

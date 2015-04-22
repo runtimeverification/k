@@ -2,22 +2,19 @@
 package org.kframework.parser.concrete2kore.kernel;
 
 import dk.brics.automaton.Automaton;
-import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.RegExp;
-import dk.brics.automaton.SpecialOperations;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
-import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
+import org.kframework.definition.TerminalLike;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -52,8 +50,20 @@ public class KSyntax2GrammarStatesFilter {
         return grammar;
     }
 
+    static public <E> String mkString(Iterable<E> list, Function<E,String> stringify, String delimiter) {
+        int i = 0;
+        StringBuilder s = new StringBuilder();
+        for (E e : list) {
+            if (i != 0) { s.append(delimiter); }
+            s.append(stringify.apply(e));
+            i++;
+        }
+        return s.toString();
+    }
+
     private static void collectRejects(Production prd, Set<String> rejects) {
         for (ProductionItem prdItem : iterable(prd.items())) {
+            String pattern = "";
             if (prdItem instanceof Terminal) {
                 if (!((Terminal) prdItem).value().equals("")) {
                     rejects.add(((Terminal) prdItem).value());
@@ -84,50 +94,24 @@ public class KSyntax2GrammarStatesFilter {
             for (Pair<ProductionItem, NextableState> pair : productionsAtPosition.keySet()) {
                 ProductionItem prdItem = pair.getKey();
                 NextableState previous = pair.getValue();
-                if (prdItem instanceof Terminal) {
-                    Terminal terminal = (Terminal) prdItem;
-                    Automaton autoFollow;
-                    if (terminal.value().isEmpty()) {
-                        autoFollow = BasicAutomata.makeEmpty();
-                    } else {
-                        autoFollow = getAutomaton(terminal.followPattern());
-                    }
-                    Grammar.PrimitiveState pstate = new Grammar.RegExState(sort + ": " + terminal.value(), nt,
-                            BasicAutomata.makeEmpty(), BasicAutomata.makeString(terminal.value()), autoFollow);
-                    previous.next.add(pstate);
-                    RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
-                    pstate.next.add(del);
-                    previous = del;
-                } else if (prdItem instanceof org.kframework.definition.NonTerminal) {
+                if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                     Grammar.NonTerminalState nts = new Grammar.NonTerminalState(sort + " ::= " + srt.sort(), nt,
                             grammar.get(srt.sort().name()), false);
                     previous.next.add(nts);
                     previous = nts;
-                } else if (prdItem instanceof RegexTerminal) {
-                    RegexTerminal lx = (RegexTerminal) prdItem;
-                    String pattern = null;
-                    try {
-                        pattern = lx.precedePattern();
-                        Automaton precedeAuto = getAutomaton(lx.precedePattern());
-                        SpecialOperations.reverse(precedeAuto);
-                        pattern = lx.regex();
-                        Automaton patternAuto = getAutomaton(lx.regex());
-                        pattern = lx.followPattern();
-                        Automaton followsAuto = getAutomaton(lx.followPattern());
-                        Grammar.PrimitiveState pstate = new Grammar.RegExState(
-                                sort.name() + ":" + lx.regex() + "(?!" + lx.followPattern() + ")",
-                                nt,
-                                precedeAuto,
-                                patternAuto,
-                                followsAuto);
-                        RuleState del = new RuleState("DelRegexTerminalRS", nt, new Rule.DeleteRule(1));
-                        previous.next.add(pstate);
-                        pstate.next.add(del);
-                        previous = del;
-                    } catch (IllegalArgumentException e) {
-                        throw KExceptionManager.criticalError("Could not compile regex: " + pattern + ", " + e.getMessage(), e);
-                    }
+                } else if (prdItem instanceof TerminalLike) {
+                    TerminalLike lx = (TerminalLike) prdItem;
+                    Grammar.PrimitiveState pstate = new Grammar.RegExState(
+                            sort.name() + ":" + lx.toString(),
+                            nt,
+                            lx.precedePattern(),
+                            lx.pattern(),
+                            lx.followPattern());
+                    RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
+                    previous.next.add(pstate);
+                    pstate.next.add(del);
+                    previous = del;
                 } else {
                     assert false : "Didn't expect this ProductionItem type: "
                             + prdItem.getClass().getName();
@@ -142,7 +126,7 @@ public class KSyntax2GrammarStatesFilter {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Automaton pattern = BasicAutomata.makeEmpty();
+                    Automaton pattern = null;
                     Set<String> rejects = new HashSet<>();
                     if (prd.att().contains("token")) {
                         // TODO: calculate reject list

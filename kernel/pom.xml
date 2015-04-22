@@ -85,11 +85,6 @@
       <version>1.11-8</version>
     </dependency>
     <dependency>
-      <groupId>de.ruedigermoeller</groupId>
-      <artifactId>fst</artifactId>
-      <version>2.24</version>
-    </dependency>
-    <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
       <version>1.0.1</version>

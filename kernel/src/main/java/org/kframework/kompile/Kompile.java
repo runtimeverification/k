@@ -259,8 +259,8 @@ public class Kompile {
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getParser().module(), parser)) {
-            cachedParser = new ParseCache(new ParseInModule(parser), java.util.Collections.synchronizedMap(new HashMap<>()));
+        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser)) {
+            cachedParser = new ParseCache(parser, java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;

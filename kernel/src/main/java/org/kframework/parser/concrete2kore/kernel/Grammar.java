@@ -1,22 +1,17 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import com.google.common.collect.Sets;
-import dk.brics.automaton.Automaton;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import dk.brics.automaton.BasicAutomata;
-import dk.brics.automaton.ExternalizableRunAutomaton;
 import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
-import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,10 +60,15 @@ import java.util.Set;
 public class Grammar implements Serializable {
 
     /** The set of "root" NonTerminals */
-    private Map<String, NonTerminal> startNonTerminals = new HashMap<>();
+    private BiMap<String, NonTerminal> startNonTerminals = HashBiMap.create();
 
-    public void add(NonTerminal newNT) {
-        startNonTerminals.put(newNT.name, newNT);
+    public boolean add(NonTerminal newNT) {
+        if (startNonTerminals.containsKey(newNT.name)) {
+            return false;
+        } else {
+            startNonTerminals.put(newNT.name, newNT);
+            return true;
+        }
     }
 
     /**
@@ -77,8 +77,9 @@ public class Grammar implements Serializable {
      * and makes it impossible for a user to cause problems by failing to add a NonTerminal.
      * @return a Set of all the {@link NonTerminal}s
      */
-    public Collection<NonTerminal> getAllNonTerminals() {
-        return startNonTerminals.values();
+    public Set<NonTerminal> getAllNonTerminals() {
+        // TODO: in the future make a cache for this
+        return getNonTerminalCallers().keySet();
     }
 
     /**
@@ -95,18 +96,15 @@ public class Grammar implements Serializable {
      * @return A mapping from NonTerminal to a Set of NonTerminalStates which call to that
      * NonTerminal
      */
-    public Map<String, Set<NonTerminalState>> getNonTerminalCallers() {
-        Map<String, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
+    public Map<NonTerminal, Set<NonTerminalState>> getNonTerminalCallers() {
+        Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
+        Set<State> visited = new HashSet<>();
         for (NonTerminal nt : startNonTerminals.values()) {
-            reachableNonTerminals.put(nt.name, new HashSet<>());
-        }
-        for (NonTerminal nt : startNonTerminals.values()) {
-            for (State s : nt.getReachableStates()) {
-                if (s instanceof NonTerminalState) {
-                    String child = ((NonTerminalState) s).child;
-                    reachableNonTerminals.get(child).add((NonTerminalState)s);
-                }
+            if (!reachableNonTerminals.containsKey(nt)) {
+                // if it is the start symbol it won't have any callers, so add it here first
+                reachableNonTerminals.put(nt, new HashSet<NonTerminalState>());
             }
+            collectNTCallers(nt.entryState, visited, reachableNonTerminals);
         }
         return reachableNonTerminals;
     }
@@ -125,7 +123,7 @@ public class Grammar implements Serializable {
             for (State s : nonTerminal.getReachableStates()) {
                 if (s instanceof PrimitiveState) {
                     PrimitiveState ps = ((PrimitiveState) s);
-                    addWhitespace(ps, nonTerminal);
+                    addWhitespace(ps);
                 }
             }
         }
@@ -133,15 +131,13 @@ public class Grammar implements Serializable {
         // add whitespace to the beginning of every start NonTerminal to allow for
         // whitespace at the beginning of the input
         for (NonTerminal nt : startNonTerminals.values()) {
-            addWhitespace(nt.entryState, nt);
+            addWhitespace(nt.entryState);
         }
     }
 
     static final String multiLine = "(/\\*([^\\*]|(\\*+([^\\*/])))*\\*+/)";
     static final String singleLine = "(//[^\n\r]*)";
     static final String whites = "([\\ \n\r\t])";
-    static final Automaton pattern = new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton();
-
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
      * All children of the given state are moved to the remove whitespace rule.
@@ -149,22 +145,24 @@ public class Grammar implements Serializable {
      * @param start NextableState to which to attach the whitespaces
      * @return the remove whitespace state
      */
-    private NextableState addWhitespace(NextableState start, NonTerminal nt) {
+    private NextableState addWhitespace(NextableState start) {
         // usually a terminal may be followed by AddLocationRule and WrapLabelRule.
         // we want to add the whitespce after these, so we iterate over them
         while (start.next.iterator().hasNext() && start.next.iterator().next() instanceof RuleState) {
             start = (NextableState) start.next.iterator().next();
         }
         PrimitiveState whitespace = new RegExState(
-            "whitespace", nt, pattern);
+            "whitespace", start.nt, pattern);
         RuleState deleteToken = new RuleState(
-            "whitespace-D", nt, new DeleteRule(1));
+            "whitespace-D", start.nt, new DeleteRule(1));
         whitespace.next.add(deleteToken);
         deleteToken.next.addAll(start.next);
         start.next.clear();
         start.next.add(whitespace);
         return deleteToken;
     }
+
+    static final RunAutomaton pattern = new RunAutomaton(new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton(), false);
 
     /**
      * Calculates Nullability and OrderingInfo for all the states in the grammar.
@@ -210,13 +208,13 @@ public class Grammar implements Serializable {
                     }
                     // Case 2 (See above)
                     if (nextState instanceof NonTerminalState) {
-                        EntryState es = startNonTerminals.get(((NonTerminalState) nextState).child).entryState;
+                        EntryState es = ((NonTerminalState) nextState).child.entryState;
                         predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
                     }
                 }
                 // Case 3 (See above)
                 if (ns instanceof NonTerminalState) {
-                    ExitState es = startNonTerminals.get(((NonTerminalState) ns).child).exitState;
+                    ExitState es = ((NonTerminalState) ns).child.exitState;
                     predecessors[inverseAllStates.get(s)].add(inverseAllStates.get(es));
                 }
             }
@@ -233,8 +231,33 @@ public class Grammar implements Serializable {
         }
     }
 
-    private enum Type {
-        EXIT, ENTRY, NONTERMINAL, RULE, REGEX
+    /**
+     * Recursive DFS that traverses all the states and returns a set of all reachable {@link NonTerminal}.
+     * @param start The state from which to run the collector.
+     * @param visited Start with an empty Set<State>. Used as intermediate data.
+     * @param reachableNonTerminals A set in which is stored the set of all reachable {@link NonTerminal}.
+     */
+    private static void collectNTCallers(State start, Set<State> visited,
+        Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
+        if (!visited.contains(start)) {
+            visited.add(start);
+            if (start instanceof NextableState) {
+                NextableState ns = (NextableState) start;
+                for (State st : ns.next) {
+                    if (st instanceof NonTerminalState) {
+                        NonTerminalState nts = (NonTerminalState) st;
+                        if (!reachableNonTerminals.containsKey(nts.child)) {
+                            reachableNonTerminals.put(
+                                nts.child, new HashSet<NonTerminalState>(Arrays.asList(nts)));
+                        }
+                        reachableNonTerminals.get(nts.child).add(nts);
+                        collectNTCallers(((NonTerminalState) st).child.entryState,
+                            visited, reachableNonTerminals);
+                    }
+                    collectNTCallers(st, visited, reachableNonTerminals);
+                }
+            }
+        }
     }
 
     ///////////////////
@@ -259,7 +282,7 @@ public class Grammar implements Serializable {
         public final ExitState exitState;
         // contains a list of all States found in this NonTerminal other than the EntryState
         // and ExitState
-        private transient final Set<NextableState> intermediaryStates = new HashSet<>();
+        private final Set<NextableState> intermediaryStates = new HashSet<>();
         final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
 
         /**
@@ -341,16 +364,16 @@ public class Grammar implements Serializable {
      * There are two classes which directly extend this one: {@link ExitState} and
      * (@link NextableState}
      */
-    public abstract static class State implements Comparable<State>, Externalizable {
+    public abstract static class State implements Comparable<State>, Serializable {
         /** "User friendly" name for the state.  Used only for debugging and error reporting. */
-        String name;
+        public final String name;
         /** Counter for generating unique ids for the state. */
         private static int counter = 0;
         /** The unique id of this state. */
-        int unique = counter++;
+        public final int unique = counter++;
 
-        String nt;
-
+        /** A back reference to the NonTerminal that this state is part of. */
+        public final NonTerminal nt;
         /** The OrderingInfo for this state. */
         OrderingInfo orderingInfo = null;
 
@@ -384,9 +407,7 @@ public class Grammar implements Serializable {
             public String toString() { return Integer.toString(key); }
         }
 
-        public State() {}
-
-        public State(String name, String nt) {
+        public State(String name, NonTerminal nt) {
             assert nt != null;
             this.name = name + "[" + this.unique + "]";
             this.nt = nt;
@@ -415,24 +436,6 @@ public class Grammar implements Serializable {
         public String toString() {
             return name;
         }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeUTF(name);
-            out.writeInt(unique);
-            out.writeUTF(nt);
-            out.writeInt(orderingInfo.key);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            name = in.readUTF();
-            unique = in.readInt();
-            nt = in.readUTF();
-            orderingInfo = new OrderingInfo(in.readInt());
-        }
-
-        abstract Type type();
     }
 
     /**
@@ -440,14 +443,7 @@ public class Grammar implements Serializable {
      * one per NonTerminal.
      */
     public static class ExitState extends State {
-        public ExitState() {}
-
-        @Override
-        Type type() {
-            return Type.EXIT;
-        }
-
-        ExitState(String name, NonTerminal nt) { super(name, nt.name); }
+        ExitState(String name, NonTerminal nt) { super(name, nt); }
     }
 
     /**
@@ -455,54 +451,18 @@ public class Grammar implements Serializable {
      */
     public abstract static class NextableState extends State {
         /** States that are successors of this one in the NFA. */
-        Set<State> next = new HashSet<>();
+        public final Set<State> next = new HashSet<State>() {
+            @Override
+            public boolean add(State s) {
+                assert s.nt == NextableState.this.nt :
+                    "States " + NextableState.this.name + " and " +
+                    s.name + " are not in the same NonTerminal.";
+                return super.add(s);
+            }
+        };
         NextableState(String name, NonTerminal nt, boolean intermediary) {
-            super(name, nt.name);
+            super(name, nt);
             if (intermediary) { nt.intermediaryStates.add(this); }
-        }
-
-        public NextableState() {}
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            super.writeExternal(out);
-            out.writeInt(next.size());
-            for (State s : next) {
-                out.writeInt(s.type().ordinal());
-                s.writeExternal(out);
-            }
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            super.readExternal(in);
-            int size = in.readInt();
-            next = Sets.newHashSetWithExpectedSize(size);
-            for (int i = 0; i < size; i++) {
-                Type type = Type.values()[in.readInt()];
-                State s;
-                switch(type) {
-                case ENTRY:
-                    s = new EntryState();
-                    break;
-                case EXIT:
-                    s = new ExitState();
-                    break;
-                case NONTERMINAL:
-                    s = new NonTerminalState();
-                    break;
-                case REGEX:
-                    s = new RegExState();
-                    break;
-                case RULE:
-                    s = new RuleState();
-                    break;
-                default:
-                    throw new AssertionError("unexpected state type");
-                }
-                s.readExternal(in);
-                next.add(s);
-            }
         }
     }
 
@@ -511,12 +471,6 @@ public class Grammar implements Serializable {
      */
     public static class EntryState extends NextableState {
         EntryState(String name, NonTerminal nt) { super(name, nt, false); }
-        public EntryState() {}
-
-        @Override
-        Type type() {
-            return Type.ENTRY;
-        }
     }
 
     /**
@@ -526,11 +480,9 @@ public class Grammar implements Serializable {
      */
     public static class NonTerminalState extends NextableState {
         /** The NonTerminal referenced by this NonTerminalState */
-        String child;
-
-        boolean isLookahead;
-
-        public NonTerminalState() {}
+        public final NonTerminal child;
+        /** Specifies if this state should be treated as a lookahead parse */
+        public final boolean isLookahead;
 
         public NonTerminalState(
                 String name, NonTerminal nt,
@@ -538,27 +490,8 @@ public class Grammar implements Serializable {
             super(name, nt, true);
             assert child != null;
             nt.intermediaryStates.add(this);
-            this.child = child.name;
+            this.child = child;
             this.isLookahead = isLookahead;
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            super.writeExternal(out);
-            out.writeUTF(child);
-            out.writeBoolean(isLookahead);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            super.readExternal(in);
-            child = in.readUTF();
-            isLookahead = in.readBoolean();
-        }
-
-        @Override
-        Type type() {
-            return Type.NONTERMINAL;
         }
     }
 
@@ -567,42 +500,11 @@ public class Grammar implements Serializable {
      */
     public static class RuleState extends NextableState {
         /** The rule to be applied. */
-        Rule rule;
+        public final Rule rule;
         public RuleState(String name, NonTerminal nt, Rule rule) {
             super(name, nt, true);
             assert rule != null;
             this.rule = rule;
-        }
-
-        public RuleState() {}
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            super.writeExternal(out);
-            out.writeInt(rule.type().ordinal());
-            rule.writeExternal(out);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            super.readExternal(in);
-            Rule.Type type = Rule.Type.values()[in.readInt()];
-            switch(type) {
-            case DELETE:
-                rule = new DeleteRule();
-                break;
-            case WRAP_LABEL:
-                rule = new WrapLabelRule();
-                break;
-            default:
-                throw new AssertionError("unexpected rule type");
-            }
-            rule.readExternal(in);
-        }
-
-        @Override
-        Type type() {
-            return Type.RULE;
         }
     }
 
@@ -618,8 +520,6 @@ public class Grammar implements Serializable {
                 this.matchEnd = matchEnd;
             }
         }
-
-        public PrimitiveState() {}
 
         /*
          *  Returns a set of matches at the given position in the given string.
@@ -647,24 +547,20 @@ public class Grammar implements Serializable {
      */
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
-        ExternalizableRunAutomaton pattern;
-        ExternalizableRunAutomaton precedePattern;
-        ExternalizableRunAutomaton followPattern;
+        public final RunAutomaton pattern;
+        public final RunAutomaton precedePattern;
+        public final RunAutomaton followPattern;
 
-        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
-
-        public RegExState(String name, NonTerminal nt, Automaton pattern) {
-            this(name, nt, BasicAutomata.makeEmpty(), pattern, BasicAutomata.makeEmpty());
+        public RegExState(String name, NonTerminal nt, RunAutomaton pattern) {
+            this(name, nt, new RunAutomaton(BasicAutomata.makeEmpty(), false), pattern, new RunAutomaton(BasicAutomata.makeEmpty(), false));
         }
 
-        public RegExState() {}
-
-        public RegExState(String name, NonTerminal nt, Automaton precedePattern, Automaton pattern, Automaton followPattern) {
+        public RegExState(String name, NonTerminal nt, RunAutomaton precedePattern, RunAutomaton pattern, RunAutomaton followPattern) {
             super(name, nt);
             assert pattern != null;
-            this.precedePattern = new ExternalizableRunAutomaton(precedePattern != null ? precedePattern : BasicAutomata.makeEmpty(), false);
-            this.pattern = new ExternalizableRunAutomaton(pattern, false);
-            this.followPattern = new ExternalizableRunAutomaton(followPattern != null ? followPattern : BasicAutomata.makeEmpty(), false);
+            this.precedePattern = precedePattern;
+            this.pattern = pattern;
+            this.followPattern = followPattern;
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
@@ -678,30 +574,6 @@ public class Grammar implements Serializable {
                 return Collections.emptySet();
 
             return Collections.singleton(new MatchResult(startPosition + matchedLength));
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            super.writeExternal(out);
-            pattern.writeExternal(out);
-            precedePattern.writeExternal(out);
-            followPattern.writeExternal(out);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            super.readExternal(in);
-            pattern = new ExternalizableRunAutomaton();
-            precedePattern = new ExternalizableRunAutomaton();
-            followPattern = new ExternalizableRunAutomaton();
-            pattern.readExternal(in);
-            precedePattern.readExternal(in);
-            followPattern.readExternal(in);
-        }
-
-        @Override
-        Type type() {
-            return Type.REGEX;
         }
     }
 }

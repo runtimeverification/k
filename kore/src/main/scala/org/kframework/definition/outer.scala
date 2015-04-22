@@ -2,6 +2,7 @@
 
 package org.kframework.definition
 
+import dk.brics.automaton.{SpecialOperations, BasicAutomata, RegExp, RunAutomaton}
 import org.kframework.POSet
 import org.kframework.attributes.Att
 import org.kframework.kore._
@@ -210,13 +211,31 @@ sealed trait ProductionItem extends OuterKORE
 
 // marker
 
+trait TerminalLike extends ProductionItem {
+  def pattern: RunAutomaton
+  def followPattern: RunAutomaton
+  def precedePattern: RunAutomaton
+}
+
 case class NonTerminal(sort: Sort) extends ProductionItem
 with NonTerminalToString
 
-case class RegexTerminal(precedePattern: String, regex: String, followPattern: String) extends ProductionItem with RegexTerminalToString
+case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with RegexTerminalToString {
+  lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
+  lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
+  lazy val precedePattern = {
+    val unreversed = new RegExp(precedeRegex).toAutomaton
+    SpecialOperations.reverse(unreversed)
+    new RunAutomaton(unreversed, false)
+  }
+}
 
-case class Terminal(value: String, followPattern: String) extends ProductionItem // hooked
-with TerminalToString
+case class Terminal(value: String, followRegex: String) extends TerminalLike // hooked
+with TerminalToString {
+  lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
+  lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
+  lazy val precedePattern = new RunAutomaton(BasicAutomata.makeEmpty(), false)
+}
 
 /* Helper constructors */
 object NonTerminal {

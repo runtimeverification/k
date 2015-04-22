@@ -1,10 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import com.google.common.collect.Sets;
 import dk.brics.automaton.Automaton;
-import dk.brics.automaton.BasicAutomata;
-import dk.brics.automaton.ExternalizableRunAutomaton;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
@@ -14,10 +11,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.pcollections.ConsPStack;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -25,14 +19,7 @@ import java.util.Set;
 /**
  * An action that transforms an AST into another AST
  */
-public abstract class Rule implements Externalizable {
-
-    public enum Type {
-        WRAP_LABEL, DELETE
-    }
-
-    abstract Type type();
-
+public abstract class Rule implements Serializable {
     /**
      * Metadata used to inform a rule about the current parse.
      */
@@ -89,20 +76,17 @@ public abstract class Rule implements Externalizable {
      * Wraps the current KList with the given KLabel
      */
     public static class WrapLabelRule extends KListRule {
-        private Production label;
-        public ExternalizableRunAutomaton rejectPattern;
-        private Set<String> rejects;
-
-        public WrapLabelRule() {}
-
+        private final Production label;
+        public final Automaton rejectPattern;
+        private final Set<String> rejects;
         public WrapLabelRule(Production label, Automaton rejectPattern, Set<String> rejects) {
             assert label != null;
             this.label = label;
-            this.rejectPattern = new ExternalizableRunAutomaton(rejectPattern, false);
+            this.rejectPattern = rejectPattern;
             this.rejects = rejects;
         }
         public WrapLabelRule(Production label) {
-            this(label, BasicAutomata.makeEmpty(), new HashSet<>());
+            this(label, null, new HashSet<>());
         }
         protected KList apply(KList klist, MetaData metaData) {
             Term term;
@@ -110,7 +94,7 @@ public abstract class Rule implements Externalizable {
             Source source = metaData.source;
             if (label.att().contains("token")) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                if (rejectPattern.run(value)) {
+                if (rejectPattern != null && rejectPattern.run(value)) {
                     return null;
                 }
                 if (rejects.contains(value)) {
@@ -122,33 +106,6 @@ public abstract class Rule implements Externalizable {
             }
             return new KList(ConsPStack.singleton(term));
         }
-
-        @Override
-        Type type() {
-            return Type.WRAP_LABEL;
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(label);
-            rejectPattern.writeExternal(out);
-            out.writeInt(rejects.size());
-            for (String s : rejects) {
-                out.writeUTF(s);
-            }
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            label = (Production) in.readObject();
-            rejectPattern = new ExternalizableRunAutomaton();
-            rejectPattern.readExternal(in);
-            int size = in.readInt();
-            rejects = Sets.newHashSetWithExpectedSize(size);
-            for (int i = 0; i < size; i++) {
-                rejects.add(in.readUTF());
-            }
-        }
     }
 
     /**
@@ -156,32 +113,15 @@ public abstract class Rule implements Externalizable {
      * Usually used to remove whitespace and tokens
      */
     public static class DeleteRule extends KListRule {
-        int length;
+        private final int length;
         public DeleteRule(int length) {
             this.length = length;
         }
-
-        public DeleteRule() {}
 
 
         @Override
         protected KList apply(KList set, MetaData metaData) {
             return set.remove(length);
-        }
-
-        @Override
-        Type type() {
-            return Type.DELETE;
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeInt(length);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            length = in.readInt();
         }
     }
 

@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.utils.errorsystem.ParseFailedException;
 
@@ -12,11 +13,11 @@ import java.util.Set;
  * Created by dwightguth on 4/20/15.
  */
 public class ParseCache implements Serializable {
-    private final ParseInModule parser;
+    private final Module module;
     private final Map<String, ParsedSentence> cache;
 
-    public ParseCache(ParseInModule parser, Map<String, ParsedSentence> cache) {
-        this.parser = parser;
+    public ParseCache(Module module, Map<String, ParsedSentence> cache) {
+        this.module = module;
         this.cache = cache;
     }
 
@@ -24,8 +25,19 @@ public class ParseCache implements Serializable {
         return cache;
     }
 
-    public ParseInModule getParser() {
-        return parser;
+    public Module getModule() {
+        return module;
+    }
+
+    private transient ParseInModule parser;
+
+    public synchronized ParseInModule getParser() {
+        ParseInModule p = parser;
+        if (p == null) {
+            p = new ParseInModule(module);
+            parser = p;
+        }
+        return p;
     }
 
     public static class ParsedSentence implements Serializable {

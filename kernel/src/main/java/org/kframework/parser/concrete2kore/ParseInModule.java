@@ -66,7 +66,7 @@ public class ParseInModule implements Serializable {
             return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
         }
 
-        Parser parser = new Parser(input, grammar, source, startLine, startColumn);
+        Parser parser = new Parser(input, source, startLine, startColumn);
         Term parsed;
         try {
             parsed = parser.parse(startSymbolNT, 0);

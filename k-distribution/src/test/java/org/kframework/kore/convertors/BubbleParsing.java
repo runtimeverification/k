@@ -44,7 +44,6 @@ import static org.kframework.definition.Constructors.Rule;
 public class BubbleParsing {
 
     private final Grammar.NonTerminal startNonterminal;
-    private final Grammar grammar;
 
     /**
      * Parse bubbles as sort K from module K in the defaulte kore.k
@@ -75,8 +74,7 @@ public class BubbleParsing {
         kilDefinitionOfKORE.setMainModule(mainModule);
         Definition definitionOfKORE = new KILtoKORE(null).apply(kilDefinitionOfKORE);
         Module kastModule = definitionOfKORE.getModule(mainModule).get();
-        grammar = KSyntax2GrammarStatesFilter.getGrammar(kastModule);
-        startNonterminal = grammar.get(startSort);
+        startNonterminal = KSyntax2GrammarStatesFilter.getGrammar(kastModule).get(startSort);
     }
 
     private org.kframework.kil.Definition parseUsingOuter(URL file) {
@@ -104,7 +102,7 @@ public class BubbleParsing {
             if (s instanceof Bubble) {
                 Bubble bubble = (Bubble) s;
 
-                Parser parser = new Parser(bubble.contents(), grammar);
+                Parser parser = new Parser(bubble.contents());
                 Term parsed = parser.parse(startNonterminal, 0);
 
                 if (parsed.equals(Ambiguity.apply())) {

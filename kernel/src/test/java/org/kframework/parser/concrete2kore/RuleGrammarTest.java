@@ -286,8 +286,8 @@ public class RuleGrammarTest {
 
     private static void assertPatterns(String original, String precede, String pattern, String follow) {
         RegexTerminal re1 = KILtoKORE.getRegexTerminal(original);
-        Assert.assertEquals(precede, re1.precedePattern());
+        Assert.assertEquals(precede, re1.precedeRegex());
         Assert.assertEquals(pattern, re1.regex());
-        Assert.assertEquals(follow, re1.followPattern());
+        Assert.assertEquals(follow, re1.followRegex());
     }
 }

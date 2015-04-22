@@ -1,11 +1,11 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import com.beust.jcommander.DynamicParameter;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.kil.loader.Context;
@@ -19,10 +19,11 @@ import org.kframework.utils.options.OnOffConverter;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 
 @RequestScoped
 public final class KRunOptions {
@@ -227,7 +228,7 @@ public final class KRunOptions {
     public boolean graph = false;
 
     @ParametersDelegate
-    public final Experimental experimental = new Experimental();
+    public Experimental experimental = new Experimental();
 
     public final class Experimental {
 
