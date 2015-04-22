@@ -1,6 +1,11 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.Grammar.EntryState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.ExitState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
@@ -9,10 +14,6 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.State;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper class in the parser that finds all of the entryNullable NonTerminals in a grammar.

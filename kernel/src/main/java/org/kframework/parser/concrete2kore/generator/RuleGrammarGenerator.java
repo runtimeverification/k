@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
@@ -17,6 +18,7 @@ import scala.collection.immutable.Seq;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.Att;
@@ -112,8 +114,9 @@ public class RuleGrammarGenerator {
                 }
             }
         }
+        scala.collection.immutable.Set<Sentence> prods2;
         if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
-            scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
+            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).map(s -> {
                 if (s instanceof Production && (s.att().contains("cell"))) {
                     Production p = (Production) s;
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
@@ -124,17 +127,16 @@ public class RuleGrammarGenerator {
                 }
                 return s;
             }).collect(Collections.toSet());
-            prods.addAll(mutable(prods2));
         } else
-            prods.addAll(mutable(mod.sentences()));
-
+            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collections.toSet());
 
         if (baseK.getModule(AUTO_FOLLOW).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_FOLLOW).get())) {
-            Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
-            prods.stream().filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
-                if (i instanceof Terminal) terminals.add(((Terminal) i).value());
+            Object PRESENT = new Object();
+            PatriciaTrie<Object> terminals = new PatriciaTrie<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
+            stream(prods2).filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
+                if (i instanceof Terminal) terminals.put(((Terminal) i).value(), PRESENT);
             }));
-            prods = mutable(prods.stream().map(s -> {
+            prods2 = stream(prods2).map(s -> {
                 if (s instanceof Production) {
                     Production p = (Production) s;
                     if (p.sort().name().startsWith("#"))
@@ -146,8 +148,8 @@ public class RuleGrammarGenerator {
                         if (pi instanceof Terminal) {
                             Terminal t = (Terminal) pi;
                             Set<String> follow = new HashSet<>();
-                            for (String biggerString : terminals) {
-                                if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
+                            for (String biggerString : terminals.prefixMap(t.value()).keySet()) {
+                                if (!t.value().equals(biggerString)) {
                                     String ending = biggerString.substring(t.value().length());
                                     follow.add(ending);
                                 }
@@ -167,10 +169,10 @@ public class RuleGrammarGenerator {
                     return p;
                 }
                 return s;
-            }).collect(Collections.toSet()));
+            }).collect(Collections.toSet());
         }
 
-        Module newM = new Module(mod.name() + "-PARSER", Set(), immutable(prods), null);
+        Module newM = new Module(mod.name() + "-PARSER", Set(), prods2, null);
         return newM;
     }
 
