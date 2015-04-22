@@ -186,6 +186,8 @@ public class RuleGrammarGenerator {
         return prods;
     }
 
+    // TODO(radumereuta): split K-SORT-LATTICE into K-TOP-SORT and K-BOTTOM-SORT, and replace this function with
+    // K-TOP-SORT
     public Module getProgramsGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 
