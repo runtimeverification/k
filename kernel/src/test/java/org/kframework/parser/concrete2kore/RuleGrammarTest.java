@@ -2,6 +2,9 @@
 package org.kframework.parser.concrete2kore;
 
 import com.google.common.collect.Lists;
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -289,5 +292,13 @@ public class RuleGrammarTest {
         Assert.assertEquals(precede, re1.precedeRegex());
         Assert.assertEquals(pattern, re1.regex());
         Assert.assertEquals(follow, re1.followRegex());
+    }
+
+    // test the new regex engine
+    @Test
+    public void test17() {
+        Automaton a = new RegExp("[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]").toAutomaton();
+        RunAutomaton ra = new RunAutomaton(a, false);
+        System.out.println(ra.run("\"n\\\\\\\"\""));
     }
 }

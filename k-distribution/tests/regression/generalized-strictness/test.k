@@ -1,9 +1,13 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
-module TEST
+module TEST-SYNTAX
   syntax Exp ::= Int | Id
                | "++" Exp [strict]
                > Exp "+" Exp [left]
 
+endmodule
+
+module TEST
+  imports TEST-SYNTAX
     context rvalue ( HOLE ) [strict, context(result(RVal)), klabel('rvalue), cell(k)]
 
     context (HOLE => 'rvalue(HOLE)) + GeneratedAnonVar2:K [left, result(RVal), cell(k)]
@@ -18,8 +22,8 @@ module TEST
 
   syntax KResult ::= Id | RVal
 
-  syntax Id ::= Token{"x"}
-  syntax Id ::= Token{"y"}
+  syntax Id ::= Token{"x"} [token]
+  syntax Id ::= Token{"y"} [token]
 
   configuration <k> $PGM:Exp </k>
                 <state> x |-> 0 y |-> 0 </state>
