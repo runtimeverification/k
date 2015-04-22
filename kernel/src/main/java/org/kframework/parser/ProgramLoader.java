@@ -140,7 +140,7 @@ public class ProgramLoader {
             } catch (IOException e) {
                 throw KExceptionManager.internalError("Error reading from binary file", e);
             }
-        } else /*TODO: do not merge with these comments, if (whatParser == ParserType.NEWPROGRAM)*/ {
+        } else if (whatParser == ParserType.NEWPROGRAM) {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
             org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
@@ -157,10 +157,10 @@ public class ProgramLoader {
             }
 
             out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));
-        } /*else {
+        } else {
             out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
-        }*/
+        }
         sw.printIntermediate("Parsing Program");
 
         return (Term) out;
