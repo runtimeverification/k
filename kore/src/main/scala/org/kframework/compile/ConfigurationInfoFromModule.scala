@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
 import org.kframework.kore.{ADT, K, KLabel, Sort}
-import org.kframework.TSort._
+import org.kframework.TopologicalSort._
 
 object ConfigurationInfoFromModule
 

@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 /**
  * Created by dwightguth on 4/16/15.
  */
-object TSort {
+object TopologicalSort {
   def tsort[A](edges: Traversable[(A, A)]): Iterable[A] = {
     @tailrec
     def tsort(toPreds: Map[A, Set[A]], done: Iterable[A]): Iterable[A] = {
