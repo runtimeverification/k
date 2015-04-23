@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
@@ -11,20 +12,18 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.Att;
-import static org.kframework.definition.Constructors.NonTerminal;
-import static org.kframework.definition.Constructors.Production;
-import static org.kframework.definition.Constructors.Terminal;
-import static org.kframework.kore.KORE.Sort;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Generator for rule and ground parsers.
@@ -61,6 +60,7 @@ public class RuleGrammarGenerator {
     public static final String K = "K";
     public static final String AUTO_CASTS = "AUTO-CASTS";
     public static final String K_SORT_LATTICE = "K-SORT-LATTICE";
+    public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
 
     public RuleGrammarGenerator(Definition baseK) {
         this.baseK = baseK;
@@ -71,12 +71,12 @@ public class RuleGrammarGenerator {
         return def;
     }
 
-    public ParseInModule getRuleGrammar(Module mod) {
+    public Module getRuleGrammar(Module mod) {
         Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
 
-    public ParseInModule getConfigGrammar(Module mod) {
+    public Module getConfigGrammar(Module mod) {
         Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
@@ -90,10 +90,10 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public ParseInModule getCombinedGrammar(Module mod) {
+    public Module getCombinedGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 
-        if (mod.importedModules().contains(baseK.getModule(AUTO_CASTS).get())) { // create the diamond
+        if (baseK.getModule(AUTO_CASTS).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_CASTS).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
@@ -105,19 +105,19 @@ public class RuleGrammarGenerator {
             prods.addAll(makeCasts(KBott, KTop, KItem));
             prods.addAll(makeCasts(KBott, KTop, KTop));
         }
-        if (mod.importedModules().contains(baseK.getModule(K_SORT_LATTICE).get())) { // create the diamond
+        if (baseK.getModule(K_SORT_LATTICE).isDefined() && mod.importedModules().contains(baseK.getModule(K_SORT_LATTICE).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // Sort ::= KBott
                     prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
-                    // K ::= Sort
                     prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
                 }
             }
         }
-        if (mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
-            scala.collection.immutable.Set<Sentence> prods2 = stream(mod.sentences()).map(s -> {
-                if (s instanceof Production && (s.att().contains("cell") || s.att().contains("maincell"))) {
+        scala.collection.immutable.Set<Sentence> prods2;
+        if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
+            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).map(s -> {
+                if (s instanceof Production && (s.att().contains("cell"))) {
                     Production p = (Production) s;
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
@@ -127,51 +127,53 @@ public class RuleGrammarGenerator {
                 }
                 return s;
             }).collect(Collections.toSet());
-            prods.addAll(mutable(prods2));
         } else
-            prods.addAll(mutable(mod.sentences()));
+            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collections.toSet());
 
-        Set<String> terminals = new HashSet<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
-        prods.stream().filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
-            if (i instanceof Terminal) terminals.add(((Terminal) i).value());
-        }));
-
-        prods = mutable(prods.stream().map(s -> {
-            if (s instanceof Production) {
-                Production p = (Production) s;
-                if (p.sort().name().startsWith("#")) return p; // don't do anything for such productions since they are advanced features
-                // rewrite productions to contin follow restrictions for prefix terminals
-                // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
-                // this also takes care of casting and productions that have ":"
-                List<ProductionItem> items = stream(p.items()).map(pi -> {
-                    if (pi instanceof Terminal) {
-                        Terminal t = (Terminal) pi;
-                        Set<String> follow = new HashSet<>();
-                        for (String biggerString : terminals) {
-                            if (!t.value().equals(biggerString) && biggerString.startsWith(t.value())) {
-                                String ending = biggerString.substring(t.value().length());
-                                follow.add(ending);
+        if (baseK.getModule(AUTO_FOLLOW).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_FOLLOW).get())) {
+            Object PRESENT = new Object();
+            PatriciaTrie<Object> terminals = new PatriciaTrie<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
+            stream(prods2).filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
+                if (i instanceof Terminal) terminals.put(((Terminal) i).value(), PRESENT);
+            }));
+            prods2 = stream(prods2).map(s -> {
+                if (s instanceof Production) {
+                    Production p = (Production) s;
+                    if (p.sort().name().startsWith("#"))
+                        return p; // don't do anything for such productions since they are advanced features
+                    // rewrite productions to contin follow restrictions for prefix terminals
+                    // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
+                    // this also takes care of casting and productions that have ":"
+                    List<ProductionItem> items = stream(p.items()).map(pi -> {
+                        if (pi instanceof Terminal) {
+                            Terminal t = (Terminal) pi;
+                            Set<String> follow = new HashSet<>();
+                            for (String biggerString : terminals.prefixMap(t.value()).keySet()) {
+                                if (!t.value().equals(biggerString)) {
+                                    String ending = biggerString.substring(t.value().length());
+                                    follow.add(ending);
+                                }
+                            }
+                            // add follow restrictions for the characters that might produce ambiguities
+                            if (!follow.isEmpty()) {
+                                String restriction = follow.stream().map(StringUtil::escapeAutomatonRegex).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
+                                return Terminal.apply(t.value(), restriction);
                             }
                         }
-                        // add follow restrictions for the characters that might produce ambiguities
-                        if (!follow.isEmpty()) {
-                            String restriction = follow.stream().map(StringUtil::escapeAutomatonRegex).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
-                            return Terminal.apply(t.value(), restriction);
-                        }
-                    }
-                    return pi;
-                }).collect(Collections.toList());
-                if (p.klabel().isDefined())
-                    p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
-                else
-                    p = Production(p.sort(), Seq(items), p.att());
-                return p;
-            }
-            return s;
-        }).collect(Collections.toSet()));
+                        return pi;
+                    }).collect(Collections.toList());
+                    if (p.klabel().isDefined())
+                        p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
+                    else
+                        p = Production(p.sort(), Seq(items), p.att());
+                    return p;
+                }
+                return s;
+            }).collect(Collections.toSet());
+        }
 
-        Module newM = new Module(mod.name() + "-PARSER", Set(), immutable(prods), null);
-        return new ParseInModule(newM);
+        Module newM = new Module(mod.name() + "-PARSER", Set(), prods2, null);
+        return newM;
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
@@ -184,7 +186,9 @@ public class RuleGrammarGenerator {
         return prods;
     }
 
-    public ParseInModule getProgramsGrammar(Module mod) {
+    // TODO(radumereuta): split K-SORT-LATTICE into K-TOP-SORT and K-BOTTOM-SORT, and replace this function with
+    // K-TOP-SORT
+    public Module getProgramsGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
 
         // if no start symbol has been defined in the configuration, then use K

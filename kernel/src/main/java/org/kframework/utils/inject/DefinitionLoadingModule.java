@@ -1,13 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.Map;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.BinaryLoader;
@@ -20,9 +20,9 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.Map;
 
 public class DefinitionLoadingModule extends AbstractModule {
 
@@ -37,8 +37,11 @@ public class DefinitionLoadingModule extends AbstractModule {
             GlobalOptions global,
             Stopwatch sw,
             KExceptionManager kem,
-            FileUtil files) {
+            FileUtil files,
+            KRunOptions krunOptions) {
         Context context = loader.loadOrDie(Context.class, files.resolveKompiled("context.bin"));
+        context.globalOptions = global;
+        context.krunOptions = krunOptions;
 
         sw.printIntermediate("Loading serialized context");
 

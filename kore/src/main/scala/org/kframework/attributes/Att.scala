@@ -18,23 +18,19 @@ case class Att(att: Set[K]) extends AttributesToString {
 
   def getK(key: String): Option[K] = attMap.get(key) map { case t@KApply(KLabel(`key`), _) => t }
 
-  val includes = Set("scala.collection.immutable", "org.kframework.attributes")
-  val down = Down(includes)
-  val up = new Up(KORE, includes)
-
   def get[T](key: String): Option[T] =
     getKValue(key).orElse(getK(key))
-      .map(down)
+      .map(Att.down)
       .map {_.asInstanceOf[T]}
 
   def get[T](key: String, cls: Class[T]): Option[T] =
     getKValue(key).orElse(getK(key))
-      .map(down)
+      .map(Att.down)
       .map { x =>
         if (cls.isInstance(x))
           x.asInstanceOf[T]
         else
-          getK(key).map(down).map { _.asInstanceOf[T] }.get
+          getK(key).map(Att.down).map { _.asInstanceOf[T] }.get
       }
 
   def getOptional[T](label: String): java.util.Optional[T] =
@@ -49,10 +45,10 @@ case class Att(att: Set[K]) extends AttributesToString {
       case z => false
     }
 
-  def +(o: Any) = new Att(att + up(o))
+  def +(o: Any) = new Att(att + Att.up(o))
   def +(k: K): Att = new Att(att + k)
   def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
-  def +(kv: (String, Any)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(up(kv._2)), Att()))
+  def +(kv: (String, Any)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(Att.up(kv._2)), Att()))
   def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
@@ -65,12 +61,18 @@ case class Att(att: Set[K]) extends AttributesToString {
   def addAll(that: Att) = this ++ that
 
   def remove(k: String): Att = new Att(att filter { case KApply(KLabel(`k`), _) => false; case _ => true })
+
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this);
 }
 
 trait KeyWithType
 
 object Att {
   @annotation.varargs def apply(atts: K*): Att = Att(atts.toSet)
+
+  val includes = Set("scala.collection.immutable", "org.kframework.attributes")
+  val down = Down(includes)
+  val up = new Up(KORE, includes)
 
   implicit def asK(key: String, value: String) =
     KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(Sorts.KString, value, Att())))), Att())

@@ -7,7 +7,13 @@ import org.kframework.definition
 object ModuleTransformer {
   def from(f: java.util.function.UnaryOperator[Module]): ModuleTransformer = ModuleTransformer(f(_))
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence]): ModuleTransformer =
-    ModuleTransformer(m => Module(m.name, m.imports, m.localSentences map {f(_)}))
+    ModuleTransformer(m => {
+      val newSentences = m.localSentences map {f(_)}
+      if (newSentences != m.localSentences)
+        Module(m.name, m.imports, newSentences, m.att)
+      else
+        m
+    })
 
   def apply(f: Module => Module): ModuleTransformer = new ModuleTransformer(f)
 }
@@ -19,7 +25,13 @@ class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
 
   override def apply(input: Module): Module = {
-    memoization.getOrElseUpdate(input, f(Module(input.name, input.imports map this, input.localSentences, input.att)))
+    memoization.getOrElseUpdate(input, {
+      var newImports = input.imports map this
+      if (newImports != input.imports)
+        f(Module(input.name, newImports, input.localSentences, input.att))
+      else
+        f(input)
+    })
   }
 }
 

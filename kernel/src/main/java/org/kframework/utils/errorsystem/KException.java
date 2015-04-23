@@ -4,10 +4,11 @@ package org.kframework.utils.errorsystem;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KException {
+public class KException implements Serializable {
     protected final ExceptionType type;
     private final KExceptionGroup exceptionGroup;
     private final Source source;

@@ -1,28 +1,21 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.collect.Sets;
-import dk.brics.automaton.Automaton;
 import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
-import org.kframework.kore.Sort;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
-import org.kframework.parser.*;
-
-import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
-import static org.kframework.definition.Constructors.*;
-
+import org.kframework.kore.Sort;
+import org.kframework.parser.Ambiguity;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.TermCons;
 import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
@@ -32,7 +25,16 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
 import org.pcollections.ConsPStack;
-import org.pcollections.PStack;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 public class ParserTest {
     /* public static void main(String[] args) {
@@ -630,7 +632,7 @@ public class ParserTest {
         return Production(x, Sorts.K(), Seq(NonTerminal(Sorts.K())));
     }
 
-    public static Automaton regex(String x) {
-        return new RegExp(x).toAutomaton();
+    public static RunAutomaton regex(String x) {
+        return new RunAutomaton(new RegExp(x).toAutomaton(), false);
     }
 }

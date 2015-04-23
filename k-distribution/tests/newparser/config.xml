@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2015 K Team. All Rights Reserved. -->
 
 <tests>
 	<test
@@ -8,7 +8,6 @@
 		  extension="test"
 		  skip="pdf"
 		  results="01-list/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
@@ -20,7 +19,6 @@
 		  extension="test"
 		  skip="pdf"
 		  results="02-arithmetic-expressions/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
@@ -32,7 +30,6 @@
           extension="test"
 		  skip="pdf"
           results="03-arithmetic-expressions-amb/">
-        <kompile-option name="--java-parser" />
         <all-programs>
             <krun-option name="--parser" value="kast --parser newprogram" />
         </all-programs>
@@ -44,7 +41,6 @@
           extension="test"
 		  skip="pdf"
           results="04-ambiguous-constructor/">
-        <kompile-option name="--java-parser" />
         <all-programs>
             <krun-option name="--parser" value="kast --parser newprogram" />
         </all-programs>
@@ -56,7 +52,6 @@
 		  extension="test"
 		  skip="pdf"
 		  results="05-reject-keywords/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
@@ -68,7 +63,6 @@
 		  extension="test"
 		  skip="pdf"
 		  results="06-constant-prefer/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
@@ -80,7 +74,6 @@
 		  extension="test"
 		  skip="pdf"
 		  results="07-conslist/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
@@ -92,7 +85,6 @@
 		  extension="test"
 	      skip="pdf"
 		  results="08-manual-reject/">
-        <kompile-option name="--java-parser" />
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>

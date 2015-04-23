@@ -55,22 +55,22 @@ module TEST
   syntax KResult ::= Int
   syntax KBool ::= "isStmt" "(" K ")"                   [klabel(isStmt), function]
 
-  rule while(BE) S => if(BE) { S while (BE) S } else {}
+  rule while(BE) S => if(BE) { S while (BE) S } else {} requires KTrue ensures KTrue
 
-  rule {} => .::K
-  rule { S } => S requires isStmt(S)
+  rule {} => .::K requires KTrue ensures KTrue
+  rule { S } => S requires isStmt(S) ensures KTrue
 
-  rule <k> `X => I::Int` ...</k> <state> X |-> I ...</state> requires isId(X)
-  rule <k> X = I; => .::K ...</k> <state> X |-> `_ => I` ...</state> requires isId(X) andBool isInt(I)
+  rule <k> `X => I::Int` ...</k> <state> X |-> I ...</state> requires isId(X) ensures KTrue
+  rule <k> X = I; => .::K ...</k> <state> X |-> `_ => I` ...</state> requires isId(X) andBool isInt(I) ensures KTrue
 
-  rule A <= B => true requires isInt(A) andBool isInt(B) andBool A <=Int B
-  rule A <= B => false requires isInt(A) andBool isInt(B) andBool notBool(A <=Int B)
-  rule A + B => A +Int B requires isInt(A) andBool isInt(B)
+  rule A <= B => true requires isInt(A) andBool isInt(B) andBool A <=Int B ensures KTrue
+  rule A <= B => false requires isInt(A) andBool isInt(B) andBool notBool(A <=Int B) ensures KTrue
+  rule A + B => A +Int B requires isInt(A) andBool isInt(B) ensures KTrue
 
-  rule if(true) S1 else S2 => S1
-  rule if(false) S1 else S2 => S2
+  rule if(true) S1 else S2 => S1 requires KTrue ensures KTrue
+  rule if(false) S1 else S2 => S2 requires KTrue ensures KTrue
 
   // todo: Radu, check why the extra cast is needed
-  rule `__`(S1::Stmt, S2::Stmt) => S1 ~> S2 requires isStmt(S1) andBool isStmt(S2)
+  rule `__`(S1::Stmt, S2::Stmt) => S1 ~> S2 requires isStmt(S1) andBool isStmt(S2) ensures KTrue
 
 endmodule

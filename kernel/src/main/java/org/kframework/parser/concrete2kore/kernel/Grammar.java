@@ -3,7 +3,6 @@ package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.RegExp;
 import dk.brics.automaton.RunAutomaton;
@@ -139,8 +138,6 @@ public class Grammar implements Serializable {
     static final String multiLine = "(/\\*([^\\*]|(\\*+([^\\*/])))*\\*+/)";
     static final String singleLine = "(//[^\n\r]*)";
     static final String whites = "([\\ \n\r\t])";
-    static final Automaton pattern = new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton();
-
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
      * All children of the given state are moved to the remove whitespace rule.
@@ -164,6 +161,8 @@ public class Grammar implements Serializable {
         start.next.add(whitespace);
         return deleteToken;
     }
+
+    static final RunAutomaton pattern = new RunAutomaton(new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton(), false);
 
     /**
      * Calculates Nullability and OrderingInfo for all the states in the grammar.
@@ -552,18 +551,16 @@ public class Grammar implements Serializable {
         public final RunAutomaton precedePattern;
         public final RunAutomaton followPattern;
 
-        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
-
-        public RegExState(String name, NonTerminal nt, Automaton pattern) {
-            this(name, nt, BasicAutomata.makeEmpty(), pattern, BasicAutomata.makeEmpty());
+        public RegExState(String name, NonTerminal nt, RunAutomaton pattern) {
+            this(name, nt, new RunAutomaton(BasicAutomata.makeEmpty(), false), pattern, new RunAutomaton(BasicAutomata.makeEmpty(), false));
         }
 
-        public RegExState(String name, NonTerminal nt, Automaton precedePattern, Automaton pattern, Automaton followPattern) {
+        public RegExState(String name, NonTerminal nt, RunAutomaton precedePattern, RunAutomaton pattern, RunAutomaton followPattern) {
             super(name, nt);
             assert pattern != null;
-            this.precedePattern = new RunAutomaton(precedePattern != null ? precedePattern : BasicAutomata.makeEmpty(), false);
-            this.pattern = new RunAutomaton(pattern, false);
-            this.followPattern = new RunAutomaton(followPattern != null ? followPattern : BasicAutomata.makeEmpty(), false);
+            this.precedePattern = precedePattern;
+            this.pattern = pattern;
+            this.followPattern = followPattern;
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'

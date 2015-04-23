@@ -1,30 +1,31 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import java.io.*;
-
+import com.google.inject.Inject;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
 
 @RequestScoped
 public class BinaryLoader {
 
     private final KExceptionManager kem;
-    // Do *NOT* use this for anything except its intended usage!
-    // We are injecting the injector because of limitations of java deserialization *ONLY*.
-    // Eventually once the framework is completely converted this will go away and
-    // be replaced by serialized objects containing data only.
-    private final Injector injector;
 
     @Inject
     public BinaryLoader(
-            KExceptionManager kem,
-            Injector injector) {
+            KExceptionManager kem) {
         this.kem = kem;
-        this.injector = injector;
     }
 
     public void save(File fileName, Object o) throws IOException {
@@ -88,7 +89,6 @@ public class BinaryLoader {
         try (ObjectInputStream deserializer
                 = new ObjectInputStream(in)) {
             Object obj = deserializer.readObject();
-            injector.injectMembers(obj);
             return obj;
         }
     }

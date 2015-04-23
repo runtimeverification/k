@@ -144,15 +144,16 @@ public class ProgramLoader {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
             org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
-            ParseInModule parser = new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod);
+            ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod));
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), startSymbol.getName(), source);
+            for (ParseFailedException warn : parsed._2()) {
+                kem.addKException(warn.getKException());
+            }
             if (parsed._1().isLeft()) {
                 for (ParseFailedException k : parsed._1().left().get())
                     kem.addKException(k.getKException());
-            }
-            for (ParseFailedException warn : parsed._2()) {
-                kem.addKException(warn.getKException());
+                throw parsed._1().left().get().iterator().next();
             }
 
             out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));

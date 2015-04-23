@@ -31,7 +31,7 @@ public class Konsole {
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         CompiledDefinition compiledDef =
-                new Kompile(FileUtil.testFileUtil(), kem).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
+                new Kompile(FileUtil.testFileUtil(), kem, false).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
 
         Module module = compiledDef.getCompiledExecutionModule();
         BiFunction<String, Source, K> programParser = compiledDef.getProgramParser();
