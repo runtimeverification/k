@@ -167,6 +167,12 @@ public class FloatBuiltin extends Token {
      * Return a {@link String} representing the (uninterpreted) value of the numerical
      * float corresponding to the value of the float token.
      */
+
+    public static String printKFloat(BigFloat value) {
+        return printKFloat(value, value::toString);
+    }
+
+
     public static String printKFloat(BigFloat value, Supplier<String> toString) {
         if (value.isInfinite()) {
             if (value.sign()) {
