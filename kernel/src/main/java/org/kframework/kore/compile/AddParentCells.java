@@ -56,7 +56,7 @@ public class AddParentCells {
     }
 
     protected List<KApply> makeParents(KLabel parent, boolean ellipses,
-                                       List<? extends K> allChildren) {
+                                       List<K> allChildren) {
         // List<KRewrite> rewrites
 //        rewrites.stream().map(r -> r.left()).flatMap(t -> if(t.));
 
