@@ -380,6 +380,7 @@ module STRING
   syntax Int ::= "rfindChar" "(" String "," String "," Int ")" [function, klabel(rfindChar), hook(#STRING:rfindChar)]
 
   syntax String ::= "Float2String" "(" Float ")" [function, klabel(Float2String), hook(#CONVERSION:float2string)]
+  syntax String ::= "Float2String" "(" Float "," String ")" [function, klabel(FloatFormat), hook(#CONVERSION:floatFormat)]
   syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2float)]
   syntax Int ::= "String2Int" "(" String ")"     [function, klabel(String2Int), hook(#CONVERSION:string2int)]
   syntax String ::= "Int2String" "(" Int ")"     [function, klabel(Int2String), hook(#CONVERSION:int2string)]
