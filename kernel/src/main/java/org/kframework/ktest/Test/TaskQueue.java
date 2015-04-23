@@ -5,7 +5,7 @@ import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.Proc;
 import org.kframework.utils.OS;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,7 +126,7 @@ public class TaskQueue {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw KExceptionManager.criticalError("KTest was interrupted", e);
+            throw KEMException.criticalError("KTest was interrupted", e);
         }
     }
 

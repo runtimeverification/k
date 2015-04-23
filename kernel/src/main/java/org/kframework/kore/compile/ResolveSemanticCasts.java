@@ -3,8 +3,6 @@ package org.kframework.kore.compile;
 
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
-import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -15,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
 
@@ -24,10 +23,11 @@ import static org.kframework.kore.KORE.*;
 public class ResolveSemanticCasts {
 
     private Set<KApply> casts = new HashSet<>();
-    private Map<String, String> varSorts = new HashMap<>();
+    private Map<KVariable, KVariable> varSorts = new HashMap<>();
 
     void resetCasts() {
         casts.clear();
+        varSorts.clear();
     }
 
     private Rule resolve(Rule rule) {
@@ -53,7 +53,7 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), kapp.klist(), kapp.att()))
+        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), KList(kapp.klist().items().stream().map(varSorts::get).collect(Collectors.toList())), kapp.att()))
                 .reduce(requires, BooleanUtils::and);
     }
 
@@ -70,7 +70,7 @@ public class ResolveSemanticCasts {
                     K child = v.klist().items().get(0);
                     if (child instanceof KVariable) {
                         KVariable var = (KVariable) child;
-                        varSorts.put(var.name(), getSortNameOfCast(v));
+                        varSorts.put(var, KVariable(var.name(), var.att().add("sort", getSortNameOfCast(v))));
                     }
                 }
                 return super.apply(v);
@@ -90,8 +90,8 @@ public class ResolveSemanticCasts {
 
             @Override
             public K apply(KVariable k) {
-                if (varSorts.containsKey(k.name())) {
-                    return KVariable(k.name(), k.att().add("sort", varSorts.get(k.name())));
+                if (varSorts.containsKey(k)) {
+                    return varSorts.get(k);
                 }
                 return super.apply(k);
             }

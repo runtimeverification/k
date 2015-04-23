@@ -8,8 +8,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
-import org.kframework.kil.Production;
-import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Builtins;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
 /**
  * Utility class that handles the builtin (hooked) operations and their Java
@@ -55,7 +53,7 @@ public class BuiltinFunction {
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
     @Inject
-    public BuiltinFunction(Definition definition, @Builtins Map<String, Provider<MethodHandle>> hookProvider, KExceptionManager kem, Tool tool) {
+    public BuiltinFunction(Definition definition, @Builtins Map<String, Provider<MethodHandle>> hookProvider, KExceptionManager kem, Stage stage) {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType hookType = MethodType.methodType(Term.class, Object[].class);
         MethodHandle throwImpureExceptionHandle;
@@ -63,7 +61,7 @@ public class BuiltinFunction {
             throwImpureExceptionHandle = lookup.findStatic(BuiltinFunction.class,
                     "throwImpureException", hookType);
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw KExceptionManager.internalError("Failed to load partial evaluation hook implementation", e);
+            throw KEMException.internalError("Failed to load partial evaluation hook implementation", e);
         }
         for (Map.Entry<String, Attributes> entry : definition.kLabelAttributes().entrySet()) {
             String hookAttribute = entry.getValue().getAttr(Attribute.HOOK_KEY);
@@ -72,7 +70,7 @@ public class BuiltinFunction {
                  * exclude hook from evaluation during compilation if the hook is dynamic
                  * in nature (is related to I/O or to meta properties).
                  * */
-                if (tool == Tool.KOMPILE && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
+                if (stage == Stage.INITIALIZING && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
                     table.put(KLabelConstant.of(entry.getKey(), definition), throwImpureExceptionHandle);
                     continue;
                 }

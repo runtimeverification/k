@@ -12,6 +12,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -61,7 +62,7 @@ public class OuterParser {
         try {
             // parse first the file given at console for fast failure in case of error
             if (!file.exists())
-                throw KExceptionManager.criticalError(missingFileMsg + file.getPath() + " given at console.");
+                throw KEMException.criticalError(missingFileMsg + file.getPath() + " given at console.");
 
             slurp2(file, context, false);
 
@@ -72,7 +73,7 @@ public class OuterParser {
 
                 File autoinclude = files.resolveKBase("include/" + autoincludedFile);
                 if (!autoinclude.exists())
-                    throw KExceptionManager.criticalError(missingFileMsg + autoinclude + " autoimported for every definition ");
+                    throw KEMException.criticalError(missingFileMsg + autoinclude + " autoimported for every definition ");
 
                 slurp2(autoinclude, context, true);
                 moduleItems.addAll(tempmi);
@@ -80,7 +81,7 @@ public class OuterParser {
 
             setMainFile(file);
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Exception: "+ e);
+            throw KEMException.criticalError("Exception: " + e);
         }
     }
 

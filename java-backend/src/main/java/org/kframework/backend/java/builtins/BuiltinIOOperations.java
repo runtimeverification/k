@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import com.google.inject.Inject;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -11,17 +12,15 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.kil.Sort;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
-import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -31,7 +30,6 @@ public class BuiltinIOOperations {
 
     private final Definition def;
     private final FileSystem fs;
-    private final ConfigurationCreationOptions ccOptions;
     private final KILtoBackendJavaKILTransformer kilTransformer;
     private final RunProcess rp;
 
@@ -39,12 +37,10 @@ public class BuiltinIOOperations {
     public BuiltinIOOperations(
             Definition def,
             FileSystem fs,
-            ConfigurationCreationOptions ccOptions,
             KILtoBackendJavaKILTransformer kilTransformer,
             RunProcess rp) {
         this.def = def;
         this.fs = fs;
-        this.ccOptions = ccOptions;
         this.kilTransformer = kilTransformer;
         this.rp = rp;
     }
@@ -129,7 +125,7 @@ public class BuiltinIOOperations {
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
             org.kframework.kil.Term kast = rp.runParser(
-                    ccOptions.parser(def.context()),
+                    termContext.global().krunOptions.configurationCreation.parser(def.context()),
                     term1.stringValue(), true, Sort.of(term2.stringValue()));
             Term term = kilTransformer.transformAndEval(kast);
             return term;

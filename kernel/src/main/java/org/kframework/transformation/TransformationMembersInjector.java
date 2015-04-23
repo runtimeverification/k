@@ -3,7 +3,7 @@ package org.kframework.transformation;
 
 import java.lang.reflect.Field;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
@@ -26,7 +26,7 @@ public class TransformationMembersInjector<T> implements MembersInjector<T> {
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException("could not inject " + t, e);
         } catch (AmbiguousTransformationException | TransformationNotSatisfiedException e) {
-            throw KExceptionManager.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage(), e);
         }
     }
 

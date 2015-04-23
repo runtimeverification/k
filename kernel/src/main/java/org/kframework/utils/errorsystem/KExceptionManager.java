@@ -56,47 +56,16 @@ public class KExceptionManager {
         }
     }
 
-    public static KEMException criticalError(String message) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, null, null);
-    }
-
-    public static KEMException criticalErrorForK(String message, K k) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null,
-                k.att().<Location>getOptional("Location").orElseGet(null),
-                k.att().<Source>getOptional("Source").orElseGet(null));
-    }
-
     public static KEMException criticalError(String message, ASTNode node) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
-    }
-
-    public static KEMException criticalError(String message, org.kframework.parser.Term node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.location().orElse(null), node.source().orElse(null));
-    }
-
-    public static KEMException criticalError(String message, Throwable e) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, null, null);
     }
 
     public static KEMException criticalError(String message, Throwable e, ASTNode node) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
     }
 
-    public static KEMException criticalError(String message, Throwable e, Location loc, Source source) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, loc, source);
-    }
-
-
     public static KEMException criticalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getSource());
-    }
-
-    public static KEMException internalError(String message) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, null, null);
-    }
-
-    public static KEMException internalError(String message, Throwable e) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
     public static KEMException internalError(String message, ASTNode node) {
@@ -107,20 +76,8 @@ public class KExceptionManager {
         return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
-    public static KEMException compilerError(String message) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null, null);
-    }
-
-    public static KEMException compilerError(String message, Throwable e) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, e, null, null);
-    }
-
     public static KEMException compilerError(String message, Throwable e, ASTNode node) {
         return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, e, node.getLocation(), node.getSource());
-    }
-
-    public static KEMException compilerError(String message, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
     }
 
     public static KEMException compilerError(String message, ASTNode node) {
@@ -137,14 +94,6 @@ public class KExceptionManager {
 
     public static KEMException innerParserError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, phase, null, node.getLocation(), node.getSource());
-    }
-
-    public static KEMException innerParserError(String message, Throwable e, Source source, Location location) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
-    }
-
-    public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
     }
 
     public void addKException(KException kex) {

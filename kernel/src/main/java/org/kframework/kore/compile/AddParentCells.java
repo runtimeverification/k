@@ -18,7 +18,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,7 +150,7 @@ public class AddParentCells {
         }
 
         // They were also not forced to be separate
-        throw KExceptionManager.criticalError("Ambiguous completion");
+        throw KEMException.criticalError("Ambiguous completion");
     }
 
     boolean isCompletionItem(K k) {
@@ -192,7 +192,7 @@ public class AddParentCells {
                 if (!level.isPresent()) {
                     level = level2;
                 } else if (!level.equals(level2)) {
-                    throw KExceptionManager.criticalError("Can't mix cells at different levels under a rewrite");
+                    throw KEMException.criticalError("Can't mix cells at different levels under a rewrite");
                 }
                 // else level is already correct
             }
@@ -210,7 +210,7 @@ public class AddParentCells {
                 Optional<KLabel> parent = getParent(items.get(0));
                 for (K item : items) {
                     if (!parent.equals(getParent(item))) {
-                        throw KExceptionManager.criticalError("Can't mix cells with different parents levels under a rewrite");
+                        throw KEMException.criticalError("Can't mix cells with different parents levels under a rewrite");
                     }
                 }
                 return parent;
@@ -232,7 +232,7 @@ public class AddParentCells {
             if (leftParent.equals(rightParent)) {
                 return leftParent;
             } else {
-                throw KExceptionManager.criticalError("All cells on the left and right of a rewrite must have the same parent: " + k);
+                throw KEMException.criticalError("All cells on the left and right of a rewrite must have the same parent: " + k);
             }
         }
     }

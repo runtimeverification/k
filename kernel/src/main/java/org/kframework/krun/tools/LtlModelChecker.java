@@ -8,10 +8,9 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
-import org.kframework.parser.ProgramLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.Main;
@@ -73,7 +72,7 @@ public interface LtlModelChecker {
                 sw.printIntermediate("Model checking total");
                 return result;
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
         }
 

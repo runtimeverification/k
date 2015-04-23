@@ -2,6 +2,7 @@
 package org.kframework.utils;
 
 import com.google.inject.Inject;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
@@ -31,7 +32,7 @@ public class BinaryLoader {
     public void save(File fileName, Object o) throws IOException {
         File dir = fileName.getAbsoluteFile().getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
-            throw KExceptionManager.criticalError("Could not create directory " + dir);
+            throw KEMException.criticalError("Could not create directory " + dir);
         }
         try (OutputStream out = new FileOutputStream(fileName)) {
             save(out, o);
@@ -41,12 +42,12 @@ public class BinaryLoader {
     public void saveOrDie(File fileName, Object o) {
         File dir = fileName.getAbsoluteFile().getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
-            throw KExceptionManager.criticalError("Could not create directory " + dir);
+            throw KEMException.criticalError("Could not create directory " + dir);
         }
         try (OutputStream out = new FileOutputStream(fileName)) {
             saveOrDie(out, o, fileName.getAbsolutePath());
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Could not write to " + fileName, e);
+            throw KEMException.criticalError("Could not write to " + fileName, e);
         }
     }
 
@@ -54,7 +55,7 @@ public class BinaryLoader {
         try {
             save(out, o);
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Could not write to " + fileName, e);
+            throw KEMException.criticalError("Could not write to " + fileName, e);
         }
     }
 
@@ -81,7 +82,7 @@ public class BinaryLoader {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
             return loadOrDie(cls, in, fileName.getAbsolutePath());
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Could not read from " + fileName, e);
+            throw KEMException.criticalError("Could not read from " + fileName, e);
         }
     }
 
@@ -106,10 +107,10 @@ public class BinaryLoader {
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
-            throw KExceptionManager.criticalError("Kompiled definition is out of date with "
+            throw KEMException.criticalError("Kompiled definition is out of date with "
                     + "the latest version of the K tool. Please re-run kompile and try again.", e);
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Could not read from " + fileName, e);
+            throw KEMException.criticalError("Could not read from " + fileName, e);
         }
     }
 }

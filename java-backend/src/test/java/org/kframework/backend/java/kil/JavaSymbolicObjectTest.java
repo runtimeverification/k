@@ -1,18 +1,17 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Collections;
-
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.kil.Attributes;
 import org.kframework.utils.BaseTestCase;
-
-import com.google.common.collect.Sets;
 import org.mockito.Mock;
+
+import java.util.Collections;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class JavaSymbolicObjectTest extends BaseTestCase {
 
@@ -22,6 +21,7 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
     @Before
     public void setUp() {
         when(definition.signaturesOf("foo")).thenReturn(Collections.emptySet());
+        when(definition.allSorts()).thenReturn(Collections.singleton(Sort.of("Foo")));
         when(definition.kLabelAttributesOf("foo")).thenReturn(new Attributes());
     }
 

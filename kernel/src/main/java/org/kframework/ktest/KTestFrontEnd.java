@@ -10,6 +10,7 @@ import org.kframework.ktest.Test.TestCase;
 import org.kframework.ktest.Test.TestSuite;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
@@ -72,10 +73,10 @@ public class KTestFrontEnd extends FrontEnd {
             return makeTestSuite(options.getTargetFile(), options).run() ? 0 : 1;
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException
                 | ParameterException e) {
-            throw KExceptionManager.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage(), e);
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
-            throw KExceptionManager.criticalError(e.getMessage(), e, location.getLocation(), location.getSource());
+            throw KEMException.criticalError(e.getMessage(), e, location.getLocation(), location.getSource());
         }
     }
 

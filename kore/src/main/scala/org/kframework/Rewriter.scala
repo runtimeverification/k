@@ -19,8 +19,5 @@ trait Rewriter {
    * - for search, it returns an Or with multiple ground terms as children
    */
 
-
-  def rewrite(k: K)(implicit sofar: Set[K] = Set()): Set[K]
-
   def execute(k: kore.K): kore.K
 }

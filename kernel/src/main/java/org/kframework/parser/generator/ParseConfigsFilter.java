@@ -11,6 +11,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -132,7 +133,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             if (context.globalOptions.debug) {
                 File file = files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-                    throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());
+                    throw KEMException.criticalError("Could not create directory " + file.getParentFile());
                 }
                 try (Formatter f = new Formatter(new FileWriter(file, true))) {
                     f.format("Parsing config: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());

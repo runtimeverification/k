@@ -16,7 +16,7 @@ import org.kframework.krun.api.KRunResult;
 import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
@@ -82,7 +82,7 @@ public interface Prover {
                 sw.printIntermediate("Proof total");
                 return result;
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
         }
 

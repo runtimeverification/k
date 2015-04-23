@@ -30,13 +30,13 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.Concrete;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import scala.Tuple2;
@@ -54,7 +54,6 @@ public class ProgramLoader {
     private final KExceptionManager kem;
     private final TermLoader termLoader;
     private final FileUtil files;
-    private final Definition definition;
 
     @Inject
     ProgramLoader(
@@ -62,14 +61,12 @@ public class ProgramLoader {
             Stopwatch sw,
             KExceptionManager kem,
             TermLoader termLoader,
-            FileUtil files,
-            @Concrete Definition definition) {
+            FileUtil files) {
         this.loader = loader;
         this.sw = sw;
         this.kem = kem;
         this.termLoader = termLoader;
         this.files = files;
-        this.definition = definition;
     }
 
     /**
@@ -138,7 +135,7 @@ public class ProgramLoader {
             try (InputStream in = new Base64InputStream(new ReaderInputStream(content))) {
                 out = loader.loadOrDie(Term.class, in, source.toString());
             } catch (IOException e) {
-                throw KExceptionManager.internalError("Error reading from binary file", e);
+                throw KEMException.internalError("Error reading from binary file", e);
             }
         } else if (whatParser == ParserType.NEWPROGRAM) {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));

@@ -8,7 +8,7 @@ import com.google.inject.Provider;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
@@ -28,7 +28,7 @@ public class KompileOptions implements Serializable {
 
     public File mainDefinitionFile() {
         if (parameters == null || parameters.size() == 0) {
-            throw KExceptionManager.criticalError("You have to provide exactly one main file in order to compile.");
+            throw KEMException.criticalError("You have to provide exactly one main file in order to compile.");
         }
         return files.get().resolveWorkingDirectory(parameters.get(0));
     }

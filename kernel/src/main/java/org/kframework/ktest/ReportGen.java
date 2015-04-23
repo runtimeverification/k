@@ -4,7 +4,7 @@ package org.kframework.ktest;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -55,7 +55,7 @@ public class ReportGen {
     public void save() throws ParserConfigurationException, TransformerException, IOException {
         if (!junitFolder.isDirectory()) {
             if (!junitFolder.mkdirs()) {
-                throw KExceptionManager.criticalError("Could not create directory " + junitFolder);
+                throw KEMException.criticalError("Could not create directory " + junitFolder);
             }
         }
 

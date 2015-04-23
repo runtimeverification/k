@@ -30,6 +30,7 @@ import org.kframework.parser.utils.ResourceExtractor;
 import org.kframework.parser.utils.Sdf2Table;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -124,7 +125,7 @@ public class DefinitionLoader {
 
         if (!def.getDefinitionContext().containsModule(mainModule)) {
             String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
-            throw KExceptionManager.compilerError(msg);
+            throw KEMException.compilerError(msg);
         }
         sw.printIntermediate("Outer Parsing");
 
@@ -190,7 +191,7 @@ public class DefinitionLoader {
             try {
                 // delete the file with the cached/partially parsed rules
                 if (cache.exists() && !cache.delete()) {
-                    throw KExceptionManager.criticalError("Could not delete file " + cache);
+                    throw KEMException.criticalError("Could not delete file " + cache);
                 }
                 // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                 Thread t1 = sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
@@ -200,7 +201,7 @@ public class DefinitionLoader {
                 files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw KExceptionManager.criticalError(
+                throw KEMException.criticalError(
                         "Thread was interrupted trying to run SDF2Table");
             }
 
@@ -256,7 +257,7 @@ public class DefinitionLoader {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw KExceptionManager.criticalError(
+            throw KEMException.criticalError(
                     "Thread was interrupted trying to run SDF2Table");
         }
 

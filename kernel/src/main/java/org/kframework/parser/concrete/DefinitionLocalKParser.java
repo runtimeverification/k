@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.JarInfo;
 
 /**
@@ -59,7 +59,7 @@ public class DefinitionLocalKParser {
             impl.put(kompiled.getCanonicalFile(), kparser);
             return kparser;
         } catch (ClassNotFoundException | IOException e) {
-            throw KExceptionManager.internalError("Failed to localize JSGLR to a thread", e);
+            throw KEMException.internalError("Failed to localize JSGLR to a thread", e);
         }
     }
 
@@ -78,7 +78,7 @@ public class DefinitionLocalKParser {
             Method m = kparser.getMethod(methodName, classes.toArray(new Class<?>[classes.size()]));
             return (String) m.invoke(null, args);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException e) {
-            throw KExceptionManager.internalError("Failed to localize JSGLR to a thread", e);
+            throw KEMException.internalError("Failed to localize JSGLR to a thread", e);
         } catch (InvocationTargetException e) {
             throw new RuntimeException("JSGLR failed to parse term", e);
         }

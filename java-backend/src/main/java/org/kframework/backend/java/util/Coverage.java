@@ -3,8 +3,7 @@ package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.attributes.Source;
-import org.kframework.attributes.Location;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class Coverage {
             try {
                 writeStringToFile(file, string + "\n", true);
             } catch (IOException e) {
-                throw KExceptionManager.internalError("Could not write to " + file, e);
+                throw KEMException.internalError("Could not write to " + file, e);
             }
         }
     }

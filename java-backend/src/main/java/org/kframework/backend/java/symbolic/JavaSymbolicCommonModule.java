@@ -1,6 +1,16 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.multibindings.MapBinder;
+import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Builtins;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -9,16 +19,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.Builtins;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.multibindings.MapBinder;
 
 public class JavaSymbolicCommonModule extends AbstractModule {
 
@@ -32,7 +32,7 @@ public class JavaSymbolicCommonModule extends AbstractModule {
         try {
             FileUtil.loadProperties(properties, getClass(), HOOK_PROPERTIES_FILE_NAME);
         } catch (IOException e) {
-            throw KExceptionManager.internalError("Could not read from resource " + HOOK_PROPERTIES_FILE_NAME, e);
+            throw KEMException.internalError("Could not read from resource " + HOOK_PROPERTIES_FILE_NAME, e);
         }
 
         MapBinder<String, String> builtinMethods = MapBinder.newMapBinder(binder(),

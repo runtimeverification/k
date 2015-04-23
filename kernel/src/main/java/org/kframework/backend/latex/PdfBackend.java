@@ -7,7 +7,7 @@ import org.kframework.backend.PosterBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
@@ -59,16 +59,16 @@ public class PdfBackend extends PosterBackend {
             if (process.exitValue() != 0) {
                 String latexLogFile = FilenameUtils.removeExtension(latexFile.getName()) + ".log";
                 files.copyTempFileToDefinitionDirectory(latexLogFile);
-                throw KExceptionManager.criticalError("pdflatex returned a non-zero exit code. " +
-                                "The pdf might be generated, but with bugs. " +
-                                "Please inspect the latex logs.");
+                throw KEMException.criticalError("pdflatex returned a non-zero exit code. " +
+                        "The pdf might be generated, but with bugs. " +
+                        "Please inspect the latex logs.");
             }
             sw.printIntermediate("Latex2PDF");
 
             return FilenameUtils.removeExtension(latexFile.getName()) + ".pdf";
         } catch (IOException | InterruptedException e) {
-            throw KExceptionManager.criticalError(
-                            "Cannot generate the pdf version of the definition. " +
+            throw KEMException.criticalError(
+                    "Cannot generate the pdf version of the definition. " +
                             "It seems that `pdflatex` is not installed or is not in your path. " +
                             "To generate the pdf version you can run `pdflatex` having as " +
                             "argument the latex version of the definition.", e);

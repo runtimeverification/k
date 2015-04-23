@@ -13,6 +13,7 @@ import java.util.Set;
 import org.kframework.main.Tool;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
@@ -44,7 +45,7 @@ public class JCommanderModule extends AbstractModule  {
             sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {
-            throw KExceptionManager.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage(), e);
         }
     }
 

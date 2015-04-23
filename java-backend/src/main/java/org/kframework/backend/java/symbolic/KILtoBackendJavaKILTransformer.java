@@ -92,8 +92,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Inject
     public KILtoBackendJavaKILTransformer(
             Context context,
-            GlobalContext globalContext,
             @FreshRules boolean freshRules,
+            GlobalContext globalContext,
             IndexingTable.Data data,
             KExceptionManager kem) {
         super("Transform KIL into java backend KIL", context);
@@ -107,6 +107,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Definition transformedDef = (Definition) this.visitNode(node);
         globalContext.setDefinition(transformedDef);
 
+        return expandAndEvaluateDefinition(globalContext, kem);
+    }
+
+    public static Definition expandAndEvaluateDefinition(GlobalContext globalContext, KExceptionManager kem) {
         Definition expandedDefinition = new MacroExpander(TermContext.of(globalContext), kem).processDefinition();
         globalContext.setDefinition(expandedDefinition);
 

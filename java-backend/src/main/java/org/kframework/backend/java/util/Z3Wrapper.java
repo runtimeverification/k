@@ -3,19 +3,21 @@ package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
-
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Set;
 
 /**
@@ -31,19 +33,18 @@ public class Z3Wrapper {
     private final SMTOptions options;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
-    private final Provider<ProcessBuilder> pb;
+    private final FileUtil files;
 
     @Inject
     public Z3Wrapper(
             SMTOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            Provider<ProcessBuilder> pb,
             FileUtil files) {
         this.options = options;
         this.kem = kem;
         this.globalOptions = globalOptions;
-        this.pb = pb;
+        this.files = files;
 
         SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
     }
@@ -81,7 +82,7 @@ public class Z3Wrapper {
         String result = "";
         try {
             for (int i = 0; i < Z3_RESTART_LIMIT; i++) {
-                ProcessBuilder pb = this.pb.get().command(
+                ProcessBuilder pb = files.getProcessBuilder().command(
                         OS.current().getNativeExecutable("z3"),
                         "-in",
                         "-smt2",

@@ -3,6 +3,7 @@
 package org.kframework.backend.java.compile;
 
 import org.kframework.attributes.Att;
+import org.kframework.backend.java.kil.InjectedKLabel;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -14,10 +15,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import scala.Option;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +60,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
-        return KItem.of(KLabel(klabel.name()), KList(klist.items()), context).evaluate(context);
+        return KItem.of(KLabel(klabel.name()), KList(klist.items()), context);
     }
 
     @Override
@@ -83,8 +82,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     @Override
-    public org.kframework.kore.InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
-        throw new AssertionError("Unsupported for now.");
+    public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
+        return new InjectedKLabel(KLabel(klabel.name()));
     }
 
 
@@ -99,8 +98,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
         else if (k instanceof org.kframework.kore.KVariable)
             return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
-//        else if (k instanceof org.kframework.kore.InjectedKLabel)
-//            return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
+        else if (k instanceof org.kframework.kore.InjectedKLabel)
+            return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
         else
             throw new AssertionError("BUM!");
     }

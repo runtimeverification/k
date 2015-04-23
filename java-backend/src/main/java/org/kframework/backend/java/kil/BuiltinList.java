@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -413,7 +414,7 @@ public class BuiltinList extends Collection {
          */
         public void concatenate(Term term) {
             if (!term.sort().equals(Sort.LIST)) {
-                throw KExceptionManager.criticalError("unexpected sort "
+                throw KEMException.criticalError("unexpected sort "
                         + term.sort() + " of concatenated term " + term
                         + "; expected " + Sort.LIST);
             }

@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
 
 import com.google.common.collect.Iterables;
@@ -55,7 +54,7 @@ public class RuleAuditing {
                 }
             }
             if (matchedRules.size() == 0) {
-                throw KExceptionManager.criticalError("Could not find rule for auditing at line "
+                throw KEMException.criticalError("Could not find rule for auditing at line "
                         + options.auditingLine + " of file matching " + options.auditingFile);
             } else if (matchedRules.size() > 1) {
                 System.err.println("Found multiple matches for rule to audit. Please select one:");
@@ -74,7 +73,7 @@ public class RuleAuditing {
                         }
                     } catch (NumberFormatException e) {
                     } catch (IOException e) {
-                        throw KExceptionManager.criticalError("Could not read selection from stdin");
+                        throw KEMException.criticalError("Could not read selection from stdin");
                     }
                 } while (true);
             } else {
@@ -98,7 +97,7 @@ public class RuleAuditing {
             throw fail();
         }
         if (isAudit() && !auditState.get().isSuccess && !auditState.get().isFailure) {
-            throw KExceptionManager.internalError("Unexpectedly reached the end of an audit step. Please "
+            throw KEMException.internalError("Unexpectedly reached the end of an audit step. Please "
                     + "file an issue with a minimal example at https://github.com/kframework/k/issues "
                     + " so that we can add audit instrumentation for your case.");
         }
@@ -127,7 +126,7 @@ public class RuleAuditing {
     public static KEMException fail(String message) {
         auditState.get().isFailure = true;
         System.err.println(message);
-        return KExceptionManager.criticalError("Audit complete");
+        return KEMException.criticalError("Audit complete");
     }
 
     public static void beginAudit() {

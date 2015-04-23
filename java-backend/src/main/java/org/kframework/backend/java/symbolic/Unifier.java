@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectedKLabel;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -41,5 +42,6 @@ public interface Unifier {
     public void unify(KList kList, Term term);
     public void unify(KSequence kSequence, Term term);
     public void unify(Token token, Term term);
+    public void unify(InjectedKLabel injectredKLabel, Term term);
 
 }

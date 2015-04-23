@@ -28,6 +28,7 @@ import org.kframework.krun.api.SearchType;
 import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
@@ -124,7 +125,7 @@ public interface Executor {
                     return execute(a);
                 }
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
         }
 
@@ -209,7 +210,7 @@ public interface Executor {
                 return null;
             }
             if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
-                throw KExceptionManager.criticalError("Pattern matching is not supported by model checking or proving");
+                throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
             }
             String patternToParse = pattern;
             if (pattern == null) {

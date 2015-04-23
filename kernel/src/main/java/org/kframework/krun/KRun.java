@@ -1,9 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import com.google.common.io.Files;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
+import org.kframework.definition.Module;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
@@ -11,13 +11,10 @@ import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.definition.Module;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.function.Function;
 
 /**
@@ -36,7 +33,7 @@ public class KRun implements Transformation<Void, Void> {
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
         String pgmFileName = options.configurationCreation.pgm();
         if (!options.configurationCreation.term()) {
-            throw KExceptionManager.criticalError("Unsupported options: term=false");
+            throw KEMException.criticalError("Unsupported options: term=false");
         }
 
         String pgm = files.loadFromWorkingDirectory(pgmFileName);

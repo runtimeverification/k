@@ -20,7 +20,7 @@ import org.kframework.attributes.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -33,11 +33,11 @@ public class KastParser {
 		try {
 			return parser.k();
 		} catch (ParseException e) {
-      		throw KExceptionManager.innerParserError(e.getMessage(), e, source,
+      		throw KEMException.innerParserError(e.getMessage(), e, source,
       			new Location(e.currentToken.beginLine, e.currentToken.beginColumn,
       			             e.currentToken.endLine, e.currentToken.endColumn));
         } catch (TokenMgrError e) {
-            throw KExceptionManager.innerParserError(e.getMessage(), e, source, null);
+            throw KEMException.innerParserError(e.getMessage(), e, source, null);
         }
 	}
 

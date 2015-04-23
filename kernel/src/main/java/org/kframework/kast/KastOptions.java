@@ -11,7 +11,7 @@ import org.kframework.attributes.Source;
 import org.kframework.kil.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
@@ -30,16 +30,16 @@ public final class KastOptions {
 
     public Reader stringToParse() {
         if (parameters != null && parameters.size() > 0 && expression != null) {
-            throw KExceptionManager.criticalError("It is an error to provide both a file and an expression to parse.");
+            throw KEMException.criticalError("It is an error to provide both a file and an expression to parse.");
         }
         if (expression != null) {
             return new StringReader(expression);
         }
         if (parameters != null && parameters.size() > 1) {
-            throw KExceptionManager.criticalError("You can only parse one program at a time.");
+            throw KEMException.criticalError("You can only parse one program at a time.");
         }
         if (parameters == null || parameters.size() != 1) {
-            throw KExceptionManager.criticalError("You have to provide a file in order to kast a program.");
+            throw KEMException.criticalError("You have to provide a file in order to kast a program.");
         }
         return files.get().readFromWorkingDirectory(parameters.get(0));
     }

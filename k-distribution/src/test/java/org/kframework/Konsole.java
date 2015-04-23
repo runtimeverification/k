@@ -5,6 +5,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.tiny.Rewriter;
@@ -31,7 +32,7 @@ public class Konsole {
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
 
         CompiledDefinition compiledDef =
-                new Kompile(FileUtil.testFileUtil(), kem, false).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
+                new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
 
         Module module = compiledDef.executionModule();
         BiFunction<String, Source, K> programParser = compiledDef.getProgramParser();

@@ -139,6 +139,15 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(InjectedKLabel injectedKLabel) {
+        preVisitor.resetProceed();
+        injectedKLabel.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        injectedKLabel.injectedKLabel().accept(this);
+        injectedKLabel.accept(postVisitor);
+    }
+
+    @Override
     public void visit(KItem kItem) {
         preVisitor.resetProceed();
         kItem.accept(preVisitor);

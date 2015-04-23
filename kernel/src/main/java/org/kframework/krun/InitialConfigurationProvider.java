@@ -26,6 +26,7 @@ import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.Main;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.TTYInfo;
 
@@ -126,7 +127,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                 buffer = br.readLine();
             }
         } catch (IOException e) {
-            throw KExceptionManager.internalError("IO error detected reading from stdin", e);
+            throw KEMException.internalError("IO error detected reading from stdin", e);
         }
         if (buffer == null) {
             return "";

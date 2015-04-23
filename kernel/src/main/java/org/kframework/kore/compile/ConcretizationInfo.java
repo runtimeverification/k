@@ -68,7 +68,7 @@ public class ConcretizationInfo {
         return cfg.isLeafCell(labels.getCodomain(klabel));
     }
     public boolean isParentCell(KLabel klabel) {
-        return cfg.isParentCell(labels.getCodomain(klabel));
+        return isCell(klabel) && cfg.isParentCell(labels.getCodomain(klabel));
     }
 
     public Sort leafCellType(KLabel label) {

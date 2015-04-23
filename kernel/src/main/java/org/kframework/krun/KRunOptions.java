@@ -11,7 +11,7 @@ import org.kframework.backend.unparser.OutputModes;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -49,7 +49,7 @@ public final class KRunOptions {
                 return null;
             }
             if (parameters.size() > 1) {
-                throw KExceptionManager.criticalError("You can only specify $PGM on the command line itself");
+                throw KEMException.criticalError("You can only specify $PGM on the command line itself");
             }
             return parameters.get(0);
         }
@@ -92,7 +92,7 @@ public final class KRunOptions {
             }
             if (!term() && pgm() != null) {
                 if (configVars.containsKey("PGM")) {
-                    throw KExceptionManager.criticalError("Cannot specify both -cPGM and a program to parse.");
+                    throw KEMException.criticalError("Cannot specify both -cPGM and a program to parse.");
                 }
                 result.put("PGM", Pair.of(pgm(), parser(context)));
             }
@@ -104,10 +104,10 @@ public final class KRunOptions {
 
         public boolean term() {
             if (term && configVars.size() > 0) {
-                throw KExceptionManager.criticalError("You cannot specify both the term and the configuration variables.");
+                throw KEMException.criticalError("You cannot specify both the term and the configuration variables.");
             }
             if (term && pgm() == null) {
-                throw KExceptionManager.criticalError("You must specify something to parse with the --term option.");
+                throw KEMException.criticalError("You must specify something to parse with the --term option.");
             }
             return term;
         }
@@ -119,13 +119,13 @@ public final class KRunOptions {
 
     public boolean io() {
         if (io != null && io == true && search()) {
-            throw KExceptionManager.criticalError("You cannot specify both --io on and --search");
+            throw KEMException.criticalError("You cannot specify both --io on and --search");
         }
         if (io != null && io == true && experimental.ltlmc()) {
-            throw KExceptionManager.criticalError("You cannot specify both --io on and --ltlmc");
+            throw KEMException.criticalError("You cannot specify both --io on and --ltlmc");
         }
         if (io != null && io == true && experimental.debugger()) {
-            throw KExceptionManager.criticalError("You cannot specify both --io on and --debugger");
+            throw KEMException.criticalError("You cannot specify both --io on and --debugger");
         }
         if (search()
                 || experimental.prove != null
@@ -180,7 +180,7 @@ public final class KRunOptions {
     public SearchType searchType() {
         if (search) {
             if (searchFinal || searchAll || searchOneStep || searchOneOrMoreSteps) {
-                throw KExceptionManager.criticalError("You can specify only one type of search.");
+                throw KEMException.criticalError("You can specify only one type of search.");
             }
             if (depth != null) {
                 return SearchType.STAR;
@@ -188,17 +188,17 @@ public final class KRunOptions {
             return SearchType.FINAL;
         } else if (searchFinal) {
             if (searchAll || searchOneStep || searchOneOrMoreSteps) {
-                throw KExceptionManager.criticalError("You can specify only one type of search.");
+                throw KEMException.criticalError("You can specify only one type of search.");
             }
             return SearchType.FINAL;
         } else if (searchAll) {
             if (searchOneStep || searchOneOrMoreSteps) {
-                throw KExceptionManager.criticalError("You can specify only one type of search.");
+                throw KEMException.criticalError("You can specify only one type of search.");
             }
             return SearchType.STAR;
         } else if (searchOneStep) {
             if (searchOneOrMoreSteps) {
-                throw KExceptionManager.criticalError("You can specify only one type of search.");
+                throw KEMException.criticalError("You can specify only one type of search.");
             }
             return SearchType.ONE;
         } else if (searchOneOrMoreSteps) {

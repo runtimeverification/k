@@ -1,11 +1,10 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
-import static org.fusesource.jansi.internal.CLibrary.isatty;
-
-import java.io.File;
-import java.util.Map;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import org.kframework.main.Tool;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
@@ -13,10 +12,10 @@ import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.file.TempDir;
 import org.kframework.utils.file.WorkingDir;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
+import java.io.File;
+import java.util.Map;
+
+import static org.fusesource.jansi.internal.CLibrary.*;
 
 public class CommonModule extends AbstractModule {
 
@@ -41,10 +40,7 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     ProcessBuilder pb(@WorkingDir File workingDir, @Environment Map<String, String> env) {
-        ProcessBuilder pb = new ProcessBuilder().directory(workingDir);
-        pb.environment().clear();
-        pb.environment().putAll(env);
-        return pb;
+        return new FileUtil(null, null, workingDir, null, null, env).getProcessBuilder();
     }
 
     @Provides

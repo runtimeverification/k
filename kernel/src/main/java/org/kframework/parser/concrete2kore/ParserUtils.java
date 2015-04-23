@@ -14,6 +14,7 @@ import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -180,7 +181,7 @@ public class ParserUtils {
         Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories, dropQuote);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
-            throw KExceptionManager.compilerError("Could not find main module with name " + mainModuleName
+            throw KEMException.compilerError("Could not find main module with name " + mainModuleName
                     + " in definition. Use --main-module to specify one.");
         }
         Module mainModule = opt.get();

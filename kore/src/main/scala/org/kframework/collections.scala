@@ -25,7 +25,6 @@ object Collections {
     x.addAll(s.asJava)
     x
   }
-  def mutable[T](s: Iterable[T]): java.lang.Iterable[T] = s.asJava
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);

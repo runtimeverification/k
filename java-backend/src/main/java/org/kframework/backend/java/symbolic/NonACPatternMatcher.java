@@ -1,27 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.RewriteEngineUtils;
-import org.kframework.kil.loader.Context;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -29,12 +15,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
@@ -93,8 +73,8 @@ public class NonACPatternMatcher {
         if (match()) {
             // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
             // (used during associative matching) back to builtin representation
-            if (termContext.definition().kRunOptions() != null
-                    && termContext.definition().kRunOptions().experimental.prove != null) {
+            if (termContext.global().krunOptions != null
+                    && termContext.global().krunOptions.experimental.prove != null) {
                 substitution = substitution.evaluate(termContext);
             }
             return substitution;
@@ -200,6 +180,12 @@ public class NonACPatternMatcher {
                     } else {
                         return false;
                     }
+                } else if (subject instanceof InjectedKLabel) {
+                    if (pattern instanceof InjectedKLabel) {
+                        match((InjectedKLabel) subject, (InjectedKLabel) pattern);
+                    } else {
+                        return false;
+                    }
                 } else if (subject instanceof Hole) {
                     check(subject.equals(pattern), subject, pattern);
                 } else if (subject instanceof BuiltinList && matchOnFunctionSymbol) {
@@ -211,7 +197,7 @@ public class NonACPatternMatcher {
                 } else if (subject instanceof AssociativeCommutativeCollection || subject instanceof BuiltinList) {
                     return false;
                 } else {
-                    throw KExceptionManager.internalError("unexpected subject type: found " + subject.getClass().getSimpleName());
+                    throw KEMException.internalError("unexpected subject type: found " + subject.getClass().getSimpleName());
                 }
             }
         }
@@ -413,6 +399,11 @@ public class NonACPatternMatcher {
 
     private void match(KLabelInjection kLabelInjection, KLabelInjection pattern) {
         addMatchingTask(kLabelInjection.term(), pattern.term());
+    }
+
+
+    private void match(InjectedKLabel kLabelInjection, InjectedKLabel pattern) {
+        addMatchingTask(kLabelInjection.injectedKLabel(), pattern.injectedKLabel());
     }
 
     private void match(BuiltinList builtinList, BuiltinList pattern) {
