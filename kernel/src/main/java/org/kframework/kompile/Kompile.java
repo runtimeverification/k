@@ -17,7 +17,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.compile.BooleanUtils;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.kore.compile.ConcretizeCells;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.kore.compile.ResolveSemanticCasts;

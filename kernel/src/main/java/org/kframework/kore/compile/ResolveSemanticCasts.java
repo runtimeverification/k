@@ -2,6 +2,7 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Sets;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
