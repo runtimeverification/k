@@ -301,4 +301,14 @@ public class RuleGrammarTest {
         RunAutomaton ra = new RunAutomaton(a, false);
         System.out.println(ra.run("\"n\\\\\\\"\""));
     }
+
+    // test unicode chars
+    @Test
+    public void test18() {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= \"\u2022\" " +
+                "endmodule";
+        parseRule("\u2022 => .K", def, 0, false);
+    }
 }
