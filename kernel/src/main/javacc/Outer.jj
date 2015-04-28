@@ -226,7 +226,6 @@ public class Outer {
     try {
       return parser.Start();
     } catch (ParseException e) {
-      // TODO: report location
       throw KExceptionManager.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
             + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
             // using an anonymous class because JavaCC doesn't support Java 8 syntax.
@@ -243,6 +242,7 @@ public class Outer {
               }).collect(Collectors.toList()).toString(), e, source,
             new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
     } catch (TokenMgrError e) {
+      // TODO: report location
       throw KExceptionManager.outerParserError(e.getMessage(), e, source, null);
     }
   }
