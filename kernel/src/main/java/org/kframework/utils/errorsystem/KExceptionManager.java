@@ -144,11 +144,15 @@ public class KExceptionManager {
     }
 
     public void addKException(KException kex) {
-        exceptions.add(kex);
+        synchronized (exceptions) {
+            exceptions.add(kex);
+        }
     }
 
     public void addAllKException(Collection<KException> kex) {
-        exceptions.addAll(kex);
+        synchronized (exceptions) {
+            exceptions.addAll(kex);
+        }
     }
 
     public void registerCompilerWarning(String message) {
