@@ -227,7 +227,7 @@ public class Outer {
       return parser.Start();
     } catch (ParseException e) {
       // TODO: report location
-      throw KExceptionManager.outerParserError("Encountered " + StringUtil.enquoteCString(e.currentToken.next.image)
+      throw KExceptionManager.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
             + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
             // using an anonymous class because JavaCC doesn't support Java 8 syntax.
               .map(new Function<int[], String>() {
