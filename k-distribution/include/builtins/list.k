@@ -40,7 +40,7 @@ module LIST
    the append "@" operation in many functional programming languages. */
   syntax List ::= List List               [left, function, hook(List:__), klabel('_List_), smtlib(smt_seq_concat)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(List:.List), smtlib(smt_seq_nil)]
+  syntax List ::= ".List"                 [function, hook(List:.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)             [function, hook(List:ListItem), smtlib(smt_seq_elem)]

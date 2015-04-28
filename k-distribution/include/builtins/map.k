@@ -15,7 +15,7 @@ module MAP
    the two Maps are assumed disjoint) */
   syntax Map ::= Map Map                        [left, function, hook(Map:__), klabel('_Map_)]
   /*@  Construct an empty Map */
-  syntax Map ::= ".Map"                         [function, hook(Map:.Map)]
+  syntax Map ::= ".Map"                         [function, hook(Map:.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(Map:.Map)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
