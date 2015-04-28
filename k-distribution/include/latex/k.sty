@@ -916,8 +916,7 @@ rectangle,rectangle
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 
 \newcommand{\ksentence}[7][]{%
-\wrapRules{%
-  \rulebox{%
+  \par\indent
   \k@ruleLabel{#3}{#2}\hspace{1em}$%
   \ifthenelse{\equal{#1}{}}{}{%  
    \left(% 
@@ -927,7 +926,6 @@ rectangle,rectangle
    \right)% 
   }%
     $%
-  }%
   \ifthenelse{\equal{#5}{}}{}{%
     \whenReq{#5}%
   }%
@@ -938,7 +936,7 @@ rectangle,rectangle
   \ifthenelse{\equal{#7}{}}{}{%  
    \ruleAttributes{#7}% 
   }%
-}%
+  \par\ \par
 }
 
 \newcommand{\krule}[6][]{%
