@@ -134,6 +134,9 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         bringToLevel(visitor, min);
         LinkedList<Term> cells = visitor.levels.get(min);
         Cell parentCell = createParentCell(confCell, cells);
+        if (!cells.isEmpty()) {
+            throw KExceptionManager.criticalError("Found term remaining in cell collection after populating parent cell. Did you duplicate a cell accidentally?", cells.iterator().next());
+        }
         assert(cells.isEmpty());
         if (change) cell = parentCell;
         return cell;
