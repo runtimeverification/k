@@ -229,6 +229,7 @@ public class Outer {
       // TODO: report location
       throw KExceptionManager.outerParserError("Encountered " + StringUtil.enquoteCString(e.currentToken.next.image)
             + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+            // using an anonymous class because JavaCC doesn't support Java 8 syntax.
               .map(new Function<int[], String>() {
                 public String apply(int[] is) {
                   StringBuilder sb = new StringBuilder();
