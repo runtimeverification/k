@@ -55,12 +55,6 @@ public class StringUtilTest {
             Assert.assertEquals("Different values at position: " + i, all[i] , all2[i]);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testErrors() {
-        String str = String.valueOf(new char[]{400});
-        StringUtil.enquoteCString(str);
-    }
-
     @Test
     public void testKBijection() {
         char[] all = new char[257];
