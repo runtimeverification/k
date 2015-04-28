@@ -1,8 +1,0 @@
-i := 1 ;
-n := 10 ;
-s := 0 ;
-while i i< n do {
-  { s := s i+ i ;
-   i := i i+ 1 } ;
-  Labe1Stmt nnn
-}

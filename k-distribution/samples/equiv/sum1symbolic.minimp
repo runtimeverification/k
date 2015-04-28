@@ -1,8 +1,0 @@
-n := #symInt(n) ;
-s := 0 ;
-i := 0 ;
-while i i< n do (
-   ( s := s i+ i ;
-   i := i i+ 1 ) ;
-   L1Stmt mylabel : skip
-)

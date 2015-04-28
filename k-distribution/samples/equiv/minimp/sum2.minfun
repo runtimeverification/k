@@ -1,1 +1,0 @@
-(fix X (lambda x . (if x f== 0 then 0 else (x f+ (X (x f- 1)))))) 9
