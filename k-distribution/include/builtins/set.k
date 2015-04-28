@@ -13,7 +13,7 @@ module SET
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
   syntax Set ::= Set Set                  [left, function, hook(Set:__), klabel('_Set_)]
   /*@ Construct an empty Set */
-  syntax Set ::= ".Set"                   [function, hook(Set:.Set)]
+  syntax Set ::= ".Set"                   [function, hook(Set:.Set), latex(\dotCt{Set})]
                //| "."
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
