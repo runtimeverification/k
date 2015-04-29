@@ -5,21 +5,29 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
+import org.kframework.parser.TreeNodesToKORE;
+import org.kframework.parser.concrete2kore.ParseInModule;
 
 import java.util.function.BiFunction;
 
 /**
- * Created by dwightguth on 4/17/15.
+ * A class representing a compiled definition. It has everything needed for executing and parsing programs.
  */
 
 public class CompiledDefinition {
-    private final Module executionModule;
     private final Definition parsedDefinition;
+    private final Definition kompiledDefinition;
     private final BiFunction<String, Source, K> programParser;
 
-    public CompiledDefinition(Module executionModule, Definition parsedDefinition, BiFunction<String, Source, K> programParser) {
-        this.executionModule = executionModule;
+    public CompiledDefinition(Definition parsedDefinition, Definition kompiledDefinition, String programStartSymbol) {
         this.parsedDefinition = parsedDefinition;
+        this.kompiledDefinition = kompiledDefinition;
+        this.programParser = getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol);
+    }
+
+    public CompiledDefinition(Definition parsedDefinition, Definition kompiledDefinition, BiFunction<String, Source, K> programParser) {
+        this.parsedDefinition = parsedDefinition;
+        this.kompiledDefinition = kompiledDefinition;
         this.programParser = programParser;
     }
 
@@ -41,6 +49,21 @@ public class CompiledDefinition {
      * A module containing the compiled definition
      */
     public Module executionModule() {
-        return executionModule;
+        return kompiledDefinition.mainModule();
+    }
+
+    /**
+     * Creates a parser for a module.
+     * Will probably want to move the method out of this class here eventually.
+     *
+     * @return a function taking a String to be parsed, a Source, and returning the parsed string as K.
+     */
+
+    public BiFunction<String, Source, K> getParser(Module module, String programStartSymbol) {
+        ParseInModule parseInModule = new ParseInModule(module);
+
+        return (s, source) -> {
+            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, programStartSymbol, source)._1().right().get()));
+        };
     }
 }

@@ -23,7 +23,6 @@ import java.util.function.BiFunction;
 
 public class TstTinyOnKORE_IT {
 
-
     @org.junit.Rule
     public TestName name = new TestName();
 

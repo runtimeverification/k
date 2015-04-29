@@ -14,7 +14,6 @@ import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -116,11 +115,16 @@ public class Kompile {
                 Set(concretized.mainModule(), kseqModule),
                 Collections.<Sentence>Set(), Att());
 
-        final BiFunction<String, Source, K> pp = getProgramParser(parsedDef.getModule(mainProgramsModule).get(), programStartSymbol);
+        Module programsModule = gen.getProgramsGrammar(parsedDef.getModule(mainProgramsModule).get());
 
-        System.out.println(concretized);
+        java.util.Set<Module> allModules = mutable(concretized.modules());
+        allModules.add(withKSeq);
+        allModules.add(programsModule);
 
-        return new CompiledDefinition(withKSeq, parsedDef, pp);
+        Definition kompiledDefinition =
+                Definition(withKSeq, programsModule, immutable(allModules));
+
+        return new CompiledDefinition(parsedDef, kompiledDefinition, programStartSymbol);
     }
 
     private Definition concretizeTransformer(Definition input) {
@@ -130,14 +134,6 @@ public class Kompile {
         return DefinitionTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize
         ).apply(input);
-    }
-
-    public BiFunction<String, Source, K> getProgramParser(Module moduleForPrograms, String programStartSymbol) {
-        ParseInModule parseInModule = new ParseInModule(gen.getProgramsGrammar(moduleForPrograms));
-
-        return (s, source) -> {
-            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, programStartSymbol, source)._1().right().get()));
-        };
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
