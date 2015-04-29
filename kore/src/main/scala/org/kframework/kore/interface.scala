@@ -55,9 +55,23 @@ trait KList extends KCollection {
 trait KApply extends KItem {
   def klabel: KLabel
   def klist: KList
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KApply =>
+        that.klabel == klabel && this.klist == that.klist
+      case _ => false
+    })
 }
 
-trait KSequence extends KCollection with K
+trait KSequence extends KCollection with K {
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KSequence => this.items == that.items
+      case _ => false
+    })
+}
 
 trait KVariable extends KItem with KLabel {
   def name: String
@@ -66,8 +80,22 @@ trait KVariable extends KItem with KLabel {
 trait KRewrite extends K {
   def left: K
   def right: K
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KRewrite => this.left == that.left && this.right == that.right
+      case _ => false
+    })
 }
 
 trait InjectedKLabel extends KItem {
   def klabel: KLabel
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: InjectedKLabel => this.klabel == that.klabel
+      case _ => false
+    })
 }
