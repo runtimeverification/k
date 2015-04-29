@@ -67,7 +67,7 @@ trait KApp extends {} with kore.KApply with K {
   def size: Int = children.size
   def children: Iterable[K]
 
-  lazy val isGround = !(children exists { !_.isGround })
+  lazy val isGround = !(children exists {!_.isGround})
 
   val klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
@@ -90,7 +90,7 @@ trait KApp extends {} with kore.KApply with K {
 trait PlainNormalization {
   self: KApp =>
   def normalizeInner(implicit theory: Theory): K =
-    klabel((children map { _.normalize }).toSeq, att)
+    klabel((children map {_.normalize}).toSeq, att)
 }
 
 /**
@@ -124,7 +124,7 @@ trait KRegularApp extends KApp {
  * KApp with fixed arity. It is defined using a non-associative operator.
  */
 trait KProduct extends KRegularApp with Product {
-  val children = productIterator collect {case k: K => k } toList
+  val children = productIterator collect { case k: K => k } toList
 }
 
 /**
@@ -234,8 +234,6 @@ trait Label extends kore.KLabel {
 
   override def toString = name
 
-  lazy override val hashCode = name.hashCode
-
   override def equals(that: Any) = super.equals(that)
 }
 
@@ -246,13 +244,13 @@ trait KRegularAppLabel extends Label {
 trait KProduct1Label extends KRegularAppLabel {
   def apply(k: K, att: Att): KProduct
   def construct(l: Iterable[K], att: Att): KProduct =
-    l match { case Seq(k) => apply(k, att) }
+    l match {case Seq(k) => apply(k, att) }
 }
 
 trait KProduct2Label extends KRegularAppLabel {
   def apply(k1: K, k2: K, att: Att): KProduct
   def construct(l: Iterable[K], att: Att): KProduct =
-    l match { case Seq(k1, k2) => apply(k1, k2, att) }
+    l match {case Seq(k1, k2) => apply(k1, k2, att) }
 }
 
 trait KAssocAppLabel extends Label {
@@ -265,7 +263,7 @@ trait KAssocAppLabel extends Label {
       b.result()
     }
   def newBuilder(att: Att): mutable.Builder[K, KAssocApp] =
-    new KAppAssocBuilder(ListBuffer[K](), this).mapResult { constructFromFlattened(_, att) }
+    new KAppAssocBuilder(ListBuffer[K](), this).mapResult {constructFromFlattened(_, att)}
   def constructFromFlattened(l: Seq[K], att: Att): KAssocApp
 }
 
