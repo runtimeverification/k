@@ -13,12 +13,12 @@ import java.util.function.BiFunction;
  */
 
 public class CompiledDefinition {
-    private final Module compiledExecutionModule;
+    private final Module executionModule;
     private final Definition parsedDefinition;
     private final BiFunction<String, Source, K> programParser;
 
-    public CompiledDefinition(Module compiledExecutionModule, Definition parsedDefinition, BiFunction<String, Source, K> programParser) {
-        this.compiledExecutionModule = compiledExecutionModule;
+    public CompiledDefinition(Module executionModule, Definition parsedDefinition, BiFunction<String, Source, K> programParser) {
+        this.executionModule = executionModule;
         this.parsedDefinition = parsedDefinition;
         this.programParser = programParser;
     }
@@ -40,7 +40,7 @@ public class CompiledDefinition {
     /**
      * A module containing the compiled definition
      */
-    public Module getCompiledExecutionModule() {
-        return compiledExecutionModule;
+    public Module executionModule() {
+        return executionModule;
     }
 }

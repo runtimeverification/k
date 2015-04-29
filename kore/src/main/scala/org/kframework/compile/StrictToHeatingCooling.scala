@@ -52,4 +52,6 @@ object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
   }
 
   Module(m.name, m.imports, m.sentences ++ heatingCoolingRules, m.att)
-})
+}) {
+  def self = this
+}

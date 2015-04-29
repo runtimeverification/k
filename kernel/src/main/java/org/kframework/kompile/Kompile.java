@@ -14,6 +14,7 @@ import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -35,6 +36,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
 import scala.util.Either;
@@ -52,6 +54,7 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
+import static scala.compat.java8.JFunction.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -86,6 +89,7 @@ public class Kompile {
 
     /**
      * Executes the Kompile tool. This tool accesses a
+     *
      * @param definitionFile
      * @param mainModuleName
      * @param mainProgramsModule
@@ -95,20 +99,21 @@ public class Kompile {
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModule, String programStartSymbol) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModule, true);
 
-        Module afterHeatingCooling = StrictToHeatingCooling.apply(parsedDef.mainModule());
+        DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
+        DefinitionTransformer resolveSemanticCasts =
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve);
 
-        Module afterResolvingCasts = new ResolveSemanticCasts().resolve(afterHeatingCooling);
+        Function1<Definition, Definition> pipeline =
+                heatingCooling
+                        .andThen(resolveSemanticCasts)
+                        .andThen(func(this::concretizeTransformer));
 
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterResolvingCasts);
-        LabelInfo labelInfo = new LabelInfoFromModule(afterResolvingCasts);
-        SortInfo sortInfo = SortInfo.fromModule(afterResolvingCasts);
-
-        Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo).concretize(afterResolvingCasts);
+        Definition concretized = pipeline.apply(parsedDef);
 
         Module kseqModule = parsedDef.getModule("KSEQ").get();
 
         Module withKSeq = Module("EXECUTION",
-                Set(concretized, kseqModule),
+                Set(concretized.mainModule(), kseqModule),
                 Collections.<Sentence>Set(), Att());
 
         final BiFunction<String, Source, K> pp = getProgramParser(parsedDef.getModule(mainProgramsModule).get(), programStartSymbol);
@@ -116,6 +121,15 @@ public class Kompile {
         System.out.println(concretized);
 
         return new CompiledDefinition(withKSeq, parsedDef, pp);
+    }
+
+    private Definition concretizeTransformer(Definition input) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
+        return DefinitionTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize
+        ).apply(input);
     }
 
     public BiFunction<String, Source, K> getProgramParser(Module moduleForPrograms, String programStartSymbol) {
@@ -222,7 +236,7 @@ public class Kompile {
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble)b)
+                .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
         Module ruleParserModule = gen.getRuleGrammar(module);
