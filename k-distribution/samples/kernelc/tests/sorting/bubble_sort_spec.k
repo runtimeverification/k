@@ -95,6 +95,5 @@ rule [bubble-sort-func-spec]:
     lseg(X1, null)(A1:List) => lseg(?X2, null)(?A2:List)
   ...</heap>
 ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
-  [trusted]
 endmodule
 
