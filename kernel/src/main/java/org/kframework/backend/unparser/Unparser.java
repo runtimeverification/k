@@ -1,7 +1,14 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import java.awt.Color;
+import com.davekoelle.AlphanumComparator;
+import org.kframework.attributes.Location;
+import org.kframework.kil.*;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.NonCachingVisitor;
+import org.kframework.krun.ColorSetting;
+import org.kframework.utils.ColorUtil;
+
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
@@ -10,62 +17,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.kframework.attributes.Location;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.BackendTerm;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BagItem;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Collection;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Freezer;
-import org.kframework.kil.FreezerHole;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Import;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KItemProjection;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KLabelInjection;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.ListBuiltin;
-import org.kframework.kil.ListTerminator;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Require;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.SetBuiltin;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermComment;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.Token;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.NonCachingVisitor;
-import org.kframework.krun.ColorSetting;
-import org.kframework.utils.ColorUtil;
-
-import com.davekoelle.AlphanumComparator;
 
 /**
  * Unparses (ie converts an AST to text) a term written in concrete syntax.
@@ -76,10 +27,10 @@ import com.davekoelle.AlphanumComparator;
 public class Unparser implements Comparator<ASTNode> {
 
     public Unparser(Context context) {
-        this(context, ColorSetting.OFF, Color.BLACK, true, false);
+        this(context, ColorSetting.OFF, "black", true, false);
     }
 
-    public Unparser(Context context, ColorSetting color, Color terminalColor, boolean wrap, boolean annotateLocation) {
+    public Unparser(Context context, ColorSetting color, String terminalColor, boolean wrap, boolean annotateLocation) {
         this.context = context;
         this.color = color;
         this.terminalColor = terminalColor;
@@ -90,7 +41,7 @@ public class Unparser implements Comparator<ASTNode> {
     private final AlphanumComparator comparator = new AlphanumComparator();
     private final Context context;
     private final ColorSetting color;
-    private final Color terminalColor;
+    private final String terminalColor;
     private final boolean wrap;
     private final boolean annotateLocation;
     private Set<String> variableList = new HashSet<>();
@@ -469,7 +420,7 @@ public class Unparser implements Comparator<ASTNode> {
             if (declaredCell != null) {
                 String declaredColor = declaredCell.getCellAttributes().get("color");
                 if (declaredColor != null) {
-                    colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, terminalColor);
+                    colorCode = ColorUtil.RgbToAnsi(declaredColor, color, terminalColor);
                     string(colorCode);
                 }
             }

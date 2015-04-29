@@ -5,6 +5,7 @@ package org.kframework.kore.convertors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.builtins.IntToken;
@@ -53,7 +54,7 @@ public class TstBackendOnKORE extends BaseTest {
         sdfTest();
     }
 
-    @Test
+    @Test @Ignore
     public void kore_csemantics() throws IOException, URISyntaxException {
         String filename = "/home/dwightguth/c-semantics/semantics/c11-translation.k";
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
