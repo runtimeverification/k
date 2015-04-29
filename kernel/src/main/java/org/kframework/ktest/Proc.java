@@ -10,13 +10,20 @@ import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
@@ -305,7 +312,7 @@ public class Proc<T> implements Runnable {
      */
     private void handlePgmResult(ProcOutput normalOutput, ProcOutput debugOutput) {
         String red = ColorUtil.RgbToAnsi(
-                Color.RED, options.getColorSetting(), options.getTerminalColor());
+                "red", options.getColorSetting(), options.getTerminalColor());
         String logStr = toLogString(args);
         if (normalOutput.returnCode == 0) {
 

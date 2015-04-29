@@ -6,11 +6,10 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 import org.kframework.parser.TermLoader;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,7 +113,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             }
             return result;
         }
-        String unparsed = new Unparser(context, ColorSetting.OFF, Color.BLACK, true, true).print(ast);
+        String unparsed = new Unparser(context, ColorSetting.OFF, "black", true, true).print(ast);
         try {
             ASTNode rule = loader.parsePatternAmbiguous(unparsed);
             Term reparsed = ((Sentence)rule).getBody();
