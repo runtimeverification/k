@@ -33,6 +33,7 @@ trait KToken extends KItem {
     case other: KToken => sort == other.sort && s == other.s
     case _ => false
   }
+  override def hashCode = sort.hashCode() * 13 + s.hashCode
 }
 
 trait Sort {
@@ -41,11 +42,21 @@ trait Sort {
     case other: Sort => name == other.name
     case _ => false
   }
+  override def hashCode = name.hashCode
 }
 
 trait KCollection {
   def items: java.util.List[K]
   def stream: java.util.stream.Stream[K] = items.stream()
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KCollection => this.items == that.items
+      case _ => false
+    })
+
+  override def hashCode = items.hashCode
 }
 
 trait KList extends KCollection {
@@ -62,16 +73,11 @@ trait KApply extends KItem {
         that.klabel == klabel && this.klist == that.klist
       case _ => false
     })
+
+  override def hashCode = klabel.hashCode * 17 + klist.hashCode
 }
 
-trait KSequence extends KCollection with K {
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KSequence => this.items == that.items
-      case _ => false
-    })
-}
+trait KSequence extends KCollection with K
 
 trait KVariable extends KItem with KLabel {
   def name: String
@@ -87,6 +93,8 @@ trait KRewrite extends K {
       case that: KRewrite => this.left == that.left && this.right == that.right
       case _ => false
     })
+
+  override def hashCode = left.hashCode * 19 + right.hashCode
 }
 
 trait InjectedKLabel extends KItem {
