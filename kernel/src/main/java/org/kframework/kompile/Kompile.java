@@ -38,6 +38,7 @@ import org.kframework.utils.file.JarInfo;
 import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
+import scala.compat.java8.JFunction;
 import scala.util.Either;
 
 import java.io.File;
@@ -48,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,7 +66,6 @@ public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
-    private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
 
     private final FileUtil files;
@@ -91,12 +92,12 @@ public class Kompile {
      *
      * @param definitionFile
      * @param mainModuleName
-     * @param mainProgramsModule
+     * @param mainProgramsModuleName
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModule, String programStartSymbol) {
-        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModule, true);
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, String programStartSymbol) {
+        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
 
         DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
         DefinitionTransformer resolveSemanticCasts =
@@ -105,26 +106,37 @@ public class Kompile {
         Function1<Definition, Definition> pipeline =
                 heatingCooling
                         .andThen(resolveSemanticCasts)
-                        .andThen(func(this::concretizeTransformer));
+                        .andThen(func(this::concretizeTransformer))
+                        .andThen(func(this::addSemanticsModule))
+                        .andThen(func(new AddProgramModule(mainProgramsModuleName)::apply));
 
-        Definition concretized = pipeline.apply(parsedDef);
-
-        Module kseqModule = parsedDef.getModule("KSEQ").get();
-
-        Module withKSeq = Module("EXECUTION",
-                Set(concretized.mainModule(), kseqModule),
-                Collections.<Sentence>Set(), Att());
-
-        Module programsModule = gen.getProgramsGrammar(parsedDef.getModule(mainProgramsModule).get());
-
-        java.util.Set<Module> allModules = mutable(concretized.modules());
-        allModules.add(withKSeq);
-        allModules.add(programsModule);
-
-        Definition kompiledDefinition =
-                Definition(withKSeq, programsModule, immutable(allModules));
+        Definition kompiledDefinition = pipeline.apply(parsedDef);
 
         return new CompiledDefinition(parsedDef, kompiledDefinition, programStartSymbol);
+    }
+
+    public Definition addSemanticsModule(Definition d) {
+        Module kseqModule = d.getModule("KSEQ").get();
+        Module withKSeq = Module("SEMANTICS", Set(d.mainModule(), kseqModule), Collections.<Sentence>Set(), Att());
+        java.util.Set<Module> allModules = mutable(d.modules());
+        allModules.add(withKSeq);
+        return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+    }
+
+    class AddProgramModule implements Function<Definition, Definition> {
+
+        private final String mainProgramsModuleName;
+
+        public AddProgramModule(String mainProgramsModuleName) {
+            this.mainProgramsModuleName = mainProgramsModuleName;
+        }
+
+        public Definition apply(Definition d) {
+            Module programsModule = gen.getProgramsGrammar(d.getModule(mainProgramsModuleName).get());
+            java.util.Set<Module> allModules = mutable(d.modules());
+            allModules.add(programsModule);
+            return Definition(d.mainModule(), programsModule, immutable(allModules));
+        }
     }
 
     private Definition concretizeTransformer(Definition input) {
