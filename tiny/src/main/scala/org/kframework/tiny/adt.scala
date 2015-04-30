@@ -46,11 +46,6 @@ trait K extends kore.K {
   def isGround: Boolean
 
   var isNormal = false
-  lazy val cachedHashCode = computeHashCode
-
-  override def hashCode = cachedHashCode
-
-  def computeHashCode: Int
 
   def isFalse: Boolean = false
 }
@@ -133,7 +128,6 @@ trait KProduct extends KRegularApp with Product {
  */
 trait KTok extends kore.KToken with KLeaf {
   override def matcher(right: K): Matcher = EqualsMatcher(this, right)
-  def computeHashCode = this.sort.hashCode * 19 + this.s.hashCode
   val isGround = true
 }
 
@@ -149,7 +143,6 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLea
   def copy(att: Att): KVar = KVar(name, att)
   override def matcher(right: K): Matcher = KVarMatcher(this, right)
   override def toString = name
-  def computeHashCode = name.hashCode
 
   lazy val isGround = false
 }
@@ -203,6 +196,8 @@ final class KSeq private(val children: Seq[K], val att: Att)
   extends kore.KSequence with KAssocApp with PlainNormalization {
   val klabel = KSeq
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
+
+  override def computeHashCode = super[KAssocApp].computeHashCode
 }
 
 case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends
@@ -214,6 +209,8 @@ case class InjectedLabel(klabel: Label, att: Att) extends kore.InjectedKLabel wi
   override def copy(att: Att): KLeaf = InjectedLabel(klabel, att)
   val sort: Sort = InjectedLabel.sort
   val s: String = klabel.toString
+
+  override def computeHashCode = super[InjectedKLabel].computeHashCode
 }
 
 object InjectedLabel {

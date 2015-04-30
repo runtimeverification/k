@@ -24,7 +24,7 @@ object ADT {
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
     override def equals(that: Any) = that match {
-      case s: KSequence => s.elements == elements && s.att == att
+      case s: KSequence => s.elements == elements
       case _ => false
     }
   }
