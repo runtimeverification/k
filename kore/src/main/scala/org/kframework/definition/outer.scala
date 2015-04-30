@@ -44,7 +44,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
 
   /** All the imported modules, calculated recursively. */
-  lazy val importedModules: Set[Module] = imports | (imports flatMap { _.importedModules })
+  lazy val importedModules: Set[Module] = imports | (imports flatMap {_.importedModules})
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
@@ -56,11 +56,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
-      .collect({ case p if p.att.contains("token") => p})
+      .collect({ case p if p.att.contains("token") => p })
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
-  @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues { _.head.sort }
+  @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
@@ -89,7 +89,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
 
-  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") => srt })
+  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") =>
+    srt })
 
   private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
     case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
@@ -185,7 +186,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  lazy val klabel: Option[KLabel] = att.get[String]("#klabel") map { org.kframework.kore.KORE.KLabel(_) }
+  lazy val klabel: Option[KLabel] = att.get[String]("#klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
@@ -220,7 +221,8 @@ trait TerminalLike extends ProductionItem {
 case class NonTerminal(sort: Sort) extends ProductionItem
 with NonTerminalToString
 
-case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with RegexTerminalToString {
+case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with
+RegexTerminalToString {
   lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
   lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
   lazy val precedePattern = {

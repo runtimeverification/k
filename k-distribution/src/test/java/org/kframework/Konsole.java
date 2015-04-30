@@ -33,7 +33,7 @@ public class Konsole {
         CompiledDefinition compiledDef =
                 new Kompile(FileUtil.testFileUtil(), kem, false).run(new File(definitionFilename), mainModuleName, programModuleName, "K");
 
-        Module module = compiledDef.getCompiledExecutionModule();
+        Module module = compiledDef.executionModule();
         BiFunction<String, Source, K> programParser = compiledDef.getProgramParser();
         Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
         String cmd;

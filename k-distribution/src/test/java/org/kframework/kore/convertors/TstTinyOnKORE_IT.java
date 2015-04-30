@@ -23,7 +23,6 @@ import java.util.function.BiFunction;
 
 public class TstTinyOnKORE_IT {
 
-
     @org.junit.Rule
     public TestName name = new TestName();
 
@@ -42,7 +41,7 @@ public class TstTinyOnKORE_IT {
         try {
             CompiledDefinition compiledDef = new Kompile(FileUtil.testFileUtil(), kem, false).run(definitionFile, "TEST", "TEST-PROGRAMS", "K");
 
-            Module module = compiledDef.getCompiledExecutionModule();
+            Module module = compiledDef.executionModule();
             BiFunction<String, Source, K> programParser = compiledDef.getProgramParser();
             Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
 
