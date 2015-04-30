@@ -77,7 +77,7 @@ public class Kompile {
     public Kompile(FileUtil files, KExceptionManager kem, boolean cacheParses) {
         this.files = files;
         this.kem = kem;
-        this.parser = new ParserUtils(files);
+        this.parser = new ParserUtils(files, kem);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);
     }

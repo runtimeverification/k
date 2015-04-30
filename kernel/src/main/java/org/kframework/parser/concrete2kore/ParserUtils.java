@@ -35,9 +35,11 @@ import static org.kframework.definition.Constructors.*;
 public class ParserUtils {
 
     private final FileUtil files;
+    private final KExceptionManager kem;
 
-    public ParserUtils(FileUtil files) {
+    public ParserUtils(FileUtil files, KExceptionManager kem) {
         this.files = files;
+        this.kem = kem;
     }
     public static K parseWithFile(String theTextToParse,
                                   String mainModule,
@@ -176,8 +178,21 @@ public class ParserUtils {
             List<File> lookupDirectories,
             boolean dropQuote) {
         Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories, dropQuote);
-        Module mainModule = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst().get();
-        Module syntaxModule = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst().get();
+        Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
+        if (!opt.isPresent()) {
+            throw KExceptionManager.compilerError("Could not find main module with name " + mainModuleName
+                    + " in definition. Use --main-module to specify one.");
+        }
+        Module mainModule = opt.get();
+        opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
+        Module syntaxModule;
+        if (!opt.isPresent()) {
+            kem.registerCompilerWarning("Could not find main syntax module with name " + syntaxModuleName
+                    + " in definition.  Use --syntax-module to specify one. Using " + mainModuleName + " as default.");
+            syntaxModule = mainModule;
+        } else {
+            syntaxModule = opt.get();
+        }
         return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());
     }
 }
