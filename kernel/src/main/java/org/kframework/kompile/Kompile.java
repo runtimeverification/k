@@ -108,7 +108,7 @@ public class Kompile {
                         .andThen(resolveSemanticCasts)
                         .andThen(func(this::concretizeTransformer))
                         .andThen(func(this::addSemanticsModule))
-                        .andThen(func(new AddProgramModule(mainProgramsModuleName)::apply));
+                        .andThen(func(this::addProgramModule));
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
 
@@ -123,20 +123,11 @@ public class Kompile {
         return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
     }
 
-    class AddProgramModule implements Function<Definition, Definition> {
-
-        private final String mainProgramsModuleName;
-
-        public AddProgramModule(String mainProgramsModuleName) {
-            this.mainProgramsModuleName = mainProgramsModuleName;
-        }
-
-        public Definition apply(Definition d) {
-            Module programsModule = gen.getProgramsGrammar(d.getModule(mainProgramsModuleName).get());
-            java.util.Set<Module> allModules = mutable(d.modules());
-            allModules.add(programsModule);
-            return Definition(d.mainModule(), programsModule, immutable(allModules));
-        }
+    public Definition addProgramModule(Definition d) {
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
+        java.util.Set<Module> allModules = mutable(d.modules());
+        allModules.add(programsModule);
+        return Definition(d.mainModule(), programsModule, immutable(allModules));
     }
 
     private Definition concretizeTransformer(Definition input) {
