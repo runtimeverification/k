@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
 import com.google.common.collect.Lists;
@@ -24,9 +25,6 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by dwightguth on 4/29/15.
- */
 public class AddBracketsTest {
 
     private RuleGrammarGenerator gen;
