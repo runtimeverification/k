@@ -135,7 +135,7 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize
         ).apply(input);
     }
 
