@@ -13,6 +13,12 @@ trait K extends Serializable {
   override def toString = Unparse.apply(this)
   def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
   def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
+
+  lazy val cachedHashCode = computeHashCode
+
+  override def hashCode = cachedHashCode
+
+  def computeHashCode: Int
 }
 
 trait KItem extends K
@@ -33,7 +39,7 @@ trait KToken extends KItem {
     case other: KToken => sort == other.sort && s == other.s
     case _ => false
   }
-  override def hashCode = sort.hashCode() * 13 + s.hashCode
+  def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
 trait Sort {
@@ -56,7 +62,7 @@ trait KCollection {
       case _ => false
     })
 
-  override def hashCode = items.hashCode
+  def computeHashCode = items.hashCode
 }
 
 trait KList extends KCollection {
@@ -66,6 +72,7 @@ trait KList extends KCollection {
 trait KApply extends KItem {
   def klabel: KLabel
   def klist: KList
+
   override def equals(that: Any): Boolean =
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
@@ -74,13 +81,15 @@ trait KApply extends KItem {
       case _ => false
     })
 
-  override def hashCode = klabel.hashCode * 17 + klist.hashCode
+  override def computeHashCode = klabel.hashCode * 17 + klist.hashCode
 }
 
 trait KSequence extends KCollection with K
 
 trait KVariable extends KItem with KLabel {
   def name: String
+
+  def computeHashCode = name.hashCode
 }
 
 trait KRewrite extends K {
@@ -94,7 +103,7 @@ trait KRewrite extends K {
       case _ => false
     })
 
-  override def hashCode = left.hashCode * 19 + right.hashCode
+  def computeHashCode = left.hashCode * 19 + right.hashCode
 }
 
 trait InjectedKLabel extends KItem {
@@ -106,4 +115,6 @@ trait InjectedKLabel extends KItem {
       case that: InjectedKLabel => this.klabel == that.klabel
       case _ => false
     })
+
+  def computeHashCode = klabel.hashCode
 }

@@ -326,4 +326,12 @@ public abstract class ASTNode implements Serializable {
     public abstract ASTNode shallowCopy();
 
     protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
+
+    public int computeHashCode() {
+        throw new AssertionError("Subclasses should implement their own hashCode so this code should not be reachable");
+    }
+
+    public int cachedHashCode() {
+        throw new AssertionError("Subclasses should implement their own hashCode so this code should not be reachable");
+    }
 }
