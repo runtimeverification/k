@@ -55,7 +55,7 @@ public class TstTinyOnKORE_IT {
 
             System.out.println("result = " + result.toString());
 
-            Assert.assertEquals("<top>(<k>(#KSequence()),<state>(_Map_(Tuple2(s:Id,55),Tuple2(n:Id,-1))))", result.toString());
+            Assert.assertEquals("<top>(<k>(#KSequence()),<state>(_Map_(Tuple2(n:Id,-1),Tuple2(s:Id,55))))", result.toString());
         } finally {
             kem.print();
         }

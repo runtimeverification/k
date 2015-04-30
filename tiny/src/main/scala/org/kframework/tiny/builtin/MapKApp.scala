@@ -10,7 +10,7 @@ import scala.collection.mutable.Builder
 
 final class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: Att = Att())
   extends KApp with PlainNormalization {
-  val children: immutable.Iterable[K] = theMap map { case (k, v) => Tuple2Label(k, v) }
+  val children: immutable.Iterable[K] = (theMap map { case (k, v) => Tuple2Label(k, v) } toList).sortBy(_.toString)
   override def matcher(right: K): Matcher = KMapAppMatcher(this, right)
 
   override def computeHashCode = klabel.hashCode * 19 + theMap.hashCode
@@ -78,8 +78,8 @@ case class KMapAppMatcher(left: KMapApp, right: K) extends Matcher {
 
   override def normalizeInner(implicit theory: Theory): K = (left.normalize, right.normalize) match {
     case (left: KMapApp, right: KMapApp) =>
-      val leftGroundKeys = left.theMap.keys filter { _.isGround } toSet
-      val rightGroundKeys = right.theMap.keys filter { _.isGround } toSet
+      val leftGroundKeys = left.theMap.keys filter {_.isGround} toSet
+      val rightGroundKeys = right.theMap.keys filter {_.isGround} toSet
 
       if ((leftGroundKeys &~ rightGroundKeys) != Set())
         False
