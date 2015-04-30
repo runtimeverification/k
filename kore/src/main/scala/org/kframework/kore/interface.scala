@@ -13,6 +13,12 @@ trait K extends Serializable {
   override def toString = Unparse.apply(this)
   def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
   def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
+
+  lazy val cachedHashCode = computeHashCode
+
+  override def hashCode = cachedHashCode
+
+  def computeHashCode: Int
 }
 
 trait KItem extends K
@@ -33,6 +39,7 @@ trait KToken extends KItem {
     case other: KToken => sort == other.sort && s == other.s
     case _ => false
   }
+  def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
 trait Sort {
@@ -41,11 +48,21 @@ trait Sort {
     case other: Sort => name == other.name
     case _ => false
   }
+  override def hashCode = name.hashCode
 }
 
 trait KCollection {
   def items: java.util.List[K]
   def stream: java.util.stream.Stream[K] = items.stream()
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KCollection => this.items == that.items
+      case _ => false
+    })
+
+  def computeHashCode = items.hashCode
 }
 
 trait KList extends KCollection {
@@ -55,19 +72,49 @@ trait KList extends KCollection {
 trait KApply extends KItem {
   def klabel: KLabel
   def klist: KList
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KApply =>
+        that.klabel == klabel && this.klist == that.klist
+      case _ => false
+    })
+
+  override def computeHashCode = klabel.hashCode * 17 + klist.hashCode
 }
 
 trait KSequence extends KCollection with K
 
 trait KVariable extends KItem with KLabel {
   def name: String
+
+  def computeHashCode = name.hashCode
 }
 
 trait KRewrite extends K {
   def left: K
   def right: K
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KRewrite => this.left == that.left && this.right == that.right
+      case _ => false
+    })
+
+  def computeHashCode = left.hashCode * 19 + right.hashCode
 }
 
 trait InjectedKLabel extends KItem {
   def klabel: KLabel
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: InjectedKLabel => this.klabel == that.klabel
+      case _ => false
+    })
+
+  def computeHashCode = klabel.hashCode
 }

@@ -1,11 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
@@ -13,6 +8,12 @@ import org.kframework.mpfr.BigFloat;
 import org.kframework.mpfr.BinaryMathContext;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.Element;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FloatBuiltin extends Token {
 
@@ -166,7 +167,13 @@ public class FloatBuiltin extends Token {
      * Return a {@link String} representing the (uninterpreted) value of the numerical
      * float corresponding to the value of the float token.
      */
+
     public static String printKFloat(BigFloat value) {
+        return printKFloat(value, value::toString);
+    }
+
+
+    public static String printKFloat(BigFloat value, Supplier<String> toString) {
         if (value.isInfinite()) {
             if (value.sign()) {
                 return "-Infinity";
@@ -176,7 +183,7 @@ public class FloatBuiltin extends Token {
         } else if (value.isNaN()) {
             return "NaN";
         } else {
-            return value.toString();
+            return toString.get();
         }
     }
 

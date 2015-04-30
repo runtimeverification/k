@@ -80,8 +80,7 @@ public class KompileFrontEnd extends FrontEnd {
             Kompile kompile = new Kompile(files, kem);
             //TODO(dwightguth): handle start symbols
             CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), "K");
-            //TODO(dwightguth): store definition for use by krun
-            System.out.println(def.getCompiledExecutionModule());
+            loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         } else {
 
             context.kompileOptions = options;

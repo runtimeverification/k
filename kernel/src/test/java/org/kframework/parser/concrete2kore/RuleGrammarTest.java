@@ -39,7 +39,7 @@ public class RuleGrammarTest {
     public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files);
+        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
@@ -300,5 +300,15 @@ public class RuleGrammarTest {
         Automaton a = new RegExp("[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]").toAutomaton();
         RunAutomaton ra = new RunAutomaton(a, false);
         System.out.println(ra.run("\"n\\\\\\\"\""));
+    }
+
+    // test unicode chars
+    @Test
+    public void test18() {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= \"\u2022\" " +
+                "endmodule";
+        parseRule("\u2022 => .K", def, 0, false);
     }
 }

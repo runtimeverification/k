@@ -1,6 +1,9 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.ktest.CmdArgs;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorOptions;
 import org.kframework.krun.ColorSetting;
@@ -16,10 +19,6 @@ import org.kframework.utils.options.OnOffConverter;
 import org.kframework.utils.options.PositiveInteger;
 import org.kframework.utils.options.StringListConverter;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.ParametersDelegate;
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -292,7 +291,7 @@ public class KTestOptions {
         return color.color();
     }
 
-    public Color getTerminalColor() {
+    public String getTerminalColor() {
         return color.terminalColor();
     }
 

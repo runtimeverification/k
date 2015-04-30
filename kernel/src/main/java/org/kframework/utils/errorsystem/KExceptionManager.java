@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequestScoped
 public class KExceptionManager {
-    private final List<KException> exceptions = new ArrayList<KException>();
+    private final List<KException> exceptions = Collections.synchronizedList(new ArrayList<>());
 
     private final GlobalOptions options;
 
@@ -225,31 +225,27 @@ public class KExceptionManager {
     private void registerInternal(KException exception) {
         if (!options.warnings.includesExceptionType(exception.type))
             return;
-        synchronized (exceptions) {
-            exceptions.add(exception);
-            if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
-                throw new KEMException(exception);
-            }
+        exceptions.add(exception);
+        if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
+            throw new KEMException(exception);
         }
     }
 
     public void print() {
-        synchronized (exceptions) {
-            Collections.sort(exceptions, new Comparator<KException>() {
-                @Override
-                public int compare(KException arg0, KException arg1) {
-                    return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
-                }
-            });
-            KException last = null;
-            for (KException e : exceptions) {
-                if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
-                    continue;
-                }
-                printStackTrace(e);
-                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
-                last = e;
+        Collections.sort(exceptions, new Comparator<KException>() {
+            @Override
+            public int compare(KException arg0, KException arg1) {
+                return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
             }
+        });
+        KException last = null;
+        for (KException e : exceptions) {
+            if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
+                continue;
+            }
+            printStackTrace(e);
+            System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+            last = e;
         }
     }
 

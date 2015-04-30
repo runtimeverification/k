@@ -108,9 +108,4 @@ public class ResolveSemanticCasts {
             return s;
         }
     }
-
-
-    public Module resolve(Module m) {
-        return ModuleTransformer.fromSentenceTransformer(this::resolve).apply(m);
-    }
 }

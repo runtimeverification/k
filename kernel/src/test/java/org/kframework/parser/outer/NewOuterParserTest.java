@@ -8,7 +8,9 @@ import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.kore.K;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
@@ -30,7 +32,7 @@ public class NewOuterParserTest {
         String definitionString = FileUtils.readFileToString(definitionFile);
         Source source = Source.apply(definitionFile.getPath());
 
-        ParserUtils parser = new ParserUtils(FileUtil.testFileUtil());
+        ParserUtils parser = new ParserUtils(FileUtil.testFileUtil(), new KExceptionManager(new GlobalOptions()));
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, definitionString, source,

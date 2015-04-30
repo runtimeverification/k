@@ -24,11 +24,15 @@ object ModuleTransformer {
         m
     })
 
-  def apply(f: Module => Module): ModuleTransformer = new ModuleTransformer(f)
+  def apply(f: Module => Module): ModuleTransformer = f match {
+    case f: ModuleTransformer => f
+    case _ => new ModuleTransformer(f)
+  }
 }
 
 /**
  * Transform all modules, transforming each module after its imports.
+ * The f function take a module with all the imported modules already transformed, and changes the current module.
  */
 class ModuleTransformer(f: Module => Module) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
@@ -45,7 +49,10 @@ class ModuleTransformer(f: Module => Module) extends (Module => Module) {
 }
 
 object DefinitionTransformer {
+  def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence]): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f))
   def from(f: java.util.function.UnaryOperator[Module]): DefinitionTransformer = DefinitionTransformer(f(_))
+  def apply(f: ModuleTransformer): DefinitionTransformer = new DefinitionTransformer(f)
   def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(ModuleTransformer(f))
 }
 

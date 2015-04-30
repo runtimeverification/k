@@ -12,7 +12,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
  * Apply the entire configuration concretization process.
  *
  * The input may freely use various configuration abstractions
- * and Full K flexibilites.
+ * and Full K flexibilites. See {@link IncompleteCellUtils} for a
+ * description of the expected term structure.
  * The output will represent cells in
  * strict accordance with their declared fixed-arity productions.
  *
@@ -46,9 +47,5 @@ public class ConcretizeCells {
                 closeCells.close(
                  addParentCells.concretize(
                   addImplicitCells.addImplicitCells(s))));
-    }
-
-    public Module concretize(Module m) {
-        return ModuleTransformer.fromSentenceTransformer(this::concretize).apply(m);
     }
 }

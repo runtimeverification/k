@@ -190,8 +190,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // Comments get processed in an odd order that may cause them to be
 // out of order.  Thus we sort module items by their *end* position so
@@ -223,10 +226,23 @@ public class Outer {
     try {
       return parser.Start();
     } catch (ParseException e) {
-      // TODO: report location
-      throw KExceptionManager.outerParserError(e.getMessage(), e, source,
-      	new Location(e.currentToken.beginLine, e.currentToken.beginColumn, e.currentToken.endLine, e.currentToken.endColumn));
+      throw KExceptionManager.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+            + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+            // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+              .map(new Function<int[], String>() {
+                public String apply(int[] is) {
+                  StringBuilder sb = new StringBuilder();
+                  for (int i : is) {
+                    sb.append(e.tokenImage[i]);
+                    sb.append(" ");
+                  }
+                  sb.deleteCharAt(sb.length() - 1);
+                  return sb.toString();
+                }
+              }).collect(Collectors.toList()).toString(), e, source,
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
     } catch (TokenMgrError e) {
+      // TODO: report location
       throw KExceptionManager.outerParserError(e.getMessage(), e, source, null);
     }
   }
@@ -414,7 +430,7 @@ PARSER_END(Outer)
 <DEFAULT> SPECIAL_TOKEN :
 {
   <COMMENT: ( "//" (~["\n", "\r"])* ("\n" | "\r")
-            | "/*" (~["*"] | "*" ~["/"])* "*/")> { parser.comment(matchedToken); }
+            | "/*" (~["*"] | ("*")+ ~["/","*"])* ("*")+ "/")> { parser.comment(matchedToken); }
 }
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }

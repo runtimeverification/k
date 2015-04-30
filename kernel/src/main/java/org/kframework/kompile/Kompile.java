@@ -35,8 +35,10 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
+import scala.compat.java8.JFunction;
 import scala.util.Either;
 
 import java.io.File;
@@ -47,11 +49,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
+import static scala.compat.java8.JFunction.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -62,7 +66,6 @@ public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
-    private static final String mainModule = "K";
     private static final String startSymbol = "RuleContent";
 
     private final FileUtil files;
@@ -74,7 +77,7 @@ public class Kompile {
     public Kompile(FileUtil files, KExceptionManager kem, boolean cacheParses) {
         this.files = files;
         this.kem = kem;
-        this.parser = new ParserUtils(files);
+        this.parser = new ParserUtils(files, kem);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);
     }
@@ -86,44 +89,54 @@ public class Kompile {
 
     /**
      * Executes the Kompile tool. This tool accesses a
+     *
      * @param definitionFile
      * @param mainModuleName
-     * @param mainProgramsModule
+     * @param mainProgramsModuleName
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModule, String programStartSymbol) {
-        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModule, true);
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, String programStartSymbol) {
+        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
 
-        Module afterHeatingCooling = StrictToHeatingCooling.apply(parsedDef.mainModule());
+        DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
+        DefinitionTransformer resolveSemanticCasts =
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve);
 
-        Module afterResolvingCasts = new ResolveSemanticCasts().resolve(afterHeatingCooling);
+        Function1<Definition, Definition> pipeline =
+                heatingCooling
+                        .andThen(resolveSemanticCasts)
+                        .andThen(func(this::concretizeTransformer))
+                        .andThen(func(this::addSemanticsModule))
+                        .andThen(func(this::addProgramModule));
 
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(afterResolvingCasts);
-        LabelInfo labelInfo = new LabelInfoFromModule(afterResolvingCasts);
-        SortInfo sortInfo = SortInfo.fromModule(afterResolvingCasts);
+        Definition kompiledDefinition = pipeline.apply(parsedDef);
 
-        Module concretized = new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(afterResolvingCasts);
-
-        Module kseqModule = parsedDef.getModule("KSEQ").get();
-
-        Module withKSeq = Module("EXECUTION",
-                Set(concretized, kseqModule),
-                Collections.<Sentence>Set(), Att());
-
-        final BiFunction<String, Source, K> pp = getProgramParser(parsedDef.getModule(mainProgramsModule).get(), programStartSymbol);
-
-        System.out.println(concretized);
-
-        return new CompiledDefinition(withKSeq, parsedDef, pp);
+        return new CompiledDefinition(parsedDef, kompiledDefinition, programStartSymbol);
     }
 
-    public BiFunction<String, Source, K> getProgramParser(Module moduleForPrograms, String programStartSymbol) {
-        ParseInModule parseInModule = new ParseInModule(gen.getProgramsGrammar(moduleForPrograms));
+    public Definition addSemanticsModule(Definition d) {
+        Module kseqModule = d.getModule("KSEQ").get();
+        Module withKSeq = Module("SEMANTICS", Set(d.mainModule(), kseqModule), Collections.<Sentence>Set(), Att());
+        java.util.Set<Module> allModules = mutable(d.modules());
+        allModules.add(withKSeq);
+        return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+    }
 
-        return (s, source) -> {
-            return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, programStartSymbol, source)._1().right().get()));
-        };
+    public Definition addProgramModule(Definition d) {
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
+        java.util.Set<Module> allModules = mutable(d.modules());
+        allModules.add(programsModule);
+        return Definition(d.mainModule(), programsModule, immutable(allModules));
+    }
+
+    private Definition concretizeTransformer(Definition input) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
+        return DefinitionTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize
+        ).apply(input);
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
@@ -222,7 +235,7 @@ public class Kompile {
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble)b)
+                .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
         Module ruleParserModule = gen.getRuleGrammar(module);

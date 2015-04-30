@@ -128,7 +128,11 @@ public class BuiltinStringOperations {
     }
 
     public static StringToken float2string(FloatToken term, TermContext context) {
-        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue()));
+        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue(), term.bigFloatValue()::toString));
+    }
+
+    public static StringToken floatFormat(FloatToken term, StringToken format, TermContext context) {
+        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue(), () -> term.bigFloatValue().toString(format.stringValue())));
     }
 
     public static StringToken int2string(IntToken term, TermContext context) {

@@ -2,18 +2,16 @@
 package org.kframework.ktest.Test;
 
 import com.google.common.collect.Iterables;
-
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
+import org.kframework.ktest.Proc;
+import org.kframework.ktest.ReportGen;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.file.FileUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-
-import java.awt.*;
-import java.io.*;
+import java.io.IOException;
 import java.util.List;
 
 public class TestSuite {
@@ -55,7 +53,7 @@ public class TestSuite {
             cpuTimeSpent += p.getTimeDelta();
         }
 
-        String colorCode = ColorUtil.RgbToAnsi(success ? Color.GREEN : Color.RED,
+        String colorCode = ColorUtil.RgbToAnsi(success ? "green" : "red",
                 options.getColorSetting(), options.getTerminalColor());
         String msg = success ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);

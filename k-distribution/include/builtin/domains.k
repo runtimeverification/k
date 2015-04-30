@@ -11,7 +11,7 @@ module MAP
    the two Maps are assumed disjoint) */
   syntax Map ::= Map Map                        [left, function, hook(Map:__), klabel('_Map_), assoc, comm, unit(.Map)]
   /*@  Construct an empty Map */
-  syntax Map ::= ".Map"                         [function, hook(Map:.Map)]
+  syntax Map ::= ".Map"                         [function, hook(Map:.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(Map:.Map)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
@@ -67,7 +67,7 @@ module SET
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
   syntax Set ::= Set Set                  [left, function, hook(Set:__), klabel('_Set_), assoc, comm, unit(.Set)]
   /*@ Construct an empty Set */
-  syntax Set ::= ".Set"                   [function, hook(Set:.Set)]
+  syntax Set ::= ".Set"                   [function, hook(Set:.Set), latex(\dotCt{Set})]
                //| "."
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
@@ -136,7 +136,7 @@ module LIST
    the append "@" operation in many functional programming languages. */
   syntax List ::= List List               [left, function, hook(List:__), klabel('_List_), smtlib(smt_seq_concat), assoc, unit(.List)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(List:.List), smtlib(smt_seq_nil)]
+  syntax List ::= ".List"                 [function, hook(List:.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)             [function, hook(List:ListItem), smtlib(smt_seq_elem)]
@@ -370,37 +370,38 @@ module STRING
   syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 
   syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
-  syntax String ::= "chrChar" "(" Int ")"   [function, klabel(chrChar), hook(#STRING:chrChar)]
-  syntax Int ::= "ordChar" "(" String ")"  [function, klabel(ordChar), hook(#STRING:ordChar)]
+  syntax String ::= "chrChar" "(" Int ")"      [function, klabel(chrChar), hook(#STRING:chrChar)]
+  syntax Int ::= "ordChar" "(" String ")"      [function, klabel(ordChar), hook(#STRING:ordChar)]
 
   syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
-  syntax Int ::= "findString" "(" String "," String "," Int ")" [function, klabel(findString), hook(#STRING:findString)]
-  syntax Int ::= "rfindString" "(" String "," String "," Int ")" [function, klabel(rfindString), hook(#STRING:rfindString)]
-  syntax Int ::= "findChar" "(" String "," String "," Int ")" [function, klabel(findChar), hook(#STRING:findChar)]
-  syntax Int ::= "rfindChar" "(" String "," String "," Int ")" [function, klabel(rfindChar), hook(#STRING:rfindChar)]
+  syntax Int ::= "findString" "(" String "," String "," Int ")"   [function, klabel(findString), hook(#STRING:findString)]
+  syntax Int ::= "rfindString" "(" String "," String "," Int ")"  [function, klabel(rfindString), hook(#STRING:rfindString)]
+  syntax Int ::= "findChar" "(" String "," String "," Int ")"     [function, klabel(findChar), hook(#STRING:findChar)]
+  syntax Int ::= "rfindChar" "(" String "," String "," Int ")"    [function, klabel(rfindChar), hook(#STRING:rfindChar)]
 
-  syntax String ::= "Float2String" "(" Float ")" [function, klabel(Float2String), hook(#CONVERSION:float2string)]
-  syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2float)]
-  syntax Int ::= "String2Int" "(" String ")"     [function, klabel(String2Int), hook(#CONVERSION:string2int)]
-  syntax String ::= "Int2String" "(" Int ")"     [function, klabel(Int2String), hook(#CONVERSION:int2string)]
-  syntax String ::= "Base2String" "(" Int "," Int ")" [function, klabel(Base2String), hook(#CONVERSION:base2string)]
-  syntax Int ::= "String2Base" "(" String "," Int ")" [function, klabel(String2Base), hook(#CONVERSION:string2base)]
+  syntax String ::= "Float2String" "(" Float ")"            [function, klabel(Float2String), hook(#CONVERSION:float2string)]
+  syntax String ::= "Float2String" "(" Float "," String ")" [function, klabel(FloatFormat), hook(#CONVERSION:floatFormat)]
+  syntax Float  ::= "String2Float" "(" String ")"           [function, klabel(String2Float), hook(#CONVERSION:string2float)]
+  syntax Int    ::= "String2Int"   "(" String ")"           [function, klabel(String2Int), hook(#CONVERSION:string2int)]
+  syntax String ::= "Int2String"   "(" Int ")"              [function, klabel(Int2String), hook(#CONVERSION:int2string)]
+  syntax String ::= "Base2String"  "(" Int "," Int ")"      [function, klabel(Base2String), hook(#CONVERSION:base2string)]
+  syntax Int    ::= "String2Base"  "(" String "," Int ")"   [function, klabel(String2Base), hook(#CONVERSION:string2base)]
 
 
-  syntax String ::= "replaceAll" "(" String "," String "," String ")" [function, hook(#STRING:replaceAll)]
+  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(#STRING:replaceAll)]
   syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(#STRING:replace)]
-  syntax String ::= "replaceFirst" "(" String "," String "," String ")" [function, hook(#STRING:replaceFirst)]
-  syntax Int ::= "countAllOccurences" "(" String "," String ")" [function, hook(#STRING:countAllOccurences)]
+  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, hook(#STRING:replaceFirst)]
+  syntax Int ::= "countAllOccurences" "(" String "," String ")"            [function, hook(#STRING:countAllOccurences)]
 
   syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
   rule S1:String =/=String S2:String => notBool `S1 ==String S2`
 
-  syntax Bool ::= String "<String" String [function, hook(#STRING:_<String_)]
+  syntax Bool ::= String  "<String" String [function, hook(#STRING:_<String_)]
                 | String "<=String" String [function, hook(#STRING:_<=String_)]
-                | String ">String" String [function, hook(#STRING:_>String_)]
+                | String  ">String" String [function, hook(#STRING:_>String_)]
                 | String ">=String" String [function, hook(#STRING:_>=String_)]
 
-  syntax String ::= categoryChar(String) [function, hook(#STRING:categoryChar)]
+  syntax String ::= categoryChar(String)       [function, hook(#STRING:categoryChar)]
                   | directionalityChar(String) [function, hook(#STRING:directionalityChar)]
 
   rule S1:String <=String S2:String => notBool `S2 <String S1`
