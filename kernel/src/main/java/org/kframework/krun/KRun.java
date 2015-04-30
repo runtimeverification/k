@@ -31,25 +31,20 @@ public class KRun implements Transformation<Void, Void> {
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
-        try {
-            String pgmFileName = options.configurationCreation.pgm();
-            if (!options.configurationCreation.term()) {
-                KExceptionManager.criticalError("Unsupported options: term=false");
-            }
-
-            String pgm = Files.toString(new File(pgmFileName), Charset.defaultCharset());
-            K program = compiledDef.getProgramParser().apply(pgm, Source.apply(pgm));
-
-            Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
-
-            K result = rewriter.execute(program);
-
-            System.err.println("result:" + result);
-            return 0;
-        } catch (IOException e) {
-            KExceptionManager.criticalError(e.getMessage(), e);
-            return 1;
+        String pgmFileName = options.configurationCreation.pgm();
+        if (!options.configurationCreation.term()) {
+            KExceptionManager.criticalError("Unsupported options: term=false");
         }
+
+        String pgm = files.loadFromWorkingDirectory(pgmFileName);
+        K program = compiledDef.getProgramParser().apply(pgm, Source.apply(pgm));
+
+        Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
+
+        K result = rewriter.execute(program);
+
+        System.err.println("result:" + result);
+        return 0;
     }
 
     @Override
