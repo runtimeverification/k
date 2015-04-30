@@ -414,7 +414,7 @@ PARSER_END(Outer)
 <DEFAULT> SPECIAL_TOKEN :
 {
   <COMMENT: ( "//" (~["\n", "\r"])* ("\n" | "\r")
-            | "/*" (~["*"] | "*" ~["/"])* "*/")> { parser.comment(matchedToken); }
+            | "/*" (~["*"] | ("*")+ ~["/","*"])* ("*")+ "/")> { parser.comment(matchedToken); }
 }
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
