@@ -44,7 +44,7 @@ public class KRun implements Transformation<Void, Void> {
 
             System.err.println("result:" + result);
             return 0;
-        } catch (Exception e) {
+        } catch (IOException e) {
             KExceptionManager.criticalError(e.getMessage(), e);
             return 1;
         }
