@@ -24,7 +24,7 @@ final class KMapApp(val klabel: KMapAppLabel, val theMap: Map[K, K], val att: At
       })
 }
 
-object Tuple2Label extends RegularKAppLabel("Tuple2", Att())
+object Tuple2Label extends RegularKAppLabel("_|->_", Att())
 
 case class KMapAppLabel(name: String, att: Att = Att()) extends Label {
   def constructFromFlattened(l: Map[K, K], att: Att): KMapApp = new KMapApp(this, l, att)
