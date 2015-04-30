@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +107,7 @@ public class SortCells {
     private class VarInfo {
         KVariable var;
         KLabel parentCell;
-        Set<Sort> remainingCells;
+        LinkedHashSet<Sort> remainingCells;
         Map<Sort, K> split;
 
         void addOccurances(KLabel cell, KVariable var, List<K> items) {
@@ -117,7 +119,7 @@ public class SortCells {
                         + parentCell + " and " + cell);
             }
             if (remainingCells == null) {
-                remainingCells = new HashSet<>(cfg.getChildren(cell));
+                remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
             }
             if (var.att().contains("sort")) {
                 Sort sort = Sort(var.att().<String>get("sort").get());
