@@ -38,7 +38,7 @@ public class KRun implements Transformation<Void, Void> {
             String pgm = Files.toString(new File(pgmFileName), Charset.defaultCharset());
             K program = compiledDef.getProgramParser().apply(pgm, Source.apply(pgm));
 
-            Rewriter rewriter = new Rewriter(compiledDef.executionModule());
+            org.kframework.Rewriter rewriter = new Rewriter(compiledDef.executionModule());
 
             K result = rewriter.execute(program);
 
