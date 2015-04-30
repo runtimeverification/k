@@ -1,11 +1,11 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.kil.loader.Context;
@@ -19,11 +19,10 @@ import org.kframework.utils.options.OnOffConverter;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
-import com.beust.jcommander.DynamicParameter;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequestScoped
 public final class KRunOptions {
@@ -274,5 +273,8 @@ public final class KRunOptions {
 
         @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
         public File coverage = null;
+
+        @Parameter(names="--kore", description="Compile with the new pipeline.")
+        public boolean kore = false;
     }
 }

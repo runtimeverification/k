@@ -8,13 +8,14 @@ import org.kframework.kore.K;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 
+import java.io.Serializable;
 import java.util.function.BiFunction;
 
 /**
  * A class representing a compiled definition. It has everything needed for executing and parsing programs.
  */
 
-public class CompiledDefinition {
+public class CompiledDefinition implements Serializable {
     private final Definition parsedDefinition;
     private final Definition kompiledDefinition;
     private final BiFunction<String, Source, K> programParser;
@@ -62,7 +63,7 @@ public class CompiledDefinition {
     public BiFunction<String, Source, K> getParser(Module module, String programStartSymbol) {
         ParseInModule parseInModule = new ParseInModule(module);
 
-        return (s, source) -> {
+        return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             return TreeNodesToKORE.down(TreeNodesToKORE.apply(parseInModule.parseString(s, programStartSymbol, source)._1().right().get()));
         };
     }

@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 
 import org.kframework.kil.Attributes;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -49,8 +50,12 @@ public class KRunFrontEnd extends FrontEnd {
 
 
     private final TransformationProvider<Transformation<Void, Void>> toolProvider;
+    private final KExceptionManager kem;
+    private final BinaryLoader loader;
+    private final FileUtil files;
     private final DefinitionScope scope;
     private final Provider<File> kompiledDir;
+    private final KRunOptions kRunOptions;
 
     @Inject
     KRunFrontEnd(
@@ -63,11 +68,16 @@ public class KRunFrontEnd extends FrontEnd {
             JarInfo jarInfo,
             @Main FileUtil files,
             DefinitionScope scope,
-            @Main(KompiledDir.class) Provider<File> kompiledDir) {
+            @Main(KompiledDir.class) Provider<File> kompiledDir,
+            KRunOptions kRunOptions) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.toolProvider = toolProvider;
+        this.kem = kem;
+        this.loader = loader;
+        this.files = files;
         this.scope = scope;
         this.kompiledDir = kompiledDir;
+        this.kRunOptions = kRunOptions;
     }
 
     /**
@@ -78,14 +88,18 @@ public class KRunFrontEnd extends FrontEnd {
         try {
             scope.enter(kompiledDir.get());
             try {
-                Transformation<Void, Void> tool = toolProvider.get();
-                Attributes a = new Attributes();
-                tool.run(null, a);
-                Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
-                if (exitCode == null) {
-                    exitCode = 0;
+                if (kRunOptions.experimental.kore) {
+                    return new KRun(kem, files).run(loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin")), kRunOptions);
+                } else {
+                    Transformation<Void, Void> tool = toolProvider.get();
+                    Attributes a = new Attributes();
+                    tool.run(null, a);
+                    Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
+                    if (exitCode == null) {
+                        exitCode = 0;
+                    }
+                    return exitCode;
                 }
-                return exitCode;
             } finally {
                 scope.exit();
             }
