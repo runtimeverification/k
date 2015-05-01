@@ -36,7 +36,7 @@ public class KRun implements Transformation<Void, Void> {
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
         String pgmFileName = options.configurationCreation.pgm();
         if (!options.configurationCreation.term()) {
-            KExceptionManager.criticalError("Unsupported options: term=false");
+            throw KExceptionManager.criticalError("Unsupported options: term=false");
         }
 
         String pgm = files.loadFromWorkingDirectory(pgmFileName);
