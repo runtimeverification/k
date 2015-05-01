@@ -7,8 +7,10 @@ import org.kframework.attributes.Source;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.parser.KOREToTreeNodes;
+import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
+import org.kframework.unparser.AddBrackets;
+import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.definition.Module;
@@ -49,7 +51,9 @@ public class KRun implements Transformation<Void, Void> {
     }
 
     private String unparseTerm(K input, Module test) {
-        return KOREToTreeNodes.toString(KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test));
+        return KOREToTreeNodes.toString(
+                new AddBrackets(test).addBrackets((ProductionReference)
+                        KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
     }
 
     @Override
