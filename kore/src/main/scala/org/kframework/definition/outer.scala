@@ -61,6 +61,12 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
+  lazy val bracketProductionsFor: Map[Sort, Set[Production]] =
+    productions
+      .collect({ case p if p.att.contains("bracket") => p})
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps)}
+
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)

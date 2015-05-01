@@ -70,6 +70,10 @@ public class KExceptionManager {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
     }
 
+    public static KEMException criticalError(String message, org.kframework.parser.Term node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.location().orElse(null), node.source().orElse(null));
+    }
+
     public static KEMException criticalError(String message, Throwable e) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, null, null);
     }
