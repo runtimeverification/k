@@ -1,19 +1,10 @@
-package org.kframework.parser
+package org.kframework.unparser
 
-import java.util
-
-import org.kframework.attributes.{Source, Location}
+import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
-import org.kframework.definition.Module
-import org.kframework.definition.NonTerminal
-import org.kframework.definition.Terminal
-import org.kframework.kore
-import org.kframework.kore.KApply
-import org.kframework.kore.KORE.KLabel
-import org.kframework.kore.KToken
-import org.kframework.kore.KVariable
-import org.kframework.kore._
-import org.kframework.kore.KORE._
+import org.kframework.definition.{Module, NonTerminal, Terminal}
+import org.kframework.kore.{KApply, KToken, KVariable, _}
+import org.kframework.parser.{Constant, Term, TermCons}
 import org.pcollections.ConsPStack
 
 import scala.collection.JavaConverters._
