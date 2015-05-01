@@ -432,8 +432,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     orientationSubstitution = orientationSubstitution
                             .plus(entry.getKey(), replacement.get())
                             .plus(replacement.get(), entry.getKey());
-                } else {
-                    return null;
                 }
             }
         }

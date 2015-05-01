@@ -140,9 +140,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
         constraint = constraint.orientSubstitution(rightOnlyVariables);
-        if (constraint == null) {
-            return null;
-        }
 
         ConjunctiveFormula leftHandSide = data.constraint;
         ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
@@ -185,11 +182,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         List<ConjunctiveFormula> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
-            ConjunctiveFormula orientedCandidate = candidate
-                    .orientSubstitution(constrainedTerm.variableSet());
-            if (orientedCandidate != null) {
-                candidate = orientedCandidate;
-            }
+            candidate = candidate.orientSubstitution(constrainedTerm.variableSet());
 
             ConjunctiveFormula solution = candidate.addAndSimplify(constraint());
             if (solution.isFalse()) {
