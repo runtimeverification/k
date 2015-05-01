@@ -19,7 +19,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellProductions: Map[Sort,Production] =
     m.productions.filter(_.att.contains("cell")).map(p => (p.sort, p)).toMap
   private val cellBagProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("cellbag")).map(p => (p.sort, p)).toMap
+    m.productions.filter(_.att.contains("assoc")).map(p => (p.sort, p)).toMap
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
   private val cellSorts: Set[Sort] = cellProductions.keySet
   private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
@@ -70,7 +70,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def isParentCell(k: Sort): Boolean = edges exists { case (c, _) => c == k }
 
   override def getMultiplicity(k: Sort): Multiplicity =
-    if (cellBagSubsorts.values.flatMap(a => a).toSet.contains(k))
+    if (cellBagSubsorts.values.flatten.toSet.contains(k))
       Multiplicity.STAR
     else if (cellProductions(k).att.contains("unit"))
       Multiplicity.OPTIONAL

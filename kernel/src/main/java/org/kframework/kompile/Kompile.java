@@ -97,7 +97,7 @@ public class Kompile {
 
         DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
         DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve);
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
 
         Function1<Definition, Definition> pipeline =
                 heatingCooling
@@ -131,7 +131,8 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize,
+                "concretizing configuration"
         ).apply(input);
     }
 
@@ -157,7 +158,7 @@ public class Kompile {
                     return Module(mod.name(), (Set<Module>) mod.imports().$plus(definition.getModule("DEFAULT-CONFIGURATION").get()), mod.localSentences(), mod.att());
                 }
                 return mod;
-            }).apply(definition);
+            }, "adding default configuration").apply(definition);
         } else {
             definitionWithConfigBubble = definition;
         }
@@ -175,10 +176,10 @@ public class Kompile {
         }
 
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
-        Definition defWithConfig = DefinitionTransformer.from(this::resolveConfig).apply(definitionWithConfigBubble);
+        Definition defWithConfig = DefinitionTransformer.from(this::resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig);
-        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles).apply(defWithConfig);
+        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
         loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
 

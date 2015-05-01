@@ -158,7 +158,7 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att());
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
-                    Att().add("assoc").add("unit", "." + bagSort.name()).add("cellbag"));
+                    Att().add("assoc").add("unit", "." + bagSort.name()));
 
             return Tuple2.apply(Set(initializer, cellProduction, bagSubsort, bagUnit, bag), bagSort);
         } else if (multiplicity == Multiplicity.OPTIONAL) {

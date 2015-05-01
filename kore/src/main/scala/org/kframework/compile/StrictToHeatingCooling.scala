@@ -52,6 +52,6 @@ object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
   }
 
   Module(m.name, m.imports, m.localSentences ++ heatingCoolingRules, m.att)
-}) {
+}, "resolving strict attribute") {
   def self = this
 }

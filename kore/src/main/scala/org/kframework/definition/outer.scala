@@ -81,8 +81,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   //  }
 
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {p => {
-    val union = p.map(_.att.att).reduce(_ ++ _)
-    val attMap = union.collect({case t@KApply(KLabel(key), _) => t}).groupBy(_.klabel).map { case (l, as) => (l, as) }
+    val union = p.flatMap(_.att.att)
+    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel).map { case (l, as) => (l, as) }
     Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
   }}
 
@@ -153,8 +153,6 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 trait Sentence {
   // marker
   val att: Att
-  def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
-  def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
 }
 
 // deprecated
