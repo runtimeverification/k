@@ -26,6 +26,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParseCache.ParsedSentence;
+import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
@@ -203,13 +204,14 @@ public class Kompile {
         Module configParserModule = gen.getConfigGrammar(module);
 
         ParseCache cache = loadCache(configParserModule);
+        ParseInModule parser = cache.getParser();
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply configContents = (KApply) contents;
                     List<K> items = configContents.klist().items();
@@ -238,13 +240,14 @@ public class Kompile {
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
+        ParseInModule parser = cache.getParser();
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply ruleContents = (KApply) contents;
                     List<org.kframework.kore.K> items = ruleContents.klist().items();
@@ -284,21 +287,21 @@ public class Kompile {
         return _this.sortDeclarations().equals(that.sortDeclarations());
     }
 
-    private Stream<? extends K> performParse(ParseCache parser, Bubble b) {
+    private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Bubble b) {
         int startLine = b.att().<Integer>get("contentStartLine").get();
         int startColumn = b.att().<Integer>get("contentStartColumn").get();
         String source = b.att().<String>get("Source").get();
         Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> result;
-        if (parser.getCache().containsKey(b.contents())) {
-            ParsedSentence parse = parser.getCache().get(b.contents());
+        if (cache.containsKey(b.contents())) {
+            ParsedSentence parse = cache.get(b.contents());
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.getParser().parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
+            result = parser.parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
                 K k = TreeNodesToKORE.down(TreeNodesToKORE.apply(result._1().right().get()));
-                parser.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+                cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);
             } else {
                 errors.addAll(result._1().left().get());
