@@ -46,7 +46,7 @@ public class KRun implements Transformation<Void, Void> {
 
         K result = rewriter.execute(program);
 
-        System.err.println("result:" + unparseTerm(result, compiledDef.kompiledDefinition.mainSyntaxModule()));
+        System.err.println(unparseTerm(result, compiledDef.kompiledDefinition.mainSyntaxModule()));
         return 0;
     }
 
