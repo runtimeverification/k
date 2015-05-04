@@ -114,7 +114,7 @@ public class Main {
                     throw e;
                 } else {
                     KEMException ex = (KEMException) m.getCause();
-                    ex.register(kem.getExceptions());
+                    kem.registerThrown(ex);
                 }
             }
             kem.print();

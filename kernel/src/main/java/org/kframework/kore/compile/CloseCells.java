@@ -171,8 +171,13 @@ public class CloseCells {
                 if (requiredLeft.isEmpty() && requiredRight.isEmpty()) {
                     return KApply(label, KList(contents));
                 } else {
-                    throw KExceptionManager.compilerError("Closed parent cell missing " +
-                            "required children " + requiredLeft.toString() + " on left hand side and " + requiredRight.toString() + " on right hand side.", cell);
+                    if (requiredLeft.equals(requiredRight)) {
+                        throw KExceptionManager.compilerError("Closed parent cell missing " +
+                                "required children " + requiredLeft.toString(), cell);
+                    } else {
+                        throw KExceptionManager.compilerError("Closed parent cell missing " +
+                                "required children " + requiredLeft.toString() + " on left hand side and " + requiredRight.toString() + " on right hand side.", cell);
+                    }
                 }
             }
 

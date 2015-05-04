@@ -85,7 +85,7 @@ public class CloseCellsTest {
     public void testClosedCellError1() {
         K term = cell("<thread>", cell("<k>"));
         exception.expect(KEMException.class);
-        exception.expectMessage("Closed parent cell missing required children [EnvCell] on left hand side and [EnvCell] on right hand side.");
+        exception.expectMessage("Closed parent cell missing required children [EnvCell]");
         new CloseCells(cfgInfo, sortInfo, labelInfo).close(term);
     }
 

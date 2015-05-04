@@ -253,6 +253,10 @@ public class KExceptionManager {
         }
     }
 
+    public void registerThrown(KEMException e) {
+        exceptions.add(e.exception);
+    }
+
     public List<KException> getExceptions() {
         return exceptions;
     }

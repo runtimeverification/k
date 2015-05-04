@@ -326,6 +326,7 @@ public class SortCells {
                         assert s != null;
                         return Collections.singletonMap(s, apply(item));
                     }
+                    // flatten the List<Map<Sort, K>> into a Map<Sort, List<K>>
                     Map<Sort, List<K>> multiMap = children.stream().map(this::getSplit).flatMap(e -> e.entrySet().stream())
                             .collect(Collectors.groupingBy(Map.Entry::getKey)).entrySet().stream()
                             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().stream().map(e2 -> e2.getValue()).collect(Collectors.toList())));
@@ -340,7 +341,6 @@ public class SortCells {
                     KRewrite rw = (KRewrite) item;
                     Map<Sort, K> splitLeft = new HashMap<>(getSplit(rw.left()));
                     Map<Sort, K> splitRight = new HashMap<>(getSplit(rw.right()));
-                    assert splitLeft != null && splitRight != null;
                     addDefault(item, splitLeft, splitRight);
                     addDefault(item, splitRight, splitLeft);
                     assert splitLeft.keySet().equals(splitRight.keySet());
