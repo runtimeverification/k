@@ -22,7 +22,11 @@ object KOREToTreeNodes {
   def up(t: K): K = t match {
     case v: KVariable => KToken(Sorts.KVariable, v.name, v.att)
     case t: KToken => t
-    case s: KSequence => KApply(KLabel("#KSequence"), upList(s.items.asScala), s.att)
+    case s: KSequence =>
+      if (s.items.size() == 0)
+        KApply(KLabel("#EmptyK"), KList(), s.att)
+      else
+        KApply(KLabel("#KSequence"), upList(s.items.asScala), s.att)
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(r.left), up(r.right)), r.att)
     case t: KApply => KApply(t.klabel, upList(t.klist.items.asScala), t.att)
   }

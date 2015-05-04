@@ -17,7 +17,7 @@ import java.util.function.BiFunction;
 
 public class CompiledDefinition implements Serializable {
     private final Definition parsedDefinition;
-    private final Definition kompiledDefinition;
+    public final Definition kompiledDefinition;
     private final BiFunction<String, Source, K> programParser;
 
     public CompiledDefinition(Definition parsedDefinition, Definition kompiledDefinition, String programStartSymbol) {
