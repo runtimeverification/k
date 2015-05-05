@@ -19,6 +19,10 @@ object Unapply {
     def unapply(token: KToken) = Some(token.sort, token.s)
   }
 
+  object InjectedKLabel {
+    def unapply(l: InjectedKLabel): Option[KLabel] = Some(l.klabel)
+  }
+
   object Sort {
     def unapply(sort: Sort) = Some(sort.name)
   }
