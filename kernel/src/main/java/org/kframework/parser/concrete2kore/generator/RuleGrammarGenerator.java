@@ -116,16 +116,18 @@ public class RuleGrammarGenerator {
         }
         scala.collection.immutable.Set<Sentence> prods2;
         if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
-            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).map(s -> {
+            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).flatMap(s -> {
                 if (s instanceof Production && (s.att().contains("cell"))) {
                     Production p = (Production) s;
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
                     assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
                     Seq<ProductionItem> pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
-                    return Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                    Production p1 = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
+                    Production p2 = Production(Sort("Cell"), Seq(NonTerminal(p.sort())));
+                    return Stream.of(p1, p2);
                 }
-                return s;
+                return Stream.of(s);
             }).collect(Collections.toSet());
         } else
             prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collections.toSet());

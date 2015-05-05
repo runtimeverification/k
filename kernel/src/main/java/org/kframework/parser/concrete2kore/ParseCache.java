@@ -31,7 +31,7 @@ public class ParseCache implements Serializable {
 
     private transient ParseInModule parser;
 
-    public synchronized ParseInModule getParser() {
+    public ParseInModule getParser() {
         ParseInModule p = parser;
         if (p == null) {
             p = new ParseInModule(module);

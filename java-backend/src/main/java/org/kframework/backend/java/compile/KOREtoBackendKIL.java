@@ -74,7 +74,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public Variable KVariable(String name, Att att) {
-        return new Variable(name, Sort.of(att.<String>get("sort").get()));
+        return new Variable(name, Sort.of(att.<String>getOptional("sort").orElse("K")));
     }
 
     @Override

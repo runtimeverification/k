@@ -55,8 +55,8 @@ public class TransformKORE extends AbstractKORETransformer<K> {
         ArrayList<K> newItems = new ArrayList<>(k.items());
         boolean change = false;
         for (int i = 0; i < newItems.size(); ++i) {
-            K in = newItems.get(0);
-            K out = apply(newItems.get(0));
+            K in = newItems.get(i);
+            K out = apply(newItems.get(i));
             newItems.set(i, out);
             change = change || (in != out);
         }

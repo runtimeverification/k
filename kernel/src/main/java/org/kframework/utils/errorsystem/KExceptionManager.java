@@ -120,7 +120,7 @@ public class KExceptionManager {
     }
 
     public static KEMException compilerError(String message, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.location(), node.source());
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
     }
 
     public static KEMException compilerError(String message, ASTNode node) {
@@ -165,6 +165,10 @@ public class KExceptionManager {
 
     public void registerCompilerWarning(String message, ASTNode node) {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
+    }
+
+    public void registerCompilerWarning(String message, K node) {
+        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
     }
 
     public void registerCompilerWarning(String message, Throwable e, ASTNode node) {
@@ -249,27 +253,8 @@ public class KExceptionManager {
         }
     }
 
-    /**
-     * Thrown to indicate that the K Exception manager has terminated the application due to an error.
-     *
-     * @author dwightguth
-     */
-    public static class KEMException extends RuntimeException {
-        public final KException exception;
-
-        KEMException(KException e) {
-            super(e.toString(), e.getException());
-            this.exception = e;
-        }
-
-        @Override
-        public String getMessage() {
-            return exception.toString();
-        }
-
-        public void register(KExceptionManager kem) {
-            kem.getExceptions().add(exception);
-        }
+    public void registerThrown(KEMException e) {
+        exceptions.add(e.exception);
     }
 
     public List<KException> getExceptions() {

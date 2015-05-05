@@ -5,9 +5,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
-import org.kframework.kore.*;
-
-import java.util.*;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.main.GlobalOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import static org.kframework.kore.KORE.*;
 
@@ -23,29 +24,93 @@ public class SortCellsTest {
 
     ConfigurationInfo cfgInfo = new TestConfiguration() {{
         addCell(null, "TopCell", "<top>");
-        addCell("TopCell", "ThreadCell", "<t>");
+        addCell("TopCell", "ThreadCell", "<t>", Multiplicity.STAR);
         addCell("ThreadCell", "KCell", "<k>", Sort("K"));
         addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
+        addCell("ThreadCell", "OptCell", "<opt>", Multiplicity.OPTIONAL, Sort("K"));
+        addUnit("OptCell", KApply(KLabel(".OptCell")));
+        addUnit("ThreadCell", KApply(KLabel(".ThreadCellBag")));
+        addConcat("ThreadCell", KLabel("_ThreadCellBag_"));
     }};
     LabelInfo labelInfo = new LabelInfo() {{
         addLabel("TopCell", "<top>");
         addLabel("ThreadCell", "<t>");
         addLabel("KCell", "<k>");
         addLabel("EnvCell", "<env>");
+        addLabel("OptCell", "<opt>");
     }};
 
     @Test
     public void testSimpleSplitting() {
-        K term = KRewrite(cell("<t>",cell("<env>"),KVariable("X")),KVariable("X"));
-        K expected = KRewrite(cell("<t>",KVariable("X"),cell("<env>")),KVariable("X"));
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
+        K term = KRewrite(cell("<t>",cell("<env>"),KVariable("X"), KVariable("Y", Att().add("sort", "OptCell"))),KVariable("X"));
+        K expected = KRewrite(cell("<t>",KVariable("X"),cell("<env>"), KVariable("Y", Att().add("sort", "OptCell"))),KVariable("X"));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
     }
 
     @Test
     public void testUselessVariable() {
-        K term = cell("<t>",cell("<env>"),cell("<k>"),KVariable("X"));
-        K expected = cell("<t>",cell("<k>"),cell("<env>"));
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
+        K term = cell("<t>", cell("<env>"), cell("<k>"), cell("<opt>"), KVariable("X"));
+        K expected = cell("<t>", cell("<k>"), cell("<env>"), cell("<opt>"));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    @Test
+    public void testMultipleSplit() {
+        K term = KRewrite(cell("<t>", KVariable("X")), KVariable("Y"));
+        K expected = KRewrite(cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")), KVariable("Y"));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    @Test
+    public void testAddOptCell() {
+        K term = cell("<t>", KVariable("X"), KRewrite(cells(), cell("<opt>")));
+        K expected = cell("<t>", KVariable("_0"), KVariable("_1"), KRewrite(KApply(KLabel(".OptCell")), cell("<opt>")));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    @Test
+    public void testRemoveOptCell() {
+        K term = cell("<t>", KVariable("X"), KRewrite(cell("<opt>"), cells()));
+        K expected = cell("<t>", KVariable("_0"), KVariable("_1"), KRewrite(cell("<opt>"), KApply(KLabel(".OptCell"))));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    @Test
+    public void testAddStarCell() {
+        K term = cell("<top>", KRewrite(cells(), cell("<t>", KVariable("X"))));
+        K expected = cell("<top>", KRewrite(KApply(KLabel(".ThreadCellBag")), cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2"))));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    @Test
+    public void testRemoveStarCell() {
+        K term = cell("<top>", KRewrite(cell("<t>", KVariable("X")), cells()));
+        K expected = cell("<top>", KRewrite(cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")), KApply(KLabel(".ThreadCellBag"))));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+
+    @Test
+    public void testConcatStarCell() {
+        K term = cell("<top>", KRewrite(KVariable("Y"), cells(KVariable("Y"), cell("<t>", KVariable("X")))));
+        K expected = cell("<top>", KRewrite(KVariable("Y"), KApply(KLabel("_ThreadCellBag_"), KApply(KLabel("_ThreadCellBag_"), KApply(KLabel(".ThreadCellBag")), KVariable("Y")), cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")))));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
     }
 
     KApply cell(String name, K... ks) {

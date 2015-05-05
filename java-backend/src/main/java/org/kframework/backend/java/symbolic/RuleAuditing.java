@@ -10,7 +10,7 @@ import java.util.List;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import com.google.common.collect.Iterables;
 

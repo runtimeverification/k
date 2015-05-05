@@ -8,10 +8,13 @@ import com.google.common.collect.Multimap;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 
-import static org.kframework.kore.KORE.*;
-
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import static org.kframework.kore.KORE.KLabel;
+import static org.kframework.kore.KORE.Sort;
 
 /**
  * Basic label information for cell completion
@@ -21,21 +24,26 @@ public class LabelInfo {
 
     private final Map<KLabel, AssocInfo> assocInfo = Maps.newHashMap();
 
+    private final Set<KLabel> functionLabels = new HashSet<>();
+
     protected void addLabel(String result, String label) {
         addLabel(result, label, false);
     }
 
     protected void addLabel(String result, String label, boolean isAssoc) {
-        addLabel(result, label, isAssoc, false);
+        addLabel(result, label, isAssoc, false, false);
     }
 
-    protected void addLabel(String result, String label, boolean isAssoc, boolean isComm) {
+    protected void addLabel(String result, String label, boolean isAssoc, boolean isComm, boolean isFunction) {
         codomain.put(KLabel(label), Sort(result));
         AssocInfo info = new AssocInfo(isAssoc, isComm);
         if (assocInfo.containsKey(KLabel(label))) {
             assert assocInfo.get(KLabel(label)).equals(info);
         } else {
             assocInfo.put(KLabel(label), new AssocInfo(isAssoc, isComm));
+        }
+        if (isFunction) {
+            functionLabels.add(KLabel(label));
         }
     }
 
@@ -48,6 +56,10 @@ public class LabelInfo {
     public Sort getCodomain(KLabel l) {
         Collection<Sort> sorts = codomain.get(l);
         return Iterables.getOnlyElement(sorts, null);
+    }
+
+    public boolean isFunction(KLabel l) {
+        return functionLabels.contains(l);
     }
 
     /**

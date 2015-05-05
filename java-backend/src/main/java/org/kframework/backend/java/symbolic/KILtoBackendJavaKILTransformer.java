@@ -43,13 +43,12 @@ import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
-import org.kframework.kil.Production;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collection;

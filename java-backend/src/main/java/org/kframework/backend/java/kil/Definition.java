@@ -1,6 +1,18 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
+import com.google.inject.name.Names;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
@@ -16,11 +28,12 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.KRewrite;
+import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import scala.collection.JavaConversions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,20 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.name.Names;
-import com.google.inject.Inject;
-import scala.collection.JavaConversions;
 
 
 /**
@@ -239,8 +238,8 @@ public class Definition extends JavaSymbolicObject {
                 oldRule.setAttributes(new KOREtoKIL().convertAttributes(rule.att()));
                 addRule(new Rule(
                         "",
-                        transformer.convert(((KRewrite) rule.body()).left()),
-                        transformer.convert(((KRewrite) rule.body()).right()),
+                        transformer.convert(RewriteToTop.toLeft(rule.body())),
+                        transformer.convert(RewriteToTop.toRight(rule.body())),
                         Collections.singletonList(transformer.convert(rule.requires())),
                         Collections.singletonList(transformer.convert(rule.ensures())),
                         Collections.emptySet(),

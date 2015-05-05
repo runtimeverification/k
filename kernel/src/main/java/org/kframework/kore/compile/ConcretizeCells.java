@@ -6,6 +6,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Sentence;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Apply the entire configuration concretization process.
@@ -31,14 +32,14 @@ public class ConcretizeCells {
     final CloseCells closeCells;
     final SortCells sortCells;
 
-    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo) {
+    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, KExceptionManager kem) {
         this.configurationInfo = configurationInfo;
         this.labelInfo = labelInfo;
         this.sortInfo = sortInfo;
         addImplicitCells = new AddImplicitCells(configurationInfo, labelInfo);
         addParentCells = new AddParentCells(configurationInfo, labelInfo);
         closeCells = new CloseCells(configurationInfo, sortInfo, labelInfo);
-        sortCells = new SortCells(configurationInfo, labelInfo);
+        sortCells = new SortCells(configurationInfo, labelInfo, kem);
     }
 
     public Sentence concretize(Sentence s) {

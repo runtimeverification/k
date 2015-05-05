@@ -132,6 +132,6 @@ public class BubbleParsing {
      * Parse bubbles in all modules of d.
      */
     public Definition parseBubbles(Definition d) {
-        return DefinitionTransformer.from(this::parseBubbles).apply(d);
+        return DefinitionTransformer.from(this::parseBubbles, "parsing rules").apply(d);
     }
 }

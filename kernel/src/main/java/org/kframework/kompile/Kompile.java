@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.kframework.Collections;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -17,7 +18,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.builtin.BooleanUtils;
 import org.kframework.kore.compile.ConcretizeCells;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.kore.compile.ResolveSemanticCasts;
@@ -38,7 +38,6 @@ import org.kframework.utils.file.JarInfo;
 import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
-import scala.compat.java8.JFunction;
 import scala.util.Either;
 
 import java.io.File;
@@ -48,8 +47,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,7 +98,7 @@ public class Kompile {
 
         DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
         DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve);
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
 
         Function1<Definition, Definition> pipeline =
                 heatingCooling
@@ -135,7 +132,8 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize,
+                "concretizing configuration"
         ).apply(input);
     }
 
@@ -161,7 +159,7 @@ public class Kompile {
                     return Module(mod.name(), (Set<Module>) mod.imports().$plus(definition.getModule("DEFAULT-CONFIGURATION").get()), mod.localSentences(), mod.att());
                 }
                 return mod;
-            }).apply(definition);
+            }, "adding default configuration").apply(definition);
         } else {
             definitionWithConfigBubble = definition;
         }
@@ -179,10 +177,10 @@ public class Kompile {
         }
 
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
-        Definition defWithConfig = DefinitionTransformer.from(this::resolveConfig).apply(definitionWithConfigBubble);
+        Definition defWithConfig = DefinitionTransformer.from(this::resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig);
-        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles).apply(defWithConfig);
+        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
         loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
 
@@ -206,13 +204,14 @@ public class Kompile {
         Module configParserModule = gen.getConfigGrammar(module);
 
         ParseCache cache = loadCache(configParserModule);
+        ParseInModule parser = cache.getParser();
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply configContents = (KApply) contents;
                     List<K> items = configContents.klist().items();
@@ -241,13 +240,14 @@ public class Kompile {
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
+        ParseInModule parser = cache.getParser();
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply ruleContents = (KApply) contents;
                     List<org.kframework.kore.K> items = ruleContents.klist().items();
@@ -267,7 +267,7 @@ public class Kompile {
                 .collect(Collections.toSet());
 
         return Module(module.name(), module.imports(),
-                (Set<Sentence>) module.localSentences().$bar(ruleSet), module.att());
+                stream((Set<Sentence>) module.localSentences().$bar(ruleSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
     }
 
     private ParseCache loadCache(Module parser) {
@@ -287,21 +287,21 @@ public class Kompile {
         return _this.sortDeclarations().equals(that.sortDeclarations());
     }
 
-    private Stream<? extends K> performParse(ParseCache parser, Bubble b) {
+    private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Bubble b) {
         int startLine = b.att().<Integer>get("contentStartLine").get();
         int startColumn = b.att().<Integer>get("contentStartColumn").get();
         String source = b.att().<String>get("Source").get();
         Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> result;
-        if (parser.getCache().containsKey(b.contents())) {
-            ParsedSentence parse = parser.getCache().get(b.contents());
+        if (cache.containsKey(b.contents())) {
+            ParsedSentence parse = cache.get(b.contents());
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.getParser().parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
+            result = parser.parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
                 K k = TreeNodesToKORE.down(TreeNodesToKORE.apply(result._1().right().get()));
-                parser.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+                cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);
             } else {
                 errors.addAll(result._1().left().get());

@@ -5,8 +5,6 @@ import com.google.common.collect.Sets;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
-import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -150,27 +148,36 @@ public class CloseCells {
         List<K> contents = IncompleteCellUtils.getChildren(cell);
 
         if (cfg.isParentCell(label)) {
-            Set<Sort> required = new HashSet<>();
+            Set<Sort> requiredLeft = new HashSet<>();
+            Set<Sort> requiredRight;
             for (Sort child : cfg.getChildren(label)) {
                 if (cfg.getMultiplicity(child) == ConfigurationInfo.Multiplicity.ONE) {
-                    required.add(child);
+                    requiredLeft.add(child);
                 }
             }
+            requiredRight = new HashSet<>(requiredLeft);
             for (K item : contents) {
-                if (item instanceof KApply) {
-                    required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
-                } else if (item instanceof KVariable) {
-                    // TODO: should consider variable sorts
-                    required.clear();
+                if (item instanceof KRewrite) {
+                    KRewrite rw = (KRewrite) item;
+                    filterRequired(requiredLeft, rw.left());
+                    filterRequired(requiredRight, rw.right());
+                } else {
+                    filterRequired(requiredLeft, item);
+                    filterRequired(requiredRight, item);
                 }
             }
 
             if (!openLeft && !openRight) {
-                if (required.isEmpty()) {
+                if (requiredLeft.isEmpty() && requiredRight.isEmpty()) {
                     return KApply(label, KList(contents));
                 } else {
-                    throw KExceptionManager.criticalError("Closed parent cell missing " +
-                            "required children " + required.toString() + " " + cell.toString());
+                    if (requiredLeft.equals(requiredRight)) {
+                        throw KExceptionManager.compilerError("Closed parent cell missing " +
+                                "required children " + requiredLeft.toString(), cell);
+                    } else {
+                        throw KExceptionManager.compilerError("Closed parent cell missing " +
+                                "required children " + requiredLeft.toString() + " on left hand side and " + requiredRight.toString() + " on right hand side.", cell);
+                    }
                 }
             }
 
@@ -182,9 +189,12 @@ public class CloseCells {
                 return KApply(label, KList(newItems));
             } else {
                 // close by adding default cells
-                List<K> newContents = new ArrayList<>(contents.size() + required.size());
+                // since we know we are on the right hand side of a rewrite, we assume that
+                // the cell cannot contain a rewrite and therefore requiredLeft will always equal
+                // requiredRight. Hence we just pick one.
+                List<K> newContents = new ArrayList<>(contents.size() + requiredLeft.size());
                 newContents.addAll(contents);
-                for (Sort reqChild : required) {
+                for (Sort reqChild : requiredLeft) {
                     newContents.add(cfg.getDefaultCell(reqChild));
                 }
                 return (KApply(label, KList(newContents)));
@@ -256,6 +266,23 @@ public class CloseCells {
                 body = KApply(closeOperator, KList(leftVar, body));
             }
             return KApply(label, KList(body));
+        }
+    }
+
+    private void filterRequired(Set<Sort> required, K item) {
+        if (item instanceof KApply) {
+            required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
+        } else if (item instanceof KVariable) {
+            if (item.att().contains("sort")) {
+                Sort sort = Sort(item.att().<String>get("sort").get());
+                if (cfg.cfg.isCell(sort)) {
+                    required.remove(sort);
+                } else {
+                    required.clear();
+                }
+            } else {
+                required.clear();
+            }
         }
     }
 }

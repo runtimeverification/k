@@ -21,7 +21,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -405,7 +405,7 @@ public class KItem extends Term implements KItemRepresentation {
                         if (t instanceof Error) {
                             throw (Error)t;
                         }
-                        if (t instanceof KExceptionManager.KEMException) {
+                        if (t instanceof KEMException) {
                             throw (RuntimeException)t;
                         }
                         if (t instanceof RuntimeException) {

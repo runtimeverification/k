@@ -3,21 +3,34 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Lists;
-
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
-import org.kframework.definition.*;
-import org.kframework.kore.*;
+import org.kframework.definition.Context;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.kore.KORE.*;
 
@@ -36,30 +49,30 @@ public class AddParentCells {
         cfg = new ConcretizationInfo(configInfo, labelInfo);
     }
 
-    Stream<KApply> streamSideCells(K side) {
+    Stream<K> streamSideCells(K side) {
         List<K> cells = IncompleteCellUtils.flattenCells(side);
         // TODO error handling
-        return (Stream<KApply>) (Object) cells.stream();
+        return cells.stream();
     }
 
     protected List<KApply> makeParents(KLabel parent, boolean ellipses,
-                                       List<? extends K> allChildren) {
+                                       List<K> allChildren) {
         // List<KRewrite> rewrites
 //        rewrites.stream().map(r -> r.left()).flatMap(t -> if(t.));
 
-        List<KApply> children = allChildren.stream().filter(t -> t instanceof KApply).map(t -> (KApply) t).collect(Collectors.toList());
+        List<K> children = allChildren.stream().filter(t -> !(t instanceof KRewrite)).collect(Collectors.toList());
         List<KRewrite> rewrites = allChildren.stream().filter(t -> t instanceof KRewrite).map(t -> (KRewrite) t).collect(Collectors.toList());
 
         // see if all children can fit together
-        Set<KLabel> usedCells = Sets.newHashSet();
-        BiFunction<List<KApply>, Set<KLabel>, Boolean> useCells = (cells, used) -> {
-            for (KApply k : cells) {
-                KLabel label = k.klabel();
-                if (cfg.getMultiplicity(label) != ConfigurationInfo.Multiplicity.STAR) {
-                    if (used.contains(label)) {
+        Set<Sort> usedCells = Sets.newHashSet();
+        BiFunction<List<K>, Set<Sort>, Boolean> useCells = (cells, used) -> {
+            for (K k : cells) {
+                Sort sort = cfg.getCellSort(k);
+                if (cfg.getMultiplicity(sort) != ConfigurationInfo.Multiplicity.STAR) {
+                    if (used.contains(sort)) {
                         return false;
                     } else {
-                        used.add(label);
+                        used.add(sort);
                     }
                 }
             }
@@ -68,14 +81,14 @@ public class AddParentCells {
 
         boolean allFitTogether = useCells.apply(children, usedCells);
         if (allFitTogether) {
-            Function<Function<KRewrite, K>, List<KApply>> flattenRewrite = f -> rewrites.stream().map(f).flatMap
+            Function<Function<KRewrite, K>, List<K>> flattenRewrite = f -> rewrites.stream().map(f).flatMap
                     (this::streamSideCells).collect(Collectors.toList());
 
-            List<KApply> leftChildren = flattenRewrite.apply(KRewrite::left);
-            Set<KLabel> usedLeft = Sets.newHashSet(usedCells);
+            List<K> leftChildren = flattenRewrite.apply(KRewrite::left);
+            Set<Sort> usedLeft = Sets.newHashSet(usedCells);
             boolean leftFit = useCells.apply(leftChildren, usedLeft);
-            List<KApply> rightChildren = flattenRewrite.apply(KRewrite::right);
-            Set<KLabel> usedRight = Sets.newHashSet(usedCells);
+            List<K> rightChildren = flattenRewrite.apply(KRewrite::right);
+            Set<Sort> usedRight = Sets.newHashSet(usedCells);
             boolean rightFit = useCells.apply(rightChildren, usedRight);
             allFitTogether = leftFit && rightFit;
         }
@@ -87,12 +100,13 @@ public class AddParentCells {
 
         boolean forcedSeparate = true;
         if (!children.isEmpty()) {
-            KLabel label = children.get(0).klabel();
+            Sort label = cfg.getCellSort(children.get(0));
             if (cfg.getMultiplicity(label) == ConfigurationInfo.Multiplicity.STAR) {
                 forcedSeparate = false;
             } else {
-                for (KApply child : children) {
-                    if (!child.klabel().equals(label)) {
+                for (K child : children) {
+                    Sort sort = cfg.getCellSort(child);
+                    if (!sort.equals(label)) {
                         forcedSeparate = false;
                         break;
                     }
@@ -100,8 +114,8 @@ public class AddParentCells {
             }
             if (forcedSeparate) {
                 for (KRewrite rew : rewrites) {
-                    if (!(streamSideCells(rew.left()).anyMatch(l -> l.klabel().equals(label))
-                            || streamSideCells(rew.left()).anyMatch(l -> l.klabel().equals(label)))) {
+                    if (!(streamSideCells(rew.left()).anyMatch(l -> cfg.getCellSort(l).equals(label))
+                            || streamSideCells(rew.left()).anyMatch(l -> cfg.getCellSort(l).equals(label)))) {
                         forcedSeparate = false;
                         break;
                     }
@@ -111,16 +125,16 @@ public class AddParentCells {
         if (forcedSeparate) {
             for (KRewrite rew1 : rewrites) {
                 for (KRewrite rew2 : rewrites) {
-                    Set<KLabel> left1NonRepeatable = streamSideCells(rew1.left()).map(KApply::klabel)
+                    Set<Sort> left1NonRepeatable = streamSideCells(rew1.left()).map(cfg::getCellSort)
                             .filter(l -> cfg.getMultiplicity(l) != ConfigurationInfo.Multiplicity.STAR)
                             .collect(Collectors.toSet());
-                    boolean lhsConflict = streamSideCells(rew2.left()).map(KApply::klabel)
+                    boolean lhsConflict = streamSideCells(rew2.left()).map(cfg::getCellSort)
                             .filter(left1NonRepeatable::contains).count() >= 1;
 
-                    Set<KLabel> right1NonRepeatable = streamSideCells(rew1.right()).map(KApply::klabel)
+                    Set<Sort> right1NonRepeatable = streamSideCells(rew1.right()).map(cfg::getCellSort)
                             .filter(l -> cfg.getMultiplicity(l) != ConfigurationInfo.Multiplicity.STAR)
                             .collect(Collectors.toSet());
-                    boolean rhsConflict = streamSideCells(rew2.right()).map(KApply::klabel)
+                    boolean rhsConflict = streamSideCells(rew2.right()).map(cfg::getCellSort)
                             .filter(right1NonRepeatable::contains).count() >= 1;
                     if (!(lhsConflict || rhsConflict)) {
                         forcedSeparate = false;
@@ -140,8 +154,8 @@ public class AddParentCells {
     }
 
     boolean isCompletionItem(K k) {
-        return (k instanceof KApply || k instanceof KRewrite)
-                && !(k instanceof KVariable) && getLevel(k).isPresent();
+        return (k instanceof KApply || k instanceof KRewrite || k instanceof KVariable)
+                && getLevel(k).isPresent();
     }
 
     Optional<Integer> getLevel(KApply k) {
@@ -156,16 +170,25 @@ public class AddParentCells {
     Optional<Integer> getLevel(K k) {
         if (k instanceof KApply) {
             return getLevel((KApply) k);
+        } else if (k instanceof KVariable) {
+            if (k.att().contains("sort")) {
+                Sort sort = Sort(k.att().<String>get("sort").get());
+                int level = cfg.cfg.getLevel(sort);
+                if (level >= 0) {
+                    return Optional.of(level);
+                }
+            }
+            return Optional.empty();
         } else {
             KRewrite rew = (KRewrite) k;
             List<K> cells = IncompleteCellUtils.flattenCells(rew.left());
             cells.addAll(IncompleteCellUtils.flattenCells(rew.right()));
             Optional<Integer> level = Optional.empty();
             for (K item : cells) {
-                if (item instanceof KVariable) {
+                Optional<Integer> level2 = getLevel(item);
+                if (item instanceof KVariable && !level2.isPresent()) {
                     continue;
                 }
-                Optional<Integer> level2 = getLevel(item);
                 if (!level.isPresent()) {
                     level = level2;
                 } else if (!level.equals(level2)) {
@@ -194,6 +217,9 @@ public class AddParentCells {
             } else {
                 return Optional.of(cfg.getParent(((KApply) k).klabel()));
             }
+        } else if (k instanceof KVariable) {
+            Sort sort = Sort(k.att().<String>get("sort").get());
+            return Optional.of(cfg.getParent(sort));
         } else {
             Optional<KLabel> leftParent = getParent(((KRewrite) k).left());
             Optional<KLabel> rightParent = getParent(((KRewrite) k).right());
@@ -222,9 +248,9 @@ public class AddParentCells {
             }
             List<K> children = Lists.newArrayList();
             List<K> otherChildren = Lists.newArrayList();
+            int ix = 0;
             boolean ellipses = IncompleteCellUtils.isOpenLeft(app)
                     || IncompleteCellUtils.isOpenRight(app);
-            int ix = 0;
             for (K item : IncompleteCellUtils.getChildren(app)) {
                 if (isCompletionItem(item)) {
                     children.add(item);

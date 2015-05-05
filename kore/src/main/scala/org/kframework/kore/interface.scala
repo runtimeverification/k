@@ -11,8 +11,6 @@ import org.kframework.attributes._
 trait K extends Serializable {
   def att: Att
   override def toString = Unparse.apply(this)
-  def location = att.get("org.kframework.attributes.Location", classOf[Location]).orNull
-  def source = att.get("org.kframework.attributes.Source", classOf[Source]).orNull
 
   lazy val cachedHashCode = computeHashCode
 

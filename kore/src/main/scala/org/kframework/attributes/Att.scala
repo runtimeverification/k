@@ -33,8 +33,22 @@ case class Att(att: Set[K]) extends AttributesToString {
           getK(key).map(Att.down).map { _.asInstanceOf[T] }.get
       }
 
+  def get[T](cls: Class[T]): Option[T] = get(cls.getName, cls)
+
   def getOptional[T](label: String): java.util.Optional[T] =
     get[T](label) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[T]()
+    }
+
+  def getOptional[T](label: String, cls: Class[T]): java.util.Optional[T] =
+    get[T](label, cls) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[T]()
+    }
+
+  def getOptional[T](cls: Class[T]): java.util.Optional[T] =
+    get[T](cls) match {
       case Some(s) => java.util.Optional.of(s);
       case None => java.util.Optional.empty[T]()
     }
