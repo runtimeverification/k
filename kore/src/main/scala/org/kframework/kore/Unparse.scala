@@ -74,6 +74,7 @@ object ToKast {
     case KToken(sort, s) => b ++= "#token(\"" + escape(sort.name) + "\",\"" + escape(s) + "\")"
     case InjectedKLabel(l) => b ++= "#klabel("+apply(l)+")"
     case KVariable(v) => b ++= v.toString
+    case KApply(l, List()) => b ++= unparse(inParen,l)+"(.KList)"
     case KApply(l, args) =>
       b ++= unparse(inParen,l)
       b ++= "("

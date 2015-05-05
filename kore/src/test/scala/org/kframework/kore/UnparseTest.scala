@@ -21,11 +21,11 @@ class UnparseTest {
   }
 
   @Test def EmptyApp() {
-    Assert.assertEquals("foo()",ToKast('foo()))
+    Assert.assertEquals("foo(.KList)",ToKast('foo()))
   }
 
   @Test def NestedApp() {
-    Assert.assertEquals("foo(a(),b())",ToKast('foo('a(), 'b())))
+    Assert.assertEquals("foo(a(.KList),b(.KList))",ToKast('foo('a(), 'b())))
   }
 
   @Test def SequenceEmpty() {
@@ -33,11 +33,11 @@ class UnparseTest {
   }
 
   @Test def Sequence() {
-    Assert.assertEquals("a()~>b()~>c()",ToKast('a()~>'b()~>'c()))
+    Assert.assertEquals("a(.KList)~>b(.KList)~>c(.KList)",ToKast('a()~>'b()~>'c()))
   }
 
   @Test def Rewrite() {
-    Assert.assertEquals("a()=>b()",ToKast(KRewrite('a(),'b())))
+    Assert.assertEquals("a(.KList)=>b(.KList)",ToKast(KRewrite('a(),'b())))
   }
 
   @Test def Tokens() {
@@ -49,14 +49,14 @@ class UnparseTest {
   }
 
   @Test def Precedence1() {
-    Assert.assertEquals("``a()=>b()``~>c()",ToKast(KRewrite('a(),'b())~>'c()))
+    Assert.assertEquals("``a(.KList)=>b(.KList)``~>c(.KList)",ToKast(KRewrite('a(),'b())~>'c()))
   }
 
   @Test def Precedence2() {
-    Assert.assertEquals("a()=>b()~>c()",ToKast(KRewrite('a(),'b()~>'c())))
+    Assert.assertEquals("a(.KList)=>b(.KList)~>c(.KList)",ToKast(KRewrite('a(),'b()~>'c())))
   }
 
   @Test def TickSpace() {
-    Assert.assertEquals("`` `_+_`()=>b()``~>c()",ToKast(KRewrite(KLabel("_+_")(),'b())~>'c()))
+    Assert.assertEquals("`` `_+_`(.KList)=>b(.KList)``~>c(.KList)",ToKast(KRewrite(KLabel("_+_")(),'b())~>'c()))
   }
 }
