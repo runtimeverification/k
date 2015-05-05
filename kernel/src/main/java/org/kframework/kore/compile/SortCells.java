@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -327,22 +326,22 @@ public class SortCells {
                         return Collections.singletonMap(s, apply(item));
                     }
                     // flatten the List<Map<Sort, K>> into a Map<Sort, List<K>>
-                    Map<Sort, List<K>> multiMap = children.stream().map(this::getSplit).flatMap(e -> e.entrySet().stream())
-                            .collect(Collectors.groupingBy(Map.Entry::getKey)).entrySet().stream()
-                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().stream().map(e2 -> e2.getValue()).collect(Collectors.toList())));
+                    Map<Sort, List<K>> multiMap = children.stream().flatMap(e -> getSplit(e).entrySet().stream()).collect(
+                            Collectors.groupingBy(Map.Entry::getKey,
+                                    Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
                     return multiMap.entrySet().stream().filter(e -> e.getValue().size() > 0).collect(Collectors.toMap(e -> e.getKey(), e -> {
                         if (e.getValue().size() == 1) {
                             return e.getValue().get(0);
                         } else {
-                            return concatenate(e.getKey(), e.getValue());
+                            return concatenateStarCells(e.getKey(), e.getValue());
                         }
                     }));
                 } else if (item instanceof KRewrite) {
                     KRewrite rw = (KRewrite) item;
                     Map<Sort, K> splitLeft = new HashMap<>(getSplit(rw.left()));
                     Map<Sort, K> splitRight = new HashMap<>(getSplit(rw.right()));
-                    addDefault(item, splitLeft, splitRight);
-                    addDefault(item, splitRight, splitLeft);
+                    addDefaultCells(item, splitLeft, splitRight);
+                    addDefaultCells(item, splitRight, splitLeft);
                     assert splitLeft.keySet().equals(splitRight.keySet());
                     return splitLeft.keySet().stream().collect(Collectors.toMap(sort -> sort,
                             sort -> KRewrite(splitLeft.get(sort), splitRight.get(sort), rw.att())));
@@ -352,7 +351,7 @@ public class SortCells {
                 }
             }
 
-            private K concatenate(Sort sort, List<K> children) {
+            private K concatenateStarCells(Sort sort, List<K> children) {
                 if (cfg.getMultiplicity(sort) != Multiplicity.STAR) {
                     throw KExceptionManager.compilerError("Attempting to concatenate cells not of multiplicity=\"*\" "
                             + "into a cell collection.", children.iterator().next());
@@ -360,7 +359,7 @@ public class SortCells {
                 return children.stream().reduce(cfg.cfg.getUnit(sort), (k1, k2) -> KApply(cfg.cfg.getConcat(sort), k1, k2));
             }
 
-            private void addDefault(K item, Map<Sort, K> splitLeft, Map<Sort, K> splitRight) {
+            private void addDefaultCells(K item, Map<Sort, K> splitLeft, Map<Sort, K> splitRight) {
                 for (Sort s : Sets.difference(splitLeft.keySet(), splitRight.keySet())) {
                     if (cfg.getMultiplicity(s) == Multiplicity.ONE) {
                         throw KExceptionManager.compilerError("Cannot rewrite a multiplicity=\"1\" cell to or from the cell unit.", item);
