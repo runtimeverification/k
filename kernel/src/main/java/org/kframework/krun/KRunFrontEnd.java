@@ -9,6 +9,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.tiny.Rewriter;
 import org.kframework.transformation.AmbiguousTransformationException;
 import org.kframework.transformation.Transformation;
 import org.kframework.transformation.TransformationNotSatisfiedException;
@@ -89,7 +90,11 @@ public class KRunFrontEnd extends FrontEnd {
             scope.enter(kompiledDir.get());
             try {
                 if (kRunOptions.experimental.kore) {
-                    return new KRun(kem, files).run(loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin")), kRunOptions);
+                    return new KRun(kem, files).run(loader.loadOrDie(
+                                    CompiledDefinition.class,
+                                    files.resolveKompiled("compiled.bin")),
+                            kRunOptions,
+                            Rewriter::new);
                 } else {
                     Transformation<Void, Void> tool = toolProvider.get();
                     Attributes a = new Attributes();

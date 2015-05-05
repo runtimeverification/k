@@ -30,7 +30,7 @@ object SimpleIndex extends (K => Option[String]) {
   }
 }
 
-class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
+class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) extends org.kframework.Rewriter {
   def this(module: definition.Module) = this(module, KIndex)
 
   val cons = new Constructors(module)
@@ -89,7 +89,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
   var indexFailures = 0
 
   def executeStep(k: K): Option[K] = {
-//    println("\n\n MATCHING ON: " + k)
+    //    println("\n\n MATCHING ON: " + k)
 
     val i = index(k).get
 
@@ -104,14 +104,14 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
       val res = r(k).headOption
       res match {
         case Some(res) =>
-//          println(r + "\n" + res + "\n");
+          //          println(r + "\n" + res + "\n");
           Some(res)
         case None => None
       }
     }
       .find {_.isInstanceOf[Some[_]]}
       .getOrElse(None)
-//    println("RESULT:\n    " + res.mkString("\n    "))
+    //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
 
@@ -142,14 +142,16 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) {
     current
   }
 
-  def rewrite(k: K)(implicit sofar: Set[K] = Set()): Set[K] = {
-    val newKs = rewriteStep(k) &~ sofar
+  def rewrite(k: kore.K)(implicit sofar: Set[kore.K] = Set()): Set[kore.K] = {
+    val sofarTiny = sofar map convert
+
+    val newKs = rewriteStep(convert(k)) &~ sofarTiny
     if (newKs.size == 0)
       sofar
     else {
-      val newSoFar = sofar | newKs
+      val newSoFar = sofarTiny | newKs
       newKs flatMap {
-        rewrite(_)(newSoFar)
+        rewrite(_)(newSoFar.asInstanceOf[Set[kore.K]])
       }
     }
   }
