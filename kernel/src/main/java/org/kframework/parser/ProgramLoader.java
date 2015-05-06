@@ -47,6 +47,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Set;
 
+import static org.kframework.kore.KORE.*;
+
 public class ProgramLoader {
 
     private final BinaryLoader loader;
@@ -143,7 +145,7 @@ public class ProgramLoader {
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
             ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod));
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
-                    = parser.parseString(FileUtil.read(content), startSymbol.getName(), source);
+                    = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {
                 kem.addKException(warn.getKException());
             }

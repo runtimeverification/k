@@ -10,6 +10,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.K;
+import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -44,7 +45,7 @@ public class ParserUtils {
     }
     public static K parseWithFile(String theTextToParse,
                                   String mainModule,
-                                  String startSymbol,
+                                  Sort startSymbol,
                                   File definitionFile) {
         String definitionText;
         try {
@@ -57,7 +58,7 @@ public class ParserUtils {
 
     public static K parseWithString(String theTextToParse,
                                     String mainModule,
-                                    String startSymbol,
+                                    Sort startSymbol,
                                     Source source,
                                     String definitionText) {
         Module kastModule = parseMainModuleOuterSyntax(definitionText, source, mainModule);
@@ -65,7 +66,7 @@ public class ParserUtils {
     }
 
     public static K parseWithModule(String theTextToParse,
-                                    String startSymbol,
+                                    Sort startSymbol,
                                     Source source,
                                     org.kframework.definition.Module kastModule) {
         ParseInModule parser = new ParseInModule(kastModule);
@@ -73,7 +74,7 @@ public class ParserUtils {
     }
 
     public static K parseWithModule(String theTextToParse,
-                                    String startSymbol,
+                                    Sort startSymbol,
                                     Source source,
                                     ParseInModule kastModule) {
         Term cleaned = kastModule.parseString(theTextToParse, startSymbol, source)._1().right().get();

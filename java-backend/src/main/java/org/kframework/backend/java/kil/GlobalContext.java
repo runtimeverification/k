@@ -35,6 +35,7 @@ public class GlobalContext implements Serializable {
     public final transient KRunOptions krunOptions;
     private final transient KExceptionManager kem;
     private final transient Map<String, Provider<MethodHandle>> hookProvider;
+    public final transient FileUtil files;
     public final transient GlobalOptions globalOptions;
 
     @Inject
@@ -53,6 +54,7 @@ public class GlobalContext implements Serializable {
         this.krunOptions = krunOptions;
         this.kem = kem;
         this.hookProvider = hookProvider;
+        this.files = files;
         this.equalityOps = new EqualityOperations(() -> def, javaOptions);
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files));
         this.kItemOps = new KItemOperations(stage, javaOptions, kem, this::builtins, globalOptions);

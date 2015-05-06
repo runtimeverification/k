@@ -63,7 +63,12 @@ public class JavaSymbolicCommonModule extends AbstractModule {
                         result.put(key, () -> {
                             MethodHandle resultHandle = handle;
                             if (!Modifier.isStatic(method.getModifiers())) {
-                                resultHandle = MethodHandles.insertArguments(handle, 0, injector.getInstance(c));
+                                try {
+                                    resultHandle = MethodHandles.insertArguments(handle, 0, injector.getInstance(c));
+                                } catch (KEMException e) {
+                                    e.exception.addTraceFrame("while constructing implementation for " + hook + " hook.");
+                                    throw e;
+                                }
                             }
                             return resultHandle;
                         });

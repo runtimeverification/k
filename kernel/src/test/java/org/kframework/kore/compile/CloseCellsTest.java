@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.*;
 
@@ -22,7 +23,7 @@ public class CloseCellsTest {
     }};
     final TestConfiguration cfgInfo = new TestConfiguration() {{
         addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
-        addCell("ThreadCell", "KCell", "<k>", Sort("K"));
+        addCell("ThreadCell", "KCell", "<k>", Sorts.K());
         addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
         addCell(null, "ListCell", "<list>", Multiplicity.STAR, Sort("List"));
         addDefault("EnvCell", cell("<env>", KApply(KLabel(".Map"))));

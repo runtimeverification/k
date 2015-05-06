@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.backend.Backend;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
@@ -81,7 +82,7 @@ public class KompileFrontEnd extends FrontEnd {
         if (options.experimental.kore) {
             Kompile kompile = new Kompile(options, files, kem);
             //TODO(dwightguth): handle start symbols
-            CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), "K");
+            CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K());
             loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         } else {
 

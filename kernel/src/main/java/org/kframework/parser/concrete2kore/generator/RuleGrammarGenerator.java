@@ -4,6 +4,7 @@ package org.kframework.parser.concrete2kore.generator;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -38,22 +39,17 @@ import static org.kframework.kore.KORE.*;
 public class RuleGrammarGenerator {
 
     private final Definition baseK;
-    private static final Sort KBott = Sort("KBott");
-    private static final Sort KTop = Sort("K");
-    private static final Sort KLabel = Sort("KLabel");
-    private static final Sort KList = Sort("KList");
-    private static final Sort KItem = Sort("KItem");
     private static final Set<Sort> kSorts = new HashSet<>();
 
     static {
-        kSorts.add(KBott);
-        kSorts.add(KTop);
-        kSorts.add(KLabel);
-        kSorts.add(KList);
-        kSorts.add(KItem);
+        kSorts.add(Sorts.KBott());
+        kSorts.add(Sorts.K());
+        kSorts.add(Sorts.KLabel());
+        kSorts.add(Sorts.KList());
+        kSorts.add(Sorts.KItem());
         kSorts.add(Sort("RuleContent"));
-        kSorts.add(Sort("KVariable"));
-        kSorts.add(Sort("KString"));
+        kSorts.add(Sorts.KVariable());
+        kSorts.add(Sorts.KString());
     }
 
     public Set<Sort> kSorts() {
@@ -103,19 +99,19 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-                    prods.addAll(makeCasts(KBott, KTop, srt));
+                    prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
                 }
             }
-            prods.addAll(makeCasts(KLabel, KLabel, KLabel));
-            prods.addAll(makeCasts(KList, KList, KList));
-            prods.addAll(makeCasts(KBott, KTop, KItem));
-            prods.addAll(makeCasts(KBott, KTop, KTop));
+            prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
+            prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList()));
+            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem()));
+            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
         }
         if (baseK.getModule(K_TOP_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_TOP_SORT).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // K ::= Sort
-                    prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
+                    prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
                 }
             }
         }
@@ -124,7 +120,7 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // Sort ::= KBott
-                    prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
+                    prods.add(Production(srt, Seq(NonTerminal(Sorts.KBott())), Att()));
                 }
             }
         }
@@ -211,7 +207,7 @@ public class RuleGrammarGenerator {
         for (Sort srt : iterable(mod.definedSorts())) {
             if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
                 // K ::= Sort
-                prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
+                prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
             }
         }
 

@@ -66,6 +66,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, node.att().getOptional("Location", Location.class).orElse(null), node.att().getOptional("Source", Source.class).orElse(null));
     }
 
+    public static KEMException innerParserError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, null, null);
+    }
+
     public static KEMException innerParserError(String message, Throwable e, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, e, location, source);
     }

@@ -1,24 +1,22 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import com.google.inject.Inject;
 import org.kframework.attributes.Source;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.Context;
 import org.kframework.parser.ParserType;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.kastparser.KastParser;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,15 +45,13 @@ public class RunProcess {
 
     private final KExceptionManager kem;
     private final ProgramLoader loader;
-    private final Provider<ProcessBuilder> pb;
     private final Context context;
     private final FileUtil files;
 
     @Inject
-    public RunProcess(KExceptionManager kem, ProgramLoader loader, Provider<ProcessBuilder> pb, Context context, FileUtil files) {
+    public RunProcess(KExceptionManager kem, ProgramLoader loader, Context context, FileUtil files) {
         this.kem = kem;
         this.loader = loader;
-        this.pb = pb;
         this.context = context;
         this.files = files;
     }
@@ -64,7 +60,7 @@ public class RunProcess {
         return kem;
     }
 
-    public ProcessOutput execute(Map<String, String> environment, String... commands) {
+    public static ProcessOutput execute(Map<String, String> environment, ProcessBuilder pb, String... commands) {
 
         ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
@@ -74,7 +70,7 @@ public class RunProcess {
             }
 
             // create process
-            ProcessBuilder pb = this.pb.get().command(commands);
+            pb = pb.command(commands);
             Map<String, String> realEnvironment = pb.environment();
             realEnvironment.putAll(environment);
 
@@ -166,7 +162,7 @@ public class RunProcess {
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }
-                ProcessOutput output = this.execute(environment, tokens.toArray(new String[tokens.size()]));
+                ProcessOutput output = this.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
 
                 if (output.exitCode != 0) {
                     throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: "

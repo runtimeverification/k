@@ -22,6 +22,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.ConcretizeCells;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.kore.compile.ResolveSemanticCasts;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.parser.Term;
@@ -55,6 +56,7 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static scala.compat.java8.JFunction.*;
 
 /**
@@ -66,7 +68,7 @@ public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
-    private static final String startSymbol = "RuleContent";
+    public static final Sort START_SYMBOL = Sort("RuleContent");
 
     private final FileUtil files;
     private final KExceptionManager kem;
@@ -98,15 +100,17 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, String programStartSymbol) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
 
         DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
+        DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
 
         Function1<Definition, Definition> pipeline =
                 heatingCooling
+                        .andThen(resolveAnonVars)
                         .andThen(resolveSemanticCasts)
                         .andThen(func(this::concretizeTransformer))
                         .andThen(func(this::addSemanticsModule))
@@ -309,7 +313,7 @@ public class Kompile {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), startSymbol, Source.apply(source), startLine, startColumn);
+            result = parser.parseString(b.contents(), START_SYMBOL, Source.apply(source), startLine, startColumn);
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
                 K k = TreeNodesToKORE.down(TreeNodesToKORE.apply(result._1().right().get()));
