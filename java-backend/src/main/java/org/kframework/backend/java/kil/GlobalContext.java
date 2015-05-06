@@ -32,8 +32,10 @@ public class GlobalContext implements Serializable {
     public final transient EqualityOperations equalityOps;
     public final transient SMTOperations constraintOps;
     public final transient KItemOperations kItemOps;
-    public final KRunOptions krunOptions;
-    public final GlobalOptions globalOptions;
+    public final transient KRunOptions krunOptions;
+    private final transient KExceptionManager kem;
+    private final transient Map<String, Provider<MethodHandle>> hookProvider;
+    public final transient GlobalOptions globalOptions;
 
     @Inject
     public GlobalContext(
@@ -49,10 +51,22 @@ public class GlobalContext implements Serializable {
         this.fs = fs;
         this.globalOptions = globalOptions;
         this.krunOptions = krunOptions;
+        this.kem = kem;
+        this.hookProvider = hookProvider;
         this.equalityOps = new EqualityOperations(() -> def, javaOptions);
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files));
-        this.kItemOps = new KItemOperations(stage, javaOptions, kem, () -> new BuiltinFunction(def, hookProvider, kem, stage), globalOptions);
+        this.kItemOps = new KItemOperations(stage, javaOptions, kem, this::builtins, globalOptions);
         this.stage = stage;
+    }
+
+    private transient BuiltinFunction builtinFunction;
+    private BuiltinFunction builtins() {
+        BuiltinFunction b = builtinFunction;
+        if (b == null) {
+            b = new BuiltinFunction(def, hookProvider, kem, stage);
+            builtinFunction = b;
+        }
+        return b;
     }
 
     public void setDefinition(Definition def) {
