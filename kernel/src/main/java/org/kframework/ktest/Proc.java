@@ -151,7 +151,6 @@ public class Proc<T> implements Runnable {
         String path = this.env.keySet().stream().filter(key -> key.toUpperCase().equals("PATH")).findFirst().orElseGet(() -> "PATH");
         if (this.env.containsKey(path)) {
             String allPaths = this.env.get(path);
-            System.out.println("allPaths = " + allPaths);
             if (!allPaths.contains(binDir))
                 this.env.put(path, allPaths + ";" + binDir);
         } else {
