@@ -61,7 +61,6 @@ public class Subsorts implements Serializable {
                 .collect(Collectors.toSet());
 
         this.subsort = ArrayTable.create(sorts, sorts);
-        Set<org.kframework.kore.Sort> kSorts = Sets.newHashSet(Sorts.K(), Sorts.KList(), Sorts.KItem(), Sorts.KLabel(), Sorts.KBott(), Sorts.KVariable(), Sorts.KString());
         for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
             for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
                 subsort.put(

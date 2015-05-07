@@ -23,11 +23,11 @@ import static org.kframework.kore.KORE.*;
 public class ResolveSemanticCasts {
 
     private Set<KApply> casts = new HashSet<>();
-    private Map<KVariable, KVariable> varSorts = new HashMap<>();
+    private Map<KVariable, KVariable> varToTypedVar = new HashMap<>();
 
     void resetCasts() {
         casts.clear();
-        varSorts.clear();
+        varToTypedVar.clear();
     }
 
     private Rule resolve(Rule rule) {
@@ -53,7 +53,7 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), KList(kapp.klist().items().stream().map(varSorts::get).collect(Collectors.toList())), kapp.att()))
+        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), KList(kapp.klist().items().stream().map(varToTypedVar::get).collect(Collectors.toList())), kapp.att()))
                 .reduce(requires, BooleanUtils::and);
     }
 
@@ -70,7 +70,7 @@ public class ResolveSemanticCasts {
                     K child = v.klist().items().get(0);
                     if (child instanceof KVariable) {
                         KVariable var = (KVariable) child;
-                        varSorts.put(var, KVariable(var.name(), var.att().add("sort", getSortNameOfCast(v))));
+                        varToTypedVar.put(var, KVariable(var.name(), var.att().add("sort", getSortNameOfCast(v))));
                     }
                 }
                 return super.apply(v);
@@ -90,8 +90,8 @@ public class ResolveSemanticCasts {
 
             @Override
             public K apply(KVariable k) {
-                if (varSorts.containsKey(k)) {
-                    return varSorts.get(k);
+                if (varToTypedVar.containsKey(k)) {
+                    return varToTypedVar.get(k);
                 }
                 return super.apply(k);
             }
