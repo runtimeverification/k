@@ -152,7 +152,7 @@ public class Proc<T> implements Runnable {
         if (this.env.containsKey(path)) {
             String allPaths = this.env.get(path);
             if (!allPaths.contains(binDir))
-                this.env.put(path, allPaths + ";" + binDir);
+                this.env.put(path, allPaths + File.pathSeparator + binDir);
         } else {
             this.env.put(path, binDir);
         }
