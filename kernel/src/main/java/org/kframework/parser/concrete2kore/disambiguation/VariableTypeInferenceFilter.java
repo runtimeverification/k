@@ -339,7 +339,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc)).apply(t);
+                boolean strict = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strict).apply(t);
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(0, rez.right().get());
@@ -364,8 +365,15 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         private class ApplyTypeCheck2 extends SetsTransformerWithErrors<ParseFailedException> {
             private final Sort sort;
+            private final boolean strict;
             public ApplyTypeCheck2(Sort sort) {
                 this.sort = sort;
+                strict = false;
+            }
+
+            public ApplyTypeCheck2(Sort sort, boolean strict) {
+                this.sort = sort;
+                this.strict = strict;
             }
 
             // TODO (Radu): check types of terms under rewrites too?
