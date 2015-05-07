@@ -6,6 +6,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
+import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
@@ -84,6 +85,9 @@ public class ParseInModule implements Serializable {
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
         rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez = new ApplyTypeCheckVisitor(module.subsorts()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
         rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
