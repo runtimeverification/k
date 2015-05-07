@@ -122,7 +122,7 @@ public class BuiltinIOOperations {
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
             org.kframework.kil.Term kast = rp.get().runParser(
-                    termContext.global().krunOptions.configurationCreation.parser(termContext.definition().context()),
+                    termContext.global().krunOptions.configurationCreation.parser(),
                     term1.stringValue(), true, Sort.of(term2.stringValue()));
             Term term = kilTransformer.get().transformAndEval(kast);
             return term;

@@ -13,8 +13,8 @@ import org.kframework.kore.KVariable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
 
@@ -54,8 +54,24 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        return casts.stream().map(kapp -> (K) KApply(KLabel("is" + getSortNameOfCast(kapp)), KList(kapp.klist().items().stream().map(varToTypedVar::get).collect(Collectors.toList())), kapp.att()))
-                .reduce(requires, BooleanUtils::and);
+        Optional<KApply> sideCondition = casts.stream().map(k -> {
+            return new TransformKORE() {
+                @Override
+                public K apply(KVariable k) {
+                    if (varToTypedVar.containsKey(k)) {
+                        return varToTypedVar.get(k);
+                    }
+                    return k;
+                }
+            }.apply(k);
+        }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply)k)), transform(k))).reduce(BooleanUtils::and);
+        if (!sideCondition.isPresent()) {
+            return requires;
+        } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
+            return sideCondition.get();
+        } else {
+            return BooleanUtils.and(requires, sideCondition.get());
+        }
     }
 
     private String getSortNameOfCast(KApply kapp) {

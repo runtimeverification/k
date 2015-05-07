@@ -29,7 +29,7 @@ endmodule
 
 module IMP-SYNTAX
   imports ID
-  imports IMP
+  imports IMP-CORE-SYNTAX
 endmodule
 
 module IMP
