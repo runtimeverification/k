@@ -119,7 +119,7 @@ public class KastFrontEnd extends FrontEnd {
                 System.out.println(ToKast.apply(parsed));
             } else {
                 Context context = contextProvider.get();
-                Sort sort = sort(Sort.of(options.sort.name()), context);
+                Sort sort = sort(options.sort, context);
 
                 ASTNode out = loader.get().processPgm(stringToParse, source, sort, context, options.parser);
                 StringBuilder kast;
@@ -139,14 +139,17 @@ public class KastFrontEnd extends FrontEnd {
     }
 
 
-    private Sort sort(Sort sort, Context context) {
+    private Sort sort(org.kframework.kore.Sort sort, Context context) {
+        Sort res;
         if (sort == null) {
             if (env.get("KRUN_SORT") != null) {
-                sort = Sort.of(env.get("KRUN_SORT"));
+                res = Sort.of(env.get("KRUN_SORT"));
             } else {
-                sort = context.startSymbolPgm();
+                res = context.startSymbolPgm();
             }
+        } else {
+            res = Sort.of(sort.name());
         }
-        return sort;
+        return res;
     }
 }
