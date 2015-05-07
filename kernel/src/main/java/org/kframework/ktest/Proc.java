@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -141,9 +142,20 @@ public class Proc<T> implements Runnable {
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
         this.kem = kem;
-        this.env = env;
+        this.env = new HashMap<>(env);
         success = options.dry;
         this.warnings2errors = warnings2errors;
+        // add the /bin directory to the PATH if not there already
+        String binDir = ExecNames.getBinDirectory();
+        // windows is case insensitive w.r.t environment variables, so first find the exact match
+        String path = this.env.keySet().stream().filter(key -> key.toUpperCase().equals("PATH")).findFirst().orElseGet(() -> "PATH");
+        if (this.env.containsKey(path)) {
+            String allPaths = this.env.get(path);
+            if (!allPaths.contains(binDir))
+                this.env.put(path, allPaths + ";" + binDir);
+        } else {
+            this.env.put(path, binDir);
+        }
     }
 
     public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem, Map<String, String> env, boolean warnings2errors) {
