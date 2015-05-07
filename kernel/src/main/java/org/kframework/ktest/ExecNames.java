@@ -25,6 +25,10 @@ public class ExecNames {
         return getExecutable("kast");
     }
 
+    public static String getBinDirectory() {
+        return JarInfo.getKBase() + FILE_SEPARATOR + "bin";
+    }
+
     public static String getExecutable(String exe) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
