@@ -18,7 +18,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
@@ -73,7 +72,7 @@ public class KItem extends Term implements KItemRepresentation {
         kList = KCollection.upKind(kList, Kind.KLIST);
 
         // TODO(yilongli): break the dependency on the Tool object
-        return new KItem(kLabel, kList, termContext, termContext.global().tool, source, location);
+        return new KItem(kLabel, kList, termContext, termContext.global().stage, source, location);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -102,7 +101,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.enableCache = enableCache;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext, Tool tool, Source source, Location location) {
+    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location) {
         super(Kind.KITEM, source, location);
         this.kLabel = kLabel;
         this.kList = kList;
@@ -114,7 +113,7 @@ public class KItem extends Term implements KItemRepresentation {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
             /* at runtime, checks if the result has been cached */
-            enableCache = (tool != Tool.KOMPILE)
+            enableCache = (stage == Stage.REWRITING)
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
 
             sort = null;
@@ -269,7 +268,7 @@ public class KItem extends Term implements KItemRepresentation {
 
     public static class KItemOperations {
 
-        private final Tool tool;
+        private final Stage stage;
         private final JavaExecutionOptions javaOptions;
         private final KExceptionManager kem;
         private final Provider<BuiltinFunction> builtins;
@@ -277,12 +276,12 @@ public class KItem extends Term implements KItemRepresentation {
 
         @Inject
         public KItemOperations(
-                Tool tool,
+                Stage stage,
                 JavaExecutionOptions javaOptions,
                 KExceptionManager kem,
                 Provider<BuiltinFunction> builtins,
                 GlobalOptions options) {
-            this.tool = tool;
+            this.stage = stage;
             this.javaOptions = javaOptions;
             this.kem = kem;
             this.builtins = builtins;
@@ -311,7 +310,7 @@ public class KItem extends Term implements KItemRepresentation {
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
-                    if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && tool != Tool.KOMPILE) {
+                    if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Unable to resolve function symbol:\n\t\t");
                         sb.append(result);
@@ -332,7 +331,7 @@ public class KItem extends Term implements KItemRepresentation {
                 }
                 return result;
             } catch (StackOverflowError e) {
-                throw KExceptionManager.criticalError(TRACE_MSG, e);
+                throw KEMException.criticalError(TRACE_MSG, e);
             } catch (KEMException e) {
                 e.exception.addTraceFrame("while evaluating function " + kItem.kLabel().toString());
                 throw e;
@@ -456,7 +455,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 } else {
                                     if (matches.size() > 1) {
                                         if (javaOptions.deterministicFunctions) {
-                                            throw KExceptionManager.criticalError("More than one possible match. " +
+                                            throw KEMException.criticalError("More than one possible match. " +
                                                     "Function " + kLabelConstant + " might be non-deterministic.");
                                         }
                                         kem.registerInternalWarning("More than one possible match. " +
@@ -496,9 +495,9 @@ public class KItem extends Term implements KItemRepresentation {
                                     owiseResult = rightHandSide;
                                 }
                             } else {
-                                if (tool == Tool.KRUN) {
+                                if (stage == Stage.REWRITING) {
                                     if (result != null && !result.equals(rightHandSide)) {
-                                        throw KExceptionManager.criticalError("[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem);
+                                        throw KEMException.criticalError("[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem);
                                     }
                                 }
                                 RuleAuditing.succeed(rule);

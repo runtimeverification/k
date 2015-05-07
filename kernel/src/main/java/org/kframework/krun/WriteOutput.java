@@ -12,7 +12,7 @@ import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.kil.Attributes;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
@@ -61,7 +61,7 @@ public class WriteOutput implements Transformation<InputStream, Void> {
             }
             return null;
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("IO error writing output of krun.", e);
+            throw KEMException.criticalError("IO error writing output of krun.", e);
         } finally {
             sw.printIntermediate("Write output to file");
         }

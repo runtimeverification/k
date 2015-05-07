@@ -1,11 +1,21 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
+import com.google.inject.throwingproviders.ThrowingProviderBinder;
+import org.kframework.Rewriter;
 import org.kframework.backend.unparser.BinaryOutputMode;
 import org.kframework.backend.unparser.ConcretizeTerm;
 import org.kframework.backend.unparser.KASTOutputMode;
@@ -37,9 +47,9 @@ import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.krun.tools.Prover;
+import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.Tool;
 import org.kframework.parser.TermLoader;
 import org.kframework.transformation.ActivatedTransformationProvider;
@@ -51,6 +61,7 @@ import org.kframework.transformation.TransformationMembersInjector;
 import org.kframework.transformation.TransformationProvider;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
@@ -62,20 +73,11 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.AbstractModule;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matchers;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.spi.TypeEncounter;
-import com.google.inject.spi.TypeListener;
-import com.google.inject.throwingproviders.ThrowingProviderBinder;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class KRunModule extends AbstractModule {
 
@@ -194,11 +196,18 @@ public class KRunModule extends AbstractModule {
             MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);
 
+            MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                    binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+            });
+
             MapBinder.newMapBinder(
                     binder(), String.class, LtlModelChecker.class);
 
             MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
+
+            //TODO(cos): move to tiny module
+            rewriterBinder.addBinding("tiny").toInstance(m -> new org.kframework.tiny.Rewriter(m));
 
             bind(Debugger.class).to(ExecutorDebugger.class);
 
@@ -221,7 +230,17 @@ public class KRunModule extends AbstractModule {
         Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map, KExceptionManager kem) {
             Provider<Executor> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                        + map.keySet());
+            }
+            return provider.get();
+        }
+
+        @Provides
+        Function<org.kframework.definition.Module, Rewriter> getRewriter(KompileOptions options, Map<String, Provider<Function<org.kframework.definition.Module, Rewriter>>> map, KExceptionManager kem) {
+            Provider<Function<org.kframework.definition.Module, Rewriter>> provider = map.get(options.backend);
+            if (provider == null) {
+                throw KEMException.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -231,7 +250,7 @@ public class KRunModule extends AbstractModule {
         LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map, KExceptionManager kem) {
             Provider<LtlModelChecker> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -241,7 +260,7 @@ public class KRunModule extends AbstractModule {
         Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map, KExceptionManager kem) {
             Provider<Prover> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();

@@ -16,7 +16,9 @@ object Sorts {
   val File = Sort("File")
 
   val K = Sort("K")
+  val KBott = Sort("KBott")
   val KVariable = Sort("KVariable")
+  val KItem = Sort("KItem")
   val KLabel = Sort("KLabel")
   val KList = Sort("KList")
   val KToken = Sort("KToken")

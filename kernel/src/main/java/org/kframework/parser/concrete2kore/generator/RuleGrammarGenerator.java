@@ -11,6 +11,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
@@ -54,12 +55,17 @@ public class RuleGrammarGenerator {
         kSorts.add(Sort("KVariable"));
         kSorts.add(Sort("KString"));
     }
+
+    public Set<Sort> kSorts() {
+        return java.util.Collections.unmodifiableSet(kSorts);
+    }
     /// modules that have a meaning:
     public static final String RULE_CELLS = "RULE-CELLS";
     public static final String CONFIG_CELLS = "CONFIG-CELLS";
     public static final String K = "K";
     public static final String AUTO_CASTS = "AUTO-CASTS";
-    public static final String K_SORT_LATTICE = "K-SORT-LATTICE";
+    public static final String K_TOP_SORT = "K-TOP-SORT";
+    public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
 
     public RuleGrammarGenerator(Definition baseK) {
@@ -105,12 +111,20 @@ public class RuleGrammarGenerator {
             prods.addAll(makeCasts(KBott, KTop, KItem));
             prods.addAll(makeCasts(KBott, KTop, KTop));
         }
-        if (baseK.getModule(K_SORT_LATTICE).isDefined() && mod.importedModules().contains(baseK.getModule(K_SORT_LATTICE).get())) { // create the diamond
+        if (baseK.getModule(K_TOP_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_TOP_SORT).get())) { // create the diamond
+            for (Sort srt : iterable(mod.definedSorts())) {
+                if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
+                    // K ::= Sort
+                    prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
+                }
+            }
+        }
+
+        if (baseK.getModule(K_BOTTOM_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_BOTTOM_SORT).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
                     // Sort ::= KBott
                     prods.add(Production(srt, Seq(NonTerminal(KBott)), Att()));
-                    prods.add(Production(KTop, Seq(NonTerminal(srt)), Att()));
                 }
             }
         }
@@ -174,13 +188,13 @@ public class RuleGrammarGenerator {
             }).collect(Collections.toSet());
         }
 
-        Module newM = new Module(mod.name() + "-PARSER", Set(), prods2, null);
+        Module newM = new Module(mod.name() + "-PARSER", Set(), prods2, mod.att());
         return newM;
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
-        Att attrs1 = Att().add("sort", castSort.name());
+        Att attrs1 = Att().add(Attribute.SORT_KEY, castSort.name());
         prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.name())), attrs1));
         prods.add(Production("#SemanticCastTo" + castSort.name(),  castSort, Seq(NonTerminal(castSort), Terminal(":"  + castSort.name())), attrs1));
         prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));
@@ -202,6 +216,6 @@ public class RuleGrammarGenerator {
         }
 
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
-        return getCombinedGrammar(newM);
+        return newM;
     }
 }

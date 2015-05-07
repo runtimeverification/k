@@ -3,6 +3,7 @@ package org.kframework.kompile;
 
 import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -14,6 +15,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -38,11 +40,11 @@ public class KompileFrontEnd extends FrontEnd {
 
     private final Context context;
     private final KompileOptions options;
-    private final Backend backend;
+    private final Provider<Backend> backend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
-    private final DefinitionLoader defLoader;
+    private final Provider<DefinitionLoader> defLoader;
     private final FileUtil files;
 
     @Inject
@@ -51,11 +53,11 @@ public class KompileFrontEnd extends FrontEnd {
             KompileOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            Backend backend,
+            Provider<Backend> backend,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader,
-            DefinitionLoader defLoader,
+            Provider<DefinitionLoader> defLoader,
             JarInfo jarInfo,
             FileUtil files) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
@@ -72,12 +74,12 @@ public class KompileFrontEnd extends FrontEnd {
     @Override
     public int run() {
         if (!options.mainDefinitionFile().exists()) {
-            throw KExceptionManager.criticalError("Definition file doesn't exist: " +
+            throw KEMException.criticalError("Definition file doesn't exist: " +
                     options.mainDefinitionFile().getAbsolutePath());
         }
 
         if (options.experimental.kore) {
-            Kompile kompile = new Kompile(files, kem);
+            Kompile kompile = new Kompile(options, files, kem);
             //TODO(dwightguth): handle start symbols
             CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), "K");
             loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
@@ -106,15 +108,16 @@ public class KompileFrontEnd extends FrontEnd {
     private Definition genericCompile(String step) {
         org.kframework.kil.Definition javaDef;
         sw.start();
-        javaDef = defLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
+        javaDef = defLoader.get().loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 context);
 
         loader.saveOrDie(files.resolveKompiled("definition-concrete.bin"), javaDef);
 
-        CompilerSteps<Definition> steps = backend.getCompilationSteps();
+        Backend b = backend.get();
+        CompilerSteps<Definition> steps = b.getCompilationSteps();
 
         if (step == null) {
-            step = backend.getDefaultStep();
+            step = b.getDefaultStep();
         }
         try {
             javaDef = steps.compile(javaDef, step);
@@ -125,7 +128,7 @@ public class KompileFrontEnd extends FrontEnd {
         loader.saveOrDie(files.resolveKompiled("configuration.bin"),
                 MetaK.getConfiguration(javaDef, context));
 
-        backend.run(javaDef);
+        b.run(javaDef);
 
         return javaDef;
     }

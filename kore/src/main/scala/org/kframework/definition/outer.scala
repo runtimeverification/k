@@ -7,6 +7,9 @@ import org.kframework.POSet
 import org.kframework.attributes.{Source, Location, Att}
 import org.kframework.kore.Unapply.{KLabel, KApply}
 import org.kframework.kore._
+import org.kframework.utils.errorsystem.KEMException
+
+import scala.collection.JavaConverters._
 
 trait OuterKORE
 
@@ -138,7 +141,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     case p@Production(_, items, _) =>
       val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
       if (!res.isEmpty)
-        throw new AssertionError("Could not find sort: " + res + " in production " + p + " in module " + this.name)
+        throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
       res
     case _ => Set()
   }

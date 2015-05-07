@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import java.util.HashMap;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
@@ -28,7 +26,7 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.w3c.dom.Element;
 
 /**
@@ -101,6 +99,6 @@ public class JavaClassesFactory {
         if (Constants.ATTRIBUTES.equals(element.getNodeName()))
             return new Attributes(element, this);
 
-        throw KExceptionManager.criticalError(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
+        throw KEMException.criticalError(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
     }
 }

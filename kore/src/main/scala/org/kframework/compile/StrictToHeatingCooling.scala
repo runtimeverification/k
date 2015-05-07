@@ -4,8 +4,7 @@ import org.kframework.definition._
 import org.kframework.kore.KORE._
 
 object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
-  val True = KLabel("_andBool_")()
-  val False = KLabel("_orBool_")()
+  val True = KToken(Sort("Bool"), "true")
   val hole = KLabel("[]")()
 
   def makeVar(pos: Int) = KVariable("A" + (pos + 1))
@@ -42,11 +41,11 @@ object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
         Rule(
           KSequence(KRewrite(cooled, heated(i))),
           KLabel("notBool_")(isKResult(i)),
-          False, Att() + "heat"),
+          True, Att() + "heat"),
         Rule(
           KSequence(KRewrite(heated(i), cooled)),
           isKResult(i),
-          False, Att() + "cool")
+          True, Att() + "cool")
       )
     }
   }

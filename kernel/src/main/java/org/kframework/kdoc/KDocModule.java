@@ -15,6 +15,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.Main;
@@ -66,7 +67,7 @@ public class KDocModule extends AbstractModule {
     PosterBackend getBackend(KDocOptions options, Map<String, PosterBackend> map, KExceptionManager kem) {
         PosterBackend backend = map.get(options.format);
         if (backend == null) {
-            throw KExceptionManager.criticalError("Invalid poster format: " + options.format
+            throw KEMException.criticalError("Invalid poster format: " + options.format
                     + ". It should be one of " + map.keySet());
         }
         return backend;

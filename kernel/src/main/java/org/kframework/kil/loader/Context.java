@@ -16,6 +16,7 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
@@ -336,7 +337,7 @@ public class Context implements Serializable {
             for (Sort sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
-            throw KExceptionManager.criticalError(msg);
+            throw KEMException.criticalError(msg);
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
@@ -448,9 +449,9 @@ public class Context implements Serializable {
     public DataStructureSort getDefaultListDataStructureSort() {
         DataStructureSort list = dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
         if (list == null) {
-            throw KExceptionManager.internalError(
+            throw KEMException.internalError(
                     "A sort List must exist and be recognized as a data structure sort."
-                    + " Installation is corrupt or --no-prelude used with incomplete definition.");
+                            + " Installation is corrupt or --no-prelude used with incomplete definition.");
         }
         return list;
     }

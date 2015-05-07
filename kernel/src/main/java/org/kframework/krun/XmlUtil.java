@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,7 +44,7 @@ public class XmlUtil {
             DocumentBuilder builder = dbf.newDocumentBuilder();
             doc = builder.parse(input);
         } catch (ParserConfigurationException | IOException | SAXException e) {
-            throw KExceptionManager.criticalError("Error while reading XML:" + e.getMessage(), e);
+            throw KEMException.criticalError("Error while reading XML:" + e.getMessage(), e);
         }
         return doc;
     }
@@ -75,7 +75,7 @@ public class XmlUtil {
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
             transformer.transform(xmlSource, result);
         } catch (TransformerFactoryConfigurationError | TransformerException | IOException e) {
-            throw KExceptionManager.criticalError("Error while writing XML:" + e.getMessage(), e);
+            throw KEMException.criticalError("Error while writing XML:" + e.getMessage(), e);
         }
     }
 

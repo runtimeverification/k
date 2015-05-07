@@ -32,7 +32,7 @@ import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.InjectGeneric;
@@ -184,7 +184,7 @@ public interface Debugger {
             try {
                 reader = new ConsoleReader();
             } catch (IOException e) {
-                throw KExceptionManager.internalError("IO error detected interacting with console", e);
+                throw KEMException.internalError("IO error detected interacting with console", e);
             }
             // adding autocompletion and history feature to the stepper internal
             // commandline by using the JLine library
@@ -204,11 +204,11 @@ public interface Debugger {
                 System.out.println("After running one step of execution the result is:\n");
                 System.out.println(statePrinter.run(debugger.getState(debugger.getCurrentState()), a));
             } catch (UnsupportedBackendOptionException e) {
-                throw KExceptionManager.criticalError("Backend \""
+                throw KEMException.criticalError("Backend \""
                         + kompileOptions.backend
                         + "\" does not support option " + e.getMessage(), e);
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
             while (true) {
                 System.out.println();
@@ -216,7 +216,7 @@ public interface Debugger {
                 try {
                     input = reader.readLine("Command > ");
                 } catch (IOException e) {
-                    throw KExceptionManager.internalError("IO error detected interacting with console", e);
+                    throw KEMException.internalError("IO error detected interacting with console", e);
                 }
                 if (input == null) {
                     // probably pressed ^D
@@ -292,7 +292,7 @@ public interface Debugger {
                                 files.resolveWorkingDirectory(options.save.file)))) {
                             loader.saveOrDie(out, debugger.getGraph());
                         } catch (IOException e) {
-                            throw KExceptionManager.internalError("Error writing to binary file", e);
+                            throw KEMException.internalError("Error writing to binary file", e);
                         }
                         System.out.println("File successfully saved.");
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
@@ -304,7 +304,7 @@ public interface Debugger {
                             debugger.setCurrentState(0);
                             System.out.println("File successfully loaded.");
                         } catch (IOException e) {
-                            throw KExceptionManager.internalError("Error reading from binary file", e);
+                            throw KEMException.internalError("Error reading from binary file", e);
                         }
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandRead) {
                         debugger.readFromStdin(StringBuiltin.valueOf(options.read.string).stringValue());

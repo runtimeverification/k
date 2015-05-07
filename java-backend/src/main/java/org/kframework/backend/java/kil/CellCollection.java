@@ -9,8 +9,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
-import org.kframework.kil.loader.Context;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -148,7 +147,7 @@ public class CellCollection extends Collection {
                     count++;
                 } else {
                     if (cells.get(cellLabel).size() != 1) {
-                        throw KExceptionManager.criticalError("Cell label " + cellLabel + " does not have "
+                        throw KEMException.criticalError("Cell label " + cellLabel + " does not have "
                                 + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
                                 + "\nExamine the last rule applied to determine the source of the error.");
                     }

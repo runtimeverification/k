@@ -1,6 +1,15 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.*;
+import org.kframework.kil.ASTNode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,11 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.kframework.backend.java.builtins.*;
-import org.kframework.backend.java.kil.*;
-import org.kframework.kil.ASTNode;
-import org.kframework.main.Tool;
 
 
 /**
@@ -103,6 +107,15 @@ public class CopyOnWriteTransformer implements Transformer {
             kLabelInjection = new KLabelInjection(term);
         }
         return kLabelInjection;
+    }
+
+    @Override
+    public ASTNode transform(InjectedKLabel injectedKLabel) {
+        Term term = (Term) injectedKLabel.injectedKLabel().accept(this);
+        if (term != injectedKLabel.injectedKLabel()) {
+            injectedKLabel = new InjectedKLabel(term);
+        }
+        return injectedKLabel;
     }
 
     @Override
@@ -399,7 +412,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        if (context.global().tool != Tool.KOMPILE) {
+        if (context.global().stage == Stage.REWRITING) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
         }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?

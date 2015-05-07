@@ -1,15 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.rewritemachine;
 
-import java.io.Serializable;
-import java.util.List;
-
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.attributes.Source;
-import org.kframework.attributes.Location;
+
+import java.io.Serializable;
+import java.util.List;
 
 public final class RHSInstruction implements Serializable {
 
@@ -64,7 +64,7 @@ public final class RHSInstruction implements Serializable {
         public enum ConstructorType {
             KITEM, BUILTIN_LIST, BUILTIN_MAP, BUILTIN_SET,
             KLABEL_FREEZER, KLIST, KSEQUENCE, KITEM_PROJECTION,
-            KLABEL_INJECTION, CELL_COLLECTION
+            KLABEL_INJECTION, CELL_COLLECTION, INJECTED_KLABEL
         }
 
         public Constructor(ConstructorType type) {

@@ -11,6 +11,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -18,7 +19,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,7 +151,7 @@ public class AddParentCells {
         }
 
         // They were also not forced to be separate
-        throw KExceptionManager.criticalError("Ambiguous completion");
+        throw KEMException.criticalError("Ambiguous completion");
     }
 
     boolean isCompletionItem(K k) {
@@ -171,8 +172,8 @@ public class AddParentCells {
         if (k instanceof KApply) {
             return getLevel((KApply) k);
         } else if (k instanceof KVariable) {
-            if (k.att().contains("sort")) {
-                Sort sort = Sort(k.att().<String>get("sort").get());
+            if (k.att().contains(Attribute.SORT_KEY)) {
+                Sort sort = Sort(k.att().<String>get(Attribute.SORT_KEY).get());
                 int level = cfg.cfg.getLevel(sort);
                 if (level >= 0) {
                     return Optional.of(level);
@@ -192,7 +193,7 @@ public class AddParentCells {
                 if (!level.isPresent()) {
                     level = level2;
                 } else if (!level.equals(level2)) {
-                    throw KExceptionManager.criticalError("Can't mix cells at different levels under a rewrite");
+                    throw KEMException.criticalError("Can't mix cells at different levels under a rewrite");
                 }
                 // else level is already correct
             }
@@ -210,7 +211,7 @@ public class AddParentCells {
                 Optional<KLabel> parent = getParent(items.get(0));
                 for (K item : items) {
                     if (!parent.equals(getParent(item))) {
-                        throw KExceptionManager.criticalError("Can't mix cells with different parents levels under a rewrite");
+                        throw KEMException.criticalError("Can't mix cells with different parents levels under a rewrite");
                     }
                 }
                 return parent;
@@ -218,7 +219,7 @@ public class AddParentCells {
                 return Optional.of(cfg.getParent(((KApply) k).klabel()));
             }
         } else if (k instanceof KVariable) {
-            Sort sort = Sort(k.att().<String>get("sort").get());
+            Sort sort = Sort(k.att().<String>get(Attribute.SORT_KEY).get());
             return Optional.of(cfg.getParent(sort));
         } else {
             Optional<KLabel> leftParent = getParent(((KRewrite) k).left());
@@ -232,7 +233,7 @@ public class AddParentCells {
             if (leftParent.equals(rightParent)) {
                 return leftParent;
             } else {
-                throw KExceptionManager.criticalError("All cells on the left and right of a rewrite must have the same parent: " + k);
+                throw KEMException.criticalError("All cells on the left and right of a rewrite must have the same parent: " + k);
             }
         }
     }

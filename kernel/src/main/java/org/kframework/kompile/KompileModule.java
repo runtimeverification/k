@@ -1,15 +1,17 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import java.io.File;
-import java.util.Map;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
-import org.kframework.backend.Backends;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.DefinitionDir;
 import org.kframework.utils.file.KompiledDir;
@@ -18,11 +20,8 @@ import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.SMTOptions;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
+import java.io.File;
+import java.util.Map;
 
 public class KompileModule extends AbstractModule {
 
@@ -65,10 +64,7 @@ public class KompileModule extends AbstractModule {
     }
 
     @Provides @KompiledDir
-    File kompiledDir(@DefinitionDir File defDir, KompileOptions options, Backend backend, @TempDir File tempDir) {
-        if (!backend.generatesDefinition()) {
-            return tempDir;
-        }
+    File kompiledDir(@DefinitionDir File defDir, KompileOptions options, @TempDir File tempDir) {
         return new File(defDir, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
     }
 
@@ -86,7 +82,7 @@ public class KompileModule extends AbstractModule {
     Backend getBackend(KompileOptions options, Map<String, Backend> map, KExceptionManager kem) {
         Backend backend = map.get(options.backend);
         if (backend == null) {
-            throw KExceptionManager.criticalError("Invalid backend: " + options.backend
+            throw KEMException.criticalError("Invalid backend: " + options.backend
                     + ". It should be one of " + map.keySet());
         }
         return backend;

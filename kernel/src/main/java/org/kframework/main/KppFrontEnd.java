@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -59,7 +60,7 @@ public class KppFrontEnd extends FrontEnd {
             KppFrontEnd.codeClean(input, System.out);
             return 0;
         } catch (IOException e) {
-            throw KExceptionManager.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage(), e);
         }
     }
 

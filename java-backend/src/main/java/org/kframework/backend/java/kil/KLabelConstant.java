@@ -1,12 +1,9 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Set;
-
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Names;
-
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -17,6 +14,8 @@ import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+
+import java.util.Set;
 
 
 /**
@@ -60,6 +59,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
     private KLabelConstant(
             String label,
             Set<SortSignature> signatures,
+            Set<Sort> allSorts,
             Attributes productionAttributes) {
         this.label = label;
         this.signatures = signatures;
@@ -70,7 +70,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         boolean isFunction;
         boolean isPattern = false;
         String smtlib = null;
-        if (!label.startsWith("is")) {
+        if (!label.startsWith("is") || !allSorts.contains(Sort.of(label.substring("is".length())))) {
             predicateSort = null;
             isFunction = productionAttributes.containsKey(Attribute.FUNCTION.getKey())
                     || productionAttributes.containsKey(Attribute.PREDICATE.getKey());
@@ -101,6 +101,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
                 .get(label, () -> new KLabelConstant(
                         label,
                         definition.signaturesOf(label),
+                        definition.allSorts(),
                         definition.kLabelAttributesOf(label)));
     }
 

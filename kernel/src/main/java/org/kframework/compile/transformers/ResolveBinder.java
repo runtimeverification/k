@@ -4,7 +4,6 @@ package org.kframework.compile.transformers;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import org.kframework.attributes.Source;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -23,7 +22,8 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,16 +71,16 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
             while (m.regionStart() < m.regionEnd()) {
                 if (!m.lookingAt()) {
-                    throw KExceptionManager.criticalError(
+                    throw KEMException.criticalError(
                             "could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\"");
                 }
                 if (m.end() < m.regionEnd()) {
                     if (!m.group(4).equals(",")) {
-                        throw KExceptionManager.criticalError("expecting ',' at the end \"" + m.group() + "\"");
+                        throw KEMException.criticalError("expecting ',' at the end \"" + m.group() + "\"");
                     }
                 } else {
                     if (!m.group(4).equals("")) {
-                        throw KExceptionManager.criticalError("unexpected ',' at the end \"" + m.group() + "\"");
+                        throw KEMException.criticalError("unexpected ',' at the end \"" + m.group() + "\"");
                     }
                 }
 

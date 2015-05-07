@@ -178,4 +178,9 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(Variable variable) {
         return transform((Term) variable);
     }
+
+    @Override
+    public ASTNode transform(InjectedKLabel injectedKLabel) {
+        return transform((Term) injectedKLabel);
+    }
 }

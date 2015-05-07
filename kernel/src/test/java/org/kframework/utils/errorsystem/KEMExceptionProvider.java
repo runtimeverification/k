@@ -7,6 +7,6 @@ public class KEMExceptionProvider<T> implements TransformationProvider<T> {
 
     @Override
     public T get() {
-        throw KExceptionManager.criticalError("foo");
+        throw KEMException.criticalError("foo");
     }
 }

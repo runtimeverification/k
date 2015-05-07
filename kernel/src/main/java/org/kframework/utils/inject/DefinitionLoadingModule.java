@@ -6,12 +6,13 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.Tool;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.DefinitionDir;
 import org.kframework.utils.file.Environment;
@@ -50,20 +51,34 @@ public class DefinitionLoadingModule extends AbstractModule {
     }
 
     @Provides @DefinitionScoped @Concrete
-    Definition concreteDefinition(Tool tool, BinaryLoader loader, FileUtil files) {
+    Definition concreteDefinition(BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
     }
 
     @Provides @DefinitionScoped
-    Definition definition(Tool tool, BinaryLoader loader, FileUtil files) {
+    Definition definition(BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(Definition.class, files.resolveKompiled("definition.bin"));
     }
 
 
+    @Provides @DefinitionScoped
+    CompiledDefinition koreDefinition(BinaryLoader loader, FileUtil files) {
+        return loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin"));
+    }
+
+
     @Provides
-    KompileOptions kompileOptions(Context context, Provider<FileUtil> files) {
-        context.kompileOptions.setFiles(files);
-        return context.kompileOptions;
+    KompileOptions kompileOptions(Provider<Context> context, Provider<CompiledDefinition> compiledDef, Provider<FileUtil> files) {
+        // a hack, but it's good enough for what we need from it, which is a temporary solution
+        if (files.get().resolveKompiled("compiled.bin").exists()) {
+            KompileOptions res = compiledDef.get().kompileOptions;
+            res.setFiles(files);
+            return res;
+        } else {
+            Context res = context.get();
+            res.kompileOptions.setFiles(files);
+            return res.kompileOptions;
+        }
     }
 
     @Provides @KompiledDir
@@ -79,7 +94,7 @@ public class DefinitionLoadingModule extends AbstractModule {
         for (int i = 0; i < dirs.length; i++) {
             if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
                 if (directory != null) {
-                    throw KExceptionManager.criticalError("Multiple compiled definitions found in the "
+                    throw KEMException.criticalError("Multiple compiled definitions found in the "
                             + "current working directory: " + directory.getAbsolutePath() + " and " +
                             dirs[i].getAbsolutePath());
                 } else {
@@ -89,11 +104,11 @@ public class DefinitionLoadingModule extends AbstractModule {
         }
 
         if (directory == null) {
-            throw KExceptionManager.criticalError("Could not find a compiled definition. " +
+            throw KEMException.criticalError("Could not find a compiled definition. " +
                     "Use --directory to specify one.");
         }
         if (!directory.isDirectory()) {
-            throw KExceptionManager.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
+            throw KEMException.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }
@@ -121,7 +136,7 @@ public class DefinitionLoadingModule extends AbstractModule {
             }
         }
         if (!directory.isDirectory()) {
-            throw KExceptionManager.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
+            throw KEMException.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }

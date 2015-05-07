@@ -1,15 +1,14 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Visitor;
-
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.visitors.Visitor;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 /**
  * Represents either an explicit attribute on a {@link Rule} or {@link Production},
@@ -23,6 +22,9 @@ public class Attribute<T> extends ASTNode {
     public static final String FUNCTION_KEY = "function";
     public static final String ASSOCIATIVE_KEY = "assoc";
     public static final String COMMUTATIVE_KEY = "comm";
+    public static final String IDEMPOTENT_KEY = "idem";
+    public static final String UNIT_KEY = "unit";
+    public static final String SORT_KEY = "sort";
     public static final String PREDICATE_KEY = "predicate";
     public static final String STREAM_KEY = "stream";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;

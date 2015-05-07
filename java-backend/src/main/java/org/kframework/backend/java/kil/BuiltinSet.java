@@ -8,7 +8,8 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -212,7 +213,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         public void concatenate(Term... terms) {
             for (Term term : terms) {
                 if (!term.sort().equals(Sort.SET)) {
-                    throw KExceptionManager.criticalError("unexpected sort "
+                    throw KEMException.criticalError("unexpected sort "
                             + term.sort() + " of concatenated term " + term
                             + "; expected " + Sort.SET);
                 }
@@ -230,7 +231,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                 } else if (term instanceof Variable) {
                     variablesBuilder.add((Variable) term);
                 } else {
-                    throw KExceptionManager.criticalError("unexpected concatenated term" + term);
+                    throw KEMException.criticalError("unexpected concatenated term" + term);
                 }
             }
         }

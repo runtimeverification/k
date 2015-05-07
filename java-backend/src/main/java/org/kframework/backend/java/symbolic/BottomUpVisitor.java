@@ -121,6 +121,12 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(InjectedKLabel injectedKLabel) {
+        injectedKLabel.injectedKLabel().accept(this);
+        visit((Term) injectedKLabel);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);

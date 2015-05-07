@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectedKLabel;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -40,5 +41,6 @@ public interface Matcher {
     public void match(KSequence kSequence, Term pattern);
     public void match(Term subject, Term pattern);
     public void match(Token token, Term pattern);
+    public void match(InjectedKLabel injectedKLabel, Term pattern);
 
 }

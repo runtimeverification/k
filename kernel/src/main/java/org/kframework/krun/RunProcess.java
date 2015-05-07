@@ -8,6 +8,7 @@ import org.kframework.kil.Term;
 import org.kframework.parser.ParserType;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -69,7 +70,7 @@ public class RunProcess {
 
         try {
             if (commands.length <= 0) {
-                throw KExceptionManager.criticalError("Need command options to run");
+                throw KEMException.criticalError("Need command options to run");
             }
 
             // create process
@@ -108,7 +109,7 @@ public class RunProcess {
             return new ProcessOutput(s1, s2, process.exitValue());
 
         } catch (IOException | InterruptedException e) {
-            throw KExceptionManager.criticalError("Error while running process:" + e.getMessage(), e);
+            throw KEMException.criticalError("Error while running process:" + e.getMessage(), e);
         }
 
     }

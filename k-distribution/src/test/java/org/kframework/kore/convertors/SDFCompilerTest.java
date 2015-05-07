@@ -59,7 +59,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
         context.globalOptions = globalOptions;
 
         FileUtil fileUtil = new FileUtil(tempDir.toFile(), Providers.of(definitionDir),
-                definitionDir, Providers.of(kompiledDir), globalOptions);
+                definitionDir, Providers.of(kompiledDir), globalOptions, System.getenv());
 
         String path = new File(JarInfo.getKBase() + "/lib/native/").getAbsolutePath()
                 + "/" + OS.current().name().toLowerCase() + "/";

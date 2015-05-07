@@ -1,22 +1,22 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import org.kframework.Collections;
 import org.kframework.backend.java.kil.Sort;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.JavaConversions;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import scala.collection.JavaConversions;
 
 
 /**
@@ -79,9 +79,9 @@ public class Subsorts implements Serializable {
         Boolean isSubsorted = subsort.get(bigSort, smallSort);
         if (isSubsorted == null) {
             if (subsort.containsRow(bigSort)) {
-                throw KExceptionManager.criticalError("Sort " + smallSort.toString() + " is undefined.");
+                throw KEMException.criticalError("Sort " + smallSort.toString() + " is undefined.");
             } else {
-                throw KExceptionManager.criticalError("Sort " + bigSort.toString() + " is undefined.");
+                throw KEMException.criticalError("Sort " + bigSort.toString() + " is undefined.");
             }
         }
         return isSubsorted;

@@ -182,7 +182,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -226,7 +226,7 @@ public class Outer {
     try {
       return parser.Start();
     } catch (ParseException e) {
-      throw KExceptionManager.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+      throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
             + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
             // using an anonymous class because JavaCC doesn't support Java 8 syntax.
               .map(new Function<int[], String>() {
@@ -243,7 +243,7 @@ public class Outer {
             new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
     } catch (TokenMgrError e) {
       // TODO: report location
-      throw KExceptionManager.outerParserError(e.getMessage(), e, source, null);
+      throw KEMException.outerParserError(e.getMessage(), e, source, null);
     }
   }
 

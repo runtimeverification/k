@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -117,9 +118,9 @@ public class AddParentsCellsTest {
 
     @Test
     public void testRewriteWithCellVariable() {
-        K term = cell("<T>", KRewrite(KVariable("KCell", Att().add("sort", "KCell")), cell("<k>", intToToken(1))));
+        K term = cell("<T>", KRewrite(KVariable("KCell", Att().add(Attribute.SORT_KEY, "KCell")), cell("<k>", intToToken(1))));
         K expected = cell("<T>", cell("<ts>",
-                cell("<t>", KRewrite(KVariable("KCell", Att().add("sort", "KCell")), cell("<k>", intToToken(1))))));
+                cell("<t>", KRewrite(KVariable("KCell", Att().add(Attribute.SORT_KEY, "KCell")), cell("<k>", intToToken(1))))));
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 

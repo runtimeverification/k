@@ -8,8 +8,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
-import com.google.common.collect.Lists;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 
 /**
@@ -26,7 +25,7 @@ public class FreshOperations {
     public static Term fresh(StringToken term, TermContext context) {
         String name = context.definition().freshFunctionNames().get(org.kframework.kil.Sort.of(term.stringValue()));
         if (name == null) {
-            throw KExceptionManager.criticalError("Attempting to generate a fresh symbol of sort " + term.stringValue()
+            throw KEMException.criticalError("Attempting to generate a fresh symbol of sort " + term.stringValue()
                     + " but no fresh function can be found.");
         }
 

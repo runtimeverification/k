@@ -1,16 +1,21 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -30,13 +35,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A conjunction of equalities (between terms with variables) and disjunctions
@@ -480,7 +478,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (context.definition().globalOptions().debug) {
+            if (context.global().globalOptions.debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
@@ -488,7 +486,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -500,7 +498,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
@@ -509,12 +507,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (!impliesSMT(left,right, rightOnlyVariables)) {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Proved!");
                 }
             }

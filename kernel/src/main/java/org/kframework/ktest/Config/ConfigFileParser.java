@@ -9,6 +9,7 @@ import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.*;
@@ -59,7 +60,7 @@ public class ConfigFileParser {
             validator.validate(xmlFile);
         } catch (SAXException e) {
             // unfortunately validator doesn't provide error locations so all we can say is this
-            throw KExceptionManager.criticalError(
+            throw KEMException.criticalError(
                     "Invalid config file formatting. Refer to the K manual for details. "
                             + e.getMessage(), e);
         }

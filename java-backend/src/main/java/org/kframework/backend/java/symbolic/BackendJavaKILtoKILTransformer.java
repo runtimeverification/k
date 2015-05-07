@@ -302,6 +302,11 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(InjectedKLabel injectedKLabel) {
+        throw new AssertionError("should be unreachable");
+    }
+
+    @Override
     public ASTNode transform(BitVector bitVector) {
         return transform((Token) bitVector);
     }

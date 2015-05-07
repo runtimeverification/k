@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import com.google.inject.Inject;
@@ -86,7 +87,7 @@ public class JarInfo {
             System.out.println("Git branch: " + branch);
             System.out.println("Build date: " + date.toString());
         } catch (IOException e) {
-            throw KExceptionManager.internalError("Could not load version info. Check your build system?");
+            throw KEMException.internalError("Could not load version info. Check your build system?");
         }
     }
 }

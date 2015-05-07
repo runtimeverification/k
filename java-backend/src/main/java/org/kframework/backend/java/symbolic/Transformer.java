@@ -44,4 +44,5 @@ public interface Transformer {
     public ASTNode transform(Token token);
     public ASTNode transform(UninterpretedToken uninterpretedToken);
     public ASTNode transform(Variable variable);
+    public ASTNode transform(InjectedKLabel injectedKLabel);
 }

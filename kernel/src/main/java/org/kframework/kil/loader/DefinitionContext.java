@@ -4,7 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.utils.Poset;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -60,7 +60,7 @@ public class DefinitionContext implements Serializable {
             for (String moduleName : circuit)
                 msg += moduleName + " < ";
             msg += circuit.get(0);
-            throw KExceptionManager.compilerError(msg);
+            throw KEMException.compilerError(msg);
         }
         modules.transitiveClosure();
     }
