@@ -11,6 +11,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -171,8 +172,8 @@ public class AddParentCells {
         if (k instanceof KApply) {
             return getLevel((KApply) k);
         } else if (k instanceof KVariable) {
-            if (k.att().contains("sort")) {
-                Sort sort = Sort(k.att().<String>get("sort").get());
+            if (k.att().contains(Attribute.SORT_KEY)) {
+                Sort sort = Sort(k.att().<String>get(Attribute.SORT_KEY).get());
                 int level = cfg.cfg.getLevel(sort);
                 if (level >= 0) {
                     return Optional.of(level);
@@ -218,7 +219,7 @@ public class AddParentCells {
                 return Optional.of(cfg.getParent(((KApply) k).klabel()));
             }
         } else if (k instanceof KVariable) {
-            Sort sort = Sort(k.att().<String>get("sort").get());
+            Sort sort = Sort(k.att().<String>get(Attribute.SORT_KEY).get());
             return Optional.of(cfg.getParent(sort));
         } else {
             Optional<KLabel> leftParent = getParent(((KRewrite) k).left());

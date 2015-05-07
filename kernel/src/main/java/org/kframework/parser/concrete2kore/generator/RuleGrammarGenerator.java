@@ -11,6 +11,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
@@ -193,7 +194,7 @@ public class RuleGrammarGenerator {
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
-        Att attrs1 = Att().add("sort", castSort.name());
+        Att attrs1 = Att().add(Attribute.SORT_KEY, castSort.name());
         prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.name())), attrs1));
         prods.add(Production("#SemanticCastTo" + castSort.name(),  castSort, Seq(NonTerminal(castSort), Terminal(":"  + castSort.name())), attrs1));
         prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));

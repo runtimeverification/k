@@ -15,6 +15,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 
@@ -73,7 +74,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public Variable KVariable(String name, Att att) {
-        return new Variable(name, Sort.of(att.<String>getOptional("sort").orElse("K")));
+        return new Variable(name, Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K")));
     }
 
     @Override

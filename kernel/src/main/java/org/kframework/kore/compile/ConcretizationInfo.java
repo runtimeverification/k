@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -30,7 +31,7 @@ public class ConcretizationInfo {
         if (k instanceof KApply) {
             return labels.getCodomain(((KApply) k).klabel());
         } else if (k instanceof KVariable) {
-            return Sort(k.att().<String>get("sort").get());
+            return Sort(k.att().<String>get(Attribute.SORT_KEY).get());
         } else {
             throw new AssertionError("expected KApply or KVariable, found " + k.getClass().getSimpleName());
         }

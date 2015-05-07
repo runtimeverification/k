@@ -11,6 +11,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -121,8 +122,8 @@ public class SortCells {
             if (remainingCells == null) {
                 remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
             }
-            if (var.att().contains("sort")) {
-                Sort sort = Sort(var.att().<String>get("sort").get());
+            if (var.att().contains(Attribute.SORT_KEY)) {
+                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
                 if (cfg.cfg.isCell(sort)) {
                     remainingCells.removeIf(s -> !s.equals(sort));
                 }
@@ -135,8 +136,8 @@ public class SortCells {
                         remainingCells.remove(s);
                     }
                 } else if (item instanceof KVariable) {
-                    if (item.att().contains("sort")) {
-                        Sort sort = Sort(item.att().<String>get("sort").get());
+                    if (item.att().contains(Attribute.SORT_KEY)) {
+                        Sort sort = Sort(item.att().<String>get(Attribute.SORT_KEY).get());
                         remainingCells.remove(sort);
                     }
                 }
@@ -145,7 +146,7 @@ public class SortCells {
 
         K replacementTerm() {
             if (remainingCells.size() == 1) {
-                return KVariable(var.name(), var.att().remove("sort"));
+                return KVariable(var.name(), var.att().remove(Attribute.SORT_KEY));
             }
             throw KEMException.compilerError("Unsupported cell fragment with types: " + remainingCells, var);
         }
@@ -155,7 +156,7 @@ public class SortCells {
                 return Collections.emptyMap();
             }
             if (remainingCells.size() == 1) {
-                return ImmutableMap.of(Iterables.getOnlyElement(remainingCells), KVariable(var.name(), var.att().remove("sort")));
+                return ImmutableMap.of(Iterables.getOnlyElement(remainingCells), KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
             }
             if(split != null) {
                 return split;
@@ -206,8 +207,8 @@ public class SortCells {
                     }
                     Set<KVariable> nonACVars = new HashSet<>();
                     for (KVariable var : leftVars.keySet()) {
-                        if (var.att().contains("sort")) {
-                            Sort sort = Sort(var.att().<String>get("sort").get());
+                        if (var.att().contains(Attribute.SORT_KEY)) {
+                            Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
                             if (cfg.cfg.isCell(sort))
                                 nonACVars.add(var);
                         }
@@ -288,7 +289,7 @@ public class SortCells {
                         if (split == null) {
                             kem.registerCompilerWarning("Unchecked isBag predicate found. Treating as isK.", k);
                             if (item instanceof KVariable) {
-                                return KVariable(((KVariable) item).name(), item.att().remove("sort"));
+                                return KVariable(((KVariable) item).name(), item.att().remove(Attribute.SORT_KEY));
                             }
                             return item;
                         }

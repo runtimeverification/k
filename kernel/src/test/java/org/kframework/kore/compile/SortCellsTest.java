@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.main.GlobalOptions;
@@ -42,8 +43,8 @@ public class SortCellsTest {
 
     @Test
     public void testSimpleSplitting() {
-        K term = KRewrite(cell("<t>",cell("<env>"),KVariable("X"), KVariable("Y", Att().add("sort", "OptCell"))),KVariable("X"));
-        K expected = KRewrite(cell("<t>",KVariable("X"),cell("<env>"), KVariable("Y", Att().add("sort", "OptCell"))),KVariable("X"));
+        K term = KRewrite(cell("<t>",cell("<env>"),KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))),KVariable("X"));
+        K expected = KRewrite(cell("<t>",KVariable("X"),cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))),KVariable("X"));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());

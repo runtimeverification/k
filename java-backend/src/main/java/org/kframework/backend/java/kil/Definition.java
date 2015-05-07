@@ -22,6 +22,7 @@ import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
@@ -229,12 +230,12 @@ public class Definition extends JavaSymbolicObject {
     private Map<org.kframework.kore.Sort, DataStructureSort> getDataStructureSorts(Module module) {
         ImmutableMap.Builder<org.kframework.kore.Sort, DataStructureSort> builder = ImmutableMap.builder();
         for (org.kframework.definition.Production prod : iterable(module.productions())) {
-            Optional<?> assoc = prod.att().getOptional("assoc");
-            Optional<?> comm = prod.att().getOptional("comm");
-            Optional<?> idem = prod.att().getOptional("idem");
+            Optional<?> assoc = prod.att().getOptional(Attribute.ASSOCIATIVE_KEY);
+            Optional<?> comm = prod.att().getOptional(Attribute.COMMUTATIVE_KEY);
+            Optional<?> idem = prod.att().getOptional(Attribute.IDEMPOTENT_KEY);
 
             org.kframework.kil.Sort type;
-            if (prod.sort().equals(Sort("KList")) || prod.sort().equals(Sort("KBott")))
+            if (prod.sort().equals(Sorts.KList()) || prod.sort().equals(Sorts.KBott()))
                 continue;
             if (assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 type = org.kframework.kil.Sort.LIST;
@@ -242,7 +243,7 @@ public class Definition extends JavaSymbolicObject {
                 type = org.kframework.kil.Sort.SET;
             } else if (assoc.isPresent() && comm.isPresent() && !idem.isPresent()) {
                 //TODO(dwightguth): distinguish between Bag and Map
-                if (!prod.att().contains("hook"))
+                if (!prod.att().contains(Attribute.HOOK_KEY))
                     continue;
                 type = org.kframework.kil.Sort.MAP;
             } else if (!assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
@@ -254,7 +255,7 @@ public class Definition extends JavaSymbolicObject {
             DataStructureSort sort = new DataStructureSort(prod.sort().name(), type,
                     prod.klabel().get().name(),
                     prod.att().<String>get("element").get(),
-                    prod.att().<String>get("unit").get(),
+                    prod.att().<String>get(Attribute.UNIT_KEY).get(),
                     new HashMap<>());
             builder.put(prod.sort(), sort);
         }
@@ -273,8 +274,8 @@ public class Definition extends JavaSymbolicObject {
                 Source source = rule.att().getOptional(Source.class).orElse(null);
                 oldRule.setLocation(loc);
                 oldRule.setSource(source);
-                if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply)leftHandSide).klabel()).contains("function")) {
-                    oldRule.putAttribute("function", "");
+                if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply)leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
+                    oldRule.putAttribute(Attribute.FUNCTION_KEY, "");
                 }
                 addRule(new Rule(
                         "",

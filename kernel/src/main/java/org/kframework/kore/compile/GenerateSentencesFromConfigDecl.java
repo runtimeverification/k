@@ -11,6 +11,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -158,13 +159,13 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)), Att());
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
-                    Att().add("assoc", "").add("comm", "").add("unit", "." + bagSort.name()));
+                    Att().add(Attribute.ASSOCIATIVE_KEY, "").add(Attribute.COMMUTATIVE_KEY, "").add(Attribute.UNIT_KEY, "." + bagSort.name()));
 
             return Tuple2.apply(Set(initializer, cellProduction, bagSubsort, bagUnit, bag), bagSort);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
-            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add("unit", cellUnit.klabel().get().name()));
+            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
 
             return Tuple2.apply(Set(initializer, cellProduction, cellUnit), sort);
         } else {
