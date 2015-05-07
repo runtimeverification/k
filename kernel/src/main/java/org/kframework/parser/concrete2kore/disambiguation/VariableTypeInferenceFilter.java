@@ -261,7 +261,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
-    private static Sort getSortOfCast(TermCons tc) {
+    public static Sort getSortOfCast(TermCons tc) {
         switch (tc.production().klabel().get().name()) {
         case "#SyntacticCast":
         case "#OuterCast":
@@ -333,7 +333,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-            // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
@@ -376,7 +375,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 this.strict = strict;
             }
 
-            // TODO (Radu): check types of terms under rewrites too?
             public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
                 if (tc.production().att().contains("bracket")
                         || (tc.production().klabel().isDefined()
@@ -390,11 +388,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (c.production().sort().name().equals("KVariable")) {
                     Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sort("K"))) {
-                        //System.out.println("c = " + c.value() + ", " + declared + " < " + sort);
-                        if (!subsorts.lessThanEq(declared, sort)) {
-                            // TODO: location information
+                        if ((!strict && !subsorts.lessThanEq(declared, sort)) || (strict && !declared.equals(sort))) {
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
-                            //System.out.println(msg);
                             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().get(), c.location().get());
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
                         }
@@ -441,7 +436,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public Term apply(TermCons tc) {
-            // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")

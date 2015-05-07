@@ -28,7 +28,6 @@ public class TreeCleanerVisitor extends SetsTransformerWithErrors<ParseFailedExc
             return Left.apply(Sets.newHashSet(new ParseFailedException(new KException(
                     KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER,
                     "Only subsort productions are allowed to have no #klabel attribute", tc.source().get(), tc.location().get()))));
-            //TODO: add source and location to error
         } else {
             // invalidate the hashCode cache
             vis = super.apply(tc);

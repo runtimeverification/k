@@ -83,7 +83,6 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
             //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
             Tag parentLabel = new Tag(parent.production().klabel().get().name());
             Tag localLabel = new Tag(tc.production().klabel().get().name());
-            // TODO: add location information
             if (priorities.lessThan(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
                 KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());

@@ -63,7 +63,6 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
         }
 
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-            // TODO: add location information
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KRewrite")) {
                 String msg = "Rewrite is not allowed to be an immediate child of " + parent.production().klabel().get() +
                         "    Use parentheses: (x)=>(y) to set the proper scope of the operations.";
