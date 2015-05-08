@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kil.Attribute;
@@ -26,9 +27,9 @@ public class SortCellsTest {
     ConfigurationInfo cfgInfo = new TestConfiguration() {{
         addCell(null, "TopCell", "<top>");
         addCell("TopCell", "ThreadCell", "<t>", Multiplicity.STAR);
-        addCell("ThreadCell", "KCell", "<k>", Sort("K"));
+        addCell("ThreadCell", "KCell", "<k>", Sorts.K());
         addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
-        addCell("ThreadCell", "OptCell", "<opt>", Multiplicity.OPTIONAL, Sort("K"));
+        addCell("ThreadCell", "OptCell", "<opt>", Multiplicity.OPTIONAL, Sorts.K());
         addUnit("OptCell", KApply(KLabel(".OptCell")));
         addUnit("ThreadCell", KApply(KLabel(".ThreadCellBag")));
         addConcat("ThreadCell", KLabel("_ThreadCellBag_"));

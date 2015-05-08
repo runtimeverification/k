@@ -82,25 +82,25 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext);
         rewritingContext.setDefinition(evaluatedDef);
 
-        return new SymbolicRewriterGlue(evaluatedDef, kompileOptions, javaOptions, initializingContext, rewritingContext);
+        return new SymbolicRewriterGlue(evaluatedDef, kompileOptions, javaOptions, rewritingContext, kem);
     }
 
     public static class SymbolicRewriterGlue implements Rewriter {
 
         private final SymbolicRewriter rewriter;
-        private final GlobalContext initializingContext;
         private final GlobalContext rewritingContext;
+        private final KExceptionManager kem;
 
-        public SymbolicRewriterGlue(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext initializingContext, GlobalContext rewritingContext) {
+        public SymbolicRewriterGlue(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
             this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
-            this.initializingContext = initializingContext;
             this.rewritingContext = rewritingContext;
+            this.kem = kem;
         }
 
         @Override
         public K execute(K k) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
-            Term backendKil = converter.convert(k);
+            Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), -1, false);
             return result.getJavaKilTerm();
         }
@@ -130,7 +130,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .forEach(definition::addKLabel);
             definition.addKoreRules(module, termContext);
 
-            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluateDefinition(termContext.global(), kem);
+            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
 
             evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
             cache.put(module, evaluatedDef);

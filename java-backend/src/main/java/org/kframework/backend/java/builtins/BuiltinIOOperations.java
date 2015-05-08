@@ -2,7 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import com.google.inject.Inject;
-import org.kframework.backend.java.kil.Definition;
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -28,18 +28,15 @@ import java.util.Map;
  */
 public class BuiltinIOOperations {
 
-    private final Definition def;
     private final FileSystem fs;
-    private final KILtoBackendJavaKILTransformer kilTransformer;
-    private final RunProcess rp;
+    private final Provider<KILtoBackendJavaKILTransformer> kilTransformer;
+    private final Provider<RunProcess> rp;
 
     @Inject
     public BuiltinIOOperations(
-            Definition def,
             FileSystem fs,
-            KILtoBackendJavaKILTransformer kilTransformer,
-            RunProcess rp) {
-        this.def = def;
+            Provider<KILtoBackendJavaKILTransformer> kilTransformer,
+            Provider<RunProcess> rp) {
         this.fs = fs;
         this.kilTransformer = kilTransformer;
         this.rp = rp;
@@ -124,10 +121,10 @@ public class BuiltinIOOperations {
 
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
         try {
-            org.kframework.kil.Term kast = rp.runParser(
-                    termContext.global().krunOptions.configurationCreation.parser(def.context()),
+            org.kframework.kil.Term kast = rp.get().runParser(
+                    termContext.global().krunOptions.configurationCreation.parser(termContext.definition().context()),
                     term1.stringValue(), true, Sort.of(term2.stringValue()));
-            Term term = kilTransformer.transformAndEval(kast);
+            Term term = kilTransformer.get().transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);
@@ -142,9 +139,9 @@ public class BuiltinIOOperations {
         Map<String, String> environment = new HashMap<>();
         String[] args = term.stringValue().split("\001", -1);
         //for (String c : args) { System.out.println(c); }
-        ProcessOutput output = rp.execute(environment, args);
+        ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", def);
+        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", termContext.definition());
         /*
         String klabelString = "'#systemResult(_,_,_)";
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
@@ -158,8 +155,8 @@ public class BuiltinIOOperations {
 
     private KItem processIOException(String errno, Term klist, TermContext termContext) {
         String klabelString = "'#" + errno;
-        KLabelConstant klabel = KLabelConstant.of(klabelString, def);
-        assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
+        KLabelConstant klabel = KLabelConstant.of(klabelString, termContext.definition());
+        assert termContext.definition().kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return KItem.of(klabel, klist, termContext);
     }
 

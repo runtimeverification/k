@@ -13,6 +13,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.kompile.Kompile;
+import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
@@ -28,7 +29,7 @@ import java.io.File;
 import java.util.Set;
 
 public class RuleGrammarTest {
-    private final static String startSymbol = "RuleContent";
+    private final static Sort startSymbol = Kompile.START_SYMBOL;
     private RuleGrammarGenerator gen;
 
     @Before

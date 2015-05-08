@@ -4,6 +4,7 @@ package org.kframework.parser.concrete2kore;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
+import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
 import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
@@ -53,13 +54,13 @@ public class ParseInModule implements Serializable {
      * @return the Term representation of the parsed input.
      */
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(String input, String startSymbol, Source source) {
+            parseString(String input, Sort startSymbol, Source source) {
         return parseString(input, startSymbol, source, 1, 1);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(String input, String startSymbol, Source source, int startLine, int startColumn) {
-        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol);
+            parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
         Set<ParseFailedException> warn = new AmbFilter().warningUnit();
         if (startSymbolNT == null) {
             String msg = "Could not find start symbol: " + startSymbol;
@@ -93,7 +94,7 @@ public class ParseInModule implements Serializable {
         rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts()).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts(), module.productionsFor()).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();

@@ -1,14 +1,13 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kast;
 
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.List;
-
 import com.beust.jcommander.IStringConverter;
-
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.kframework.attributes.Source;
-import org.kframework.kil.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.errorsystem.KEMException;
@@ -17,10 +16,11 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.List;
+
+import static org.kframework.kore.KORE.*;
 
 @RequestScoped
 public final class KastOptions {
@@ -99,36 +99,19 @@ public final class KastOptions {
         // converts the command line argument into a Sort
         @Override
         public Sort convert(String arg) {
-            return Sort.of(arg);
+            return Sort(arg);
         }
     }
+
+    @Parameter(names={"--module", "-m"}, description="Parse text in the specified module. Defaults to the syntax module of the definition.")
+    public String module;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
     public static final class Experimental {
 
-        @Parameter(names="--pretty", description="Pretty print the output.")
-        public boolean pretty = false;
-
-        @Parameter(names="--tab-size", description="How many spaces to use for each indentation level.")
-        public int tabSize = 4;
-
-        // we don't specify the default here because it would show up in the usage message and look ugly
-        @Parameter(names="--max-width", description="Line will be split before <num> chars.")
-        private Integer maxWidth;
-
-        public int maxWidth() {
-            if (maxWidth == null) {
-                return Integer.MAX_VALUE;
-            }
-            return maxWidth;
-        }
-
-        @Parameter(names="--aux-tab-size", description="How many spaces to indent lines which do not fit into max-width.")
-        public int auxTabSize = 2;
-
-        @Parameter(names="--next-line", description="Force newline before first argument.")
-        public boolean nextLine = false;
+        @Parameter(names="--kore", description="Parse with the new pipeline.")
+        public boolean kore = false;
     }
 }

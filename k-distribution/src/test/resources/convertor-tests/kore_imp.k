@@ -45,11 +45,11 @@ module IMP
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
 // BExp
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 // Block

@@ -58,7 +58,7 @@ public final class KRunOptions {
         public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
         @Parameter(names={"--parser"}, description="Command used to parse programs. Default is \"kast\"")
-        private String parser;
+        public String parser;
 
         public String parser(Context context) {
             if (parser == null) {
@@ -274,7 +274,7 @@ public final class KRunOptions {
         @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
         public File coverage = null;
 
-        @Parameter(names="--kore", description="Compile with the new pipeline.")
+        @Parameter(names="--kore", description="Execute with the new pipeline.")
         public boolean kore = false;
     }
 }

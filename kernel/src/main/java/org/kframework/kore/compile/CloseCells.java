@@ -2,6 +2,7 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Sets;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
@@ -222,7 +223,7 @@ public class CloseCells {
 
         K body = contents.get(0);
         Sort cellType = cfg.leafCellType(label);
-        if (cellType.equals(Sort("K"))) {
+        if (cellType.equals(Sorts.K())) {
             // Need special handling to make a KSequence.
             int bodyLength;
             if (body instanceof KSequence) {

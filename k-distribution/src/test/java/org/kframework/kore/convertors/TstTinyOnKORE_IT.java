@@ -6,6 +6,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
@@ -40,10 +41,10 @@ public class TstTinyOnKORE_IT {
         File definitionFile = testResource(filename);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         try {
-            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "TEST", "TEST-PROGRAMS", "K");
+            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "TEST", "TEST-PROGRAMS", Sorts.K());
 
             Module module = compiledDef.executionModule();
-            BiFunction<String, Source, K> programParser = compiledDef.getProgramParser();
+            BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);
             Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
 
             K program = programParser.apply(

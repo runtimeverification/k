@@ -505,6 +505,8 @@ module K-IO
                   | #ostream(Int)
   syntax Stream ::= "#noIO"
 
+  //TODO(dwightguth): add back support for stream cells
+/*
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        `ListItem(F:Float) => .List`
@@ -575,7 +577,7 @@ module K-IO
   rule `ListItem(#ostream(_:Int)) ListItem(#noIO) => .List`
        ListItem(#buffer(_))
        _:List [stdout, stderr]
-
+*/
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2
