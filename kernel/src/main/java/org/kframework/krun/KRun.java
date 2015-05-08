@@ -9,6 +9,7 @@ import org.kframework.definition.Module;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.parser.ProductionReference;
@@ -51,7 +52,7 @@ public class KRun implements Transformation<Void, Void> {
             program = externalParse(options.configurationCreation.parser(compiledDef.executionModule().name()),
                     pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef);
         } else {
-            program = plugConfigVars(options, compiledDef);
+            program = parseConfigVars(options, compiledDef);
         }
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
@@ -64,7 +65,7 @@ public class KRun implements Transformation<Void, Void> {
         return 0;
     }
 
-    private K plugConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
+    private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
         for (Map.Entry<String, Pair<String, String>> entry
                 : options.configurationCreation.configVars(compiledDef.executionModule().name()).entrySet()) {
@@ -76,6 +77,10 @@ public class KRun implements Transformation<Void, Void> {
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken(Sorts.KConfigVar(), "$" + name), configVar);
         }
+        return plugConfigVars(compiledDef, output);
+    }
+
+    public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
