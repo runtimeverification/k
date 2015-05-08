@@ -205,26 +205,24 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     Att().add(Attribute.ASSOCIATIVE_KEY, "").add(Attribute.COMMUTATIVE_KEY, "").add(Attribute.UNIT_KEY, "." + bagSort.name()));
-            K rhs;
-            if (initializeOptionalCell) {
-                rhs = KApply(KLabel(initLabel), KVariable("Init"));
-            } else {
-                rhs = KApply(KLabel("." + bagSort.name()));
-            }
+            K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, bagSubsort, bagUnit, bag), bagSort, rhs);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
             cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
-            K rhs;
-            if (initializeOptionalCell) {
-                rhs = KApply(KLabel(initLabel), KVariable("Init"));
-            } else {
-                rhs = KApply(KLabel("." + sortName));
-            }
+            K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, cellUnit), sort, rhs);
         } else {
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction), sort, KApply(KLabel(initLabel), KVariable("Init")));
+        }
+    }
+
+    private static KApply optionalCellInitializer(boolean initializeOptionalCell, String initLabel) {
+        if (initializeOptionalCell) {
+            return KApply(KLabel(initLabel), KVariable("Init"));
+        } else {
+            return KApply(KLabel("#cells"));
         }
     }
 
