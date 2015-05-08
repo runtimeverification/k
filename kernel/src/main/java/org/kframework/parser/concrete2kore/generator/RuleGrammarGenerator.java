@@ -86,7 +86,6 @@ public class RuleGrammarGenerator {
 
     public Module getProgramsGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
-
         // if no start symbol has been defined in the configuration, then use K
         for (Sort srt : iterable(mod.definedSorts())) {
             if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
@@ -94,7 +93,6 @@ public class RuleGrammarGenerator {
                 prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
             }
         }
-        
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
         return newM;
     }
