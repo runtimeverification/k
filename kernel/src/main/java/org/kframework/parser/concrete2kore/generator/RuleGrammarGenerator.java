@@ -85,9 +85,18 @@ public class RuleGrammarGenerator {
     }
 
     public Module getProgramsGrammar(Module mod) {
-        // if no start symbol has been defined in the configuration, then use K, so import K-TOP-SORT
-        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod, baseK.getModule(K_TOP_SORT).get()), Set(), null);
-        return getCombinedGrammar(newM);
+        Set<Sentence> prods = new HashSet<>();
+
+        // if no start symbol has been defined in the configuration, then use K
+        for (Sort srt : iterable(mod.definedSorts())) {
+            if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
+                // K ::= Sort
+                prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
+            }
+        }
+        
+        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
+        return newM;
     }
 
     /**
