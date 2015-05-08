@@ -327,7 +327,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable") && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
+                if (c.production().sort().equals(Sorts.KVariable()) && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
                     return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c.value(), this.sort, c.source().get(), c.location().get(), varType)));
                 }
                 return new Tuple2<>(Right.apply(c), this.warningUnit());
@@ -392,7 +392,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Either<java.util.Set<ParseFailedException>, Term> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable")) {
+                if (c.production().sort().equals(Sorts.KVariable())) {
                     Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sorts.K())) {
                         if ((!strict && !subsorts.lessThanEq(declared, sort)) || (strict && !declared.equals(sort))) {
@@ -485,7 +485,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Term apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable") && !declaredNames.contains(c.value()) && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
+                if (c.production().sort().equals(Sorts.KVariable()) && !declaredNames.contains(c.value()) && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
                     if (vars.isEmpty())
                         vars.add(HashMultimap.<String, Sort>create());
                     for (Multimap<String, Sort> vars2 : vars)
