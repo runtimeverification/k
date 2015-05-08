@@ -3,6 +3,7 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.NonTerminal;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Constant;
@@ -81,7 +82,7 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
                     return super.apply(tc);
                 }
             }
-            if (pr instanceof Constant && pr.production().sort().equals(Sort("KVariable"))) {
+            if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
                 // skip variables since they will always have a different sort at this stage.
                 return Right.apply(pr);
             }
