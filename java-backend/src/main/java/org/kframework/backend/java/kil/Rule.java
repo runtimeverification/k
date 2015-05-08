@@ -131,9 +131,9 @@ public class Rule extends JavaSymbolicObject {
         setLocation(oldRule.getLocation());
         setSource(oldRule.getSource());
 
-        if ((oldRule.containsAttribute(Constants.STDIN)
+        if (oldRule.containsAttribute(Constants.STDIN)
                 || oldRule.containsAttribute(Constants.STDOUT)
-                || oldRule.containsAttribute(Constants.STDERR)) && lhsOfReadCells != null) {
+                || oldRule.containsAttribute(Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
             BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
             for (Equality eq : lookups.equalities()) {
