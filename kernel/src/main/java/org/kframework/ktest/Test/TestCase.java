@@ -459,8 +459,13 @@ public class TestCase {
                     // skip excluded files
                     boolean exclude = false;
                     for (String excludedPattern : excludes)
-                            if (pgmFilePath.contains(excludedPattern))
-                                exclude = true;
+                        if (pgmFilePath.contains(excludedPattern)) {
+                            if (options.isVerbose()) {
+                                System.out.format("Excluding file %s (matching pattern: \"%s\")%n",
+                                        pgmFilePath, excludedPattern);
+                            }
+                            exclude = true;
+                        }
                     if (exclude)
                         continue;
 
