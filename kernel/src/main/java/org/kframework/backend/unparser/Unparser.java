@@ -514,10 +514,10 @@ public class Unparser implements Comparator<ASTNode> {
         public Void visit(KApp kapp, Void _void) {
             term(kapp.getLabel());
             if (!(kapp.getLabel() instanceof Token) && !(kapp.getLabel() instanceof KInjectedLabel)) {
-	            string("`(");
+                string("`(");
                 term(kapp.getChild());
                 string(")");
-		    }
+            }
             return null;
         }
 
