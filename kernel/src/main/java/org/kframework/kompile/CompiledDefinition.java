@@ -71,7 +71,7 @@ public class CompiledDefinition implements Serializable {
      */
 
     public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
-        ParseInModule parseInModule = new ParseInModule(getParserModule(module));
+        ParseInModule parseInModule = new ParseInModule(getParserModule(module), kompileOptions.strict());
 
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);

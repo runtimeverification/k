@@ -70,7 +70,7 @@ public class ResolveSemanticCasts {
         } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
             return sideCondition.get();
         } else {
-            return BooleanUtils.and(requires, sideCondition.get());
+            return BooleanUtils.and(sideCondition.get(), requires);
         }
     }
 

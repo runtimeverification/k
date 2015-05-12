@@ -12,7 +12,7 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public abstract class Collection extends Term implements CollectionInternalRepresentation {
+public abstract class Collection extends Term {
 
     /**
      * Represents the rest part of this {@code Collection} which is not
@@ -82,28 +82,6 @@ public abstract class Collection extends Term implements CollectionInternalRepre
     }
 
     @Override
-    public Term toKore() {
-        return toKore(context);
-    }
-
-    @Override
-    public KLabel constructorLabel() {
-        return KLabelConstant.of(
-                context.definition().dataStructureSortOf(sort()).constructorLabel(),
-                context.definition());
-    }
-
-    @Override
-    public KItem unit() {
-        return KItem.of(
-                KLabelConstant.of(
-                        context.definition().dataStructureSortOf(sort()).unitLabel(),
-                        context.definition()),
-                KList.EMPTY,
-                context);
-    }
-
-    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -111,6 +89,10 @@ public abstract class Collection extends Term implements CollectionInternalRepre
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    public TermContext context() {
+        return context;
     }
 
 }

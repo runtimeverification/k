@@ -27,6 +27,7 @@ import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class KompileFrontEnd extends FrontEnd {
 
@@ -42,6 +43,7 @@ public class KompileFrontEnd extends FrontEnd {
     private final Context context;
     private final KompileOptions options;
     private final Provider<Backend> backend;
+    private final Provider<Consumer<CompiledDefinition>> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -55,6 +57,7 @@ public class KompileFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             Provider<Backend> backend,
+            Provider<Consumer<CompiledDefinition>> koreBackend,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader,
@@ -65,6 +68,7 @@ public class KompileFrontEnd extends FrontEnd {
         this.context = context;
         this.options = options;
         this.backend = backend;
+        this.koreBackend = koreBackend;
         this.sw = sw;
         this.kem = kem;
         this.loader = loader;
@@ -84,6 +88,7 @@ public class KompileFrontEnd extends FrontEnd {
             //TODO(dwightguth): handle start symbols
             CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K());
             loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
+            koreBackend.get().accept(def);
         } else {
 
             context.kompileOptions = options;

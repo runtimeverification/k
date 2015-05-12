@@ -18,6 +18,9 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.convertors.KOREtoKIL;
+import org.kframework.tiny.KVar;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,6 +64,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
+        if (klabel instanceof KVariable) {
+            return KItem.of(KVariable(klabel.name(), ((KVariable) klabel).att()), KList(klist.items()), context);
+        }
         return KItem.of(KLabel(klabel.name()), KList(klist.items()), context);
     }
 
@@ -74,7 +80,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public Variable KVariable(String name, Att att) {
-        return new Variable(name, Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K")));
+        Variable var = new Variable(name, Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K")));
+        var.setAttributes(new KOREtoKIL().convertAttributes(att));
+        return var;
     }
 
     @Override
@@ -84,6 +92,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
+        if (klabel instanceof KVariable) {
+            return new InjectedKLabel(KVariable(klabel.name(), att));
+        }
         return new InjectedKLabel(KLabel(klabel.name()));
     }
 

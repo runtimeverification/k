@@ -22,6 +22,7 @@ import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class KompileModule extends AbstractModule {
 
@@ -41,6 +42,9 @@ public class KompileModule extends AbstractModule {
 
         MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), String.class, Backend.class);
+
+        MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {});
     }
 
     @Provides
@@ -84,6 +88,15 @@ public class KompileModule extends AbstractModule {
         if (backend == null) {
             throw KEMException.criticalError("Invalid backend: " + options.backend
                     + ". It should be one of " + map.keySet());
+        }
+        return backend;
+    }
+
+    @Provides
+    Consumer<CompiledDefinition> getKoreBackend(KompileOptions options, Map<String, Consumer<CompiledDefinition>> map, KExceptionManager kem) {
+        Consumer<CompiledDefinition> backend = map.get(options.backend);
+        if (backend == null) {
+            return c -> {};
         }
         return backend;
     }

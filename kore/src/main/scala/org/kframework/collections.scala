@@ -20,6 +20,7 @@ object Collections {
   def immutable[T](s: Array[T]): Seq[T] = s
 
   def mutable[T](s: List[T]): java.util.List[T] = s.asJava
+  def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
   def mutable[T](s: Set[T]): java.util.Set[T] = {
     val x = new util.HashSet[T]()
     x.addAll(s.asJava)

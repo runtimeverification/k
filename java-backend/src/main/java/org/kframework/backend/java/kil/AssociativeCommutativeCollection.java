@@ -10,7 +10,7 @@ import com.google.common.collect.Multisets;
  * Common parent for {@link org.kframework.backend.java.kil.BuiltinMap} and
  * {@link org.kframework.backend.java.kil.BuiltinSet}.
  */
-public abstract class AssociativeCommutativeCollection extends Collection {
+public abstract class AssociativeCommutativeCollection extends Collection implements KItemCollection {
 
     protected final ImmutableMultiset<KItem> collectionPatterns;
     protected final ImmutableMultiset<Term> collectionFunctions;

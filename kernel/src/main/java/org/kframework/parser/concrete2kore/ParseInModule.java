@@ -37,9 +37,11 @@ import java.util.Set;
  */
 public class ParseInModule implements Serializable {
     private final Module module;
+    private final boolean strict;
     private final Grammar grammar;
-    public ParseInModule(Module module) {
+    public ParseInModule(Module module, boolean strict) {
         this.module = module;
+        this.strict = strict;
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(module);
     }
 
@@ -94,7 +96,7 @@ public class ParseInModule implements Serializable {
         rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts(), module.productionsFor()).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts(), module.productionsFor(), strict).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();

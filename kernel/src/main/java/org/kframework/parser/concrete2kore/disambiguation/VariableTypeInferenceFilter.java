@@ -48,12 +48,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     private final POSet<Sort> subsorts;
     private final scala.collection.immutable.Set<Sort> sortSet;
     private final scala.collection.immutable.Map<KLabel, scala.collection.immutable.Set<Production>> productions;
+    private final boolean inferSortChecks;
     private Set<ParseFailedException> warnings = this.warningUnit();
     public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.immutable.Set<Sort> sortSet, scala.collection.immutable.Map<
-            KLabel, scala.collection.immutable.Set<Production>> productions) {
+            KLabel, scala.collection.immutable.Set<Production>> productions, boolean inferSortChecks) {
         this.subsorts = subsorts;
         this.sortSet = sortSet;
         this.productions = productions;
+        this.inferSortChecks = inferSortChecks;
     }
 
     @Override
@@ -348,7 +350,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
                 boolean strict = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strict, strict).apply(t);
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strict, strict && inferSortChecks).apply(t);
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(0, rez.right().get());
@@ -357,7 +359,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, true).apply(t);
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, inferSortChecks).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc = tc.with(j, rez.right().get());

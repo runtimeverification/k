@@ -19,6 +19,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -56,6 +57,7 @@ public class ProgramLoader {
     private final KExceptionManager kem;
     private final TermLoader termLoader;
     private final FileUtil files;
+    private final KompileOptions options;
 
     @Inject
     ProgramLoader(
@@ -63,12 +65,14 @@ public class ProgramLoader {
             Stopwatch sw,
             KExceptionManager kem,
             TermLoader termLoader,
-            FileUtil files) {
+            FileUtil files,
+            KompileOptions options) {
         this.loader = loader;
         this.sw = sw;
         this.kem = kem;
         this.termLoader = termLoader;
         this.files = files;
+        this.options = options;
     }
 
     /**
@@ -143,7 +147,7 @@ public class ProgramLoader {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
             org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
-            ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod));
+            ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod), options.strict());
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {

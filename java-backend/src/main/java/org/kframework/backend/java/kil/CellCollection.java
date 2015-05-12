@@ -1,6 +1,10 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multiset;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -13,13 +17,7 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multiset;
 
 
 /**
@@ -280,11 +278,6 @@ public class CellCollection extends Collection {
             }
             return stringBuilder.toString();
         }
-    }
-
-    @Override
-    public List<Term> getKComponents() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
