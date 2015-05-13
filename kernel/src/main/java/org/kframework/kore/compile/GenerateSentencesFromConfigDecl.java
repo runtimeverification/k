@@ -74,7 +74,7 @@ public class GenerateSentencesFromConfigDecl {
      *                it is not the top cell of a configuration declaration.
      * @param cfgAtt The attributes of the configuration declaration. Appended to all cell productions generated.
      * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
-     * @return A tuple of the sentences generated and a list of the sorts of the children of the cell.
+     * @return A tuple of the sentences generated, a list of the sorts of the children of the cell, and the body of the initializer.
      */
     private static Tuple3<Set<Sentence>, List<Sort>, K> genInternal(K term, K ensures, Att cfgAtt, Module m) {
         if (term instanceof KApply) {
@@ -128,19 +128,26 @@ public class GenerateSentencesFromConfigDecl {
             }
             //TODO: call generic getSort method of some kind
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
+            // A leaf cell initializes to the value specified in the configuration declaration.
             return Tuple3.apply(Set(), Lists.newArrayList(m.sortFor().get(kapp.klabel()).get()), getLeafInitializer(term));
         } else if (term instanceof KToken) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
+            // A leaf cell initializes to the value specified in the configuration declaration.
             KToken ktoken = (KToken) term;
             return Tuple3.apply(Set(), Lists.newArrayList(ktoken.sort()), getLeafInitializer(term));
         } else if (term instanceof KSequence || term instanceof KVariable || term instanceof InjectedKLabel) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
+            // A leaf cell initializes to the value specified in the configuration declaration.
             return Tuple3.apply(Set(), Lists.newArrayList(Sorts.K()), getLeafInitializer(term));
         } else {
             throw KEMException.compilerError("Unexpected value found in configuration declaration, expected KToken, KSequence, or KApply", term);
         }
     }
 
+    /**
+     * Returns true if the specified term has a configuration variable
+     * @param contents
+     */
     private static boolean hasConfigVariable(K contents) {
         FindConfigVar visitor = new FindConfigVar();
         visitor.apply(contents);
@@ -158,6 +165,12 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
+    /**
+     * Returns the body of an initializer for a leaf cell: replaces any configuration variables
+     * with map lookups in the initialization map.
+     * @param leafContents
+     * @return
+     */
     private static K getLeafInitializer(K leafContents) {
         return new TransformKORE() {
             @Override
@@ -170,6 +183,20 @@ public class GenerateSentencesFromConfigDecl {
         }.apply(leafContents);
     }
 
+    /**
+     * Generates the sentences associated with a particular cell.
+     * @param multiplicity The multiplicity of the cell
+     * @param configAtt The attributes on the configuration declaration.
+     * @param m The module containing the configuration.
+     * @param cellName The name of the cell being generated.
+     * @param cellProperties The attributes on the configuration cell (&lt;cell foo="bar"&gt;&lt;/cell&gt;
+     * @param childSorts The list of sorts computed via recursion of the children of the current cell.
+     * @param childInitializer The contents of the cell being processed, converted into the right hand side of an initializer.
+     * @param ensures The ensures clause to be used; null if the cell is not a top cell.
+     * @param initializeOptionalCell true if a cell of multiplicity * or ? should be initialized to a non-empty bag.
+     * @return A tuple containing the sentences associated with the cell, the sort of the cell, and the term to be used to initialize
+     * this cell in the initializer of its parent cell.
+     */
     private static Tuple3<Set<Sentence>, Sort, K> computeSentencesOfWellFormedCell(
             Multiplicity multiplicity,
             Att configAtt,
@@ -188,7 +215,7 @@ public class GenerateSentencesFromConfigDecl {
                 .map(Constructors::NonTerminal)), Stream.of(Terminal("</" + cellName + ">")))
                 .collect(Collectors.toList());
 
-        // syntax Cell ::= "initCell" [initializer]
+        // syntax Cell ::= initCell(Map) [initializer, function]
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         String initLabel = "init" + sort.name();
         Sentence initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
@@ -197,7 +224,7 @@ public class GenerateSentencesFromConfigDecl {
         Rule initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
 
         if (multiplicity == Multiplicity.STAR) {
-            // syntax CellBag ::= Cell [cellbag]
+            // syntax CellBag ::= Cell
             // syntax CellBag ::= ".CellBag"
             // syntax CellBag  ::= CellBag CellBag [assoc, unit(.CellBag)]
             Sort bagSort = Sort(sortName + "Bag");
@@ -205,19 +232,30 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     Att().add(Attribute.ASSOCIATIVE_KEY, "").add(Attribute.COMMUTATIVE_KEY, "").add(Attribute.UNIT_KEY, "." + bagSort.name()));
+            // rule initCell(Init) => .CellBag
+            // -or-
+            // rule initCell(Init) => <cell> Context[$var] </cell>
             K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, bagSubsort, bagUnit, bag), bagSort, rhs);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
             cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+            // rule initCell(Init) => .CellBag
+            // -or-
+            // rule initCell(Init) => <cell> Context[$var] </cell>
             K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, cellUnit), sort, rhs);
         } else {
+            // rule initCell(Init) => <cell> initChildren(Init)... </cell>
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction), sort, KApply(KLabel(initLabel), KVariable("Init")));
         }
     }
 
+    /**
+     * Returns the term used to initialize an optinoal cell. An optional cell is initialized to the empty bag if
+     * it contains no configuration variables, and to a single cell if it contains configuration variables.
+     */
     private static KApply optionalCellInitializer(boolean initializeOptionalCell, String initLabel) {
         if (initializeOptionalCell) {
             return KApply(KLabel(initLabel), KVariable("Init"));
