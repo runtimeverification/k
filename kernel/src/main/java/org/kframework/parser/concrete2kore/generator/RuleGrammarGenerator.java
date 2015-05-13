@@ -48,8 +48,6 @@ public class RuleGrammarGenerator {
         kSorts.add(Sorts.KList());
         kSorts.add(Sorts.KItem());
         kSorts.add(Sort("RuleContent"));
-        kSorts.add(Sorts.KVariable());
-        kSorts.add(Sorts.KConfigVar());
         kSorts.add(Sorts.KString());
     }
 
@@ -70,18 +68,33 @@ public class RuleGrammarGenerator {
     }
 
     private Set<Module> renameKItem2Bottom(Set<Module> def) {
-        // TODO: do renaming of KItem and K in the LHS to KBott
+        // TODO: do renaming of KItem and K in the LHS to KBott?
         return def;
     }
 
     public Module getRuleGrammar(Module mod) {
+        // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
 
     public Module getConfigGrammar(Module mod) {
+        // import CONFIG-CELLS in order to parse cells specific to configurations
         Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
+    }
+
+    public Module getProgramsGrammar(Module mod) {
+        Set<Sentence> prods = new HashSet<>();
+        // if no start symbol has been defined in the configuration, then use K
+        for (Sort srt : iterable(mod.definedSorts())) {
+            if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
+                // K ::= Sort
+                prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
+            }
+        }
+        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
+        return newM;
     }
 
     /**
@@ -161,12 +174,11 @@ public class RuleGrammarGenerator {
                         if (pi instanceof Terminal) {
                             Terminal t = (Terminal) pi;
                             Set<String> follow = new HashSet<>();
-                            for (String biggerString : terminals.prefixMap(t.value()).keySet()) {
-                                if (!t.value().equals(biggerString)) {
-                                    String ending = biggerString.substring(t.value().length());
-                                    follow.add(ending);
-                                }
-                            }
+                            terminals.prefixMap(t.value()).keySet().stream().filter(biggerString -> !t.value().equals(biggerString))
+                                    .forEach(biggerString -> {
+                                        String ending = biggerString.substring(t.value().length());
+                                        follow.add(ending);
+                                    });
                             // add follow restrictions for the characters that might produce ambiguities
                             if (!follow.isEmpty()) {
                                 String restriction = follow.stream().map(StringUtil::escapeAutomatonRegex).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
@@ -197,22 +209,5 @@ public class RuleGrammarGenerator {
         prods.add(Production("#InnerCast",     outerSort, Seq(NonTerminal(castSort), Terminal("<:" + castSort.name())), attrs1));
         prods.add(Production("#OuterCast",     castSort, Seq(NonTerminal(innerSort), Terminal(":>" + castSort.name())), attrs1));
         return prods;
-    }
-
-    // TODO(radumereuta): split K-SORT-LATTICE into K-TOP-SORT and K-BOTTOM-SORT, and replace this function with
-    // K-TOP-SORT
-    public Module getProgramsGrammar(Module mod) {
-        Set<Sentence> prods = new HashSet<>();
-
-        // if no start symbol has been defined in the configuration, then use K
-        for (Sort srt : iterable(mod.definedSorts())) {
-            if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
-                // K ::= Sort
-                prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
-            }
-        }
-
-        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
-        return newM;
     }
 }
