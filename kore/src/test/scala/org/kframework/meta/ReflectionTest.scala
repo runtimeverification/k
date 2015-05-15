@@ -108,6 +108,4 @@ class ReflectionTest {
     interval foreach { x => javaMethod.invoke(b, 3.asInstanceOf[Object]) }
     //    println((System.nanoTime() - startTime - diffTime) / 1000)
   }
-
-
 }

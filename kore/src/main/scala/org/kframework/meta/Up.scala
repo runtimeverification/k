@@ -31,14 +31,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[Str
 
       case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
       case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())
-
-
-
-      // Already K
-//      case o: K => o
-
-//      case o: Sort => 'Sort(cons.KToken(Sorts.KString, o.name, Att()))
-
+        
       // Fallback to reflection
       case o: Product =>
         val elements = o.productIterator.toList
