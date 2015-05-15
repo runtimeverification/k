@@ -1,9 +1,6 @@
 package org.kframework.meta
 
 import org.junit.Test
-import org.kframework.attributes.Att
-import org.kframework.definition.{RegexTerminal, Terminal, NonTerminal, Production}
-import org.kframework.kore.ADT.Sort
 
 case class Foo(bar: Int = 6, buz: String)(zzz: String = "foo") {
   override def toString = s"Foo($bar,$buz)($zzz)"
@@ -112,26 +109,5 @@ class ReflectionTest {
     //    println((System.nanoTime() - startTime - diffTime) / 1000)
   }
 
-  @Test def upDownProd() {
-    {
-      val prod = Production(Sort("Exp"), Seq(), Att())
-      val prod2 = Production(Sort("Exp"), Seq(), Att().add("originalProd", prod))
-      assertEquals(prod, prod2.att.get("originalProd").get)
-    }
-    {
-      val prod = Production(Sort("Exp"), Seq(NonTerminal(Sort("Int")), Terminal("+", "#"), RegexTerminal("#", "[a-z]", "#")), Att())
-      val prod2 = Production(Sort("Exp"), Seq(), Att().add("originalProd", prod))
-      assertEquals(prod, prod2.att.get("originalProd").get)
-    }
-    {
-      val prod = Production(Sort("Exp"), Seq(), Att().add("token", "abc"))
-      val prod2 = Production(Sort("Exp"), Seq(), Att().add("originalProd", prod))
-      assertEquals(prod, prod2.att.get("originalProd").get)
-    }
-    {
-      val prod = Production(Sort("Exp"), Seq(), Att().add("token"))
-      val prod2 = Production(Sort("Exp"), Seq(), Att().add("originalProd", prod))
-      assertEquals(prod, prod2.att.get("originalProd").get)
-    }
-  }
+
 }
