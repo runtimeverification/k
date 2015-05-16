@@ -22,6 +22,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[Str
     o match {
       case o: List[_] => 'List(o map apply: _*)
       case o: Set[_] => 'Set(o map apply toList: _*)
+      case att: Att => 'Att(att.att.toSeq.asInstanceOf[Seq[K]] :_*)
 
       // Primitives
       case o: Int => cons.KToken(Sorts.Int, o.toString, Att())
@@ -30,12 +31,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[Str
 
       case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
       case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())
-
-      // Already K
-      case o: K => o
-
-      case o: Sort => 'Sort(cons.KToken(Sorts.KString, o.name, Att()))
-
+        
       // Fallback to reflection
       case o: Product =>
         val elements = o.productIterator.toList

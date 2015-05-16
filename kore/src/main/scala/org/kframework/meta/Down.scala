@@ -1,7 +1,7 @@
 package org.kframework.meta
 
 import org.kframework.attributes._
-import org.kframework.kore.K
+import org.kframework.kore.{Unapply, K}
 import org.kframework.kore.Unapply._
 import org.kframework.kore.KORE.Sort
 
@@ -28,13 +28,23 @@ case class Down(imports: Set[String]) extends (K => Any) {
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
     case t@KApply(KLabel(l), ks) if t.att.contains(ClassFromUp) =>
       val classNameRecoveredFromUp = t.att.get[String](ClassFromUp).get
-      Reflection.construct(classNameRecoveredFromUp, ks map { apply _ })
+      Reflection.construct(classNameRecoveredFromUp, ks map {
+        apply _
+      })
+
+    case Unapply.KApply(Unapply.KLabel("Set"), l) => (l map apply).toSet
+    case Unapply.KApply(Unapply.KLabel("List"), l) => l map apply
+    case Unapply.KApply(Unapply.KLabel("Att"), l) => Att(l: _*)
 
     case KApply(KLabel(l), ks) =>
-      val children = ks map { apply _ }
+      val children = ks map {
+        apply _
+      }
 
       val namespacesToTry = imports
-      val matchingClasses = imports map { _ + "." + l }
+      val matchingClasses = imports map {
+        _ + "." + l
+      }
 
       matchingClasses
         .view
@@ -53,6 +63,6 @@ case class Down(imports: Set[String]) extends (K => Any) {
             matchingClasses.mkString("\n    "))
         }
       }
-//    case _ => throw new AssertionError("Could not down.")
+    //    case _ => throw new AssertionError("Could not down.")
   }
 }
