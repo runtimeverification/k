@@ -48,6 +48,7 @@ public class RuleGrammarGenerator {
         kSorts.add(Sorts.KList());
         kSorts.add(Sorts.KItem());
         kSorts.add(Sort("RuleContent"));
+        kSorts.add(Sort("KConfigVar"));
         kSorts.add(Sorts.KString());
     }
 

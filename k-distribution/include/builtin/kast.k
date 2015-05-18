@@ -50,6 +50,7 @@ module KSEQ-SYMBOLIC
   syntax #KVariable  ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, autoReject, hook(org.kframework.kore.KVariable)]
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\$)([A-Z][A-Za-z0-9'_]*)"          [token, autoReject]
   syntax KBott      ::= #KVariable
+  syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
 endmodule
 
