@@ -4,6 +4,7 @@ import java.util
 
 import org.kframework.POSet
 import org.kframework.kore.KORE.{KLabel, KList, KApply}
+import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
 
@@ -26,7 +27,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
   private val cellInitializer: Map[Sort, KApply] =
     m.productions.filter(p => cellSorts(p.sort) && p.att.contains("initializer"))
-      .map(p => (p.sort, KApply(p.klabel.get,KList(KApply(KLabel(".Map")))))).toMap
+      .map(p => (p.sort, KApply(p.klabel.get))).toMap
 
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
     p.items.flatMap{
@@ -86,6 +87,10 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst{ case NonTerminal(n) => n} get
 
   override def getDefaultCell(k: Sort): KApply = cellInitializer(k)
+
+  override def isConstantInitializer(k: Sort): Boolean = {
+    !m.productionsFor(getDefaultCell(k).klabel).exists(_.items.exists(_.isInstanceOf[NonTerminal]))
+  }
 
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
 

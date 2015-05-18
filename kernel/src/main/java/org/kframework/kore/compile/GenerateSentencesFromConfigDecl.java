@@ -193,7 +193,10 @@ public class GenerateSentencesFromConfigDecl {
      * @param childSorts The list of sorts computed via recursion of the children of the current cell.
      * @param childInitializer The contents of the cell being processed, converted into the right hand side of an initializer.
      * @param ensures The ensures clause to be used; null if the cell is not a top cell.
-     * @param initializeOptionalCell true if a cell of multiplicity * or ? should be initialized to a non-empty bag.
+     * @param hasConfigurationVariable true if the initializer for the cell requires a configuration variable.
+     *                                 This causes cells of multiplicity * or ? to be initialized to a non-empty bag,
+     *                                 and the initializer to take a Map argument containing the values of the configuration
+     *                                 variables.
      * @return A tuple containing the sentences associated with the cell, the sort of the cell, and the term to be used to initialize
      * this cell in the initializer of its parent cell.
      */
@@ -206,7 +209,7 @@ public class GenerateSentencesFromConfigDecl {
             List<Sort> childSorts,
             K childInitializer,
             K ensures,
-            boolean initializeOptionalCell) {
+            boolean hasConfigurationVariable) {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
@@ -218,10 +221,17 @@ public class GenerateSentencesFromConfigDecl {
         // syntax Cell ::= initCell(Map) [initializer, function]
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         String initLabel = "init" + sort.name();
-        Sentence initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
+        Sentence initializer;
+        Rule initializerRule;
+        if (hasConfigurationVariable) {
+            initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
+        } else {
+            initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function"));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
+        }
         Production cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
                 cellProperties.addAll(configAtt));
-        Rule initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
 
         if (multiplicity == Multiplicity.STAR) {
             // syntax CellBag ::= Cell
@@ -235,7 +245,7 @@ public class GenerateSentencesFromConfigDecl {
             // rule initCell(Init) => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
-            K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
+            K rhs = optionalCellInitializer(hasConfigurationVariable, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, bagSubsort, bagUnit, bag), bagSort, rhs);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
@@ -244,11 +254,19 @@ public class GenerateSentencesFromConfigDecl {
             // rule initCell(Init) => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
-            K rhs = optionalCellInitializer(initializeOptionalCell, initLabel);
+            K rhs = optionalCellInitializer(hasConfigurationVariable, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, cellUnit), sort, rhs);
         } else {
             // rule initCell(Init) => <cell> initChildren(Init)... </cell>
-            return Tuple3.apply(Set(initializer, initializerRule, cellProduction), sort, KApply(KLabel(initLabel), KVariable("Init")));
+            // -or-
+            // rule initCell => <cell> initChildren... </cell>
+            K rhs;
+            if (hasConfigurationVariable) {
+                rhs = KApply(KLabel(initLabel), KVariable("Init"));
+            } else {
+                rhs = KApply(KLabel(initLabel));
+            }
+            return Tuple3.apply(Set(initializer, initializerRule, cellProduction), sort, rhs);
         }
     }
 

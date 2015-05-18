@@ -46,6 +46,8 @@ public interface ConfigurationInfo {
      * probably an initializer macro */
     K getDefaultCell(Sort k);
 
+    boolean isConstantInitializer(Sort k);
+
     /** Return the root cell of the configuration . */
     Sort getRootCell();
     /** Return the declared computation cell, by default the k cell */
