@@ -218,6 +218,8 @@ public class GenerateSentencesFromConfigDecl {
                 .map(Constructors::NonTerminal)), Stream.of(Terminal("</" + cellName + ">")))
                 .collect(Collectors.toList());
 
+        // syntax Cell ::= "initCell" [initializer, function]
+        // -or-
         // syntax Cell ::= initCell(Map) [initializer, function]
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         String initLabel = "init" + sort.name();
@@ -242,7 +244,7 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     Att().add(Attribute.ASSOCIATIVE_KEY, "").add(Attribute.COMMUTATIVE_KEY, "").add(Attribute.UNIT_KEY, "." + bagSort.name()));
-            // rule initCell(Init) => .CellBag
+            // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
             K rhs = optionalCellInitializer(hasConfigurationVariable, initLabel);
@@ -251,15 +253,15 @@ public class GenerateSentencesFromConfigDecl {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
             cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
-            // rule initCell(Init) => .CellBag
+            // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
             K rhs = optionalCellInitializer(hasConfigurationVariable, initLabel);
             return Tuple3.apply(Set(initializer, initializerRule, cellProduction, cellUnit), sort, rhs);
         } else {
-            // rule initCell(Init) => <cell> initChildren(Init)... </cell>
-            // -or-
             // rule initCell => <cell> initChildren... </cell>
+            // -or-
+            // rule initCell(Init) => <cell> initChildren(Init)... </cell>
             K rhs;
             if (hasConfigurationVariable) {
                 rhs = KApply(KLabel(initLabel), KVariable("Init"));
