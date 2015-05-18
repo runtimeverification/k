@@ -1,12 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.transformers.Cell2DataStructure;
@@ -30,8 +26,11 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.TTYInfo;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InitialConfigurationProvider implements Provider<Term> {
 
@@ -72,13 +71,13 @@ public class InitialConfigurationProvider implements Provider<Term> {
 
         if (options.term()) {
             sw.printIntermediate("Parse term");
-            return rp.runParser(options.parser(context),
+            return rp.runParser(options.parser(),
                     options.pgm(), false, null);
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
         for (Map.Entry<String, Pair<String, String>> entry
-                : options.configVars(context).entrySet()) {
+                : options.configVars().entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();

@@ -118,6 +118,11 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
+    public boolean isConstantInitializer(Sort k) {
+        return true;
+    }
+
+    @Override
     public Sort getRootCell() {
         return topCell;
     }

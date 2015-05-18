@@ -118,7 +118,9 @@ public class Kompile {
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
 
-        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol);
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
+
+        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
     }
 
     public Definition addSemanticsModule(Definition d) {
@@ -193,7 +195,7 @@ public class Kompile {
         }
 
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
-        Definition defWithConfig = DefinitionTransformer.from(this::resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
+        Definition defWithConfig = DefinitionTransformer.from(m -> resolveConfig(m, definitionWithConfigBubble), "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig);
         Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
@@ -211,7 +213,7 @@ public class Kompile {
     java.util.Set<ParseFailedException> errors;
     RuleGrammarGenerator gen;
 
-    private Module resolveConfig(Module module) {
+    private Module resolveConfig(Module module, Definition def) {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
@@ -244,7 +246,7 @@ public class Kompile {
                         configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParserModule)))
                 .collect(Collections.toSet());
 
-        return Module(module.name(), module.imports(), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
+        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(def.getModule("MAP").get())), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
     }
 
     private Module resolveBubbles(Module module) {

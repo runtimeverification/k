@@ -5,6 +5,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -29,19 +30,21 @@ public class CompiledDefinition implements Serializable {
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
+    public final KLabel topCellInitializer;
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol) {
+    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
         this.programStartSymbol = programStartSymbol;
+        this.topCellInitializer = topCellInitializer;
     }
 
     /**
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(parsedDefinition.mainSyntaxModule(), programStartSymbol, kem);
+        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
     }
 
     /**

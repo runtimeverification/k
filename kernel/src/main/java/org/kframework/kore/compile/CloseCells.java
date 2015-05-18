@@ -201,6 +201,8 @@ public class CloseCells {
                 List<K> newContents = new ArrayList<>(contents.size() + requiredLeft.size());
                 newContents.addAll(contents);
                 for (Sort reqChild : requiredLeft) {
+                    if (!cfg.cfg.isConstantInitializer(reqChild))
+                        throw KEMException.compilerError("Cannot close cell on right hand side because the initializer for " + reqChild.name() + " requires configuration variables.");
                     newContents.add(cfg.getDefaultCell(reqChild));
                 }
                 return (KApply(label, KList(newContents)));

@@ -4,12 +4,13 @@ import java.util
 
 import org.kframework.POSet
 import org.kframework.kore.KORE.{KLabel, KList, KApply}
+import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
 
 import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
-import org.kframework.kore.{ADT, K, KLabel, Sort}
+import org.kframework.kore._
 import org.kframework.TopologicalSort._
 
 object ConfigurationInfoFromModule
@@ -24,9 +25,9 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellSorts: Set[Sort] = cellProductions.keySet
   private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
   val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
-  private val cellInitializer: Map[Sort, K] =
+  private val cellInitializer: Map[Sort, KApply] =
     m.productions.filter(p => cellSorts(p.sort) && p.att.contains("initializer"))
-      .map(p => (p.sort, KApply(p.klabel.get,KList(List.empty)))).toMap
+      .map(p => (p.sort, KApply(p.klabel.get))).toMap
 
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
     p.items.flatMap{
@@ -85,7 +86,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst{ case NonTerminal(n) => n} get
 
-  override def getDefaultCell(k: Sort): K = cellInitializer(k)
+  override def getDefaultCell(k: Sort): KApply = cellInitializer(k)
+
+  override def isConstantInitializer(k: Sort): Boolean = {
+    !m.productionsFor(getDefaultCell(k).klabel).exists(_.items.exists(_.isInstanceOf[NonTerminal]))
+  }
 
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
 

@@ -107,7 +107,7 @@ public class KastFrontEnd extends FrontEnd {
                 }
                 org.kframework.definition.Module mod;
                 if (options.module == null) {
-                    mod = def.getParsedDefinition().mainSyntaxModule();
+                    mod = def.syntaxModule();
                 } else {
                     Option<org.kframework.definition.Module> mod2 = def.getParsedDefinition().getModule(options.module);
                     if (mod2.isEmpty()) {

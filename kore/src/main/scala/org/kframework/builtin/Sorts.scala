@@ -22,6 +22,7 @@ object Sorts {
   val KLabel = Sort("KLabel")
   val KList = Sort("KList")
   val KToken = Sort("KToken")
+  val KConfigVar = Sort("KConfigVar")
 
   val Id = ADT.Sort("Id")
   val KSeq = ADT.Sort("KSequence")

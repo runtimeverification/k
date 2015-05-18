@@ -71,6 +71,8 @@ module MAP
   syntax priorities '_|->_ > '_Map_
 
   syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]
+
+  syntax K ::= Map "[" K "]"                    [function, klabel(Map:lookup)]
 endmodule
 
 module SET
