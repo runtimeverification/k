@@ -39,7 +39,8 @@ object ToKast {
   def escape(s: String): String = StringEscapeUtils.escapeJava(s)
 
   def unparse(inParen: Boolean, l: KLabel) : String = {
-    if (l.name.matches("[#a-z][a-zA-Z0-9]*")) {
+    if (l.name.matches("[#a-z][a-zA-Z0-9]*")
+        && l.name != "#token" && l.name != "#klabel") {
       l.name
     } else if (inParen) {
       " `"+l.name+'`'
