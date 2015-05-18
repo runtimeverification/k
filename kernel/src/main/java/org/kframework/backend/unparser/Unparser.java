@@ -620,7 +620,7 @@ public class Unparser implements Comparator<ASTNode> {
         @Override
         public Void visit(KLabelConstant kLabelConstant, Void _void) {
             string("`");
-            string(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll(",", "`,"));
+            string(kLabelConstant.getLabel());
             string("`");
             return null;
         }
