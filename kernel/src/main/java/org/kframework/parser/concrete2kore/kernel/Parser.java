@@ -7,7 +7,6 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
-import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.kernel.Grammar.EntryState;
@@ -19,8 +18,6 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.State;
-import org.kframework.parser.concrete2kore.kernel.Rule.ContextFreeRule;
-import org.kframework.parser.concrete2kore.kernel.Rule.ContextSensitiveRule;
 import org.kframework.utils.algorithms.AutoVivifyingBiMap;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -28,9 +25,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.pcollections.ConsPStack;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -217,11 +212,6 @@ public class Parser {
             private final int hashCode;
             public Key(StateCall stateCall, int stateEnd) {
                 assert stateCall != null;
-                // if we are a lookahead, then force the the state end to be equal to the state begin
-                if (stateCall.key.state instanceof NonTerminalState &&
-                    ((NonTerminalState)stateCall.key.state).isLookahead) {
-                    stateEnd = stateCall.key.stateBegin;
-                }
                 //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
                 this.hashCode = computeHash();
@@ -298,13 +288,6 @@ public class Parser {
     }
 
     /**
-     * See NonTerminalCall for an explanation of Context.
-     */
-    private static class Context {
-        final Set<Term> contexts = new HashSet<>();
-    }
-
-    /**
      * A NonTerminalCall represents the fact that the parser needs to try parsing
      * a particular {@link NonTerminal} (i.e., key.nt) starting at a particular position
      * (i.e., key.ntBegin).
@@ -322,24 +305,12 @@ public class Parser {
      * should be added back on the work queue if we discover that this NonTerminalCall
      * is called from a new context (i.e., reactivations).  This is used
      * to handle context sensitivity.
-     *
-     * The contexts in which a NonTerminalCall is called are stored in a {@link Context} object
-     * (i.e., 'context'). For now, contexts are limited to one layer and thus a context
-     * might say that this NonTerminalCall is called from a {@link StateCall} that has thus far
-     * parsed a '+(1,_)'.  This information is stored as a {@link KList} where the "_"
-     * are omitted.  This is kept as a separate class because they might be extended
-     * in the future.
      */
     private static class NonTerminalCall {
         /** The {@link StateCall}s that call this NonTerminalCall */
         final Set<StateCall> callers = new HashSet<>();
         /** The {@link StateReturn}s for the {@link ExitState} in this NonTerminalCall */
         final Set<StateReturn> exitStateReturns = new HashSet<>();
-        /** The {@link StateReturn}s that should be added back on the work queue if
-         * this NonTerminal Call is called from a new context */
-        final Set<StateReturn> reactivations = new HashSet<>();
-        /** The {@link Context}s from which this NonTerminalCall is called */
-        final Context context = new Context();
         private static class Key implements AutoVivifyingBiMap.Create<NonTerminalCall> {
             /** The {@link NonTerminal} being called */
             public final NonTerminal nt;
@@ -479,49 +450,21 @@ public class Parser {
     ////////////////
 
     /**
-     * A Function represents a mapping from one or more {@link Context}s
-     * to one or more ASTs. Functions are used throughout the parser
-     * instead of manipulating ASTs in order to support context sensitivity.
+     * A Function represents an ASTs.
      */
     private static class Function {
-        /**
-         * A Function stores this mapping from a context to an AST as it's
-         * {@link #mapping} field.  Their are two sorts of mappings: {@link Nil} and {@link One}.
-         * A {@link Nil} mapping does not depend on the context in any way.
-         * In effect, it represents a constant Function that ignores its argument.
-         * A {@link One} mapping, on the other hand, depends on one layer of context.
-         * It does this by storing input/output pairs.  These pairs are populated
-         * dynamically based on what input contexts actually occur, so this
-         * mapping may grow when new contexts are added to a {@link NonTerminalCall}.
-         * The reason we have both {@link Nil} and {@link One} is that several operations
-         * on {@link Nil} can be done much more efficiently than on a {@link One}.
-         *
-         * For example, a {@link Nil} containing the set {+(), -()} maps every context to those two values.
-         * On the other hand, a {@link One} containing the map {*() |-> {+(), -()}}
-         * maps the context *() to the two values +() and -(), but does not have a mapping
-         * for other contexts.  In this example, the context *() represents what we expect
-         * as the AST parsed thus far by the *caller* of the current non-terminal.
-         * In other words, we are trying to parse a +() or -() that will become children
-         * of the *().
-         */
-        private static abstract class Mapping {}
-        private static class Nil extends Mapping { Set<Term> values = new HashSet<>(); }
-        private static class One extends Mapping { Map<Term, Set<Term>> values = new HashMap<>(); }
-
-        /** The mapping that this Function represents */
-        private Mapping mapping = new Nil();
-        private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
+        /** The AST that this Function represents */
+        private Set<Term> values = new HashSet<>();
 
         /**
          * The identity function that maps everything to a singleton containing an empty KList.
-         * This is an identity because it maps every context to the {@link KList#EMPTY} which is the identity for KList.
          *
          * NOTE: It is important that this function is never mutated, but we have no good way
          * of enforcing this.
          */
         static final Function IDENTITY = new Function();
         static {
-            ((Nil) IDENTITY.mapping).values.add(KList.apply(ConsPStack.empty()));
+            IDENTITY.values.add(KList.apply(ConsPStack.empty()));
         }
 
         /**
@@ -531,76 +474,13 @@ public class Parser {
         static Function empty() { return new Function(); }
 
         /**
-         * Converts a function containing a {@link Nil} mapping to and equivalent one with
-         * a {@link One} mapping for the given contexts
-         * @param contexts The contexts for which the {@link One} should have mappings
-         */
-        private void promote(Set<Term> contexts) {
-            assert this.mapping instanceof Nil;
-            Set<Term> oldValues = ((Nil) this.mapping).values;
-            this.mapping = new One();
-            for (Term key : contexts) {
-                // Java, why you no have copy constructor?!
-                Set<Term> value = new HashSet<>();
-                value.addAll(oldValues);
-                ((One) this.mapping).values.put((KList)key, value);
-            }
-        }
-
-        /**
          * A helper function that adds the mappings in 'that' to 'this' after applying 'adder' to each mapping.
          * @param that     That 'Function' from which to get the mappings to be added to 'this'.
          * @param adder    The function to be applied to each value that a particular context is mapped to.
          * @return 'true' iff new mappings were added to this
          */
         private boolean addAux(Function that, com.google.common.base.Function<Set<Term>, Set<Term>> adder) {
-            if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
-                return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
-            } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
-                this.promote(((One) that.mapping).values.keySet());
-                return this.addAux(that, adder);
-            } else if (this.mapping instanceof One && that.mapping instanceof Nil) {
-                boolean result = false;
-                Set<Term> newValues = adder.apply(((Nil) that.mapping).values);
-                for (Set<Term> values : ((One) this.mapping).values.values()) {
-                    result |= values.addAll(newValues);
-                }
-                return result;
-            } else if (this.mapping instanceof One && that.mapping instanceof One) {
-                boolean result = false;
-                for (Term key : ((One) that.mapping).values.keySet()) {
-                    if (!((One) this.mapping).values.containsKey(key)) {
-                        ((One) this.mapping).values.put(key, new HashSet<Term>());
-                    }
-                    result |= ((One) this.mapping).values.get(key).addAll(
-                        adder.apply(((One) that.mapping).values.get(key)));
-                }
-                return result;
-            } else { throw unknownMappingType(); }
-        }
-
-        /**
-         * Get the set of {@link KList}s that this function maps to regardless of input (i.e., the range of this function).
-         * @return The set of {@link KList}s that this function maps to
-         */
-        Set<Term> results() {
-            if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
-            else if (this.mapping instanceof One) {
-                Set<Term> result = new HashSet<>();
-                for (Set<Term> value: ((One) this.mapping).values.values()) {
-                    result.addAll(value);
-                }
-                return result;
-            } else { throw unknownMappingType(); }
-        }
-
-        /**
-         * Returns the output of this function if it were applied to an empty (i.e., zero depth) context.
-         * @return The output of this function applied to an empty context
-         */
-        Set<Term> applyToNull() {
-            if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
-            else { assert false : "unimplemented"; return null; } // TODO
+            return this.values.addAll(adder.apply(that.values));
         }
 
         /**
@@ -609,31 +489,11 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed
          */
         public boolean add(Function that) {
-            return addAux(that, set -> set);
-        }
-
-        /**
-         * Add to 'this' all mappings formed by adding the token
-         * 'string' of sort 'sort' to the end of the mapping in that.
-         * @param that      The function from which
-         * @param string    The token value
-         * @param prd      The production of the token. 'null' if intermediate token
-         * @return 'true' iff the mappings in this function changed.
-         */
-        boolean addToken(Function that, String string) {
-            final Constant token =  Constant.apply(string, null);
-            return addAux(that, set -> {
-                Set<Term> result = new HashSet<>();
-                for (Term klist : set) {
-                    result.add(((KList)klist).add(token));
-                }
-                return result;
-            });
+            return this.values.addAll(that.values);
         }
 
         /**
          * Add to this function the mappings resulting from composing mappings in call with the mappings in exit.
-         * We do this in a way that matches up the contexts in 'exit' with the results in 'call'.
          *
          * This is used when the child (a {@link NonTerminal}) of a {@link NonTerminalState} finishes parsing.
          * In that case 'call' is the Function for the {@link StateCall} for that {@link NonTerminalState} and
@@ -645,17 +505,10 @@ public class Parser {
         boolean addNTCall(Function call, final Function exit) {
             return addAux(call, set -> {
                 Set<Term> result = new HashSet<>();
-                for (Term context : set) {
-                    // find subset of exit that matches
-                    Set<Term> matches;
-                    if (exit.mapping instanceof Nil) {
-                        matches = ((Nil) exit.mapping).values;
-                    } else if (exit.mapping instanceof One) {
-                        matches = ((One) exit.mapping).values.get(context);
-                    } else { throw unknownMappingType(); }
+                if (!exit.values.isEmpty()) {
                     // if we found some, make an amb node and append them to the KList
-                    if (!matches.isEmpty()) {
-                        result.add(((KList)context).add(Ambiguity.apply(matches)));
+                    for (Term context : set) {
+                        result.add(((KList)context).add(Ambiguity.apply(exit.values)));
                     }
                 }
                 return result;
@@ -665,7 +518,6 @@ public class Parser {
         /**
          * Add to 'this', the mappings from 'that' after they have had 'rule' applied to them.
          *
-         * NOTE: May also add 'stateReturn' to the 'reactivations' of the {@link NonTerminalCall} containing 'stateReturn'
          *
          * @param that           The function on which to apply 'rule'
          * @param rule           The 'Rule' to apply to the values in 'that'
@@ -675,37 +527,7 @@ public class Parser {
          * @return 'true' iff the mapping in this function changed
          */
         boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
-            if (rule instanceof ContextFreeRule) {
-                return addAux(that, set -> ((ContextFreeRule) rule).apply(set, metaData));
-            } else if (rule instanceof ContextSensitiveRule) {
-                Set<Term> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
-
-                if (this.mapping instanceof Nil) { promote(ntCallContexts); }
-
-                // Build a "promoted" version of "that"
-                One promotedThat;
-                if (that.mapping instanceof Nil) {
-                    promotedThat = new One();
-                    for (Term context : ntCallContexts) {
-                        promotedThat.values.put(context, ((Nil) that.mapping).values);
-                    }
-                } else if (that.mapping instanceof One) {
-                    promotedThat = ((One) that.mapping);
-                } else { throw unknownMappingType(); }
-
-                boolean result = false;
-                for (Term key : promotedThat.values.keySet()) {
-                    if (((One) this.mapping).values.get(key) == null) {
-                        ((One) this.mapping).values.put(key, new HashSet<>());
-                    }
-                    result |= ((One) this.mapping).values.get(key).
-                        addAll(((ContextSensitiveRule) rule).apply((KList)key, promotedThat.values.get(key), metaData));
-                }
-
-                stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
-
-                return result;
-            } else { throw unknownMappingType(); }
+            return addAux(that, set -> rule.apply(set, metaData));
         }
     }
 
@@ -744,7 +566,7 @@ public class Parser {
         Ambiguity result = Ambiguity.apply(new HashSet<>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                result.items().add(KList.apply(ConsPStack.singleton(Ambiguity.apply(stateReturn.function.applyToNull()))));
+                result.items().add(KList.apply(ConsPStack.singleton(Ambiguity.apply(stateReturn.function.values))));
             }
         }
 
@@ -791,7 +613,6 @@ public class Parser {
      * Contains the maximum position in the text which the parser managed to recognize.
      */
     public static class ParseError {
-        // TODO: replace the fields below with Location class
         /// The character offset of the error
         public final Source source;
         public final int position;
@@ -842,9 +663,7 @@ public class Parser {
         } else if (stateReturn.key.stateCall.key.state instanceof ExitState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
         } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
-            return stateReturn.function.addToken(stateReturn.key.stateCall.function,
-                s.input.subSequence(stateReturn.key.stateCall.key.stateBegin,
-                    stateReturn.key.stateEnd).toString());
+            return stateReturn.function.add(stateReturn.key.stateCall.function);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             int startPosition = stateReturn.key.stateCall.key.ntCall.key.ntBegin;
             int endPosition = stateReturn.key.stateEnd;
@@ -889,20 +708,10 @@ public class Parser {
             }
         // not instanceof SimpleState
         } else if (nextState instanceof NonTerminalState) {
-            // make sure lookaheads have a stateReturn even if empty
-            if (((NonTerminalState) nextState).isLookahead) {
-                s.stateReturnWorkList.enqueue(
-                    s.stateReturns.get(
-                        new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
-            }
             // add to the ntCall
             NonTerminalCall ntCall = s.ntCalls.get(new NonTerminalCall.Key(
                 ((NonTerminalState) nextState).child, stateCall.key.stateBegin));
             ntCall.callers.add(stateCall);
-            if (ntCall.context.contexts.addAll(stateCall.function.results())) {
-                // enqueues anything sensitive
-                s.stateReturnWorkList.addAll(ntCall.reactivations);
-            }
             // activate the entry state call (almost like activateStateCall but we have no stateReturn)
             StateCall entryStateCall = s.stateCalls.get(new StateCall.Key(
                 ntCall, stateCall.key.stateBegin, ntCall.key.nt.entryState));

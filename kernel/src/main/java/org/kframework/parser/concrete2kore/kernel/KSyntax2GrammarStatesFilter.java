@@ -97,7 +97,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                     Grammar.NonTerminalState nts = new Grammar.NonTerminalState(sort + " ::= " + srt.sort(), nt,
-                            grammar.get(srt.sort().name()), false);
+                            grammar.get(srt.sort().name()));
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof TerminalLike) {
@@ -108,10 +108,8 @@ public class KSyntax2GrammarStatesFilter {
                             lx.precedePattern(),
                             lx.pattern(),
                             lx.followPattern());
-                    RuleState del = new RuleState("DelTerminalRS", nt, new Rule.DeleteRule(1));
                     previous.next.add(pstate);
-                    pstate.next.add(del);
-                    previous = del;
+                    previous = pstate;
                 } else {
                     assert false : "Didn't expect this ProductionItem type: "
                             + prdItem.getClass().getName();
