@@ -401,15 +401,15 @@ public class KILtoKORE extends KILTransformation<Object> {
 
             // IdsTerminator ::= "" [klabel('.Ids)]
             prod1 = Production(dropQuote(p.getTerminatorKLabel()), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
-                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getTerminatorKLabel())));
+                    attrsWithKilProductionId.add("klabel", dropQuote(p.getTerminatorKLabel())));
             // NeIds ::= Id "," NeIds [klabel('_,_)]
             prod2 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
                     Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(Sort("Ne" + sort.name()))),
-                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
+                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())));
             // NeIds ::= Id IdsTerminator [klabel('_,_)]
             prod3 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
                     Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminator"))),
-                    attrsWithKilProductionId.add("#klabel", p.getKLabel()));
+                    attrsWithKilProductionId.add("klabel", p.getKLabel()));
             // Ids ::= NeIds
             prod4 = Production(sort, Seq(NonTerminal(Sort("Ne" + sort.name()))),
                     attrsWithKilProductionId);
@@ -430,14 +430,14 @@ public class KILtoKORE extends KILTransformation<Object> {
             // lst ::= lst sep lst
             prod1 = Production(sort,
                     Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                    attrsWithKilProductionId.add("#klabel", dropQuote(p.getKLabel())));
+                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())));
 
             // lst ::= elem
             prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict"));
 
             // lst ::= .UserList
             prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                    attrsWithKilProductionId.remove("strict").add("#klabel", dropQuote(p.getTerminatorKLabel())));
+                    attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
 
             res.add(prod1);
             res.add(prod2);

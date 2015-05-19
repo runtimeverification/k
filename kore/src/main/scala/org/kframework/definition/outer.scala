@@ -76,7 +76,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
-  // Check that productions with the same #klabel have identical attributes
+  // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {
   //    case (l, ps) =>
   //      if (ps.groupBy(_.att).size != 1)
@@ -200,7 +200,7 @@ with SyntaxSortToString with OuterKORE {
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  lazy val klabel: Option[KLabel] = att.get[String]("#klabel") map {org.kframework.kore.KORE.KLabel(_)}
+  lazy val klabel: Option[KLabel] = att.get[String]("klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
@@ -215,7 +215,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
 object Production {
   def apply(klabel: String, sort: Sort, items: Seq[ProductionItem], att: Att = Att()): Production = {
-    Production(sort, items, att + ("#klabel" -> klabel))
+    Production(sort, items, att + ("klabel" -> klabel))
   }
   val kLabelAttribute = "klabel"
 }

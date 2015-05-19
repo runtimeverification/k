@@ -198,7 +198,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                     String keyString = key.toString();
                     String valueString = attributes.get(key).getValue().toString();
                     if (keyString.equals("klabel")) {
-                        return (K) KApply(KLabel("#klabel"),
+                        return (K) KApply(KLabel("klabel"),
                                 KList(KToken(Sort("AttributeValue"), dropQuote(valueString))));
                     } else {
                         return (K) KApply(KLabel(keyString),
