@@ -48,17 +48,12 @@ public abstract class Rule implements Serializable {
         }
     }
 
-    /**
-     * A rule who's action does not depend on the context in which the parse occurs.
-     */
-    public static abstract class ContextFreeRule extends Rule {
-        public abstract Set<Term> apply(Set<Term> set, MetaData metaData);
-    }
+    public abstract Set<Term> apply(Set<Term> set, MetaData metaData);
 
     /**
      * Helper class for rules that treat each KList passed to apply() independently from each other
      */
-    public static abstract class KListRule extends ContextFreeRule {
+    public static abstract class KListRule extends Rule {
         public Set<Term> apply(Set<Term> set, MetaData metaData) {
             Set<Term> result = new HashSet<>();
             for (Term klist : set) {

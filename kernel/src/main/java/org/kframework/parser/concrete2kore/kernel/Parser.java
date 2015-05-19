@@ -18,7 +18,6 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.State;
-import org.kframework.parser.concrete2kore.kernel.Rule.ContextFreeRule;
 import org.kframework.utils.algorithms.AutoVivifyingBiMap;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -528,7 +527,7 @@ public class Parser {
          * @return 'true' iff the mapping in this function changed
          */
         boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
-            return addAux(that, set -> ((ContextFreeRule) rule).apply(set, metaData));
+            return addAux(that, set -> rule.apply(set, metaData));
         }
     }
 
