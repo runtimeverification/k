@@ -59,4 +59,11 @@ class UnparseTest {
   @Test def TickSpace() {
     Assert.assertEquals("`` `_+_`(.KList)=>b(.KList)``~>c(.KList)",ToKast(KRewrite(KLabel("_+_")(),'b())~>'c()))
   }
+
+  @Test def testKeywords(): Unit = {
+    Assert.assertEquals("#a(.KList)~>`#klabel`(.KList)~>#klabel(test)~>`#token`(.KList)~>#token(\"Int\",\"1\")",
+      ToKast(KSequence(KLabel("#a")(),
+        KLabel("#klabel")(), InjectedKLabel(KLabel("test"),Att()),
+        KLabel("#token")(),  KToken(Sort("Int"),"1"))))
+  }
 }
