@@ -124,41 +124,4 @@ public abstract class Rule implements Serializable {
             return set.remove(length);
         }
     }
-
-    /*  // for adding a non-constant to a label that was added before the fact
-        class AdoptionRule extends ContextFreeRule {
-            private boolean reject;
-            public Set<KList> apply(Set<KList> set) {
-                Set<KList> result = new HashSet<>();
-                for (KList klist : set) {
-                    List<Term> contents = klist.getContents();
-                    if (contents.size() >= 2) {
-                        KList newKList = new KList(klist);
-                        Term oldFinal = newKList.getContents().remove(contents);
-                        Term oldPreFinal = newKList.getContents().remove(...);
-                        if (oldPreFinal instanceof KApp) {
-                            assert ((KApp) oldPreFinal).getChild() instanceof KList : "unimplemented"; // TODO
-                            Term newFinal = new KApp(((KApp) oldPreFinal).getLabel(),
-                                KList.append((KList) ((KApp) oldPreFinal).getChild(), oldFinal));
-                            newKList.add(newFinal);
-                            result.add(newKList);
-                        } else if (!reject) { result.add(klist); }
-                    } else if (!reject) { return.add(klist); }
-                }
-            }
-        }
-        */
-
-    /**
-     * TODO: implement this
-     */
-    public static abstract class ContextSensitiveRule extends Rule {
-        abstract Set<Term> apply(KList context, Set<Term> set, MetaData metaData);
-    }
-
-    /*
-    public static class CheckLabelContextRule extends ContextSensitiveRule {
-        private boolean positive;
-    }
-    */
 }

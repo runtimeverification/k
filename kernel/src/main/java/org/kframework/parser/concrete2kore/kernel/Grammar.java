@@ -6,7 +6,6 @@ import com.google.common.collect.HashBiMap;
 import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.RegExp;
 import dk.brics.automaton.RunAutomaton;
-import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 
 import java.io.Serializable;
@@ -41,13 +40,13 @@ import java.util.Set;
  *     | E "*" E   [label(mul)]
  *     | {E, ","}+ [label(lst)]
  *
- *     +--[E]---("+")--<Del>--[E]--<add>--+
- *     |                                  |
- * (|--+--[E]---("*")--<Del>--[E]--<mul>--+--|)
- *     |                                  |
- *     |   +-----------------------<lst>--+
- *     +--[E]---(",")--<Del>--+
- *         ^------------------+
+ *     +--[E]---("+")--[E]--<add>--+
+ *     |                           |
+ * (|--+--[E]---("*")--[E]--<mul>--+--|)
+ *     |                           |
+ *     |   +----------------<lst>--+
+ *     +--[E]---(",")----+
+ *         ^-------------+
  *
  * (| - EntryState
  * |) - ExitState
@@ -141,7 +140,7 @@ public class Grammar implements Serializable {
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
      * All children of the given state are moved to the remove whitespace rule.
-     * (|-- gets transformed into (|-->(white)--><remove>---
+     * (|-- gets transformed into (|-->(white)--
      * @param start NextableState to which to attach the whitespaces
      * @return the remove whitespace state
      */
@@ -153,13 +152,10 @@ public class Grammar implements Serializable {
         }
         PrimitiveState whitespace = new RegExState(
             "whitespace", start.nt, pattern);
-        RuleState deleteToken = new RuleState(
-            "whitespace-D", start.nt, new DeleteRule(1));
-        whitespace.next.add(deleteToken);
-        deleteToken.next.addAll(start.next);
+        whitespace.next.addAll(start.next);
         start.next.clear();
         start.next.add(whitespace);
-        return deleteToken;
+        return whitespace;
     }
 
     static final RunAutomaton pattern = new RunAutomaton(new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton(), false);
@@ -269,7 +265,7 @@ public class Grammar implements Serializable {
      * original BNF grammar. The non-terminal is represented as a NFA automaton which has only
      * one EntryState and one ExitState.
      */
-    public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
+    public static class NonTerminal implements Serializable {
         public final String name;
         private final int hashCode;
         /**
@@ -283,37 +279,6 @@ public class Grammar implements Serializable {
         // contains a list of all States found in this NonTerminal other than the EntryState
         // and ExitState
         private final Set<NextableState> intermediaryStates = new HashSet<>();
-        final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
-
-        /**
-         * Metadata used by the parser used to determine in what order to process StateReturns
-         * Note: currently unused until we do lookahead.
-         */
-        static class OrderingInfo implements Comparable<OrderingInfo> {
-            final int key;
-            public OrderingInfo(int key) { this.key = key; }
-            public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
-            @Override
-            public int hashCode() {
-                final int prime = 31;
-                int result = 1;
-                result = prime * result + key;
-                return result;
-            }
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj)
-                    return true;
-                if (obj == null)
-                    return false;
-                if (getClass() != obj.getClass())
-                    return false;
-                OrderingInfo other = (OrderingInfo) obj;
-                if (key != other.key)
-                    return false;
-                return true;
-            }
-        }
 
         public NonTerminal(String name) {
             assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
@@ -321,10 +286,6 @@ public class Grammar implements Serializable {
             hashCode = name.hashCode();
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
-        }
-
-        public int compareTo(NonTerminal that) {
-            return this.name.compareTo(that.name);
         }
 
         /**
@@ -481,17 +442,14 @@ public class Grammar implements Serializable {
     public static class NonTerminalState extends NextableState {
         /** The NonTerminal referenced by this NonTerminalState */
         public final NonTerminal child;
-        /** Specifies if this state should be treated as a lookahead parse */
-        public final boolean isLookahead;
 
         public NonTerminalState(
                 String name, NonTerminal nt,
-                NonTerminal child, boolean isLookahead) {
+                NonTerminal child) {
             super(name, nt, true);
             assert child != null;
             nt.intermediaryStates.add(this);
             this.child = child;
-            this.isLookahead = isLookahead;
         }
     }
 
