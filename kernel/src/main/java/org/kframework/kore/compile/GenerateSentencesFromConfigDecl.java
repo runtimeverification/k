@@ -291,7 +291,7 @@ public class GenerateSentencesFromConfigDecl {
         if (ensures != null) {
             att = att.add("topcell");
         }
-        att = att.add("cell").add("#klabel", "<" + cellName + ">");
+        att = att.add("cell").add("klabel", "<" + cellName + ">");
         return att.addAll(getCellPropertiesAsAtt(k));
     }
 
