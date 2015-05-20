@@ -86,7 +86,7 @@ public class TstBackendOnKORE_IT {
             requestScope.enter();
             try {
                 InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
-                K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken(Sorts.KConfigVar(), "$PGM"), program)));
+                K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), program)));
                 Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
                 System.err.println(KOREToTreeNodes.toString(new AddBrackets(unparsingModule).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(kResult), unparsingModule))));
             } finally {

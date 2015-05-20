@@ -45,7 +45,7 @@ object ADT {
     override def toString = name
   }
 
-  case class KToken(sort: kore.Sort, s: String, att: Att = Att()) extends kore.KToken
+  case class KToken(s: String, sort: kore.Sort, att: Att = Att()) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
     elements foreach { e => assert(e.isInstanceOf[K]) }

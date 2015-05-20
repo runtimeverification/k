@@ -148,7 +148,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Context apply(org.kframework.kil.Context c) {
         if (syntactic)
-            return Context(KApply(KLabel("'context")), KToken(Sorts.Bool(), "true"),
+            return Context(KApply(KLabel("'context")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
@@ -160,7 +160,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
         if (syntactic)
-            return Configuration(KApply(KLabel("'configuration")), KToken(Sorts.Bool(), "true"),
+            return Configuration(KApply(KLabel("'configuration")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
@@ -169,8 +169,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Rule apply(org.kframework.kil.Rule r) {
         if (syntactic)
-            return Rule(KApply(KLabel("'rule")), KToken(Sorts.Bool(), "true"),
-                    KToken(Sorts.Bool(), "true"), inner.convertAttributes(r));
+            return Rule(KApply(KLabel("'rule")), KToken("true", Sorts.Bool()),
+                    KToken("true", Sorts.Bool()), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
 
         AbstractKORETransformer<Set<Tuple2<K, Sort>>> gatherSorts = new AbstractKORETransformer<Set<Tuple2<K, Sort>>>() {
@@ -220,7 +220,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
                 .reduce(makeAnd)
-                .orElseGet(() -> KToken(Sorts.Bool(), "true"));
+                .orElseGet(() -> KToken("true", Sorts.Bool()));
 
 
         return Rule(body, makeAnd.apply(inner.applyOrTrue(r.getRequires()), sortPredicates),

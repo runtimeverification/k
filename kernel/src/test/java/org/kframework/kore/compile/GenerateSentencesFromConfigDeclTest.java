@@ -56,7 +56,7 @@ public class GenerateSentencesFromConfigDeclTest {
     public void testSingleTop() {
         K configuration = cell("threads", Collections.emptyMap(),
                 cell("thread", Collections.singletonMap("multiplicity", "*"),
-                        cells(cell("k", Collections.emptyMap(), KApply(KLabel("#SemanticCastToK"), KToken(Sorts.KConfigVar(), "$PGM"))),
+                        cells(cell("k", Collections.emptyMap(), KApply(KLabel("#SemanticCastToK"), KToken("$PGM", Sorts.KConfigVar()))),
                                 cell("opt", Collections.singletonMap("multiplicity", "?"),
                                         KApply(KLabel(".Opt"))))));
         Module m = new RuleGrammarGenerator(def).getConfigGrammar(def.getModule("KSEQ").get());
@@ -98,7 +98,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 Rule(KRewrite(KApply(KLabel("initKCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<k>"), false, KApply(KLabel("#SemanticCastToK"), KApply(KLabel("Map:lookup"),
                                         KVariable("Init"),
-                                        KToken(Sorts.KConfigVar(), "$PGM"))), false)),
+                                        KToken("$PGM", Sorts.KConfigVar()))), false)),
                         BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
                 Rule(KRewrite(KApply(KLabel("initOptCell")),
                                 IncompleteCellUtils.make(KLabel("<opt>"), false, KApply(KLabel(".Opt")), false)),
@@ -113,9 +113,9 @@ public class GenerateSentencesFromConfigDeclTest {
     private KApply cell(String s, Map<String, String> att, K body) {
         K cellAtt = att.entrySet().stream()
                 .map(e -> KApply(KLabel("#cellProperty"),
-                        KToken(Sort("#CellName"), e.getKey()),
-                        KToken(Sort("KString"), StringUtil.enquoteKString(e.getValue()))))
+                        KToken(e.getKey(), Sort("#CellName")),
+                        KToken(StringUtil.enquoteKString(e.getValue()), Sort("KString"))))
                 .reduce(KApply(KLabel("#cellPropertyListTerminator")), (k1, k2) -> KApply(KLabel("#cellPropertyList"), k2, k1));
-        return KApply(KLabel("#configCell"), KToken(Sort("#CellName"), s), cellAtt, body, KToken(Sort("#CellName"), s));
+        return KApply(KLabel("#configCell"), KToken(s, Sort("#CellName")), cellAtt, body, KToken(s, Sort("#CellName")));
     }
 }

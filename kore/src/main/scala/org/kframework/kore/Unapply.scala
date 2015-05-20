@@ -16,7 +16,7 @@ object Unapply {
   }
 
   object KToken {
-    def unapply(token: KToken) = Some(token.sort, token.s)
+    def unapply(token: KToken) = Some(token.s, token.sort)
   }
 
   object InjectedKLabel {

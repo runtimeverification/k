@@ -1,7 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"6"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/userList.k"))]
-  syntax Stxs ::= Stxs "," Stxs [Location(#token(Int,"5"),#token(Int,"21"),#token(Int,"5"),#token(Int,"42")) Source(#token(KString,"src/test/resources/convertor-tests/userList.k")) foo(#token(AttributeValue,"")) klabel(#token(KString,"_,_")) userList(#token(KString,"Stxs"))]
-  syntax Stxs ::= Stx [Location(#token(Int,"5"),#token(Int,"21"),#token(Int,"5"),#token(Int,"42")) Source(#token(KString,"src/test/resources/convertor-tests/userList.k")) foo(#token(AttributeValue,"")) userList(#token(KString,"Stxs"))]
-  syntax Stxs ::= ".Stxs" [Location(#token(Int,"5"),#token(Int,"21"),#token(Int,"5"),#token(Int,"42")) Source(#token(KString,"src/test/resources/convertor-tests/userList.k")) foo(#token(AttributeValue,"")) klabel(#token(KString,".List{\"'_,_\"}")) userList(#token(KString,"Stxs"))]
-  syntax Stx ::= "1" [Location(#token(Int,"4"),#token(Int,"20"),#token(Int,"4"),#token(Int,"22")) Source(#token(KString,"src/test/resources/convertor-tests/userList.k")) klabel(#token(KString,"1"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("6",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString))]
+  syntax Stxs ::= Stxs "," Stxs [Location(#token("5",Int),#token("21",Int),#token("5",Int),#token("42",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) foo(#token("",AttributeValue)) klabel(#token("_,_",KString)) userList(#token("Stxs",KString))]
+  syntax Stxs ::= Stx [Location(#token("5",Int),#token("21",Int),#token("5",Int),#token("42",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) foo(#token("",AttributeValue)) userList(#token("Stxs",KString))]
+  syntax Stxs ::= ".Stxs" [Location(#token("5",Int),#token("21",Int),#token("5",Int),#token("42",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) foo(#token("",AttributeValue)) klabel(#token(".List{\"'_,_\"}",KString)) userList(#token("Stxs",KString))]
+  syntax Stx ::= "1" [Location(#token("4",Int),#token("20",Int),#token("4",Int),#token("22",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) klabel(#token("1",KString))]
 endmodule

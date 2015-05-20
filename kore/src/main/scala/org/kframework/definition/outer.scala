@@ -190,7 +190,7 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //  def att: Att
 //  def items: Seq[ProductionItem]
 //  def klabel: Option[KLabel] =
-//    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(_, s, _)) => s } map { KLabel(_) }
+//    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(s, _, _)) => s } map { KLabel(_) }
 //}
 
 case class SyntaxSort(sort: Sort, att: Att = Att()) extends Sentence

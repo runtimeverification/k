@@ -75,7 +75,7 @@ public class KRun implements Transformation<Void, Void> {
             // TODO(dwightguth): start symbols
             Sort sort = Sorts.K();
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
-            output.put(KToken(Sorts.KConfigVar(), "$" + name), configVar);
+            output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
         }
         return plugConfigVars(compiledDef, output);
     }

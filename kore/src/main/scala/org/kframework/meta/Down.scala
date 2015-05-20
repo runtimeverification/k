@@ -19,10 +19,10 @@ case class Down(imports: Set[String]) extends (K => Any) {
   val AttVal = Sort("AttributeValue")
 
   def apply(o: K): Any = o match {
-    case KToken(`KString`, v) => v
-    case KToken(`String`, v) => v
-    case KToken(`Int`, v) => v.toInt
-    case KToken(`AttVal`, v) => v
+    case KToken(v, `KString`) => v
+    case KToken(v,`String`) => v
+    case KToken(v, `Int`) => v.toInt
+    case KToken(v, `AttVal`) => v
     //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet

@@ -2,7 +2,6 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Lists;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
@@ -109,7 +108,7 @@ public class GenerateSentencesFromConfigDecl {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
                     //top level cell, therefore, should be the children of the generatedTop cell
-                    KToken cellLabel = KToken(Sort("#CellName"), "generatedTop");
+                    KToken cellLabel = KToken("generatedTop", Sort("#CellName"));
                     K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), term, cellLabel);
                     return genInternal(generatedTop, ensures, cfgAtt, m);
                 }

@@ -215,7 +215,7 @@ case class SortPredicate(klabel: SortPredicateLabel, k: K, att: Att = Att())
     if (!k.isInstanceOf[KVar]) {
       val actualSort = k match {
         case KApp(l, _, _) => theory.asInstanceOf[TheoryWithUpDown].module.sortFor(l)
-        case Unapply.KToken(s, _) => s
+        case Unapply.KToken(_, s) => s
       }
       if (actualSort == klabel.sort ||
         theory.asInstanceOf[TheoryWithUpDown].module.subsorts.<(actualSort, klabel.sort))
