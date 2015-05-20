@@ -20,7 +20,7 @@ object KOREToTreeNodes {
   }
 
   def up(t: K): K = t match {
-    case v: KVariable => KToken(Sorts.KVariable, v.name, v.att)
+    case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
     case t: KToken => t
     case s: KSequence =>
       if (s.items.size() == 0)

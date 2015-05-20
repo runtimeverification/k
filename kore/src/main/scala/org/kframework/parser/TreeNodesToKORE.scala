@@ -16,13 +16,13 @@ object TreeNodesToKORE {
   import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
-    case c@Constant(s, p) => KToken(p.sort, s, locationToAtt(c.location.get(), c.source.get()))
+    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location.get(), c.source.get()))
     case t@TermCons(items, p) => KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
     case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
   }
 
   def down(t: K): K = t match {
-    case t@KToken(sort, s) if sort == Sorts.KVariable =>
+    case t@KToken(s, sort) if sort == Sorts.KVariable =>
       KVariable(s.trim, t.att)
 
     case t: kore.KToken => t
@@ -49,8 +49,7 @@ object TreeNodesToKORE {
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1)
 
-      KToken(Sort(removeQuotes(items(0).asInstanceOf[KToken].s)),
-        removeQuotes(items.tail.head.asInstanceOf[KToken].s))
+      KToken(removeQuotes(items.tail.head.asInstanceOf[KToken].s), Sort(removeQuotes(items(0).asInstanceOf[KToken].s)))
 
     case t@KApply(l, items) =>
       KApply(l, KList((items map down _).asJava), t.att)
@@ -65,10 +64,10 @@ object TreeNodesToKORE {
   }
 
   def downKLabel(t: K): KLabel = t match {
-    case t@KToken(sort, s) if sort == Sorts.KVariable =>
+    case t@KToken(s, sort) if sort == Sorts.KVariable =>
       KVariable(s.trim, t.att)
 
-    case t@KToken(sort, s) if sort == Sorts.KLabel =>
+    case t@KToken(s, sort) if sort == Sorts.KLabel =>
       KLabel(unquote(t))
 
     case t@KApply(KLabel(s), items) if s.startsWith("#SemanticCastTo") =>

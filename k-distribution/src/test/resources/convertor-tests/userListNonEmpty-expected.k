@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"6"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/userListNonEmpty.k"))]
-  syntax Stxs ::= Stxs "," Stxs [#klabel(#token(KString,"_,_")) Location(#token(Int,"5"),#token(Int,"19"),#token(Int,"5"),#token(Int,"33")) Source(#token(KString,"src/test/resources/convertor-tests/userListNonEmpty.k")) userList(#token(KString,"Stxs"))]
-  syntax Stxs ::= Stx [Location(#token(Int,"5"),#token(Int,"19"),#token(Int,"5"),#token(Int,"33")) Source(#token(KString,"src/test/resources/convertor-tests/userListNonEmpty.k")) userList(#token(KString,"Stxs"))]
-  syntax Stx ::= "1" [#klabel(#token(KString,"1")) Location(#token(Int,"4"),#token(Int,"18"),#token(Int,"4"),#token(Int,"20")) Source(#token(KString,"src/test/resources/convertor-tests/userListNonEmpty.k"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("6",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/userListNonEmpty.k",KString))]
+  syntax Stxs ::= Stxs "," Stxs [#klabel(#token("_,_",KString)) Location(#token("5",Int),#token("19",Int),#token("5",Int),#token("33",Int)) Source(#token("src/test/resources/convertor-tests/userListNonEmpty.k",KString)) userList(#token("Stxs",KString))]
+  syntax Stxs ::= Stx [Location(#token("5",Int),#token("19",Int),#token("5",Int),#token("33",Int)) Source(#token("src/test/resources/convertor-tests/userListNonEmpty.k",KString)) userList(#token("Stxs",KString))]
+  syntax Stx ::= "1" [#klabel(#token("1",KString)) Location(#token("4",Int),#token("18",Int),#token("4",Int),#token("20",Int)) Source(#token("src/test/resources/convertor-tests/userListNonEmpty.k",KString))]
 endmodule

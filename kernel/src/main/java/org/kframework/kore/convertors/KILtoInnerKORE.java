@@ -113,7 +113,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         Term label = kApp.getLabel();
 
         if (label instanceof Token) {
-            return KToken(Sort(((Token) label).tokenSort().getName()), ((Token) label).value());
+            return KToken(((Token) label).value(), Sort(((Token) label).tokenSort().getName()));
         } else {
             Term child = kApp.getChild();
 
@@ -153,11 +153,11 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
         return convertAttributes(cons).addAll(
                 Attributes(KApply(KLabel("sort"),
-                        KList(KToken(Sorts.KString(), cons.getSort().toString())))));
+                        KList(KToken(cons.getSort().toString(), Sorts.KString())))));
     }
 
     public KApply apply(Hole hole) {
-        return KApply(labels.Hole(), KList(KToken(Sort(hole.getSort().getName()), "")),
+        return KApply(labels.Hole(), KList(KToken("", Sort(hole.getSort().getName()))),
                 sortAttributes(hole));
     }
 
@@ -181,7 +181,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         if (t != null)
             return apply(t);
         else
-            return KToken(Sorts.Bool(), "true");
+            return KToken("true", Sorts.Bool());
     }
 
     public K apply(TermComment t) {
@@ -199,10 +199,10 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                     String valueString = attributes.get(key).getValue().toString();
                     if (keyString.equals("klabel")) {
                         return (K) KApply(KLabel("#klabel"),
-                                KList(KToken(Sort("AttributeValue"), dropQuote(valueString))));
+                                KList(KToken(dropQuote(valueString), Sort("AttributeValue"))));
                     } else {
                         return (K) KApply(KLabel(keyString),
-                                KList(KToken(Sort("AttributeValue"), valueString)));
+                                KList(KToken(valueString, Sort("AttributeValue"))));
                     }
 
                 }).collect(Collectors.toSet());
@@ -228,7 +228,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
                 .stream()
                 .map(key -> {
                     String value = attributes.get(key);
-                    return (K)KApply(KLabel(key), KList(KToken(Sort("AttributeValue"), value)));
+                    return (K)KApply(KLabel(key), KList(KToken(value, Sort("AttributeValue"))));
                 }).collect(Collectors.toSet());
 
         return Attributes(immutable(attributesSet));

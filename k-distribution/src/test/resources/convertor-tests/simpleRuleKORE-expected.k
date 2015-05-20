@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"6"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/simpleRuleKORE.k"))]
-  syntax Exp [Location(#token(Int,"4"),#token(Int,"3"),#token(Int,"4"),#token(Int,"12")) Source(#token(KString,"src/test/resources/convertor-tests/simpleRuleKORE.k"))]
-  rule #KRewrite(#token(KVariable,"A"),#token(KVariable,"B")) requires null ensures null [Location(#token(Int,"5"),#token(Int,"3"),#token(Int,"5"),#token(Int,"13")) Source(#token(KString,"src/test/resources/convertor-tests/simpleRuleKORE.k")) contentStartColumn(#token(Int,"8")) contentStartLine(#token(Int,"5"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("6",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/simpleRuleKORE.k",KString))]
+  syntax Exp [Location(#token("4",Int),#token("3",Int),#token("4",Int),#token("12",Int)) Source(#token("src/test/resources/convertor-tests/simpleRuleKORE.k",KString))]
+  rule #KRewrite(#token("A",KVariable),#token("B",KVariable)) requires null ensures null [Location(#token("5",Int),#token("3",Int),#token("5",Int),#token("13",Int)) Source(#token("src/test/resources/convertor-tests/simpleRuleKORE.k",KString)) contentStartColumn(#token("8",Int)) contentStartLine(#token("5",Int))]
 endmodule

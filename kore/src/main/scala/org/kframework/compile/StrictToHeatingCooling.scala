@@ -4,7 +4,7 @@ import org.kframework.definition._
 import org.kframework.kore.KORE._
 
 object StrictToHeatingCooling extends ModuleTransformer({m: Module =>
-  val True = KToken(Sort("Bool"), "true")
+  val True = KToken("true", Sort("Bool"))
   val hole = KLabel("[]")()
 
   def makeVar(pos: Int) = KVariable("A" + (pos + 1))
