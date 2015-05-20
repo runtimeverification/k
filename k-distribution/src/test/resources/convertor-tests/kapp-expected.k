@@ -1,8 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"18"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k"))]
-  syntax Bools ::= Bools "," Bools [Location(#token(Int,"15"),#token(Int,"20"),#token(Int,"15"),#token(Int,"34")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) userList(#token(KString,"Bools")) klabel(#token(KString,"_,_"))]
+  syntax Bools ::= Bools "," Bools [Location(#token(Int,"15"),#token(Int,"20"),#token(Int,"15"),#token(Int,"34")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) klabel(#token(KString,"_,_")) userList(#token(KString,"Bools"))]
   syntax Bools ::= Bool [Location(#token(Int,"15"),#token(Int,"20"),#token(Int,"15"),#token(Int,"34")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) userList(#token(KString,"Bools"))]
-  syntax Bools ::= ".Bools" [Location(#token(Int,"15"),#token(Int,"20"),#token(Int,"15"),#token(Int,"34")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) userList(#token(KString,"Bools")) klabel(#token(KString,".List{\"'_,_\"}"))]
+  syntax Bools ::= ".Bools" [Location(#token(Int,"15"),#token(Int,"20"),#token(Int,"15"),#token(Int,"34")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) klabel(#token(KString,".List{\"'_,_\"}")) userList(#token(KString,"Bools"))]
   syntax Bool ::= #Bool [Location(#token(Int,"6"),#token(Int,"19"),#token(Int,"6"),#token(Int,"23")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k"))]
   syntax Bool ::= "notBool" Bool [Location(#token(Int,"8"),#token(Int,"19"),#token(Int,"8"),#token(Int,"32")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) klabel(#token(KString,"notBool_"))]
   syntax #Bool ::= "true" [Location(#token(Int,"4"),#token(Int,"20"),#token(Int,"4"),#token(Int,"25")) Source(#token(KString,"src/test/resources/convertor-tests/kapp.k")) klabel(#token(KString,"true"))]
