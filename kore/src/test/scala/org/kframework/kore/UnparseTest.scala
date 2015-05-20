@@ -6,7 +6,7 @@ import org.kframework.kore.KORE._
 
 class UnparseTest {
   @Test def Token() {
-    Assert.assertEquals("""#token("Int","12")""",ToKast(KToken(Sort("Int"), "12")))
+    Assert.assertEquals("""#token("12","Int")""",ToKast(KToken("12", Sort("Int"))))
   }
 
   @Test def SimpleLabel() {
@@ -41,7 +41,7 @@ class UnparseTest {
   }
 
   @Test def Tokens() {
-    Assert.assertEquals("""#token("Int","9")~>#token("String","Test")""",ToKast(intToToken(9)~>"Test"))
+    Assert.assertEquals("""#token("9","Int")~>#token("Test","String")""",ToKast(intToToken(9)~>"Test"))
   }
 
   @Test def Variables() {
@@ -61,9 +61,9 @@ class UnparseTest {
   }
 
   @Test def testKeywords(): Unit = {
-    Assert.assertEquals("#a(.KList)~>`#klabel`(.KList)~>#klabel(test)~>`#token`(.KList)~>#token(\"Int\",\"1\")",
+    Assert.assertEquals("#a(.KList)~>`#klabel`(.KList)~>#klabel(test)~>`#token`(.KList)~>#token(\"1\",\"Int\")",
       ToKast(KSequence(KLabel("#a")(),
         KLabel("#klabel")(), InjectedKLabel(KLabel("test"),Att()),
-        KLabel("#token")(),  KToken(Sort("Int"),"1"))))
+        KLabel("#token")(),  KToken("1", Sort("Int")))))
   }
 }

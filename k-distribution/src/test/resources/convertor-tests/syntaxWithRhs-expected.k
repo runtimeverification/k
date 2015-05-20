@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"6"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithRhs.k"))]
-  syntax Foo ::= "1" [#klabel(#token(KString,"1")) Location(#token(Int,"4"),#token(Int,"18"),#token(Int,"4"),#token(Int,"20")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithRhs.k"))]
-  syntax Bar ::= "2" [#klabel(#token(KString,"2")) Location(#token(Int,"5"),#token(Int,"18"),#token(Int,"5"),#token(Int,"32")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithRhs.k")) some(#token(AttributeValue,"foo"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("6",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithRhs.k",KString))]
+  syntax Foo ::= "1" [#klabel(#token("1",KString)) Location(#token("4",Int),#token("18",Int),#token("4",Int),#token("20",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithRhs.k",KString))]
+  syntax Bar ::= "2" [#klabel(#token("2",KString)) Location(#token("5",Int),#token("18",Int),#token("5",Int),#token("32",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithRhs.k",KString)) some(#token("foo",AttributeValue))]
 endmodule

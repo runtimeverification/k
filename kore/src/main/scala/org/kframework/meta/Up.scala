@@ -25,12 +25,12 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[Str
       case att: Att => 'Att(att.att.toSeq.asInstanceOf[Seq[K]] :_*)
 
       // Primitives
-      case o: Int => cons.KToken(Sorts.Int, o.toString, Att())
-      case o: String => cons.KToken(Sorts.KString, o.toString, Att())
-      case o: Boolean => cons.KToken(Sorts.Bool, o.toString, Att())
+      case o: Int => cons.KToken(o.toString, Sorts.Int, Att())
+      case o: String => cons.KToken(o.toString, Sorts.KString, Att())
+      case o: Boolean => cons.KToken(o.toString, Sorts.Bool, Att())
 
-      case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
-      case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())
+      case o: Associativity.Value => cons.KToken(o.toString, cons.Sort("Associativity"), Att())
+      case o: java.io.File => cons.KToken(o.toString, cons.Sort("File"), Att())
         
       // Fallback to reflection
       case o: Product =>

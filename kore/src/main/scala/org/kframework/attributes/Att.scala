@@ -89,7 +89,7 @@ object Att {
   val up = new Up(KORE, includes)
 
   implicit def asK(key: String, value: String) =
-    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(Sorts.KString, value, Att())))), Att())
+    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
 }
 
 trait AttributesToString {
@@ -98,7 +98,7 @@ trait AttributesToString {
   override def toString() =
     "[" +
       (this.filteredAtt map {
-        case KApply(KLabel(keyName), KList(KToken(_, value))) => keyName + "(" + value + ")"
+        case KApply(KLabel(keyName), KList(KToken(value, _))) => keyName + "(" + value + ")"
         case x => x.toString
       }).toList.sorted.mkString(" ") +
       "]"

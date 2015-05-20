@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 import static org.kframework.kore.KORE.*;
 
 import org.junit.Test;
-import org.kframework.Collections;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +49,7 @@ public class VisitorTest {
     @Test
     public void testTopLevel() {
         FooTransformer fooTransformer = new FooTransformer();
-        K t = fooTransformer.apply(KToken(Sort("foo"), "bla"));
+        K t = fooTransformer.apply(KToken("bla", Sort("foo")));
 
         assertEquals(KVariable("T"), t);
     }
@@ -85,7 +84,7 @@ public class VisitorTest {
     @Test
     public void testNested() {
         FooTransformer fooTransformer = new FooTransformer();
-        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken(Sort("foo"), "bla"),
+        KRewrite t = (KRewrite) fooTransformer.apply(KRewrite(KToken("bla", Sort("foo")),
                 KVariable("U")));
 
         assertEquals(KRewrite(KVariable("T"), KVariable("U")), t);

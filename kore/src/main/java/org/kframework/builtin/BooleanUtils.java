@@ -19,6 +19,6 @@ public class BooleanUtils {
         return KApply(KLabel("_andBool_"), k1, k2);
     }
 
-    public static final KToken TRUE = KToken(Sort("Bool"), "true");
-    public static final KToken FALSE = KToken(Sort("Bool"), "false");
+    public static final KToken TRUE = KToken("true", Sort("Bool"));
+    public static final KToken FALSE = KToken("false", Sort("Bool"));
 }

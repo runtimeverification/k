@@ -73,7 +73,7 @@ class Constructors(val module: definition.Module) extends kore.Constructors[K] w
 
   override def Sort(name: String): kore.Sort = KORE.Sort(name)
 
-  override def KToken(sort: kore.Sort, s: String, att: Att): K = {
+  override def KToken(s: String, sort: Sort, att: Att): K = {
     sort match {
       case Sorts.KString => TypedKTok(sort, s)
       case Sorts.Int => TypedKTok(sort, s.toInt)
@@ -100,7 +100,7 @@ class Constructors(val module: definition.Module) extends kore.Constructors[K] w
   def convert(k: kore.K): tiny.K = k match {
     case k: K => k
     case t@Unapply.KVariable(name) => KVariable(name, t.att)
-    case t@Unapply.KToken(s, v) => KToken(s, v, t.att)
+    case t@Unapply.KToken(v, s) => KToken(v, s, t.att)
     case t@Unapply.KRewrite(left, right) => KRewrite(convert(left), convert(right), t.att)
     case t@Unapply.KSequence(s) => KSequence((s map convert).asJava, t.att)
     case t@Unapply.KApply(label, list) => KApply(label, KList((list map convert).asJava), t.att)

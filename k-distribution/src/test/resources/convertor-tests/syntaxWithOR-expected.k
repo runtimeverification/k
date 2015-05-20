@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module TEST [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"5"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithOR.k"))]
-  syntax Foo ::= "y" [#klabel(#token(KString,"y")) Location(#token(Int,"4"),#token(Int,"25"),#token(Int,"4"),#token(Int,"27")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithOR.k"))]
-  syntax Foo ::= "x" [#klabel(#token(KString,"x")) Location(#token(Int,"4"),#token(Int,"19"),#token(Int,"4"),#token(Int,"21")) Source(#token(KString,"src/test/resources/convertor-tests/syntaxWithOR.k"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("5",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithOR.k",KString))]
+  syntax Foo ::= "y" [#klabel(#token("y",KString)) Location(#token("4",Int),#token("25",Int),#token("4",Int),#token("27",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithOR.k",KString))]
+  syntax Foo ::= "x" [#klabel(#token("x",KString)) Location(#token("4",Int),#token("19",Int),#token("4",Int),#token("21",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithOR.k",KString))]
 endmodule

@@ -1,8 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-module ANOTHER [Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"4"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/imports.k"))]
+module ANOTHER [Location(#token("3",Int),#token("1",Int),#token("4",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/imports.k",KString))]
 endmodule
 
 
-module TEST [Location(#token(Int,"6"),#token(Int,"1"),#token(Int,"8"),#token(Int,"9")) Source(#token(KString,"src/test/resources/convertor-tests/imports.k"))]
+module TEST [Location(#token("6",Int),#token("1",Int),#token("8",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/imports.k",KString))]
   imports ANOTHER
 endmodule
