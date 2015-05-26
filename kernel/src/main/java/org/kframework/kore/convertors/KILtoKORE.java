@@ -391,7 +391,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Using attributes to mark these three rules
         // (to be used when translating those back to single KIL declaration)
-        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, p.getSort().getName());
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod2, prod3;
@@ -430,7 +430,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             // lst ::= lst sep lst
             prod1 = Production(sort,
                     Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())));
+                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("left"));
 
             // lst ::= elem
             prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict"));

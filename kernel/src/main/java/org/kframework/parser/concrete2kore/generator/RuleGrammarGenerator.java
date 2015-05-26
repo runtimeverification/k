@@ -2,24 +2,32 @@
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
+import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
@@ -95,6 +103,29 @@ public class RuleGrammarGenerator {
             }
         }
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
+        Map<String, java.util.List<Sentence>> prods2 = mutable(newM.sentences()).stream().filter(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)).
+                collect(Collectors.groupingBy(s -> ((Production) s).sort().name()));
+        for (Map.Entry<String, java.util.List<Sentence>> x : prods2.entrySet()) {
+            String sort = x.getKey();
+            String childSort = null;
+            String separator = null;
+            String terminatorKLabel = null;
+            String klabel = null;
+            String type = "";
+            for (Sentence s : x.getValue()) {
+                Production p = (Production) s;
+                if (p.isSyntacticSubsort()) {
+                    childSort = ((NonTerminal) p.items().head()).sort().name();
+                } else if (p.items().size() == 3) {
+                    Terminal t = (Terminal) p.items().tail().head();
+                    separator = t.value();
+                } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
+                    terminatorKLabel = p.klabel().get().name();
+                } else
+                    throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");
+            }
+            // TODO: recreate the patterns for program parsing
+        }
         return newM;
     }
 
