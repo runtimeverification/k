@@ -103,15 +103,19 @@ public class RuleGrammarGenerator {
             }
         }
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
-        Map<String, java.util.List<Sentence>> prods2 = mutable(newM.sentences()).stream().filter(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)).
-                collect(Collectors.groupingBy(s -> ((Production) s).sort().name()));
-        for (Map.Entry<String, java.util.List<Sentence>> x : prods2.entrySet()) {
+        Map<Boolean, java.util.List<Sentence>> separatedProds
+                = mutable(newM.sentences()).stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)));
+        Map<String, java.util.List<Sentence>> listsMap = separatedProds.get(true).stream().collect(Collectors.groupingBy(s -> ((Production) s).sort().name()));
+
+        java.util.Set<Sentence> res = new HashSet<>();
+        for (Map.Entry<String, java.util.List<Sentence>> x : listsMap.entrySet()) {
             String sort = x.getKey();
             String childSort = null;
             String separator = null;
             String terminatorKLabel = null;
             String klabel = null;
-            String type = "";
+            boolean nonEmpty = false;
+            org.kframework.attributes.Att attrs = null;
             for (Sentence s : x.getValue()) {
                 Production p = (Production) s;
                 if (p.isSyntacticSubsort()) {
@@ -119,14 +123,47 @@ public class RuleGrammarGenerator {
                 } else if (p.items().size() == 3) {
                     Terminal t = (Terminal) p.items().tail().head();
                     separator = t.value();
+                    klabel = p.klabel().get().name();
+                    attrs = p.att();
+                    nonEmpty = attrs.get(KOREtoKIL.USER_LIST_ATTRIBUTE).get().equals("+");
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
                     terminatorKLabel = p.klabel().get().name();
                 } else
                     throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");
             }
             // TODO: recreate the patterns for program parsing
+            assert attrs != null;
+            org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
+            // IdsTerminator ::= "" [klabel('.Ids)]
+            prod1 = Production(terminatorKLabel, Sort(sort + "#Terminator"), Seq(Terminal("")),
+                    attrs.add("klabel", terminatorKLabel));
+            // NeIds ::= Id "," NeIds [klabel('_,_)]
+            prod2 = Production(klabel, Sort("Ne#" + sort),
+                    Seq(NonTerminal(Sort(childSort)), Terminal(separator), NonTerminal(Sort("Ne#" + sort))),
+                    attrs.add("klabel", klabel));
+            // NeIds ::= Id IdsTerminator [klabel('_,_)]
+            prod3 = Production(klabel, Sort("Ne#" + sort),
+                    Seq(NonTerminal(Sort(childSort)), NonTerminal(Sort(sort + "#Terminator"))),
+                    attrs.add("klabel", klabel));
+            // Ids ::= NeIds
+            prod4 = Production(Sort(sort), Seq(NonTerminal(Sort("Ne#" + sort))));
+            // Ids ::= IdsTerminator // if the list is *
+            prod5 = Production(Sort(sort), Seq(NonTerminal(Sort(sort + "#Terminator"))));
+
+            res.add(prod1);
+            res.add(prod2);
+            res.add(prod3);
+            res.add(prod4);
+            res.add(SyntaxSort(Sort(sort + "#Terminator")));
+            res.add(SyntaxSort(Sort("Ne#" + sort)));
+            if (!nonEmpty) {
+                res.add(prod5);
+            }
         }
-        return newM;
+        res.addAll(separatedProds.get(false));
+
+        Module newM2 = new Module(mod.name() + "-FOR-PROGRAMS", Set(), immutable(res), null);
+        return newM2;
     }
 
     /**

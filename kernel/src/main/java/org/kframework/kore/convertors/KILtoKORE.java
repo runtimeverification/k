@@ -381,70 +381,29 @@ public class KILtoKORE extends KILTransformation<Object> {
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
                               org.kframework.kore.Sort sort, Production p, UserList userList,
                               boolean forPrograms) {
-        boolean nonEmpty = userList.getListType().equals(UserList.ONE_OR_MORE);
 
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
-        // TODO: we're splitting one syntax declaration into three, where to put
-        // attributes
-        // of original declaration?
-
-        // Using attributes to mark these three rules
-        // (to be used when translating those back to single KIL declaration)
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod2, prod3;
 
-        if (forPrograms) {
-            org.kframework.definition.Production prod4, prod5;
+        // lst ::= lst sep lst
+        prod1 = Production(sort,
+                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("right"));
 
-            // IdsTerminator ::= "" [klabel('.Ids)]
-            prod1 = Production(dropQuote(p.getTerminatorKLabel()), Sort(sort.name() + "Terminator"), Seq(Terminal("")),
-                    attrsWithKilProductionId.add("klabel", dropQuote(p.getTerminatorKLabel())));
-            // NeIds ::= Id "," NeIds [klabel('_,_)]
-            prod2 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
-                    Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(Sort("Ne" + sort.name()))),
-                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())));
-            // NeIds ::= Id IdsTerminator [klabel('_,_)]
-            prod3 = Production(dropQuote(p.getKLabel()), Sort("Ne" + sort.name()),
-                    Seq(NonTerminal(elementSort), NonTerminal(Sort(sort.name() + "Terminator"))),
-                    attrsWithKilProductionId.add("klabel", p.getKLabel()));
-            // Ids ::= NeIds
-            prod4 = Production(sort, Seq(NonTerminal(Sort("Ne" + sort.name()))),
-                    attrsWithKilProductionId);
-            // Ids ::= IdsTerminator // if the list is *
-            prod5 = Production(sort, Seq(NonTerminal(Sort(sort.name() + "Terminator"))),
-                    attrsWithKilProductionId);
+        // lst ::= elem
+        prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict").remove("klabel"));
 
-            res.add(prod1);
-            res.add(prod2);
-            res.add(prod3);
-            res.add(prod4);
-            res.add(SyntaxSort(Sort(sort.name() + "Terminator")));
-            res.add(SyntaxSort(Sort("Ne" + sort.name())));
-            if (!nonEmpty) {
-                res.add(prod5);
-            }
-        } else {
-            // lst ::= lst sep lst
-            prod1 = Production(sort,
-                    Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                    attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("left"));
+        // lst ::= .UserList
+        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
 
-            // lst ::= elem
-            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict"));
-
-            // lst ::= .UserList
-            prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                    attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
-
-            res.add(prod1);
-            res.add(prod2);
-            if (!nonEmpty) {
-                res.add(prod3);
-            }
-        }
+        res.add(prod1);
+        res.add(prod2);
+        res.add(prod3);
     }
 
     public String dropQuote(String s) {
