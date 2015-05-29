@@ -102,6 +102,12 @@ public class RuleGrammarGenerator {
                 prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
             }
         }
+        // find all productions annotated with 'userList'
+        // expecting to always find 3 of them of the form:
+        // Es ::= Es "," Es [right, userList, klabel(...)]
+        // Es ::= ".Es"     [userList, klabel(...)]
+        // Es ::= E         [userList]
+        // for each triple, generate a new pattern which works better for parsing lists in programs.
         Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod), immutable(prods), null);
         Map<Boolean, java.util.List<Sentence>> separatedProds
                 = mutable(newM.sentences()).stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)));
@@ -116,6 +122,7 @@ public class RuleGrammarGenerator {
             String klabel = null;
             boolean nonEmpty = false;
             org.kframework.attributes.Att attrs = null;
+            assert x.getValue().size() == 3;
             for (Sentence s : x.getValue()) {
                 Production p = (Production) s;
                 if (p.isSyntacticSubsort()) {
@@ -131,7 +138,7 @@ public class RuleGrammarGenerator {
                 } else
                     throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");
             }
-            assert attrs != null;
+            assert attrs != null; assert klabel != null; assert terminatorKLabel != null; assert childSort != null;
             org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
             // EsTerminator ::= "" [klabel('.Es)]
             prod1 = Production(terminatorKLabel, Sort(sort + "#Terminator"), Seq(Terminal("")),
