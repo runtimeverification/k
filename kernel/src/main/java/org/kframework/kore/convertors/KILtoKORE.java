@@ -294,7 +294,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 // Handle a special case first: List productions have only
                 // one item.
                 if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
-                    applyUserList(res, sort, p, (UserList) p.getItems().get(0), syntactic);
+                    applyUserList(res, sort, p, (UserList) p.getItems().get(0));
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
@@ -379,9 +379,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public void applyUserList(Set<org.kframework.definition.Sentence> res,
-                              org.kframework.kore.Sort sort, Production p, UserList userList,
-                              boolean forPrograms) {
+                              org.kframework.kore.Sort sort, Production p, UserList userList) {
 
+        // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
         org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, userList.getListType());

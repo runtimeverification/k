@@ -140,20 +140,20 @@ public class RuleGrammarGenerator {
             }
             assert attrs != null; assert klabel != null; assert terminatorKLabel != null; assert childSort != null;
             org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
-            // EsTerminator ::= "" [klabel('.Es)]
+            // Es#Terminator ::= "" [klabel('.Es)]
             prod1 = Production(terminatorKLabel, Sort(sort + "#Terminator"), Seq(Terminal("")),
                     attrs.add("klabel", terminatorKLabel));
-            // NeEs ::= E "," NeEs [klabel('_,_)]
+            // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
             prod2 = Production(klabel, Sort("Ne#" + sort),
                     Seq(NonTerminal(Sort(childSort)), Terminal(separator), NonTerminal(Sort("Ne#" + sort))),
                     attrs.add("klabel", klabel));
-            // NeEs ::= E EsTerminator [klabel('_,_)]
+            // Ne#Es ::= E Es#Terminator [klabel('_,_)]
             prod3 = Production(klabel, Sort("Ne#" + sort),
                     Seq(NonTerminal(Sort(childSort)), NonTerminal(Sort(sort + "#Terminator"))),
                     attrs.add("klabel", klabel));
-            // Es ::= NeEs
+            // Es ::= Ne#Es
             prod4 = Production(Sort(sort), Seq(NonTerminal(Sort("Ne#" + sort))));
-            // Es ::= EsTerminator // if the list is *
+            // Es ::= Es#Terminator // if the list is *
             prod5 = Production(Sort(sort), Seq(NonTerminal(Sort(sort + "#Terminator"))));
 
             res.add(prod1);
