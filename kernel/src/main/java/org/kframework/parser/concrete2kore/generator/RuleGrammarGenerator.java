@@ -131,23 +131,22 @@ public class RuleGrammarGenerator {
                 } else
                     throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");
             }
-            // TODO: recreate the patterns for program parsing
             assert attrs != null;
             org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
-            // IdsTerminator ::= "" [klabel('.Ids)]
+            // EsTerminator ::= "" [klabel('.Es)]
             prod1 = Production(terminatorKLabel, Sort(sort + "#Terminator"), Seq(Terminal("")),
                     attrs.add("klabel", terminatorKLabel));
-            // NeIds ::= Id "," NeIds [klabel('_,_)]
+            // NeEs ::= E "," NeEs [klabel('_,_)]
             prod2 = Production(klabel, Sort("Ne#" + sort),
                     Seq(NonTerminal(Sort(childSort)), Terminal(separator), NonTerminal(Sort("Ne#" + sort))),
                     attrs.add("klabel", klabel));
-            // NeIds ::= Id IdsTerminator [klabel('_,_)]
+            // NeEs ::= E EsTerminator [klabel('_,_)]
             prod3 = Production(klabel, Sort("Ne#" + sort),
                     Seq(NonTerminal(Sort(childSort)), NonTerminal(Sort(sort + "#Terminator"))),
                     attrs.add("klabel", klabel));
-            // Ids ::= NeIds
+            // Es ::= NeEs
             prod4 = Production(Sort(sort), Seq(NonTerminal(Sort("Ne#" + sort))));
-            // Ids ::= IdsTerminator // if the list is *
+            // Es ::= EsTerminator // if the list is *
             prod5 = Production(Sort(sort), Seq(NonTerminal(Sort(sort + "#Terminator"))));
 
             res.add(prod1);
