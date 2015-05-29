@@ -30,6 +30,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
         exceptions.add("#ruleRequiresEnsures");
         exceptions.add("#KRewrite");
         exceptions.add("#KSequence");
+        exceptions.add("#KList");
     }
 
     @Override
