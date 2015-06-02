@@ -339,7 +339,7 @@ public class RuleGrammarTest {
                 "syntax Exp ::= Int \"(\" Ints  \")\" " +
                 "syntax Exp ::= Int \"[\" Ints2 \"]\" " +
                 "syntax Ints  ::=   List{Int, \",\"} " +
-                "syntax Ints2 ::= NeList{Int, \",\"} " +
+                "syntax Ints2 ::= NeList{Int, \".\"} " +
                 "syntax Int ::= r\"[0-9]+\" [token] " +
                 "endmodule";
         parseRule("0, 1, 2", def, 0, false);

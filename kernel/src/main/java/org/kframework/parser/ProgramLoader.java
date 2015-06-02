@@ -48,6 +48,8 @@ import java.io.Reader;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.Collections.*;
 
 public class ProgramLoader {
 
@@ -143,7 +145,9 @@ public class ProgramLoader {
             Definition def = loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
             org.kframework.definition.Definition koreDef = new KILtoKORE(context, true, false).apply(def);
             Module synMod = koreDef.getModule(def.getMainSyntaxModule()).get();
-            ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(koreDef).getProgramsGrammar(synMod));
+            Module m = Module("PROGRAM-LISTS", Set(), Set(SyntaxSort(Sort("K"))), Att());
+            org.kframework.definition.Definition baseK = org.kframework.definition.Definition.apply(m, m, Set(m), Att());
+            ParseInModule parser = new ParseInModule(new RuleGrammarGenerator(baseK).getProgramsGrammar(synMod));
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {

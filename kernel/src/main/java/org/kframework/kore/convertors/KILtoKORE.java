@@ -391,7 +391,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // lst ::= lst sep lst
         prod1 = Production(sort,
-                Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                 attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("right"));
 
         // lst ::= elem
