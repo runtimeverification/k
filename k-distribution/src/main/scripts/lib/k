@@ -11,9 +11,10 @@ if "$(dirname "$0")/checkJava"; then
     NG=ng
   fi
   $NG ng-version > /dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  if [[ $? -eq 0 && -z $K_NO_NAILGUN ]]; then
     $NG org.kframework.main.Main "$@"
   else
+    unset K_NO_NAILGUN
     java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/java/*" org.kframework.main.Main "$@"
   fi
 else
