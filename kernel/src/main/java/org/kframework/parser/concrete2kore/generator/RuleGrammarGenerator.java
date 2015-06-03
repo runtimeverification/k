@@ -2,7 +2,6 @@
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
@@ -13,7 +12,6 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
@@ -22,8 +20,6 @@ import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -96,7 +92,8 @@ public class RuleGrammarGenerator {
     }
 
     public Module getProgramsGrammar(Module mod) {
-        Module newM = new Module(mod.name() + "-FOR-PROGRAMS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), null);
+        // import PROGRAM-LISTS so user lists are modified to parse programs
+        Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
 
