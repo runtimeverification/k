@@ -243,14 +243,14 @@ public class CellCollection extends Collection {
 
         CellCollection collection = (CellCollection) object;
         return collectionVariables.equals(collection.collectionVariables)
-                && ImmutableMultiset.copyOf(cells.entries()).equals(ImmutableMultiset.copyOf(collection.cells.entries()));
+                && ImmutableMultiset.copyOf(cells.values()).equals(ImmutableMultiset.copyOf(collection.cells.values()));
     }
 
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + ImmutableMultiset.copyOf(cells.values()).hashCode();
         return hashCode;
     }
 
