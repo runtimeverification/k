@@ -3,6 +3,7 @@
 package org.kframework.kore.convertors;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
@@ -34,7 +35,7 @@ public class TstTinyOnKORE_IT {
         return new File(TstTinyOnKORE_IT.class.getResource(baseName).toURI());
     }
 
-    @Test
+    @Test @Ignore
     public void kore_imp_tiny() throws IOException, URISyntaxException {
 
         String filename = "/convertor-tests/" + name.getMethodName() + ".k";
