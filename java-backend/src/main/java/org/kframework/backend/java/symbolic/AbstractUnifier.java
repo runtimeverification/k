@@ -121,13 +121,7 @@ public abstract class AbstractUnifier implements Unifier {
 
             /* unify */
             if (term instanceof CellCollection && otherTerm instanceof CellCollection) {
-                if (Profiler.isRunning(Profiler.PATTERN_MATCH_TIMER)) {
-                    Profiler.stopTimer(Profiler.PATTERN_MATCH_TIMER);
-                    unify((CellCollection) term, (CellCollection) otherTerm);
-                    Profiler.startTimer(Profiler.PATTERN_MATCH_TIMER);
-                } else {
-                    unify((CellCollection) term, (CellCollection) otherTerm);
-                }
+                unify((CellCollection) term, (CellCollection) otherTerm);
             } else if (term instanceof KItem && otherTerm instanceof KItem) {
                 unify((KItem) term, (KItem) otherTerm);
             } else if (term instanceof KLabelConstant && otherTerm instanceof KLabelConstant) {
