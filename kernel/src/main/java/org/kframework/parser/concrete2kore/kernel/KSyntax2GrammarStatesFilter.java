@@ -133,6 +133,8 @@ public class KSyntax2GrammarStatesFilter {
                         if (prd.att().contains(Constants.REJECT2))
                             pattern = getAutomaton(prd.att().get(Constants.REJECT2).get().toString());
                     }
+                    if (prd.att().contains(Constants.ORIGINAL_PRD))
+                        prd = (Production) prd.att().get(Constants.ORIGINAL_PRD).get();
                     RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern, rejects));
                     previous.next.add(labelRule);
                     previous = labelRule;

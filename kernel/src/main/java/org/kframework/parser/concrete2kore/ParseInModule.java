@@ -36,16 +36,57 @@ import java.util.Set;
  * Declarative disambiguation filters are also applied.
  */
 public class ParseInModule implements Serializable {
-    private final Module module;
+    private Module module;
+    private final Module disambModule;
+    private final Module parsingModule;
     private final Grammar grammar;
     public ParseInModule(Module module) {
         this.module = module;
-        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(module);
+        this.disambModule = module;
+        this.parsingModule = module;
+        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
     }
 
+    public ParseInModule(Module module, Module disambModule, Module parsingModule) {
+        this.module = module;
+        this.disambModule = disambModule;
+        this.parsingModule = parsingModule;
+        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
+    }
+
+    /**
+     * The original before any processing has been done. This can be used to invalidate caches.
+     * @return Module given by the user.
+     */
     public Module module() {
         return module;
     }
+
+    public void setModule(Module module) {
+        this.module = module;
+    }
+
+    /**
+     * The module in which parsing will be done.
+     * Note that this module will be used for disambiguation, and the parsing module can be different.
+     * This allows for grammar rewriting and more flexibility in the implementation.
+     * @return Module in which parsing will be done.
+     */
+    public Module disambModule() {
+        return disambModule;
+    }
+
+    /**
+     * The exact module used for parsing. This can contain productions and sorts that are not
+     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
+     * In this case the modified productino will be annotated with the information from the
+     * original production, so disambiguation can be done safely.
+     * @return Module used to parse with.
+     */
+    // TODO: (radum) I'm not sure yet if this should be available outside this class
+    //public Module getParsingModule() {
+    //   return parsingModule;
+    //}
 
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
@@ -88,13 +129,13 @@ public class ParseInModule implements Serializable {
         rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new ApplyTypeCheckVisitor(module.subsorts()).apply(rez.right().get());
+        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
+        rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts(), module.productionsFor()).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor()).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();

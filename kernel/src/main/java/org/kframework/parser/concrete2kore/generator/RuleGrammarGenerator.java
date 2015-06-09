@@ -14,8 +14,10 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KOREtoKIL;
+import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.StringUtil;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Seq;
@@ -79,19 +81,19 @@ public class RuleGrammarGenerator {
         return def;
     }
 
-    public Module getRuleGrammar(Module mod) {
+    public ParseInModule getRuleGrammar(Module mod) {
         // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
 
-    public Module getConfigGrammar(Module mod) {
+    public ParseInModule getConfigGrammar(Module mod) {
         // import CONFIG-CELLS in order to parse cells specific to configurations
         Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
         return getCombinedGrammar(newM);
     }
 
-    public Module getProgramsGrammar(Module mod) {
+    public ParseInModule getProgramsGrammar(Module mod) {
         // import PROGRAM-LISTS so user lists are modified to parse programs
         Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), null);
         return getCombinedGrammar(newM);
@@ -106,12 +108,13 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public Module getCombinedGrammar(Module mod) {
+    public ParseInModule getCombinedGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
+        Set<Sentence> disambProds = prods.stream().collect(Collectors.toSet());
 
         if (baseK.getModule(AUTO_CASTS).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_CASTS).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
+                if (!isExceptionSort(srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                     prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
                 }
@@ -123,7 +126,7 @@ public class RuleGrammarGenerator {
         }
         if (baseK.getModule(K_TOP_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_TOP_SORT).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
+                if (!isExceptionSort(srt)) {
                     // K ::= Sort
                     prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
                 }
@@ -132,15 +135,15 @@ public class RuleGrammarGenerator {
 
         if (baseK.getModule(K_BOTTOM_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_BOTTOM_SORT).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!kSorts.contains(srt) && !srt.name().startsWith("#")) {
+                if (!isExceptionSort(srt)) {
                     // Sort ::= KBott
                     prods.add(Production(srt, Seq(NonTerminal(Sorts.KBott())), Att()));
                 }
             }
         }
-        scala.collection.immutable.Set<Sentence> prods2;
+        Set<Sentence> parseProds;
         if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
-            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).flatMap(s -> {
+            parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).flatMap(s -> {
                 if (s instanceof Production && (s.att().contains("cell"))) {
                     Production p = (Production) s;
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
@@ -152,22 +155,22 @@ public class RuleGrammarGenerator {
                     return Stream.of(p1, p2);
                 }
                 return Stream.of(s);
-            }).collect(Collections.toSet());
+            }).collect(Collectors.toSet());
         } else
-            prods2 = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collections.toSet());
+            parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
 
         if (baseK.getModule(AUTO_FOLLOW).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_FOLLOW).get())) {
             Object PRESENT = new Object();
             PatriciaTrie<Object> terminals = new PatriciaTrie<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
-            stream(prods2).filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
+            parseProds.stream().filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
                 if (i instanceof Terminal) terminals.put(((Terminal) i).value(), PRESENT);
             }));
-            prods2 = stream(prods2).map(s -> {
+            parseProds = parseProds.stream().map(s -> {
                 if (s instanceof Production) {
                     Production p = (Production) s;
                     if (p.sort().name().startsWith("#"))
                         return p; // don't do anything for such productions since they are advanced features
-                    // rewrite productions to contin follow restrictions for prefix terminals
+                    // rewrite productions to contain follow restrictions for prefix terminals
                     // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
                     // this also takes care of casting and productions that have ":"
                     List<ProductionItem> items = stream(p.items()).map(pi -> {
@@ -194,9 +197,10 @@ public class RuleGrammarGenerator {
                     return p;
                 }
                 return s;
-            }).collect(Collections.toSet());
+            }).collect(Collectors.toSet());
         }
 
+        disambProds = parseProds.stream().collect(Collectors.toSet());
         if (baseK.getModule(PROGRAM_LISTS).isDefined() && mod.importedModules().contains(baseK.getModule(PROGRAM_LISTS).get())) {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
@@ -212,7 +216,7 @@ public class RuleGrammarGenerator {
             // Es ::= ".Es"     [userList, klabel(...)]
             // Es ::= E         [userList]
             // for each triple, generate a new pattern which works better for parsing lists in programs.
-            prods3.addAll(mutable(stream(prods2).collect(Collections.toSet())));
+            prods3.addAll(parseProds.stream().collect(Collectors.toSet()));
             Map<Boolean, java.util.List<Sentence>> separatedProds
                     = prods3.stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)));
             Map<String, java.util.List<Sentence>> listsMap = separatedProds.getOrDefault(true, new LinkedList<>())
@@ -226,20 +230,24 @@ public class RuleGrammarGenerator {
                 String terminatorKLabel = null;
                 String klabel = null;
                 boolean nonEmpty = false;
+                Production pList = null, pSubSort = null, pTerminator = null;
                 org.kframework.attributes.Att attrs = null;
                 assert x.getValue().size() == 3;
                 for (Sentence s : x.getValue()) {
                     Production p = (Production) s;
                     if (p.isSyntacticSubsort()) {
                         childSort = ((NonTerminal) p.items().head()).sort().name();
+                        pSubSort = p;
                     } else if (p.items().size() == 3) {
                         Terminal t = (Terminal) p.items().tail().head();
                         separator = t.value();
                         klabel = p.klabel().get().name();
                         attrs = p.att().remove("klabel");
                         nonEmpty = attrs.get(KOREtoKIL.USER_LIST_ATTRIBUTE).get().equals("+");
+                        pList = p;
                     } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
                         terminatorKLabel = p.klabel().get().name();
+                        pTerminator = p;
                     } else
                         throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");
                 }
@@ -250,15 +258,15 @@ public class RuleGrammarGenerator {
                 org.kframework.definition.Production prod1, prod2, prod3, prod4, prod5;
                 // Es#Terminator ::= "" [klabel('.Es)]
                 prod1 = Production(terminatorKLabel, Sort(sort + "#Terminator"), Seq(Terminal("")),
-                        attrs.add("klabel", terminatorKLabel));
+                        attrs.add("klabel", terminatorKLabel).add(Constants.ORIGINAL_PRD, pTerminator));
                 // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
                 prod2 = Production(klabel, Sort("Ne#" + sort),
                         Seq(NonTerminal(Sort(childSort)), Terminal(separator), NonTerminal(Sort("Ne#" + sort))),
-                        attrs.add("klabel", klabel));
+                        attrs.add("klabel", klabel).add(Constants.ORIGINAL_PRD, pList));
                 // Ne#Es ::= E Es#Terminator [klabel('_,_)]
                 prod3 = Production(klabel, Sort("Ne#" + sort),
                         Seq(NonTerminal(Sort(childSort)), NonTerminal(Sort(sort + "#Terminator"))),
-                        attrs.add("klabel", klabel));
+                        attrs.add("klabel", klabel).add(Constants.ORIGINAL_PRD, pList));
                 // Es ::= Ne#Es
                 prod4 = Production(Sort(sort), Seq(NonTerminal(Sort("Ne#" + sort))));
                 // Es ::= Es#Terminator // if the list is *
@@ -275,10 +283,15 @@ public class RuleGrammarGenerator {
                 }
             }
             res.addAll(separatedProds.get(false));
-            prods2 = immutable(res);
+            parseProds = res;
         }
-        Module newM = new Module(mod.name() + "-PARSER", Set(), prods2, mod.att());
-        return newM;
+        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
+        Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
+        return new ParseInModule(mod, disambM, parseM);
+    }
+
+    private boolean isExceptionSort(Sort srt) {
+        return kSorts.contains(srt) || srt.name().startsWith("#");
     }
 
     private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {

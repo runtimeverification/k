@@ -96,7 +96,7 @@ public class AddBracketsTest {
 
     private void unparserTest(String def, String pgm) {
         Module test = parseModule(def);
-        ParseInModule parser = new ParseInModule(gen.getProgramsGrammar(test));
+        ParseInModule parser = gen.getProgramsGrammar(test);
         K parsed = parseTerm(pgm, parser);
         String unparsed = unparseTerm(parsed, test);
         assertEquals(pgm, unparsed);

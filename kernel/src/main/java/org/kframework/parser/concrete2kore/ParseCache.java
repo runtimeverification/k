@@ -31,14 +31,14 @@ public class ParseCache implements Serializable {
 
     private transient ParseInModule parser;
 
-    public ParseInModule getParser() {
+    /*public ParseInModule getParser() {
         ParseInModule p = parser;
         if (p == null) {
             p = new ParseInModule(module);
             parser = p;
         }
         return p;
-    }
+    }*/
 
     public static class ParsedSentence implements Serializable {
         private final K parse;

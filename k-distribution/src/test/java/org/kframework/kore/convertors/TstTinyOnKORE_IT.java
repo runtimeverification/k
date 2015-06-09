@@ -44,7 +44,7 @@ public class TstTinyOnKORE_IT {
             CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "TEST", "TEST-PROGRAMS", Sorts.K());
 
             Module module = compiledDef.executionModule();
-            BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);
+            BiFunction<String, Source, K> programParser = compiledDef.getGroundParser(kem);
             Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
 
             K program = programParser.apply(
