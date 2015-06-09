@@ -22,26 +22,24 @@ import org.kframework.backend.java.kil.Token;
  * which uses double dispatch to reduce an invocation of {@code unify} with two generic {@link
  * Term} arguments to an invocation of {@code unify} with the first argument of the actual class.
  *
- * @see Unifiable
- *
  * @author AndreiS
  */
 public interface Unifier {
 
-    public String getName();
+    String getName();
 
-    public void unify(Bottom bottom, Term term);
-    public void unify(BuiltinList builtinList, Term term);
-    public void unify(BuiltinMap builtinMap, Term term);
-    public void unify(BuiltinSet builtinSet, Term term);
-    public void unify(CellCollection cellCollection, Term term);
-    public void unify(Hole hole, Term term);
-    public void unify(KItem kItem, Term term);
-    public void unify(KLabelConstant kLabelConstant, Term term);
-    public void unify(KLabelInjection kLabelInjection, Term term);
-    public void unify(KList kList, Term term);
-    public void unify(KSequence kSequence, Term term);
-    public void unify(Token token, Term term);
-    public void unify(InjectedKLabel injectredKLabel, Term term);
+    void unify(Bottom bottom, Bottom term);
+    void unify(BuiltinList builtinList, BuiltinList term);
+    void unify(BuiltinMap builtinMap, BuiltinMap term);
+    void unify(BuiltinSet builtinSet, BuiltinSet term);
+    void unify(CellCollection cellCollection, CellCollection term);
+    void unify(Hole hole, Hole term);
+    void unify(KItem kItem, KItem term);
+    void unify(KLabelConstant kLabelConstant, KLabelConstant term);
+    void unify(KLabelInjection kLabelInjection, KLabelInjection term);
+    void unify(KList kList, KList term);
+    void unify(KSequence kSequence, KSequence term);
+    void unify(Token token, Token term);
+    void unify(InjectedKLabel injectedKLabel, InjectedKLabel term);
 
 }
