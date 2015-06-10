@@ -67,6 +67,8 @@ public class KRun implements Transformation<Void, Void> {
 
         Object result = executionMode.execute(program, rewriter);
 
+        System.out.println("Null Happened");
+
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
         }
