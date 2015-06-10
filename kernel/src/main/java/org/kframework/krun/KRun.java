@@ -65,21 +65,13 @@ public class KRun implements Transformation<Void, Void> {
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-<<<<<<< HEAD
         Object result = executionMode.execute(program, rewriter);
 
         if (result instanceof K) {
-
-            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
-
-            System.out.println(unparseTerm((K) result, unparsingModule));
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
         }
 
-=======
-        K result = rewriter.execute(program, Optional.ofNullable(options.depth));
 
-        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
->>>>>>> ocaml8
         return 0;
     }
 

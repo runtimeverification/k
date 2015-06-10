@@ -7,6 +7,8 @@ import org.kframework.Rewriter;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 
+import java.util.Optional;
+
 /**
  * Execution Mode for Conventional KRun
  */
@@ -21,6 +23,6 @@ public class KRunExecutionMode implements ExecutionMode<K> {
 
     @Override
     public K execute(K k, Rewriter rewriter) {
-        return rewriter.execute(k);
+        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
     }
 }
