@@ -54,6 +54,7 @@ public class PatternMatcher extends AbstractUnifier {
     private ConjunctiveFormula fSubstitution;
 
     private final boolean matchOnFunctionSymbol;
+    private final boolean disjointVariables;
 
     private final TermContext termContext;
 
@@ -87,7 +88,7 @@ public class PatternMatcher extends AbstractUnifier {
      *         {@code false}
      */
     public static boolean matchable(Term subject, Term pattern, TermContext context) {
-        return new PatternMatcher(false, context).patternMatch(subject, pattern);
+        return new PatternMatcher(false, false, context).patternMatch(subject, pattern);
     }
 
     /**
@@ -108,7 +109,7 @@ public class PatternMatcher extends AbstractUnifier {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Substitution<Variable, Term>> match(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), context);
+        PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), true, context);
 
         if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
@@ -117,8 +118,9 @@ public class PatternMatcher extends AbstractUnifier {
         return RewriteEngineUtils.evaluateConditions(rule, matcher.substitutions(), context);
     }
 
-    public PatternMatcher(boolean matchOnFunctionSymbol, TermContext context) {
+    public PatternMatcher(boolean matchOnFunctionSymbol, boolean disjointVariables, TermContext context) {
         this.matchOnFunctionSymbol = matchOnFunctionSymbol;
+        this.disjointVariables = disjointVariables;
         this.termContext = context;
         this.fSubstitution = ConjunctiveFormula.of(context);
     }
@@ -189,7 +191,11 @@ public class PatternMatcher extends AbstractUnifier {
             fail(variable, term);
         }
 
-        fSubstitution = fSubstitution.unsafeAddVariableBinding(variable, term);
+        if (disjointVariables) {
+            fSubstitution = fSubstitution.unsafeAddVariableBinding(variable, term);
+        } else {
+            fSubstitution = fSubstitution.add(variable, term).simplify();
+        }
         if (fSubstitution.isFalse()) {
             fail(variable, term);
         }
@@ -243,7 +249,7 @@ public class PatternMatcher extends AbstractUnifier {
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
-                PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, termContext);
+                PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, disjointVariables, termContext);
                 matcher.addUnificationTask(entry.getKey(), patternEntry.getKey());
                 matcher.addUnificationTask(entry.getValue(), patternEntry.getValue());
                 if (matcher.unify()) {
@@ -260,7 +266,7 @@ public class PatternMatcher extends AbstractUnifier {
             List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
             for (KItem kItem : builtinMap.collectionPatterns()) {
                 if (kItem.kLabel().equals(patternKItem.kLabel())) {
-                    PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, termContext);
+                    PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, disjointVariables, termContext);
                     if (matcher.patternMatch(kItem.kList(), patternKItem.kList())) {
                         stepSubstitutions.add(new PartialSubstitution(
                                 ImmutableSet.<Term>of(kItem),
@@ -511,7 +517,7 @@ public class PatternMatcher extends AbstractUnifier {
                 ConjunctiveFormula nestedSubstitution = ConjunctiveFormula.of(termContext);
 
                 for (int i = 0; i < otherCells.length; ++i) {
-                    PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, termContext);
+                    PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, disjointVariables, termContext);
                     matcher.addUnificationTask(
                             cells[generator.getSelection(i)].content(),
                             otherCells[i].content());
