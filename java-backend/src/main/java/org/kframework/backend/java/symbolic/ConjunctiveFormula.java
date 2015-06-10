@@ -163,6 +163,24 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 context);
     }
 
+    public ConjunctiveFormula unsafeAddVariableBinding(Variable variable, Term term) {
+        assert term.substituteAndEvaluate(substitution, context) == term;
+        assert !term.variableSet().contains(variable);
+        Term previousTerm = substitution.get(variable);
+        if (previousTerm == null) {
+            return new ConjunctiveFormula(
+                    substitution.plus(variable, term),
+                    equalities,
+                    disjunctions,
+                    truthValue,
+                    context);
+        } else if (previousTerm.equals(term)) {
+            return this;
+        } else {
+            return falsify(substitution, equalities, disjunctions, new Equality(previousTerm, term, context));
+        }
+    }
+
     public ConjunctiveFormula add(Term leftHandSide, Term rightHandSide) {
         return add(new Equality(leftHandSide, rightHandSide, context));
     }
@@ -625,6 +643,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + disjunctions.hashCode();
         return hashCode;
     }
 
@@ -657,16 +676,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        throw new UnsupportedOperationException();
     }
 
 }

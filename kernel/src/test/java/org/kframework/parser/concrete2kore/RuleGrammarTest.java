@@ -312,4 +312,14 @@ public class RuleGrammarTest {
                 "endmodule";
         parseRule("\u2022 => .K", def, 0, false);
     }
+
+    // test special priority
+    @Test
+    public void test19() {
+        String def = "" +
+                "module TEST " +
+                "endmodule";
+        parseRule("`foo`(`bar`(.KList) ~> .K , .KList)", def, 0, false);
+        parseRule("`foo`(`bar`(.KList) => .K , .KList)", def, 0, false);
+    }
 }
