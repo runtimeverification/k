@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import org.kframework.ExecutionMode;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.tools.Executor;
@@ -85,14 +86,17 @@ public class KRunFrontEnd extends FrontEnd {
         private final FileUtil files;
         private final CompiledDefinition compiledDef;
         private final Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter;
+        private final ExecutionMode executionMode;
 
         @Inject
-        public NewKRunFrontEnd(KExceptionManager kem, KRunOptions krunOptions, @Main FileUtil files, @Main CompiledDefinition compiledDef, @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter) {
+        public NewKRunFrontEnd(KExceptionManager kem, KRunOptions krunOptions, @Main FileUtil files, @Main CompiledDefinition compiledDef, @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter
+        , ExecutionMode executionMode) {
             this.kem = kem;
             this.krunOptions = krunOptions;
             this.files = files;
             this.compiledDef = compiledDef;
             this.initializeRewriter = initializeRewriter;
+            this.executionMode = executionMode;
         }
 
         public int run() {
