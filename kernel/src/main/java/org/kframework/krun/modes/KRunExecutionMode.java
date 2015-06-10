@@ -14,11 +14,11 @@ import java.util.Optional;
  */
 public class KRunExecutionMode implements ExecutionMode<K> {
 
-    private KRunOptions kRunOptions;
+    private final KRunOptions kRunOptions;
 
     @Inject
     public KRunExecutionMode(KRunOptions kRunOptions) {
-        kRunOptions = kRunOptions;
+        this.kRunOptions = kRunOptions;
     }
 
     @Override
