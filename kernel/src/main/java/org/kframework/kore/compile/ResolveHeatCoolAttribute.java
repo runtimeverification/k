@@ -39,7 +39,7 @@ public class ResolveHeatCoolAttribute {
         throw new AssertionError("unreachable");
     }
 
-    public synchronized Sentence resolve(Sentence s) {
+    public Sentence resolve(Sentence s) {
         if (!s.att().contains("heat") && !s.att().contains("cool")) {
             return s;
         }
