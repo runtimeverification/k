@@ -57,7 +57,7 @@ public class ResolveFreshConstants {
                 context.att());
     }
 
-    private synchronized Sentence resolve(Sentence s) {
+    private Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
         } else if (s instanceof Context) {

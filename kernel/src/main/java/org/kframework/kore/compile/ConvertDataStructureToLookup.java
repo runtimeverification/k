@@ -36,6 +36,10 @@ import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
+/**
+ * Convert all operations involving associativity to use the standard data types
+ * List,Set,Map,Bag.
+ */
 public class ConvertDataStructureToLookup {
 
 
@@ -134,6 +138,9 @@ public class ConvertDataStructureToLookup {
         return newLabel;
     }
 
+    /**
+     * For the cell bag sorts with multiplicitly *, add the single-element wrapper around individual cells.
+     */
     private K infer(K term, KLabel collectionLabel) {
         Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).<String>getOptional("wrapElement");
         if (wrapElement.isPresent()) {
@@ -184,13 +191,18 @@ public class ConvertDataStructureToLookup {
                 }
             }
 
+            /**
+             * Convert a list pattern, requiring that there is at most one list variable component.
+             * Individual items may appear before and after the frame variable, which can be
+             * translated into efficient operatations at the beginning and end of the list.
+             */
             private K convertList(KApply k, KLabel collectionLabel, List<K> components) {
                 if (rhsOf == null) {
                     //left hand side
                     KVariable frame = null;
                     List<K> elementsLeft = new ArrayList<K>();
                     List<K> elementsRight = new ArrayList<K>();
-                    boolean isRight = false;
+                    boolean isRight = false; // true for components later than the frame variable.
                     for (K component : components) {
                         if (component instanceof KVariable) {
                             if (frame != null) {
@@ -205,6 +217,7 @@ public class ConvertDataStructureToLookup {
                                     throw KEMException.internalError("Unexpected arity of list element: " + kapp.klist().size(), kapp);
                                 }
                                 K stack = lhsOf;
+                                // setting lhsOf prevents inner lists from being translated to rewrites,
                                 lhsOf = kapp;
                                 (isRight ? elementsRight : elementsLeft).add(super.apply(kapp.klist().items().get(0)));
                                 lhsOf = stack;
@@ -232,6 +245,8 @@ public class ConvertDataStructureToLookup {
                         state.add(KApply(KLabel("#match"), element, KApply(KLabel("List:get"), list, KToken(Integer.toString(i-elementsRight.size()), Sorts.Int()))));
                     }
                     if (lhsOf == null) {
+                        // An outermost list may contain nested rewrites, so the term
+                        // is translated into a rewrite from compiled match into the original right-hand side.
                         return KRewrite(list, RewriteToTop.toRight(k));
                     } else {
                         return list;
@@ -360,7 +375,7 @@ public class ConvertDataStructureToLookup {
     }
 
 
-    public synchronized Sentence convert(Sentence s) {
+    public Sentence convert(Sentence s) {
         if (s instanceof Rule) {
             return convert((Rule) s);
         } else if (s instanceof Context) {

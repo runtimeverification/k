@@ -20,7 +20,7 @@ import static org.kframework.kore.KORE.*;
 public class LiftToKSequence {
 
 
-    public synchronized Sentence convert(Sentence s) {
+    public Sentence convert(Sentence s) {
         if (s instanceof Rule) {
             return convert((Rule) s);
         } else if (s instanceof Context) {
