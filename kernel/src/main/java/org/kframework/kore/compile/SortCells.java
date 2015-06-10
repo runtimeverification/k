@@ -178,15 +178,16 @@ public class SortCells {
         KVariable newLabel;
         do {
             newLabel = KVariable("_" + (counter++));
-        } while (variables.containsKey(newLabel));
+        } while (variables.containsKey(newLabel) || previousVars.contains(newLabel));
         variables.put(newLabel, null);
         return newLabel;
     }
 
     private Map<KVariable, VarInfo> variables = new HashMap<>();
+    private Set<KVariable> previousVars = new HashSet<>();
 
     private void resetVars() {
-        variables.clear();
+        variables.clear(); previousVars.clear(); counter = 0;
     }
 
     private KRewrite rhsOf = null;
@@ -272,6 +273,12 @@ public class SortCells {
                 rhsOf = k;
                 apply(k.right());
                 rhsOf = null;
+                return null;
+            }
+
+            @Override
+            public Void apply(KVariable k) {
+                previousVars.add(k);
                 return null;
             }
         }.apply(term);

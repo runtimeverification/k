@@ -198,11 +198,15 @@ final class KSeq private(val children: Seq[K], val att: Att)
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 
   override def computeHashCode = super[KAssocApp].computeHashCode
+
+  override def attEquals(that: Any, attNames: Array[String]) = super[KAssocApp].attEquals(that, attNames)
 }
 
 case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends
 kore.KRewrite with KProduct with PlainNormalization {
   val klabel = KRewrite
+
+  override def attEquals(that: Any, attNames: Array[String]) = super[KRewrite].attEquals(that, attNames)
 }
 
 case class InjectedLabel(klabel: Label, att: Att) extends kore.InjectedKLabel with KTok {
@@ -211,6 +215,8 @@ case class InjectedLabel(klabel: Label, att: Att) extends kore.InjectedKLabel wi
   val s: String = klabel.toString
 
   override def computeHashCode = super[InjectedKLabel].computeHashCode
+
+  override def attEquals(that: Any, attNames: Array[String]) = super[InjectedKLabel].attEquals(that, attNames)
 }
 
 object InjectedLabel {

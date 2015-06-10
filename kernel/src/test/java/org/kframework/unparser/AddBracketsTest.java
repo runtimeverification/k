@@ -51,7 +51,7 @@ public class AddBracketsTest {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
 
-        return new RuleGrammarGenerator(baseK);
+        return new RuleGrammarGenerator(baseK, true);
     }
 
     private Module parseModule(String def) {

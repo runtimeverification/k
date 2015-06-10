@@ -3,6 +3,8 @@ module MAP
   imports LIST
   imports SET
 
+  syntax Map [hook(Map)]
+
   /*@\section{Description} The Map represents a generalized associative array.
    Each key can be paired with an arbitrary value, and can be used to reference
    its associated value. Multiple bindings for the same key are not allowed. */
@@ -61,6 +63,8 @@ module SET
   imports INT-SYNTAX
   imports BASIC-K
 
+  syntax Set [hook(Set)]
+
   /*@ \section{Description} The Set represents a mathematical set (a collection
    of unique items). */
 
@@ -102,6 +106,8 @@ endmodule
 module LIST
   imports INT-SYNTAX
   imports BASIC-K
+
+  syntax List [hook(List)]
 
   /*@ \section{Description} \K lists are ordered collections that may contain
    duplicate elements. These behave more like lists in functional programming
@@ -474,6 +480,7 @@ module K-REFLECTION
   syntax K ::= "#configuration" [function, impure, hook(MetaK:#configuration)]
   syntax String ::= #sort(K) [function, hook(MetaK:#sort)]
   syntax KItem ::= #fresh(String)   [function, hook(#FRESH:fresh), impure]
+  syntax KItem ::= getKLabel(K)  [function, hook(MetaK:getKLabel)]
 
 endmodule
 
