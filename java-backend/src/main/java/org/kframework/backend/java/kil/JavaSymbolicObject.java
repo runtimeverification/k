@@ -20,6 +20,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
 
 
@@ -114,7 +115,11 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public PSet<Variable> variableSet() {
         if (variableSet == null) {
-            new VariableSetFieldInitializer().visitNode(this);
+            if (isGround == null || !isGround) {
+                new VariableSetFieldInitializer().visitNode(this);
+            } else {
+                variableSet = HashTreePSet.empty();
+            }
         }
         return variableSet;
     }
@@ -124,7 +129,11 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public boolean isGround() {
         if (isGround == null) {
-            new IsGroundFieldInitializer().visitNode(this);
+            if (variableSet == null || !variableSet.isEmpty()) {
+                new IsGroundFieldInitializer().visitNode(this);
+            } else {
+                isGround = true;
+            }
         }
         return isGround;
     }
