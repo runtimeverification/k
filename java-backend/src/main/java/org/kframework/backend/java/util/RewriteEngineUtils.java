@@ -108,7 +108,7 @@ public class RewriteEngineUtils {
 
                     Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
 
-                    PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
+                    PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), true, context);
                     if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
                         if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                             resolved = true;
