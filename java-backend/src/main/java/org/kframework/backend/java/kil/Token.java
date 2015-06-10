@@ -5,15 +5,10 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kore.KToken;
-
-import java.util.Collections;
-import java.util.Set;
 
 
 /**
@@ -68,11 +63,6 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
     }
 
     @Override
-    public Set<Variable> variableSet() {
-        return Collections.emptySet();
-    }
-
-    @Override
     protected final boolean computeMutability() {
         return false;
     }
@@ -80,16 +70,6 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
     @Override
     public Token toKore() {
         return this;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override
