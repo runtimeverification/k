@@ -135,13 +135,13 @@ public class ConvertDataStructureToLookup {
     }
 
     private K infer(K term, KLabel collectionLabel) {
-        Optional<String> infer = m.attributesFor().apply(collectionLabel).<String>getOptional("infer");
-        if (infer.isPresent()) {
-            KLabel inferLabel = KLabel(infer.get());
+        Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).<String>getOptional("wrapElement");
+        if (wrapElement.isPresent()) {
+            KLabel wrappedLabel = KLabel(wrapElement.get());
             return new TransformKORE() {
                 @Override
                 public K apply(KApply k) {
-                    if (k.klabel().equals(inferLabel)) {
+                    if (k.klabel().equals(wrappedLabel)) {
                         KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).<String>get("element").get());
                         return KApply(elementLabel, super.apply(k));
                     }
@@ -154,6 +154,9 @@ public class ConvertDataStructureToLookup {
     }
 
     private K transform(K body, K requires) {
+        //maintain the list of variables in the term so that we can deduce that a particular variable is unconstrained
+        Multiset<KVariable> varConstraints = HashMultiset.create();
+        gatherVars(RewriteToTop.toLeft(body), varConstraints);
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
@@ -164,8 +167,6 @@ public class ConvertDataStructureToLookup {
                     //assumed assoc
                     KApply left = (KApply) RewriteToTop.toLeft(k);
                     List<K> components = Assoc.flatten(collectionLabel, Collections.singletonList(left), m);
-                    Multiset<KVariable> varConstraints = HashMultiset.create();
-                    gatherVars(RewriteToTop.toLeft(body), varConstraints);
                     if (att.contains(Attribute.COMMUTATIVE_KEY)) {
                         if (att.contains(Attribute.IDEMPOTENT_KEY)) {
                             // Set
@@ -228,7 +229,7 @@ public class ConvertDataStructureToLookup {
                     }
                     for (int i = 0; i < elementsRight.size(); i++) {
                         K element = elementsRight.get(i);
-                        state.add(KApply(KLabel("#match"), element, KApply(KLabel("List:get"), list, KToken(Integer.toString(-i - 1), Sorts.Int()))));
+                        state.add(KApply(KLabel("#match"), element, KApply(KLabel("List:get"), list, KToken(Integer.toString(i-elementsRight.size()), Sorts.Int()))));
                     }
                     if (lhsOf == null) {
                         return KRewrite(list, RewriteToTop.toRight(k));

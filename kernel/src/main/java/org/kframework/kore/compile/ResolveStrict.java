@@ -62,8 +62,11 @@ public class ResolveStrict {
             String[] strictAttrs = attribute.split(",");
             for (String strictAttr : strictAttrs) {
                 try {
-                    strictnessPositions.add(Integer.parseInt(strictAttr.trim()));
-                } catch (NumberFormatException e) {
+                    int pos = Integer.parseInt(strictAttr.trim());
+                    if (pos < 1 || pos > arity)
+                        throw new IndexOutOfBoundsException();
+                    strictnessPositions.add(pos);
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
                     throw KEMException.compilerError(
                             "Expecting a number between 1 and " + arity + ", but found " + strictAttr + " as a" +
                                     " strict position in " + Arrays.toString(strictAttrs),

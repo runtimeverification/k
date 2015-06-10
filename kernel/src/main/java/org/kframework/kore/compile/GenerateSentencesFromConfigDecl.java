@@ -243,7 +243,7 @@ public class GenerateSentencesFromConfigDecl {
             Att bagAtt = Att()
                     .add(Attribute.ASSOCIATIVE_KEY, "")
                     .add("element", bagSort.name() + "Item")
-                    .add("infer", "<" + cellName + ">")
+                    .add("wrapElement", "<" + cellName + ">")
                     .add(Attribute.UNIT_KEY, "." + bagSort.name())
                     .add(Attribute.HOOK_KEY, type + ":__")
                     .add(Attribute.FUNCTION_KEY);
