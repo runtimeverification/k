@@ -102,7 +102,8 @@ public class KRunFrontEnd extends FrontEnd {
         public int run() {
             return new KRun(kem, files).run(compiledDef,
                     krunOptions,
-                    initializeRewriter);
+                    initializeRewriter,
+                    executionMode);
         }
     }
 
