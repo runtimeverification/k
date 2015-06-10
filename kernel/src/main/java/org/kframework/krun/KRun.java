@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -66,7 +65,7 @@ public class KRun implements Transformation<Void, Void> {
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
         Object result = executionMode.execute(program, rewriter);
-        
+
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
         }
