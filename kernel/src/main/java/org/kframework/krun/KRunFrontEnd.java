@@ -89,8 +89,13 @@ public class KRunFrontEnd extends FrontEnd {
         private final ExecutionMode executionMode;
 
         @Inject
-        public NewKRunFrontEnd(KExceptionManager kem, KRunOptions krunOptions, @Main FileUtil files, @Main CompiledDefinition compiledDef, @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter
-                , @Main ExecutionMode executionMode) {
+        public NewKRunFrontEnd(
+                KExceptionManager kem,
+                KRunOptions krunOptions,
+                @Main FileUtil files,
+                @Main CompiledDefinition compiledDef,
+                @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter,
+                @Main ExecutionMode executionMode) {
             this.kem = kem;
             this.krunOptions = krunOptions;
             this.files = files;
