@@ -12,9 +12,6 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kore.KToken;
 
-import java.util.Collections;
-import java.util.Set;
-
 
 /**
  * A K term of the form {@code SORT(#"VALUE")}.
@@ -65,11 +62,6 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
     @Override
     public final boolean isSymbolic() {
         return false;
-    }
-
-    @Override
-    public Set<Variable> variableSet() {
-        return Collections.emptySet();
     }
 
     @Override
