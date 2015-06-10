@@ -54,6 +54,9 @@ public class PatternMatcher extends AbstractUnifier {
     private ConjunctiveFormula fSubstitution;
 
     private final boolean matchOnFunctionSymbol;
+    /**
+     * True if the subject and the pattern have disjoint variables.
+     */
     private final boolean disjointVariables;
 
     private final TermContext termContext;
