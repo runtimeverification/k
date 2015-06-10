@@ -93,7 +93,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     @Override
     public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
         if (klabel instanceof KVariable) {
-            return new InjectedKLabel(KVariable(klabel.name(), att));
+            return new InjectedKLabel(KVariable(klabel.name(), Att.apply()));
         }
         return new InjectedKLabel(KLabel(klabel.name()));
     }

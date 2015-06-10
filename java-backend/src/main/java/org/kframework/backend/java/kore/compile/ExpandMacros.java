@@ -41,7 +41,12 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
- * Created by dwightguth on 5/26/15.
+ * Uses the Java backend to expand all the macros in a particular module. A macro is a rule (without a side condition)
+ * which is tagged with the "macro" attribute. This class creates a Java Backend rewriter and uses it to reach
+ * a fixed point on such rules.
+ *
+ * Note that this class is somewhat expensive to construct, and so copies of it should be kept around as long
+ * as possible and reused where they can be.
  */
 public class ExpandMacros {
 
@@ -140,7 +145,7 @@ public class ExpandMacros {
         }.apply(t);
     }
 
-    public synchronized Sentence expand(Sentence s) {
+    public Sentence expand(Sentence s) {
         if (s instanceof Rule) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
