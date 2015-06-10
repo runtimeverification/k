@@ -129,10 +129,10 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public boolean isGround() {
         if (isGround == null) {
-            if (variableSet == null || !variableSet.isEmpty()) {
+            if (variableSet == null) {
                 new IsGroundFieldInitializer().visitNode(this);
             } else {
-                isGround = true;
+                isGround = variableSet.isEmpty();
             }
         }
         return isGround;
