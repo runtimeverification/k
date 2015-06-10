@@ -56,13 +56,18 @@ public class KRun implements Transformation<Void, Void> {
             program = parseConfigVars(options, compiledDef);
         }
 
+
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        K result = rewriter.execute(program);
+        Object result = executionMode.execute(program, rewriter);
 
-        Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+        if (result instanceof K) {
 
-        System.out.println(unparseTerm(result, unparsingModule));
+            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+
+            System.out.println(unparseTerm((K) result, unparsingModule));
+        }
+
         return 0;
     }
 

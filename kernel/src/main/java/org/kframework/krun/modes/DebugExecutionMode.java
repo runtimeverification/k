@@ -8,9 +8,11 @@ import org.kframework.kore.K;
 /**
  * Created by manasvi on 6/10/15.
  */
-public class DebugExecutionMode implements ExecutionMode<K> {
+public class DebugExecutionMode implements ExecutionMode<Void> {
     @Override
-    public K execute(K k, Rewriter rewriter) {
+    public Void execute(K k, Rewriter rewriter) {
+        System.out.println("Kore Debugger Under Construction.");
+
         return null;
     }
 }

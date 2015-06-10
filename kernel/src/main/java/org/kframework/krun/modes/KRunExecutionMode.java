@@ -21,6 +21,6 @@ public class KRunExecutionMode implements ExecutionMode<K> {
 
     @Override
     public K execute(K k, Rewriter rewriter) {
-        return null;
+        return rewriter.execute(k);
     }
 }

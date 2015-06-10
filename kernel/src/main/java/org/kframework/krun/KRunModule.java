@@ -264,7 +264,7 @@ public class KRunModule extends AbstractModule {
             }
             return provider.get();
         }
-        
+
         @Provides
         ExecutionMode getExecutionMode(JCommander jc, Map<ToolActivation, Provider<ExecutionMode>> map, KRunOptions kRunOptions) {
             ExecutionMode res = null;
