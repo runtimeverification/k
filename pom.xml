@@ -14,6 +14,7 @@
     <module>k-distribution</module>
     <module>java-backend</module>
     <module>coq-backend</module>
+    <module>ocaml-backend</module>
     <module>sdf-parser</module>
     <module>tiny</module>
   </modules>

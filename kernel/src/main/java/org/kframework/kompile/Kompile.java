@@ -11,8 +11,8 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.compile.StrictToHeatingCooling;
 import org.kframework.definition.Bubble;
+import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
@@ -22,8 +22,13 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.ConcretizeCells;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.kore.compile.GenerateSortPredicateSyntax;
 import org.kframework.kore.compile.ResolveAnonVar;
+import org.kframework.kore.compile.ResolveContexts;
+import org.kframework.kore.compile.ResolveFreshConstants;
+import org.kframework.kore.compile.ResolveHeatCoolAttribute;
 import org.kframework.kore.compile.ResolveSemanticCasts;
+import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -103,18 +108,24 @@ public class Kompile {
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
 
-        DefinitionTransformer heatingCooling = new DefinitionTransformer(StrictToHeatingCooling.self());
+        DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict()::resolve, "resolving strict and seqstrict attributes");
+        DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts()::resolve, "resolving context sentences");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute()::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
+        DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
-        Function1<Definition, Definition> pipeline =
-                heatingCooling
-                        .andThen(resolveAnonVars)
-                        .andThen(resolveSemanticCasts)
-                        .andThen(func(this::concretizeTransformer))
-                        .andThen(func(this::addSemanticsModule))
-                        .andThen(func(this::addProgramModule));
+        Function1<Definition, Definition> pipeline = resolveStrict
+                .andThen(resolveAnonVars)
+                .andThen(resolveContexts)
+                .andThen(resolveHeatCoolAttribute)
+                .andThen(resolveSemanticCasts)
+                .andThen(generateSortPredicateSyntax)
+                .andThen(func(this::resolveFreshConstants))
+                .andThen(func(this::concretizeTransformer))
+                .andThen(func(this::addSemanticsModule))
+                .andThen(func(this::addProgramModule));
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
 
@@ -127,8 +138,8 @@ public class Kompile {
         Module kseqModule = d.getModule("KSEQ").get();
         java.util.Set<Sentence> prods = new HashSet<>();
         for (Sort srt : iterable(d.mainModule().definedSorts())) {
-            if (!gen.kSorts().contains(srt) && !srt.name().startsWith("#")) {
-                // K ::= Sort
+            if (!RuleGrammarGenerator.isParserSort(srt)) {
+                // KItem ::= Sort
                 prods.add(Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
             }
         }
@@ -136,6 +147,11 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(withKSeq);
         return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+    }
+
+    public Definition resolveFreshConstants(Definition input) {
+        return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
+                .apply(input);
     }
 
     public Definition addProgramModule(Definition d) {
@@ -239,7 +255,7 @@ public class Kompile {
                     case "#ruleEnsures":
                         return Configuration(items.get(0), items.get(1), configContents.att());
                     default:
-                        throw new AssertionError("Wrong KLabel for rule content");
+                        throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
                     }
                 })
                 .flatMap(
@@ -264,7 +280,7 @@ public class Kompile {
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
-                .filter(b -> !b.sentenceType().equals("config"))
+                .filter(b -> b.sentenceType().equals("rule"))
                 .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply ruleContents = (KApply) contents;
@@ -284,14 +300,36 @@ public class Kompile {
                 })
                 .collect(Collections.toSet());
 
+        Set<Sentence> contextSet = stream(module.localSentences())
+                .parallel()
+                .filter(s -> s instanceof Bubble)
+                .map(b -> (Bubble) b)
+                .filter(b -> b.sentenceType().equals("context"))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
+                .map(this::upContext)
+                .collect(Collections.toSet());
+
         return Module(module.name(), module.imports(),
-                stream((Set<Sentence>) module.localSentences().$bar(ruleSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+                stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+    }
+
+    private Context upContext(K contents) {
+        KApply ruleContents = (KApply) contents;
+        List<K> items = ruleContents.klist().items();
+        switch (ruleContents.klabel().name()) {
+        case "#ruleNoConditions":
+            return Context(items.get(0), BooleanUtils.TRUE, ruleContents.att());
+        case "#ruleRequires":
+            return Context(items.get(0), items.get(1), ruleContents.att());
+        default:
+            throw KEMException.criticalError("Illegal context with ensures clause detected.", contents);
+        }
     }
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser)) {
-            cachedParser = new ParseCache(parser, java.util.Collections.synchronizedMap(new HashMap<>()));
+        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != kompileOptions.strict()) {
+            cachedParser = new ParseCache(parser, kompileOptions.strict(), java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;

@@ -11,7 +11,7 @@ module IMP-CORE-SYNTAX
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [strict, latex({#1}\leq{#2})]
+                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
                  > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
@@ -45,11 +45,11 @@ module IMP
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
-  rule I1 + I2 => I1 +Int I2
+  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
+  rule I1:Int + I2:Int => I1 +Int I2
 // BExp
-  rule I1 <= I2 => I1 <=Int I2
-  rule ! T => notBool T
+  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule ! T:Bool => notBool T
   rule true && B => B
   rule false && _ => false
 // Block
@@ -57,7 +57,7 @@ module IMP
   rule {S} => S  [structural]
 // Stmt
   rule <k> X = I:Int; => .K ...</k> <state>... X |-> `_ => I` ...</state>
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]

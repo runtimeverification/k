@@ -157,6 +157,7 @@ module LIST
 endmodule
 
 module BOOL-SYNTAX
+  syntax Bool [hook(#BOOL)]
   syntax Bool ::= "true"  [token]
   syntax Bool ::= "false" [token]
 endmodule
@@ -164,7 +165,6 @@ endmodule
 module BOOL
   imports KSEQ
   imports BOOL-SYNTAX
-
   syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
                 > Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_andBool_)]
                 | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(#BOOL:_andThenBool_)]
@@ -214,12 +214,14 @@ module BOOL
 endmodule
 
 module INT-SYNTAX
+  syntax Int [hook(#INT)]
   syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token]
 endmodule
 
 module INT
   imports INT-SYNTAX
   imports BOOL
+  imports K-EQUAL
 
   syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(#INT:~Int_)]
                > left:
@@ -265,6 +267,7 @@ module INT
                 | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_=/=Int_)]
                 | Int "dividesInt" Int    [function]
 
+  rule I1:Int ==Int I2:Int => I1 ==K I2
   rule I1:Int =/=Int I2:Int => notBool `I1 ==Int I2`
   rule `I1:Int dividesInt I2:Int` => `I2 %Int I1` ==Int 0
 
@@ -273,6 +276,7 @@ module INT
 endmodule
 
 module FLOAT-SYNTAX
+  syntax Float [hook(#FLOAT)]
   syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]d+))?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
   syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
   syntax Float ::= r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
@@ -356,6 +360,7 @@ module STRING-SYNTAX
   //              | [\\][u] 4*Hex // "\uFFFF"     Backslash 'u' followed by four  hexadecimal characters
   //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
   //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
+  syntax String [hook(#STRING)]
   syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][u][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
 endmodule
 
@@ -395,6 +400,7 @@ module STRING
 
   syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
   rule S1:String =/=String S2:String => notBool `S1 ==String S2`
+  rule S1:String ==String S2:String => S1 ==K S2
 
   syntax Bool ::= String  "<String" String [function, hook(#STRING:_<String_)]
                 | String "<=String" String [function, hook(#STRING:_<=String_)]
@@ -435,7 +441,7 @@ module STRING
 endmodule
 
 module ID
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoreject]
+  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoReject]
 endmodule
 
 module EMPTY-ID
@@ -453,6 +459,8 @@ module K-EQUAL
   syntax priorities equalEqualK notEqualEqualK > boolOperation
   rule K1:K =/=K K2:K => notBool `K1 ==K K2`
 
+  rule K1:Bool ==Bool K2:Bool => K1 ==K K2
+
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, hook(KEqual:ite)]
   rule #if true #then K:K #else _:K #fi => K
   rule #if false #then _:K #else K:K #fi => K
@@ -460,9 +468,12 @@ module K-EQUAL
 endmodule
 
 module K-REFLECTION
-  imports BASIC-K
+  imports KAST
+  imports STRING
 
   syntax K ::= "#configuration" [function, impure, hook(MetaK:#configuration)]
+  syntax String ::= #sort(K) [function, hook(MetaK:#sort)]
+  syntax KItem ::= #fresh(String)   [function, hook(#FRESH:fresh), impure]
 
 endmodule
 

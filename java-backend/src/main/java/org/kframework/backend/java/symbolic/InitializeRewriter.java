@@ -32,6 +32,7 @@ import java.lang.invoke.MethodHandle;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -88,7 +89,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     public static class SymbolicRewriterGlue implements Rewriter {
 
         private final SymbolicRewriter rewriter;
-        private final GlobalContext rewritingContext;
+        public final GlobalContext rewritingContext;
         private final KExceptionManager kem;
 
         public SymbolicRewriterGlue(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
@@ -98,10 +99,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public K execute(K k) {
+        public K execute(K k, Optional<Integer> depth) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
-            JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), -1, false);
+            JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
             return result.getJavaKilTerm();
         }
     }

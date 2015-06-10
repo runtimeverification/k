@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static org.kframework.Collections.*;
@@ -86,7 +87,7 @@ public class TstBackendOnKORE_IT {
             requestScope.enter();
             try {
                 InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
-                K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), program)));
+                K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), program)), Optional.empty());
                 Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
                 System.err.println(KOREToTreeNodes.toString(new AddBrackets(unparsingModule).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(kResult), unparsingModule))));
             } finally {

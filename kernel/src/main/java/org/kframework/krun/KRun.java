@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
+import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kil.Attributes;
@@ -13,10 +14,12 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.ToKast;
 import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -27,11 +30,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
+import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * The KORE-based KRun
@@ -59,6 +65,7 @@ public class KRun implements Transformation<Void, Void> {
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
+<<<<<<< HEAD
         Object result = executionMode.execute(program, rewriter);
 
         if (result instanceof K) {
@@ -68,8 +75,41 @@ public class KRun implements Transformation<Void, Void> {
             System.out.println(unparseTerm((K) result, unparsingModule));
         }
 
+=======
+        K result = rewriter.execute(program, Optional.ofNullable(options.depth));
+
+        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+>>>>>>> ocaml8
         return 0;
     }
+
+    //TODO(dwightguth): use Writer
+    public void outputFile(String output, KRunOptions options) {
+        if (options.outputFile == null) {
+            System.out.print(output);
+        } else {
+            files.saveToWorkingDirectory(options.outputFile, output);
+        }
+    }
+
+    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
+        switch (output) {
+        case KAST:
+            print.accept(ToKast.apply(result) + "\n");
+            break;
+        case NONE:
+            print.accept("");
+            break;
+        case PRETTY:
+            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+            print.accept(unparseTerm(result, unparsingModule) + "\n");
+            break;
+        default:
+            throw KEMException.criticalError("Unsupported output mode: " + output);
+        }
+    }
+
+
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
@@ -90,7 +130,7 @@ public class KRun implements Transformation<Void, Void> {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    private String unparseTerm(K input, Module test) {
+    private static String unparseTerm(K input, Module test) {
         return KOREToTreeNodes.toString(
                 new AddBrackets(test).addBrackets((ProductionReference)
                         KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));

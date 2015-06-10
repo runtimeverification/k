@@ -433,11 +433,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())));
 
             // lst ::= elem
-            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict"));
+            prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove(Attribute.STRICT_KEY).remove(Attribute.SEQSTRICT_KEY));
 
             // lst ::= .UserList
             prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                    attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
+                    attrsWithKilProductionId.remove(Attribute.STRICT_KEY).remove(Attribute.SEQSTRICT_KEY).add("klabel", dropQuote(p.getTerminatorKLabel())));
 
             res.add(prod1);
             res.add(prod2);

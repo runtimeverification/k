@@ -70,6 +70,8 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(Terminal(".ThreadCellBag"))),
                 Production(Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCell")))),
+                Production("ThreadCellBagItem", Sort("ThreadCellBag"),
+                        Seq(Terminal("ThreadCellBagItem"), Terminal("("), NonTerminal(Sort("ThreadCell")), Terminal(")"))),
                 Production("<thread>", Sort("ThreadCell"),
                         Seq(Terminal("<thread>"), NonTerminal(Sort("KCell")), NonTerminal(Sort("OptCell")), Terminal("</thread>"))),
                 Production("<k>", Sort("KCell"),
