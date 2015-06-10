@@ -36,7 +36,7 @@ public class JavaSymbolicKompileModule extends AbstractModule {
         MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), String.class, Backend.class);
         mapBinder.addBinding("java").to(JavaSymbolicBackend.class);
-        
+
         MapBinder<String, Consumer<CompiledDefinition>> koreBackendBinder = MapBinder.newMapBinder(
                 binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {});
         koreBackendBinder.addBinding("java").toInstance(c -> {
