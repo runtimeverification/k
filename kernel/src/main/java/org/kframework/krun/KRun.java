@@ -2,6 +2,7 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
@@ -39,10 +40,12 @@ public class KRun implements Transformation<Void, Void> {
 
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final ExecutionMode executionMode;
 
-    public KRun(KExceptionManager kem, FileUtil files) {
+    public KRun(KExceptionManager kem, FileUtil files, ExecutionMode executionMode) {
         this.kem = kem;
         this.files = files;
+        this.executionMode = executionMode;
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
