@@ -40,15 +40,13 @@ public class KRun implements Transformation<Void, Void> {
 
     private final KExceptionManager kem;
     private final FileUtil files;
-    private final ExecutionMode executionMode;
 
-    public KRun(KExceptionManager kem, FileUtil files, ExecutionMode executionMode) {
+    public KRun(KExceptionManager kem, FileUtil files) {
         this.kem = kem;
         this.files = files;
-        this.executionMode = executionMode;
     }
 
-    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
+    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
