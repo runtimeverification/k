@@ -39,9 +39,12 @@ import static org.kframework.kore.KORE.*;
 /**
  * Convert all operations involving associativity to use the standard data types
  * List,Set,Map,Bag. This algorithm is currently incomplete and may not correctly
- * handle all cases. However, it should be capable of handling all the
- * cases that were handleable in the old KIL framework, including multiplicity * cells.
- * In some cases however it may be more inefficient than the old framework because
+ * handle all cases. However, it should be capable of handling most cases
+ * that were handleable in the old KIL framework, including multiplicity * cells,
+ * although there may be some incorrect behaviors because it has not been thoroughly
+ * tested and there are several known issues that will cause some patterns to behave
+ * incorrectly.
+ * In some cases it may also be more inefficient than the old framework because
  * it will sometimes choose a backtracking choice operation instead of a set or map
  * lookup.
  */
