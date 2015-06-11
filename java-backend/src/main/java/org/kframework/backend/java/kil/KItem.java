@@ -441,28 +441,19 @@ public class KItem extends Term implements KItemRepresentation {
 
 
                             Map<Variable, Term> solution;
-                            if (rule.getAttribute(Attribute.ASSOCIATIVE_KEY) == null ||
-                                    rule.getAttribute(Attribute.COMMUTATIVE_KEY) == null) {
-                                    /* Use the non-assoc pattern matcher unless explicitely specified*/
-                                solution = NonACPatternMatcher.match(kItem, rule, context);
-                                if (solution == null) {
-                                    continue;
-                                }
+                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
+                            if (matches.isEmpty()) {
+                                continue;
                             } else {
-                                List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
-                                if (matches.isEmpty()) {
-                                    continue;
-                                } else {
-                                    if (matches.size() > 1) {
-                                        if (javaOptions.deterministicFunctions) {
-                                            throw KEMException.criticalError("More than one possible match. " +
-                                                    "Function " + kLabelConstant + " might be non-deterministic.");
-                                        }
-                                        kem.registerInternalWarning("More than one possible match. " +
-                                                "Behaviors might be lost.");
+                                if (matches.size() > 1) {
+                                    if (javaOptions.deterministicFunctions) {
+                                        throw KEMException.criticalError("More than one possible match. " +
+                                                "Function " + kLabelConstant + " might be non-deterministic.");
                                     }
-                                    solution = matches.get(0);
+                                    kem.registerInternalWarning("More than one possible match. " +
+                                            "Behaviors might be lost.");
                                 }
+                                solution = matches.get(0);
                             }
 
                             Term rightHandSide = rule.rightHandSide();
@@ -580,20 +571,26 @@ public class KItem extends Term implements KItemRepresentation {
                     System.err.println("\nAuditing " + rule + "...\n");
                 }
                 /* anywhere rules should be applied by pattern match rather than unification */
-                Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
-                if (solution != null) {
-                    RuleAuditing.succeed(rule);
-                    Term rightHandSide = rule.rightHandSide();
-                    if (copyOnShareSubstAndEval) {
-                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                                solution,
-                                rule.reusableVariables().elementSet(),
-                                context);
-                    } else {
-                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                    }
-                    return rightHandSide;
+                Map<Variable, Term> solution;
+                List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context);
+                if (matches.isEmpty()) {
+                    continue;
+                } else {
+                    assert matches.size() == 1 : "unexpected non-deterministic anywhere rule " + rule;
+                    solution = matches.get(0);
                 }
+
+                RuleAuditing.succeed(rule);
+                Term rightHandSide = rule.rightHandSide();
+                if (copyOnShareSubstAndEval) {
+                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                            solution,
+                            rule.reusableVariables().elementSet(),
+                            context);
+                } else {
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                }
+                return rightHandSide;
             } finally {
                 if (RuleAuditing.isAuditBegun()) {
                     if (RuleAuditing.getAuditingRule() == rule) {
