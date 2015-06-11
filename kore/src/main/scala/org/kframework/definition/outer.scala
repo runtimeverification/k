@@ -181,17 +181,6 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
         set.head
     }}
 
-  lazy val collectionFor: Map[KLabel, KLabel] = productions.filter(_.att.contains("assoc")).flatMap { p => {
-    var set : Set[Tuple2[KLabel, KLabel]] = Set(Tuple2(p.klabel.get, p.klabel.get))
-    if (p.att.contains("unit")) {
-      set = set + Tuple2(KORE.KLabel(p.att.get("unit").get), p.klabel.get)
-    }
-    if (p.att.contains("element")) {
-      set = set + Tuple2(KORE.KLabel(p.att.get("element").get), p.klabel.get)
-    }
-    set
-  }} toMap
-
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
     case p@Production(_, items, _) =>

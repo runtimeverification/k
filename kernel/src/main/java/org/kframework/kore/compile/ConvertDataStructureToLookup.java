@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
@@ -60,9 +61,25 @@ public class ConvertDataStructureToLookup {
     }
 
     private final Module m;
+    private final Map<KLabel, KLabel> collectionFor;
 
     public ConvertDataStructureToLookup(Module m) {
         this.m = m;
+        collectionFor = collectionFor(m);
+    }
+
+    private Map<KLabel, KLabel> collectionFor(Module m) {
+        stream(m.productions()).filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY)).flatMap(p -> {
+            Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
+            set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
+            if (p.att().contains(Attribute.UNIT_KEY)) {
+                set.add(Tuple2.apply(KLabel(p.att().<String>get(Attribute.UNIT_KEY).get()), p.klabel().get()));
+            }
+            if (p.att().contains("element")) {
+                set.add(Tuple2.apply(KLabel(p.att().<String>get("element").get()), p.klabel().get()));
+            }
+            return set.stream();
+        }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
     }
 
     private Rule convert(Rule rule) {
@@ -193,8 +210,8 @@ public class ConvertDataStructureToLookup {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
-                if (m.collectionFor().contains(k.klabel())) {
-                    KLabel collectionLabel = m.collectionFor().apply(k.klabel());
+                if (collectionFor.containsKey(k.klabel())) {
+                    KLabel collectionLabel = collectionFor.get(k.klabel());
                     k = (KApply) infer(k, collectionLabel);
                     Att att = m.attributesFor().apply(collectionLabel);
                     //assumed assoc
