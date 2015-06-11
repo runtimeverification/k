@@ -13,7 +13,6 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.parser.ProductionReference;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
@@ -60,9 +59,10 @@ public class KRun implements Transformation<Void, Void> {
 
         K result = rewriter.execute(program);
 
-        ParseInModule unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+        Module mod = Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att());
+        Module unparsingModule = compiledDef.getParserModule(mod).module();
 
-        System.out.println(unparseTerm(result, unparsingModule.disambModule()));
+        System.out.println(unparseTerm(result, unparsingModule));
         return 0;
     }
 
@@ -110,7 +110,7 @@ public class KRun implements Transformation<Void, Void> {
         }
 
         String kast = output.stdout != null ? output.stdout : "";
-        return compiledDef.getParser(new ParseInModule(compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Sorts.K(), kem).apply(kast, source);
+        return compiledDef.getParser(compiledDef.getParserModule(compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Sorts.K(), kem).apply(kast, source);
     }
 
     @Override

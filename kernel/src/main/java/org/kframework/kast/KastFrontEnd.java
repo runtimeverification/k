@@ -14,7 +14,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.ToKast;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.ProgramLoader;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -116,7 +115,7 @@ public class KastFrontEnd extends FrontEnd {
                     }
                     mod = mod2.get();
                 }
-                K parsed = def.getParser(new ParseInModule(mod), sort, kem).apply(FileUtil.read(stringToParse), source);
+                K parsed = def.getParser(def.getParserModule(mod), sort, kem).apply(FileUtil.read(stringToParse), source);
                 System.out.println(ToKast.apply(parsed));
             } else {
                 Context context = contextProvider.get();

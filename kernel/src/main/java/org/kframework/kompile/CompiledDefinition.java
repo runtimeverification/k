@@ -2,6 +2,7 @@
 package org.kframework.kompile;
 
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
@@ -53,10 +54,10 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a ground term
      * in the syntax module into KAST.
      */
-    public BiFunction<String, Source, K> getGroundParser(KExceptionManager kem) {
-        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getConfigGrammar(kompiledDefinition.mainSyntaxModule());
+    public BiFunction<String, Source, K> getGroundParser(KExceptionManager kem, String moduleName) {
+        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getConfigGrammar(kompiledDefinition.getModule(moduleName).get());
 
-        return getParser(parseInModule, programStartSymbol, kem);
+        return getParser(parseInModule, Sorts.K(), kem);
     }
 
     /**

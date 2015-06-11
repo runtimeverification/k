@@ -29,16 +29,16 @@ public class ParseCache implements Serializable {
         return module;
     }
 
-    private transient ParseInModule parser;
+    private transient Module parser;
 
-    /*public ParseInModule getParser() {
-        ParseInModule p = parser;
+    public Module getParserModule() {
+        Module p = parser;
         if (p == null) {
-            p = new ParseInModule(module);
+            p = module;
             parser = p;
         }
         return p;
-    }*/
+    }
 
     public static class ParsedSentence implements Serializable {
         private final K parse;

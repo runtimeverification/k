@@ -139,10 +139,10 @@ public class Kompile {
     }
 
     public Definition addProgramModule(Definition d) {
-        ParseInModule programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule()).module();
         java.util.Set<Module> allModules = mutable(d.modules());
-        allModules.add(programsModule.module());
-        return Definition(d.mainModule(), programsModule.module(), immutable(allModules));
+        allModules.add(programsModule);
+        return Definition(d.mainModule(), programsModule, immutable(allModules));
     }
 
     private Definition concretizeTransformer(Definition input) {
@@ -219,17 +219,17 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config")).count() == 0)
             return module;
-        ParseInModule configParserModule = gen.getConfigGrammar(module);
+        Module configParserModule = gen.getConfigGrammar(module).disambModule();
 
-        ParseCache cache = loadCache(configParserModule.module());
-        //ParseInModule parser = cache.getParser();
+        ParseCache cache = loadCache(configParserModule);
+        ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache.getCache(), configParserModule, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply configContents = (KApply) contents;
                     List<K> items = configContents.klist().items();
@@ -243,7 +243,7 @@ public class Kompile {
                     }
                 })
                 .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParserModule.disambModule())))
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParserModule)))
                 .collect(Collections.toSet());
 
         return Module(module.name(), (Set<Module>) module.imports().$bar(Set(def.getModule("MAP").get())), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
@@ -255,17 +255,17 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
-        ParseInModule ruleParserModule = gen.getRuleGrammar(module);
+        Module ruleParserModule = gen.getRuleGrammar(module).module();
 
-        ParseCache cache = loadCache(ruleParserModule.module());
-        //ParseInModule parser = cache.getParser();
+        ParseCache cache = loadCache(ruleParserModule);
+        ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache.getCache(), ruleParserModule, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, b))
                 .map(contents -> {
                     KApply ruleContents = (KApply) contents;
                     List<org.kframework.kore.K> items = ruleContents.klist().items();
