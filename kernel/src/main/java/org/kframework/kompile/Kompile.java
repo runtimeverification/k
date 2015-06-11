@@ -145,6 +145,12 @@ public class Kompile {
         Module withKSeq = Module("SEMANTICS", Set(d.mainModule()), immutable(prods), Att());
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(withKSeq);
+
+        Module languageParsingModule = Module("LANGUAGE-PARSING",
+                Set(d.mainModule(),
+                        d.mainSyntaxModule(),
+                        d.getModule("K-TERM").get()), Set(), Att());
+        allModules.add(languageParsingModule);
         return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
     }
 

@@ -21,9 +21,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
-
 /**
  * A class representing a compiled definition. It has everything needed for executing and parsing programs.
  */
@@ -34,7 +31,7 @@ public class CompiledDefinition implements Serializable {
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
     public final KLabel topCellInitializer;
-    private Module languageParsingModule;
+    private final Module languageParsingModule;
 
     public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
@@ -42,10 +39,7 @@ public class CompiledDefinition implements Serializable {
         this.kompiledDefinition = kompiledDefinition;
         this.programStartSymbol = programStartSymbol;
         this.topCellInitializer = topCellInitializer;
-        languageParsingModule = Module("LANGUAGE-PARSING",
-                Set(kompiledDefinition.mainModule(),
-                        kompiledDefinition.mainSyntaxModule(),
-                        parsedDefinition.getModule("K-TERM").get()), Set(), Att());
+        this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
     }
 
     /**
@@ -94,6 +88,6 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Module getParserModule(Module module) {
-        return new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
+        return new RuleGrammarGenerator(kompiledDefinition).getCombinedGrammar(module);
     }
 }
