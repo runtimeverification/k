@@ -87,7 +87,11 @@ public class KRun implements Transformation<Void, Void> {
             print.accept("");
             break;
         case PRETTY:
-            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING",
+                    Set(compiledDef.executionModule(),
+                            compiledDef.syntaxModule(),
+                            compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get(),
+                            compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Set(), Att()));
             print.accept(unparseTerm(result, unparsingModule) + "\n");
             break;
         default:
