@@ -163,7 +163,7 @@ module BOOL-SYNTAX
 endmodule
 
 module BOOL
-  imports KSEQ
+  imports BASIC-K
   imports BOOL-SYNTAX
   syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
                 > Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_andBool_)]
@@ -468,7 +468,7 @@ module K-EQUAL
 endmodule
 
 module K-REFLECTION
-  imports KAST
+  imports BASIC-K
   imports STRING
 
   syntax K ::= "#configuration" [function, impure, hook(MetaK:#configuration)]

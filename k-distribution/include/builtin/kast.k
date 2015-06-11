@@ -3,16 +3,16 @@
 // Module defining only the sorts K and KString, useful for modularity
 module BASIC-K
   syntax K
-  syntax KString ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fa-f]{2})|([\\\\][u][0-9a-fa-f]{4})|([\\\\][u][0-9a-fa-f]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
-    // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
   syntax KLabel
+  syntax KItem
+  syntax K     ::= KItem
 endmodule
 
 
 module KAST
   imports BASIC-K
-  syntax KItem
-  syntax K     ::= KItem
+  syntax KString ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fa-f]{2})|([\\\\][u][0-9a-fa-f]{4})|([\\\\][u][0-9a-fa-f]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
+  // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
   syntax KBott ::= "#token" "(" KString "," KString ")"  [klabel(#KToken), hook(org.kframework.kore.KToken)]
                  | "#klabel" "(" KLabel ")"              [klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel)]
                  | KLabel "(" KList ")"                  [klabel(#KApply), hook(org.kframework.kore.KApply)]
