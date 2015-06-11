@@ -160,3 +160,11 @@ module K
   syntax non-assoc #KRewrite
 
 endmodule
+
+// To be used to parse terms in full K
+module K-TERM
+  imports KSEQ-SYMBOLIC
+  imports K-SORT-LATTICE
+  imports AUTO-CASTS
+  imports AUTO-FOLLOW
+endmodule

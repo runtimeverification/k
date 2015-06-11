@@ -33,9 +33,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -87,11 +84,7 @@ public class KRun implements Transformation<Void, Void> {
             print.accept("");
             break;
         case PRETTY:
-            Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING",
-                    Set(compiledDef.executionModule(),
-                            compiledDef.syntaxModule(),
-                            compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get(),
-                            compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Set(), Att()));
+            Module unparsingModule = compiledDef.getParserModule(compiledDef.languageParsingModule());
             print.accept(unparseTerm(result, unparsingModule) + "\n");
             break;
         default:
@@ -104,7 +97,7 @@ public class KRun implements Transformation<Void, Void> {
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
         for (Map.Entry<String, Pair<String, String>> entry
-                : options.configurationCreation.configVars(compiledDef.executionModule().name()).entrySet()) {
+                : options.configurationCreation.configVars(compiledDef.languageParsingModule().name()).entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
