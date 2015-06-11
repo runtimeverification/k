@@ -2,16 +2,12 @@
 package org.kframework.backend.java.kil;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableList;
-import org.kframework.kore.K;
 
 
 /**
@@ -144,16 +140,6 @@ public class KList extends KCollection implements org.kframework.kore.KList {
         KList kList = (KList) object;
         return (frame == null ? kList.frame == null : frame.equals(kList.frame))
                 && contents.equals(kList.contents);
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override
