@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -163,10 +164,16 @@ public class SymbolicRewriter {
 
                         ConstrainedTerm pattern = buildPattern(rule, subject.termContext());
 
-                        for (ConjunctiveFormula unificationConstraint : subject.unify(pattern)) {
+                        for (Pair<ConjunctiveFormula, Boolean> solution : subject.unify(pattern, rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())) {
+                            ConjunctiveFormula unificationConstraint = solution.getLeft();
+                            boolean isMatching = solution.getRight();
+
                             RuleAuditing.succeed(rule);
                             /* compute all results */
-                            ConstrainedTerm result = buildResult(rule, unificationConstraint);
+                            ConstrainedTerm result = buildResult(rule, unificationConstraint, subject.term(), !isMatching);
+                            if (result == null) {
+                                continue;
+                            }
                             results.add(result);
                             appliedRules.add(rule);
                             substitutions.add(unificationConstraint.substitution());
@@ -214,22 +221,15 @@ public class SymbolicRewriter {
     }
 
     /**
-     * Builds the result of rewrite by applying the resulting symbolic
-     * constraint of unification to the right-hand side of the rewrite rule.
-     *
-     * @param rule
-     *            the rewrite rule
-     * @param constraint
-     *            the resulting symbolic constraint of unification
-     * @return the new subject term
+     * Builds the result of rewrite based on the unification constraint.
+     * It applies the unification constraint on the right-hand side of the rewrite rule,
+     * if the rule is not compiled for fast rewriting.
+     * It uses build instructions, if the rule is compiled for fast rewriting.
      */
-    public static ConstrainedTerm buildResult(Rule rule, ConjunctiveFormula constraint) {
-        return buildResult(rule, constraint, false);
-    }
-
-    private static ConstrainedTerm buildResult(
+    public static ConstrainedTerm buildResult(
             Rule rule,
             ConjunctiveFormula constraint,
+            Term subject,
             boolean expandPattern) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
@@ -238,26 +238,51 @@ public class SymbolicRewriter {
         }
         constraint = constraint.addAll(rule.ensures()).simplify();
 
-        /* get fresh substitutions of rule variables */
-        BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+        Term term;
+        if (rule.isCompiledForFastRewriting()) {
+            constraint = constraint.orientSubstitution(rule.matchingVariables());
 
-        /* rename rule variables in the constraints */
-        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
+            /* apply the constraints substitution on the rule RHS */
+            term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, constraint.termContext());
 
-        /* rename rule variables in the rule RHS */
-        Term term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
-        /* apply the constraints substitution on the rule RHS */
-        constraint = constraint.orientSubstitution(rule.boundVariables().stream()
-                .map(freshSubstitution::get)
-                .collect(Collectors.toSet()));
-        term = term.substituteAndEvaluate(constraint.substitution(), constraint.termContext());
-        /* eliminate bindings of rule variables */
-        constraint = constraint.removeBindings(freshSubstitution.values());
+            /* eliminate bindings of rule variables */
+            constraint = constraint.removeBindings(rule.matchingVariables());
+
+            /* get fresh substitutions of rule variables */
+            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(Sets.union(rule.variableSet(), rule.matchingVariables()));
+
+            /* rename rule variables in the rule RHS */
+            term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
+            /* rename rule variables in the constraints */
+            constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
+        } else {
+            /* get fresh substitutions of rule variables */
+            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+
+            /* rename rule variables in the rule RHS */
+            term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
+
+            /* rename rule variables in the constraints */
+            constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
+            constraint = constraint.orientSubstitution(rule.boundVariables().stream()
+                    .map(freshSubstitution::get)
+                    .collect(Collectors.toSet()));
+
+            /* apply the constraints substitution on the rule RHS */
+            term = term.substituteAndEvaluate(constraint.substitution(), constraint.termContext());
+
+            /* eliminate bindings of rule variables */
+            constraint = constraint.removeBindings(freshSubstitution.values());
+        }
 
         ConstrainedTerm result = new ConstrainedTerm(term, constraint);
         if (expandPattern) {
+            result = new ConstrainedTerm(term.substituteAndEvaluate(constraint.substitution(), constraint.termContext()), constraint);
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
+            if (result.constraint().isFalse() || result.constraint().checkUnsat()) {
+                result = null;
+            }
         }
 
         return result;
@@ -277,7 +302,7 @@ public class SymbolicRewriter {
                 continue;
             }
 
-            return buildResult(rule, constraint, true);
+            return buildResult(rule, constraint, null, true);
         }
 
         return null;
