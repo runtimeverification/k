@@ -114,6 +114,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         return false;
     }
 
+    @Override
     void add(Term left, Term right) {
         constraint = constraint.add(left, right);
     }

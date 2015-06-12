@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
@@ -100,19 +101,66 @@ public abstract class AbstractUnifier implements Unifier {
             if (term.kind().isComputational()) {
                 assert otherTerm.kind().isComputational() : otherTerm;
 
-                term = KCollection.upKind(term, otherTerm.kind());
-                otherTerm = KCollection.upKind(otherTerm, term.kind());
+                if (term.kind() != otherTerm.kind()) {
+                    if (term.kind() == Kind.KITEM) {
+                        if (otherTerm instanceof KList && ((KList) otherTerm).concreteSize() == 1) {
+                            if (((KList) otherTerm).hasFrame()) {
+                                add(KList.EMPTY, ((KList) otherTerm).frame());
+                            }
+                            otherTerm = ((KList) otherTerm).get(0);
+                        }
+                        if (otherTerm instanceof KSequence && ((KSequence) otherTerm).concreteSize() == 1) {
+                            if (((KSequence) otherTerm).hasFrame()) {
+                                add(KSequence.EMPTY, ((KSequence) otherTerm).frame());
+                            }
+                            otherTerm = ((KSequence) otherTerm).get(0);
+                        }
+                    } else if (otherTerm.kind() == Kind.KITEM) {
+                        if (term instanceof KList && ((KList) term).concreteSize() == 1) {
+                            if (((KList) term).hasFrame()) {
+                                add(((KList) term).frame(), KList.EMPTY);
+                            }
+                            term = ((KList) term).get(0);
+                        }
+                        if (term instanceof KSequence && ((KSequence) term).concreteSize() == 1) {
+                            if (((KSequence) term).hasFrame()) {
+                                add(((KSequence) term).frame(), KSequence.EMPTY);
+                            }
+                            term = ((KSequence) term).get(0);
+                        }
+                    } else if (term.kind() == Kind.K) {
+                        if (otherTerm instanceof KList && ((KList) otherTerm).concreteSize() == 1) {
+                            if (((KList) otherTerm).hasFrame()) {
+                                add(KList.EMPTY, ((KList) otherTerm).frame());
+                            }
+                            otherTerm = ((KList) otherTerm).get(0);
+                        }
+                    } else if (otherTerm.kind() == Kind.K) {
+                        if (term instanceof KList && ((KList) term).concreteSize() == 1) {
+                            if (((KList) term).hasFrame()) {
+                                add(((KList) term).frame(), KList.EMPTY);
+                            }
+                            term = ((KList) term).get(0);
+                        }
+                    }
+                }
+
+                if (term.kind() != otherTerm.kind()) {
+                    term = KCollection.upKind(term, otherTerm.kind());
+                    otherTerm = KCollection.upKind(otherTerm, term.kind());
+                }
             }
 
             assert term.kind() == otherTerm.kind();
 
-            if (term.hashCode() == otherTerm.hashCode() && term.equals(otherTerm)) {
-                continue;
-            } else if (term.isGround() && otherTerm.isGround()
-                    && term.isNormal() && otherTerm.isNormal()) {
-                fail(term, otherTerm);
-                break;
-            }
+            //if (term.hashCode() == otherTerm.hashCode() && term.equals(otherTerm)) {
+            //if (term.equals(otherTerm)) {
+            //    continue;
+            //} else if (term.isGround() && otherTerm.isGround()
+            //        && term.isNormal() && otherTerm.isNormal()) {
+            //    fail(term, otherTerm);
+            //    break;
+            //}
 
             if (stop(term, otherTerm)) {
                 flushTaskBuffer();
@@ -169,6 +217,8 @@ public abstract class AbstractUnifier implements Unifier {
             tasks.push(taskBuffer.pop());
         }
     }
+
+    abstract void add(Term left, Term right);
 
     abstract boolean stop(Term term, Term otherTerm);
 
