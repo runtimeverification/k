@@ -8,7 +8,11 @@ package org.kframework.debugger;
  */
 public interface KDebug {
 
-    public
+    /**
+     *  Take a certain number of steps from the current state.
+     */
+    public int step(int steps);
 
+    
 
 }
