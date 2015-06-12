@@ -153,8 +153,8 @@ public abstract class AbstractUnifier implements Unifier {
 
             assert term.kind() == otherTerm.kind();
 
+            // the code below is commented out due to hashCode not being updated for mutable cells
             //if (term.hashCode() == otherTerm.hashCode() && term.equals(otherTerm)) {
-            //if (term.equals(otherTerm)) {
             //    continue;
             //} else if (term.isGround() && otherTerm.isGround()
             //        && term.isNormal() && otherTerm.isNormal()) {

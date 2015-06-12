@@ -164,6 +164,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public ConjunctiveFormula unsafeAddVariableBinding(Variable variable, Term term) {
+        // these assertions are commented out for performance reasons
         //assert term.substituteAndEvaluate(substitution, context) == term;
         //assert !term.variableSet().contains(variable);
         Term previousTerm = substitution.get(variable);
