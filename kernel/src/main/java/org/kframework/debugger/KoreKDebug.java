@@ -23,13 +23,13 @@ public class KoreKDebug implements KDebug {
     private Rewriter rewriter;
     private int checkpointInterval;
     private KExceptionManager kem;
-    private int activeStateId;
+    private int activeStateCheckpoint;
     public KoreKDebug(K initialK, Rewriter rewriter, KExceptionManager kem) {
         this.stateSet = new TreeSet<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
         this.kem = kem;
-        this.activeStateId = DEFAULT_ID;
+        this.activeStateCheckpoint = DEFAULT_ID;
         KDebugState initialState = new KDebugState(initialK);
         initialState.addCheckpoint(new Checkpoint(initialK, DEFAULT_ID), DEFAULT_ID);
         stateSet.add(initialState);
@@ -39,29 +39,37 @@ public class KoreKDebug implements KDebug {
     @Override
     public int step(int steps) {
         K currentK = activeState.getCurrentK();
-        if(activeStateId != 1 && activeStateId % checkpointInterval != 0) {
-            if (activeStateId + steps < activeState.getCurrentCheckpoint() + checkpointInterval) {
-                currentK = rewriter.execute(currentK, Optional.of(new Integer(steps));
-
+        if(activeStateCheckpoint != 1 && activeStateCheckpoint % checkpointInterval != 0) {
+            if (activeStateCheckpoint + steps < activeState.getlastMapCheckpoint() + checkpointInterval) {
+                currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
+                activeStateCheckpoint += steps;
+                return activeStateCheckpoint;
             }
+            currentK = rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval - steps)));
+            activeStateCheckpoint += checkpointInterval - steps;
         }
-
-        int rollingCheckpointID = activeState.getCurrentCheckpoint();
         currentK = activeState.getCurrentK();
         while (steps >= checkpointInterval) {
-            rollingCheckpointID += checkpointInterval;
+            activeStateCheckpoint += checkpointInterval;
             Checkpoint newCheckpoint = new Checkpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))),
-                    rollingCheckpointID);
+                    activeStateCheckpoint);
             steps -= checkpointInterval;
-            activeState.addCheckpoint(newCheckpoint, rollingCheckpointID);
+            activeState.addCheckpoint(newCheckpoint, activeStateCheckpoint);
             currentK = newCheckpoint.getCheckpointK();
         }
-
-
+        currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
+        activeStateCheckpoint += steps;
+        activeState.setCurrentK(currentK);
+        return activeStateCheckpoint;
     }
 
     public void setCheckpointInterval(int checkpointSize) {
         this.checkpointInterval = checkpointSize;
+    }
+
+    @Override
+    public int backStep(int steps) {
+        return 0;
     }
 
 

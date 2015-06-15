@@ -24,6 +24,8 @@ public class KDebugState {
 
     private K currentK;
 
+    private int currentCheckpoint;
+
     public KDebugState(K initialK) {
         checkpointMap = new TreeMap<>();
         currentK = initialK;
@@ -48,7 +50,7 @@ public class KDebugState {
      * @return The most recent checkpoint element in the Map
 
      */
-    public Integer getCurrentCheckpoint() {
+    public Integer getlastMapCheckpoint() {
         return checkpointMap.lastKey();
     }
 }

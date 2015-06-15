@@ -15,6 +15,11 @@ public interface KDebug {
      */
     public int step(int steps);
 
+    /**
+     * Go back from a given number of steps to a predefined position
+     */
+    public int backStep(int steps);
+
 
 
 
