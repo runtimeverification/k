@@ -1,6 +1,8 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.debugger;
 
+import org.kframework.kore.K;
+
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -20,11 +22,33 @@ public class KDebugState {
 
     private NavigableMap<Integer, Checkpoint> checkpointMap;
 
-    public KDebugState() {
+    private K currentK;
+
+    public KDebugState(K initialK) {
         checkpointMap = new TreeMap<>();
+        currentK = initialK;
     }
 
     public void addCheckpoint(Checkpoint checkpoint, int checkpointNum) {
         checkpointMap.put(checkpointNum, checkpoint);
+    }
+
+    public K getCurrentK() {
+        return currentK;
+    }
+
+    public void setCurrentK(K currentK) {
+        this.currentK = currentK;
+    }
+
+    /**
+     * Get the last checkpoint from the Map.
+     * The last checkpoint may not have the most recent K.
+     *
+     * @return The most recent checkpoint element in the Map
+
+     */
+    public Integer getCurrentCheckpoint() {
+        return checkpointMap.lastKey();
     }
 }
