@@ -584,10 +584,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             partiallyEvaluatedRules.clear();
             for (Rule rule : Iterables.concat(definition.functionRules().values(),
                     definition.anywhereRules().values())) {
-                Rule evaluatedRule = evaluateRule(rule, globalContext);
+                Rule freshRule = rule.getFreshRule(TermContext.of(globalContext));
+                Rule evaluatedRule = evaluateRule(freshRule, globalContext);
                 partiallyEvaluatedRules.add(evaluatedRule);
 
-                if (!evaluatedRule.equals(rule)) {
+                if (!evaluatedRule.equals(freshRule)) {
                     change = true;
                 }
             }

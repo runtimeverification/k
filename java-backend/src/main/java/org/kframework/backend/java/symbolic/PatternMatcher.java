@@ -163,7 +163,7 @@ public class PatternMatcher extends AbstractUnifier {
             }
 
             /* add substitution */
-            addSubstitution(variable, subject);
+            add(subject, variable);
             return true;
         }
 
@@ -176,15 +176,12 @@ public class PatternMatcher extends AbstractUnifier {
     }
 
     /**
-     * Binds a variable in the pattern to a subterm of the subject; calls
-     * {@link PatternMatcher#fail(Term, Term)} when the binding fails.
-     *
-     * @param variable
-     *            the variable
-     * @param term
-     *            the term
+     * Binds a variable in the pattern to a subterm of the subject.
      */
-    private void addSubstitution(Variable variable, Term term) {
+    @Override
+    void add(Term term, Term variableTerm) {
+        assert variableTerm instanceof Variable;
+        Variable variable = (Variable) variableTerm;
         /* retrieve the exact element when the term is some singleton collection */
         if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.downKind(term);
@@ -429,9 +426,7 @@ public class PatternMatcher extends AbstractUnifier {
 
             if (frame != null) {
                 if (otherFrame != null && numOfOtherDiffCellLabels == 0) {
-                    addSubstitution(
-                            otherFrame,
-                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -450,9 +445,7 @@ public class PatternMatcher extends AbstractUnifier {
                         return;
                     }
                 } else {
-                    addSubstitution(
-                            otherFrame,
-                            cellCollection.removeAll(unifiableCellLabels, termContext.definition()));
+                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -590,7 +583,7 @@ public class PatternMatcher extends AbstractUnifier {
         int length = pattern.concreteSize();
         if (kCollection.concreteSize() >= length) {
             if (pattern.hasFrame()) {
-                addSubstitution(pattern.frame(), kCollection.fragment(length));
+                add(kCollection.fragment(length), pattern.frame());
                 if (failed) {
                     return;
                 }
