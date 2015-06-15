@@ -18,12 +18,13 @@ import java.util.TreeMap;
  */
 public class KDebugState {
 
-    private int StateId;
-
     private NavigableMap<Integer, Checkpoint> checkpointMap;
 
-    public KDebugState(int stateId) {
-        StateId = stateId;
+    public KDebugState() {
         checkpointMap = new TreeMap<>();
+    }
+
+    public void addCheckpoint(Checkpoint checkpoint, int checkpointNum) {
+        checkpointMap.put(checkpointNum, checkpoint);
     }
 }
