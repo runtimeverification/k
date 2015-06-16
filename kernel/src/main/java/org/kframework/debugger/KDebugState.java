@@ -13,10 +13,11 @@ import java.util.TreeMap;
  * The Debugger can have multiple states at the same time,
  * but only one state is active.
  *
- * Every State has a Checkpoint History.
+ * Every State has a Checkpoint Enabled History.
  *
  * A State essentially represents a specific branch in the
  * execution tree of a program.
+ *
  */
 public class KDebugState {
 
@@ -24,7 +25,15 @@ public class KDebugState {
 
     private K currentK;
 
-    private int currentCheckpoint;
+    public int getActiveStateId() {
+        return activeStateId;
+    }
+
+    public void setActiveStateId(int activeStateId) {
+        this.activeStateId = activeStateId;
+    }
+
+    private int activeStateId;
 
     public KDebugState(K initialK) {
         checkpointMap = new TreeMap<>();

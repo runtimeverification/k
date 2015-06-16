@@ -16,7 +16,9 @@ public interface KDebug {
     public int step(int steps);
 
     /**
+     * Change the Checkpoint Interval in the Debugger.
      *
+     * Global Setting, will persist across states.
      */
     public void setCheckpointInterval(int interval);
 

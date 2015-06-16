@@ -23,14 +23,12 @@ public class KoreKDebug implements KDebug {
     private Rewriter rewriter;
     private int checkpointInterval;
     private KExceptionManager kem;
-    private int activeStateCheckpoint;
 
     public KoreKDebug(K initialK, Rewriter rewriter, KExceptionManager kem) {
         this.stateSet = new TreeSet<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
         this.kem = kem;
-        this.activeStateCheckpoint = DEFAULT_ID;
         KDebugState initialState = new KDebugState(initialK);
         initialState.addCheckpoint(new Checkpoint(initialK, DEFAULT_ID), DEFAULT_ID);
         stateSet.add(initialState);
@@ -40,6 +38,7 @@ public class KoreKDebug implements KDebug {
     @Override
     public int step(int steps) {
         K currentK = activeState.getCurrentK();
+        int activeStateCheckpoint = activeState.getActiveStateId();
         if (activeStateCheckpoint != 1 && activeStateCheckpoint % checkpointInterval != 0) {
             if (activeStateCheckpoint + steps < activeState.getlastMapCheckpoint() + checkpointInterval) {
                 currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
@@ -49,7 +48,6 @@ public class KoreKDebug implements KDebug {
             currentK = rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval - steps)));
             activeStateCheckpoint += checkpointInterval - steps;
         }
-        currentK = activeState.getCurrentK();
         while (steps >= checkpointInterval) {
             activeStateCheckpoint += checkpointInterval;
             Checkpoint newCheckpoint = new Checkpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))),
@@ -69,5 +67,5 @@ public class KoreKDebug implements KDebug {
         this.checkpointInterval = checkpointInterval;
     }
 
-    
+
 }
