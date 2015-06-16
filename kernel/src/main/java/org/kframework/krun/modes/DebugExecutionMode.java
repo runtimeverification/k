@@ -15,7 +15,6 @@ import org.kframework.debugger.KDebugOpResult;
 import org.kframework.debugger.KoreKDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.krun.ExecutionMode;
 import org.kframework.krun.KRunDebuggerOptions;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -35,6 +34,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         /* Development Purposes Only, will go away in production */
+        System.out.println("came here");
         KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;
         try {

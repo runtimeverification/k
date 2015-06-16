@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import org.kframework.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.krun.ExecutionMode;
 import org.kframework.krun.KRunOptions;
 
 import java.util.Optional;

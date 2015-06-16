@@ -7,6 +7,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
