@@ -55,7 +55,8 @@ public class CompiledDefinition implements Serializable {
      * in the syntax module into KAST.
      */
     public BiFunction<String, Source, K> getGroundParser(KExceptionManager kem, String moduleName) {
-        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getConfigGrammar(kompiledDefinition.getModule(moduleName).get());
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition);
+        ParseInModule parseInModule = gen.getCombinedGrammar(gen.getConfigGrammar(kompiledDefinition.getModule(moduleName).get()));
 
         return getParser(parseInModule, Sorts.K(), kem);
     }

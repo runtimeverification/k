@@ -81,22 +81,40 @@ public class RuleGrammarGenerator {
         return def;
     }
 
-    public ParseInModule getRuleGrammar(Module mod) {
+    /**
+     * Creates the seed module that can be used to parse rules.
+     * Imports module markers RULE-CELLS and K found in /include/kast.k.
+     * @param mod The user defined module from which to start.
+     * @return a new module which imports the original user module and a set of marker modules.
+     */
+    public Module getRuleGrammar(Module mod) {
         // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
-        return getCombinedGrammar(newM);
+        return newM;
     }
 
-    public ParseInModule getConfigGrammar(Module mod) {
+    /**
+     * Creates the seed module that can be used to parse configurations.
+     * Imports module markers CONFIG-CELLS and K found in /include/kast.k.
+     * @param mod The user defined module from which to start.
+     * @return a new module which imports the original user module and a set of marker modules.
+     */
+    public Module getConfigGrammar(Module mod) {
         // import CONFIG-CELLS in order to parse cells specific to configurations
         Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
-        return getCombinedGrammar(newM);
+        return newM;
     }
 
-    public ParseInModule getProgramsGrammar(Module mod) {
+    /**
+     * Creates the seed module that can be used to parse programs.
+     * Imports module markers PROGRAM-LISTS found in /include/kast.k.
+     * @param mod The user defined module from which to start.
+     * @return a new module which imports the original user module and a set of marker modules.
+     */
+    public Module getProgramsGrammar(Module mod) {
         // import PROGRAM-LISTS so user lists are modified to parse programs
         Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), null);
-        return getCombinedGrammar(newM);
+        return newM;
     }
 
     /**

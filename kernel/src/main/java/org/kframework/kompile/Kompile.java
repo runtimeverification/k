@@ -139,7 +139,7 @@ public class Kompile {
     }
 
     public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule()).seedModule();
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(programsModule);
         return Definition(d.mainModule(), programsModule, immutable(allModules));
@@ -219,7 +219,7 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config")).count() == 0)
             return module;
-        Module configParserModule = gen.getConfigGrammar(module).seedModule();
+        Module configParserModule = gen.getConfigGrammar(module);
 
         ParseCache cache = loadCache(configParserModule);
         ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
@@ -255,7 +255,7 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
-        Module ruleParserModule = gen.getRuleGrammar(module).seedModule();
+        Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
         ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
