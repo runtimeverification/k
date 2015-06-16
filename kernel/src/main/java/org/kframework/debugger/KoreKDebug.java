@@ -69,7 +69,7 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public int backStep(int steps) {
-        return 0;
+
     }
 
 
