@@ -1,5 +1,5 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.debugger;
-
 
 
 /**
@@ -11,23 +11,21 @@ package org.kframework.debugger;
 public interface KDebug {
 
     /**
-     *  Take a certain number of steps from the current state.
+     * Take a certain number of steps from the current state.
      */
     public KDebugOpResult step(int steps);
 
     /**
      * Change the Checkpoint Interval in the Debugger.
-     *
+     * <p>
      * Global Setting, will persist across states.
      */
     public void setCheckpointInterval(int interval);
 
-//    /**
-//     * Go back from a given number of steps to a predefined position
-//     */
-//    public int backStep(int steps);
-
-
+    /**
+     * Go back from a given number of steps to a predefined position
+     */
+    public int backStep(int steps);
 
 
 }

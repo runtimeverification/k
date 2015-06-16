@@ -80,5 +80,8 @@ public class KoreKDebug implements KDebug {
         this.checkpointInterval = checkpointInterval;
     }
 
-
+    @Override
+    public int backStep(int steps) {
+        return 0;
+    }
 }
