@@ -9,25 +9,16 @@ import jline.ConsoleReader;
 import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
-import org.apache.commons.codec.binary.Base64InputStream;
-import org.apache.commons.codec.binary.Base64OutputStream;
-import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
-import org.kframework.backend.unparser.PrintTransition;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KDebugOpResult;
 import org.kframework.debugger.KoreKDebug;
-import org.kframework.kil.Definition;
-import org.kframework.kil.StringBuiltin;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.krun.ExecutionMode;
 import org.kframework.krun.KRunDebuggerOptions;
-import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.api.KRunGraph;
-import org.kframework.krun.api.SearchResults;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,7 +33,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     }
     @Override
-    public Void execute(K k, Rewriter rewriter) {
+    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         /* Development Purposes Only, will go away in production */
         KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;

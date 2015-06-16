@@ -2,9 +2,10 @@
 package org.kframework.krun.modes;
 
 import com.google.inject.Inject;
-import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.krun.ExecutionMode;
 import org.kframework.krun.KRunOptions;
 
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class KRunExecutionMode implements ExecutionMode<K> {
     }
 
     @Override
-    public K execute(K k, Rewriter rewriter) {
+    public K execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
     }
 }

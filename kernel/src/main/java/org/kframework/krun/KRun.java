@@ -2,7 +2,6 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
@@ -64,7 +63,7 @@ public class KRun implements Transformation<Void, Void> {
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(program, rewriter);
+        Object result = executionMode.execute(program, rewriter, compiledDef);
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
