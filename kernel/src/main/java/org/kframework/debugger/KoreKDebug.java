@@ -4,11 +4,10 @@ package org.kframework.debugger;
 
 import org.kframework.Rewriter;
 import org.kframework.kore.K;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Kore Based Debugger Implementation.
@@ -32,7 +31,7 @@ public class KoreKDebug implements KDebug {
      * @param kem
      */
     public KoreKDebug(K initialK, Rewriter rewriter) {
-        this.stateSet = new TreeSet<>();
+        this.stateSet = new HashSet<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
         KDebugState initialState = new KDebugState(initialK);
@@ -43,6 +42,7 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public KDebugOpResult step(int steps) {
+        System.out.println(steps);
         K currentK = activeState.getCurrentK();
         int activeStateCheckpoint = activeState.getActiveStateId();
         if (activeStateCheckpoint % checkpointInterval != 0) {
