@@ -22,7 +22,6 @@ public class KoreKDebug implements KDebug {
     private KDebugState activeState;
     private Rewriter rewriter;
     private int checkpointInterval;
-    private KExceptionManager kem;
 
 
     /**
@@ -32,11 +31,10 @@ public class KoreKDebug implements KDebug {
      * @param rewriter The Rewriter being used
      * @param kem
      */
-    public KoreKDebug(K initialK, Rewriter rewriter, KExceptionManager kem) {
+    public KoreKDebug(K initialK, Rewriter rewriter) {
         this.stateSet = new TreeSet<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
-        this.kem = kem;
         KDebugState initialState = new KDebugState(initialK);
         initialState.addCheckpoint(new Checkpoint(initialK, DEFAULT_ID), DEFAULT_ID);
         stateSet.add(initialState);

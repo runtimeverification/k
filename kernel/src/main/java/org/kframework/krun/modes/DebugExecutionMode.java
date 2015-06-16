@@ -14,6 +14,9 @@ import org.apache.commons.codec.binary.Base64OutputStream;
 import org.kframework.ExecutionMode;
 import org.kframework.Rewriter;
 import org.kframework.backend.unparser.PrintTransition;
+import org.kframework.debugger.KDebug;
+import org.kframework.debugger.KDebugOpResult;
+import org.kframework.debugger.KoreKDebug;
 import org.kframework.kil.Definition;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kore.K;
@@ -41,6 +44,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     @Override
     public Void execute(K k, Rewriter rewriter) {
         /* Development Purposes Only, will go away in production */
+        KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;
         try {
             reader = new ConsoleReader();
@@ -109,7 +113,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
-
+                    KDebugOpResult res = debugger.step(1);
+                    System.out.println(res.getFinalK().toString());
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
 

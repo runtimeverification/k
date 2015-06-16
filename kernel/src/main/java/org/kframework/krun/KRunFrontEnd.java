@@ -15,7 +15,6 @@ import org.kframework.transformation.AmbiguousTransformationException;
 import org.kframework.transformation.Transformation;
 import org.kframework.transformation.TransformationNotSatisfiedException;
 import org.kframework.transformation.TransformationProvider;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
