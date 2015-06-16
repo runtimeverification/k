@@ -24,6 +24,14 @@ public class KoreKDebug implements KDebug {
     private int checkpointInterval;
     private KExceptionManager kem;
 
+
+    /**
+     * Start a Debugger Session. The initial Configuration becomes a part of the new and only state of the Debugger
+     *
+     * @param initialK The initial Configuration.
+     * @param rewriter The Rewriter being used
+     * @param kem
+     */
     public KoreKDebug(K initialK, Rewriter rewriter, KExceptionManager kem) {
         this.stateSet = new TreeSet<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
