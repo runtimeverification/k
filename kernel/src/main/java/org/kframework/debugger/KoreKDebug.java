@@ -15,8 +15,8 @@ import java.util.TreeSet;
  */
 public class KoreKDebug implements KDebug {
 
-    private final int DEFAULT_ID = 1;
-    private final int DEFAULT_CHECKPOINT_SIZE = 49;
+    private final int DEFAULT_ID = 0;
+    private final int DEFAULT_CHECKPOINT_SIZE = 50;
 
     private Set<KDebugState> stateSet;
     private KDebugState activeState;
@@ -47,7 +47,7 @@ public class KoreKDebug implements KDebug {
     public int step(int steps) {
         K currentK = activeState.getCurrentK();
         int activeStateCheckpoint = activeState.getActiveStateId();
-        if (activeStateCheckpoint != 1 && activeStateCheckpoint % checkpointInterval != 0) {
+        if (activeStateCheckpoint % checkpointInterval != 0) {
             if (activeStateCheckpoint + steps < activeState.getlastMapCheckpoint() + checkpointInterval) {
                 currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
                 activeStateCheckpoint += steps;
