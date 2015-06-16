@@ -13,7 +13,7 @@ public interface KDebug {
     /**
      *  Take a certain number of steps from the current state.
      */
-    public int step(int steps);
+    public KDebugOpResult step(int steps);
 
     /**
      * Change the Checkpoint Interval in the Debugger.

@@ -10,13 +10,13 @@ import java.util.Optional;
  * <p>
  * The result of using a debugger operation
  */
-public class DebugOpResult {
+public class KDebugOpResult {
 
     private Optional<K> finalK;
 
     private Optional<NavigableMap<Integer, Checkpoint>> checkpointMap;
 
-    public DebugOpResult(K finalK, NavigableMap<Integer, Checkpoint> checkpointMap) {
+    public KDebugOpResult(K finalK, NavigableMap<Integer, Checkpoint> checkpointMap) {
         this.finalK = Optional.ofNullable(finalK);
         this.checkpointMap = Optional.ofNullable(checkpointMap);
     }
