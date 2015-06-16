@@ -110,19 +110,23 @@ public class RuleGrammarGenerator {
      */
     public ParseInModule getCombinedGrammar(Module mod) {
         Set<Sentence> prods = new HashSet<>();
-        Set<Sentence> disambProds = prods.stream().collect(Collectors.toSet());
+        Set<Sentence> extensionProds = new HashSet<>();
+        Set<Sentence> disambProds;
 
         if (baseK.getModule(AUTO_CASTS).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_CASTS).get())) { // create the diamond
+            Set<Sentence> temp;
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isExceptionSort(srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-                    prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
+                    temp = makeCasts(Sorts.KBott(), Sorts.K(), srt);
+                    prods.addAll(temp);
+                    extensionProds.addAll(temp);
                 }
             }
-            prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
-            prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList()));
-            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem()));
-            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
+            temp = makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()); prods.addAll(temp); extensionProds.addAll(temp);
+            temp = makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList());    prods.addAll(temp); extensionProds.addAll(temp);
+            temp = makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem());        prods.addAll(temp); extensionProds.addAll(temp);
+            temp = makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K());            prods.addAll(temp); extensionProds.addAll(temp);
         }
         if (baseK.getModule(K_TOP_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_TOP_SORT).get())) { // create the diamond
             for (Sort srt : iterable(mod.definedSorts())) {
@@ -285,9 +289,10 @@ public class RuleGrammarGenerator {
             res.addAll(separatedProds.get(false));
             parseProds = res;
         }
-        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
-        return new ParseInModule(mod, disambM, parseM);
+        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
+        return new ParseInModule(mod, extensionM, disambM, parseM);
     }
 
     private boolean isExceptionSort(Sort srt) {

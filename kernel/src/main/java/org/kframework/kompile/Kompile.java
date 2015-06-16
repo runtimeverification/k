@@ -139,7 +139,7 @@ public class Kompile {
     }
 
     public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule()).module();
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule()).seedModule();
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(programsModule);
         return Definition(d.mainModule(), programsModule, immutable(allModules));
@@ -219,7 +219,7 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config")).count() == 0)
             return module;
-        Module configParserModule = gen.getConfigGrammar(module).disambModule();
+        Module configParserModule = gen.getConfigGrammar(module).seedModule();
 
         ParseCache cache = loadCache(configParserModule);
         ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
@@ -243,7 +243,7 @@ public class Kompile {
                     }
                 })
                 .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParserModule)))
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                 .collect(Collections.toSet());
 
         return Module(module.name(), (Set<Module>) module.imports().$bar(Set(def.getModule("MAP").get())), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
@@ -255,7 +255,7 @@ public class Kompile {
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
-        Module ruleParserModule = gen.getRuleGrammar(module).module();
+        Module ruleParserModule = gen.getRuleGrammar(module).seedModule();
 
         ParseCache cache = loadCache(ruleParserModule);
         ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());

@@ -36,57 +36,55 @@ import java.util.Set;
  * Declarative disambiguation filters are also applied.
  */
 public class ParseInModule implements Serializable {
-    private Module module;
+    private final Module seedModule;
+    private final Module extensionModule;
+    /**
+     * The module in which parsing will be done.
+     * Note that this module will be used for disambiguation, and the parsing module can be different.
+     * This allows for grammar rewriting and more flexibility in the implementation.
+     */
     private final Module disambModule;
+    /**
+     * The exact module used for parsing. This can contain productions and sorts that are not
+     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
+     * In this case the modified production will be annotated with the information from the
+     * original production, so disambiguation can be done safely.
+     */
     private final Module parsingModule;
     private final Grammar grammar;
-    public ParseInModule(Module module) {
-        this.module = module;
-        this.disambModule = module;
-        this.parsingModule = module;
+    public ParseInModule(Module seedModule) {
+        this.seedModule = seedModule;
+        this.extensionModule = seedModule;
+        this.disambModule = seedModule;
+        this.parsingModule = seedModule;
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
     }
 
-    public ParseInModule(Module module, Module disambModule, Module parsingModule) {
-        this.module = module;
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule) {
+        this.seedModule = seedModule;
+        this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
     }
 
     /**
-     * The original before any processing has been done. This can be used to invalidate caches.
+     * The original module, which includes all the marker/flags imports.
+     * This can be used to invalidate caches.
      * @return Module given by the user.
      */
-    public Module module() {
-        return module;
-    }
-
-    public void setModule(Module module) {
-        this.module = module;
+    public Module seedModule() {
+        return seedModule;
     }
 
     /**
-     * The module in which parsing will be done.
-     * Note that this module will be used for disambiguation, and the parsing module can be different.
-     * This allows for grammar rewriting and more flexibility in the implementation.
-     * @return Module in which parsing will be done.
+     * An extension module of the seedModule which includes all productions, unmodified, and in addition,
+     * contains extra productions auto-defined, like casts.
+     * @return Module with extra productions defined during parser generator.
      */
-    public Module disambModule() {
-        return disambModule;
+    public Module getExtensionModule() {
+        return extensionModule;
     }
-
-    /**
-     * The exact module used for parsing. This can contain productions and sorts that are not
-     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
-     * In this case the modified productino will be annotated with the information from the
-     * original production, so disambiguation can be done safely.
-     * @return Module used to parse with.
-     */
-    // TODO: (radum) I'm not sure yet if this should be available outside this class
-    //public Module getParsingModule() {
-    //   return parsingModule;
-    //}
 
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
