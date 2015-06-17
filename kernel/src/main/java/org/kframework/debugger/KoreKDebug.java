@@ -27,8 +27,7 @@ public class KoreKDebug implements KDebug {
      * Start a Debugger Session. The initial Configuration becomes a part of the new and only state of the Debugger
      *
      * @param initialK The initial Configuration.
-     * @param rewriter The Rewriter being used
-     * @param kem
+     * @param rewriter The Rewriter being used.
      */
     public KoreKDebug(K initialK, Rewriter rewriter) {
         this.stateSet = new HashSet<>();
@@ -88,4 +87,3 @@ public class KoreKDebug implements KDebug {
         return null;
     }
 }
-g
