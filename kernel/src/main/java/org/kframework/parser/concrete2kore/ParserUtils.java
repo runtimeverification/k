@@ -111,7 +111,7 @@ public class ParserUtils {
         if (kem.getOptions().verbose) {
             try {
                 System.out.println("Importing: " + new File(source.source()).getCanonicalPath());
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Importing: " + new File(source.source()).getAbsolutePath());
             }
         }
