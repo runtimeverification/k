@@ -76,7 +76,7 @@ public class CompiledDefinition implements Serializable {
     public Module syntaxModule() { return kompiledDefinition.mainSyntaxModule(); }
 
     public Module languageParsingModule() { return languageParsingModule; }
-    
+
     /**
      * Creates a parser for a module.
      * Will probably want to move the method out of this class here eventually.
