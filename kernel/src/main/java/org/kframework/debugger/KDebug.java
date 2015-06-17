@@ -13,7 +13,7 @@ public interface KDebug {
     /**
      * Take a certain number of steps from the current state.
      */
-    public KDebugOpResult step(int steps);
+    public DebuggerState step(int steps);
 
     /**
      * Change the Checkpoint Interval in the Debugger.
@@ -26,7 +26,7 @@ public interface KDebug {
      *
      * You can only select a state that you've already encountered
      */
-    public KDebugOpResult select(int stateNum);
+    public DebuggerState select(int stateNum);
 
 
 }

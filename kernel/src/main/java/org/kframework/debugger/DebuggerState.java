@@ -19,9 +19,9 @@ import java.util.TreeMap;
  * execution tree of a program.
  *
  */
-public class KDebugState {
+public class DebuggerState {
 
-    private NavigableMap<Integer, Checkpoint> checkpointMap;
+    private NavigableMap<Integer, RewriterCheckpoint> checkpointMap;
 
     private K currentK;
 
@@ -35,13 +35,13 @@ public class KDebugState {
 
     private int activeStateId;
 
-    public KDebugState(K initialK) {
+    public DebuggerState(K initialK) {
         checkpointMap = new TreeMap<>();
         currentK = initialK;
     }
 
-    public void addCheckpoint(Checkpoint checkpoint, int checkpointNum) {
-        checkpointMap.put(checkpointNum, checkpoint);
+    public void addCheckpoint(RewriterCheckpoint rewriterCheckpoint, int checkpointNum) {
+        checkpointMap.put(checkpointNum, rewriterCheckpoint);
     }
 
     public K getCurrentK() {

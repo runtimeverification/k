@@ -10,8 +10,8 @@ import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
 import org.kframework.Rewriter;
+import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
-import org.kframework.debugger.KDebugOpResult;
 import org.kframework.debugger.KoreKDebug;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -126,11 +126,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
-                    KDebugOpResult result = debugger.step(options.step.numSteps);
-                    K finalK = result.getFinalK().get();
-                    if (result.getFinalK().get() instanceof K) {
-                        prettyPrint(compiledDef, finalK);
-                    }
+                    DebuggerState result = debugger.step(options.step.numSteps);
+                    K finalK = result.getCurrentK();
+                    prettyPrint(compiledDef, finalK);
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
 
