@@ -17,15 +17,16 @@ public interface KDebug {
 
     /**
      * Change the Checkpoint Interval in the Debugger.
-     * <p>
      * Global Setting, will persist across states.
      */
     public void setCheckpointInterval(int interval);
 
     /**
-     * Go back from a given number of steps to a predefined position
+     * Go back from a given number of steps to a predefined position.
+     *
+     * You can only select a state that you've already encountered
      */
-    public int backStep(int steps);
+    public KDebugOpResult select(int stateNum);
 
 
 }
