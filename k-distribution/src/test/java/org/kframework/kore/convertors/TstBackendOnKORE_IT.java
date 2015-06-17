@@ -26,7 +26,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;

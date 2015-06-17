@@ -12,6 +12,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
@@ -38,11 +39,20 @@ public class ParserUtils {
 
     private final FileUtil files;
     private final KExceptionManager kem;
+    private final GlobalOptions options;
 
     public ParserUtils(FileUtil files, KExceptionManager kem) {
         this.files = files;
         this.kem = kem;
+        this.options = new GlobalOptions();
     }
+
+    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options) {
+        this.files = files;
+        this.kem = kem;
+        this.options = options;
+    }
+
     public static K parseWithFile(String theTextToParse,
                                   String mainModule,
                                   Sort startSymbol,
@@ -108,7 +118,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories) {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
-        if (kem.getOptions().verbose) {
+        if (options.verbose) {
             try {
                 System.out.println("Importing: " + new File(source.source()).getCanonicalPath());
             } catch (IOException e) {

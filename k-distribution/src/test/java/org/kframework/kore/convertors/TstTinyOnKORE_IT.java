@@ -15,7 +15,6 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.tiny.Rewriter;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 

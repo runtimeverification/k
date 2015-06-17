@@ -91,7 +91,7 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.kompileOptions = kompileOptions;
-        this.parser = new ParserUtils(files, kem);
+        this.parser = new ParserUtils(files, kem, kompileOptions.global);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);
         this.sw = sw;
@@ -101,10 +101,10 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.kompileOptions = kompileOptions;
-        this.parser = new ParserUtils(files, kem);
+        this.parser = new ParserUtils(files, kem, kompileOptions.global);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);
-        this.sw = new Stopwatch(kem.getOptions());
+        this.sw = new Stopwatch(kompileOptions.global);
     }
 
     @Inject
