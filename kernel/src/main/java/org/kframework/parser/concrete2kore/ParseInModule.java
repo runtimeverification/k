@@ -52,6 +52,7 @@ public class ParseInModule implements Serializable {
      */
     private final Module parsingModule;
     private final Grammar grammar;
+    private boolean strict = true;
     ParseInModule(Module seedModule) {
         this.seedModule = seedModule;
         this.extensionModule = seedModule;
@@ -66,6 +67,15 @@ public class ParseInModule implements Serializable {
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
         this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
+    }
+
+    /**
+     * If set to true, the variables inferred automatically will be checked at runtime.
+     * Default true.
+     * @param strict    true to generate predicates for automatically inferred variables.
+     */
+    public void setStrict(boolean strict) {
+        this.strict = strict;
     }
 
     /**
@@ -133,7 +143,7 @@ public class ParseInModule implements Serializable {
         rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor()).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();

@@ -82,7 +82,12 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def isCell(k: Sort): Boolean = cellSorts.contains(k)
   override def isLeafCell(k: Sort): Boolean = !isParentCell(k)
 
-  override def getChildren(k: Sort): util.List[Sort] = edges.toList.collect { case (`k`,p) => p }.asJava
+  override def getChildren(k: Sort): util.List[Sort] = cellProductions(k).items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal].sort).flatMap {s => {
+    if (cellBagSorts(s))
+      getCellSortsOfCellBag(s).toSeq
+    else
+      Seq(s)
+  }}.asJava
 
   override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst{ case NonTerminal(n) => n} get
 

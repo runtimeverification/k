@@ -72,6 +72,14 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     boolean stop(Term term, Term otherTerm) {
+        if (term.hashCode() == otherTerm.hashCode() && term.equals(otherTerm)) {
+            return true;
+        } else if (term.isGround() && otherTerm.isGround()
+                && term.isNormal() && otherTerm.isNormal()) {
+            fail(term, otherTerm);
+            return true;
+        }
+
         // TODO(AndreiS): treat Map unification less adhoc
         if (BuiltinMap.isMapUnifiableByCurrentAlgorithm(term, otherTerm)) {
             unifyMapModuloPatternFolding((BuiltinMap) term, (BuiltinMap) otherTerm);
@@ -114,6 +122,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         return false;
     }
 
+    @Override
     void add(Term left, Term right) {
         constraint = constraint.add(left, right);
     }

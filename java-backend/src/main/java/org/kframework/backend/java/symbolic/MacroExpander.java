@@ -134,9 +134,16 @@ public class MacroExpander extends CopyOnWriteTransformer {
 
     private Term applyMacroRule(Term term) {
         for (Rule rule : definition.macros()) {
-            Map<Variable, Term> subst = NonACPatternMatcher.match(term, rule, context);
-            if (subst != null) {
-                return rule.rightHandSide().substituteAndEvaluate(subst, context);
+            Map<Variable, Term> solution;
+            List<Substitution<Variable, Term>> matches = PatternMatcher.match(term, rule, context);
+            if (matches.isEmpty()) {
+                continue;
+            } else {
+                assert matches.size() == 1 : "unexpected non-deterministic macro " + rule;
+                solution = matches.get(0);
+            }
+            if (solution != null) {
+                return rule.rightHandSide().substituteAndEvaluate(solution, context);
             }
         }
 

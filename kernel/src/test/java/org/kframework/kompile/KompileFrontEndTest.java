@@ -35,7 +35,7 @@ public class KompileFrontEndTest extends IOTestCase {
     public void testHelp() throws IOException {
         when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.help = true;
-        new KompileFrontEnd(context, options, "foo", "", Providers.of(backend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(context, options, "foo", "", Providers.of(backend), Providers.of(c -> {}), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
         assertEquals("foo", stdout.toString());
     }
 
@@ -44,14 +44,14 @@ public class KompileFrontEndTest extends IOTestCase {
     public void testExperimentalHelp() throws IOException {
         when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.helpExperimental = true;
-        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), Providers.of(c -> {}), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         options.global.version = true;
-        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), Providers.of(c -> {}), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
         verify(jarInfo).printVersionMessage();
     }
 }

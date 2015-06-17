@@ -6,6 +6,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -100,6 +101,9 @@ public class AddImplicitCells {
     }
 
     public Sentence addImplicitCells(Sentence s) {
+        if (s.att().contains(Attribute.MACRO_KEY)) {
+            return s;
+        }
         if (s instanceof Rule) {
             return addImplicitCells((Rule) s);
         } else if (s instanceof Context) {

@@ -1,14 +1,15 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kore.K;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -98,6 +99,15 @@ public class KSequence extends KCollection implements org.kframework.kore.KSeque
         super(frame, Kind.K);
         this.contents = contents;
         this.kSequenceVariables = kSequenceVariables;
+    }
+
+    @Override
+    public List<K> items() {
+        if (frame != null) {
+            return ListUtils.union(super.items(), Collections.singletonList(frame));
+        } else {
+            return super.items();
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ public class BooleanUtils {
     public static KApply and(K k1, K k2) {
         return KApply(KLabel("_andBool_"), k1, k2);
     }
+    public static KApply not(K k) { return KApply(KLabel("notBool_"), k); }
 
     public static final KToken TRUE = KToken("true", Sort("Bool"));
     public static final KToken FALSE = KToken("false", Sort("Bool"));

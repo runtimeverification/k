@@ -13,6 +13,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.ksimulation.Simulator;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
@@ -33,6 +34,7 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
@@ -76,6 +78,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                     });
             rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+
         }
 
         @Provides @DefinitionScoped

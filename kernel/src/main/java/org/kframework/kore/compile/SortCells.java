@@ -22,6 +22,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -77,7 +79,7 @@ public class SortCells {
         analyzeVars(rule.body());
         analyzeVars(rule.requires());
         analyzeVars(rule.ensures());
-        return new Rule(
+        return Rule(
                 processVars(rule.body()),
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
@@ -177,7 +179,7 @@ public class SortCells {
         do {
             newLabel = KVariable("_" + (counter++));
         } while (variables.containsKey(newLabel));
-        variables.put(newLabel, new VarInfo());
+        variables.put(newLabel, null);
         return newLabel;
     }
 
@@ -303,7 +305,12 @@ public class SortCells {
                         Map<Sort, K> split = getSplit(item);
                         assert split != null;
                         for (Map.Entry<Sort, K> e : split.entrySet()) {
-                            ordered.set(order.indexOf(e.getKey()), e.getValue());
+                            int idx = order.indexOf(e.getKey());
+                            if (ordered.get(idx) != null) {
+                                ordered.set(idx, concatenateStarCells(e.getKey(), Arrays.asList(e.getValue(), ordered.get(idx))));
+                            } else {
+                                ordered.set(order.indexOf(e.getKey()), e.getValue());
+                            }
                         }
                     }
                     order.stream().filter(s -> ordered.get(order.indexOf(s)) == null).forEach(sort -> {
@@ -326,7 +333,7 @@ public class SortCells {
                     List<K> children = IncompleteCellUtils.flattenCells(item);
                     if(children.size() == 1 && children.get(0) == item) {
                         Sort s = cfg.getCellSort(((KApply) item).klabel());
-                        assert s != null;
+                        if (s == null) return null;
                         return Collections.singletonMap(s, apply(item));
                     }
                     // flatten the List<Map<Sort, K>> into a Map<Sort, List<K>>

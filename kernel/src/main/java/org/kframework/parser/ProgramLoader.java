@@ -19,6 +19,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -58,6 +59,7 @@ public class ProgramLoader {
     private final KExceptionManager kem;
     private final TermLoader termLoader;
     private final FileUtil files;
+    private final KompileOptions options;
 
     @Inject
     ProgramLoader(
@@ -65,12 +67,14 @@ public class ProgramLoader {
             Stopwatch sw,
             KExceptionManager kem,
             TermLoader termLoader,
-            FileUtil files) {
+            FileUtil files,
+            KompileOptions options) {
         this.loader = loader;
         this.sw = sw;
         this.kem = kem;
         this.termLoader = termLoader;
         this.files = files;
+        this.options = options;
     }
 
     /**
@@ -148,6 +152,7 @@ public class ProgramLoader {
             Module m = Module("PROGRAM-LISTS", Set(), Set(SyntaxSort(Sort("K"))), Att());
             org.kframework.definition.Definition baseK = org.kframework.definition.Definition.apply(m, m, Set(m), Att());
             ParseInModule parser = new RuleGrammarGenerator(baseK).getCombinedGrammar(synMod);
+            parser.setStrict(options.strict());
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {

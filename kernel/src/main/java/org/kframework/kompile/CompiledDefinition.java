@@ -32,6 +32,7 @@ public class CompiledDefinition implements Serializable {
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
     public final KLabel topCellInitializer;
+    private final Module languageParsingModule;
 
     public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
@@ -39,6 +40,7 @@ public class CompiledDefinition implements Serializable {
         this.kompiledDefinition = kompiledDefinition;
         this.programStartSymbol = programStartSymbol;
         this.topCellInitializer = topCellInitializer;
+        this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
     }
 
     /**
@@ -73,6 +75,8 @@ public class CompiledDefinition implements Serializable {
 
     public Module syntaxModule() { return kompiledDefinition.mainSyntaxModule(); }
 
+    public Module languageParsingModule() { return languageParsingModule; }
+
     /**
      * Creates a parser for a module.
      * Will probably want to move the method out of this class here eventually.
@@ -82,7 +86,8 @@ public class CompiledDefinition implements Serializable {
 
     public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
         ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
-
+        parseInModule.setStrict(false);
+        
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
@@ -94,6 +99,6 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Module getExtensionModule(Module module) {
-        return new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module).getExtensionModule();
+        return new RuleGrammarGenerator(kompiledDefinition).getCombinedGrammar(module).getExtensionModule();
     }
 }

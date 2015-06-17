@@ -14,10 +14,12 @@ import java.util.Set;
  */
 public class ParseCache implements Serializable {
     private final Module module;
+    private final boolean strict;
     private final Map<String, ParsedSentence> cache;
 
-    public ParseCache(Module module, Map<String, ParsedSentence> cache) {
+    public ParseCache(Module module, boolean strict, Map<String, ParsedSentence> cache) {
         this.module = module;
+        this.strict = strict;
         this.cache = cache;
     }
 
@@ -30,6 +32,9 @@ public class ParseCache implements Serializable {
     }
 
     private transient Module parser;
+    public boolean isStrict() {
+        return strict;
+    }
 
     public Module getParserModule() {
         Module p = parser;
