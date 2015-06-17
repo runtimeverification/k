@@ -848,9 +848,6 @@ public class DefinitionToOcaml {
                 if (!stack) {
                     sb.append("]");
                 }
-            } else if (mainModule.collectionFor().contains(k.klabel()) && !rhs) {
-                applyKLabel(k);
-                sb.append(" :: []");
             } else {
                 if (mainModule.attributesFor().apply(k.klabel()).contains(Attribute.PREDICATE_KEY)) {
                     Sort s = Sort(mainModule.attributesFor().apply(k.klabel()).<String>get(Attribute.PREDICATE_KEY).get());

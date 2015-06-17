@@ -127,13 +127,12 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   lazy val sortDeclarationsFor: Map[Sort, Set[SyntaxSort]] =
     sortDeclarations
       .groupBy(_.sort)
-      .map { case (l, ps) => (l, ps) }
 
   @transient lazy val sortAttributesFor: Map[Sort, Att] =  sortDeclarationsFor mapValues {mergeAttributes(_)}
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     val union = p.flatMap(_.att.att)
-    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel).map { case (l, as) => (l, as) }
+    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel)
     Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
   }
 
@@ -181,17 +180,6 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       else
         set.head
     }}
-
-  lazy val collectionFor: Map[KLabel, KLabel] = productions.filter(_.att.contains("assoc")).flatMap { p => {
-    var set : Set[Tuple2[KLabel, KLabel]] = Set(Tuple2(p.klabel.get, p.klabel.get))
-    if (p.att.contains("unit")) {
-      set = set + Tuple2(KORE.KLabel(p.att.get("unit").get), p.klabel.get)
-    }
-    if (p.att.contains("element")) {
-      set = set + Tuple2(KORE.KLabel(p.att.get("element").get), p.klabel.get)
-    }
-    set
-  }} toMap
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {

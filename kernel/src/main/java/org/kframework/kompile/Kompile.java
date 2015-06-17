@@ -135,7 +135,6 @@ public class Kompile {
     }
 
     public Definition addSemanticsModule(Definition d) {
-        Module kseqModule = d.getModule("KSEQ").get();
         java.util.Set<Sentence> prods = new HashSet<>();
         for (Sort srt : iterable(d.mainModule().definedSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
@@ -143,9 +142,15 @@ public class Kompile {
                 prods.add(Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
             }
         }
-        Module withKSeq = Module("SEMANTICS", Set(d.mainModule(), kseqModule), immutable(prods), Att());
+        Module withKSeq = Module("SEMANTICS", Set(d.mainModule()), immutable(prods), Att());
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(withKSeq);
+
+        Module languageParsingModule = Module("LANGUAGE-PARSING",
+                Set(d.mainModule(),
+                        d.mainSyntaxModule(),
+                        d.getModule("K-TERM").get()), Set(), Att());
+        allModules.add(languageParsingModule);
         return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
     }
 
