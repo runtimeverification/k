@@ -389,15 +389,15 @@ public class KILtoKORE extends KILTransformation<Object> {
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod2, prod3;
 
-        // lst ::= lst sep lst
+        // Es ::= E "," Es
         prod1 = Production(sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                 attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("right"));
 
-        // lst ::= elem
+        // Es ::= E
         prod2 = Production(sort, Seq(NonTerminal(elementSort)), attrsWithKilProductionId.remove("strict").remove("klabel"));
 
-        // lst ::= .UserList
+        // Es ::= ".Es"
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
                 attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
 

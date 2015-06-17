@@ -52,7 +52,7 @@ public class ParseInModule implements Serializable {
      */
     private final Module parsingModule;
     private final Grammar grammar;
-    public ParseInModule(Module seedModule) {
+    ParseInModule(Module seedModule) {
         this.seedModule = seedModule;
         this.extensionModule = seedModule;
         this.disambModule = seedModule;

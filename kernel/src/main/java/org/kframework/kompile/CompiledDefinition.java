@@ -93,7 +93,7 @@ public class CompiledDefinition implements Serializable {
         };
     }
 
-    public ParseInModule getParserModule(Module module) {
-        return new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
+    public Module getExtensionModule(Module module) {
+        return new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module).getExtensionModule();
     }
 }

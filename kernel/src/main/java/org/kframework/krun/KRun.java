@@ -60,7 +60,7 @@ public class KRun implements Transformation<Void, Void> {
         K result = rewriter.execute(program);
 
         Module mod = Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att());
-        Module unparsingModule = compiledDef.getParserModule(mod).getExtensionModule();
+        Module unparsingModule = compiledDef.getExtensionModule(mod);
 
         System.out.println(unparseTerm(result, unparsingModule));
         return 0;

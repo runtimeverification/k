@@ -149,9 +149,9 @@ module PROGRAM-LISTS
   imports SORT-K
   // if this module is imported, the parser automatically
   // replaces the default productions for lists:
-  // Es ::= Es "," Es [userList("*"), klabel('_,_)]
-  //      | E         [userList("*")]
-  //      | ".Es"     [userList("*"), klabel('.Es)]
+  // Es ::= E "," Es [userList("*"), klabel('_,_)]
+  //      | E        [userList("*")]
+  //      | ".Es"    [userList("*"), klabel('.Es)]
   // into a series of productions more suitable for programs:
   // Es#Terminator ::= ""      [klabel('.Es)]
   // Ne#Es ::= E "," Ne#Es     [klabel('_,_)]
