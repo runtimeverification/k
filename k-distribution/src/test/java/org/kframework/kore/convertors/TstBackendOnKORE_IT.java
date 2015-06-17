@@ -26,6 +26,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
@@ -60,8 +61,9 @@ public class TstBackendOnKORE_IT {
 
         File definitionFile = testResource(filename);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Stopwatch sw = new Stopwatch(new GlobalOptions());
         try {
-            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
+            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, sw, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
 
             BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);
 

@@ -108,7 +108,13 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories) {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
-
+        if (kem.getOptions().verbose) {
+            try {
+                System.out.println("Importing: " + new File(source.source()).getCanonicalPath());
+            } catch (Exception e) {
+                System.out.println("Importing: " + new File(source.source()).getAbsolutePath());
+            }
+        }
         List<org.kframework.kil.Module> results = new ArrayList<>();
 
         for (DefinitionItem di : items) {
