@@ -13,17 +13,27 @@ import org.kframework.Rewriter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KDebugOpResult;
 import org.kframework.debugger.KoreKDebug;
+import org.kframework.definition.Constructors$;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunDebuggerOptions;
+import org.kframework.parser.ProductionReference;
+import org.kframework.unparser.AddBrackets;
+import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+
 /**
- * Created by manasvi on 6/10/15.
+ * Created by Manasvi on 6/10/15.
+ * <p>
+ * Execution mode class for the Kore based Debugger
  */
 public class DebugExecutionMode implements ExecutionMode<Void> {
 
@@ -31,8 +41,22 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
 
     }
+
+    private static String unparseTerm(K input, Module test) {
+        return KOREToTreeNodes.toString(
+                new AddBrackets(test).addBrackets((ProductionReference)
+                        KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
+    }
+
+    public static void prettyPrint(CompiledDefinition compiledDef, K result) {
+
+        Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+        System.out.println(unparseTerm(result, unparsingModule) + "\n");
+
+    }
+
     @Override
-    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
         System.out.println("came here");
         KDebug debugger = new KoreKDebug(k, rewriter);
@@ -45,9 +69,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         reader.setBellEnabled(false);
 
         List<Completor> argCompletor = new LinkedList<Completor>();
-        argCompletor.add(new SimpleCompletor(new String[] { "help",
+        argCompletor.add(new SimpleCompletor(new String[]{"help",
                 "exit", "resume", "step", "search", "select",
-                "show-graph", "show-state", "show-transition", "save", "load", "read" }));
+                "show-graph", "show-state", "show-transition", "save", "load", "read"}));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));
@@ -104,8 +128,10 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
-                    KDebugOpResult res = debugger.step(options.step.numSteps);
-                    System.out.println(res.getFinalK().toString());
+                    KDebugOpResult result = debugger.step(options.step.numSteps);
+                    if (result instanceof K) {
+                        prettyPrint(compiledDef, (K) result);
+                    }
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
 
