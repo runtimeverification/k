@@ -43,9 +43,8 @@ public class TstTinyOnKORE_IT {
 
         File definitionFile = testResource(filename);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Stopwatch sw = new Stopwatch(new GlobalOptions());
         try {
-            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, sw, false).run(definitionFile, "TEST", "TEST-PROGRAMS", Sorts.K());
+            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "TEST", "TEST-PROGRAMS", Sorts.K());
 
             Module module = compiledDef.executionModule();
             BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);

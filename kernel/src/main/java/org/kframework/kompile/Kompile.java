@@ -97,6 +97,16 @@ public class Kompile {
         this.sw = sw;
     }
 
+    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this.files = files;
+        this.kem = kem;
+        this.kompileOptions = kompileOptions;
+        this.parser = new ParserUtils(files, kem);
+        this.cacheParses = cacheParses;
+        this.loader = new BinaryLoader(kem);
+        this.sw = new Stopwatch(kem.getOptions());
+    }
+
     @Inject
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
         this(kompileOptions, files, kem, sw, true);

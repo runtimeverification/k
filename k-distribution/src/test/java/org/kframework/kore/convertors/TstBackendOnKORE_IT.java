@@ -61,9 +61,8 @@ public class TstBackendOnKORE_IT {
 
         File definitionFile = testResource(filename);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Stopwatch sw = new Stopwatch(new GlobalOptions());
         try {
-            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, sw, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
+            CompiledDefinition compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
 
             BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);
 
