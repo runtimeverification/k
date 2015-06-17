@@ -44,6 +44,7 @@ public class KoreKDebug implements KDebug {
     public KDebugOpResult step(int steps) {
         K currentK = activeState.getCurrentK();
         int activeStateCheckpoint = activeState.getActiveStateId();
+        int lastCheckpoint = activeState.getlastMapCheckpoint();
         if (activeStateCheckpoint % checkpointInterval != 0) {
             if (activeStateCheckpoint + steps < activeState.getlastMapCheckpoint() + checkpointInterval) {
                 currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
@@ -53,8 +54,9 @@ public class KoreKDebug implements KDebug {
                 return new KDebugOpResult(currentK, null);
             }
             /* Move to the next Checkpoint */
-            currentK = rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval - steps)));
-            activeStateCheckpoint += checkpointInterval - steps;
+            currentK = rewriter.execute(currentK, Optional.of(new Integer(lastCheckpoint + checkpointInterval - activeStateCheckpoint)));
+            steps -= lastCheckpoint + checkpointInterval - activeStateCheckpoint;
+            activeStateCheckpoint = lastCheckpoint + checkpointInterval;
             activeState.addCheckpoint(new Checkpoint(currentK, activeStateCheckpoint), activeStateCheckpoint);
         }
         while (steps >= checkpointInterval) {
