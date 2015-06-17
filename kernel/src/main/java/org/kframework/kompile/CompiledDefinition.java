@@ -76,7 +76,7 @@ public class CompiledDefinition implements Serializable {
     public Module syntaxModule() { return kompiledDefinition.mainSyntaxModule(); }
 
     public Module languageParsingModule() { return languageParsingModule; }
-
+    
     /**
      * Creates a parser for a module.
      * Will probably want to move the method out of this class here eventually.
@@ -87,7 +87,7 @@ public class CompiledDefinition implements Serializable {
     public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
         ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
         parseInModule.setStrict(false);
-        
+
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
