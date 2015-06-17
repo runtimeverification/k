@@ -22,6 +22,7 @@ object Unparse extends {
     // apply(left) + "=>" + apply(right)
     case kapp: KApply => kapp.klabel.name + "(" + kapp.klist.items.asScala.map(apply).mkString(",") + ")"
     case KVariable(name) => name
+    case inj: InjectedKLabel => "#klabel(" + inj.klabel.name + ")"
   }
 }
 

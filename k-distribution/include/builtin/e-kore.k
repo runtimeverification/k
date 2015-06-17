@@ -10,6 +10,7 @@ module BUBBLE
 endmodule
 
 module ATTRIBUTES
+  imports KSTRING
   imports BASIC-K
   syntax KEY        ::= r"[a-z][A-Za-z\\-0-9]*" [token]
   syntax TAGList    ::= TAGCONTENT              [token]
@@ -28,6 +29,7 @@ endmodule
 // definitions, where the K terms are put in bubbles.  A similar, but
 // larger OUTER module can be defined for arbitrary K definitions.
 module OUTER-KORE
+  imports KSTRING
   imports BASIC-K
   imports BUBBLE
   imports ATTRIBUTES

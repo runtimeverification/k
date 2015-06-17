@@ -106,6 +106,11 @@ public class KompileOptions implements Serializable {
 
     public static final String DEFAULT_TRANSITION = "transition";
 
+    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort.")
+    private boolean nonStrict;
+
+    public boolean strict() { return !nonStrict; }
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
