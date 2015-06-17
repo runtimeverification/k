@@ -13,7 +13,6 @@ import org.kframework.Rewriter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KDebugOpResult;
 import org.kframework.debugger.KoreKDebug;
-import org.kframework.definition.Constructors$;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
