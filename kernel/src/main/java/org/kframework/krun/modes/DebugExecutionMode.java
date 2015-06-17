@@ -58,7 +58,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
-        System.out.println("came here");
         KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;
         try {
