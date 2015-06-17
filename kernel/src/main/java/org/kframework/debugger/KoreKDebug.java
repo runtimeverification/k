@@ -41,7 +41,6 @@ public class KoreKDebug implements KDebug {
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, new RewriterCheckpoint(initialK));
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
-        initialState.addCheckpoint(new RewriterCheckpoint(initialK), DEFAULT_ID);
         stateList.add(initialState);
         activeState = initialState;
     }
