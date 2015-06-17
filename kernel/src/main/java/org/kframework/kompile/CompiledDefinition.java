@@ -45,9 +45,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        ParseInModule parseInModule = getParserModule(kompiledDefinition.mainSyntaxModule());
-
-        return getParser(parseInModule, programStartSymbol, kem);
+        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
     }
 
     /**
@@ -56,9 +54,7 @@ public class CompiledDefinition implements Serializable {
      */
     public BiFunction<String, Source, K> getGroundParser(KExceptionManager kem, String moduleName) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition);
-        ParseInModule parseInModule = gen.getCombinedGrammar(gen.getConfigGrammar(kompiledDefinition.getModule(moduleName).get()));
-
-        return getParser(parseInModule, Sorts.K(), kem);
+        return getParser(gen.getConfigGrammar(kompiledDefinition.getModule(moduleName).get()), Sorts.K(), kem);
     }
 
     /**
@@ -84,7 +80,8 @@ public class CompiledDefinition implements Serializable {
      * @return a function taking a String to be parsed, a Source, and returning the parsed string as K.
      */
 
-    public BiFunction<String, Source, K> getParser(ParseInModule parseInModule, Sort programStartSymbol, KExceptionManager kem) {
+    public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
+        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
 
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);

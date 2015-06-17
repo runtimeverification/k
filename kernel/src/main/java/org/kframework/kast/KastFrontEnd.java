@@ -115,7 +115,7 @@ public class KastFrontEnd extends FrontEnd {
                     }
                     mod = mod2.get();
                 }
-                K parsed = def.getParser(def.getParserModule(mod), sort, kem).apply(FileUtil.read(stringToParse), source);
+                K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
                 System.out.println(ToKast.apply(parsed));
             } else {
                 Context context = contextProvider.get();

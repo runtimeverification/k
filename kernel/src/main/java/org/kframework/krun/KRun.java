@@ -60,7 +60,7 @@ public class KRun implements Transformation<Void, Void> {
         K result = rewriter.execute(program);
 
         Module mod = Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att());
-        Module unparsingModule = compiledDef.getParserModule(mod).seedModule();
+        Module unparsingModule = compiledDef.getParserModule(mod).getExtensionModule();
 
         System.out.println(unparseTerm(result, unparsingModule));
         return 0;
@@ -110,7 +110,7 @@ public class KRun implements Transformation<Void, Void> {
         }
 
         String kast = output.stdout != null ? output.stdout : "";
-        return compiledDef.getParser(compiledDef.getParserModule(compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Sorts.K(), kem).apply(kast, source);
+        return compiledDef.getParser(compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get(), Sorts.K(), kem).apply(kast, source);
     }
 
     @Override
