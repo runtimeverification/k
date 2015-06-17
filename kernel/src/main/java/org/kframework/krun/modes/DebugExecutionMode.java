@@ -129,8 +129,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     KDebugOpResult result = debugger.step(options.step.numSteps);
+                    K finalK = result.getFinalK().get();
                     if (result.getFinalK().get() instanceof K) {
-                        prettyPrint(compiledDef, (K) result);
+                        prettyPrint(compiledDef, finalK);
                     }
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
