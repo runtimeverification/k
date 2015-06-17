@@ -100,7 +100,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public K execute(K k, Optional<Integer> depth) {
-            System.out.println("called with depth " + depth.get());
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);

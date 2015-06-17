@@ -42,7 +42,6 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public KDebugOpResult step(int steps) {
-        System.out.println(steps);
         K currentK = activeState.getCurrentK();
         int activeStateCheckpoint = activeState.getActiveStateId();
         if (activeStateCheckpoint % checkpointInterval != 0) {
