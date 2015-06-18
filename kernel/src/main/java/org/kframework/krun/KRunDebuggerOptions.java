@@ -106,6 +106,6 @@ public final class KRunDebuggerOptions {
     public static final class CommandSetCheckpoint {
 
         @Parameter(names="-s", description="Checkpoint Interval", required=true)
-        public int checkpointInterval;
+        public int checkpointInterval = 50;
     }
 }
