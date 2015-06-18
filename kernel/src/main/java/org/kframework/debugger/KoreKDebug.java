@@ -2,7 +2,6 @@
 package org.kframework.debugger;
 
 
-import jdk.nashorn.internal.runtime.Debug;
 import org.kframework.Rewriter;
 import org.kframework.kore.K;
 
@@ -103,7 +102,8 @@ public class KoreKDebug implements KDebug {
         }
 
         int floorKey = relevantEntry.getKey();
-        activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, currMap.headMap(floorKey, true));
+        stateList.remove(activeState);
+        activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
         return step(target - floorKey);
     }
 
