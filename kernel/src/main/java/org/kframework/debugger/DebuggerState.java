@@ -31,9 +31,6 @@ public class DebuggerState {
         return activeStateId;
     }
 
-    public void setActiveStateId(int activeStateId) {
-        this.activeStateId = activeStateId;
-    }
 
     public DebuggerState(K currentK, int activeStateId, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
         this.checkpointMap = checkpointMap;
