@@ -46,7 +46,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     public static void prettyPrint(CompiledDefinition compiledDef, K result) {
 
-        Module unparsingModule = compiledDef.getParserModule(compiledDef.languageParsingModule());
+        Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
         System.out.println(unparseTerm(result, unparsingModule) + "\n");
 
     }
