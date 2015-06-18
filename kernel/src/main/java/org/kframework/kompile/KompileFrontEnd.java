@@ -84,11 +84,12 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         if (options.experimental.kore) {
-            Kompile kompile = new Kompile(options, files, kem);
+            Kompile kompile = new Kompile(options, files, kem, sw);
             //TODO(dwightguth): handle start symbols
             CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K());
             loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
             koreBackend.get().accept(def);
+            sw.printIntermediate("Save to disk");
         } else {
 
             context.kompileOptions = options;
@@ -99,11 +100,11 @@ public class KompileFrontEnd extends FrontEnd {
             loader.saveOrDie(files.resolveKompiled("definition.bin"), def);
             verbose(def);
         }
+        sw.printTotal("Total");
         return 0;
     }
 
     private void verbose(Definition def) {
-        sw.printTotal("Total");
         if (context.globalOptions.verbose) {
             CountNodesVisitor visitor = new CountNodesVisitor();
             visitor.visitNode(def);
