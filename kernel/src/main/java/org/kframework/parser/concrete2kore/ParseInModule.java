@@ -54,11 +54,7 @@ public class ParseInModule implements Serializable {
     private final Grammar grammar;
     private boolean strict = true;
     ParseInModule(Module seedModule) {
-        this.seedModule = seedModule;
-        this.extensionModule = seedModule;
-        this.disambModule = seedModule;
-        this.parsingModule = seedModule;
-        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
+        this(seedModule, seedModule, seedModule, seedModule);
     }
 
     public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule) {
