@@ -36,11 +36,11 @@ public interface KDebug {
     public DebuggerState backStep(int steps);
 
     /**
-     * Go back from a given number of steps to a predefined position.
+     * Go to a certain state in your the execution trace.
      *
-     * You can only select a state that you've already encountered
+     * @param stateNum The id of the state you're wanting to go to.
      */
-    public DebuggerState select(int stateNum);
+    public DebuggerState jumpTo(int stateNum);
 
 
 }

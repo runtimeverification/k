@@ -108,7 +108,16 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public DebuggerState select(int steps) {
-        return null;
+    public DebuggerState jumpTo(int stateNum) {
+        NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
+        int firstKey = checkpointMap.firstKey();
+        if (stateNum < firstKey) {
+            return null;
+        }
+        int lastKey = checkpointMap.lastKey();
+        if (stateNum >= lastKey) {
+            return step(stateNum - lastKey);
+        }
+        return backStep(lastKey - stateNum);
     }
 }

@@ -104,6 +104,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.read);
             jc.addCommand(options.setCheckpoint);
             jc.addCommand(options.backStep);
+            jc.addCommand(options.jumpTo);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -154,13 +155,19 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
 
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandJumpTo) {
+                    DebuggerState result = debugger.jumpTo(options.jumpTo.stateNum);
+                    if (result != null) {
+                        K finalK = result.getCurrentK();
+                        prettyPrint(compiledDef, (K) finalK);
+                    } else
+                        System.out.println("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
                     DebuggerState result = debugger.backStep(options.backStep.backSteps);
                     if (result != null) {
                         K finalK = result.getCurrentK();
                         prettyPrint(compiledDef, (K) finalK);
-                    }
-                    else
+                    } else
                         System.out.println("Invalid Operation");
 
 

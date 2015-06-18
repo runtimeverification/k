@@ -22,6 +22,7 @@ public final class KRunDebuggerOptions {
     public final CommandRead read = new CommandRead();
     public final CommandSetCheckpoint setCheckpoint = new CommandSetCheckpoint();
     public final CommandBackStep backStep = new CommandBackStep();
+    public final CommandJumpTo jumpTo = new CommandJumpTo();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -116,4 +117,13 @@ public final class KRunDebuggerOptions {
         @Parameter(names="-s", description="Number of steps to go back")
         public int backSteps = 1;
     }
+
+    @Parameters(commandNames="jump-to", commandDescription="Jump to a specific State")
+    public static final class CommandJumpTo {
+
+        @Parameter(names="-s", description="State Number to jump to", required=true)
+        public int stateNum;
+    }
+
+
 }
