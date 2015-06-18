@@ -21,6 +21,7 @@ public final class KRunDebuggerOptions {
     public final CommandLoad load = new CommandLoad();
     public final CommandRead read = new CommandRead();
     public final CommandSetCheckpoint setCheckpoint = new CommandSetCheckpoint();
+    public final CommandBackStep backStep = new CommandBackStep();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -107,5 +108,12 @@ public final class KRunDebuggerOptions {
 
         @Parameter(names="-s", description="Checkpoint Interval", required=true)
         public int checkpointInterval = 50;
+    }
+
+    @Parameters(commandNames="step", commandDescription="Execute one or more steps back from the current state")
+    public static final class CommandBackStep {
+
+        @Parameter(names="-s", description="Number of steps to go back")
+        public int backSteps = 1;
     }
 }

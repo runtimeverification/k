@@ -106,6 +106,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.load);
             jc.addCommand(options.read);
             jc.addCommand(options.setCheckpoint);
+            jc.addCommand(options.backStep);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -128,7 +129,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
-                    if(finalK instanceof K)
+                    if (finalK instanceof K)
                         prettyPrint(compiledDef, (K) finalK);
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
@@ -153,6 +154,13 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
+
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
+                    DebuggerState result = debugger.backStep(options.backStep.backSteps);
+                    K finalK = result.getCurrentK();
+                    if (finalK instanceof K)
+                        prettyPrint(compiledDef, (K) finalK);
+
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }

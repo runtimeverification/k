@@ -2,11 +2,13 @@
 package org.kframework.debugger;
 
 
+import jdk.nashorn.internal.runtime.Debug;
 import org.kframework.Rewriter;
 import org.kframework.kore.K;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -40,6 +42,11 @@ public class KoreKDebug implements KDebug {
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
         stateList.add(initialState);
         activeState = initialState;
+    }
+
+    @Override
+    public void setCheckpointInterval(int checkpointInterval) {
+        this.checkpointInterval = checkpointInterval;
     }
 
     @Override
@@ -85,8 +92,19 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public void setCheckpointInterval(int checkpointInterval) {
-        this.checkpointInterval = checkpointInterval;
+    public DebuggerState backStep(int steps) {
+        int currentCheckpoint = activeState.getActiveStateId();
+        int target  = currentCheckpoint - steps;
+        if (target < 0) {
+            /* Invalid Operation, no need to change the state */
+            return null;
+        }
+
+        NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
+        Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
+        int floorKey = relevantEntry.getKey();
+        activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, currMap.headMap(floorKey, true));
+        return step(target - floorKey);
     }
 
     @Override

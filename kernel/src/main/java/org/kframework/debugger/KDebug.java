@@ -11,15 +11,29 @@ package org.kframework.debugger;
 public interface KDebug {
 
     /**
-     * Take a certain number of steps from the current state.
-     */
-    public DebuggerState step(int steps);
-
-    /**
      * Change the Checkpoint Interval in the Debugger.
      * Global Setting, will persist across states.
      */
     public void setCheckpointInterval(int interval);
+
+    /**
+     * Take a certain number of steps from the current state.
+     *
+     * @param steps The number of steps to take
+     *
+     * @return DebuggerState Oject depicting the state debugger was in
+     * after the operation.
+     */
+    public DebuggerState step(int steps);
+
+    /**
+     * Take specified number of steps backwards from current state.
+     * @param steps The number of steps to go back.
+     *
+     * @return DebuggerState Oject depicting the state debugger was in
+     * after the operation.
+     */
+    public DebuggerState backStep(int steps);
 
     /**
      * Go back from a given number of steps to a predefined position.
