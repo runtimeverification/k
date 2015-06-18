@@ -49,7 +49,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     public static void prettyPrint(CompiledDefinition compiledDef, K result) {
 
-        Module unparsingModule = compiledDef.getParserModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get()), Set(), Att()));
+        Module unparsingModule = compiledDef.getParserModule(compiledDef.languageParsingModule());
         System.out.println(unparseTerm(result, unparsingModule) + "\n");
 
     }

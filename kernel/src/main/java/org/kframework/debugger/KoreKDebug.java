@@ -50,7 +50,7 @@ public class KoreKDebug implements KDebug {
         DebuggerState nextActiveState;
         stateList.remove(activeState);
         /* Not enough steps for a new checkpoint */
-        if (activeStateCheckpoint + steps < activeState.getlastMapCheckpoint() + checkpointInterval) {
+        if (activeStateCheckpoint + steps < lastCheckpoint + checkpointInterval) {
             currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
             activeStateCheckpoint += steps;
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
