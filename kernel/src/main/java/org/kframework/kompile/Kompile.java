@@ -255,7 +255,7 @@ public class Kompile {
         Module configParserModule = gen.getConfigGrammar(module);
 
         ParseCache cache = loadCache(configParserModule);
-        ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
+        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
@@ -291,7 +291,7 @@ public class Kompile {
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
-        ParseInModule parser = gen.getCombinedGrammar(cache.getParserModule());
+        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()

@@ -31,18 +31,8 @@ public class ParseCache implements Serializable {
         return module;
     }
 
-    private transient Module parser;
     public boolean isStrict() {
         return strict;
-    }
-
-    public Module getParserModule() {
-        Module p = parser;
-        if (p == null) {
-            p = module;
-            parser = p;
-        }
-        return p;
     }
 
     public static class ParsedSentence implements Serializable {

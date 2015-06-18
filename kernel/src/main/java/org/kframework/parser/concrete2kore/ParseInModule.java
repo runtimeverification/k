@@ -51,7 +51,7 @@ public class ParseInModule implements Serializable {
      * original production, so disambiguation can be done safely.
      */
     private final Module parsingModule;
-    private final Grammar grammar;
+    private Grammar grammar = null;
     private boolean strict = true;
     ParseInModule(Module seedModule) {
         this(seedModule, seedModule, seedModule, seedModule);
@@ -62,7 +62,6 @@ public class ParseInModule implements Serializable {
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
-        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(parsingModule);
     }
 
     /**
@@ -105,6 +104,11 @@ public class ParseInModule implements Serializable {
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+        synchronized (seedModule) { // grammar generation needs to happen only once, therefore the synchronization
+            if (grammar == null) // build by need
+                grammar = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule);
+        }
+
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
         Set<ParseFailedException> warn = new AmbFilter().warningUnit();
         if (startSymbolNT == null) {
