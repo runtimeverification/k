@@ -35,17 +35,6 @@ public class ParseCache implements Serializable {
         return strict;
     }
 
-    private transient ParseInModule parser;
-
-    public ParseInModule getParser() {
-        ParseInModule p = parser;
-        if (p == null) {
-            p = new ParseInModule(module, strict);
-            parser = p;
-        }
-        return p;
-    }
-
     public static class ParsedSentence implements Serializable {
         private final K parse;
         private final Set<ParseFailedException> warnings;

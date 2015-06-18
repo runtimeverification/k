@@ -1,8 +1,12 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
-module BASIC-K
+module SORT-K
   syntax K
+endmodule
+
+module BASIC-K
+  imports SORT-K
   syntax KLabel
   syntax KItem
   syntax K     ::= KItem
@@ -141,6 +145,21 @@ module AUTO-FOLLOW
   // #parse("ab", "K")
   // In the above example, the terminal "a" is not allowed to be followed by a "b"
   // because it would turn the terminal into the terminal "ab".
+endmodule
+
+module PROGRAM-LISTS
+  imports SORT-K
+  // if this module is imported, the parser automatically
+  // replaces the default productions for lists:
+  // Es ::= E "," Es [userList("*"), klabel('_,_)]
+  //      | E        [userList("*")]
+  //      | ".Es"    [userList("*"), klabel('.Es)]
+  // into a series of productions more suitable for programs:
+  // Es#Terminator ::= ""      [klabel('.Es)]
+  // Ne#Es ::= E "," Ne#Es     [klabel('_,_)]
+  //         | E Es#Terminator [klabel('_,_)]
+  // Es ::= Ne#Es
+  //      | Es#Terminator      // if the list is *
 endmodule
 
 module DEFAULT-CONFIGURATION
