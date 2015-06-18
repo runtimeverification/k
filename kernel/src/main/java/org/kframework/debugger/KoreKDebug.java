@@ -4,14 +4,11 @@ package org.kframework.debugger;
 
 import org.kframework.Rewriter;
 import org.kframework.kore.K;
-import org.kframework.krun.tools.Debugger;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
