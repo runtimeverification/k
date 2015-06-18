@@ -20,6 +20,7 @@ public final class KRunDebuggerOptions {
     public final CommandSave save = new CommandSave();
     public final CommandLoad load = new CommandLoad();
     public final CommandRead read = new CommandRead();
+    public final CommandSetCheckpoint setCheckpoint = new CommandSetCheckpoint();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -99,5 +100,12 @@ public final class KRunDebuggerOptions {
 
         @Parameter(names="-s", description="String to read")
         public String string;
+    }
+
+    @Parameters(commandNames="set-chkpt", commandDescription="Set the Checkpoint Interval")
+    public static final class CommandSetCheckpoint {
+
+        @Parameter(names="-s", description="Checkpoint Interval", required=true)
+        public int checkpointInterval;
     }
 }

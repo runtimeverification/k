@@ -105,7 +105,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.save);
             jc.addCommand(options.load);
             jc.addCommand(options.read);
-
+            jc.addCommand(options.setCheckpoint);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -151,6 +151,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandRead) {
 
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
+                    debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
