@@ -26,9 +26,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
-
 /**
  * Created by Manasvi on 6/10/15.
  * <p>
@@ -131,6 +128,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
                         prettyPrint(compiledDef, (K) finalK);
+                    else
+                        System.out.printf("Invalid Operation");
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
 
@@ -160,6 +159,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
                         prettyPrint(compiledDef, (K) finalK);
+                    else
+                        System.out.println("Invalid Operation");
 
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();

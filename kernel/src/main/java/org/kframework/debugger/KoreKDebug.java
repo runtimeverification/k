@@ -95,13 +95,13 @@ public class KoreKDebug implements KDebug {
     public DebuggerState backStep(int steps) {
         int currentCheckpoint = activeState.getActiveStateId();
         int target  = currentCheckpoint - steps;
-        if (target < 0) {
+        NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
+        Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
+        if (relevantEntry == null) {
             /* Invalid Operation, no need to change the state */
             return null;
         }
 
-        NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
-        Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
         int floorKey = relevantEntry.getKey();
         activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, currMap.headMap(floorKey, true));
         return step(target - floorKey);
