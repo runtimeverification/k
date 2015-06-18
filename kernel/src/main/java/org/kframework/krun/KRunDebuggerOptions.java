@@ -110,7 +110,7 @@ public final class KRunDebuggerOptions {
         public int checkpointInterval = 50;
     }
 
-    @Parameters(commandNames="step", commandDescription="Execute one or more steps back from the current state")
+    @Parameters(commandNames="back-step", commandDescription="Execute one or more steps back from the current state")
     public static final class CommandBackStep {
 
         @Parameter(names="-s", description="Number of steps to go back")
