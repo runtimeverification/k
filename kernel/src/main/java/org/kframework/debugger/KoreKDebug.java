@@ -80,6 +80,7 @@ public class KoreKDebug implements KDebug {
         activeStateCheckpoint += steps;
         nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
         activeState = nextActiveState;
+        stateList.add(activeState);
         return nextActiveState;
     }
 
