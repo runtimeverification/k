@@ -51,15 +51,6 @@ public class CompiledDefinition implements Serializable {
     }
 
     /**
-     * A function that takes a string and the source of that string and parses it as a ground term
-     * in the syntax module into KAST.
-     */
-    public BiFunction<String, Source, K> getConfigParser(KExceptionManager kem, String moduleName) {
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition);
-        return getParser(gen.getConfigGrammar(kompiledDefinition.getModule(moduleName).get()), Sorts.K(), kem);
-    }
-
-    /**
      * The parsed but uncompiled definition
      */
     public Definition getParsedDefinition() {
