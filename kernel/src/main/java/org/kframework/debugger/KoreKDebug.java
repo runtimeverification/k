@@ -114,7 +114,7 @@ public class KoreKDebug implements KDebug {
         if (stateNum < firstKey) {
             return null;
         }
-        int lastKey = checkpointMap.lastKey();
+        int lastKey = activeState.getActiveStateId();
         if (stateNum >= lastKey) {
             return step(stateNum - lastKey);
         }
