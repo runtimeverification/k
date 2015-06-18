@@ -156,12 +156,13 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
                     DebuggerState result = debugger.backStep(options.backStep.backSteps);
-                    K finalK = result.getCurrentK();
-                    if (result != null)
+                    if (result != null) {
+                        K finalK = result.getCurrentK();
                         prettyPrint(compiledDef, (K) finalK);
+                    }
                     else
                         System.out.println("Invalid Operation");
-                    
+
 
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
