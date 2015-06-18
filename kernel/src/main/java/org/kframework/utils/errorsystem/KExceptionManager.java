@@ -101,7 +101,8 @@ public class KExceptionManager {
     }
 
     public void addAllKException(Collection<KException> kex) {
-        exceptions.addAll(kex);
+        for (KException e : kex)
+            registerInternal(e);
     }
 
     public void registerCompilerWarning(String message) {
