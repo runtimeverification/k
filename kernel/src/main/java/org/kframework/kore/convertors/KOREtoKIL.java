@@ -61,13 +61,12 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 Sentence sentence = iter.next();
                 if (sentence instanceof org.kframework.definition.Production) {
                     org.kframework.definition.Production prod = (org.kframework.definition.Production) sentence;
-                    List<K> attrs = stream(prod.att().att()).collect(Collectors.toList());
-                    Optional<String> listType = prod.att().getOptional(USER_LIST_ATTRIBUTE);
-                    if (listType.isPresent()) {
-                        List<org.kframework.definition.Production> prods = listProds.get(listType.get());
+                    if (prod.att().contains(USER_LIST_ATTRIBUTE)) {
+                        String listSort = prod.sort().name();
+                        List<org.kframework.definition.Production> prods = listProds.get(listSort);
                         if (prods == null) {
                             prods = new ArrayList<>(3);
-                            listProds.put(listType.get(), prods);
+                            listProds.put(listSort, prods);
                         }
                         prods.add(prod);
                         iter.remove();
@@ -83,13 +82,14 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             for (Map.Entry<String, List<org.kframework.definition.Production>> entry : listProds.entrySet()) {
                 String listType = entry.getKey();
                 List<org.kframework.definition.Production> prods = entry.getValue();
-                if (prods.size() != 3 && prods.size() != 2) {
+                if (prods.size() != 3) {
                     throw new AssertionError("Found list with " + prods.size() + " elements.");
-                }
-                if (prods.size() == 2) {
-                    userLists.add(makeNonEmptyUserList(prods, listType));
                 } else {
-                    userLists.add(makeUserList(prods, listType));
+                    if (prods.iterator().next().att().get(USER_LIST_ATTRIBUTE).get().equals("+")) {
+                        userLists.add(makeNonEmptyUserList(prods, listType));
+                    } else {
+                        userLists.add(makeUserList(prods, listType));
+                    }
                 }
             }
         }

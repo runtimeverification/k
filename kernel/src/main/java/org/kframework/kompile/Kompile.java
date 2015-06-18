@@ -255,7 +255,7 @@ public class Kompile {
         Module configParserModule = gen.getConfigGrammar(module);
 
         ParseCache cache = loadCache(configParserModule);
-        ParseInModule parser = cache.getParser();
+        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
@@ -276,7 +276,7 @@ public class Kompile {
                     }
                 })
                 .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), configParserModule)))
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                 .collect(Collections.toSet());
 
         return Module(module.name(), (Set<Module>) module.imports().$bar(Set(def.getModule("MAP").get())), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
@@ -291,7 +291,7 @@ public class Kompile {
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
-        ParseInModule parser = cache.getParser();
+        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()

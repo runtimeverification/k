@@ -79,7 +79,7 @@ public class ParserUtils {
                                     Sort startSymbol,
                                     Source source,
                                     org.kframework.definition.Module kastModule) {
-        ParseInModule parser = new ParseInModule(kastModule, true);
+        ParseInModule parser = new ParseInModule(kastModule);
         return parseWithModule(theTextToParse, startSymbol, source, parser);
     }
 

@@ -2,6 +2,7 @@
 package org.kframework.kompile;
 
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
@@ -75,7 +76,8 @@ public class CompiledDefinition implements Serializable {
      */
 
     public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
-        ParseInModule parseInModule = new ParseInModule(getParserModule(module), false);
+        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition).getCombinedGrammar(module);
+        parseInModule.setStrict(false);
 
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
@@ -87,7 +89,7 @@ public class CompiledDefinition implements Serializable {
         };
     }
 
-    public Module getParserModule(Module module) {
-        return new RuleGrammarGenerator(kompiledDefinition).getCombinedGrammar(module);
+    public Module getExtensionModule(Module module) {
+        return new RuleGrammarGenerator(kompiledDefinition).getCombinedGrammar(module).getExtensionModule();
     }
 }
