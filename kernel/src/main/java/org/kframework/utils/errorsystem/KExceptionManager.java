@@ -101,17 +101,8 @@ public class KExceptionManager {
     }
 
     public void addAllKException(Collection<KException> kex) {
-        if (this.options.warnings == GlobalOptions.Warnings.NONE)
-            return;
-        if (this.options.warnings == GlobalOptions.Warnings.ALL) {
-            exceptions.addAll(kex);
-        } else if (this.options.warnings == GlobalOptions.Warnings.NORMAL) {
-            for (KException e : kex) {
-                if (e.getType() != ExceptionType.HIDDENWARNING)
-                    exceptions.add(e);
-            }
-        } else
-            throw new AssertionError("Unexpected warning type!");
+        for (KException e : kex)
+            registerInternal(e);
     }
 
     public void registerCompilerWarning(String message) {

@@ -98,13 +98,7 @@ public class Kompile {
     }
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this.files = files;
-        this.kem = kem;
-        this.kompileOptions = kompileOptions;
-        this.parser = new ParserUtils(files, kem, kompileOptions.global);
-        this.cacheParses = cacheParses;
-        this.loader = new BinaryLoader(kem);
-        this.sw = new Stopwatch(kompileOptions.global);
+        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
     }
 
     @Inject
