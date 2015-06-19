@@ -89,7 +89,7 @@ public class KRun implements Transformation<Void, Void> {
             print.accept("");
             break;
         case PRETTY:
-            Module unparsingModule = compiledDef.getParserModule(compiledDef.languageParsingModule());
+            Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
             print.accept(unparseTerm(result, unparsingModule) + "\n");
             break;
         default:

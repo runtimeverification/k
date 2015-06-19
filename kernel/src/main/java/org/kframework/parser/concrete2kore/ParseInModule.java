@@ -36,17 +36,59 @@ import java.util.Set;
  * Declarative disambiguation filters are also applied.
  */
 public class ParseInModule implements Serializable {
-    private final Module module;
-    private final boolean strict;
-    private final Grammar grammar;
-    public ParseInModule(Module module, boolean strict) {
-        this.module = module;
-        this.strict = strict;
-        this.grammar = KSyntax2GrammarStatesFilter.getGrammar(module);
+    private final Module seedModule;
+    private final Module extensionModule;
+    /**
+     * The module in which parsing will be done.
+     * Note that this module will be used for disambiguation, and the parsing module can be different.
+     * This allows for grammar rewriting and more flexibility in the implementation.
+     */
+    private final Module disambModule;
+    /**
+     * The exact module used for parsing. This can contain productions and sorts that are not
+     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
+     * In this case the modified production will be annotated with the information from the
+     * original production, so disambiguation can be done safely.
+     */
+    private final Module parsingModule;
+    private Grammar grammar = null;
+    private boolean strict = true;
+    ParseInModule(Module seedModule) {
+        this(seedModule, seedModule, seedModule, seedModule);
     }
 
-    public Module module() {
-        return module;
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule) {
+        this.seedModule = seedModule;
+        this.extensionModule = extensionModule;
+        this.disambModule = disambModule;
+        this.parsingModule = parsingModule;
+    }
+
+    /**
+     * If set to true, the variables inferred automatically will be checked at runtime.
+     * Default true.
+     * @param strict    true to generate predicates for automatically inferred variables.
+     */
+    public void setStrict(boolean strict) {
+        this.strict = strict;
+    }
+
+    /**
+     * The original module, which includes all the marker/flags imports.
+     * This can be used to invalidate caches.
+     * @return Module given by the user.
+     */
+    public Module seedModule() {
+        return seedModule;
+    }
+
+    /**
+     * An extension module of the seedModule which includes all productions, unmodified, and in addition,
+     * contains extra productions auto-defined, like casts.
+     * @return Module with extra productions defined during parser generator.
+     */
+    public Module getExtensionModule() {
+        return extensionModule;
     }
 
     /**
@@ -62,6 +104,11 @@ public class ParseInModule implements Serializable {
 
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+        synchronized (seedModule) { // grammar generation needs to happen only once, therefore the synchronization
+            if (grammar == null) // build by need
+                grammar = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule);
+        }
+
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
         Set<ParseFailedException> warn = new AmbFilter().warningUnit();
         if (startSymbolNT == null) {
@@ -90,13 +137,13 @@ public class ParseInModule implements Serializable {
         rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new ApplyTypeCheckVisitor(module.subsorts()).apply(rez.right().get());
+        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new PriorityVisitor(module.priorities(), module.leftAssoc(), module.rightAssoc()).apply(rez.right().get());
+        rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(module.subsorts(), module.definedSorts(), module.productionsFor(), strict).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();
