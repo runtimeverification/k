@@ -4,8 +4,6 @@ package org.kframework.debugger;
 import org.kframework.kore.K;
 
 import java.util.NavigableMap;
-import java.util.Optional;
-import java.util.TreeMap;
 
 /**
  * Created by Manasvi on 6/15/15.
@@ -25,20 +23,20 @@ public class DebuggerState {
 
     private K currentK;
 
-    private int activeStateId;
+    private int stepNum;
 
-    public int getActiveStateId() {
-        return activeStateId;
+    public int getStepNum() {
+        return stepNum;
     }
 
-    public void setActiveStateId(int activeStateId) {
-        this.activeStateId = activeStateId;
+    public void setStepNum(int stepNum) {
+        this.stepNum = stepNum;
     }
 
-    public DebuggerState(K currentK, int activeStateId, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
+    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
         this.checkpointMap = checkpointMap;
         this.currentK = currentK;
-        this.activeStateId = activeStateId;
+        this.stepNum = stepNum;
     }
 
     public K getCurrentK() {
