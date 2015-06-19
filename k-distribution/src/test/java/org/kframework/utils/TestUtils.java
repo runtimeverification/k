@@ -22,7 +22,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.function.BiFunction;
 
-
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 
 /**
  * Created by Manasvi on 6/19/15.
