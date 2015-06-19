@@ -51,7 +51,7 @@ public class KoreKDebug implements KDebug {
     @Override
     public DebuggerState step(int steps) {
         K currentK = activeState.getCurrentK();
-        int activeStateCheckpoint = activeState.getActiveStateId();
+        int activeStateCheckpoint = activeState.getStepNum();
         int lastCheckpoint = activeState.getlastMapCheckpoint();
         DebuggerState nextActiveState;
         stateList.remove(activeState);
@@ -96,7 +96,7 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState backStep(int steps) {
-        int currentCheckpoint = activeState.getActiveStateId();
+        int currentCheckpoint = activeState.getStepNum();
         int target  = currentCheckpoint - steps;
         NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
         Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
@@ -118,7 +118,7 @@ public class KoreKDebug implements KDebug {
         if (stateNum < firstKey) {
             return null;
         }
-        int lastKey = activeState.getActiveStateId();
+        int lastKey = activeState.getStepNum();
         if (stateNum >= lastKey) {
             return step(stateNum - lastKey);
         }
