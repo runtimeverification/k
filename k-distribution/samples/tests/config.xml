@@ -6,17 +6,13 @@
   <include file="../quine/tests/config.xml" directory="quine" />
 
   <!-- AGENT -->
-  <!--
   <include file="../agent/tests/config.xml" directory="agent" />
-  -->
 
   <!-- BF -->
   <include file="../bf/tests/config.xml" directory="bf" />
 
   <include file="../wcet/tests/config.xml" directory="wcet" />
 
-  <!--
   <include file="../kernelc/tests/config.xml" directory="kernelc" />
-  -->
 
 </tests>
