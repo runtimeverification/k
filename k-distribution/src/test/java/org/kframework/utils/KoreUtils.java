@@ -53,7 +53,7 @@ public class KoreUtils {
     private static KExceptionManager kem;
     private static SimpleScope requestScope;
     private static BiFunction<String, Source, K> programParser;
-    private static Rewriter rewriter;
+    private static Rewriter rewriter = null;
 
 
     protected File testResource(String baseName) throws URISyntaxException {
@@ -80,7 +80,6 @@ public class KoreUtils {
             }
         });
         programParser = compiledDef.getProgramParser(kem);
-        rewriter = injector.getInstance(InitializeRewriter.class).apply(compiledDef.executionModule());
     }
 
     public K getParsed(String program, Source source) throws IOException, URISyntaxException {
@@ -88,13 +87,12 @@ public class KoreUtils {
     }
 
     public K stepRewrite(K parsedPgm, Optional<Integer> depth) {
+        requestScope.enter();
         InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
         KRun krun = new KRun(kem, FileUtil.testFileUtil());
-
-        requestScope.enter();
         try {
             InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
-            K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsedPgm)), Optional.empty());
+            K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsedPgm)), depth);
             return kResult;
         } finally {
             requestScope.exit();
@@ -102,6 +100,11 @@ public class KoreUtils {
     }
 
     public Rewriter getRewriter() {
+        if(rewriter == null) {
+            requestScope.enter();
+            rewriter = injector.getInstance(InitializeRewriter.class).apply(compiledDef.executionModule());
+            requestScope.exit();
+        }
         return rewriter;
     }
 
