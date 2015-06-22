@@ -160,6 +160,17 @@ public class CellCollection extends Collection {
         return cells;
     }
 
+    private Multiset<Cell> values;
+
+    public Multiset<Cell> values() {
+        Multiset<Cell> v = values;
+        if (v == null) {
+            v = ImmutableMultiset.copyOf(cells.values());
+            values = v;
+        }
+        return v;
+    }
+
     public Multiset<Term> baseTerms() {
         return (Multiset<Term>) (Object) collectionVariables();
     }
@@ -239,14 +250,14 @@ public class CellCollection extends Collection {
 
         CellCollection collection = (CellCollection) object;
         return collectionVariables.equals(collection.collectionVariables)
-                && ImmutableMultiset.copyOf(cells.values()).equals(ImmutableMultiset.copyOf(collection.cells.values()));
+                && values().equals(collection.values());
     }
 
     @Override
     protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + ImmutableMultiset.copyOf(cells.values()).hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + values().hashCode();
         return hashCode;
     }
 
