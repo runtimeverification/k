@@ -79,7 +79,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 
             for (Cell son : sons) {
                 ConfigurationStructure sonCfg = potentialSons.get(son.getId());
-                if (sonCfg != null && (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME))
+                if (sonCfg != null)
                         potentialSons.remove(son.getId());
             }
 
@@ -95,7 +95,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
             }
             boolean change = false;
             for (ConfigurationStructure sonCfg : potentialSons.values()) {
-                if (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME) {
+                if (sonCfg.isDefaultCell()) {
                     Cell son = sonCfg.cell.shallowCopy();
                     son.setCellAttributes(new HashMap<String, String>());
                     if (! sonCfg.sons.isEmpty()) {
