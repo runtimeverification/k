@@ -1,4 +1,4 @@
-package org.kframework.testingutils;
+package org.kframework.backend.java.util;
 
 import com.google.inject.Injector;
 import org.kframework.Rewriter;
@@ -25,13 +25,13 @@ import static org.kframework.definition.Constructors.*;
  * Contains utilities used across Tests.
  */
 
-public class TestUtils {
+public class KoreUtils {
 
     private CompiledDefinition compiledDef;
     private Injector injector;
     private KExceptionManager kem;
 
-    public TestUtils(CompiledDefinition compiledDef, Injector injector, KExceptionManager kem) {
+    public KoreUtils(CompiledDefinition compiledDef, Injector injector, KExceptionManager kem) {
         this.compiledDef = compiledDef;
         this.injector = injector;
         this.kem = kem;

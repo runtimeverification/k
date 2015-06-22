@@ -4,14 +4,12 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.BeforeClass;
 import org.junit.rules.TestName;
-import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
 import org.kframework.backend.java.symbolic.Stage;
 import org.kframework.builtin.Sorts;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kore.K;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.main.GlobalOptions;
@@ -21,7 +19,6 @@ import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.SimpleScope;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.testingutils.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,15 +30,14 @@ import java.net.URISyntaxException;
  * <p>
  * Test File for the Debugger Interface Implementation
  */
-public class KDebugTest {
+public class TstKDebugOnKORE_IT {
 
-    private static TestUtils testUtils;
 
     @org.junit.Rule
     public TestName name = new TestName();
 
     protected File testResource(String baseName) throws URISyntaxException {
-        return new File(KDebugTest.class.getResource(baseName).toURI());
+        return new File(TstKDebugOnKORE_IT.class.getResource(baseName).toURI());
     }
 
     @BeforeClass
