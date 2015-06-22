@@ -110,8 +110,10 @@ public class KoreUtils {
 
 
     public Module getUnparsingModule() {
-        return compiledDef.getExtensionModule(Module("UNPARSING", Set(compiledDef.executionModule(), compiledDef.syntaxModule(), compiledDef.getParsedDefinition().getModule("K-SORT-LATTICE").get(), compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get()), Set(), Att()));
-
+        Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
     }
 
+    public static CompiledDefinition getCompiledDef() {
+        return compiledDef;
+    }
 }
