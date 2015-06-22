@@ -1,9 +1,6 @@
 package org.kframework.debugger;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
@@ -12,15 +9,11 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRun;
-import org.kframework.parser.ProductionReference;
-import org.kframework.unparser.AddBrackets;
-import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.utils.KoreUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 
 /**
@@ -45,7 +38,7 @@ public class TstKDebugOnKORE_IT {
         String filename = "/convertor-tests/" + name.getMethodName() + ".k";
         utils = new KoreUtils(filename);
     }
-    
+
 
     @Test
     public void kore_imp() throws IOException, URISyntaxException {

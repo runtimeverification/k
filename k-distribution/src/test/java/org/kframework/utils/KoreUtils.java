@@ -110,7 +110,8 @@ public class KoreUtils {
 
 
     public Module getUnparsingModule() {
-        Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
+        return compiledDef.getExtensionModule(compiledDef.languageParsingModule());
+
     }
 
     public static CompiledDefinition getCompiledDef() {
