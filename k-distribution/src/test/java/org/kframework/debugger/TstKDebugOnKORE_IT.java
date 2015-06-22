@@ -45,8 +45,17 @@ public class TstKDebugOnKORE_IT {
         /* 10 more steps on debugger should equal 20 total steps for normal execution */
         debugResult = debuggerSession.step(10).getCurrentK();
         expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(20)));
-        assertEquals("Normal and Debug results don't match, when normal takes 20 steps, and debug 10 steps from session", expectedResult, debugResult);
+        assertEquals("Normal and Debug results don't match, when normal takes 20 steps, and debugger 10 steps in ongoing session", expectedResult, debugResult);
 
+        /*  Jumping on Debugger and 50 steps for normal executor */
+        debugResult = debuggerSession.jumpTo(50).getCurrentK();
+        expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(50)));
+        assertEquals("Normal and Debug results don't match, when normal takes 50 steps, and debugger jumps to state 50", expectedResult, debugResult);
+
+        /* Going Back on Debugger */
+        debugResult = debuggerSession.backStep(25).getCurrentK();
+        expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(25)));
+        assertEquals("Normal and Debug results don't match, when normal takes 25 steps, and debugger goes back 25 steps", expectedResult, debugResult);
 
     }
 }
