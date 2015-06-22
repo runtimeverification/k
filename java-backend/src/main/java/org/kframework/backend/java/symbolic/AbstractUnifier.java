@@ -1,9 +1,26 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Multimap;
-import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectedKLabel;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.Profiler;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -11,6 +28,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+import com.google.common.collect.Multimap;
 
 
 /**
