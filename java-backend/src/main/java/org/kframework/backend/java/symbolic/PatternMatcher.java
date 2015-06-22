@@ -176,6 +176,21 @@ public class PatternMatcher extends AbstractUnifier {
     }
 
     /**
+     * try last-resort matching techniques, such as checking hashCode and equals, which
+     * are expensive and we do not want to try every time.
+     * @param msg The message to throw in the exception if matching can not be completed.
+     */
+    private void lastChanceMatching(String msg, Term term, Term otherTerm) {
+        if (term.hashCode() == otherTerm.hashCode() && term.equals(otherTerm)) {
+        } else if (term.isGround() && otherTerm.isGround()
+                && term.isNormal() && otherTerm.isNormal()) {
+            fail(term, otherTerm);
+        } else {
+            throw new UnsupportedOperationException(msg);
+        }
+    }
+
+    /**
      * Binds a variable in the pattern to a subterm of the subject.
      */
     @Override
@@ -211,8 +226,8 @@ public class PatternMatcher extends AbstractUnifier {
         }
 
         if (!patternList.isConcreteCollection()) {
-            throw new UnsupportedOperationException(
-                    "list matching is only supported when one of the lists is a variable.");
+            lastChanceMatching("list matching is only supported when one of the lists is a variable.", builtinList, patternList);
+            return;
         }
 
         if (patternList.concreteSize() != builtinList.concreteSize()) {
@@ -228,8 +243,7 @@ public class PatternMatcher extends AbstractUnifier {
     @Override
     public void unify(BuiltinMap builtinMap, BuiltinMap patternBuiltinMap) {
         if (!patternBuiltinMap.isUnifiableByCurrentAlgorithm()) {
-            throw new UnsupportedOperationException(
-                    "map matching is only supported when one of the maps is a variable.");
+            lastChanceMatching("map matching is only supported when one of the maps is a variable.", builtinMap, patternBuiltinMap);
         }
 
         if (patternBuiltinMap.collectionVariables().isEmpty()
@@ -374,8 +388,7 @@ public class PatternMatcher extends AbstractUnifier {
     @Override
     public void unify(BuiltinSet builtinSet, BuiltinSet patternSet) {
         if (!patternSet.isConcreteCollection() || patternSet.concreteSize() > 1) {
-            throw new UnsupportedOperationException(
-                    "set matching is only supported when one of the sets is a variable.");
+            lastChanceMatching("set matching is only supported when one of the sets is a variable.", builtinSet, patternSet);
         }
 
         if (builtinSet.concreteSize() != patternSet.concreteSize()) {
