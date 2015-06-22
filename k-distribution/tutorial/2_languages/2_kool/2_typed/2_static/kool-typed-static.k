@@ -584,7 +584,7 @@ checks for cycles. */
   rule (<T>...
           <className> C </className>
           <extendsAll>... SetItem(C) ...</extendsAll>
-        ...</cT> => .)
+        ...</T> => .)
        <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
     [inheritance-cycle]
