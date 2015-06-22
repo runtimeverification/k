@@ -253,7 +253,7 @@ and the set of all its superclasses (in the \textsf{extendsAll} cell).
 The later is useful for example for checking whether there are cycles
 in the class extends relation. */
 
-  configuration <T color="yellow">
+  configuration <T multiplicity="?" color="yellow">
                   <tasks color="orange" multiplicity="?">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
@@ -272,8 +272,8 @@ in the class extends relation. */
                       <ctenv multiplicity="?" color="blue"> .Map </ctenv>
                     </class>
                   </classes>
-                  <out color="brown" stream="stdout"> .List </out>
                 </T>
+                <out color="brown" stream="stdout"> .List </out>
 
 /*@ \subsection{Unchanged semantics from statically typed SIMPLE}
 
@@ -556,15 +556,13 @@ instance of this rule). */
 
 //@ \paragraph{Check for unique class names}
 
-// The rule below is also more complicated than needed because of the
-// configuration abstraction which does not seem to work right.  We
-// should not need to mention the classes cell.
-  rule <T> (<classes>... <className> C </className>
-                         <className> C </className>
-            ...</classes> _ => .)
-           <out>... .List => ListItem("Class \"" +String Id2String(C)
+  rule (<T>...
+          <className> C </className>
+          <className> C </className>
+        ...</T> => .)
+       <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
-       </T>  [structural]
+    [structural]
 
 /*@ \paragraph{Check for cycles in class hierarchy}
 We check for cycles in the class hierarchy by transitively closing the
@@ -583,13 +581,13 @@ checks for cycles. */
        <class>... <className>C</className> <extends>C'</extends> ...</class>
     when notBool(C' in SetItem(C) Cs)  [structural]
 
-// similarly, we should not need to mention the classes cell below
-  rule <T> (<classes>... <className> C </className>
-                         <extendsAll>... SetItem(C) ...</extendsAll>
-            ...</classes> _ => .)
-           <out>... .List => ListItem("Class \"" +String Id2String(C)
+  rule (<T>...
+          <className> C </className>
+          <extendsAll>... SetItem(C) ...</extendsAll>
+        ...</cT> => .)
+       <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-       </T>  [inheritance-cycle]
+    [inheritance-cycle]
 
 
 /*@ \subsubsection{New}
@@ -771,7 +769,7 @@ the \textsf{tasks} cell has been removed. */
 
 // cleanup tasks and output a success message when done
 
-  rule (<tasks> .Bag </tasks> => .)
+  rule (<T>... <tasks> .Bag </tasks> ...</T> => .)
        <out>... .List => ListItem("Type checked!\n") </out>
     [structural]
 
