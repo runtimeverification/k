@@ -1,6 +1,10 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multiset;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
@@ -11,13 +15,7 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multiset;
 
 
 /**
@@ -162,6 +160,17 @@ public class CellCollection extends Collection {
         return cells;
     }
 
+    private Multiset<Cell> values;
+
+    public Multiset<Cell> values() {
+        Multiset<Cell> v = values;
+        if (v == null) {
+            v = ImmutableMultiset.copyOf(cells.values());
+            values = v;
+        }
+        return v;
+    }
+
     public Multiset<Term> baseTerms() {
         return (Multiset<Term>) (Object) collectionVariables();
     }
@@ -241,14 +250,14 @@ public class CellCollection extends Collection {
 
         CellCollection collection = (CellCollection) object;
         return collectionVariables.equals(collection.collectionVariables)
-                && ImmutableMultiset.copyOf(cells.values()).equals(ImmutableMultiset.copyOf(collection.cells.values()));
+                && values().equals(collection.values());
     }
 
     @Override
     protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + ImmutableMultiset.copyOf(cells.values()).hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + values().hashCode();
         return hashCode;
     }
 
@@ -278,11 +287,6 @@ public class CellCollection extends Collection {
             }
             return stringBuilder.toString();
         }
-    }
-
-    @Override
-    public List<Term> getKComponents() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

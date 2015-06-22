@@ -7,6 +7,7 @@ import org.kframework.POSet
 import org.kframework.attributes.{Source, Location, Att}
 import org.kframework.kore.Unapply.{KLabel, KApply}
 import org.kframework.kore._
+import org.kframework.kore.KORE.KLabel
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
@@ -45,10 +46,14 @@ case class Definition(
 case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
 
-  val sentences: Set[Sentence] = localSentences | (imports flatMap {_.sentences})
+  val sentences: Set[Sentence] = localSentences | (imports flatMap {
+    _.sentences
+  })
 
   /** All the imported modules, calculated recursively. */
-  lazy val importedModules: Set[Module] = imports | (imports flatMap {_.importedModules})
+  lazy val importedModules: Set[Module] = imports | (imports flatMap {
+    _.importedModules
+  })
 
   val productions: Set[Production] = sentences collect { case p: Production => p }
 
@@ -57,6 +62,28 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .collect({ case p if p.klabel != None => p })
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
+
+  lazy val definedKLabels: Set[KLabel] =
+    (productionsFor.keys.toSet | klabelsDefinedInRules).filter(!_.isInstanceOf[KVariable])
+
+  private lazy val klabelsDefinedInRules: Set[KLabel] = {
+    val transformer = new KORETransformer[Set[KLabel]] {
+      override def apply(k: KApply): Set[KLabel] = k.klist.items.asScala.flatMap(apply).toSet + k.klabel
+
+      override def apply(k: KRewrite): Set[KLabel] = apply(k.left) | apply(k.right)
+
+      override def apply(k: KToken): Set[KLabel] = Set()
+
+      override def apply(k: KVariable): Set[KLabel] = Set()
+
+      override def apply(k: KSequence): Set[KLabel] = k.items.asScala.flatMap(apply).toSet
+
+      override def apply(k: InjectedKLabel): Set[KLabel] = Set(k.klabel)
+    }
+    rules.flatMap(r => {
+      transformer.apply(r.body) | transformer.apply(r.requires) | transformer.apply(r.ensures)
+    })
+  }
 
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
@@ -83,11 +110,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
-  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {p => {
-    val union = p.flatMap(_.att.att)
-    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel).map { case (l, as) => (l, as) }
-    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
-  }}
+  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
 
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
@@ -100,6 +123,18 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     }
 
   val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
+
+  lazy val sortDeclarationsFor: Map[Sort, Set[SyntaxSort]] =
+    sortDeclarations
+      .groupBy(_.sort)
+
+  @transient lazy val sortAttributesFor: Map[Sort, Att] =  sortDeclarationsFor mapValues {mergeAttributes(_)}
+
+  private def mergeAttributes[T <: Sentence](p: Set[T]) = {
+    val union = p.flatMap(_.att.att)
+    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel)
+    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
+  }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
 
@@ -135,6 +170,16 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   }
 
   lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
+
+  lazy val freshFunctionFor: Map[Sort, KLabel] =
+    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")) )
+      .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
+      if (set.size > 1)
+        throw KEMException.compilerError("Found more than one fresh generator for sort " + sortFor(set.head)
+          + ". Found: " + set)
+      else
+        set.head
+    }}
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {

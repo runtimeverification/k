@@ -59,9 +59,10 @@ public class GenerateSentencesFromConfigDeclTest {
                         cells(cell("k", Collections.emptyMap(), KApply(KLabel("#SemanticCastToK"), KToken("$PGM", Sorts.KConfigVar()))),
                                 cell("opt", Collections.singletonMap("multiplicity", "?"),
                                         KApply(KLabel(".Opt"))))));
-        Module m = new RuleGrammarGenerator(def).getConfigGrammar(def.getModule("KSEQ").get());
-        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(),
-                Module("CONFIG", Set(m), Set(Production(".Opt", Sort("OptCellContent"), Seq(Terminal("")))), Att()));
+        Module m1 = Module("CONFIG", Set(def.getModule("KSEQ").get()), Set(Production(".Opt", Sort("OptCellContent"), Seq(Terminal("")))), Att());
+        RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
+        Module m = parserGen.getCombinedGrammar(parserGen.getConfigGrammar(m1)).getExtensionModule();
+        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
         Set reference = Set(Production("<threads>", Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>"))),
                 Production("_ThreadCellBag_", Sort("ThreadCellBag"),
@@ -70,6 +71,8 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(Terminal(".ThreadCellBag"))),
                 Production(Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCell")))),
+                Production("ThreadCellBagItem", Sort("ThreadCellBag"),
+                        Seq(Terminal("ThreadCellBagItem"), Terminal("("), NonTerminal(Sort("ThreadCell")), Terminal(")"))),
                 Production("<thread>", Sort("ThreadCell"),
                         Seq(Terminal("<thread>"), NonTerminal(Sort("KCell")), NonTerminal(Sort("OptCell")), Terminal("</thread>"))),
                 Production("<k>", Sort("KCell"),

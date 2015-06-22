@@ -1,5 +1,7 @@
 package org.kframework
 
+import java.util.Optional
+
 import org.kframework.definition.Module
 import org.kframework.kore.K
 
@@ -19,5 +21,5 @@ trait Rewriter {
    * - for search, it returns an Or with multiple ground terms as children
    */
 
-  def execute(k: kore.K): kore.K
+  def execute(k: kore.K, depth: Optional[Integer]): kore.K
 }

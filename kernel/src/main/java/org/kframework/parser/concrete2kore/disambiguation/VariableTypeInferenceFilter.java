@@ -48,12 +48,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     private final POSet<Sort> subsorts;
     private final scala.collection.immutable.Set<Sort> sortSet;
     private final scala.collection.immutable.Map<KLabel, scala.collection.immutable.Set<Production>> productions;
+    private final boolean inferSortChecks;
     private Set<ParseFailedException> warnings = this.warningUnit();
     public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.immutable.Set<Sort> sortSet, scala.collection.immutable.Map<
-            KLabel, scala.collection.immutable.Set<Production>> productions) {
+            KLabel, scala.collection.immutable.Set<Production>> productions, boolean inferSortChecks) {
         this.subsorts = subsorts;
         this.sortSet = sortSet;
         this.productions = productions;
+        this.inferSortChecks = inferSortChecks;
     }
 
     @Override
@@ -347,8 +349,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
-                boolean strict = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strict, strict).apply(t);
+                boolean strictSortEquality = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(0, rez.right().get());
@@ -357,7 +359,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, true).apply(t);
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, inferSortChecks).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc = tc.with(j, rez.right().get());
@@ -373,12 +375,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         private class ApplyTypeCheck2 extends SetsTransformerWithErrors<ParseFailedException> {
             private final Sort sort;
-            private final boolean strict;
+            private final boolean strictSortEquality;
             private final boolean addCast;
 
-            public ApplyTypeCheck2(Sort sort, boolean strict, boolean addCast) {
+            public ApplyTypeCheck2(Sort sort, boolean strictSortEquality, boolean addCast) {
                 this.sort = sort;
-                this.strict = strict;
+                this.strictSortEquality = strictSortEquality;
                 this.addCast = addCast;
             }
 
@@ -395,7 +397,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (c.production().sort().equals(Sorts.KVariable())) {
                     Sort declared = decl.get(c.value());
                     if (declared != null && !declared.equals(Sorts.K())) {
-                        if ((!strict && !subsorts.lessThanEq(declared, sort)) || (strict && !declared.equals(sort))) {
+                        if ((!strictSortEquality && !subsorts.lessThanEq(declared, sort)) || (strictSortEquality && !declared.equals(sort))) {
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
                             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().get(), c.location().get());
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));

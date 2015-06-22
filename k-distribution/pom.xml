@@ -39,6 +39,12 @@
     </dependency>
     <dependency>
       <groupId>org.kframework.k</groupId>
+      <artifactId>ocaml-backend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.k</groupId>
       <artifactId>coq-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

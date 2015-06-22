@@ -310,7 +310,7 @@ public class AddParentCells {
             return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
         } else if (m instanceof Context) {
             Context c = (Context) m;
-            return new Context(c.body(), c.requires(), c.att());
+            return new Context(concretize(c.body()), c.requires(), c.att());
         } else {
             return m;
         }

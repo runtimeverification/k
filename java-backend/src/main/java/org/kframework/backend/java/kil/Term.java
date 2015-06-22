@@ -2,8 +2,8 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Source;
 import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
@@ -11,6 +11,7 @@ import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.util.Utils;
+import org.kframework.kore.convertors.KILtoInnerKORE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -229,7 +230,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         if (h == Utils.NO_HASHCODE) {
             h = computeHash();
             h = h == 0 ? 1 : h;
-            hashCode = h;
+            if (!isMutable())
+                hashCode = h;
         }
         return h;
     }
@@ -244,7 +246,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public abstract boolean equals(Object object);
 
     public Att att() {
-        return Att.apply();
+        return new KILtoInnerKORE(null, true).convertAttributes(this);
     }
 
     public Location location() { return getLocation(); }
