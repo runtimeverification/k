@@ -1,7 +1,10 @@
+// Copyright 2015 K Team. All Rights Reserved.
+
 package org.kframework.utils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
 import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
@@ -31,8 +34,9 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE$.KToken;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Created by Manasvi on 6/19/15.
@@ -49,6 +53,7 @@ public class KoreUtils {
     private static KExceptionManager kem;
     private static SimpleScope requestScope;
     private static BiFunction<String, Source, K> programParser;
+    private static Rewriter rewriter;
 
 
     protected File testResource(String baseName) throws URISyntaxException {
@@ -75,6 +80,7 @@ public class KoreUtils {
             }
         });
         programParser = compiledDef.getProgramParser(kem);
+        rewriter = injector.getInstance(InitializeRewriter.class).apply(compiledDef.executionModule());
     }
 
     public K getParsed(String program, Source source) throws IOException, URISyntaxException {
@@ -88,12 +94,16 @@ public class KoreUtils {
         requestScope.enter();
         try {
             InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
-            K kResult = initRewriter.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsedPgm)), Optional.empty());
-
+            K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsedPgm)), Optional.empty());
+            return kResult;
         } finally {
             requestScope.exit();
+        }
     }
 
+    public Rewriter getRewriter() {
+        return rewriter;
+    }
 
 
     public Module getUnparsingModule() {
