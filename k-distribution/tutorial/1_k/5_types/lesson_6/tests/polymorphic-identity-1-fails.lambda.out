@@ -9,4 +9,4 @@ _0:Type
 
 Solution 3:
 V:K -->
-int = bool
+bool = int
