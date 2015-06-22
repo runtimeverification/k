@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.CellCollection.Cell;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.util.Profiler;
@@ -186,138 +187,6 @@ public class AbstractKMachine {
             this.rule = rule;
         }
 
-        private static Term construct(
-                List<RHSInstruction> rhsInstructions,
-                Map<Variable, Term> substitution,
-                TermContext context) {
-            if (rhsInstructions.size() == 1) {
-                RHSInstruction instruction = rhsInstructions.get(0);
-                switch (instruction.type()) {
-                case PUSH:
-                    return instruction.term();
-                case SUBST:
-                    Variable variable = (Variable) instruction.term();
-                    Term content = substitution.get(variable);
-                    if (content == null) {
-                        content = variable;
-                    }
-                    return content;
-                default:
-                    assert false : "unreachable";
-                }
-            }
-
-            Deque<Term> stack = new ArrayDeque<>();
-            for (RHSInstruction instruction : rhsInstructions) {
-                switch (instruction.type()) {
-                case PUSH:
-                    stack.push(instruction.term());
-                    break;
-                case CONSTRUCT:
-                    RHSInstruction.Constructor constructor = instruction.constructor();
-                    switch (constructor.type()) {
-                    case BUILTIN_LIST:
-                        BuiltinList.Builder builder = BuiltinList.builder(context);
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            builder.addItem(stack.pop());
-                        }
-                        for (int i = 0; i < constructor.size2(); i++) {
-                            builder.concatenate(stack.pop());
-                        }
-                        for (int i = 0; i < constructor.size3(); i++) {
-                            builder.addItem(stack.pop());
-                        }
-                        stack.push(builder.build());
-                        break;
-                    case BUILTIN_MAP:
-                        BuiltinMap.Builder builder1 = BuiltinMap.builder(context);
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            Term key = stack.pop();
-                            Term value = stack.pop();
-                            builder1.put(key, value);
-                        }
-                        for (int i = 0; i < constructor.size2(); i++) {
-                            builder1.concatenate(stack.pop());
-                        }
-                        stack.push(builder1.build());
-                        break;
-                    case BUILTIN_SET:
-                        BuiltinSet.Builder builder2 = BuiltinSet.builder(context);
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            builder2.add(stack.pop());
-                        }
-                        for (int i = 0; i < constructor.size2(); i++) {
-                            builder2.concatenate(stack.pop());
-                        }
-                        stack.push(builder2.build());
-                        break;
-                    case KITEM:
-                        Term kLabel = stack.pop();
-                        Term kList = stack.pop();
-                        stack.push(KItem.of(kLabel, kList, context, constructor.getSource(), constructor.getLocation()));
-                        break;
-                    case KITEM_PROJECTION:
-                        stack.push(new KItemProjection(constructor.kind(), stack.pop()));
-                        break;
-                    case KLABEL_FREEZER:
-                        stack.push(new KLabelFreezer(stack.pop()));
-                        break;
-                    case KLABEL_INJECTION:
-                        stack.push(new KLabelInjection(stack.pop()));
-                        break;
-                    case INJECTED_KLABEL:
-                        stack.push(new InjectedKLabel(stack.pop()));
-                        break;
-                    case KLIST:
-                        KList.Builder builder3 = KList.builder();
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            builder3.concatenate(stack.pop());
-                        }
-                        stack.push(builder3.build());
-                        break;
-                    case KSEQUENCE:
-                        KSequence.Builder builder4 = KSequence.builder();
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            builder4.concatenate(stack.pop());
-                        }
-                        stack.push(builder4.build());
-                        break;
-                    case CELL_COLLECTION:
-                        CellCollection.Builder builder5 = CellCollection.builder(context.definition());
-                        for (CellLabel cellLabel : constructor.cellLabels()) {
-                            builder5.add(new Cell(cellLabel, stack.pop()));
-                        }
-                        for (int i = 0; i < constructor.size1(); i++) {
-                            builder5.concatenate(stack.pop());
-                        }
-                        stack.push(builder5.build());
-                        break;
-                    default:
-                        assert false : "unreachable";
-                    }
-                    break;
-                case SUBST:
-                    Variable variable = (Variable) instruction.term();
-                    Term term = substitution.get(variable);
-                    if (term == null) {
-                        term = variable;
-                    }
-                    stack.push(term);
-                    break;
-                case EVAL:
-                    KItem kItem = (KItem) stack.pop();
-                    stack.push(kItem.resolveFunctionAndAnywhere(true, context));
-                    break;
-                case PROJECT:
-                    KItemProjection projection = (KItemProjection) stack.pop();
-                    stack.push(projection.evaluateProjection());
-                    break;
-                }
-            }
-            assert stack.size() == 1;
-            return stack.pop();
-        }
-
         @Override
         public CellCollection transform(CellCollection cellCollection) {
             assert cellCollection.isConcreteCollection();
@@ -330,7 +199,9 @@ public class AbstractKMachine {
                     builder.put(cell.cellLabel(), cell.content());
                 } else if (isWriteCell(cell.cellLabel())) {
                     List<RHSInstruction> instructions = getWriteCellInstructions(cell.cellLabel());
-                    builder.put(cell.cellLabel(), construct(instructions, substitution, context));
+                    builder.put(
+                            cell.cellLabel(),
+                            KAbstractRewriteMachine.construct(instructions, substitution, null, context, false));
                     changed = true;
                 } else if (cell.content() instanceof CellCollection) {
                     CellCollection transformedContent = transform((CellCollection) cell.content());
