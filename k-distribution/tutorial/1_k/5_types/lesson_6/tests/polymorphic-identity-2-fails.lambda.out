@@ -6,4 +6,4 @@ _0:Type
 
 Solution 2:
 V:K -->
-_0:Type -> _0 = (_0 -> _0) -> _1:Type
+_0:Type -> _0 = _0
