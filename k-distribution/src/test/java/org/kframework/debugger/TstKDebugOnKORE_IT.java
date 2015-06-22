@@ -49,6 +49,5 @@ public class TstKDebugOnKORE_IT {
         Module unparsingModule = utils.getUnparsingModule();
         CompiledDefinition compiledDef = utils.getCompiledDef();
         KRun.prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.err.println(s), kResult);
-
     }
 }
