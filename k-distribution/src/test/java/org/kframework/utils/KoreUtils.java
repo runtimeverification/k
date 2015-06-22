@@ -83,16 +83,18 @@ public class KoreUtils {
     }
 
     public K getParsed(String program, Source source) throws IOException, URISyntaxException {
-        return programParser.apply(program, source);
+        K parsed = programParser.apply(program, source);
+        KRun krun = new KRun(kem, FileUtil.testFileUtil());
+        return krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsed));
+
     }
 
     public K stepRewrite(K parsedPgm, Optional<Integer> depth) {
         requestScope.enter();
         InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
-        KRun krun = new KRun(kem, FileUtil.testFileUtil());
         try {
             InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
-            K kResult = init.apply(compiledDef.executionModule()).execute(krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsedPgm)), depth);
+            K kResult = init.apply(compiledDef.executionModule()).execute(parsedPgm, depth);
             return kResult;
         } finally {
             requestScope.exit();
@@ -114,7 +116,4 @@ public class KoreUtils {
 
     }
 
-    public static CompiledDefinition getCompiledDef() {
-        return compiledDef;
-    }
 }
