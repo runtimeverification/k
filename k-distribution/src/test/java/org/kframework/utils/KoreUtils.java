@@ -1,5 +1,4 @@
 // Copyright 2015 K Team. All Rights Reserved.
-
 package org.kframework.utils;
 
 import com.google.inject.Guice;
@@ -33,9 +32,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
