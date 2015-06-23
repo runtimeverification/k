@@ -1,4 +1,4 @@
-// Copyright 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import com.google.inject.Guice;
