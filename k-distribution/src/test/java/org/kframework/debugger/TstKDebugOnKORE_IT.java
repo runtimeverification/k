@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 /**

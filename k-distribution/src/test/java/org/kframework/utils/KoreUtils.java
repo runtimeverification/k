@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import static org.kframework.kore.KORE.*;
+import static org.kframework.kore.KORE.KToken;
 
 /**
  * Created by Manasvi on 6/19/15.

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.kframework.krun.KRun.*;
+import static org.kframework.krun.KRun.prettyPrint;
 
 /**
  * Created by Manasvi on 6/10/15.
