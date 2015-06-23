@@ -78,16 +78,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             JCommander jc = new JCommander(options);
             jc.addCommand(options.help);
             jc.addCommand(options.step);
-            jc.addCommand(options.search);
-            jc.addCommand(options.select);
-            jc.addCommand(options.showGraph);
-            jc.addCommand(options.showState);
-            jc.addCommand(options.showTransition);
-            jc.addCommand(options.resume);
             jc.addCommand(options.exit);
-            jc.addCommand(options.save);
-            jc.addCommand(options.load);
-            jc.addCommand(options.read);
             jc.addCommand(options.setCheckpoint);
             jc.addCommand(options.backStep);
             jc.addCommand(options.jumpTo);
@@ -107,10 +98,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandExit) {
                     return null;
 
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandResume) {
-
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
+                }  else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
@@ -118,27 +106,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     else
                         System.out.printf("Invalid Operation");
 
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
-
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
-
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowGraph) {
-
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowState) {
-
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowTransition) {
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSave) {
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandRead) {
-
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
+                }  else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandJumpTo) {
