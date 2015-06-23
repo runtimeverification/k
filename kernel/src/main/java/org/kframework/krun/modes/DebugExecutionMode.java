@@ -105,7 +105,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
-
                 }  else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
 
