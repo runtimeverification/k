@@ -19,7 +19,6 @@ public class KoreKDebug implements KDebug {
 
     private final int DEFAULT_ID = 0;
     private final int DEFAULT_CHECKPOINT_SIZE = 50;
-
     private List<DebuggerState> stateList;
     private DebuggerState activeState;
     private Rewriter rewriter;

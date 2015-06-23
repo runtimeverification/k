@@ -40,9 +40,9 @@ import static org.kframework.kore.KORE.*;
 
 /**
  * Created by Manasvi on 6/19/15.
- *
+ * <p>
  * Create this object to use for Tests.
- *
+ * <p>
  * Contains utilities used across Tests.
  */
 
@@ -102,11 +102,9 @@ public class KoreUtils {
     }
 
     public Rewriter getRewriter() {
-        if(rewriter == null) {
-            requestScope.enter();
-            rewriter = injector.getInstance(InitializeRewriter.class).apply(compiledDef.executionModule());
-            requestScope.exit();
-        }
+        requestScope.enter();
+        rewriter = injector.getInstance(InitializeRewriter.class).apply(compiledDef.executionModule());
+        requestScope.exit();
         return rewriter;
     }
 

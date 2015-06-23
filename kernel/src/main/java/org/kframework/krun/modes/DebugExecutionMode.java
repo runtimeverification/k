@@ -10,21 +10,20 @@ import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
 import org.kframework.Rewriter;
+import org.kframework.backend.unparser.OutputModes;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
-import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunDebuggerOptions;
-import org.kframework.parser.ProductionReference;
-import org.kframework.unparser.AddBrackets;
-import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.kframework.krun.KRun.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -35,19 +34,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     private static Object command(JCommander jc) {
         return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
-
-    }
-
-    private static String unparseTerm(K input, Module test) {
-        return KOREToTreeNodes.toString(
-                new AddBrackets(test).addBrackets((ProductionReference)
-                        KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
-    }
-
-    public static void prettyPrint(CompiledDefinition compiledDef, K result) {
-
-        Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
-        System.out.println(unparseTerm(result, unparsingModule) + "\n");
 
     }
 
@@ -128,7 +114,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
-                        prettyPrint(compiledDef, (K) finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
 
@@ -159,14 +145,14 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.jumpTo(options.jumpTo.stateNum);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, (K) finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
                     DebuggerState result = debugger.backStep(options.backStep.backSteps);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, (K) finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
 
