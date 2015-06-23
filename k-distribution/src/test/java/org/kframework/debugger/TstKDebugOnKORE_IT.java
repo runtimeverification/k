@@ -44,8 +44,8 @@ public class TstKDebugOnKORE_IT {
     @Test
     public void normalExecutionTest() throws IOException, URISyntaxException {
         int steps = getRandomSteps(1, 100);
-        K debugResult = debuggerSession.step(steps).getCurrentK();
-        K expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps)));
+        K debugResult = trans.apply(debuggerSession.step(steps).getCurrentK());
+        K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps))));
         assertEquals("Normal and Debug results don't match, when both allowed to run for some random steps", expectedResult, debugResult);
     }
     @Test
@@ -54,8 +54,8 @@ public class TstKDebugOnKORE_IT {
         int forward = getRandomSteps(20, 150);
         int backward = getRandomSteps(1, forward);
         debuggerSession.step(forward);
-        K debugResult = debuggerSession.backStep(backward).getCurrentK();
-        K expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(forward - backward)));
+        K debugResult = trans.apply(debuggerSession.backStep(backward).getCurrentK());
+        K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(forward - backward))));
         assertEquals("Normal and Debug results don't match, when normal takes 25 steps, and debugger goes back 25 steps", expectedResult, debugResult);
     }
 
@@ -74,8 +74,8 @@ public class TstKDebugOnKORE_IT {
         int steps1 = getRandomSteps(1, 50);
         int steps2 = getRandomSteps(1, 50);
         debuggerSession.step(steps1);
-        K debugResult = debuggerSession.step(steps2).getCurrentK();
-        K expectedResult = utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps1 + steps2)));
+        K debugResult = trans.apply(debuggerSession.step(steps2).getCurrentK());
+        K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps1 + steps2))));
         assertEquals("Normal and Debug results don't match, when normal takes 20 steps, and debugger 10 steps in ongoing session", expectedResult, debugResult);
     }
 
