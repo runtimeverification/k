@@ -7,6 +7,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -14,7 +15,6 @@ import org.kframework.transformation.AmbiguousTransformationException;
 import org.kframework.transformation.Transformation;
 import org.kframework.transformation.TransformationNotSatisfiedException;
 import org.kframework.transformation.TransformationProvider;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -85,20 +85,29 @@ public class KRunFrontEnd extends FrontEnd {
         private final FileUtil files;
         private final CompiledDefinition compiledDef;
         private final Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter;
+        private final ExecutionMode executionMode;
 
         @Inject
-        public NewKRunFrontEnd(KExceptionManager kem, KRunOptions krunOptions, @Main FileUtil files, @Main CompiledDefinition compiledDef, @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter) {
+        public NewKRunFrontEnd(
+                KExceptionManager kem,
+                KRunOptions krunOptions,
+                @Main FileUtil files,
+                @Main CompiledDefinition compiledDef,
+                @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter,
+                @Main ExecutionMode executionMode) {
             this.kem = kem;
             this.krunOptions = krunOptions;
             this.files = files;
             this.compiledDef = compiledDef;
             this.initializeRewriter = initializeRewriter;
+            this.executionMode = executionMode;
         }
 
         public int run() {
             return new KRun(kem, files).run(compiledDef,
                     krunOptions,
-                    initializeRewriter);
+                    initializeRewriter,
+                    executionMode);
         }
     }
 

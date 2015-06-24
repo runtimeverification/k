@@ -14,6 +14,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
@@ -29,7 +30,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -48,7 +48,7 @@ public class KRun implements Transformation<Void, Void> {
         this.files = files;
     }
 
-    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
+    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
@@ -58,11 +58,16 @@ public class KRun implements Transformation<Void, Void> {
             program = parseConfigVars(options, compiledDef);
         }
 
+
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        K result = rewriter.execute(program, Optional.ofNullable(options.depth));
+        Object result = executionMode.execute(program, rewriter, compiledDef);
 
-        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+        if (result instanceof K) {
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+        }
+
+
         return 0;
     }
 

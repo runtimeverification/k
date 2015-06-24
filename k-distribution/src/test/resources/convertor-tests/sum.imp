@@ -1,1 +1,1 @@
-int n, s, .Ids; n = 10; while(0<=n) { s = s + n; n = n + -1; }
+int n, s; n = 10; while(0<=n) { s = s + n; n = n + -1; }
