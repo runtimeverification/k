@@ -95,7 +95,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .addAll(rule.ensures())
                     .simplify();
             if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
-                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint));
+                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false));
             }
         }
 
