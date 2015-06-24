@@ -51,8 +51,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         List<Completor> argCompletor = new LinkedList<Completor>();
         argCompletor.add(new SimpleCompletor(new String[]{"help",
-                "exit", "resume", "step", "search", "select",
-                "show-graph", "show-state", "show-transition", "save", "load", "read"}));
+                "exit", "step", "jump-to", "back-step"}));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));
@@ -98,14 +97,18 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandExit) {
                     return null;
 
-                }  else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
                         prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
-                }  else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
+
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
+
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
+
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandJumpTo) {

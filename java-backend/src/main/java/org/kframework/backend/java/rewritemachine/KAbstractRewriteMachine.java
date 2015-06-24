@@ -115,7 +115,7 @@ public class KAbstractRewriteMachine {
             case PUSH:
                 return instruction.term();
             case SUBST:
-                Term var = instruction.term();
+                Variable var = (Variable) instruction.term();
                 Term content = solution.get(var);
                 if (content == null) {
                     content = var;
