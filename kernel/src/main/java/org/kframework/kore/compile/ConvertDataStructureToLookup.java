@@ -63,13 +63,15 @@ public class ConvertDataStructureToLookup {
 
     private final Module m;
     private final Map<KLabel, KLabel> collectionFor;
+    private final boolean matchOnConsList;
 
-    public ConvertDataStructureToLookup(Module m) {
+    public ConvertDataStructureToLookup(Module m, boolean matchOnConsList) {
         this.m = m;
         collectionFor = collectionFor(m);
+        this.matchOnConsList = matchOnConsList;
     }
 
-    private Map<KLabel, KLabel> collectionFor(Module m) {
+    public static Map<KLabel, KLabel> collectionFor(Module m) {
         return stream(m.productions()).filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY)).flatMap(p -> {
             Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
             set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
@@ -277,6 +279,9 @@ public class ConvertDataStructureToLookup {
                                 throw KEMException.internalError("Unexpected term in list, not a list element.", kapp);
                             }
                         }
+                    }
+                    if (elementsRight.size() == 0 && matchOnConsList) {
+                        return infer(super.apply(k), collectionLabel);
                     }
                     KVariable list = newDotVariable();
                     // Ctx[ListItem(5) Frame ListItem(X) ListItem(foo(Y))] => Ctx [L]
