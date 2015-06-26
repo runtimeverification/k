@@ -249,11 +249,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return new KILtoInnerKORE(null, true).convertAttributes(this);
     }
 
-    @Override
-    public boolean attEquals(Object object, String... attNames) {
-        throw new UnsupportedOperationException();
-    }
-
     public Location location() { return getLocation(); }
     public Source source() { return getSource(); }
 }
