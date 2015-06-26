@@ -246,8 +246,9 @@ public class Kompile {
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
         Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
-        loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
-
+        if(cacheParses) {
+            loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
+        }
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");

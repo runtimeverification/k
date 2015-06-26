@@ -17,6 +17,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
@@ -34,7 +35,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -54,7 +54,7 @@ public class KRun implements Transformation<Void, Void> {
         this.files = files;
     }
 
-    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator) {
+    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
@@ -64,36 +64,39 @@ public class KRun implements Transformation<Void, Void> {
             program = parseConfigVars(options, compiledDef);
         }
 
+
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        K result = rewriter.execute(program, Optional.ofNullable(options.depth));
+        Object result = executionMode.execute(program, rewriter, compiledDef);
 
-        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+        if (result instanceof K) {
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
-        if (options.exitCodePattern != null) {
-            Rule exitCodePattern = pattern(options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
-            List<Map<KVariable, K>> res = rewriter.match(result, exitCodePattern);
-            if (res.size() != 1) {
-                kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
-                return 112;
-            }
-            Map<? extends KVariable, ? extends K> solution = res.get(0);
-            Set<Integer> vars = new HashSet<>();
-            for (K t : solution.values()) {
-                // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
-                if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
-                    try {
-                        vars.add(Integer.valueOf(((KToken) t).s()));
-                    } catch (NumberFormatException e) {
-                        throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
+            if (options.exitCodePattern != null) {
+                Rule exitCodePattern = pattern(options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
+                if (res.size() != 1) {
+                    kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
+                    return 112;
+                }
+                Map<? extends KVariable, ? extends K> solution = res.get(0);
+                Set<Integer> vars = new HashSet<>();
+                for (K t : solution.values()) {
+                    // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
+                    if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
+                        try {
+                            vars.add(Integer.valueOf(((KToken) t).s()));
+                        } catch (NumberFormatException e) {
+                            throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
+                        }
                     }
                 }
+                if (vars.size() != 1) {
+                    kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
+                    return 111;
+                }
+                return vars.iterator().next();
             }
-            if (vars.size() != 1) {
-                kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
-                return 111;
-            }
-            return vars.iterator().next();
         }
 
         return 0;

@@ -28,6 +28,7 @@ import org.kframework.kil.loader.Constants;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,6 +97,8 @@ public class Rule extends JavaSymbolicObject {
     private final List<RHSInstruction> rhsInstructions;
 
     private final boolean modifyCellStructure;
+
+    private final Set<Variable> matchingVariables;
 
     // TODO(YilongL): make it final
     private boolean isSortPredicate;
@@ -241,6 +244,28 @@ public class Rule extends JavaSymbolicObject {
             modifyCellStructure = true;
         }
         this.modifyCellStructure = modifyCellStructure;
+
+        Set<Variable> choiceVariables = new HashSet<>();
+        if (compiledForFastRewriting) {
+            for (int i = 0; i < instructions.size(); ++i) {
+                if (instructions.get(i) == MatchingInstruction.CHOICE) {
+                    choiceVariables.add(getChoiceVariableForCell(instructions.get(i + 1).cellLabel()));
+                }
+            }
+        }
+        matchingVariables = ImmutableSet.copyOf(Sets.union(
+                !compiledForFastRewriting ?
+                        leftHandSide.variableSet() :
+                        Sets.union(
+                                lhsOfReadCells.values().stream().map(Term::variableSet).flatMap(Set::stream).collect(Collectors.toSet()),
+                                choiceVariables),
+                Sets.union(
+                        lookups.variableSet(),
+                        requires.stream().map(Term::variableSet).flatMap(Set::stream).collect(Collectors.toSet()))));
+    }
+
+    public static Variable getChoiceVariableForCell(CellLabel label) {
+        return new Variable("__choice_" + label, Sort.BAG);
     }
 
     /**
@@ -451,6 +476,10 @@ public class Rule extends JavaSymbolicObject {
      */
     public boolean modifyCellStructure() {
         return modifyCellStructure;
+    }
+
+    public Set<Variable> matchingVariables() {
+        return matchingVariables;
     }
 
     @Override

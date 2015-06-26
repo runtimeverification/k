@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import com.beust.jcommander.JCommander;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
@@ -43,6 +44,9 @@ import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+import org.kframework.krun.modes.DebugExecutionMode;
+import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.krun.modes.KRunExecutionMode;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.LtlModelChecker;
@@ -101,10 +105,10 @@ public class KRunModule extends AbstractModule {
             public <I> void hear(TypeLiteral<I> typeLiteral, TypeEncounter<I> typeEncounter) {
                 for (Field field : typeLiteral.getRawType().getDeclaredFields()) {
                     if (field.getType() == Transformation.class && field.isAnnotationPresent(InjectGeneric.class)) {
-                      TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
-                      TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
-                      TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
-                      typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral))));
+                        TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
+                        TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
+                        TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
+                        typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral))));
                     }
                 }
             }
@@ -198,7 +202,7 @@ public class KRunModule extends AbstractModule {
 
             MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
-            });
+                    });
 
             MapBinder.newMapBinder(
                     binder(), String.class, LtlModelChecker.class);
@@ -218,6 +222,11 @@ public class KRunModule extends AbstractModule {
             bind(ConcretizeTerm.class);
 
             bind(FileSystem.class).to(PortableFileSystem.class);
+
+            MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
+                    ToolActivation.class, ExecutionMode.class);
+
+            executionBinder.addBinding(new ToolActivation.OptionActivation("--debugger")).to(DebugExecutionMode.class);
 
         }
 
@@ -254,6 +263,24 @@ public class KRunModule extends AbstractModule {
                         + map.keySet());
             }
             return provider.get();
+        }
+
+        @Provides
+        ExecutionMode getExecutionMode(JCommander jc, Map<ToolActivation, Provider<ExecutionMode>> map, KRunOptions kRunOptions) {
+            ExecutionMode res = null;
+            ToolActivation previous = null;
+            for (Map.Entry<ToolActivation, Provider<ExecutionMode>> entry : map.entrySet()) {
+                if (entry.getKey().isActive(jc)) {
+                    if (res != null) {
+                        throw KEMException.criticalError("Multiple tool activations found: " + entry.getKey() + " and " + previous);
+                    }
+                    res = entry.getValue().get();
+                    previous = entry.getKey();
+                }
+            }
+            if (res == null)
+                res = new KRunExecutionMode(kRunOptions);
+            return res;
         }
 
         @Provides
