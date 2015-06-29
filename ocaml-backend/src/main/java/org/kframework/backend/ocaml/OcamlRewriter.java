@@ -127,7 +127,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                         p2.getOutputStream().write(buffer, 0, count);
                     }
                 } catch (IOException | InterruptedException e) {}
-            });;
+            });
             Thread out = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
@@ -146,7 +146,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     }
                 } catch (IOException e) {}
             });
-            in.start();;
+            in.start();
             out.start();
             err.start();
 
