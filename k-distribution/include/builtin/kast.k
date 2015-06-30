@@ -2,13 +2,13 @@
 
 // Module defining only the sorts K and KString, useful for modularity
 module SORT-K
-  syntax K [hook(org.kframework.kore.K)]
+  syntax K [hook(K.K)]
 endmodule
 
 module BASIC-K
   imports SORT-K
   syntax KLabel
-  syntax KItem [hook(org.kframework.kore.KItem)]
+  syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar
 endmodule

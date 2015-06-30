@@ -2,6 +2,6 @@
 
 module FRESH-HOOKS
   imports STRING-SYNTAX-HOOKS
-  syntax KItem ::= fresh(String)   [function, hook(#FRESH:fresh), impure]
+  syntax KItem ::= fresh(String)   [function, hook(KREFLECTION.fresh), impure]
 endmodule
 

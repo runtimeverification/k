@@ -102,7 +102,7 @@ public class KExceptionManager {
 
     public void addAllKException(Collection<KException> kex) {
         for (KException e : kex)
-            registerInternal(e);
+            registerInternal(e, false);
     }
 
     public void registerCompilerWarning(String message) {
@@ -168,19 +168,19 @@ public class KExceptionManager {
 
     private void register(ExceptionType type, KExceptionGroup group, String message,
                           AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
-        registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
+        registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e), true);
     }
 
     @Deprecated
     public void register(KException exception) {
-        registerInternal(exception);
+        registerInternal(exception, true);
     }
 
-    private void registerInternal(KException exception) {
+    private void registerInternal(KException exception, boolean _throw) {
         if (!options.warnings.includesExceptionType(exception.type))
             return;
         exceptions.add(exception);
-        if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
+        if (_throw && (exception.type == ExceptionType.ERROR || options.warnings2errors)) {
             throw new KEMException(exception);
         }
     }

@@ -28,6 +28,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.koreparser.KoreParser;
+import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,33 +74,43 @@ public class KRun implements Transformation<Void, Void> {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = pattern(options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                Rule exitCodePattern = pattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
-                if (res.size() != 1) {
-                    kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
-                    return 112;
-                }
-                Map<? extends KVariable, ? extends K> solution = res.get(0);
-                Set<Integer> vars = new HashSet<>();
-                for (K t : solution.values()) {
-                    // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
-                    if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
-                        try {
-                            vars.add(Integer.valueOf(((KToken) t).s()));
-                        } catch (NumberFormatException e) {
-                            throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
-                        }
-                    }
-                }
-                if (vars.size() != 1) {
-                    kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
-                    return 111;
-                }
-                return vars.iterator().next();
+                return getExitCode(kem, res);
+            }
+        } else if (result instanceof Tuple2) {
+            Tuple2<?, ?> tuple = (Tuple2<?, ?>) result;
+            if (tuple._1() instanceof K && tuple._2() instanceof Integer) {
+                prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
+                return (Integer) tuple._2();
             }
         }
 
         return 0;
+    }
+
+    public static int getExitCode(KExceptionManager kem, List<Map<KVariable, K>> res) {
+        if (res.size() != 1) {
+            kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
+            return 112;
+        }
+        Map<? extends KVariable, ? extends K> solution = res.get(0);
+        Set<Integer> vars = new HashSet<>();
+        for (K t : solution.values()) {
+            // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
+            if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
+                try {
+                    vars.add(Integer.valueOf(((KToken) t).s()));
+                } catch (NumberFormatException e) {
+                    throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
+                }
+            }
+        }
+        if (vars.size() != 1) {
+            kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
+            return 111;
+        }
+        return vars.iterator().next();
     }
 
     //TODO(dwightguth): use Writer
@@ -111,7 +122,7 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public Rule pattern(String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+    public static Rule pattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
         }

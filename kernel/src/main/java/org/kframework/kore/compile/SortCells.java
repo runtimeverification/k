@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -154,18 +155,42 @@ public class SortCells {
         }
 
         Map<Sort, K> getSplit(KVariable var) {
+            return getSplit(var, false);
+        }
+
+        Sort getPredicateSort(Sort s) {
+            if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
+                scala.collection.immutable.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
+                if (sorts.size() != 1) {
+                    throw KEMException.compilerError("Expected exactly one cell collection sort for the sort " + s + "; found " + sorts);
+                }
+                return stream(sorts).findFirst().get();
+            }
+            return s;
+        }
+
+
+        Map<Sort, K> getSplit(KVariable var, boolean predicate) {
             if (remainingCells.size() == 0) {
                 return Collections.emptyMap();
             }
             if (remainingCells.size() == 1) {
-                return ImmutableMap.of(Iterables.getOnlyElement(remainingCells), KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
+                Sort s = Iterables.getOnlyElement(remainingCells);
+                if (predicate) {
+                    return ImmutableMap.of(getPredicateSort(s), KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
+                }
+                return ImmutableMap.of(s, KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
             }
             if(split != null) {
                 return split;
             }
             split = new HashMap<>();
             for (Sort cell : remainingCells) {
-                split.put(cell, newDotVariable());
+                if (predicate) {
+                    split.put(getPredicateSort(cell), newDotVariable());
+                } else {
+                    split.put(cell, newDotVariable());
+                }
             }
             return split;
 
@@ -294,13 +319,13 @@ public class SortCells {
                             throw KEMException.compilerError("Unexpected isBag predicate not of arity 1 found; cannot compile to sorted cells.", k);
                         }
                         K item = k.klist().items().get(0);
-                        Map<Sort, K> split = getSplit(item);
+                        Map<Sort, K> split = getSplit(item, true);
                         if (split == null) {
                             kem.registerCompilerWarning("Unchecked isBag predicate found. Treating as isK.", k);
                             if (item instanceof KVariable) {
                                 return KVariable(((KVariable) item).name(), item.att().remove(Attribute.SORT_KEY));
                             }
-                            return item;
+                            return BooleanUtils.TRUE;
                         }
                         return split.entrySet().stream().map(e -> (K)KApply(KLabel("is" + e.getKey()), e.getValue())).reduce(BooleanUtils.TRUE, BooleanUtils::and);
                     }
@@ -309,7 +334,7 @@ public class SortCells {
                     List<Sort> order = cfg.getChildren(k.klabel());
                     ArrayList<K> ordered = new ArrayList<K>(Collections.nCopies(order.size(), null));
                     for (K item : k.klist().items()) {
-                        Map<Sort, K> split = getSplit(item);
+                        Map<Sort, K> split = getSplit(item, false);
                         assert split != null;
                         for (Map.Entry<Sort, K> e : split.entrySet()) {
                             int idx = order.indexOf(e.getKey());
@@ -331,11 +356,11 @@ public class SortCells {
                 }
             }
 
-            private Map<Sort, K> getSplit(K item) {
+            private Map<Sort, K> getSplit(K item, boolean predicate) {
                 if (item instanceof KVariable) {
                     VarInfo info = variables.get(item);
                     if (info == null) return null;
-                    return info.getSplit((KVariable) item);
+                    return info.getSplit((KVariable) item, predicate);
                 } else if (item instanceof KApply) {
                     List<K> children = IncompleteCellUtils.flattenCells(item);
                     if(children.size() == 1 && children.get(0) == item) {
@@ -344,7 +369,7 @@ public class SortCells {
                         return Collections.singletonMap(s, apply(item));
                     }
                     // flatten the List<Map<Sort, K>> into a Map<Sort, List<K>>
-                    Map<Sort, List<K>> multiMap = children.stream().flatMap(e -> getSplit(e).entrySet().stream()).collect(
+                    Map<Sort, List<K>> multiMap = children.stream().flatMap(e -> getSplit(e, predicate).entrySet().stream()).collect(
                             Collectors.groupingBy(Map.Entry::getKey,
                                     Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
                     return multiMap.entrySet().stream().filter(e -> e.getValue().size() > 0).collect(Collectors.toMap(e -> e.getKey(), e -> {
@@ -356,8 +381,8 @@ public class SortCells {
                     }));
                 } else if (item instanceof KRewrite) {
                     KRewrite rw = (KRewrite) item;
-                    Map<Sort, K> splitLeft = new HashMap<>(getSplit(rw.left()));
-                    Map<Sort, K> splitRight = new HashMap<>(getSplit(rw.right()));
+                    Map<Sort, K> splitLeft = new HashMap<>(getSplit(rw.left(), predicate));
+                    Map<Sort, K> splitRight = new HashMap<>(getSplit(rw.right(), predicate));
                     addDefaultCells(item, splitLeft, splitRight);
                     addDefaultCells(item, splitRight, splitLeft);
                     assert splitLeft.keySet().equals(splitRight.keySet());

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -32,11 +33,18 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
 
     @Override
     public void accept(CompiledDefinition compiledDefinition) {
-        String ocaml = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions).convert(compiledDefinition);
+        DefinitionToOcaml def = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions);
+        def.initialize(compiledDefinition);
+        String ocaml = def.constants();
+        files.saveToKompiled("constants.ml", ocaml);
+        ocaml = def.definition();
         files.saveToKompiled("def.ml", ocaml);
+        new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             Process ocamlopt = files.getProcessBuilder()
-                    .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp", "-safe-string", "def.ml")
+                    .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
+                            "-I", files.resolveKBase("include/ocaml").getAbsolutePath(), "-safe-string", "-w", "-26-11",
+                            "constants.ml", files.resolveKBase("include/ocaml/prelude.ml").getAbsolutePath(), "def.ml")
                     .directory(files.resolveKompiled("."))
                     .inheritIO()
                     .start();
