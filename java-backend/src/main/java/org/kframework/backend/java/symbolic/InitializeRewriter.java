@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -118,8 +119,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public Set<K> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, K pattern) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
-            Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
-            List<>
+            Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
+            Term javaPattern = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(pattern));
+            List<Substitution<Variable, Term>> searchResults;
+            if (depth.isPresent() && bound.isPresent()) {
+                searchResults = rewriter.search(javaTerm, null, null, javaPattern.)
+            }
 
         }
     }
