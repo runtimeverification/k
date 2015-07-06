@@ -1,9 +1,8 @@
 package org.kframework
 
 import java.util.Optional
-
+import java.util.Set
 import org.kframework.definition.Module
-import org.kframework.kore.K
 
 trait RewriterConstructor extends (Module => Rewriter)
 
@@ -20,6 +19,7 @@ trait Rewriter {
    * - for symbolic execution, it can return any formula with symbolic constraints
    * - for search, it returns an Or with multiple ground terms as children
    */
-
   def execute(k: kore.K, depth: Optional[Integer]): kore.K
+
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: kore.K) : Set[kore.K]
 }
