@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -112,6 +113,14 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<Map<KVariable, K>> match(K k, Rule rule) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<K> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, K pattern) {
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
+            Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
+            List<>
+
         }
     }
 
