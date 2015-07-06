@@ -33,6 +33,7 @@ import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -104,6 +105,14 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
             return result.getJavaKilTerm();
+        }
+
+        @Override
+        public Set<K> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, K pattern) {
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
+            Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
+            List<>
+
         }
     }
 
