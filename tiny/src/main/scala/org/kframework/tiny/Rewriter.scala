@@ -4,6 +4,7 @@ package org.kframework.tiny
 import java.util
 import java.util.Optional
 
+import org.kframework.kore.KVariable
 import org.kframework.{kore, definition}
 import org.kframework.kore.Unapply.KLabel
 
@@ -44,7 +45,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
    * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
    * @return A list of substitutions, denoting all the configurations matching the given rule.
    */
-  override def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: definition.Rule): util.List[util.Map[kore.K, kore.K]] = ???
+  override def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: definition.Rule): util.List[_ <: util.Map[_ <: KVariable, _ <: kore.K]] = ???
 
   val cons = new Constructors(module)
 

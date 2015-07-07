@@ -50,7 +50,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return new Rewriter() {
             @Override
-            public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
                 return null;
             }
 
