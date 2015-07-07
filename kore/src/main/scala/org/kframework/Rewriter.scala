@@ -1,7 +1,7 @@
 package org.kframework
 
 import java.util.Optional
-import org.kframework.definition.{Rule, Module}
+import org.kframework.definition.Module
 
 trait RewriterConstructor extends (Module => Rewriter)
 
@@ -20,5 +20,14 @@ trait Rewriter {
    */
   def execute(k: kore.K, depth: Optional[Integer]): kore.K
 
-  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: Rule) : List[Substitution]
+
+  /**
+   * Execute a search of the Transition System.
+   * @param initialConfig The State to begin searching from
+   * @param depth No. of transitions to consider before termination (Depth of Tree to traverse). Empty represents unbounded
+   * @param bound No. of states to consider as final results. Empty represents unbounded.
+   * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
+   * @return A list of substitutions, denoting all the configurations matching the given rule.
+   */
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: kore.K) : List[Map[kore.K, kore.K]]
 }
