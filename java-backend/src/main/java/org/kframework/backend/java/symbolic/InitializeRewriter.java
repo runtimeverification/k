@@ -131,40 +131,44 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
                     SearchType.STAR, TermContext.of(rewritingContext), false);
-
+            return processSearchResults(searchResults);
         }
 
-
-
-        @DefinitionScoped
-        public static class InitializeDefinition {
-
-            private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<Module, Definition> eldest) {
-                    return this.size() > 20;
-                }
-            };
-
-            public Definition invoke(Module module, KExceptionManager kem, GlobalContext initializingContext) {
-                if (cache.containsKey(module)) {
-                    return cache.get(module);
-                }
-                Definition definition = new Definition(module, kem);
-
-                TermContext termContext = TermContext.of(initializingContext);
-                termContext.global().setDefinition(definition);
-
-                JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
-                        .map(l -> KLabelConstant.of(l.name(), definition))
-                        .forEach(definition::addKLabel);
-                definition.addKoreRules(module, termContext);
-
-                Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
-
-                evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
-                cache.put(module, evaluatedDef);
-                return evaluatedDef;
-            }
+        private Set<K> processSearchResults(List<Substitution<Variable, Term>> searchResults) {
+            
         }
     }
+
+
+    @DefinitionScoped
+    public static class InitializeDefinition {
+
+        private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Module, Definition> eldest) {
+                return this.size() > 20;
+            }
+        };
+
+        public Definition invoke(Module module, KExceptionManager kem, GlobalContext initializingContext) {
+            if (cache.containsKey(module)) {
+                return cache.get(module);
+            }
+            Definition definition = new Definition(module, kem);
+
+            TermContext termContext = TermContext.of(initializingContext);
+            termContext.global().setDefinition(definition);
+
+            JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
+                    .map(l -> KLabelConstant.of(l.name(), definition))
+                    .forEach(definition::addKLabel);
+            definition.addKoreRules(module, termContext);
+
+            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
+
+            evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
+            cache.put(module, evaluatedDef);
+            return evaluatedDef;
+        }
+    }
+}
