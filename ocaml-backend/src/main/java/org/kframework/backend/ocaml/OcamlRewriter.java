@@ -10,6 +10,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -54,7 +55,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return new Rewriter() {
             @Override
-            public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
                 return null;
             }
 

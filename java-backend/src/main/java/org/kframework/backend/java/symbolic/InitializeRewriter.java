@@ -18,6 +18,7 @@ import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
@@ -114,7 +115,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
+        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
             Rule javaPattern = converter.convert(pattern);
@@ -122,13 +123,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
                     SearchType.STAR, TermContext.of(rewritingContext), false);
             return searchResults;
-        }
-
-        private List<Map<K, K>> processSearchResults(List<Substitution<Variable, Term>> searchResults) {
-            List<Map<K, K>> retList = new ArrayList<>();
-            for (Substitution<Variable, Term> substitution : searchResults) {
-                retList.
-            }
         }
 
     }
