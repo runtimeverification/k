@@ -113,7 +113,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public Set<K> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
+        public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
             Rule javaPattern = converter.convert(pattern);
@@ -123,9 +123,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             return processSearchResults(searchResults);
         }
 
-        private Set<K> processSearchResults(List<Substitution<Variable, Term>> searchResults) {
-            
+        private List<Map<K, K>> processSearchResults(List<Substitution<Variable, Term>> searchResults) {
+            return null;
         }
+
     }
 
 

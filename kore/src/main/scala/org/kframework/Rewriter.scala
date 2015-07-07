@@ -1,7 +1,9 @@
 package org.kframework
 
 import java.util.Optional
-import org.kframework.definition.Module
+import org.kframework.definition.{Rule, Module}
+import java.util.List
+import java.util.Map
 
 trait RewriterConstructor extends (Module => Rewriter)
 
@@ -29,5 +31,5 @@ trait Rewriter {
    * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
    * @return A list of substitutions, denoting all the configurations matching the given rule.
    */
-  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: kore.K) : List[Map[kore.K, kore.K]]
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: Rule) : List[Map[kore.K, kore.K]]
 }
