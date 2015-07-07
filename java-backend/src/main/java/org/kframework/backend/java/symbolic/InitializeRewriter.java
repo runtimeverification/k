@@ -22,6 +22,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -57,6 +58,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final KRunOptions krunOptions;
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
+    private static int NEGATIVE_VALUE = -1;
 
     @Inject
     public InitializeRewriter(
@@ -99,7 +101,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         private final KExceptionManager kem;
 
         public SymbolicRewriterGlue(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
-            this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
+            this.rewriter = new SymbolicRewriter(definition, kompileOptions, javaOptions, new KRunState.Counter());
             this.rewritingContext = rewritingContext;
             this.kem = kem;
         }
@@ -121,43 +123,48 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public Set<K> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
-            Rule backendRule = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, pattern);
+            Rule javaPattern = converter.convert(pattern);
             List<Substitution<Variable, Term>> searchResults;
             if (depth.isPresent() && bound.isPresent()) {
                 searchResults = rewriter.search(javaTerm, null, null, javaPattern.)
             }
+
+            searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
+                    SearchType.STAR, TermContext.of(rewritingContext), false);
+
+        }
+
+
+
+        @DefinitionScoped
+        public static class InitializeDefinition {
+
+            private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<Module, Definition> eldest) {
+                    return this.size() > 20;
+                }
+            };
+
+            public Definition invoke(Module module, KExceptionManager kem, GlobalContext initializingContext) {
+                if (cache.containsKey(module)) {
+                    return cache.get(module);
+                }
+                Definition definition = new Definition(module, kem);
+
+                TermContext termContext = TermContext.of(initializingContext);
+                termContext.global().setDefinition(definition);
+
+                JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
+                        .map(l -> KLabelConstant.of(l.name(), definition))
+                        .forEach(definition::addKLabel);
+                definition.addKoreRules(module, termContext);
+
+                Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
+
+                evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
+                cache.put(module, evaluatedDef);
+                return evaluatedDef;
+            }
         }
     }
-
-    @DefinitionScoped
-    public static class InitializeDefinition {
-
-        private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<Module, Definition> eldest) {
-                return this.size() > 20;
-            }
-        };
-
-        public Definition invoke(Module module, KExceptionManager kem, GlobalContext initializingContext) {
-            if (cache.containsKey(module)) {
-                return cache.get(module);
-            }
-            Definition definition = new Definition(module, kem);
-
-            TermContext termContext = TermContext.of(initializingContext);
-            termContext.global().setDefinition(definition);
-
-            JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
-                    .map(l -> KLabelConstant.of(l.name(), definition))
-                    .forEach(definition::addKLabel);
-            definition.addKoreRules(module, termContext);
-
-            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
-
-            evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
-            cache.put(module, evaluatedDef);
-            return evaluatedDef;
-        }
-    }
-}
