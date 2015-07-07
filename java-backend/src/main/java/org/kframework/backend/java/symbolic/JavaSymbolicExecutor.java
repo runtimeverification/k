@@ -185,11 +185,11 @@ public class JavaSymbolicExecutor implements Executor {
             if (computeGraph) {
                 KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
             }
-            hits = getPatternMatchRewriter().search(initialTerm, targetTerm, claims,
+            hits = getPatternMatchRewriter().search(initialTerm,
                     patternRule, bound, depth, searchType, termContext);
         } else {
             SymbolicRewriter rewriter = getSymbolicRewriter();
-            hits = rewriter.search(initialTerm, targetTerm, claims,
+            hits = rewriter.search(initialTerm,
                     patternRule, bound, depth, searchType, termContext, computeGraph);
             executionGraph = rewriter.getExecutionGraph();
         }

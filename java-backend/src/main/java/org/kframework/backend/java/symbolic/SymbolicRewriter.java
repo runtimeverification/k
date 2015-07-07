@@ -337,9 +337,9 @@ public class SymbolicRewriter {
 
     /**
      *
-     * @param initialTerm
      * @param targetTerm not implemented yet
      * @param rules not implemented yet
+     * @param initialTerm
      * @param pattern the pattern we are searching for
      * @param bound a negative value specifies no bound
      * @param depth a negative value specifies no bound
@@ -350,8 +350,6 @@ public class SymbolicRewriter {
      */
     public List<Substitution<Variable,Term>> search(
             Term initialTerm,
-            Term targetTerm,
-            List<Rule> rules,
             Rule pattern,
             int bound,
             int depth,
