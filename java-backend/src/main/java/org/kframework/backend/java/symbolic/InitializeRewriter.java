@@ -33,6 +33,7 @@ import scala.collection.JavaConversions;
 
 import java.lang.invoke.MethodHandle;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,11 +121,14 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             List<Substitution<Variable, Term>> searchResults;
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
                     SearchType.STAR, TermContext.of(rewritingContext), false);
-            return processSearchResults(searchResults);
+            return searchResults;
         }
 
         private List<Map<K, K>> processSearchResults(List<Substitution<Variable, Term>> searchResults) {
-            return null;
+            List<Map<K, K>> retList = new ArrayList<>();
+            for (Substitution<Variable, Term> substitution : searchResults) {
+                retList.
+            }
         }
 
     }
