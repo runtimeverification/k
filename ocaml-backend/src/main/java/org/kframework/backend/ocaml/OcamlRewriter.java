@@ -6,6 +6,7 @@ import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -16,6 +17,8 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -50,6 +53,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     " the definition's main module.");
         }
         return new Rewriter() {
+            @Override
+            public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+                return null;
+            }
+
             @Override
             public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.convert(k, depth.orElse(-1));
