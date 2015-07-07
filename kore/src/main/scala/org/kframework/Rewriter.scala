@@ -4,7 +4,6 @@ import java.util.{Optional, Set}
 
 import org.kframework.definition.{Module, Rule}
 
-
 trait RewriterConstructor extends (Module => Rewriter)
 
 trait Rewriter {
@@ -22,7 +21,10 @@ trait Rewriter {
    */
   def execute(k: kore.K, depth: Optional[Integer]): kore.K
 
+
   def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
 
-  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: kore.K) : Set[kore.K]
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: kore.K): Set[kore.K]
+
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule): Set[kore.K]
 }
