@@ -50,6 +50,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return new Rewriter() {
             @Override
+            public List<Map<K, K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+                return null;
+            }
+
+            @Override
             public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
@@ -75,7 +80,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                             break;
                         }
                         KVariable key = KVariable(lines[line]);
-                        K value = parseOcamlOutput(lines[line+1]);
+                        K value = parseOcamlOutput(lines[line + 1]);
                         map.put(key, value);
                     }
                 }
@@ -126,7 +131,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = System.in.read(buffer)) > 0) {
                         p2.getOutputStream().write(buffer, 0, count);
                     }
-                } catch (IOException | InterruptedException e) {}
+                } catch (IOException | InterruptedException e) {
+                }
             });
             Thread out = new Thread(() -> {
                 int count;
@@ -135,7 +141,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = p2.getInputStream().read(buffer)) >= 0) {
                         System.out.write(buffer, 0, count);
                     }
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             });
             Thread err = new Thread(() -> {
                 int count;
@@ -144,7 +151,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = p2.getErrorStream().read(buffer)) >= 0) {
                         System.err.write(buffer, 0, count);
                     }
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             });
             in.start();
             out.start();

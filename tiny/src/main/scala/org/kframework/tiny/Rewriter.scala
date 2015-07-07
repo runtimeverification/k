@@ -1,11 +1,11 @@
 package org.kframework.tiny
 
 
+import java.util
 import java.util.Optional
 
-import org.kframework.definition
+import org.kframework.{kore, definition}
 import org.kframework.kore.Unapply.KLabel
-import org.kframework.kore
 
 import scala.collection.parallel.ParIterable
 
@@ -34,6 +34,17 @@ object SimpleIndex extends (K => Option[String]) {
 
 class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) extends org.kframework.Rewriter {
   def this(module: definition.Module) = this(module, KIndex)
+
+
+  /**
+   * Execute a search of the Transition System.
+   * @param initialConfig The State to begin searching from
+   * @param depth No. of transitions to consider before termination (Depth of Tree to traverse). Empty represents unbounded
+   * @param bound No. of states to consider as final results. Empty represents unbounded.
+   * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
+   * @return A list of substitutions, denoting all the configurations matching the given rule.
+   */
+  override def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: definition.Rule): util.List[util.Map[kore.K, kore.K]] = ???
 
   val cons = new Constructors(module)
 
