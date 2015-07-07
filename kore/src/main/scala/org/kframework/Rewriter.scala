@@ -1,7 +1,6 @@
 package org.kframework
 
 import java.util.Optional
-import java.util.Set
 import org.kframework.definition.{Rule, Module}
 
 trait RewriterConstructor extends (Module => Rewriter)
@@ -21,5 +20,5 @@ trait Rewriter {
    */
   def execute(k: kore.K, depth: Optional[Integer]): kore.K
 
-  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: Rule) : Set[kore.K]
+  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer],  pattern: Rule) : List[Substitution]
 }
