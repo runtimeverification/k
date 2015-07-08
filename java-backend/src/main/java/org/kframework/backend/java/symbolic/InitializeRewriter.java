@@ -114,16 +114,15 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-
         public List<Map<KVariable, K>> match(K k, Rule rule) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
+        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, org.kframework.definition.Rule pattern) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
-            Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfig));
-            Rule javaPattern = converter.convert(pattern);
+            Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
+            Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
             if (depth.isPresent() && bound.isPresent()) {
                 searchResults = rewriter.search(javaTerm, null, null, javaPattern.)
