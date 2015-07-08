@@ -19,6 +19,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.definition.Module;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -29,6 +30,7 @@ import org.kframework.kore.convertors.KOREtoKIL;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -124,7 +126,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             throw new AssertionError("BUM!");
     }
 
-    public Rule convert(org.kframework.definition.Rule rule) {
+    public Rule convert(Optional<Module> module, org.kframework.definition.Rule rule) {
         K leftHandSide = RewriteToTop.toLeft(rule.body());
         org.kframework.kil.Rule oldRule = new org.kframework.kil.Rule();
         oldRule.setAttributes(new KOREtoKIL().convertAttributes(rule.att()));
@@ -132,6 +134,14 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         Source source = rule.att().getOptional(Source.class).orElse(null);
         oldRule.setLocation(loc);
         oldRule.setSource(source);
+
+        if (module.isPresent()) {
+            if (leftHandSide instanceof KApply && module.get().attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
+                oldRule.putAttribute(Attribute.FUNCTION_KEY, "");
+            }
+        }
+
+
         return new Rule(
                 "",
                 convert(leftHandSide),
