@@ -32,7 +32,6 @@ public class TstKDebugOnKORE_IT {
 
     @Before
     public void setup() throws URISyntaxException, IOException {
-
         fileName = "/convertor-tests/kore_imp.k";
         utils = new KoreUtils(fileName);
         trans = new KtoKORE();
@@ -61,7 +60,6 @@ public class TstKDebugOnKORE_IT {
 
     @Test
     public void jumpCommandTest() {
-
         /*  Jumping on Debugger and 50 steps for normal executor */
         int stateNum = getRandomSteps(20, 50);
         K debugResult = trans.apply(debuggerSession.jumpTo(stateNum).getCurrentK());
