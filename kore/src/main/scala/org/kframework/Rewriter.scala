@@ -1,9 +1,8 @@
 package org.kframework
 
-import java.util.Optional
-import org.kframework.definition.{Rule, Module}
-import java.util.List
-import java.util.Map
+import java.util.{List, Map, Optional}
+
+import org.kframework.definition.{Module, Rule}
 
 trait RewriterConstructor extends (Module => Rewriter)
 
