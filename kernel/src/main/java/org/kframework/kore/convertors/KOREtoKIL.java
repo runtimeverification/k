@@ -82,26 +82,19 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             for (Map.Entry<String, List<org.kframework.definition.Production>> entry : listProds.entrySet()) {
                 String listType = entry.getKey();
                 List<org.kframework.definition.Production> prods = entry.getValue();
-                if (prods.size() != 3) {
+                if (prods.size() != 2) {
                     throw new AssertionError("Found list with " + prods.size() + " elements.");
                 } else {
-                    if (prods.iterator().next().att().get(USER_LIST_ATTRIBUTE).get().equals("+")) {
-                        userLists.add(makeNonEmptyUserList(prods, listType));
-                    } else {
-                        userLists.add(makeUserList(prods, listType));
-                    }
+                    userLists.add(makeUserList(prods, listType));
                 }
             }
         }
 
-        // TODO: Remove duplicated code (makeUserList and makeNonEmptyUserList)
         private org.kframework.kil.Syntax makeUserList(List<org.kframework.definition.Production> prods,
                                                        String listType) {
             List<ProductionItem> prod1Items = stream(prods.get(0).items()).collect(
                     Collectors.toList());
             List<ProductionItem> prod2Items = stream(prods.get(1).items()).collect(
-                    Collectors.toList());
-            List<ProductionItem> prod3Items = stream(prods.get(2).items()).collect(
                     Collectors.toList());
 
             Terminal sep;
@@ -109,25 +102,21 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
 
             if (prod1Items.size() == 3) {
                 sep = (Terminal) prod1Items.get(1);
-            } else if (prod2Items.size() == 3) {
-                sep = (Terminal) prod2Items.get(1);
             } else {
-                sep = (Terminal) prod3Items.get(1);
+                sep = (Terminal) prod2Items.get(1);
             }
 
             if (prod1Items.size() == 1 && prod1Items.get(0) instanceof NonTerminal) {
                 elem = (NonTerminal) prod1Items.get(0);
-            } else if (prod2Items.size() == 1 && prod2Items.get(0) instanceof NonTerminal) {
-                elem = (NonTerminal) prod2Items.get(0);
             } else {
-                elem = (NonTerminal) prod3Items.get(0);
+                elem = (NonTerminal) prod2Items.get(0);
             }
 
             org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
                     org.kframework.kil.Sort.of(elem.sort().name()), sep.value(),
-                    UserList.ZERO_OR_MORE);
+                    (String) prods.get(0).att().get(USER_LIST_ATTRIBUTE).get());
 
             List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>(1);
             prodItems.add(userList);
@@ -141,46 +130,6 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
         }
-    }
-
-    private org.kframework.kil.Syntax makeNonEmptyUserList(List<org.kframework.definition.Production> prods,
-                                                           String listType) {
-        List<ProductionItem> prod1Items = stream(prods.get(0).items())
-                .collect(Collectors.toList());
-        List<ProductionItem> prod2Items = stream(prods.get(1).items())
-                .collect(Collectors.toList());
-
-        Terminal sep;
-        NonTerminal elem;
-
-        if (prod1Items.size() == 3) {
-            sep = (Terminal) prod1Items.get(1);
-        } else {
-            sep = (Terminal) prod2Items.get(1);
-        }
-
-        if (prod1Items.size() == 1 && prod1Items.get(0) instanceof NonTerminal) {
-            elem = (NonTerminal) prod1Items.get(0);
-        } else {
-            elem = (NonTerminal) prod2Items.get(0);
-        }
-
-        org.kframework.kil.Sort listSort = org.kframework.kil.Sort.of(listType);
-
-        org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
-                org.kframework.kil.Sort.of(elem.sort().name()), sep.value(), UserList.ONE_OR_MORE);
-
-        List<org.kframework.kil.ProductionItem> prodItems = new ArrayList<>(1);
-        prodItems.add(userList);
-
-        org.kframework.kil.Production prod = new org.kframework.kil.Production(
-                new org.kframework.kil.NonTerminal(listSort), prodItems);
-
-        kilProductionIdToProductionInstance.put(
-                prods.get(0).att().<String>getOptional(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
-
-        org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
-        return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(listSort), pb);
     }
 
     private org.kframework.kil.loader.Context dummyContext = new org.kframework.kil.loader.Context();

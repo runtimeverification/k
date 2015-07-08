@@ -74,6 +74,7 @@ endmodule
 
 module RULE-CELLS
   imports KCELLS
+  imports RULE-LISTS
   // if this module is imported, the parser automatically
   // generates, for all productions that have the attribute 'cell' or 'maincell',
   // a production like below:
@@ -85,6 +86,7 @@ endmodule
 
 module CONFIG-CELLS
   imports KCELLS
+  imports RULE-LISTS
   syntax #CellName ::= r"[a-zA-Z0-9\\-]+"  [token]
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
   syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
@@ -160,6 +162,13 @@ module PROGRAM-LISTS
   //         | E Es#Terminator [klabel('_,_)]
   // Es ::= Ne#Es
   //      | Es#Terminator      // if the list is *
+endmodule
+
+module RULE-LISTS
+  // if this module is imported, the parser automatically
+  // adds the subsort production to the parsing module only:
+  // Es ::= E        [userList("*")]
+
 endmodule
 
 module DEFAULT-CONFIGURATION
