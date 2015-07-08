@@ -25,11 +25,11 @@ trait Rewriter {
 
   /**
    * Execute a search of the Transition System.
-   * @param initialConfig The State to begin searching from
-   * @param depth No. of transitions to consider before termination (Depth of Tree to traverse). Empty represents unbounded
+   * @param initialConfiguration The configuration to begin searching from.
+   * @param depth No. of transitions to consider before termination (Depth of Tree to traverse). Empty represents unbounded.
    * @param bound No. of states to consider as final results. Empty represents unbounded.
    * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
    * @return A list of substitutions, denoting all the configurations matching the given rule.
    */
-  def search(initialConfig: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule): List[_ <: Map[_ <: kore.KVariable, _ <: kore.K]]
+  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule): List[_ <: Map[_ <: kore.KVariable, _ <: kore.K]]
 }
