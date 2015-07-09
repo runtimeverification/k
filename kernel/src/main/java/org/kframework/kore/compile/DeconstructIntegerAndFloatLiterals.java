@@ -20,7 +20,7 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
- * Transforms patterns in the LHS of rules which have tokens of sort Int
+ * Transforms patterns in the LHS of rules which have tokens of sort Int or Float
  * into side conditions generating equality over a reconstructed value.
  * Thus,
  *
@@ -30,7 +30,7 @@ import static org.kframework.kore.KORE.*;
  *
  * rule I:Int => .K when I ==K 5
  */
-public class DeconstructIntegerLiterals {
+public class DeconstructIntegerAndFloatLiterals {
 
     private Set<KApply> state = new HashSet<>();
     private Set<KVariable> vars = new HashSet<>();
@@ -112,7 +112,7 @@ public class DeconstructIntegerLiterals {
             public K apply(KToken k) {
                 if (rhsOf == null) {
                     //lhs
-                    if (k.sort().equals(Sorts.Int())) {
+                    if (k.sort().equals(Sorts.Int()) || k.sort().equals(Sorts.Float())) {
                         KVariable var = newDotVariable();
                         state.add(KApply(KLabel("_==K_"), var, k));
                         return var;
@@ -121,14 +121,11 @@ public class DeconstructIntegerLiterals {
                 return super.apply(k);
             }
 
-            private K lhsOf;
             private K rhsOf;
 
             @Override
             public K apply(KRewrite k) {
-                lhsOf = k;
                 K l = apply(k.left());
-                lhsOf = null;
                 rhsOf = k;
                 K r = apply(k.right());
                 rhsOf = null;

@@ -118,6 +118,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
   }
 
   def execute(k: kore.K, depth: Optional[Integer]): kore.K = execute(cons.convert(k))
+  def `match`(k: kore.K, rule: definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = throw new UnsupportedOperationException
 
   def execute(k: K): K = {
     var steps = 0

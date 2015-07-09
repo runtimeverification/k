@@ -52,24 +52,16 @@ public class ParseInModule implements Serializable {
      */
     private final Module parsingModule;
     private Grammar grammar = null;
-    private boolean strict = true;
+    private final boolean strict;
     ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule);
+        this(seedModule, seedModule, seedModule, seedModule, true);
     }
 
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule) {
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
-    }
-
-    /**
-     * If set to true, the variables inferred automatically will be checked at runtime.
-     * Default true.
-     * @param strict    true to generate predicates for automatically inferred variables.
-     */
-    public void setStrict(boolean strict) {
         this.strict = strict;
     }
 

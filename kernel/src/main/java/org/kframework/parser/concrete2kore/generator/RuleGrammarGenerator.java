@@ -46,6 +46,7 @@ import static org.kframework.kore.KORE.*;
 public class RuleGrammarGenerator {
 
     private final Definition baseK;
+    private final boolean strict;
     private static final Set<Sort> kSorts = new HashSet<>();
 
     static {
@@ -72,8 +73,9 @@ public class RuleGrammarGenerator {
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
 
-    public RuleGrammarGenerator(Definition baseK) {
+    public RuleGrammarGenerator(Definition baseK, boolean strict) {
         this.baseK = baseK;
+        this.strict = strict;
     }
 
     private Set<Module> renameKItem2Bottom(Set<Module> def) {
@@ -314,7 +316,7 @@ public class RuleGrammarGenerator {
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
-        return new ParseInModule(mod, extensionM, disambM, parseM);
+        return new ParseInModule(mod, extensionM, disambM, parseM, this.strict);
     }
 
     private boolean isExceptionSort(Sort srt) {

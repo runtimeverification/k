@@ -7,11 +7,14 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
 import org.kframework.krun.modes.ExecutionMode;
@@ -24,12 +27,15 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.koreparser.KoreParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -65,8 +71,33 @@ public class KRun implements Transformation<Void, Void> {
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
-        }
 
+            if (options.exitCodePattern != null) {
+                Rule exitCodePattern = pattern(options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
+                if (res.size() != 1) {
+                    kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
+                    return 112;
+                }
+                Map<? extends KVariable, ? extends K> solution = res.get(0);
+                Set<Integer> vars = new HashSet<>();
+                for (K t : solution.values()) {
+                    // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
+                    if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
+                        try {
+                            vars.add(Integer.valueOf(((KToken) t).s()));
+                        } catch (NumberFormatException e) {
+                            throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
+                        }
+                    }
+                }
+                if (vars.size() != 1) {
+                    kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
+                    return 111;
+                }
+                return vars.iterator().next();
+            }
+        }
 
         return 0;
     }
@@ -78,6 +109,13 @@ public class KRun implements Transformation<Void, Void> {
         } else {
             files.saveToWorkingDirectory(options.outputFile, output);
         }
+    }
+
+    public Rule pattern(String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+        if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
+            throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
+        }
+        return new Kompile(compiledDef.kompileOptions, files, kem).compileRule(compiledDef, pattern, source);
     }
 
     public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
@@ -143,7 +181,7 @@ public class KRun implements Transformation<Void, Void> {
         }
 
         String kast = output.stdout != null ? output.stdout : "";
-        return compiledDef.getParser(compiledDef.getParsedDefinition().getModule("KSEQ-SYMBOLIC").get(), Sorts.K(), kem).apply(kast, source);
+        return KoreParser.parse(kast, source);
     }
 
     @Override

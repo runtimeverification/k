@@ -14,6 +14,7 @@ object Sorts {
 
   val Int = Sort("Int")
   val File = Sort("File")
+  val Float = Sort("Float")
 
   val K = Sort("K")
   val KBott = Sort("KBott")

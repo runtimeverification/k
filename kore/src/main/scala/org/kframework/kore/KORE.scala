@@ -34,6 +34,8 @@ object KORE extends Constructors[K] with ScalaSugar[K] {
 
   def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, Attributes())
 
+  def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, Att())
+
   //  def toKList: Collector[K, KList] =
   //    Collector(() => new CombinerFromBuilder(KList.newBuilder()))
 
