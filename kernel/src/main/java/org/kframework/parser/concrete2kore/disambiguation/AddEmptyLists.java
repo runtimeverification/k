@@ -66,16 +66,15 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             Sort expectedSort = ((NonTerminal) pi).sort();
             ProductionReference child = (ProductionReference) items.next();
             Sort childSort = child.production().sort();
-            if (child.production().att().contains("bracket")
-                    || (child.production().klabel().isDefined()
-                    && (child.production().klabel().get().name().equals("#KRewrite")
+            if (listSorts.contains(expectedSort) && !expectedSort.equals(childSort)) {
+                if (child.production().att().contains("bracket")
+                        || (child.production().klabel().isDefined()
+                        && (child.production().klabel().get().name().equals("#KRewrite")
                         || tc.production().klabel().get().name().equals("#SyntacticCast")
                         || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                         || tc.production().klabel().get().name().equals("#InnerCast")))) {
-                continue;
-            }
-            if (listSorts.contains(expectedSort) && !expectedSort.equals(childSort)) {
-                if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
+                    newItems.add(child);
+                } else if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
                     String msg = "Found sort '" + childSort + "' where list sort '" + expectedSort + "' was expected. Moving on.";
                     warnings.add(new ParseFailedException(
                             new KException(KException.ExceptionType.HIDDENWARNING, KException.KExceptionGroup.LISTS, msg, child.source().get(), child.location().get())));
