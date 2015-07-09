@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -123,10 +124,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
             Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
-            if (depth.isPresent() && bound.isPresent()) {
-                searchResults = rewriter.search(javaTerm, null, null, javaPattern.)
-            }
-
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
                     SearchType.STAR, TermContext.of(rewritingContext), false);
             return searchResults;

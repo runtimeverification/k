@@ -101,7 +101,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     private Term convert(KLabel klabel) {
-        if (klabel instanceof  KVariable) {
+        if (klabel instanceof KVariable) {
             return KVariable(klabel.name(), ((KVariable) klabel).att().add(Attribute.SORT_KEY, "KLabel"));
 
         } else {

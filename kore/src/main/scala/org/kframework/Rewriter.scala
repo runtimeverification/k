@@ -1,7 +1,6 @@
 package org.kframework
 
 
-
 import java.util.{List, Map, Optional}
 
 import org.kframework.definition.{Module, Rule}
