@@ -21,12 +21,18 @@ import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Right;
 
-import static org.kframework.Collections.*;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
- /**
+import static org.kframework.Collections.*;
+/**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
  */
 public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
@@ -60,6 +66,14 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             Sort expectedSort = ((NonTerminal) pi).sort();
             ProductionReference child = (ProductionReference) items.next();
             Sort childSort = child.production().sort();
+            if (child.production().att().contains("bracket")
+                    || (child.production().klabel().isDefined()
+                    && (child.production().klabel().get().name().equals("#KRewrite")
+                        || tc.production().klabel().get().name().equals("#SyntacticCast")
+                        || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                        || tc.production().klabel().get().name().equals("#InnerCast")))) {
+                continue;
+            }
             if (listSorts.contains(expectedSort) && !expectedSort.equals(childSort)) {
                 if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
                     String msg = "Found sort '" + childSort + "' where list sort '" + expectedSort + "' was expected. Moving on.";
