@@ -16,7 +16,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
@@ -114,7 +113,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public List<Map<KVariable, K>> match(K k, Rule rule) {
+        public List<Map<KVariable, K>> match(K k, org.kframework.definition.Rule rule) {
             throw new UnsupportedOperationException();
         }
 
