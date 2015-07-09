@@ -40,8 +40,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
     private static final Labels labels = new Labels(KORE.constructor());
 
     class ListProductionCollector {
-        private Map<String, List<org.kframework.definition.Production>> listProds;
-        private List<org.kframework.kil.Syntax> userLists;
+        private List<org.kframework.kil.Syntax> userLists = new ArrayList<>();
 
         public List<org.kframework.kil.Syntax> getResults() {
             return userLists;
@@ -67,8 +66,8 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
             org.kframework.kil.Production prod = new org.kframework.kil.Production(
                     new org.kframework.kil.NonTerminal(org.kframework.kil.Sort.of(ul.sort)), prodItems);
 
-            //kilProductionIdToProductionInstance.put(
-            //        prods.get(0).att().<String>getOptional(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
+            kilProductionIdToProductionInstance.put(
+                    ul.pList.att().<String>getOptional(KILtoInnerKORE.PRODUCTION_ID).get(), prod);
 
             org.kframework.kil.PriorityBlock pb = new org.kframework.kil.PriorityBlock("", prod);
             return new org.kframework.kil.Syntax(new org.kframework.kil.NonTerminal(org.kframework.kil.Sort.of(ul.sort)), pb);
