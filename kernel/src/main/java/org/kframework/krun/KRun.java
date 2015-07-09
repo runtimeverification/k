@@ -73,7 +73,7 @@ public class KRun implements Transformation<Void, Void> {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = pattern(options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                Rule exitCodePattern = pattern(options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
                 if (res.size() != 1) {
                     kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
@@ -111,10 +111,7 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static Rule pattern(String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
-        if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
-            throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
-        }
+    public static Rule pattern(String pattern, CompiledDefinition compiledDef, Source source) {
         return new Kompile(compiledDef.kompileOptions, files, kem).compileRule(compiledDef, pattern, source);
     }
 

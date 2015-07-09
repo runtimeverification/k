@@ -10,18 +10,22 @@ import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
 import org.kframework.Rewriter;
+import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunDebuggerOptions;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.kframework.krun.KRun.*;
 
@@ -129,6 +133,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
+                    Rule parsedPattern =  pattern(options.search.patternStr, compiledDef, Source.apply("<command line: --exit-code>"));
+                    List<Map<KVariable, K>> results = debugger.search()
+
 
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();

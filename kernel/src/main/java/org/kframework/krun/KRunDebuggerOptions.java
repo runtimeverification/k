@@ -43,7 +43,7 @@ public final class KRunDebuggerOptions {
     public static final class CommandStepAll {
 
         @Parameter(names="-s", description="Number of steps to step")
-        public int numSteps = 1;
+        public int numStepsAll = 1;
     }
 
     @Parameters(commandNames="select", commandDescription="Select a particular state as the current state")
@@ -126,12 +126,15 @@ public final class KRunDebuggerOptions {
         public int stateNum;
     }
 
-    @Parameters(commandNames={"search"}, commandDescription="Search for a substitution matching a given pattern")
+    @Parameters(commandNames = {"search"}, commandDescription = "Search for a substitution matching a given pattern")
     public static final class CommandSearch {
 
-        @Parameter(names="-s", description="Pattern String", required=true)
-        public String  patternStr;
+        @Parameter(names = "-s", description = "Pattern String", required = true)
+        public String patternStr;
+
+
     }
+
 
 
 }

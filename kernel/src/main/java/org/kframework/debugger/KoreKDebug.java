@@ -3,6 +3,7 @@ package org.kframework.debugger;
 
 
 import org.kframework.Rewriter;
+import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 
 import java.util.ArrayList;
@@ -122,5 +123,13 @@ public class KoreKDebug implements KDebug {
             return step(stateNum - lastKey);
         }
         return backStep(lastKey - stateNum);
+    }
+
+    @Override
+    public List<? extends Map<? extends K, ? extends K>> search(Optional<Integer> startStateId, Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds) {
+        if (startStateId.isPresent()) {
+            jumpTo(startStateId.get());
+        }
+        return rewriter.search(activeState.getCurrentK(), depth, bounds, searchPattern);
     }
 }
