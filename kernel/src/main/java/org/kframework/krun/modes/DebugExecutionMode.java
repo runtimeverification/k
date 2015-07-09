@@ -129,7 +129,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
-                    
+
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }

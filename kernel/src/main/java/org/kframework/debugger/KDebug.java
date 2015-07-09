@@ -43,4 +43,7 @@ public interface KDebug {
     public DebuggerState jumpTo(int stateNum);
 
 
+    public
+
+
 }
