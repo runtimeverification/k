@@ -23,6 +23,7 @@ public final class KRunDebuggerOptions {
     public final CommandSetCheckpoint setCheckpoint = new CommandSetCheckpoint();
     public final CommandBackStep backStep = new CommandBackStep();
     public final CommandJumpTo jumpTo = new CommandJumpTo();
+    public final CommandStepAll stepAll = new CommandStepAll();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -38,8 +39,8 @@ public final class KRunDebuggerOptions {
         public int numSteps = 1;
     }
 
-    @Parameters(commandNames={"search", "step-all"}, commandDescription="Search one or more steps from the current state")
-    public static final class CommandSearch {
+    @Parameters(commandNames={"step-all"}, commandDescription="Take one or more steps from the current state")
+    public static final class CommandStepAll {
 
         @Parameter(names="-s", description="Number of steps to step")
         public int numSteps = 1;
@@ -123,6 +124,13 @@ public final class KRunDebuggerOptions {
 
         @Parameter(names="-s", description="State Number to jump to", required=true)
         public int stateNum;
+    }
+
+    @Parameters(commandNames={"search"}, commandDescription="Search for a substitution matching a given pattern")
+    public static final class CommandSearch {
+
+        @Parameter(names="-s", description="Pattern String", required=true)
+        public String  patternStr;
     }
 
 

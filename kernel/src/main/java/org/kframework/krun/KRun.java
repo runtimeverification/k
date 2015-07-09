@@ -111,7 +111,7 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public Rule pattern(String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+    public static Rule pattern(String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
         }

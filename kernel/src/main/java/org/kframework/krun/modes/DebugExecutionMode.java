@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.kframework.krun.KRun.prettyPrint;
+import static org.kframework.krun.KRun.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -81,6 +81,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.setCheckpoint);
             jc.addCommand(options.backStep);
             jc.addCommand(options.jumpTo);
+            jc.addCommand(options.search);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -127,6 +128,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.println("Invalid Operation");
 
 
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
+                    
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
