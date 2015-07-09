@@ -26,7 +26,7 @@ import static org.kframework.Collections.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-                /**
+ /**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
  */
 public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
