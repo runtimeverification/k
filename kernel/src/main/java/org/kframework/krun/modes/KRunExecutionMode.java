@@ -6,6 +6,8 @@ import org.kframework.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import java.util.Optional;
 
@@ -22,7 +24,7 @@ public class KRunExecutionMode implements ExecutionMode<K> {
     }
 
     @Override
-    public K execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public K execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition, FileUtil files, KExceptionManager kem) {
         return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
     }
 }

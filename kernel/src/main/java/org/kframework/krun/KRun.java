@@ -67,13 +67,13 @@ public class KRun implements Transformation<Void, Void> {
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(program, rewriter, compiledDef);
+        Object result = executionMode.execute(program, rewriter, compiledDef, files, kem);
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = pattern(options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"));
+                Rule exitCodePattern = pattern(options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"), files, kem);
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
                 if (res.size() != 1) {
                     kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
@@ -111,7 +111,7 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static Rule pattern(String pattern, CompiledDefinition compiledDef, Source source) {
+    public static Rule pattern(String pattern, CompiledDefinition compiledDef, Source source, FileUtil files, KExceptionManager kem) {
         return new Kompile(compiledDef.kompileOptions, files, kem).compileRule(compiledDef, pattern, source);
     }
 

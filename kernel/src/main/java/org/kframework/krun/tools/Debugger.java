@@ -266,8 +266,8 @@ public interface Debugger {
                         debugger.step(options.step.numSteps);
                         System.out.println(statePrinter.run(debugger.getState(debugger.getCurrentState()), a));
 
-                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
-                        SearchResults states = debugger.stepAll(options.search.numSteps);
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandStepAll) {
+                        SearchResults states = debugger.stepAll(options.stepAll.numStepsAll);
                         System.out.println(searchPrinter.run(states, a));
 
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {

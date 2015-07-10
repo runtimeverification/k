@@ -18,14 +18,14 @@ import org.kframework.debugger.KoreKDebug;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunDebuggerOptions;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static org.kframework.krun.KRun.*;
 
@@ -42,7 +42,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     }
 
     @Override
-    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
+    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef, FileUtil files, KExceptionManager kem) {
         /* Development Purposes Only, will go away in production */
         KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;
@@ -133,8 +133,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
-                    Rule parsedPattern =  pattern(options.search.patternStr, compiledDef, Source.apply("<command line: --exit-code>"));
-                    List<Map<KVariable, K>> results = debugger.search()
+                    Rule parsedPattern = pattern(options.search.patternStr, compiledDef, Source.apply("<command line: --exit-code>"), files, kem);
+                    //List<Map<KVariable, K>> results = debugger.search()
 
 
                 } else {
