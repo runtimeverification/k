@@ -132,4 +132,14 @@ public class KoreKDebug implements KDebug {
         }
         return rewriter.search(activeState.getCurrentK(), depth, bounds, searchPattern);
     }
+
+    @Override
+    public DebuggerState resume() {
+        K previousK;
+        do {
+            previousK = activeState.getCurrentK();
+            step(checkpointInterval);
+        } while (previousK != activeState.getCurrentK());
+        return activeState;
+    }
 }

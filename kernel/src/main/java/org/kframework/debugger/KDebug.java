@@ -62,5 +62,7 @@ public interface KDebug {
      */
     public List<? extends Map<? extends K, ? extends K>> search(Optional<Integer> startStateId, Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
 
+    public DebuggerState resume();
+
 
 }

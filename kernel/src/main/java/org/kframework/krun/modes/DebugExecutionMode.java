@@ -86,6 +86,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.backStep);
             jc.addCommand(options.jumpTo);
             jc.addCommand(options.search);
+            jc.addCommand(options.resume);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -106,7 +107,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
-                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
 
@@ -120,14 +121,14 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.jumpTo(options.jumpTo.stateNum);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
                     DebuggerState result = debugger.backStep(options.backStep.backSteps);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
 
@@ -137,6 +138,13 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     //List<Map<KVariable, K>> results = debugger.search()
 
 
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandResume) {
+                    DebuggerState result = debugger.resume();
+                    K finalK = result.getCurrentK();
+                    if (finalK instanceof K)
+                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
+                    else
+                        System.out.printf("Invalid Operation");
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
