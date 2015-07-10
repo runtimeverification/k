@@ -152,8 +152,7 @@ public class ProgramLoader {
             Module m = Module("PROGRAM-LISTS", Set(), Set(SyntaxSort(Sort("K"))), Att());
             org.kframework.definition.Definition baseK = org.kframework.definition.Definition.apply(m, m, Set(m), Att());
             Module newSynMod = new Module(synMod.name() + "-PROGRAM-LISTS", Set(synMod, m), Set(), null);
-            ParseInModule parser = new RuleGrammarGenerator(baseK).getCombinedGrammar(newSynMod);
-            parser.setStrict(options.strict());
+            ParseInModule parser = new RuleGrammarGenerator(baseK, options.strict()).getCombinedGrammar(newSynMod);
             Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {

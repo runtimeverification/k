@@ -52,7 +52,7 @@ public class RuleGrammarTest {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
 
-        return new RuleGrammarGenerator(baseK);
+        return new RuleGrammarGenerator(baseK, true);
     }
 
     private void parseRule(String input, String def, int warnings, boolean expectedError) {

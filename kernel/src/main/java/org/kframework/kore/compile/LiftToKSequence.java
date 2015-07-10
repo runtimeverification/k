@@ -20,32 +20,32 @@ import static org.kframework.kore.KORE.*;
 public class LiftToKSequence {
 
 
-    public Sentence convert(Sentence s) {
+    public Sentence lift(Sentence s) {
         if (s instanceof Rule) {
-            return convert((Rule) s);
+            return lift((Rule) s);
         } else if (s instanceof Context) {
-            return convert((Context) s);
+            return lift((Context) s);
         } else {
             return s;
         }
     }
 
-    private Rule convert(Rule rule) {
+    private Rule lift(Rule rule) {
         return Rule(
-                convert(rule.body()),
-                convert(rule.requires()),
-                convert(rule.ensures()),
+                lift(rule.body()),
+                lift(rule.requires()),
+                lift(rule.ensures()),
                 rule.att());
     }
 
-    private Context convert(Context context) {
+    private Context lift(Context context) {
         return Context(
-                convert(context.body()),
-                convert(context.requires()),
+                lift(context.body()),
+                lift(context.requires()),
                 context.att());
     }
 
-    public K convert(K term) {
+    public K lift(K term) {
         K result = new TransformKORE()  {
             @Override
             public K apply(KApply k) {
@@ -66,5 +66,17 @@ public class LiftToKSequence {
         } else {
             return KSequence(result);
         }
+    }
+
+    public K lower(K term) {
+        return new TransformKORE() {
+            @Override
+            public K apply(KSequence k) {
+                if (k.items().size() == 1) {
+                    return super.apply(k.items().get(0));
+                }
+                return super.apply(k);
+            }
+        }.apply(term);
     }
 }
