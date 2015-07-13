@@ -2,6 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
+import org.apache.commons.io.FileUtils;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
@@ -41,10 +42,11 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         files.saveToKompiled("def.ml", ocaml);
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
+            FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
             Process ocamlopt = files.getProcessBuilder()
                     .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
-                            "-I", files.resolveKBase("include/ocaml").getAbsolutePath(), "-safe-string", "-w", "-26-11",
-                            "constants.ml", files.resolveKBase("include/ocaml/prelude.ml").getAbsolutePath(), "def.ml")
+                            "-safe-string", "-w", "-26-11",
+                            "constants.ml", "prelude.ml", "def.ml")
                     .directory(files.resolveKompiled("."))
                     .inheritIO()
                     .start();
