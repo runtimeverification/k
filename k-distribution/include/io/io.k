@@ -10,27 +10,27 @@ module K-IO
 
   // B, N, and P are really supposed to be Nat
   syntax KItem ::= "#open" "(" String ")" [function]
-                 | "#open" "(" String "," String ")" [function, hook(#IO:#open), impure]
-                 | "#tell" "(" Int ")" [function, hook(#IO:#tell), impure]
-                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc), impure]
-                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read), impure]
+                 | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
+                 | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
+                 | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
+                 | "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
 
-  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close), impure]
-             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek), impure]
-             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc), impure]
-             | "#write" "(" Int "," String ")" [function, hook(#IO:#write), impure]
+  syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
+             | "#seek" "(" Int "," Int ")" [function, hook(IO.seek), impure]
+             | "#putc" "(" Int "," Int ")"      [function, hook(IO.putc), impure]
+             | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
 
   syntax KItem ::= "#ioError" "(" String ")"
 
-  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat), impure]
-                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat), impure]
-                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir), impure]
+  syntax KList ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
+                 | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
+                 | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
 
-  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse), impure]
+  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(IO.parse), impure]
   syntax KItem ::= #parseInModule(String, // input
                                   String, // start symbol
                                   String) // module name
-                                  [function, hook(#K-PARSER:#parseInModule), impure]
+                                  [function, hook(IO.parseInModule), impure]
 
   rule #open(S:String) => #open(S:String, "rw")
 
@@ -122,7 +122,7 @@ module K-IO
 // ------------------------------
 // System
 
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system), impure]
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
 endmodule

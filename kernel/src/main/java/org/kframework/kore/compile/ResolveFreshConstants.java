@@ -71,7 +71,10 @@ public class ResolveFreshConstants {
         } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
             return sideCondition.get();
         } else {
-            return BooleanUtils.and(sideCondition.get(), requires);
+            // we order the lookup after the requires clause so that the fresh constant
+            // matching side condition occurs last. This is necessary in order to
+            // ensure that fresh constants in rule RHSs are consecutive
+            return BooleanUtils.and(requires, sideCondition.get());
         }
     }
 

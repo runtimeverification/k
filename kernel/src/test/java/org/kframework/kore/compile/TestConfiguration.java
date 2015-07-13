@@ -8,10 +8,12 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import scala.collection.immutable.Set;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -137,4 +139,9 @@ class TestConfiguration implements ConfigurationInfo {
 
     @Override
     public KLabel getConcat(Sort k) { return concats.get(k); }
+
+    @Override
+    public Set<Sort> getCellBagSortsOfCell(Sort k) {
+        return Set(Sort(k.name() + "Bag"));
+    }
 }

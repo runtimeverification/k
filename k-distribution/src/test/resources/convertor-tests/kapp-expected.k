@@ -1,6 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("18",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
-  syntax Bools ::= Bool [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) userList(#token("*",KString))]
   syntax Bools ::= Bool "," Bools [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token("_,_",KString)) right() userList(#token("*",KString))]
   syntax Bools ::= ".Bools" [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token(".List{\"'_,_\"}",KString)) userList(#token("*",KString))]
   syntax Bool ::= #Bool [Location(#token("6",Int),#token("19",Int),#token("6",Int),#token("23",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]

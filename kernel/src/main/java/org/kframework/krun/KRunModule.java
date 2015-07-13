@@ -266,7 +266,7 @@ public class KRunModule extends AbstractModule {
         }
 
         @Provides
-        ExecutionMode getExecutionMode(JCommander jc, Map<ToolActivation, Provider<ExecutionMode>> map, KRunOptions kRunOptions) {
+        ExecutionMode getExecutionMode(JCommander jc, Map<ToolActivation, Provider<ExecutionMode>> map, KRunOptions kRunOptions, KExceptionManager kem, FileUtil files) {
             ExecutionMode res = null;
             ToolActivation previous = null;
             for (Map.Entry<ToolActivation, Provider<ExecutionMode>> entry : map.entrySet()) {
@@ -279,7 +279,7 @@ public class KRunModule extends AbstractModule {
                 }
             }
             if (res == null)
-                res = new KRunExecutionMode(kRunOptions);
+                res = new KRunExecutionMode(kRunOptions, kem, files);
             return res;
         }
 
