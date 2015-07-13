@@ -425,9 +425,9 @@ module STRING
   rule rfindChar(S1:String, S2:String, I:Int) => maxInt(rfindString(S1, substrString(S2, 0, 1), I), rfindChar(S1, substrString(S2, 1, lengthString(S2)), I)) requires S2 =/=String ""
   rule rfindChar(_, "", _) => -1
 
-  rule countAllOccurences(Source:String, ToCount:String) => 0
+  rule countAllOccurrences(Source:String, ToCount:String) => 0
             requires findString(Source, ToCount, 0) <Int 0
-  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
+  rule countAllOccurrences(Source:String, ToCount:String) => 1 +Int countAllOccurrences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
             requires findString(Source, ToCount, 0) >=Int 0
 
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
@@ -442,7 +442,7 @@ module STRING
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
         requires Count >Int 0
   rule replace(Source:String, _, _, 0) => Source
-  rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
+  rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
 endmodule
 

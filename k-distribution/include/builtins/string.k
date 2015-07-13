@@ -104,9 +104,9 @@ module STRING-HOOKS
       => (ordChar(C) >=Int ordChar("0"))
            andBool (ordChar(C) <=Int ordChar("9")) when isChar(C)
 
-  rule countAllOccurences(Source:String, ToCount:String) => 0
+  rule countAllOccurrences(Source:String, ToCount:String) => 0
             when findString(Source, ToCount, 0) <Int 0
-  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
+  rule countAllOccurrences(Source:String, ToCount:String) => 1 +Int countAllOccurrences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
             when findString(Source, ToCount, 0) >=Int 0
 
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
@@ -121,7 +121,7 @@ module STRING-HOOKS
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
         when Count >Int 0
   rule replace(Source:K, _, _, 0) => Source
-  rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
+  rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
   rule ltrim(S:String) => ltrim(replaceFirst(S, " ", "")) when findString(S, " ", 0) ==Int 0
   rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0
