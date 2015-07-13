@@ -24,7 +24,7 @@ trait Rewriter {
 
 
   def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
-  
+
 
   /**
    * Execute a search of the Transition System.

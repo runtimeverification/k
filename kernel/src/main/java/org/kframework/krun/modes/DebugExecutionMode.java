@@ -3,6 +3,7 @@ package org.kframework.krun.modes;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.google.inject.Inject;
 import jline.ArgumentCompletor;
 import jline.Completor;
 import jline.ConsoleReader;
@@ -19,6 +20,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunDebuggerOptions;
+import org.kframework.krun.KRunOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -36,13 +38,23 @@ import static org.kframework.krun.KRun.*;
  */
 public class DebugExecutionMode implements ExecutionMode<Void> {
 
+    private final KRunOptions kRunOptions;
+    private final KExceptionManager kem;
+    private final FileUtil files;
+
     private static Object command(JCommander jc) {
         return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
+    }
 
+    @Inject
+    public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files) {
+        this.kRunOptions = kRunOptions;
+        this.kem = kem;
+        this.files = files;
     }
 
     @Override
-    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef, FileUtil files, KExceptionManager kem) {
+    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
         KDebug debugger = new KoreKDebug(k, rewriter);
         ConsoleReader reader;
@@ -134,7 +146,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
-                    Rule parsedPattern = pattern(options.search.patternStr, compiledDef, Source.apply("<command line: --exit-code>"), files, kem);
+                    Rule parsedPattern = pattern(files, kem, options.search.patternStr, kRunOptions, compiledDef, Source.apply("<Console>"));
                     //List<Map<KVariable, K>> results = debugger.search()
 
 

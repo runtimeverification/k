@@ -68,17 +68,14 @@ public class KRun implements Transformation<Void, Void> {
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(program, rewriter, compiledDef, files, kem);
+        Object result = executionMode.execute(program, rewriter, compiledDef);
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-<<<<<<< HEAD
-                Rule exitCodePattern = pattern(options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"), files, kem);
-=======
+
                 Rule exitCodePattern = pattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
->>>>>>> ocamlmap4
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
             }
@@ -126,9 +123,13 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static Rule pattern(String pattern, CompiledDefinition compiledDef, Source source, FileUtil files, KExceptionManager kem) {
+    public static Rule pattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+        if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
+            throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
+        }
         return new Kompile(compiledDef.kompileOptions, files, kem).compileRule(compiledDef, pattern, source);
     }
+
 
     public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
         switch (output) {
