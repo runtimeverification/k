@@ -65,7 +65,7 @@ public class GenerateSentencesFromConfigDeclTest {
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
         Set reference = Set(Production("<threads>", Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>"))),
-                SyntaxSort(Sort("ThreadCellBag"), Att().add("hook", "Bag")),
+                SyntaxSort(Sort("ThreadCellBag"), Att().add("hook", "BAG.Bag")),
                 Production("_ThreadCellBag_", Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag")))),
                 Production(".ThreadCellBag", Sort("ThreadCellBag"),
