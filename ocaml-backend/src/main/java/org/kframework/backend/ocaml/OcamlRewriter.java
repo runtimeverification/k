@@ -12,6 +12,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -55,7 +56,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("pgm.ml", ocaml);
+                files.saveToTemp("pgm.ml", StringUtil.splitLines(ocaml));
                 String output = compileAndExecOcaml("pgm.ml");
                 return parseOcamlOutput(output);
             }
@@ -63,7 +64,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public List<Map<KVariable, K>> match(K k, Rule rule) {
                 String ocaml = converter.match(k, rule, files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("match.ml", ocaml);
+                files.saveToTemp("match.ml", StringUtil.splitLines(ocaml));
                 String output = compileAndExecOcaml("match.ml");
                 return parseOcamlSearchOutput(output);
             }
@@ -71,7 +72,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
                 String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
-                files.saveToTemp("pgm.ml", ocaml);
+                files.saveToTemp("pgm.ml", StringUtil.splitLines(ocaml));
                 String output = compileAndExecOcaml("pgm.ml");
                 String subst = files.loadFromTemp("run.subst");
                 return Tuple2.apply(parseOcamlOutput(output), parseOcamlSearchOutput(subst));
