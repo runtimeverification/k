@@ -12,7 +12,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -56,7 +55,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("pgm.ml", StringUtil.splitLines(ocaml));
+                files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");
                 return parseOcamlOutput(output);
             }
@@ -64,7 +63,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public List<Map<KVariable, K>> match(K k, Rule rule) {
                 String ocaml = converter.match(k, rule, files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("match.ml", StringUtil.splitLines(ocaml));
+                files.saveToTemp("match.ml", ocaml);
                 String output = compileAndExecOcaml("match.ml");
                 return parseOcamlSearchOutput(output);
             }
@@ -72,7 +71,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             @Override
             public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
                 String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
-                files.saveToTemp("pgm.ml", StringUtil.splitLines(ocaml));
+                files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");
                 String subst = files.loadFromTemp("run.subst");
                 return Tuple2.apply(parseOcamlOutput(output), parseOcamlSearchOutput(subst));
@@ -148,28 +147,39 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                             Thread.sleep(100);
                         }
                     }
-                    while ((count = System.in.read(buffer)) > 0) {
-                        p2.getOutputStream().write(buffer, 0, count);
-                    }
                 } catch (IOException | InterruptedException e) {}
             });
             Thread out = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getInputStream().read(buffer)) >= 0) {
-                        System.out.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getInputStream().available() > 0) {
+                            count = p2.getInputStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.out.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {}
+                } catch (IOException | InterruptedException e) {}
             });
             Thread err = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getErrorStream().read(buffer)) >= 0) {
-                        System.err.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getErrorStream().available() > 0) {
+                            count = p2.getErrorStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.err.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {}
+                } catch (IOException | InterruptedException e) {}
             });
             in.start();
             out.start();
@@ -177,6 +187,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
             exit = p2.waitFor();
             in.interrupt();
+            out.interrupt();
+            err.interrupt();
             in.join();
             out.join();
             err.join();

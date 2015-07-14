@@ -7,7 +7,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -38,9 +37,9 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         DefinitionToOcaml def = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions);
         def.initialize(compiledDefinition);
         String ocaml = def.constants();
-        files.saveToKompiled("constants.ml", StringUtil.splitLines(ocaml));
+        files.saveToKompiled("constants.ml", ocaml);
         ocaml = def.definition();
-        files.saveToKompiled("def.ml", StringUtil.splitLines(ocaml));
+        files.saveToKompiled("def.ml", ocaml);
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
