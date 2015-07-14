@@ -53,11 +53,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return new Rewriter() {
             @Override
-            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfig, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-                return null;
-            }
-
-            @Override
             public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
@@ -70,23 +65,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 String ocaml = converter.match(k, rule, files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("match.ml", ocaml);
                 String output = compileAndExecOcaml("match.ml");
-                String[] lines = output.split("\n");
-                int count = Integer.parseInt(lines[0]);
-                int line = 1;
-                List<Map<KVariable, K>> list = new ArrayList<>();
-                for (int i = 0; i < count; i++) {
-                    Map<KVariable, K> map = new HashMap<>();
-                    list.add(map);
-                    for (; line < lines.length; line += 2) {
-                        if (lines[line].equals("|")) {
-                            line++;
-                            break;
-                        }
-                        KVariable key = KVariable(lines[line]);
-                        K value = parseOcamlOutput(lines[line + 1]);
-                        map.put(key, value);
-                    }
-                }
                 return parseOcamlSearchOutput(output);
             }
 
@@ -115,7 +93,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     break;
                 }
                 KVariable key = KVariable(lines[line]);
-                K value = parseOcamlOutput(lines[line + 1]);
+                K value = parseOcamlOutput(lines[line+1]);
                 map.put(key, value);
             }
         }
@@ -142,7 +120,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                         "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
                         name);
             }
-
             Process p = pb.directory(files.resolveTemp("."))
                     .redirectError(files.resolveTemp("compile.err"))
                     .redirectOutput(files.resolveTemp("compile.out"))
@@ -173,8 +150,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = System.in.read(buffer)) > 0) {
                         p2.getOutputStream().write(buffer, 0, count);
                     }
-                } catch (IOException | InterruptedException e) {
-                }
+                } catch (IOException | InterruptedException e) {}
             });
             Thread out = new Thread(() -> {
                 int count;
@@ -183,8 +159,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = p2.getInputStream().read(buffer)) >= 0) {
                         System.out.write(buffer, 0, count);
                     }
-                } catch (IOException e) {
-                }
+                } catch (IOException e) {}
             });
             Thread err = new Thread(() -> {
                 int count;
@@ -193,8 +168,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     while ((count = p2.getErrorStream().read(buffer)) >= 0) {
                         System.err.write(buffer, 0, count);
                     }
-                } catch (IOException e) {
-                }
+                } catch (IOException e) {}
             });
             in.start();
             out.start();
