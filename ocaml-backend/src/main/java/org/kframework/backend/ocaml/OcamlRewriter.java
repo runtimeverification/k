@@ -142,15 +142,22 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                         "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
                         name);
             }
+            long startTime = System.currentTimeMillis();
+
+
             Process p = pb.directory(files.resolveTemp("."))
                     .redirectError(files.resolveTemp("compile.err"))
                     .redirectOutput(files.resolveTemp("compile.out"))
                     .start();
             int exit = p.waitFor();
+            long endTime = System.currentTimeMillis();
+            System.out.println("Ocaml Compilation Time " + (endTime - startTime) + " milliseconds");
+
             if (exit != 0) {
                 System.err.println(files.loadFromTemp("compile.err"));
                 throw KEMException.criticalError("Failed to compile program to ocaml. See output for error information.");
             }
+            startTime = System.currentTimeMillis();
             Process p2 = files.getProcessBuilder()
                     .command(files.resolveTemp("a.out").getAbsolutePath())
                     .start();
@@ -206,9 +213,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             err.join();
             System.out.flush();
             System.err.flush();
+            endTime = System.currentTimeMillis();
             if (exit != 0) {
                 throw KEMException.criticalError("Failed to execute program in ocaml. See output for error information.");
             }
+            System.out.println("Ocaml Execution Time " + (endTime - startTime) + " milliseconds");
+            System.out.println("----------------------------------------------------------------");
             return files.loadFromTemp("run.out");
         } catch (IOException e) {
             throw KEMException.criticalError("Failed to start ocamlopt: " + e.getMessage(), e);

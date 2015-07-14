@@ -4,6 +4,7 @@ package org.kframework.krun.modes;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import jline.ArgumentCompletor;
 import jline.Completor;
 import jline.ConsoleReader;
@@ -41,22 +42,24 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     private final KRunOptions kRunOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
+    private int checkpointInterval;
 
     private static Object command(JCommander jc) {
         return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
     }
 
     @Inject
-    public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files) {
+    public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files, @Named("checkpointIntervalValue") Integer checkpointInterval) {
         this.kRunOptions = kRunOptions;
         this.kem = kem;
         this.files = files;
+        this.checkpointInterval = checkpointInterval;
     }
 
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
-        KDebug debugger = new KoreKDebug(k, rewriter);
+        KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
         ConsoleReader reader;
         try {
             reader = new ConsoleReader();
@@ -119,7 +122,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
-                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
 

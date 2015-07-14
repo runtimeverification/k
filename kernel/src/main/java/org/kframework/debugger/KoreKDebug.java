@@ -19,7 +19,7 @@ import java.util.TreeMap;
 public class KoreKDebug implements KDebug {
 
     private final int DEFAULT_ID = 0;
-    private final int DEFAULT_CHECKPOINT_SIZE = 50;
+    private final int DEFAULT_CHECKPOINT_SIZE = 1000000;
     private List<DebuggerState> stateList;
     private DebuggerState activeState;
     private Rewriter rewriter;
@@ -32,10 +32,11 @@ public class KoreKDebug implements KDebug {
      * @param initialK The initial Configuration.
      * @param rewriter The Rewriter being used.
      */
-    public KoreKDebug(K initialK, Rewriter rewriter) {
+    public KoreKDebug(K initialK, Rewriter rewriter, int checkpointInterval) {
         this.stateList = new ArrayList<>();
         this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
+        this.checkpointInterval = checkpointInterval;
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, new RewriterCheckpoint(initialK));
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
@@ -75,9 +76,8 @@ public class KoreKDebug implements KDebug {
         steps -= lastCheckpoint + checkpointInterval - activeStateCheckpoint;
         activeStateCheckpoint = lastCheckpoint + checkpointInterval;
         checkpointMap.put(new Integer(activeStateCheckpoint), new RewriterCheckpoint(currentK));
-
         /* Register Checkpoints and Proceed. Take Jumps equal to the Checkpoint Interval */
-        while (steps >= checkpointInterval) {
+        while (steps > checkpointInterval) {
             activeStateCheckpoint += checkpointInterval;
             RewriterCheckpoint newCheckpoint = new RewriterCheckpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))));
             steps -= checkpointInterval;
@@ -135,11 +135,14 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState resume() {
-        K previousK;
         do {
-            previousK = activeState.getCurrentK();
             step(checkpointInterval);
-        } while (!previousK.equals(activeState.getCurrentK()));
+        } while (!isFinalResult(activeState.getCurrentK()));
         return activeState;
+    }
+
+
+    private boolean isFinalResult(K currK) {
+        return currK.equals(rewriter.execute(currK, Optional.of(1)));
     }
 }
