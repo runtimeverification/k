@@ -67,7 +67,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         List<Completor> argCompletor = new LinkedList<Completor>();
         argCompletor.add(new SimpleCompletor(new String[]{"help",
-                "exit", "step", "jump-to", "back-step"}));
+                "exit", "step", "jump-to", "back-step", "resume", "run"}));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));
@@ -125,22 +125,20 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
 
-                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSetCheckpoint) {
-
                     debugger.setCheckpointInterval(options.setCheckpoint.checkpointInterval);
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandJumpTo) {
                     DebuggerState result = debugger.jumpTo(options.jumpTo.stateNum);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandBackStep) {
                     DebuggerState result = debugger.backStep(options.backStep.backSteps);
                     if (result != null) {
                         K finalK = result.getCurrentK();
-                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     } else
                         System.out.println("Invalid Operation");
 
@@ -154,7 +152,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     DebuggerState result = debugger.resume();
                     K finalK = result.getCurrentK();
                     if (finalK instanceof K)
-                        prettyPrint(compiledDef, OutputModes.KAST, s -> System.out.println(s), finalK);
+                        prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
                 } else {

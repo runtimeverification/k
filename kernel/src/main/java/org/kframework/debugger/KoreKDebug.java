@@ -139,7 +139,7 @@ public class KoreKDebug implements KDebug {
         do {
             previousK = activeState.getCurrentK();
             step(checkpointInterval);
-        } while (previousK != activeState.getCurrentK());
+        } while (!previousK.equals(activeState.getCurrentK()));
         return activeState;
     }
 }

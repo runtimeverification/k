@@ -132,7 +132,6 @@ public final class KRunDebuggerOptions {
         @Parameter(names = "-s", description = "Pattern String", required = true)
         public String patternStr;
 
-
     }
 
 
