@@ -97,9 +97,9 @@ public class KoreKDebug implements KDebug {
     @Override
     public DebuggerState backStep(int steps) {
         int currentCheckpoint = activeState.getStepNum();
-        int target  = currentCheckpoint - steps;
+        int target = currentCheckpoint - steps;
         NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
-        Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
+        Map.Entry<Integer, RewriterCheckpoint> relevantEntry = currMap.floorEntry(target);
         if (relevantEntry == null) {
             /* Invalid Operation, no need to change the state */
             return null;
@@ -158,5 +158,16 @@ public class KoreKDebug implements KDebug {
 
     private boolean isFinalResult(K currK) {
         return currK.equals(rewriter.execute(currK, Optional.of(1)));
+    }
+
+    @Override
+    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum) {
+        DebuggerState newActiveState = stateList.get(stateNum);
+        if (newActiveState == null) {
+            return null;
+        }
+        activeState = newActiveState;
+        configurationNum.ifPresent(configNum -> jumpTo(configNum));
+        return activeState;
     }
 }

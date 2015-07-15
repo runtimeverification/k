@@ -47,13 +47,6 @@ public final class KRunDebuggerOptions {
         public int numStepsAll = 1;
     }
 
-    @Parameters(commandNames="select", commandDescription="Select a particular state as the current state")
-    public static final class CommandSelect {
-
-        @Parameter(names="-s", description="State ID to select", required=true)
-        public int stateId;
-    }
-
     @Parameters(commandNames={"show-graph", "show-search-graph"}, commandDescription="Displays the search graph of states in the execution trace")
     public static final class CommandShowGraph {}
 
@@ -139,6 +132,17 @@ public final class KRunDebuggerOptions {
     public static final class CommandGetStates {
 
     }
+
+    @Parameters(commandNames = {"select"}, commandDescription = "Select a state from States observed so far")
+    public static final class CommandSelect {
+
+        @Parameter(names = "-s", description = "<State Id> [Configuration Id]", variableArity = true)
+        public List<Integer> ids;
+
+        public int stateId() {return ids.get(0);}
+
+    }
+
 
 
 

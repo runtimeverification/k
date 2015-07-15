@@ -271,7 +271,7 @@ public interface Debugger {
                         System.out.println(searchPrinter.run(states, a));
 
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
-                        debugger.setCurrentState(options.select.stateId);
+                        debugger.setCurrentState(options.select.stateId());
                         System.out.println(statePrinter.run(debugger.getState(debugger.getCurrentState()), a));
 
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowGraph) {

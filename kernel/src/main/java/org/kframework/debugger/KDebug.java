@@ -76,5 +76,14 @@ public interface KDebug {
      */
     public List<DebuggerState> getStates();
 
+    /**
+     * Specified a State and a Configuration, makes it the active state with configuration.
+     *
+     * @param stateNum         The state number
+     * @param configurationNum The configuration within the state
+     * @return DebuggerState object containing the State of the debugger. Null if operation fails.
+     */
+    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum);
+
 
 }

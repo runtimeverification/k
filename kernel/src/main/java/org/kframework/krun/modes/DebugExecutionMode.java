@@ -11,7 +11,6 @@ import jline.ConsoleReader;
 import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
@@ -33,10 +32,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Optional;
 
-import static org.kframework.krun.KRun.*;
 import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
+import static org.kframework.krun.KRun.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -81,7 +80,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         for (Integer key : checkpointMap.navigableKeySet()) {
             System.out.print("Configuration " + key + " ---> ");
         }
-        if(!isFinalState)
+        if (!isFinalState)
             System.out.println("Configuration " + finalCheckpoint.getKey() + " ---> ");
         else
             System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + "|@"));
@@ -90,8 +89,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
-
-        System.out.println(ansi().render("@|red Hello|@ @|green World|@"));
 
         KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
         ConsoleReader reader;
@@ -104,16 +101,17 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         List<Completor> argCompletor = new LinkedList<Completor>();
         argCompletor.add(new SimpleCompletor(new String[]{"help",
-                "exit", "step", "jump-to", "back-step", "resume", "run", "get-states"}));
+                "exit", "step", "jump-to", "back-step", "resume", "run", "get-states", "select"}));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));
         reader.addCompletor(new MultiCompletor(completors));
         while (true) {
+
             System.out.println();
             String input;
             try {
-                input = reader.readLine("Command > ");
+                input = reader.readLine("KDebug> ");
             } catch (IOException e) {
                 throw KEMException.internalError("IO error detected interacting with console", e);
             }
@@ -137,6 +135,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.search);
             jc.addCommand(options.resume);
             jc.addCommand(options.getStates);
+            jc.addCommand(options.select);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -195,6 +194,40 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandGetStates) {
                     List<DebuggerState> stateList = debugger.getStates();
                     printStateList(stateList);
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
+                    List<Integer> ids = options.select.ids;
+                    List<DebuggerState> stateList = debugger.getStates();
+                    if (ids.isEmpty() || !stateList.contains(ids.get(0))) {
+                        System.out.println("State not present/specified");
+                        continue;
+                    }
+                    DebuggerState currState;
+                    if (ids.size() < 2) {
+                        currState = debugger.setState(ids.get(0), Optional.empty());
+                        if (currState != null) {
+                            System.out.println("Selected State - " + ids.get(0));
+                            printCheckpoints(currState.getCheckpointMap(), true);
+
+                        }
+                        System.out.println("Could not select State");
+                        continue;
+                    }
+                    DebuggerState currFinalState = stateList.get(stateList.size() - 1);
+                    if (currFinalState.getCheckpointMap().lastEntry().getKey() > ids.get(1)) {
+                        System.out.println("Final Configuration Specified is behind current configuration. Debugger Will advance current state's configuration");
+                    } else if (currFinalState.getCheckpointMap().lastEntry().getKey() < ids.get(1)) {
+                        System.out.println("Specifed configuration behind current, debugger will make new State");
+                    } else {
+                        System.out.println("Selecting specified state");
+                    }
+                    DebuggerState finalState = debugger.setState(ids.get(0), Optional.of(ids.get(1)));
+                    if (finalState == null) {
+                        System.out.println("State Could not be selected");
+                        continue;
+                    }
+                    System.out.println("Selected State " + ids.get(0));
+                    printCheckpoints(finalState.getCheckpointMap(), true);
+
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }

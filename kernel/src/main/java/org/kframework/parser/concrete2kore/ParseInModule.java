@@ -37,7 +37,7 @@ public class ParseInModule implements Serializable {
     private final Module disambModule;
     /**
      * The exact module used for parsing. This can contain productions and sorts that are not
-     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
+     * necessarily representable in KORE (sorts like Ne#ids, to avoid name collisions).
      * In this case the modified production will be annotated with the information from the
      * original production, so disambiguation can be done safely.
      */
