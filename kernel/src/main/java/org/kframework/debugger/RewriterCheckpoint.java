@@ -11,7 +11,7 @@ import org.kframework.kore.K;
  * Recall that the state represents a branch in the execution tree.
  * This class stores some intermediate K's encountered in that branch.
  */
-class RewriterCheckpoint {
+public class RewriterCheckpoint {
     private K checkpointK;
 
     K getCheckpointK() {

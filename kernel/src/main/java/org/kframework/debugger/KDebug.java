@@ -62,7 +62,19 @@ public interface KDebug {
      */
     public List<? extends Map<? extends K, ? extends K>> search(Optional<Integer> startStateId, Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
 
+    /**
+     * Resume the execution of the program until a final Configuration is reached.
+     *
+     * @return State showing the final state the Debugger is in.
+     */
     public DebuggerState resume();
+
+    /**
+     * Return a list of States the Debugger has been in. A State is essentially a path in the execution tree.
+     *
+     * @return List of State. The last state in the list is the active State.
+     */
+    public List<DebuggerState> getStates();
 
 
 }

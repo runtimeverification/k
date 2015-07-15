@@ -24,6 +24,7 @@ public final class KRunDebuggerOptions {
     public final CommandBackStep backStep = new CommandBackStep();
     public final CommandJumpTo jumpTo = new CommandJumpTo();
     public final CommandStepAll stepAll = new CommandStepAll();
+    public final CommandGetStates getStates = new CommandGetStates();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -131,6 +132,11 @@ public final class KRunDebuggerOptions {
 
         @Parameter(names = "-s", description = "Pattern String", required = true)
         public String patternStr;
+
+    }
+
+    @Parameters(commandNames = {"get-states"}, commandDescription = "Get all the paths traversed so far")
+    public static final class CommandGetStates {
 
     }
 

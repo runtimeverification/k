@@ -141,6 +141,20 @@ public class KoreKDebug implements KDebug {
         return activeState;
     }
 
+    @Override
+    public List<DebuggerState> getStates() {
+        if (stateList.size() == 1) {
+            return stateList;
+        }
+
+        /* Making sure last state is the active state */
+        stateList.remove(activeState);
+        stateList.add(activeState);
+
+        /* Returning Copy to ensure Immutability */
+        return new ArrayList<>(stateList);
+
+    }
 
     private boolean isFinalResult(K currK) {
         return currK.equals(rewriter.execute(currK, Optional.of(1)));

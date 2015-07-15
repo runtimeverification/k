@@ -11,12 +11,14 @@ import jline.ConsoleReader;
 import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
+import org.kframework.debugger.RewriterCheckpoint;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
@@ -56,9 +58,20 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         this.checkpointInterval = checkpointInterval;
     }
 
+    private void printStateList(List<DebuggerState> stateList) {
+        for (int i = 0; i < stateList.size(); ++i) {
+            System.out.println("State Number " + i);
+            Entry<Integer, RewriterCheckpoint>
+            
+        }
+
+    }
+
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
+
+
         KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
         ConsoleReader reader;
         try {
@@ -70,7 +83,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         List<Completor> argCompletor = new LinkedList<Completor>();
         argCompletor.add(new SimpleCompletor(new String[]{"help",
-                "exit", "step", "jump-to", "back-step", "resume", "run"}));
+                "exit", "step", "jump-to", "back-step", "resume", "run", "get-states"}));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));
@@ -102,6 +115,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.jumpTo);
             jc.addCommand(options.search);
             jc.addCommand(options.resume);
+            jc.addCommand(options.getStates);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -116,7 +130,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         }
                     }
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandExit) {
-                    return null;
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     DebuggerState result = debugger.step(options.step.numSteps);
@@ -148,8 +161,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
                     Rule parsedPattern = pattern(files, kem, options.search.patternStr, kRunOptions, compiledDef, Source.apply("<Console>"));
-                    //List<Map<KVariable, K>> results = debugger.search()
-
+                    //List<Map<KVariable, K> substitutionList =
 
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandResume) {
                     DebuggerState result = debugger.resume();
@@ -158,6 +170,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), finalK);
                     else
                         System.out.printf("Invalid Operation");
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandGetStates) {
+                    List<DebuggerState> stateList = debugger.getStates();
+
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
@@ -168,5 +183,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.err.println(e.getMessage());
             }
         }
+
+
     }
 }
