@@ -31,8 +31,12 @@ import org.kframework.utils.file.FileUtil;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
 
 import static org.kframework.krun.KRun.*;
+import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -60,17 +64,34 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     private void printStateList(List<DebuggerState> stateList) {
         for (int i = 0; i < stateList.size(); ++i) {
-            System.out.println("State Number " + i);
-            Entry<Integer, RewriterCheckpoint>
-            
+            DebuggerState currState = stateList.get(i);
+            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currState.getCheckpointMap();
+            if (i < stateList.size() - 1) {
+                printCheckpoints(checkpointMap, false);
+            } else {
+                System.out.println(ansi().render("@|green State " + i + "|@"));
+                printCheckpoints(checkpointMap, true);
+            }
         }
 
+    }
+
+    private void printCheckpoints(NavigableMap<Integer, RewriterCheckpoint> checkpointMap, boolean isFinalState) {
+        Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
+        for (Integer key : checkpointMap.navigableKeySet()) {
+            System.out.print("Configuration " + key + " ---> ");
+        }
+        if(!isFinalState)
+            System.out.println("Configuration " + finalCheckpoint.getKey() + " ---> ");
+        else
+            System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + "|@"));
     }
 
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDef) {
         /* Development Purposes Only, will go away in production */
 
+        System.out.println(ansi().render("@|red Hello|@ @|green World|@"));
 
         KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
         ConsoleReader reader;
@@ -131,6 +152,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     }
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandExit) {
 
+                    return null;
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                     DebuggerState result = debugger.step(options.step.numSteps);
                     K finalK = result.getCurrentK();
@@ -172,7 +194,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.printf("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandGetStates) {
                     List<DebuggerState> stateList = debugger.getStates();
-
+                    printStateList(stateList);
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }

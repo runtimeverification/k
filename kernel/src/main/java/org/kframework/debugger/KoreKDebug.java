@@ -106,8 +106,8 @@ public class KoreKDebug implements KDebug {
         }
 
         int floorKey = relevantEntry.getKey();
-        stateList.remove(activeState);
         activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
+        stateList.add(activeState);
         return step(target - floorKey);
     }
 
@@ -144,7 +144,7 @@ public class KoreKDebug implements KDebug {
     @Override
     public List<DebuggerState> getStates() {
         if (stateList.size() == 1) {
-            return stateList;
+            return new ArrayList<>(stateList);
         }
 
         /* Making sure last state is the active state */

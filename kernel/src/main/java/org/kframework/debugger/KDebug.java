@@ -27,7 +27,7 @@ public interface KDebug {
      * Take a certain number of steps from the current state.
      *
      * @param steps The number of steps to take
-     * @return DebuggerState Oject depicting the state debugger was in
+     * @return DebuggerState Ob ject depicting the state debugger was in
      * after the operation.
      */
     public DebuggerState step(int steps);
