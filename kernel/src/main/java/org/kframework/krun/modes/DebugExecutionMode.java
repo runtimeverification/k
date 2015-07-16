@@ -147,6 +147,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             jc.addCommand(options.resume);
             jc.addCommand(options.getStates);
             jc.addCommand(options.select);
+            jc.addCommand(options.peek);
             try {
                 jc.parse(input.split("\\s+"));
 
@@ -240,6 +241,30 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.println("Active State With Specified Configuration is:" + activeStateNum);
                     } else {
                         System.out.println("Specified State Selected");
+                    }
+                } else if (command(jc) instanceof KRunDebuggerOptions.CommandPeek) {
+                    if (options.peek.peekIds.isEmpty()) {
+                        System.out.println("Invalid, must specify at least state Id");
+                        continue;
+                    }
+                    List<DebuggerState> statesList = debugger.getStates();
+                    Integer index = options.peek.peekIds.get(0);
+                    if (index < statesList.size()) {
+                        DebuggerState debuggerState = statesList.get(index);
+                        if (statesList.size() < 2) {
+
+                            String stateInfo = processState(debuggerState, compiledDef);
+                            System.out.println(stateInfo);
+                        } else {
+                            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = debuggerState.getCheckpointMap();
+                            if (checkpointMap.containsKey(index)) {
+                                prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), checkpointMap.get(index).getCheckpointK());
+                            } else if (debuggerState.getStepNum() == index) {
+                                prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), debuggerState.getCurrentK());
+                            } else {
+                                System.out.println("Specified Configuration not present in State. See jump-to");
+                            }
+                        }
                     }
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();

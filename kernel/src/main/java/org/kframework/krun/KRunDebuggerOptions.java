@@ -25,6 +25,7 @@ public final class KRunDebuggerOptions {
     public final CommandJumpTo jumpTo = new CommandJumpTo();
     public final CommandStepAll stepAll = new CommandStepAll();
     public final CommandGetStates getStates = new CommandGetStates();
+    public final CommandPeek peek = new CommandPeek();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -140,6 +141,14 @@ public final class KRunDebuggerOptions {
         public List<Integer> ids;
 
         public int stateId() {return ids.get(0);}
+
+    }
+
+    @Parameters(commandNames = {"peek"}, commandDescription = "Display information from a state observed so far")
+    public static final class CommandPeek {
+
+        @Parameter(names = "-s", description = "<State Id> [Configuration Id]", variableArity = true)
+        public List<Integer> peekIds;
 
     }
 

@@ -14,11 +14,11 @@ import org.kframework.kore.K;
 public class RewriterCheckpoint {
     private K checkpointK;
 
-    K getCheckpointK() {
+    public K getCheckpointK() {
         return checkpointK;
     }
 
-    RewriterCheckpoint(K checkpointK) {
+    public RewriterCheckpoint(K checkpointK) {
         this.checkpointK = checkpointK;
     }
 }
