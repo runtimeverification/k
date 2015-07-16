@@ -65,22 +65,23 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         for (int i = 0; i < stateList.size(); ++i) {
             DebuggerState currState = stateList.get(i);
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currState.getCheckpointMap();
+            Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
             if (i < stateList.size() - 1) {
                 System.out.printf("State " + i);
                 printCheckpoints(checkpointMap, false);
-                if (checkpointMap.lastKey() == currState.getStepNum()) {
-                    System.out.println();
+                if (finalCheckpoint.getKey() == currState.getStepNum()) {
+                    System.out.println("Configuration " + finalCheckpoint.getKey());
                 } else {
-                    System.out.println(" ---> " + currState.getStepNum());
+                    System.out.println("Configuration " + finalCheckpoint.getKey() + " ---> " + currState.getStepNum());
                 }
 
             } else {
                 System.out.println(ansi().render("@|green State " + i + "|@"));
                 printCheckpoints(checkpointMap, true);
-                if (checkpointMap.lastKey() == currState.getStepNum()) {
-                    System.out.println();
+                if (finalCheckpoint.getKey() == currState.getStepNum()) {
+                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey()) + "|@");
                 } else {
-                    System.out.println(ansi().render("@|yellow ---> " + currState.getStepNum() + " |@"));
+                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + " --->" + currState.getStepNum() + " |@"));
                 }
             }
         }
@@ -93,7 +94,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.print("Configuration " + key + " ---> ");
             }
             else {
-                System.out.print(ansi().render("@|yellow " + "Configuration " + key + " |@"));
+                System.out.print(ansi().render("@|yellow " + "Configuration " + key + " ---> |@"));
             }
 
         }
