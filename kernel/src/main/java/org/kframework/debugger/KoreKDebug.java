@@ -146,11 +146,6 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public List<DebuggerState> getStates() {
-        if (stateList.size() == 1) {
-            return new ArrayList<>(stateList);
-        }
-
-        /* Returning Copy to ensure Immutability */
         return new ArrayList<>(stateList);
 
     }

@@ -4,6 +4,7 @@ package org.kframework.debugger;
 import org.kframework.kore.K;
 
 import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
  * Created by Manasvi on 6/15/15.
@@ -50,11 +51,11 @@ public class DebuggerState {
      *
      * @return The most recent checkpoint element in the Map
      */
-    public Integer getlastMapCheckpoint() {
+    public int getlastMapCheckpoint() {
         return checkpointMap.lastKey();
     }
 
     public NavigableMap<Integer, RewriterCheckpoint> getCheckpointMap() {
-        return checkpointMap;
+        return new TreeMap<>(checkpointMap);
     }
 }

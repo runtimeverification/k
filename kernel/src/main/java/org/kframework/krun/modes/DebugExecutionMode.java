@@ -35,7 +35,7 @@ import java.util.NavigableMap;
 import java.util.Optional;
 
 import static org.kframework.krun.KRun.*;
-import static org.fusesource.jansi.Ansi.ansi
+import static org.fusesource.jansi.Ansi.ansi;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -74,6 +74,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             if (state == activeState) {
                 outputString.append("|@");
             }
+            i++;
             outputString.append("\n");
         }
         System.out.println(ansi().render(outputString.toString()));
@@ -216,8 +217,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         currState = debugger.setState(ids.get(0), Optional.empty());
                         if (currState != null) {
                             System.out.println("Selected State - " + ids.get(0));
+                        } else {
+                            System.out.println("Could not select State");
                         }
-                        System.out.println("Could not select State");
                         continue;
                     }
                     DebuggerState currFinalState = stateList.get(stateList.size() - 1);
@@ -233,7 +235,12 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.println("State Could not be selected");
                         continue;
                     }
-                    System.out.println("Selected State " + ids.get(0));
+                    int activeStateNum = debugger.getStates().lastIndexOf(debugger.getActiveState());
+                    if (activeStateNum != ids.get(0)) {
+                        System.out.println("Active State With Specified Configuration is:" + activeStateNum);
+                    } else {
+                        System.out.println("Specified State Selected");
+                    }
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
