@@ -34,8 +34,8 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 
-import static org.fusesource.jansi.Ansi.*;
 import static org.kframework.krun.KRun.*;
+import static org.fusesource.jansi.Ansi.ansi
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -61,44 +61,39 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         this.checkpointInterval = checkpointInterval;
     }
 
-    private void printStateList(List<DebuggerState> stateList) {
-        for (int i = 0; i < stateList.size(); ++i) {
-            DebuggerState currState = stateList.get(i);
-            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currState.getCheckpointMap();
-            Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
-            if (i < stateList.size() - 1) {
-                System.out.println("State " + i);
-                printCheckpoints(checkpointMap, false);
-                if (finalCheckpoint.getKey() == currState.getStepNum()) {
-                    System.out.println("Configuration " + finalCheckpoint.getKey());
-                } else {
-                    System.out.println("Configuration " + finalCheckpoint.getKey() + " ---> " + currState.getStepNum());
-                }
-
-            } else {
-                System.out.println(ansi().render("@|green State " + i + "|@"));
-                printCheckpoints(checkpointMap, true);
-                if (finalCheckpoint.getKey() == currState.getStepNum()) {
-                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + "|@"));
-                } else {
-                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + " --->" + currState.getStepNum() + " |@"));
-                }
+    private void printStateList(List<DebuggerState> stateList, DebuggerState activeState, CompiledDefinition compiledDefinition) {
+        StringBuffer outputString = new StringBuffer();
+        int i = 0;
+        for (DebuggerState state : stateList) {
+            String checkpointSequence = processState(state, compiledDefinition);
+            if (state == activeState) {
+                outputString.append("@|green ");
             }
+            outputString.append("StateNum " + i + "\n");
+            outputString.append(checkpointSequence);
+            if (state == activeState) {
+                outputString.append("|@");
+            }
+            outputString.append("\n");
         }
+        System.out.println(ansi().render(outputString.toString()));
 
     }
 
-    private void printCheckpoints(NavigableMap<Integer, RewriterCheckpoint> checkpointMap, boolean isActiveState) {
-        for (Integer key : checkpointMap.navigableKeySet()) {
-            if(!isActiveState) {
-                System.out.print("Configuration " + key + " ---> ");
-            }
-            else {
-                System.out.print(ansi().render("@|yellow " + "Configuration " + key + " ---> |@"));
-            }
-
+    private String processState(DebuggerState state, CompiledDefinition compiledDef) {
+        NavigableMap<Integer, RewriterCheckpoint> checkpointMap = state.getCheckpointMap();
+        Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
+        StringBuffer str = new StringBuffer();
+        for (Integer key : checkpointMap.keySet()) {
+            str.append("Checkpoint " + key + " ---> ");
         }
-
+        if (finalCheckpoint.getKey() == state.getStepNum()) {
+            str.append("Checkpoint " + finalCheckpoint.getKey());
+        } else {
+            str.append("Checkpoint " + finalCheckpoint.getKey() + " ---> ");
+            prettyPrint(compiledDef, OutputModes.PRETTY, s -> str.append(s), state.getCurrentK());
+        }
+        return str.toString();
     }
 
     @Override
@@ -208,7 +203,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.printf("Invalid Operation");
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandGetStates) {
                     List<DebuggerState> stateList = debugger.getStates();
-                    printStateList(stateList);
+                    printStateList(stateList, debugger.getActiveState(), compiledDef);
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
                     List<Integer> ids = options.select.ids;
                     List<DebuggerState> stateList = debugger.getStates();
@@ -221,14 +216,12 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         currState = debugger.setState(ids.get(0), Optional.empty());
                         if (currState != null) {
                             System.out.println("Selected State - " + ids.get(0));
-                            printCheckpoints(currState.getCheckpointMap(), true);
-
                         }
                         System.out.println("Could not select State");
                         continue;
                     }
                     DebuggerState currFinalState = stateList.get(stateList.size() - 1);
-                    if (currFinalState.getStepNum()> ids.get(1)) {
+                    if (currFinalState.getStepNum() > ids.get(1)) {
                         System.out.println("Specified step number is behind current final configuration. Debugger Will create and switch to new State, having specified configuration.");
                     } else if (currFinalState.getStepNum() < ids.get(1)) {
                         System.out.println("Specified step number is ahead of current configuration. Debugger will advance current state.");
@@ -241,8 +234,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         continue;
                     }
                     System.out.println("Selected State " + ids.get(0));
-                    printCheckpoints(finalState.getCheckpointMap(), true);
-
                 } else {
                     assert false : "Unexpected krun debugger command " + jc.getParsedCommand();
                 }
