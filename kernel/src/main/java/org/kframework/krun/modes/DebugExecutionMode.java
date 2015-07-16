@@ -66,24 +66,38 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             DebuggerState currState = stateList.get(i);
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currState.getCheckpointMap();
             if (i < stateList.size() - 1) {
+                System.out.printf("State " + i);
                 printCheckpoints(checkpointMap, false);
+                if (checkpointMap.lastKey() == currState.getStepNum()) {
+                    System.out.println();
+                } else {
+                    System.out.println(" ---> " + currState.getStepNum());
+                }
+
             } else {
                 System.out.println(ansi().render("@|green State " + i + "|@"));
                 printCheckpoints(checkpointMap, true);
+                if (checkpointMap.lastKey() == currState.getStepNum()) {
+                    System.out.println();
+                } else {
+                    System.out.println(ansi().render("@|yellow ---> " + currState.getStepNum() + " |@"));
+                }
             }
         }
 
     }
 
-    private void printCheckpoints(NavigableMap<Integer, RewriterCheckpoint> checkpointMap, boolean isFinalState) {
-        Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
+    private void printCheckpoints(NavigableMap<Integer, RewriterCheckpoint> checkpointMap, boolean isActiveState) {
         for (Integer key : checkpointMap.navigableKeySet()) {
-            System.out.print("Configuration " + key + " ---> ");
+            if(!isActiveState) {
+                System.out.print("Configuration " + key + " ---> ");
+            }
+            else {
+                System.out.print(ansi().render("@|yellow " + "Configuration " + key + " |@"));
+            }
+
         }
-        if (!isFinalState)
-            System.out.println("Configuration " + finalCheckpoint.getKey() + " ---> ");
-        else
-            System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + "|@"));
+
     }
 
     @Override
