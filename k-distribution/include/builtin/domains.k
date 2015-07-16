@@ -39,6 +39,7 @@ module MAP
   syntax Map ::= ".Map"                         [function, hook(MAP.unit), latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
+  syntax Map ::= "(" Map ")" [bracket]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
   syntax Map ::= K "|->" K                      [function, hook(MAP.element), latex({#1}\mapsto{#2})]
