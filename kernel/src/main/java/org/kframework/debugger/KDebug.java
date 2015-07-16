@@ -85,5 +85,10 @@ public interface KDebug {
      */
     public DebuggerState setState(int stateNum, Optional<Integer> configurationNum);
 
+    /**
+     * Returns the state the activated state the debugger is in at the moment
+     * @return The DebuggerState object corresponding to the Active State
+     */
+    public DebuggerState getActiveState();
 
 }

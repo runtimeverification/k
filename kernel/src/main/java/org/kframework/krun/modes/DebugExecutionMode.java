@@ -67,7 +67,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currState.getCheckpointMap();
             Map.Entry<Integer, RewriterCheckpoint> finalCheckpoint = checkpointMap.pollLastEntry();
             if (i < stateList.size() - 1) {
-                System.out.printf("State " + i);
+                System.out.println("State " + i);
                 printCheckpoints(checkpointMap, false);
                 if (finalCheckpoint.getKey() == currState.getStepNum()) {
                     System.out.println("Configuration " + finalCheckpoint.getKey());
@@ -79,7 +79,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println(ansi().render("@|green State " + i + "|@"));
                 printCheckpoints(checkpointMap, true);
                 if (finalCheckpoint.getKey() == currState.getStepNum()) {
-                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey()) + "|@");
+                    System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + "|@"));
                 } else {
                     System.out.println(ansi().render("@|yellow Configuration " + finalCheckpoint.getKey() + " --->" + currState.getStepNum() + " |@"));
                 }
@@ -212,7 +212,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
                     List<Integer> ids = options.select.ids;
                     List<DebuggerState> stateList = debugger.getStates();
-                    if (ids.isEmpty() || !stateList.contains(ids.get(0))) {
+                    if (ids.isEmpty() || !(ids.get(0) < stateList.size())) {
                         System.out.println("State not present/specified");
                         continue;
                     }
@@ -228,10 +228,10 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         continue;
                     }
                     DebuggerState currFinalState = stateList.get(stateList.size() - 1);
-                    if (currFinalState.getCheckpointMap().lastEntry().getKey() > ids.get(1)) {
-                        System.out.println("Final Configuration Specified is behind current configuration. Debugger Will advance current state's configuration");
-                    } else if (currFinalState.getCheckpointMap().lastEntry().getKey() < ids.get(1)) {
-                        System.out.println("Specifed configuration behind current, debugger will make new State");
+                    if (currFinalState.getStepNum()> ids.get(1)) {
+                        System.out.println("Specified step number is behind current final configuration. Debugger Will create and switch to new State, having specified configuration.");
+                    } else if (currFinalState.getStepNum() < ids.get(1)) {
+                        System.out.println("Specified step number is ahead of current configuration. Debugger will advance current state.");
                     } else {
                         System.out.println("Selecting specified state");
                     }

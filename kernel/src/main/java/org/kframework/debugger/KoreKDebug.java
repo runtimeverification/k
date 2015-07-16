@@ -24,6 +24,7 @@ public class KoreKDebug implements KDebug {
     private DebuggerState activeState;
     private Rewriter rewriter;
     private int checkpointInterval;
+    private int activeStateNum;
 
 
     /**
@@ -42,6 +43,7 @@ public class KoreKDebug implements KDebug {
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
         stateList.add(initialState);
         activeState = initialState;
+        activeStateNum = DEFAULT_ID;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class KoreKDebug implements KDebug {
             activeStateCheckpoint += steps;
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
             nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
-            stateList.add(nextActiveState);
+            stateList.add(activeStateNum, nextActiveState);
             activeState = nextActiveState;
             return nextActiveState;
         }
@@ -90,7 +92,7 @@ public class KoreKDebug implements KDebug {
         activeStateCheckpoint += steps;
         nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
         activeState = nextActiveState;
-        stateList.add(activeState);
+        stateList.add(activeStateNum, activeState);
         return nextActiveState;
     }
 
@@ -108,6 +110,7 @@ public class KoreKDebug implements KDebug {
         int floorKey = relevantEntry.getKey();
         activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
         stateList.add(activeState);
+        activeStateNum = stateList.size() - 1;
         return step(target - floorKey);
     }
 
@@ -147,10 +150,6 @@ public class KoreKDebug implements KDebug {
             return new ArrayList<>(stateList);
         }
 
-        /* Making sure last state is the active state */
-        stateList.remove(activeState);
-        stateList.add(activeState);
-
         /* Returning Copy to ensure Immutability */
         return new ArrayList<>(stateList);
 
@@ -167,7 +166,13 @@ public class KoreKDebug implements KDebug {
             return null;
         }
         activeState = newActiveState;
+        activeStateNum = stateNum;
         configurationNum.ifPresent(configNum -> jumpTo(configNum));
+        return activeState;
+    }
+
+    @Override
+    public DebuggerState getActiveState() {
         return activeState;
     }
 }
