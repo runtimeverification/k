@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
@@ -180,7 +181,32 @@ public class ConvertDataStructureToLookup {
             }
         };
         List<KApply> topologicalSorted = mutable(TopologicalSort.tsort(immutable(edges)).toList());
-        return state.stream().sorted((k1, k2) -> (topologicalSorted.indexOf(k1) - topologicalSorted.indexOf(k2)));
+        return state.stream().sorted((k1, k2) -> ComparisonChain.start()
+                .compareTrueFirst(isChoice(k1), isChoice(k2))
+                .compareTrueFirst(hasKCell(k1), hasKCell(k2))
+                .compare(topologicalSorted.indexOf(k1), topologicalSorted.indexOf(k2))
+                .result());
+    }
+
+    private boolean isChoice(KApply term) {
+        return term.klabel().name().equals("#setChoice") || term.klabel().name().equals("#mapChoice");
+    }
+
+    private boolean hasKCell(K term) {
+        class Holder {
+            boolean hasKCell;
+        }
+        Holder h = new Holder();
+        new VisitKORE() {
+            @Override
+            public Void apply(KApply k) {
+                if (k.klabel().name().equals("<k>")) {
+                    h.hasKCell = true;
+                }
+                return super.apply(k);
+            }
+        }.apply(term);
+        return h.hasKCell;
     }
 
     private int counter = 0;

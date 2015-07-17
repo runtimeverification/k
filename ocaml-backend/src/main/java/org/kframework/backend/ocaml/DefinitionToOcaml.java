@@ -87,7 +87,7 @@ public class DefinitionToOcaml implements Serializable {
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
     }
-    public static final boolean ocamlopt = true;
+    public static final boolean ocamlopt = false;
     public static final boolean fastCompilation = false;
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
