@@ -104,7 +104,7 @@ let rec list_range (c: k list * int * int) : k list = match c with
 | (head :: tail, 0, len) -> head :: list_range(tail, 0, len - 1)
 | (_ :: tail, n, len) -> list_range(tail, n - 1, len)
 | ([], _, _) -> raise(Failure "list_range")
-let float_to_string (f: FR.t) : string = if FR.is_nan f then "NaN" else if FR.is_inf f then if FR.sgn f > 0 then "Infinity" else "-Infinity" else FR.to_string f
+let float_to_string (f: FR.t) : string = if FR.is_nan f then "NaN" else if FR.is_inf f then if FR.sgn f > 0 then "Infinity" else "-Infinity" else FR.to_string_base_digits GMP_RNDN 10 0 f
 let k_of_list lbl l = match l with 
   [] -> KApply((unit_for lbl),[])
 | hd :: tl -> List.fold_left (fun list el -> KApply(lbl, [list] :: [KApply((el_for lbl),[el])] :: [])) (KApply((el_for lbl),[hd])) tl
