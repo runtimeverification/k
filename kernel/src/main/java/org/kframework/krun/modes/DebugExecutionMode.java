@@ -209,7 +209,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
                     List<Integer> ids = options.select.ids;
                     List<DebuggerState> stateList = debugger.getStates();
-                    if (ids.isEmpty() || !(ids.get(0) < stateList.size())) {
+                    if (ids == null || ids.isEmpty() || !(ids.get(0) < stateList.size())) {
                         System.out.println("State not present/specified");
                         continue;
                     }
@@ -223,7 +223,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         }
                         continue;
                     }
-                    DebuggerState currFinalState = stateList.get(stateList.size() - 1);
+                    DebuggerState currFinalState = debugger.getActiveState();
                     if (currFinalState.getStepNum() > ids.get(1)) {
                         System.out.println("Specified step number is behind current final configuration. Debugger Will create and switch to new State, having specified configuration.");
                     } else if (currFinalState.getStepNum() < ids.get(1)) {
@@ -243,23 +243,24 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                         System.out.println("Specified State Selected");
                     }
                 } else if (command(jc) instanceof KRunDebuggerOptions.CommandPeek) {
-                    if (options.peek.peekIds.isEmpty()) {
+                    if (options.peek.peekIds == null || options.peek.peekIds.isEmpty()) {
                         System.out.println("Invalid, must specify at least state Id");
                         continue;
                     }
                     List<DebuggerState> statesList = debugger.getStates();
-                    Integer index = options.peek.peekIds.get(0);
-                    if (index < statesList.size()) {
-                        DebuggerState debuggerState = statesList.get(index);
-                        if (statesList.size() < 2) {
+                    Integer stateIndex = options.peek.peekIds.get(0);
+                    Integer configIndex = options.peek.peekIds.get(1);
+                    if (stateIndex < statesList.size()) {
+                        DebuggerState debuggerState = statesList.get(stateIndex);
+                        if (options.peek.peekIds.size() < 2) {
 
                             String stateInfo = processState(debuggerState, compiledDef);
                             System.out.println(stateInfo);
                         } else {
                             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = debuggerState.getCheckpointMap();
-                            if (checkpointMap.containsKey(index)) {
-                                prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), checkpointMap.get(index).getCheckpointK());
-                            } else if (debuggerState.getStepNum() == index) {
+                            if (checkpointMap.containsKey(configIndex)) {
+                                prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), checkpointMap.get(configIndex).getCheckpointK());
+                            } else if (debuggerState.getStepNum() == configIndex) {
                                 prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), debuggerState.getCurrentK());
                             } else {
                                 System.out.println("Specified Configuration not present in State. See jump-to");
