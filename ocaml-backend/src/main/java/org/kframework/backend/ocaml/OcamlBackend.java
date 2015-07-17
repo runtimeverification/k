@@ -46,7 +46,7 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
             Process ocamlopt = files.getProcessBuilder()
                     .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
                             "-safe-string", "-w", "-26-11",
-                            "constants.ml", "prelude.ml", "def.ml", "-inline", "20", "-nodynlink")
+                            "constants.ml", "prelude.ml", "def.ml")
                     .directory(files.resolveKompiled("."))
                     .inheritIO()
                     .start();
