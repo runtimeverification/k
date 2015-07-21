@@ -1,93 +1,12 @@
 open Gmp
 open Constants
-module type S =
-sig
-  type 'a m
-  type s
-  type t = kitem list
- and kitem = KApply of klabel * t list
-           | KToken of sort * string
-           | InjectedKLabel of klabel
-           | Map of sort * klabel * t m
-           | List of sort * klabel * t list
-           | Set of sort * klabel * s
-           | Int of Z.t
-           | Float of FR.t * int * int
-           | String of string
-           | Bool of bool
-           | Bottom
-  val compare : t -> t -> int
-  val compare_kitem : kitem -> kitem -> int
-end 
-
-
-module rec K : (S with type 'a m = 'a Map.Make(K).t and type s = Set.Make(K).t)  = 
-struct
-  module KMap = Map.Make(K)
-  module KSet = Set.Make(K)
-  type 'a m = 'a KMap.t
-  and s = KSet.t
-  and t = kitem list
- and kitem = KApply of klabel * t list
-           | KToken of sort * string
-           | InjectedKLabel of klabel
-           | Map of sort * klabel * t m
-           | List of sort * klabel * t list
-           | Set of sort * klabel * s
-           | Int of Z.t
-           | Float of FR.t * int * int
-           | String of string
-           | Bool of bool
-           | Bottom
-  let rec compare c1 c2 = if c1 == c2 then 0 else match (c1, c2) with
-    | [], [] -> 0
-    | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare_kitem hd1 hd2 in if v = 0 then compare tl1 tl2 else v
-    | (hd1 :: tl1), _ -> -1
-    | _ -> 1
-  and compare_kitem c1 c2 = match (c1, c2) with
-    | (KApply(kl1, k1)), (KApply(kl2, k2)) -> let v = Pervasives.compare kl1 kl2 in if v = 0 then compare_klist k1 k2 else v
-    | (KToken(s1, st1)), (KToken(s2, st2)) -> let v = Pervasives.compare s1 s2 in if v = 0 then Pervasives.compare st1 st2 else v
-    | (InjectedKLabel kl1), (InjectedKLabel kl2) -> Pervasives.compare kl1 kl2
-    | (Map (_,k1,m1)), (Map (_,k2,m2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then (KMap.compare) compare m1 m2 else v
-    | (List (_,k1,l1)), (List (_,k2,l2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then compare_klist l1 l2 else v
-    | (Set (_,k1,s1)), (Set (_,k2,s2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then (KSet.compare) s1 s2 else v
-    | (Int i1), (Int i2) -> Z.compare i1 i2
-    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> let v = e2 - e1 in if v = 0 then let v2 = p2 - p1 in if v2 = 0 then FR.compare f1 f2 else v2 else v
-    | (String s1), (String s2) -> Pervasives.compare s1 s2
-    | (Bool b1), (Bool b2) -> if b1 = b2 then 0 else if b1 then -1 else 1
-    | Bottom, Bottom -> 0
-    | KApply(_, _), _ -> -1
-    | _, KApply(_, _) -> 1
-    | KToken(_, _), _ -> -1
-    | _, KToken(_, _) -> 1
-    | InjectedKLabel(_), _ -> -1
-    | _, InjectedKLabel(_) -> 1
-    | Map(_), _ -> -1
-    | _, Map(_) -> 1
-    | List(_), _ -> -1
-    | _, List(_) -> 1
-    | Set(_), _ -> -1
-    | _, Set(_) -> 1
-    | Int(_), _ -> -1
-    | _, Int(_) -> 1
-    | Float(_), _ -> -1
-    | _, Float(_) -> 1
-    | String(_), _ -> -1
-    | _, String(_) -> 1
-    | Bool(_), _ -> -1
-    | _, Bool(_) -> 1
-  and compare_klist c1 c2 = match (c1, c2) with
-    | [], [] -> 0
-    | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare hd1 hd2 in if v = 0 then compare_klist tl1 tl2 else v
-    | (hd1 :: tl1), _ -> -1
-    | _ -> 1
-end
 
 module KMap = Map.Make(K)
 module KSet = Set.Make(K)
 
-open K
+open Constants.K
 type k = K.t
+
 exception Stuck of k
 exception Not_implemented
 module GuardElt = struct
@@ -106,32 +25,32 @@ let rec list_range (c: k list * int * int) : k list = match c with
 | ([], _, _) -> raise(Failure "list_range")
 let float_to_string (f: FR.t) : string = if FR.is_nan f then "NaN" else if FR.is_inf f then if FR.sgn f > 0 then "Infinity" else "-Infinity" else FR.to_string_base_digits GMP_RNDN 10 0 f
 let k_of_list lbl l = match l with 
-  [] -> KApply((unit_for lbl),[])
-| hd :: tl -> List.fold_left (fun list el -> KApply(lbl, [list] :: [KApply((el_for lbl),[el])] :: [])) (KApply((el_for lbl),[hd])) tl
-let k_of_set lbl s = if (KSet.cardinal s) = 0 then KApply((unit_for lbl),[]) else 
-  let hd = KSet.choose s in KSet.fold (fun el set -> KApply(lbl, [set] :: [KApply((el_for lbl),[el])] :: [])) (KSet.remove hd s) (KApply((el_for lbl),[hd]))
-let k_of_map lbl m = if (KMap.cardinal m) = 0 then KApply((unit_for lbl),[]) else 
-  let (k,v) = KMap.choose m in KMap.fold (fun k v map -> KApply(lbl, [map] :: [KApply((el_for lbl),[k;v])] :: [])) (KMap.remove k m) (KApply((el_for lbl),[k;v]))
+  [] -> denormalize (KApply((unit_for lbl),[]))
+| hd :: tl -> List.fold_left (fun list el -> denormalize (KApply(lbl, [list] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (denormalize (KApply((el_for lbl),[hd]))) tl
+let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for lbl),[])) else 
+  let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
+let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else 
+  let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
 let rec print_klist(c: k list) : string = match c with
 | [] -> ".KList"
 | e::[] -> print_k(e)
 | e1::e2::l -> print_k(e1) ^ ", " ^ print_klist(e2::l)
 and print_k(c: k) : string = match c with
 | [] -> ".K"
-| e::[] -> print_kitem(e)
-| e1::e2::l -> print_kitem(e1) ^ " ~> " ^ print_k(e2::l)
-and print_kitem(c: kitem) : string = match c with
+| e::[] -> print_kitem(normalize e)
+| e1::e2::l -> print_kitem(normalize e1) ^ " ~> " ^ print_k(e2::l)
+and print_kitem(c: normal_kitem) : string = match c with
 | KApply(klabel, klist) -> print_klabel(klabel) ^ "(" ^ print_klist(klist) ^ ")"
-| KToken(sort, s) -> "#token(\"" ^ (String.escaped s) ^ "\", \"" ^ print_sort(sort) ^ "\")"
-| InjectedKLabel(klabel) -> "#klabel(" ^ print_klabel(klabel) ^ ")"
-| Bool(b) -> print_kitem(KToken(Constants.boolSort, string_of_bool(b)))
-| String(s) -> print_kitem(KToken(Constants.stringSort, "\"" ^ (String.escaped s) ^ "\""))
-| Int(i) -> print_kitem(KToken(Constants.intSort, Z.to_string(i)))
-| Float(f,_,_) -> print_kitem(KToken(Constants.floatSort, float_to_string(f)))
-| Bottom -> "`#Bottom`(.KList)"
-| List(_,lbl,l) -> print_kitem(k_of_list lbl l)
-| Set(_,lbl,s) -> print_kitem(k_of_set lbl s)
-| Map(_,lbl,m) -> print_kitem(k_of_map lbl m)
+| KItem (KToken(sort, s)) -> "#token(\"" ^ (String.escaped s) ^ "\", \"" ^ print_sort(sort) ^ "\")"
+| KItem (InjectedKLabel(klabel)) -> "#klabel(" ^ print_klabel(klabel) ^ ")"
+| KItem (Bool(b)) -> print_kitem(KItem (KToken(Constants.boolSort, string_of_bool(b))))
+| KItem (String(s)) -> print_kitem(KItem (KToken(Constants.stringSort, "\"" ^ (String.escaped s) ^ "\"")))
+| KItem (Int(i)) -> print_kitem(KItem (KToken(Constants.intSort, Z.to_string(i))))
+| KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(Constants.floatSort, float_to_string(f))))
+| KItem (Bottom) -> "`#Bottom`(.KList)"
+| KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
+| KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
+| KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
@@ -282,7 +201,7 @@ struct
     | [Set (s,_,_)] :: [] -> [String (print_sort s)]
     | _ -> raise Not_implemented
   let hook_getKLabel c lbl sort config ff = match c with
-      [KApply (lbl, _)] :: [] -> [InjectedKLabel lbl] | _ -> [Bottom]
+      [k] :: [] -> match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom]
     | _ -> raise Not_implemented
   let hook_configuration c lbl sort config ff = match c with
       [] -> config

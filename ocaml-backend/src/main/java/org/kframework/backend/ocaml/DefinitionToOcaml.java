@@ -2,7 +2,9 @@
 package org.kframework.backend.ocaml;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -19,6 +21,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -52,6 +55,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
+import scala.Tuple2;
 import scala.Tuple3;
 
 import java.io.Serializable;
@@ -65,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -90,19 +95,6 @@ public class DefinitionToOcaml implements Serializable {
     public static final boolean ocamlopt = true;
     public static final boolean fastCompilation = false;
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
-
-    public static final String kType = "t = kitem list\n" +
-            " and kitem = KApply of klabel * t list\n" +
-            "           | KToken of sort * string\n" +
-            "           | InjectedKLabel of klabel\n" +
-            "           | Map of sort * klabel * t m\n" +
-            "           | List of sort * klabel * t list\n" +
-            "           | Set of sort * klabel * s\n" +
-            "           | Int of Z.t\n" +
-            "           | Float of FR.t * int * int\n" +
-            "           | String of string\n" +
-            "           | Bool of bool\n" +
-            "           | Bottom\n";
 
     public static final String TRUE = "(Bool true)";
     public static final String BOOL = encodeStringToIdentifier(Sort("Bool"));
@@ -246,7 +238,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Prelude.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
         sb.append("let _ = let config = [Bottom] in let out = open_out " + enquoteString(file) + " in output_string out (print_k(try(run(");
         convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
         sb.append(") (").append(depth).append(")) with Stuck c' -> c'))");
@@ -255,7 +247,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Prelude.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
@@ -267,7 +259,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Prelude.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
@@ -279,6 +271,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String constants() {
         StringBuilder sb = new StringBuilder();
+        sb.append("open Gmp\n");
         sb.append("type sort = \n");
         if (fastCompilation) {
             sb.append("Sort of string\n");
@@ -359,12 +352,227 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("\n and setConcatLabel = ").append(SET_CONCAT);
         sb.append("\n and listSort = ").append(LIST);
         sb.append("\n and listConcatLabel = ").append(LIST_CONCAT);
+        sb.append("\n\nmodule type S =\n");
+        sb.append("sig\n");
+        sb.append("  type m\n");
+        sb.append("  type s\n");
+        sb.append("  type t = kitem list\n");
+        printKType(sb);
+        sb.append("  val compare : t -> t -> int\n" +
+                "  val compare_kitem : kitem -> kitem -> int\n" +
+                "end\n");
+        sb.append("module rec K : (S with type m = K.t Map.Make(K).t and type s = Set.Make(K).t)  =\n" +
+                "struct\n" +
+                "  module KMap = Map.Make(K)\n" +
+                "  module KSet = Set.Make(K)\n" +
+                "  type m = K.t KMap.t\n" +
+                "  and s = KSet.t\n" +
+                "  and t = kitem list\n");
+        printKType(sb);
+        sb.append("  let rec compare c1 c2 = if c1 == c2 then 0 else match (c1, c2) with\n" +
+                "    | [], [] -> 0\n" +
+                "    | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare_kitem hd1 hd2 in if v = 0 then compare tl1 tl2 else v\n" +
+                "    | (hd1 :: tl1), _ -> -1\n" +
+                "    | _ -> 1\n" +
+                "  and compare_kitem c1 c2 = match (c1, c2) with\n");
+        forEachKLabel(t -> {
+            sb.append("    | ");
+            encodeStringToCons(sb, t._1(), t._2());
+            String conn = "(";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i).append("_1");
+                conn = ",";
+            }
+            if (t._2() > 0) {
+                sb.append(")");
+            }
+            sb.append("),");
+            encodeStringToCons(sb, t._1(), t._2());
+            conn = "(";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i).append("_2");
+                conn = ",";
+            }
+            if (t._2() > 0) {
+                sb.append(")");
+            }
+            sb.append(") -> ");
+            if (t._2() == 0) {
+                sb.append("0");
+            } else {
+                int i;
+                for (i = 0; i < t._2() - 1; i++) {
+                    sb.append("(match compare k").append(i).append("_1 k").append(i).append("_2 with 0 -> ");
+                }
+                sb.append("compare k").append(i).append("_1 k").append(i).append("_2\n");
+                for (i = 0; i < t._2() - 1; i++) {
+                    sb.append("| v -> v)\n");
+                }
+            }
+        });
+        sb.append("    | (KToken(s1, st1)), (KToken(s2, st2)) -> let v = Pervasives.compare s1 s2 in if v = 0 then Pervasives.compare st1 st2 else v\n" +
+                "    | (InjectedKLabel kl1), (InjectedKLabel kl2) -> Pervasives.compare kl1 kl2\n" +
+                "    | (Map (_,k1,m1)), (Map (_,k2,m2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then (KMap.compare) compare m1 m2 else v\n" +
+                "    | (List (_,k1,l1)), (List (_,k2,l2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then compare_klist l1 l2 else v\n" +
+                "    | (Set (_,k1,s1)), (Set (_,k2,s2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then (KSet.compare) s1 s2 else v\n" +
+                "    | (Int i1), (Int i2) -> Z.compare i1 i2\n" +
+                "    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> let v = e2 - e1 in if v = 0 then let v2 = p2 - p1 in if v2 = 0 then FR.compare f1 f2 else v2 else v\n" +
+                "    | (String s1), (String s2) -> Pervasives.compare s1 s2\n" +
+                "    | (Bool b1), (Bool b2) -> if b1 = b2 then 0 else if b1 then -1 else 1\n" +
+                "    | Bottom, Bottom -> 0\n");
+        forEachKLabel(t -> {
+            sb.append("    | ");
+            encodeStringToCons(sb, t._1(), t._2());
+            if (t._2() > 0) {
+                sb.append(" _");
+            }
+            sb.append("), _ -> -1\n");
+            sb.append("    | _, ");
+            encodeStringToCons(sb, t._1(), t._2());
+            if (t._2() > 0) {
+                sb.append(" _");
+            }
+            sb.append(") -> 1\n");
+        });
+        sb.append("    | KToken(_, _), _ -> -1\n" +
+                "    | _, KToken(_, _) -> 1\n" +
+                "    | InjectedKLabel(_), _ -> -1\n" +
+                "    | _, InjectedKLabel(_) -> 1\n" +
+                "    | Map(_), _ -> -1\n" +
+                "    | _, Map(_) -> 1\n" +
+                "    | List(_), _ -> -1\n" +
+                "    | _, List(_) -> 1\n" +
+                "    | Set(_), _ -> -1\n" +
+                "    | _, Set(_) -> 1\n" +
+                "    | Int(_), _ -> -1\n" +
+                "    | _, Int(_) -> 1\n" +
+                "    | Float(_), _ -> -1\n" +
+                "    | _, Float(_) -> 1\n" +
+                "    | String(_), _ -> -1\n" +
+                "    | _, String(_) -> 1\n" +
+                "    | Bool(_), _ -> -1\n" +
+                "    | _, Bool(_) -> 1\n" +
+                "  and compare_klist c1 c2 = match (c1, c2) with\n" +
+                "    | [], [] -> 0\n" +
+                "    | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare hd1 hd2 in if v = 0 then compare_klist tl1 tl2 else v\n" +
+                "    | (hd1 :: tl1), _ -> -1\n" +
+                "    | _ -> 1\n" +
+                "end\n");
+        sb.append("type normal_kitem = KApply of klabel * K.t list\n");
+        sb.append("                  | KItem of K.kitem\n");
+        sb.append("open K\n");
+        sb.append("let normalize (k: kitem) : normal_kitem = match k with \n");
+        forEachKLabel(t -> {
+            sb.append("  | ");
+            encodeStringToCons(sb, t._1(), t._2());
+            String conn = "(";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i);
+                conn = ",";
+            }
+            if (t._2() > 0) {
+                sb.append(")");
+            }
+            sb.append(") -> KApply (");
+            encodeStringToIdentifier(sb, t._1());
+            sb.append(", [");
+            conn = "";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i);
+                conn = "; ";
+            }
+            sb.append("])\n");
+        });
+        sb.append("| v -> KItem v\n");
+        sb.append("let denormalize (k: normal_kitem) : kitem = match k with \n");
+        forEachKLabel(t -> {
+            sb.append("  | KApply (");
+            encodeStringToIdentifier(sb, t._1());
+            sb.append(", [");
+            String conn = "";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i);
+                conn = "; ";
+            }
+            sb.append("]) -> ");
+            encodeStringToCons(sb, t._1(), t._2());
+            conn = "(";
+            for (int i = 0; i < t._2(); i++) {
+                sb.append(conn);
+                sb.append("k").append(i);
+                conn = ",";
+            }
+            if (t._2() > 0) {
+                sb.append(")");
+            }
+            sb.append(")");
+        });
+        sb.append("| KItem v -> v");
         return sb.toString();
+    }
+
+    private void printKType(StringBuilder sb) {
+        sb.append("  and kitem = KToken of sort * string\n");
+        sb.append("            | InjectedKLabel of klabel\n");
+        sb.append("            | Map of sort * klabel * m\n");
+        sb.append("            | List of sort * klabel * t list\n");
+        sb.append("            | Set of sort * klabel * s\n");
+        sb.append("            | Int of Z.t\n");
+        sb.append("            | Float of FR.t * int * int\n");
+        sb.append("            | String of string\n");
+        sb.append("            | Bool of bool\n");
+        sb.append("            | Bottom\n");
+        class Holder {
+            int i = 0;
+        }
+        Holder h = new Holder();
+        forEachKLabel(t -> {
+            klabels.put(t, h.i++);
+        });
+        for (int i = 0; i * 246 < h.i; i++) {
+            sb.append("            | KItem").append(i).append(" of kitem").append(i).append("\n");
+        }
+        for (int i = 0; i * 246 < h.i; i++) {
+            sb.append("  and kitem").append(i).append(" = \n");
+            for (int j = 0; j < 246; j++) {
+                int idx = i * 246 + j;
+                Tuple2<KLabel, Long> t = klabels.inverse().get(idx);
+                if (t == null)
+                    continue;
+                sb.append("            | ");
+                sb.append("Cons");
+                encodeStringToAlphanumeric(sb, t._1().name());
+                sb.append(t._2());
+                String conn = " of ";
+                for (int k = 0; k < t._2(); k++) {
+                    sb.append(conn);
+                    sb.append("t");
+                    conn = " * ";
+                }
+                sb.append("\n");
+
+            }
+        }
+    }
+
+    private BiMap<Tuple2<KLabel, Long>, Integer> klabels = HashBiMap.create();
+
+    private void forEachKLabel(Consumer<Tuple2<KLabel, Long>> action) {
+        for (KLabel label : iterable(mainModule.definedKLabels())) {
+            if (isLookupKLabel(label) || label.name().equals("#KToken"))
+                continue;
+            stream(mainModule.productionsFor().apply(label)).map(p -> Tuple2.apply(p.klabel().get(), stream(p.items()).filter(pi -> pi instanceof NonTerminal).count())).distinct().forEach(action);
+        }
     }
 
     public String definition() {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Prelude.K\nopen Gmp\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\n");
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
@@ -426,7 +634,7 @@ public class DefinitionToOcaml implements Serializable {
 
             convertFunction( functionRules.get(functionLabel).stream().sorted(this::sortFunctionRules).collect(Collectors.toList()),
                     sb, functionName, RuleType.FUNCTION);
-            sb.append("| _ -> raise (Stuck [KApply(lbl, c)])\n");
+            sb.append("| _ -> raise (Stuck [denormalize (KApply(lbl, c))])\n");
             conn = "and ";
         }
         for (KLabel functionLabel : anywhereKLabels) {
@@ -436,7 +644,7 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToIdentifier(sb, functionLabel);
             sb.append(" in match c with \n");
             convertFunction(anywhereRules.get(functionLabel), sb, functionName, RuleType.ANYWHERE);
-            sb.append("| _ -> [KApply(lbl, c)]\n");
+            sb.append("| _ -> [denormalize (KApply(lbl, c))]\n");
             conn = "and ";
         }
 
@@ -447,7 +655,7 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToFunction(sb, freshFunction.name());
             sb.append(" ([Int counter] :: []) config Guard.empty)\n");
         }
-        sb.append("and eval (c: kitem) (config: k) : k = match c with KApply(lbl, kl) -> (match lbl with \n");
+        sb.append("and eval (c: normal_kitem) (config: k) : k = match c with KApply(lbl, kl) -> (match lbl with \n");
         for (KLabel label : Sets.union(functions, anywhereKLabels)) {
             sb.append("|");
             encodeStringToIdentifier(sb, label);
@@ -455,8 +663,8 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToFunction(sb, label.name());
             sb.append(" kl config Guard.empty\n");
         }
-        sb.append("| _ -> [c])\n");
-        sb.append("| _ -> [c]\n");
+        sb.append("| _ -> [denormalize c])\n");
+        sb.append("| _ -> [denormalize c]\n");
         sb.append("let rec lookups_step (c: k) (config: k) (guards: Guard.t) : k = match c with \n");
         List<Rule> sortedRules = stream(mainModule.rules())
                 .sorted((r1, r2) -> ComparisonChain.start()
@@ -522,6 +730,14 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("Lbl");
             encodeStringToAlphanumeric(sb, name.name());
         }
+    }
+
+    private void encodeStringToCons(StringBuilder sb, KLabel name, long arity) {
+        int idx = klabels.get(Tuple2.apply(name, arity)) / 246;
+        sb.append("KItem").append(idx).append("(");
+        sb.append("Cons");
+        encodeStringToAlphanumeric(sb, name.name());
+        sb.append(arity);
     }
 
     private static void encodeStringToIdentifier(StringBuilder sb, Sort name) {
@@ -592,17 +808,19 @@ public class DefinitionToOcaml implements Serializable {
         final SetMultimap<KVariable, String> vars;
         final Map<String, KLabel> listVars;
         final Map<K, String> termCache;
+        final Set<KApply> matchedKLabels;
 
-        VarInfo() { this(HashMultimap.create(), new HashMap<>(), new HashMap<>()); }
+        VarInfo() { this(HashMultimap.create(), new HashMap<>(), new HashMap<>(), new HashSet<>()); }
 
         VarInfo(VarInfo vars) {
-            this(HashMultimap.create(vars.vars), new HashMap<>(vars.listVars), new HashMap<>(vars.termCache));
+            this(HashMultimap.create(vars.vars), new HashMap<>(vars.listVars), new HashMap<>(vars.termCache), new HashSet<>(vars.matchedKLabels));
         }
 
-        VarInfo(SetMultimap<KVariable, String> vars, Map<String, KLabel> listVars, Map<K, String> termCache) {
+        VarInfo(SetMultimap<KVariable, String> vars, Map<String, KLabel> listVars, Map<K, String> termCache, Set<KApply> matchedKLabels) {
             this.vars = vars;
             this.listVars = listVars;
             this.termCache = termCache;
+            this.matchedKLabels = matchedKLabels;
         }
     }
 
@@ -1041,7 +1259,20 @@ public class DefinitionToOcaml implements Serializable {
                 applyFunction(k);
             } else {
                 topAnywherePre = false;
-                applyKLabel(k);
+                if (k.klabel() instanceof KVariable) {
+                    vars.matchedKLabels.add(k);
+                }
+                encodeStringToCons(sb, k.klabel(), k.klist().items().size());
+                sb.append("(");
+                for (int i = 0; i < k.klist().items().size(); i++) {
+                    K item = k.klist().items().get(i);
+                    boolean stack = false;
+                    apply(item);
+                    if (i != k.klist().items().size() - 1) {
+                        sb.append(",");
+                    }
+                }
+                sb.append("))");
             }
             return null;
         }
@@ -1313,8 +1544,12 @@ public class DefinitionToOcaml implements Serializable {
         return k.att().<String>getOptional(Attribute.SORT_KEY).orElse("K");
     }
 
+    private boolean isLookupKLabel(KLabel k) {
+        return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#setChoice");
+    }
+
     private boolean isLookupKLabel(KApply k) {
-        return k.klabel().name().equals("#match") || k.klabel().name().equals("#mapChoice") || k.klabel().name().equals("#setChoice");
+        return isLookupKLabel(k.klabel());
     }
 
     private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
