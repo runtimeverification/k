@@ -87,8 +87,8 @@ public class DefinitionToOcaml implements Serializable {
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
     }
-    public static final boolean ocamlopt = false;
-    public static final boolean fastCompilation = true;
+    public static final boolean ocamlopt = true;
+    public static final boolean fastCompilation = false;
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
     public static final String kType = "t = kitem list\n" +
@@ -591,16 +591,18 @@ public class DefinitionToOcaml implements Serializable {
     private static class VarInfo {
         final SetMultimap<KVariable, String> vars;
         final Map<String, KLabel> listVars;
+        final Map<K, String> termCache;
 
-        VarInfo() { this(HashMultimap.create(), new HashMap<>()); }
+        VarInfo() { this(HashMultimap.create(), new HashMap<>(), new HashMap<>()); }
 
         VarInfo(VarInfo vars) {
-            this(HashMultimap.create(vars.vars), new HashMap<>(vars.listVars));
+            this(HashMultimap.create(vars.vars), new HashMap<>(vars.listVars), new HashMap<>(vars.termCache));
         }
 
-        VarInfo(SetMultimap<KVariable, String> vars, Map<String, KLabel> listVars) {
+        VarInfo(SetMultimap<KVariable, String> vars, Map<String, KLabel> listVars, Map<K, String> termCache) {
             this.vars = vars;
             this.listVars = listVars;
+            this.termCache = termCache;
         }
     }
 
@@ -648,6 +650,7 @@ public class DefinitionToOcaml implements Serializable {
                 Lookup head = convertLookups(KApply(entry2.getKey()._2(),
                         KToken("dummy", Sort("Dummy")), entry2.getKey()._3().get()),
                         globalVars, functionName, ruleNum++, true).get(0);
+                String e = globalVars.termCache.remove(KToken("dummy", Sort("Dummy")));
                 sb.append(head.prefix);
                 for (Rule r : entry2.getValue()) {
                     if (indexesPoorly(r) || r.att().contains("owise")) {
@@ -860,6 +863,8 @@ public class DefinitionToOcaml implements Serializable {
         }
     }
 
+    private int choiceCounter = 0;
+
     private List<Lookup> convertLookups(K requires, VarInfo vars, String functionName, int ruleNum, boolean hasMultiple) {
         List<Lookup> results = new ArrayList<>();
         Holder h = new Holder();
@@ -897,6 +902,7 @@ public class DefinitionToOcaml implements Serializable {
                 if (k.klist().items().size() != 2) {
                     throw KEMException.internalError("Unexpected arity of choice: " + k.klist().size(), k);
                 }
+                vars.termCache.put(k.klist().items().get(0), "e" + choiceCounter);
                 StringBuilder sb = new StringBuilder();
                 sb.append(" -> (match ");
                 convert(sb, true, vars, false, false).apply(k.klist().items().get(1));
@@ -917,6 +923,7 @@ public class DefinitionToOcaml implements Serializable {
                 }
                 sb.append("| ");
                 convert(sb, false, vars, false, false).apply(k.klist().items().get(0));
+                sb.append(" as e" + choiceCounter++);
                 String pattern = sb.toString();
                 results.add(new Lookup(prefix, pattern, suffix));
                 h.first = false;
@@ -1235,6 +1242,10 @@ public class DefinitionToOcaml implements Serializable {
         public Void apply(KSequence k) {
             if (useNativeBooleanExp && k.items().size() == 1 && inBooleanExp) {
                 apply(k.items().get(0));
+                return null;
+            }
+            if (vars.termCache.containsKey(k) && rhs) {
+                sb.append(vars.termCache.get(k));
                 return null;
             }
             sb.append("(");

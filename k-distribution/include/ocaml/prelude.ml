@@ -39,7 +39,7 @@ struct
            | String of string
            | Bool of bool
            | Bottom
-  let rec compare c1 c2 = match (c1, c2) with
+  let rec compare c1 c2 = if c1 == c2 then 0 else match (c1, c2) with
     | [], [] -> 0
     | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare_kitem hd1 hd2 in if v = 0 then compare tl1 tl2 else v
     | (hd1 :: tl1), _ -> -1
