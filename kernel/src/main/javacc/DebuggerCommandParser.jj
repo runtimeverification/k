@@ -1,0 +1,75 @@
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Represents the grammar accepted by the Debugger TUI.
+
+PARSER_BEGIN(DebuggerCommandParser)
+
+package org.kframework.utils.debugparser;
+
+import java.io.StringReader;
+import java.io.Reader;
+
+public class DebuggerCommandParser {
+
+
+    public static void main(String args[])
+    {
+        try
+        {
+              DebuggerCommandParser parser = new DebuggerCommandParser(System.in);
+              parser.command();
+              //command.run();
+        }
+        catch(Exception e)
+        {
+              e.printStackTrace();
+        }
+    }
+}
+PARSER_END(DebuggerCommandParser)
+
+/** Skip these characters, they are considered "white space" **/
+SKIP :
+{
+    " "
+    | "\t"
+    | "\r"
+    | "\n"
+}
+
+
+TOKEN: /*RESERVED TOKENS */
+{
+      <STEP: (["s", "S"])| "step" >
+   |  <BACKSTEP:  (["b", "B"])| "back-step">
+   |  <JUMPTO: (["j", "J"])| "jump-to">
+   |  <QUIT: "quit" | "abort" | "exit">
+   |  <CHECKPOINT: "set-chkpt">
+   |  <RESUME: "resume">
+   |  <NUMBER: (["0" - "9"])+>
+   |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
+
+}
+
+
+void command() :
+{
+    int stepNum = 1;
+}
+{
+      <STEP> <NUMBER>
+    | <BACKSTEP> <NUMBER>
+    | <JUMPTO> <NUMBER>
+    | <CHECKPOINT> <NUMBER>
+    | <QUIT>
+    | <RESUME>
+}
+
+
+int parseNum() throws NumberFormatException:
+{
+    Token t;
+}
+{
+    t = <NUMBER>
+    {return Integer.parseInt(t.image);}
+}

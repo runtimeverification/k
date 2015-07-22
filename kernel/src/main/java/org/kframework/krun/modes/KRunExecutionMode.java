@@ -10,6 +10,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
