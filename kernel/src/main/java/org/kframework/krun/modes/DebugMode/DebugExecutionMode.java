@@ -84,7 +84,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         while (true) {
             try {
-                System.out.println();
                 String input = reader.readLine("KDebug>");
                 Command command = parseCommand(input);
                 command.runCommand(debugger, compiledDefinition);

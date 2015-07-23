@@ -46,10 +46,10 @@ TOKEN: /*RESERVED TOKENS */
    |  <QUIT: "quit" | "abort" | "exit">
    |  <CHECKPOINT: "set-chkpt">
    |  <RESUME: "resume">
+   |  <PEEK: "p" | "peek">
    |  <NUMBER: (["0" - "9"])+>
    |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
    |  <NEWLINE : "\n" | "\r\n">
-   |  <PEEK: "peek"| "p">
 
 }
 
@@ -64,12 +64,12 @@ Command command() throws NumberFormatException:
         <STEP> (stepCount = parseNum())? {return new StepCommand(stepCount);}
     |   LOOKAHEAD(3)
         <PEEK> (stateNum = parseNum()) (configurationNum = parseNum()) {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
-    |   <PEEK> (configurationNum = parseNum())? {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
-    | <BACKSTEP> (<NUMBER>)?
-    | <JUMPTO> <NUMBER>
-    | <CHECKPOINT> <NUMBER>
-    | <QUIT>
-    | <RESUME>
+    |   <PEEK> (configurationNum = parseNum())? {return new PeekCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
+    |   <BACKSTEP> (<NUMBER>)?
+    |   <JUMPTO> <NUMBER>
+    |   <CHECKPOINT> <NUMBER>
+    |   <QUIT>
+    |   <RESUME>
 }
 
 Command parseCommand() throws NumberFormatException:
