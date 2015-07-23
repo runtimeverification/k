@@ -1,0 +1,85 @@
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Represents the grammar accepted by the Debugger TUI.
+
+options {
+  STATIC = false;
+  UNICODE_INPUT = true;
+  SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+}
+
+PARSER_BEGIN(DebuggerCommandParser)
+
+package org.kframework.utils.debugparser;
+
+import java.io.StringReader;
+import java.io.Reader;
+import org.kframework.debugger.KDebug;
+import org.kframework.kompile.CompiledDefinition;
+
+
+
+import static org.kframework.krun.modes.DebugMode.Commands.*;
+public class DebuggerCommandParser {
+    public static Runnable parseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws NumberFormatException, ParseException
+    {
+        DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
+        return parser.parseCommand(session, compiledDef);
+    }
+
+}
+PARSER_END(DebuggerCommandParser)
+
+/** Skip these characters, they are considered "white space" **/
+SKIP :
+{
+    " "
+    | "\t"
+    | "\r"
+}
+
+
+TOKEN: /*RESERVED TOKENS */
+{
+      <STEP: (["s", "S"])| "step" >
+   |  <BACKSTEP:  (["b", "B"])| "back-step">
+   |  <JUMPTO: (["j", "J"])| "jump-to">
+   |  <QUIT: "quit" | "abort" | "exit">
+   |  <CHECKPOINT: "set-chkpt">
+   |  <RESUME: "resume">
+   |  <NUMBER: (["0" - "9"])+>
+   |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
+   |  <NEWLINE : "\n" | "\r\n">
+
+}
+
+
+Runnable command(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
+{
+    int stepNum = 1;
+}
+{
+      <STEP> (stepNum = parseNum())? {return new StepCommand(stepNum, debugSession, compiledDef);}
+    | <BACKSTEP> (<NUMBER>)?
+    | <JUMPTO> <NUMBER>
+    | <CHECKPOINT> <NUMBER>
+    | <QUIT>
+    | <RESUME>
+}
+
+Runnable parseCommand(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
+{
+    Runnable command;
+}
+{
+    command = command(debugSession, compiledDef) ((<NEWLINE>)? | (<EOF>)?) {return command;}
+}
+
+
+int parseNum() throws NumberFormatException:
+{
+    Token t;
+}
+{
+    t = <NUMBER>
+    {return Integer.parseInt(t.image);}
+}
