@@ -9,6 +9,14 @@ type k = K.t
 
 exception Stuck of k
 exception Not_implemented
+
+module MemoKey = struct
+  type t = k list
+  let compare c1 c2 = compare_klist c1 c2
+end
+
+module Memo = Map.Make(MemoKey)
+
 module GuardElt = struct
   type t = Guard of int
   let compare c1 c2 = match c1 with Guard(i1) -> match c2 with Guard(i2) -> i2 - i1
@@ -73,13 +81,13 @@ module MAP =
 struct
 
   let hook_element c lbl sort config ff = match c with 
-      k1 :: k2 :: [] -> [Map (sort,(collection_for lbl),(KMap.singleton k1 k2))]
+      k1, k2 -> [Map (sort,(collection_for lbl),(KMap.singleton k1 k2))]
     | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with 
-      [] -> [Map (sort,(collection_for lbl),KMap.empty)]
+      () -> [Map (sort,(collection_for lbl),KMap.empty)]
     | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with 
-      ([Map (s,l1,k1)]) :: ([Map (_,l2,k2)]) :: [] 
+      ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
         when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
                           None, None -> None 
                         | None, Some v 
@@ -87,36 +95,36 @@ struct
                         | Some v1, Some v2 when v1 = v2 -> Some v1) k1 k2))]
     | _ -> raise Not_implemented
   let hook_lookup c lbl sort config ff = match c with 
-      [Map (_,_,k1)] :: k2 :: [] -> (try KMap.find k2 k1 with Not_found -> [Bottom])
+      [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> [Bottom])
     | _ -> raise Not_implemented
   let hook_update c lbl sort config ff = match c with 
-      [Map (s,l,k1)] :: k :: v :: [] -> [Map (s,l,(KMap.add k v k1))]
+      [Map (s,l,k1)], k, v -> [Map (s,l,(KMap.add k v k1))]
     | _ -> raise Not_implemented
   let hook_remove c lbl sort config ff = match c with 
-      [Map (s,l,k1)] :: k2 :: [] -> [Map (s,l,(KMap.remove k2 k1))]
+      [Map (s,l,k1)], k2 -> [Map (s,l,(KMap.remove k2 k1))]
     | _ -> raise Not_implemented
   let hook_difference c lbl sort config ff = match c with
-      [Map (s,l1,k1)] :: [Map (_,l2,k2)] :: []
+      [Map (s,l1,k1)], [Map (_,l2,k2)]
         when (l1 = l2) -> [Map (s,l1,(KMap.filter (fun k v -> try (compare (KMap.find k k2) v) <> 0 with Not_found -> true) k1))]
     | _ -> raise Not_implemented
   let hook_keys c lbl sort config ff = match c with 
-      [Map (_,_,k1)] :: [] -> [Set (Constants.setSort, Constants.setConcatLabel,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
+      [Map (_,_,k1)] -> [Set (Constants.setSort, Constants.setConcatLabel,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
     | _ -> raise Not_implemented
   let hook_values c lbl sort config ff = match c with 
-      [Map (_,_,k1)] :: [] -> [List (Constants.listSort, Constants.listConcatLabel,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
+      [Map (_,_,k1)] -> [List (Constants.listSort, Constants.listConcatLabel,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
     | _ -> raise Not_implemented
   let hook_choice c lbl sort config ff = match c with 
-      [Map (_,_,k1)] :: [] -> (match KMap.choose k1 with (k, _) -> k)
+      [Map (_,_,k1)] -> (match KMap.choose k1 with (k, _) -> k)
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with 
-      [Map (_,_,m)] :: [] -> [Int (Z.of_int (KMap.cardinal m))]
+      [Map (_,_,m)] -> [Int (Z.of_int (KMap.cardinal m))]
     | _ -> raise Not_implemented
   let hook_inclusion c lbl sort config ff = match c with
-      [Map (s,l1,k1)] :: [Map (_,l2,k2)] :: [] 
+      [Map (s,l1,k1)], [Map (_,l2,k2)] 
         when (l1 = l2) -> [Bool (KMap.for_all (fun k v -> try (compare (KMap.find k k2) v) = 0 with Not_found -> false) k1)]
     | _ -> raise Not_implemented
   let hook_updateAll c lbl sort config ff = match c with 
-      ([Map (s,l1,k1)]) :: ([Map (_,l2,k2)]) :: [] 
+      ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
         when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
                           None, None -> None 
                         | None, Some v 
@@ -124,67 +132,67 @@ struct
                         | Some _, Some v -> Some v) k1 k2))]
     | _ -> raise Not_implemented
   let hook_removeAll c lbl sort config ff = match c with
-      [Map (s,l,k1)] :: [Set (_,_,k2)] :: [] -> [Map (s,l,KMap.filter (fun k v -> not (KSet.mem k k2)) k1)]
+      [Map (s,l,k1)], [Set (_,_,k2)] -> [Map (s,l,KMap.filter (fun k v -> not (KSet.mem k k2)) k1)]
     | _ -> raise Not_implemented
 end
 
 module SET =
 struct
   let hook_in c lbl sort config ff = match c with
-      k1 :: [Set (_,_,k2)] :: [] -> [Bool (KSet.mem k1 k2)]
+      k1, [Set (_,_,k2)] -> [Bool (KSet.mem k1 k2)]
     | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with
-      [] -> [Set (sort,(collection_for lbl),KSet.empty)]
+      () -> [Set (sort,(collection_for lbl),KSet.empty)]
     | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
-      k :: [] -> [Set (sort,(collection_for lbl),(KSet.singleton k))]
+      k -> [Set (sort,(collection_for lbl),(KSet.singleton k))]
     | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
-      [Set (sort,l1,s1)] :: [Set (_,l2,s2)] :: [] when (l1 = l2) -> [Set (sort,l1,(KSet.union s1 s2))]
+      [Set (sort,l1,s1)], [Set (_,l2,s2)] when (l1 = l2) -> [Set (sort,l1,(KSet.union s1 s2))]
     | _ -> raise Not_implemented
   let hook_difference c lbl sort config ff = match c with
-      [Set (s,l1,k1)] :: [Set (_,l2,k2)] :: [] when (l1 = l2) -> [Set (s,l1,(KSet.diff k1 k2))]
+      [Set (s,l1,k1)], [Set (_,l2,k2)] when (l1 = l2) -> [Set (s,l1,(KSet.diff k1 k2))]
     | _ -> raise Not_implemented
   let hook_inclusion c lbl sort config ff = match c with
-      [Set (s,l1,k1)] :: [Set (_,l2,k2)] :: [] when (l1 = l2) -> [Bool (KSet.subset k1 k2)]
+      [Set (s,l1,k1)], [Set (_,l2,k2)] when (l1 = l2) -> [Bool (KSet.subset k1 k2)]
     | _ -> raise Not_implemented
   let hook_intersection c lbl sort config ff = match c with
-      [Set (s,l1,k1)] :: [Set (_,l2,k2)] :: [] when (l1 = l2) -> [Set (s,l1,(KSet.inter k1 k2))]
+      [Set (s,l1,k1)], [Set (_,l2,k2)] when (l1 = l2) -> [Set (s,l1,(KSet.inter k1 k2))]
     | _ -> raise Not_implemented
   let hook_choice c lbl sort config ff = match c with
-      [Set (_,_,k1)] :: [] -> KSet.choose k1
+      [Set (_,_,k1)] -> KSet.choose k1
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
-      [Set (_,_,s)] :: [] -> [Int (Z.of_int (KSet.cardinal s))]
+      [Set (_,_,s)] -> [Int (Z.of_int (KSet.cardinal s))]
     | _ -> raise Not_implemented
 end
 
 module LIST =
 struct
   let hook_unit c lbl sort config ff = match c with
-      [] -> [List (sort,(collection_for lbl),[])]
+      () -> [List (sort,(collection_for lbl),[])]
     | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
-      k :: [] -> [List (sort,(collection_for lbl),[k])]
+      k -> [List (sort,(collection_for lbl),[k])]
     | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
-      [List (s,lbl1,l1)] :: [List (_,lbl2,l2)] :: [] when (lbl1 = lbl2) -> [List (s,lbl1,(l1 @ l2))]
+      [List (s,lbl1,l1)], [List (_,lbl2,l2)] when (lbl1 = lbl2) -> [List (s,lbl1,(l1 @ l2))]
     | _ -> raise Not_implemented
   let hook_in c lbl sort config ff = match c with
-      k1 :: [List (_,_,k2)] :: [] -> [Bool (List.mem k1 k2)]
+      k1, [List (_,_,k2)] -> [Bool (List.mem k1 k2)]
     | _ -> raise Not_implemented
   let hook_get c lbl sort config ff = match c with
-      [List (_,_,l1)] :: [Int i] :: [] -> 
+      [List (_,_,l1)], [Int i] -> 
         let i = Z.to_int i in (try if i >= 0 then List.nth l1 i else List.nth l1 ((List.length l1) + i) 
                                with Failure "nth" -> [Bottom] | Invalid_argument "List.nth" -> [Bottom])
     | _ -> raise Not_implemented
   let hook_range c lbl sort config ff = match c with
-      [List (s,lbl,l1)] :: [Int i1] :: [Int i2] :: [] -> 
+      [List (s,lbl,l1)], [Int i1], [Int i2] -> 
         (try [List (s,lbl,(list_range (l1, (Z.to_int i1), (List.length(l1) - (Z.to_int i2) - (Z.to_int i1)))))] 
          with Failure "list_range" -> [Bottom])
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
-      [List (_,_,l)] :: [] -> [Int (Z.of_int (List.length l))]
+      [List (_,_,l)] -> [Int (Z.of_int (List.length l))]
     | _ -> raise Not_implemented
 end
 
@@ -192,66 +200,66 @@ module KREFLECTION =
 struct
   let hook_sort c lbl sort config ff = match c with
       
-      [KToken (sort, s)] :: [] -> [String (print_sort(sort))]
-    | [Int _] :: [] -> [String "Int"]
-    | [String _] :: [] -> [String "String"]
-    | [Bool _] :: [] -> [String "Bool"]
-    | [Map (s,_,_)] :: [] -> [String (print_sort s)]
-    | [List (s,_,_)] :: [] -> [String (print_sort s)]
-    | [Set (s,_,_)] :: [] -> [String (print_sort s)]
+      [KToken (sort, s)] -> [String (print_sort(sort))]
+    | [Int _] -> [String "Int"]
+    | [String _] -> [String "String"]
+    | [Bool _] -> [String "Bool"]
+    | [Map (s,_,_)] -> [String (print_sort s)]
+    | [List (s,_,_)] -> [String (print_sort s)]
+    | [Set (s,_,_)] -> [String (print_sort s)]
     | _ -> raise Not_implemented
   let hook_getKLabel c lbl sort config ff = match c with
-      [k] :: [] -> match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom]
+      [k] -> match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom]
     | _ -> raise Not_implemented
   let hook_configuration c lbl sort config ff = match c with
-      [] -> config
+      () -> config
     | _ -> raise Not_implemented
   let hook_fresh c lbl sort config ff = match c with
-      [String sort] :: [] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
+      [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
 end
 
 module KEQUAL =
 struct
   let hook_eq c lbl sort config ff = match c with
-      k1 :: k2 :: [] -> [Bool ((compare k1 k2) = 0)]
+      k1, k2 -> [Bool ((compare k1 k2) = 0)]
     | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
-      k1 :: k2 :: [] -> [Bool ((compare k1 k2) <> 0)]
+      k1, k2 -> [Bool ((compare k1 k2) <> 0)]
     | _ -> raise Not_implemented
   let hook_ite c lbl sort config ff = match c with
-      [Bool t] :: k1 :: k2 :: [] -> if t then k1 else k2
+      [Bool t], k1, k2 -> if t then k1 else k2
     | _ -> raise Not_implemented
 end
 
 module IO =
 struct
   let hook_close c lbl sort config ff = match c with
-      [Int i] :: [] -> Unix.close (Hashtbl.find file_descriptors i); []
+      [Int i] -> Unix.close (Hashtbl.find file_descriptors i); []
     | _ -> raise Not_implemented
   let hook_getc c lbl sort config ff = match c with
-      [Int i] :: [] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.from_int (Char.code (Bytes.get b 0)))]
+      [Int i] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.from_int (Char.code (Bytes.get b 0)))]
     | _ -> raise Not_implemented
   let hook_open c lbl sort config ff = match c with
-      [String path] :: [String flags] :: [] -> 
+      [String path], [String flags] -> 
         let fd = Unix.openfile path (convert_open_flags flags) default_file_perm in
           let fd_int = !curr_fd in Hashtbl.add file_descriptors fd_int fd; curr_fd := (Z.add fd_int Z.one); [Int fd_int]
     | _ -> raise Not_implemented
   let hook_putc c lbl sort config ff = match c with
-      [Int fd] :: [Int c] :: [] -> let _ = Unix.write (Hashtbl.find file_descriptors fd) (Bytes.make 1 (Char.chr (Z.to_int c))) 0 1 in []
+      [Int fd], [Int c] -> let _ = Unix.write (Hashtbl.find file_descriptors fd) (Bytes.make 1 (Char.chr (Z.to_int c))) 0 1 in []
     | _ -> raise Not_implemented
   let hook_read c lbl sort config ff = match c with
-      [Int fd] :: [Int len] :: [] -> let l = (Z.to_int len) in 
+      [Int fd], [Int len] -> let l = (Z.to_int len) in 
         let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)]
     | _ -> raise Not_implemented
   let hook_seek c lbl sort config ff = match c with
-      [Int fd] :: [Int off] :: [] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in []
+      [Int fd], [Int off] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in []
     | _ -> raise Not_implemented
   let hook_tell c lbl sort config ff = match c with
-      [Int fd] :: [] -> [Int (Z.of_int (Unix.lseek (Hashtbl.find file_descriptors fd) 0 Unix.SEEK_CUR))]
+      [Int fd] -> [Int (Z.of_int (Unix.lseek (Hashtbl.find file_descriptors fd) 0 Unix.SEEK_CUR))]
     | _ -> raise Not_implemented
   let hook_write c lbl sort config ff = match c with
-      [Int fd] :: [String s] :: [] -> let b = Bytes.of_string s in let _ = Unix.write (Hashtbl.find file_descriptors fd) b 0 (Bytes.length b) in []
+      [Int fd], [String s] -> let b = Bytes.of_string s in let _ = Unix.write (Hashtbl.find file_descriptors fd) b 0 (Bytes.length b) in []
     | _ -> raise Not_implemented
 
   let hook_stat c lbl sort config ff = raise Not_implemented
@@ -265,24 +273,24 @@ end
 module BOOL = 
 struct
   let hook_and c lbl sort config ff = match c with
-      [Bool b1] :: [Bool b2] :: [] -> [Bool (b1 && b2)]
+      [Bool b1], [Bool b2] -> [Bool (b1 && b2)]
     | _ -> raise Not_implemented
   let hook_andThen = hook_and
   let hook_or c lbl sort config ff = match c with
-      [Bool b1] :: [Bool b2] :: [] -> [Bool (b1 || b2)]
+      [Bool b1], [Bool b2] -> [Bool (b1 || b2)]
     | _ -> raise Not_implemented
   let hook_orElse = hook_or
   let hook_not c lbl sort config ff = match c with
-      [Bool b1] :: [] -> [Bool (not b1)]
+      [Bool b1] -> [Bool (not b1)]
     | _ -> raise Not_implemented
   let hook_implies c lbl sort config ff = match c with
-      [Bool b1] :: [Bool b2] :: [] -> [Bool ((not b1) || b2)]
+      [Bool b1], [Bool b2] -> [Bool ((not b1) || b2)]
     | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
-      [Bool b1] :: [Bool b2] :: [] -> [Bool (b1 <> b2)]
+      [Bool b1], [Bool b2] -> [Bool (b1 <> b2)]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [Bool b1] :: [Bool b2] :: [] -> [Bool (b1 = b2)]
+      [Bool b1], [Bool b2] -> [Bool (b1 = b2)]
     | _ -> raise Not_implemented
   let hook_xor = hook_ne
 end
@@ -290,59 +298,59 @@ end
 module STRING =
 struct
   let hook_concat c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [String (s1 ^ s2)]
+      [String s1], [String s2] -> [String (s1 ^ s2)]
     | _ -> raise Not_implemented
   let hook_lt c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool ((String.compare s1 s2) < 0)]
+      [String s1], [String s2] -> [Bool ((String.compare s1 s2) < 0)]
     | _ -> raise Not_implemented
   let hook_le c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool ((String.compare s1 s2) <= 0)]
+      [String s1], [String s2] -> [Bool ((String.compare s1 s2) <= 0)]
     | _ -> raise Not_implemented
   let hook_gt c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool ((String.compare s1 s2) > 0)]
+      [String s1], [String s2] -> [Bool ((String.compare s1 s2) > 0)]
     | _ -> raise Not_implemented
   let hook_ge c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool ((String.compare s1 s2) >= 0)]
+      [String s1], [String s2] -> [Bool ((String.compare s1 s2) >= 0)]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool (s1 = s2)]
+      [String s1], [String s2] -> [Bool (s1 = s2)]
     | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [] -> [Bool (s1 <> s2)]
+      [String s1], [String s2] -> [Bool (s1 <> s2)]
     | _ -> raise Not_implemented
   let hook_chr c lbl sort config ff = match c with
-      [Int i] :: [] -> [String (String.make 1 (Char.chr (Z.to_int i)))]
+      [Int i] -> [String (String.make 1 (Char.chr (Z.to_int i)))]
     | _ -> raise Not_implemented
   let hook_find c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [Int i] :: [] -> 
+      [String s1], [String s2], [Int i] -> 
         (try [Int (Z.of_int (Str.search_forward (Str.regexp_string s2) s1 (Z.to_int i)))] 
         with Not_found -> [Int (Z.of_int (-1))])
     | _ -> raise Not_implemented
   let hook_rfind c lbl sort config ff = match c with
-      [String s1] :: [String s2] :: [Int i] :: [] -> 
+      [String s1], [String s2], [Int i] -> 
         (try [Int (Z.of_int (Str.search_backward (Str.regexp_string s2) s1 (Z.to_int i)))] 
         with Not_found -> [Int (Z.of_int (-1))])
     | _ -> raise Not_implemented
   let hook_length c lbl sort config ff = match c with
-      [String s] :: [] -> [Int (Z.of_int (String.length s))]
+      [String s] -> [Int (Z.of_int (String.length s))]
     | _ -> raise Not_implemented
   let hook_substr c lbl sort config ff = match c with
-      [String s] :: [Int i1] :: [Int i2] :: [] -> [String (String.sub s (Z.to_int i1) (Z.to_int (Z.sub i2 i1)))]
+      [String s], [Int i1], [Int i2] -> [String (String.sub s (Z.to_int i1) (Z.to_int (Z.sub i2 i1)))]
     | _ -> raise Not_implemented
   let hook_ord c lbl sort config ff = match c with
-      [String s] :: [] -> [Int (Z.of_int (Char.code (String.get s 0)))]
+      [String s] -> [Int (Z.of_int (Char.code (String.get s 0)))]
     | _ -> raise Not_implemented
   let hook_int2string c lbl sort config ff = match c with
-      [Int i] :: [] -> [String (Z.to_string i)]
+      [Int i] -> [String (Z.to_string i)]
     | _ -> raise Not_implemented
   let hook_string2int c lbl sort config ff = match c with
-      [String s] :: [] -> [Int (Z.from_string s)]
+      [String s] -> [Int (Z.from_string s)]
     | _ -> raise Not_implemented
   let hook_string2base c lbl sort config ff = match c with
-      [String s] :: [Int i] :: [] -> [Int (Z.from_string_base (Z.to_int i) s)]
+      [String s], [Int i] -> [Int (Z.from_string_base (Z.to_int i) s)]
     | _ -> raise Not_implemented
   let hook_base2string c lbl sort config ff = match c with
-      [Int i] :: [Int base] :: [] -> [String (Z.to_string_base (Z.to_int base) i)]
+      [Int i], [Int base] -> [String (Z.to_string_base (Z.to_int base) i)]
     | _ -> raise Not_implemented
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
   let hook_float2string c lbl sort config ff = raise Not_implemented
@@ -360,67 +368,67 @@ end
 module INT =
 struct
   let hook_tmod c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.tdiv_r a b)]
+      [Int a], [Int b] -> [Int (Z.tdiv_r a b)]
     | _ -> raise Not_implemented
   let hook_add c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.add a b)]
+      [Int a], [Int b] -> [Int (Z.add a b)]
     | _ -> raise Not_implemented
   let hook_le c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) <= 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) <= 0)]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) = 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) = 0)]
     | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) <> 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) <> 0)]
     | _ -> raise Not_implemented
   let hook_and c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.band a b)]
+      [Int a], [Int b] -> [Int (Z.band a b)]
     | _ -> raise Not_implemented
   let hook_mul c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.mul a b)]
+      [Int a], [Int b] -> [Int (Z.mul a b)]
     | _ -> raise Not_implemented
   let hook_sub c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.sub a b)]
+      [Int a], [Int b] -> [Int (Z.sub a b)]
     | _ -> raise Not_implemented
   let hook_tdiv c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.tdiv_q a b)]
+      [Int a], [Int b] -> [Int (Z.tdiv_q a b)]
     | _ -> raise Not_implemented
   let hook_shl c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.mul_2exp a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.mul_2exp a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_lt c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) < 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) < 0)]
     | _ -> raise Not_implemented
   let hook_ge c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) >= 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) >= 0)]
     | _ -> raise Not_implemented
   let hook_shr c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.fdiv_q_2exp a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.fdiv_q_2exp a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_gt c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Bool ((Z.compare a b) > 0)]
+      [Int a], [Int b] -> [Bool ((Z.compare a b) > 0)]
     | _ -> raise Not_implemented
   let hook_pow c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.pow_ui a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.pow_ui a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_xor c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.bxor a b)]
+      [Int a], [Int b] -> [Int (Z.bxor a b)]
     | _ -> raise Not_implemented
   let hook_or c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.bior a b)]
+      [Int a], [Int b] -> [Int (Z.bior a b)]
     | _ -> raise Not_implemented
   let hook_not c lbl sort config ff = match c with
-      [Int a] :: [] -> [Int (Z.bcom a)]
+      [Int a] -> [Int (Z.bcom a)]
     | _ -> raise Not_implemented
   let hook_abs c lbl sort config ff = match c with
-      [Int a] :: [] -> [Int (Z.abs a)]
+      [Int a] -> [Int (Z.abs a)]
     | _ -> raise Not_implemented
   let hook_max c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.max a b)]
+      [Int a], [Int b] -> [Int (Z.max a b)]
     | _ -> raise Not_implemented
   let hook_min c lbl sort config ff = match c with
-      [Int a] :: [Int b] :: [] -> [Int (Z.min a b)]
+      [Int a], [Int b] -> [Int (Z.min a b)]
     | _ -> raise Not_implemented
   let hook_ediv c lbl sort config ff = raise Not_implemented
   let hook_emod c lbl sort config ff = raise Not_implemented
@@ -429,102 +437,102 @@ end
 module FLOAT =
 struct
   let hook_isNaN c lbl sort config ff = match c with
-      [Float (f,_,_)] :: [] -> [Bool (FR.is_nan f)]
+      [Float (f,_,_)] -> [Bool (FR.is_nan f)]
     | _ -> raise Not_implemented
   let hook_maxValue c lbl sort config ff = match c with
-      [Int prec] :: [Int exp] :: [] -> let e = Z.to_int exp and p = Z.to_int prec in
+      [Int prec], [Int exp] -> let e = Z.to_int exp and p = Z.to_int prec in
         [round_to_range(Float ((FR.nexttoward (emin e p) (emax e) (FR.from_string_prec_base p GMP_RNDN 10 "inf") FR.zero),e,p))]
     | _ -> raise Not_implemented
   let hook_minValue c lbl sort config ff = match c with
-      [Int prec] :: [Int exp] :: [] -> let e = Z.to_int exp and p = Z.to_int prec in
+      [Int prec], [Int exp] -> let e = Z.to_int exp and p = Z.to_int prec in
         [round_to_range(Float ((FR.nexttoward (emin e p) (emax e) FR.zero (FR.from_string_prec_base p GMP_RNDN 10 "inf")),e,p))]
     | _ -> raise Not_implemented
   let hook_round c lbl sort config ff = match c with
-      [Float (f,_,_)] :: [Int prec] :: [Int exp] :: [] ->
+      [Float (f,_,_)], [Int prec], [Int exp] ->
         [round_to_range (Float (f,(Z.to_int exp),(Z.to_int prec)))]
     | _ -> raise Not_implemented
   let hook_abs c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.abs_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.abs_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_ceil c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDU f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDU f),e,p))]
     | _ -> raise Not_implemented
   let hook_floor c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDD f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDD f),e,p))]
     | _ -> raise Not_implemented
   let hook_acos c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.acos_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.acos_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_asin c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.asin_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.asin_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_atan c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.atan_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.atan_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_cos c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.cos_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.cos_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_sin c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.sin_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.sin_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_tan c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.tan_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.tan_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_exp c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.exp_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.exp_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_log c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.log_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.log_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_neg c lbl sort config ff = match c with
-      [Float (f,e,p)] :: [] -> [round_to_range(Float ((FR.neg_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((FR.neg_prec p GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_add c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.add_prec p1 GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_sub c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.sub_prec p1 GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_mul c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.mul_prec p1 GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_div c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.div_prec p1 GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_pow c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: []
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)]
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.pow_prec p1 GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] -> [Bool (FR.equal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.equal f1 f2)]
     | _ -> raise Not_implemented
   let hook_lt c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] -> [Bool (FR.less f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.less f1 f2)]
     | _ -> raise Not_implemented
   let hook_le c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] -> [Bool (FR.lessequal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.lessequal f1 f2)]
     | _ -> raise Not_implemented
   let hook_gt c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] -> [Bool (FR.greater f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.greater f1 f2)]
     | _ -> raise Not_implemented
   let hook_ge c lbl sort config ff = match c with
-      [Float (f1,e1,p1)] :: [Float (f2,e2,p2)] :: [] -> [Bool (FR.greaterequal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.greaterequal f1 f2)]
     | _ -> raise Not_implemented
   let hook_precision c lbl sort config ff = match c with
-      [Float (_,_,p)] :: [] -> [Int (Z.from_int p)]
+      [Float (_,_,p)] -> [Int (Z.from_int p)]
     | _ -> raise Not_implemented
   let hook_exponentBits c lbl sort config ff = match c with
-      [Float (_,e,_)] :: [] -> [Int (Z.from_int e)]
+      [Float (_,e,_)] -> [Int (Z.from_int e)]
     | _ -> raise Not_implemented
   let hook_float2int c lbl sort config ff = match c with
-      [Float (f,_,_)] :: [] -> [Int (FR.to_z_f f)]
+      [Float (f,_,_)] -> [Int (FR.to_z_f f)]
     | _ -> raise Not_implemented
   let hook_int2float c lbl sort config ff = match c with
-      [Int i] :: [Int prec] :: [Int exp] :: [] -> 
+      [Int i], [Int prec], [Int exp] -> 
         [round_to_range(Float ((FR.from_z_prec (Z.to_int prec) GMP_RNDN i),(Z.to_int exp),(Z.to_int prec)))]
     | _ -> raise Not_implemented
   let hook_min c lbl sort config ff = raise Not_implemented

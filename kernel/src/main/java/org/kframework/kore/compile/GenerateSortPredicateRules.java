@@ -12,10 +12,11 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.utils.StringUtil;
 import scala.collection.immutable.Set;
 
 import java.util.ArrayList;
@@ -60,13 +61,7 @@ public class GenerateSortPredicateRules {
                 Seq(Terminal("is" + sort.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
                 Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, sort.name()));
         res.add(prod);
-        if (mod.subsorts().relations().contains(sort)) {
-            for (Sort bigSort : iterable(mod.subsorts().relations().apply(sort))) {
-                Rule subsort = Rule(KRewrite(KApply(KLabel("is" + bigSort.name()), KVariable("K", Att().add(Attribute.SORT_KEY, sort.name()))), BooleanUtils.TRUE), KApply(KLabel("is" + sort.name()), KVariable("K", Att().add(Attribute.SORT_KEY, sort.name()))), BooleanUtils.TRUE);
-                res.add(subsort);
-            }
-        }
-        for (Production p : stream(mod.productions()).filter(p -> p.sort().equals(sort)).collect(Collectors.toSet())) {
+        stream(mod.productions()).filter(p -> mod.subsorts().lessThanEq(p.sort(), sort)).distinct().forEach(p -> {
             if (p.klabel().isDefined() && !p.att().contains(Attribute.FUNCTION_KEY)) {
                 List<K> klist = new ArrayList<>();
                 List<K> side = new ArrayList<>();
@@ -88,11 +83,49 @@ public class GenerateSortPredicateRules {
                 Rule r = Rule(KRewrite(KApply(KLabel("is" + sort.name()), KApply(p.klabel().get(), KList(klist))), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
                 res.add(r);
             }
-        }
-        res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KApply(KLabel("#KToken"), KToken(sort.name(), Sorts.KString()), KVariable("_"))), BooleanUtils.TRUE),
-                BooleanUtils.TRUE,
-                BooleanUtils.TRUE));
+        });
+        stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).distinct().forEach(s -> {
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KApply(KLabel("#KToken"), KToken(s.name(), Sorts.KString()), KVariable("_"))), BooleanUtils.TRUE),
+                    BooleanUtils.TRUE,
+                    BooleanUtils.TRUE));
+            res.addAll(stream(mod.rules()).filter(r -> isPredicateFor(r, s)).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
+        });
         res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
         return res.stream();
+    }
+
+    private boolean isPredicateFor(Rule r, Sort s) {
+        KLabel topKLabel;
+        if (r.body() instanceof KApply) {
+            topKLabel = ((KApply) r.body()).klabel();
+        } else if (r.body() instanceof KRewrite) {
+            KRewrite rw = (KRewrite) r.body();
+            if (rw.left() instanceof KApply) {
+                topKLabel = ((KApply) rw.left()).klabel();
+            } else {
+                return false;
+            }
+        } else
+            return false;
+        Optional<String> sort = mod.attributesFor().apply(topKLabel).<String>getOptional(Attribute.PREDICATE_KEY);
+        return sort.isPresent() && sort.get().equals(s.name());
+    }
+
+    /**
+     * Takes a rule representing a predicate of one sort and promotes it to a rule representing a predicate for one of its supersorts
+     */
+    private Rule promotePredicate(Rule r, Sort s) {
+        if (r.body() instanceof KApply) {
+            return Rule(KApply(KLabel("is" + s.name()), ((KApply) r.body()).klist()), r.requires(), r.ensures(), r.att());
+        } else if (r.body() instanceof KRewrite) {
+            KRewrite rw = (KRewrite) r.body();
+            if (rw.left() instanceof KApply) {
+                return Rule(KRewrite(KApply(KLabel("is" + s.name()), ((KApply) rw.left()).klist()), rw.right()), r.requires(), r.ensures(), r.att());
+            } else {
+                throw new IllegalArgumentException("not a predicate rule");
+            }
+        } else {
+            throw new IllegalArgumentException("not a predicate rule");
+        }
     }
 }
