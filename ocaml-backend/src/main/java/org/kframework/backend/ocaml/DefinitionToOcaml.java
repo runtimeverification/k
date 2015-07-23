@@ -87,8 +87,8 @@ public class DefinitionToOcaml implements Serializable {
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
     }
-    public static final boolean ocamlopt = true;
-    public static final boolean fastCompilation = false;
+    public static final boolean ocamlopt = false;
+    public static final boolean fastCompilation = true;
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
     public static final String kType = "t = kitem list\n" +
@@ -248,7 +248,7 @@ public class DefinitionToOcaml implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Prelude.K\nopen Gmp\nopen Def\n");
         sb.append("let _ = let config = [Bottom] in let out = open_out " + enquoteString(file) + " in output_string out (print_k(try(run(");
-        convert(sb, true, new VarInfo(), false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
+        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
         sb.append(") (").append(depth).append(")) with Stuck c' -> c'))");
         return sb.toString();
     }
@@ -260,7 +260,7 @@ public class DefinitionToOcaml implements Serializable {
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
         sb.append("let _ = let config = [Bottom] in let out = open_out " + enquoteString(file) + "in (try print_subst out (try_match(");
-        convert(sb, true, new VarInfo(), false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
+        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
         sb.append("\n)) with Stuck c -> output_string out \"0\\n\")");
         return sb.toString();
     }
@@ -272,7 +272,7 @@ public class DefinitionToOcaml implements Serializable {
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
         sb.append("let _ = let config = [Bottom] in let out = open_out " + enquoteString(file) + " and subst = open_out " + enquoteString(substFile) + " in (try print_subst subst (try_match(let res = run(");
-        convert(sb, true, new VarInfo(), false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
+        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
         sb.append("\n) (").append(depth).append(") in output_string out (print_k(res)); res)) with Stuck c -> output_string out (print_k(c)); output_string subst \"0\\n\")");
         return sb.toString();
     }
@@ -780,7 +780,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void convertLHS(StringBuilder sb, RuleType type, K left, VarInfo vars) {
-        Visitor visitor = convert(sb, false, vars, false);
+        Visitor visitor = convert(sb, false, vars, false, false);
         if (type == RuleType.ANYWHERE || type == RuleType.FUNCTION) {
             KApply kapp = (KApply) ((KSequence) left).items().get(0);
             visitor.apply(kapp.klist().items(), true);
@@ -808,7 +808,7 @@ public class DefinitionToOcaml implements Serializable {
         if (type == RuleType.PATTERN) {
             for (KVariable var : vars.vars.keySet()) {
                 sb.append("(Subst.add \"").append(var.name()).append("\" ");
-                boolean isList = isList(var, false, true, vars);
+                boolean isList = isList(var, false, true, vars, false);
                 if (!isList) {
                     sb.append("[");
                 }
@@ -823,7 +823,7 @@ public class DefinitionToOcaml implements Serializable {
                 sb.append(")");
             }
         } else {
-            convert(sb, true, vars, false).apply(right);
+            convert(sb, true, vars, false, type == RuleType.ANYWHERE).apply(right);
         }
         if (type == RuleType.ANYWHERE) {
             sb.append(" with [item] -> eval item config)");
@@ -839,7 +839,7 @@ public class DefinitionToOcaml implements Serializable {
         }
         result = convert(vars);
         sb.append(when ? " when " : " && ");
-        convert(sb, true, vars, true).apply(requires);
+        convert(sb, true, vars, true, false).apply(requires);
         sb.append(" && (");
         sb.append(result);
         sb.append(")");
@@ -874,13 +874,13 @@ public class DefinitionToOcaml implements Serializable {
                     }
                     StringBuilder sb = new StringBuilder();
                     sb.append(" -> (let e = ");
-                    convert(sb, true, vars, false).apply(k.klist().items().get(1));
+                    convert(sb, true, vars, false, false).apply(k.klist().items().get(1));
                     sb.append(" in match e with \n");
                     sb.append("| [Bottom] -> ").append(h.reapply).append("\n");
                     String prefix = sb.toString();
                     sb = new StringBuilder();
                     sb.append("| ");
-                    convert(sb, false, vars, false).apply(k.klist().items().get(0));
+                    convert(sb, false, vars, false, false).apply(k.klist().items().get(0));
                     String pattern = sb.toString();
                     String suffix = "| _ -> " + h.reapply + ")";
                     results.add(new Lookup(prefix, pattern, suffix));
@@ -899,7 +899,7 @@ public class DefinitionToOcaml implements Serializable {
                 }
                 StringBuilder sb = new StringBuilder();
                 sb.append(" -> (match ");
-                convert(sb, true, vars, false).apply(k.klist().items().get(1));
+                convert(sb, true, vars, false, false).apply(k.klist().items().get(1));
                 sb.append(" with \n");
                 sb.append(choiceString);
                 if (h.first) {
@@ -916,7 +916,7 @@ public class DefinitionToOcaml implements Serializable {
                     h.reapply = "[Bottom]";
                 }
                 sb.append("| ");
-                convert(sb, false, vars, false).apply(k.klist().items().get(0));
+                convert(sb, false, vars, false, false).apply(k.klist().items().get(0));
                 String pattern = sb.toString();
                 results.add(new Lookup(prefix, pattern, suffix));
                 h.first = false;
@@ -937,7 +937,7 @@ public class DefinitionToOcaml implements Serializable {
             while (iter.hasNext()) {
                 //handle nonlinear variables in pattern
                 String next = iter.next();
-                if (!isList(entry.getKey(), false, true, vars)) {
+                if (!isList(entry.getKey(), false, true, vars, false)) {
                     sb.append("((compare_kitem ");
                 } else{
                     sb.append("((compare ");
@@ -988,8 +988,8 @@ public class DefinitionToOcaml implements Serializable {
         sb.append(varName);
     }
 
-    private Visitor convert(StringBuilder sb, boolean rhs, VarInfo vars, boolean useNativeBooleanExp) {
-        return new Visitor(sb, rhs, vars, useNativeBooleanExp);
+    private Visitor convert(StringBuilder sb, boolean rhs, VarInfo vars, boolean useNativeBooleanExp, boolean anywhereRule) {
+        return new Visitor(sb, rhs, vars, useNativeBooleanExp, anywhereRule);
     }
 
     private class Visitor extends VisitKORE {
@@ -998,15 +998,19 @@ public class DefinitionToOcaml implements Serializable {
         private final VarInfo vars;
         private final boolean useNativeBooleanExp;
 
-        public Visitor(StringBuilder sb, boolean rhs, VarInfo vars, boolean useNativeBooleanExp) {
+        public Visitor(StringBuilder sb, boolean rhs, VarInfo vars, boolean useNativeBooleanExp, boolean anywhereRule) {
             this.sb = sb;
             this.rhs = rhs;
             this.vars = vars;
             this.useNativeBooleanExp = useNativeBooleanExp;
             this.inBooleanExp = useNativeBooleanExp;
+            this.topAnywherePre = anywhereRule;
+            this.topAnywherePost = anywhereRule;
         }
 
         private boolean inBooleanExp;
+        private boolean topAnywherePre;
+        private boolean topAnywherePost;
 
         @Override
         public Void apply(KApply k) {
@@ -1026,9 +1030,10 @@ public class DefinitionToOcaml implements Serializable {
                 sb.append(", ");
                 apply(((KSequence) k.klist().items().get(1)).items().get(0));
                 sb.append(")");
-            } else if (functions.contains(k.klabel()) || (anywhereKLabels.contains(k.klabel()) && rhs)) {
+            } else if (functions.contains(k.klabel()) || (anywhereKLabels.contains(k.klabel()) && rhs && !topAnywherePre)) {
                 applyFunction(k);
             } else {
+                topAnywherePre = false;
                 applyKLabel(k);
             }
             return null;
@@ -1235,7 +1240,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("(");
             if (!rhs) {
                 for (int i = 0; i < k.items().size() - 1; i++) {
-                    if (isList(k.items().get(i), false, rhs, vars)) {
+                    if (isList(k.items().get(i), false, rhs, vars, topAnywherePost)) {
                         throw KEMException.criticalError("Cannot compile KSequence with K variable not at tail.", k.items().get(i));
                     }
                 }
@@ -1256,15 +1261,16 @@ public class DefinitionToOcaml implements Serializable {
         private void apply(List<K> items, boolean klist) {
             for (int i = 0; i < items.size(); i++) {
                 K item = items.get(i);
+                boolean stack = topAnywherePre;
                 apply(item);
                 if (i != items.size() - 1) {
-                    if (isList(item, klist, rhs, vars)) {
+                    if (isList(item, klist, rhs, vars, stack)) {
                         sb.append(" @ ");
                     } else {
                         sb.append(" :: ");
                     }
                 } else {
-                    if (!isList(item, klist, rhs, vars)) {
+                    if (!isList(item, klist, rhs, vars, stack)) {
                         sb.append(" :: []");
                     }
                 }
@@ -1300,9 +1306,9 @@ public class DefinitionToOcaml implements Serializable {
         return k.klabel().name().equals("#match") || k.klabel().name().equals("#mapChoice") || k.klabel().name().equals("#setChoice");
     }
 
-    private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars) {
+    private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
         return !klist && ((item instanceof KVariable && getSortOfVar((KVariable)item, vars).equals("K")) || item instanceof KSequence
-                || (item instanceof KApply && (functions.contains(((KApply) item).klabel()) || ((anywhereKLabels.contains(((KApply) item).klabel()) || ((KApply) item).klabel() instanceof KVariable) && rhs))))
+                || (item instanceof KApply && (functions.contains(((KApply) item).klabel()) || (((anywhereKLabels.contains(((KApply) item).klabel()) && !anywhereRule) || ((KApply) item).klabel() instanceof KVariable) && rhs))))
                 && !(!rhs && item instanceof KApply && collectionFor.containsKey(((KApply) item).klabel()));
     }
 

@@ -172,31 +172,42 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                             Thread.sleep(100);
                         }
                     }
-                    while ((count = System.in.read(buffer)) > 0) {
-                        p2.getOutputStream().write(buffer, 0, count);
-                    }
-                } catch (IOException | InterruptedException e) {
-                }
+
+                } catch (IOException | InterruptedException e) {}
             });
             Thread out = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getInputStream().read(buffer)) >= 0) {
-                        System.out.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getInputStream().available() > 0) {
+                            count = p2.getInputStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.out.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {
-                }
+
+                } catch (IOException | InterruptedException e) {}
             });
             Thread err = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getErrorStream().read(buffer)) >= 0) {
-                        System.err.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getErrorStream().available() > 0) {
+                            count = p2.getErrorStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.err.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {
-                }
+
+                } catch (IOException | InterruptedException e) {}
             });
             in.start();
             out.start();
@@ -204,6 +215,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
             exit = p2.waitFor();
             in.interrupt();
+            out.interrupt();
+            err.interrupt();
             in.join();
             out.join();
             err.join();
