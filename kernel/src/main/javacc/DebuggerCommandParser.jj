@@ -14,18 +14,16 @@ package org.kframework.utils.debugparser;
 import java.io.StringReader;
 import java.io.Reader;
 import java.util.Optional;
-import org.kframework.debugger.KDebug;
-import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.modes.DebugMode.Command;
 
 
 
 import static org.kframework.krun.modes.DebugMode.Commands.*;
 public class DebuggerCommandParser {
-    public static Command parseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws NumberFormatException, ParseException
+    public static Command parseCommand(String command) throws NumberFormatException, ParseException
     {
         DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
-        return parser.parseCommand(session, compiledDef);
+        return parser.parseCommand();
     }
 
 }
@@ -56,17 +54,17 @@ TOKEN: /*RESERVED TOKENS */
 }
 
 
-Command command(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
+Command command() throws NumberFormatException:
 {
     int stepCount = 1;
     Integer stateNum = null;
     Integer configurationNum = null;
 }
 {
-        <STEP> (stepCount = parseNum())? {return new StepCommand(debugSession, compiledDef, stepCount);}
+        <STEP> (stepCount = parseNum())? {return new StepCommand(stepCount);}
     |   LOOKAHEAD(3)
-        <PEEK> (stateNum = parseNum()) (configurationNum = parseNum()) {return new PeekCommand(debugSession, compiledDef, Optional.of(stateNum), Optional.of(configurationNum));}
-    |   <PEEK> (configurationNum = parseNum()) {return new PeekCommand(debugSession, compiledDef, Optional.of(stateNum), Optional.of(configurationNum));}
+        <PEEK> (stateNum = parseNum()) (configurationNum = parseNum()) {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
+    |   <PEEK> (configurationNum = parseNum())? {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
     | <BACKSTEP> (<NUMBER>)?
     | <JUMPTO> <NUMBER>
     | <CHECKPOINT> <NUMBER>
@@ -74,12 +72,12 @@ Command command(KDebug debugSession, CompiledDefinition compiledDef) throws Numb
     | <RESUME>
 }
 
-Command parseCommand(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
+Command parseCommand() throws NumberFormatException:
 {
     Command command;
 }
 {
-    command = command(debugSession, compiledDef) ((<NEWLINE>)? | (<EOF>)?) {return command;}
+    command = command() ((<NEWLINE>)+ | (<EOF>)) {return command;}
 }
 
 

@@ -17,43 +17,40 @@ import static org.kframework.krun.KRun.*;
  */
 public class Commands {
 
-    public static class StepCommand extends Command {
+    public static class StepCommand implements Command {
 
         private int stepCount;
 
-        public StepCommand(KDebug session, CompiledDefinition compiledDefinition, int stepCount) {
-            super(session, compiledDefinition);
+        public StepCommand(int stepCount) {
             this.stepCount = stepCount;
         }
 
         @Override
-        public void run() {
-            debugSession.step(stepCount);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            session.step(stepCount);
             System.out.println(stepCount + " Step(s) Taken");
         }
     }
 
-    public static class PeekCommand extends Command {
+    public static class PeekCommand implements Command {
 
         private Optional<Integer> stateNum;
 
         private Optional<Integer> configurationNum;
 
-        public PeekCommand(KDebug debugSession, CompiledDefinition compiledDef, Optional<Integer> stateNum, Optional<Integer> configurationNum) {
-            super(debugSession, compiledDef);
+        public PeekCommand(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
             this.stateNum = stateNum;
             this.configurationNum = configurationNum;
         }
 
         @Override
-        public void run() {
-            if (stateNum == SHOW_CURRENT_STATE_FLAG) {
-                DebuggerState currentState = debugSession.getActiveState();
-                if (configurationNum == SHOW_CURRENT_STATE_FLAG || configurationNum == currentState.getStepNum()) {
-                    prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), currentState.getCurrentK());
-                    return;
-                }
-
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            DebuggerState requestedState = session.peek(stateNum, configurationNum);
+            if (requestedState != null) {
+                prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), requestedState.getCurrentK());
+            }
+            else {
+                System.out.println("Requested State/Configuration Unreachable");
             }
         }
     }

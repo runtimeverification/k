@@ -86,8 +86,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             try {
                 System.out.println();
                 String input = reader.readLine("KDebug>");
-                Command command = parseCommand(input, debugger, compiledDefinition);
-                command.run();
+                Command command = parseCommand(input);
+                command.runCommand(debugger, compiledDefinition);
             } catch (ParseException parseException) {
                 System.out.println(parseException.getMessage());
             } catch (NumberFormatException numberException) {
