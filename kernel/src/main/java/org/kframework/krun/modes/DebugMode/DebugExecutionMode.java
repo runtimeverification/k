@@ -23,15 +23,18 @@ import org.kframework.kore.K;
 import org.kframework.krun.KRunDebuggerOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.utils.debugparser.DebuggerCommandParser;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.kframework.krun.KRun.*;
+import static org.kframework.krun.modes.DebugMode.Commands.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -171,10 +174,35 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 //            }
 //        }
 //    }
+    private ConsoleReader getConsoleReader() {
+        ConsoleReader reader;
+        try {
+            reader = new ConsoleReader();
+        } catch (IOException e) {
+            throw KEMException.internalError("IO error detected interacting with console", e);
+        }
+        reader.setBellEnabled(false);
 
+        List<Completor> argCompletor = new LinkedList<Completor>();
+        argCompletor.add(new SimpleCompletor(new String[]{"help",
+                "exit", "step", "jump-to", "back-step", "resume", "run"}));
+        argCompletor.add(new FileNameCompletor());
+        List<Completor> completors = new LinkedList<Completor>();
+        completors.add(new ArgumentCompletor(argCompletor));
+        reader.addCompletor(new MultiCompletor(completors));
+        return reader;
+    }
+
+    private static Runnable parseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws Exception
+    {
+        DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
+        return parser.command(session, compiledDef);
+    }
 
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
-        return null;
+        KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
+        ConsoleReader reader = getConsoleReader();
+
     }
 }

@@ -1,29 +1,30 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 // Represents the grammar accepted by the Debugger TUI.
 
+options {
+  STATIC = false;
+  UNICODE_INPUT = true;
+  SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+}
+
 PARSER_BEGIN(DebuggerCommandParser)
 
 package org.kframework.utils.debugparser;
 
 import java.io.StringReader;
 import java.io.Reader;
+import org.kframework.debugger.KDebug;
+import org.kframework.kompile.CompiledDefinition;
 
+
+import static org.kframework.krun.modes.DebugMode.Commands.*;
 public class DebuggerCommandParser {
-
-
-    public static void main(String args[])
+    public static RunnableparseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws NumberFormatException
     {
-        try
-        {
-              DebuggerCommandParser parser = new DebuggerCommandParser(System.in);
-              parser.command();
-              //command.run();
-        }
-        catch(Exception e)
-        {
-              e.printStackTrace();
-        }
+        DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
+        return parser.command(session, compiledDef);
     }
+
 }
 PARSER_END(DebuggerCommandParser)
 
@@ -51,13 +52,13 @@ TOKEN: /*RESERVED TOKENS */
 }
 
 
-void command() :
+Runnable command(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
 {
     int stepNum = 1;
 }
 {
-      <STEP> <NUMBER>
-    | <BACKSTEP> <NUMBER>
+      <STEP> (stepNum = parseNum())? {return new StepCommand(stepNum, debugSession, compiledDef);}
+    | <BACKSTEP> (<NUMBER>)?
     | <JUMPTO> <NUMBER>
     | <CHECKPOINT> <NUMBER>
     | <QUIT>
