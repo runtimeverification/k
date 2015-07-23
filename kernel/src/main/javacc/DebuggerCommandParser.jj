@@ -17,12 +17,13 @@ import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 
 
+
 import static org.kframework.krun.modes.DebugMode.Commands.*;
 public class DebuggerCommandParser {
-    public static RunnableparseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws NumberFormatException
+    public static Runnable parseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws NumberFormatException, ParseException
     {
         DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
-        return parser.command(session, compiledDef);
+        return parser.parseCommand(session, compiledDef);
     }
 
 }
@@ -34,7 +35,6 @@ SKIP :
     " "
     | "\t"
     | "\r"
-    | "\n"
 }
 
 
@@ -48,6 +48,7 @@ TOKEN: /*RESERVED TOKENS */
    |  <RESUME: "resume">
    |  <NUMBER: (["0" - "9"])+>
    |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
+   |  <NEWLINE : "\n" | "\r\n">
 
 }
 
@@ -63,6 +64,14 @@ Runnable command(KDebug debugSession, CompiledDefinition compiledDef) throws Num
     | <CHECKPOINT> <NUMBER>
     | <QUIT>
     | <RESUME>
+}
+
+Runnable parseCommand(KDebug debugSession, CompiledDefinition compiledDef) throws NumberFormatException:
+{
+    Runnable command;
+}
+{
+    command = command(debugSession, compiledDef) ((<NEWLINE>)? | (<EOF>)?) {return command;}
 }
 
 

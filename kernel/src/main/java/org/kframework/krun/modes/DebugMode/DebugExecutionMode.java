@@ -24,6 +24,7 @@ import org.kframework.krun.KRunDebuggerOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.utils.debugparser.DebuggerCommandParser;
+import org.kframework.utils.debugparser.ParseException;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import static org.kframework.krun.KRun.*;
 import static org.kframework.krun.modes.DebugMode.Commands.*;
+import static org.kframework.utils.debugparser.DebuggerCommandParser.parseCommand;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -193,16 +195,29 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         return reader;
     }
 
-    private static Runnable parseCommand(String command, KDebug session, CompiledDefinition compiledDef) throws Exception
-    {
-        DebuggerCommandParser parser = new DebuggerCommandParser(new StringReader(command));
-        return parser.command(session, compiledDef);
-    }
 
     @Override
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval);
         ConsoleReader reader = getConsoleReader();
+
+        while (true) {
+            try {
+            System.out.println();
+            String input = reader.readLine("KDebug>");
+            Runnable command = parseCommand(input, debugger, compiledDefinition);
+            command.run();
+            } catch (ParseException parseException) {
+                System.out.println(parseException.getMessage());
+            } catch (NumberFormatException numberException) {
+                System.out.println(numberException.getMessage());
+            } catch (IOException inputException) {
+                System.out.println(inputException.getMessage());
+            } catch (Exception e) {
+                System.out.println("Problem Occured");
+                return null;
+            }
+        }
 
     }
 }

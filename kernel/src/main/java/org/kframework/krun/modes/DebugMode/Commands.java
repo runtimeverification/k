@@ -8,23 +8,37 @@ import org.kframework.kompile.CompiledDefinition;
  */
 public class Commands {
 
-    public static class StepCommand implements Runnable {
+    public static class StepCommand extends Command {
 
         private int stepCount;
 
-        private KDebug debugSession;
-
-        private CompiledDefinition compiledDef;
-
-        public StepCommand(int stepCount, KDebug debugSession, CompiledDefinition compiledDef) {
+        public StepCommand(KDebug session, CompiledDefinition compiledDefinition, int stepCount) {
+            super(session, compiledDefinition);
             this.stepCount = stepCount;
-            this.debugSession = debugSession;
-            this.compiledDef = compiledDef;
         }
 
         @Override
         public void run() {
-            System.out.println("Step Called");
+            debugSession.step(stepCount);
+            System.out.println(stepCount + " Step(s) Taken");
+        }
+    }
+
+    public static class PeekCommand extends Command {
+
+        private int stateNum;
+
+        private int stepNum;
+
+        public PeekCommand(KDebug debugSession, CompiledDefinition compiledDef, int stepNum) {
+            super(debugSession, compiledDef);
+            this.stepNum = stepNum;
+            this.stateNum = -1;
+        }
+
+        @Override
+        public void run() {
+
         }
     }
 }
