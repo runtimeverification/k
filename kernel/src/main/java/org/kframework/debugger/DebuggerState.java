@@ -2,6 +2,7 @@
 package org.kframework.debugger;
 
 import org.kframework.kore.K;
+import org.kframework.krun.tools.Debugger;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -35,9 +36,16 @@ public class DebuggerState {
     }
 
     public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
-        this.checkpointMap = checkpointMap;
+        this.checkpointMap = new TreeMap<>(checkpointMap);
         this.currentK = currentK;
         this.stepNum = stepNum;
+    }
+
+    public DebuggerState(DebuggerState copyState) {
+        this.checkpointMap = new TreeMap<>(copyState.getCheckpointMap());
+        this.currentK = copyState.getCurrentK();
+        this.stepNum = copyState.getStepNum();
+
     }
 
     public K getCurrentK() {

@@ -1,10 +1,19 @@
 package org.kframework.krun.modes.DebugMode;
 
+import org.kframework.backend.unparser.OutputModes;
+import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 
+import java.util.Optional;
+
+import static org.kframework.krun.KRun.*;
+
 /**
- * Created by manasvi on 7/22/15.
+ * Created by Manasvi on 7/22/15.
+ * <p>
+ * Classes concerned with TUI commands go under this class.
+ * Commands must extend {@link org.kframework.krun.modes.DebugMode.Command}.
  */
 public class Commands {
 
@@ -26,19 +35,26 @@ public class Commands {
 
     public static class PeekCommand extends Command {
 
-        private int stateNum;
+        private Optional<Integer> stateNum;
 
-        private int stepNum;
+        private Optional<Integer> configurationNum;
 
-        public PeekCommand(KDebug debugSession, CompiledDefinition compiledDef, int stepNum) {
+        public PeekCommand(KDebug debugSession, CompiledDefinition compiledDef, Optional<Integer> stateNum, Optional<Integer> configurationNum) {
             super(debugSession, compiledDef);
-            this.stepNum = stepNum;
-            this.stateNum = -1;
+            this.stateNum = stateNum;
+            this.configurationNum = configurationNum;
         }
 
         @Override
         public void run() {
+            if (stateNum == SHOW_CURRENT_STATE_FLAG) {
+                DebuggerState currentState = debugSession.getActiveState();
+                if (configurationNum == SHOW_CURRENT_STATE_FLAG || configurationNum == currentState.getStepNum()) {
+                    prettyPrint(compiledDef, OutputModes.PRETTY, s -> System.out.println(s), currentState.getCurrentK());
+                    return;
+                }
 
+            }
         }
     }
 }

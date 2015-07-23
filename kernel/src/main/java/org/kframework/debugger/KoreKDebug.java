@@ -168,4 +168,33 @@ public class KoreKDebug implements KDebug {
     public DebuggerState getActiveState() {
         return activeState;
     }
+
+    private DebuggerState createCopyState(DebuggerState copyState) {
+        DebuggerState newState = new DebuggerState(activeState);
+        stateList.add(newState);
+        return newState;
+    }
+
+    @Override
+    public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
+        if (stateNum.isPresent()) {
+            int concreteStateNum = stateNum.get();
+            if (concreteStateNum < 0 || concreteStateNum >= stateList.size()) {
+                return null;
+            }
+            DebuggerState requestedState = stateList.get(concreteStateNum);
+            if (configurationNum.isPresent()) {
+                Integer concreteConfigurationNum = configurationNum.get();
+                if (concreteConfigurationNum < 0) {
+                    return null;
+                }
+                DebuggerState tempState = createCopyState(requestedState);
+                activeState = tempState;
+                DebuggerState resultantState = jumpTo(concreteConfigurationNum);
+                return resultantState;
+            }
+            return requestedState;
+        }
+        return activeState;
+    }
 }

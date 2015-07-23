@@ -87,8 +87,22 @@ public interface KDebug {
 
     /**
      * Returns the state the activated state the debugger is in at the moment
+     *
      * @return The DebuggerState object corresponding to the Active State
      */
     public DebuggerState getActiveState();
+
+    /**
+     * Allows the user to peek at a particular configuration/state, without changing the current state.
+     * <p>
+     * Return null if configuration not present.
+     *
+     * @param stateNum         The state to peek at. Empty for current state.
+     * @param configurationNum The configuration to peek it. Empty to look at current configuration.
+     *                         That is, if called with both empty state and configuration numbers, will
+     *                         return the current state.
+     * @return
+     */
+    public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum);
 
 }
