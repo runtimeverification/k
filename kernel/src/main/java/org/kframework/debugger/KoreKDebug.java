@@ -19,7 +19,6 @@ import java.util.TreeMap;
 public class KoreKDebug implements KDebug {
 
     private final int DEFAULT_ID = 0;
-    private final int DEFAULT_CHECKPOINT_SIZE = 1000000;
     private List<DebuggerState> stateList;
     private DebuggerState activeState;
     private Rewriter rewriter;
@@ -35,7 +34,6 @@ public class KoreKDebug implements KDebug {
      */
     public KoreKDebug(K initialK, Rewriter rewriter, int checkpointInterval) {
         this.stateList = new ArrayList<>();
-        this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
         this.checkpointInterval = checkpointInterval;
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
