@@ -154,14 +154,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 byte[] buffer = new byte[8192];
                 try {
                     while (true) {
-                        if (p2.getInputStream().available() > 0) {
-                            count = p2.getInputStream().read(buffer);
-                            if (count < 0)
-                                break;
-                            System.out.write(buffer, 0, count);
-                        } else {
+                        count = p2.getInputStream().read(buffer);
+                        if (count < 0)
+                            break;
+                        System.out.write(buffer, 0, count);
+                        if (p2.getInputStream().available() == 0)
                             Thread.sleep(100);
-                        }
                     }
                 } catch (IOException | InterruptedException e) {}
             });
@@ -170,14 +168,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 byte[] buffer = new byte[8192];
                 try {
                     while (true) {
-                        if (p2.getErrorStream().available() > 0) {
-                            count = p2.getErrorStream().read(buffer);
-                            if (count < 0)
-                                break;
-                            System.err.write(buffer, 0, count);
-                        } else {
+                        count = p2.getErrorStream().read(buffer);
+                        if (count < 0)
+                            break;
+                        System.err.write(buffer, 0, count);
+                        if (p2.getErrorStream().available() == 0)
                             Thread.sleep(100);
-                        }
                     }
                 } catch (IOException | InterruptedException e) {}
             });
@@ -187,8 +183,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
             exit = p2.waitFor();
             in.interrupt();
-            out.interrupt();
-            err.interrupt();
             in.join();
             out.join();
             err.join();

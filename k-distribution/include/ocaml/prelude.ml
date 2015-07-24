@@ -209,8 +209,8 @@ struct
     | [Set (s,_,_)] -> [String (print_sort s)]
     | _ -> raise Not_implemented
   let hook_getKLabel c lbl sort config ff = match c with
-      [k] -> match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom]
-    | _ -> raise Not_implemented
+      [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom])
+    | _ -> [Bottom]
   let hook_configuration c lbl sort config ff = match c with
       () -> config
     | _ -> raise Not_implemented

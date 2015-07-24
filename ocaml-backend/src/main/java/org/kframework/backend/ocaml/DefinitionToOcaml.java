@@ -91,6 +91,7 @@ public class DefinitionToOcaml implements Serializable {
         this.files = files;
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
+        this.sortHooks = defSortHooks;
     }
     public static final boolean ocamlopt = true;
     public static final boolean fastCompilation = false;
@@ -111,7 +112,9 @@ public class DefinitionToOcaml implements Serializable {
             "  with Stuck c' -> c'\n";
 
     public static final ImmutableSet<String> hookNamespaces;
-    public static final ImmutableMap<String, Function<String, String>> sortHooks;
+    private transient ImmutableMap<String, Function<String, String>> sortHooks;
+    public static final ImmutableMap<String, Function<String, String>> defSortHooks;
+    public static final ImmutableMap<String, Function<String, String>> userSortHooks;
     public static final ImmutableMap<String, Function<Sort, String>> sortVarHooks;
     public static final ImmutableMap<String, Function<Sort, String>> predicateRules;
 
@@ -125,13 +128,23 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableMap.Builder<String, Function<String, String>> builder = ImmutableMap.builder();
         builder.put("BOOL.Bool", s -> "(Bool " + s + ")");
+        builder.put("INT.Int", s -> "(Int (Z.from_string \"" +  s + "\"))");
+        builder.put("FLOAT.Float", s -> {
+            Pair<BigFloat, Integer> f = FloatBuiltin.parseKFloat(s);
+            return "(round_to_range(Float ((FR.from_string_prec_base " + f.getLeft().precision() + " GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
+        });
+        builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
+        userSortHooks = builder.build();
+
+        builder = ImmutableMap.builder();
+        builder.put("BOOL.Bool", s -> "(Bool " + s + ")");
         builder.put("INT.Int", s -> "(Lazy.force " + encodeStringToIntConst(s) + ")");
         builder.put("FLOAT.Float", s -> {
             Pair<BigFloat, Integer> f = FloatBuiltin.parseKFloat(s);
             return "(round_to_range(Float ((FR.from_string_prec_base " + f.getLeft().precision() + " GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
         });
         builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
-        sortHooks = builder.build();
+        defSortHooks = builder.build();
     }
 
     static {
@@ -171,6 +184,7 @@ public class DefinitionToOcaml implements Serializable {
         anywhereKLabels = serialized.anywhereKLabels;
         expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
         klabels = serialized.klabels;
+        sortHooks = userSortHooks;
     }
 
     public void initialize(CompiledDefinition def) {
@@ -519,7 +533,7 @@ public class DefinitionToOcaml implements Serializable {
         for (String i : integerConstants) {
             sb.append("let ");
             encodeStringToIntConst(sb, i);
-            sb.append(" = lazy (Int (Z.from_string \"" + i + "\"))\n");
+            sb.append(" = lazy (Int (Z.from_string \"").append(i).append("\"))\n");
         }
         return sb.toString();
     }

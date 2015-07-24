@@ -115,15 +115,11 @@ public class GenerateSortPredicateRules {
      * Takes a rule representing a predicate of one sort and promotes it to a rule representing a predicate for one of its supersorts
      */
     private Rule promotePredicate(Rule r, Sort s) {
-        if (r.body() instanceof KApply) {
-            return Rule(KApply(KLabel("is" + s.name()), ((KApply) r.body()).klist()), r.requires(), r.ensures(), r.att());
-        } else if (r.body() instanceof KRewrite) {
-            KRewrite rw = (KRewrite) r.body();
-            if (rw.left() instanceof KApply) {
-                return Rule(KRewrite(KApply(KLabel("is" + s.name()), ((KApply) rw.left()).klist()), rw.right()), r.requires(), r.ensures(), r.att());
-            } else {
-                throw new IllegalArgumentException("not a predicate rule");
-            }
+        K left = RewriteToTop.toLeft(r.body());
+        K right = RewriteToTop.toRight(r.body());
+        if (left instanceof KApply) {
+            // the case where a rewrite applies unconditionally may be dependent on the klabel, so we hoist the rhs into the side condition
+            return Rule(KRewrite(KApply(KLabel("is" + s.name()), ((KApply) left).klist()), BooleanUtils.TRUE), BooleanUtils.and(r.requires(), right), r.ensures(), r.att());
         } else {
             throw new IllegalArgumentException("not a predicate rule");
         }
