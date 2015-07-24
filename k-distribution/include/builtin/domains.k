@@ -367,7 +367,7 @@ module STRING-SYNTAX
   //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
   //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
   syntax String [hook(#STRING)]
-  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][u][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
+  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
 endmodule
 
 module STRING
