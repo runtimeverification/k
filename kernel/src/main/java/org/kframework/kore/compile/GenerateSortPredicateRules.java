@@ -68,7 +68,7 @@ public class GenerateSortPredicateRules {
                 int i = 0;
                 List<NonTerminal> nts = stream(p.items()).filter(pi -> pi instanceof NonTerminal).map(pi -> (NonTerminal) pi).collect(Collectors.toList());
                 for (NonTerminal nt : nts) {
-                    KVariable v = KVariable("K" + i++);
+                    KVariable v = KVariable("K" + i++, Att().add(Attribute.SORT_KEY, nt.sort().name()));
                     klist.add(v);
                     side.add(KApply(KLabel("is" + nt.sort().name()), v));
                 }

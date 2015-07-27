@@ -110,6 +110,9 @@ struct
   let hook_keys c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> [Set (Constants.setSort, Constants.setConcatLabel,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
     | _ -> raise Not_implemented
+  let hook_in_keys c lbl sort config ff = match c with
+      (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
+    | _ -> raise Not_implemented
   let hook_values c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> [List (Constants.listSort, Constants.listConcatLabel,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
     | _ -> raise Not_implemented

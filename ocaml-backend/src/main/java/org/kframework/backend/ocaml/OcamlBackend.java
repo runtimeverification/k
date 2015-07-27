@@ -43,10 +43,17 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
-            Process ocamlopt = files.getProcessBuilder()
-                    .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
-                            "-safe-string", "-w", "-26-11",
-                            "constants.ml", "prelude.ml", "def.ml")
+            ProcessBuilder pb = files.getProcessBuilder();
+            if (DefinitionToOcaml.ocamlopt) {
+                pb.command("ocamlopt.opt", "-c", "-g", "-I", "+gmp",
+                        "-safe-string", "-w", "-26-11",
+                        "constants.ml", "prelude.ml", "def.ml", "-inline", "20", "-nodynlink");
+            } else {
+                pb.command("ocamlc.opt", "-c", "-g", "-I", "+gmp",
+                        "-safe-string", "-w", "-26-11",
+                        "constants.ml", "prelude.ml", "def.ml");
+            }
+            Process ocamlopt = pb
                     .directory(files.resolveKompiled("."))
                     .inheritIO()
                     .start();

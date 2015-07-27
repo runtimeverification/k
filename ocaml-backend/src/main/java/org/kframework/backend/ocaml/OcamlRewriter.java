@@ -112,7 +112,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                         files.resolveKompiled("constants.cmx").getAbsolutePath(), files.resolveKompiled("prelude.cmx").getAbsolutePath(),
                         files.resolveKompiled("def.cmx").getAbsolutePath(),
                         "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        name);
+                        name, "-inline", "20", "-nodynlink");
             } else {
                 pb = pb.command("ocamlc.opt", "-g", "-o", "a.out", "gmp.cma", "str.cma", "unix.cma", "-safe-string",
                         files.resolveKompiled("constants.cmo").getAbsolutePath(), files.resolveKompiled("prelude.cmo").getAbsolutePath(),

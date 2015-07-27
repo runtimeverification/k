@@ -114,7 +114,7 @@ public class DeconstructIntegerAndFloatLiterals {
                     //lhs
                     if (k.sort().equals(Sorts.Int()) || k.sort().equals(Sorts.Float())) {
                         KVariable var = newDotVariable();
-                        state.add(KApply(KLabel("_==K_"), var, k));
+                        state.add(KApply(KLabel("_==" + k.sort().name() + "_"), var, k));
                         return var;
                     }
                 }
