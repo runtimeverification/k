@@ -696,7 +696,8 @@ public class DefinitionToOcaml implements Serializable {
                             sb, functionName, RuleType.FUNCTION);
                     sb.append("| _ -> raise (Stuck [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))])\n");
                     if (constants.contains(functionLabel)) {
-                        sb.append("let const");
+                        sb.append(conn.equals("let rec ") ? "and " : conn);
+                        sb.append("const");
                         encodeStringToAlphanumeric(sb, functionLabel.name());
                         sb.append(" : k Lazy.t = lazy (");
                         encodeStringToFunction(sb, functionLabel);
