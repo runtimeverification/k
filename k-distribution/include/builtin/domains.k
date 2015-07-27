@@ -144,6 +144,7 @@ module LIST
   /*@ Construct an empty List: */
   syntax List ::= ".List"                 [function, hook(LIST.unit), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
+  syntax List ::= "(" List ")" [bracket]
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)             [function, hook(LIST.element), smtlib(smt_seq_elem)]
 
