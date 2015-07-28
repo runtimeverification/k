@@ -45,11 +45,11 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
             ProcessBuilder pb = files.getProcessBuilder();
             if (DefinitionToOcaml.ocamlopt) {
-                pb.command("ocamlopt.opt", "-c", "-g", "-I", "+gmp",
+                pb.command("ocamlopt.opt", "-c", "-g", "-I", "+gmp", "-I", "+zarith",
                         "-safe-string", "-w", "-26-11",
                         "constants.ml", "prelude.ml", "def.ml", "-inline", "20", "-nodynlink");
             } else {
-                pb.command("ocamlc.opt", "-c", "-g", "-I", "+gmp",
+                pb.command("ocamlc.opt", "-c", "-g", "-I", "+gmp", "-I", "+zarith",
                         "-safe-string", "-w", "-26-11",
                         "constants.ml", "prelude.ml", "def.ml");
             }

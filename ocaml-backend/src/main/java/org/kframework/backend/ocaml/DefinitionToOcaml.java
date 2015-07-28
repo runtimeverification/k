@@ -131,10 +131,10 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableMap.Builder<String, Function<String, String>> builder = ImmutableMap.builder();
         builder.put("BOOL.Bool", s -> "(Bool " + s + ")");
-        builder.put("INT.Int", s -> "(Int (Z.from_string \"" +  s + "\"))");
+        builder.put("INT.Int", s -> "(Int (Z.of_string \"" +  s + "\"))");
         builder.put("FLOAT.Float", s -> {
             Pair<BigFloat, Integer> f = FloatBuiltin.parseKFloat(s);
-            return "(round_to_range(Float ((FR.from_string_prec_base " + f.getLeft().precision() + " GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
+            return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.getLeft().precision() + " Gmp.GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
         });
         builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
         userSortHooks = builder.build();
@@ -144,7 +144,7 @@ public class DefinitionToOcaml implements Serializable {
         builder.put("INT.Int", s -> "(Lazy.force " + encodeStringToIntConst(s) + ")");
         builder.put("FLOAT.Float", s -> {
             Pair<BigFloat, Integer> f = FloatBuiltin.parseKFloat(s);
-            return "(round_to_range(Float ((FR.from_string_prec_base " + f.getLeft().precision() + " GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
+            return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.getLeft().precision() + " Gmp.GMP_RNDN 10 \"" + f.getLeft().toString() + "\"), " + f.getRight() + ", " + f.getLeft().precision() + ")))";
         });
         builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
         defSortHooks = builder.build();
@@ -254,7 +254,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
         sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" in output_string out (print_k(try(run(");
         convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
         sb.append(") (").append(depth).append(")) with Stuck c' -> c'))");
@@ -263,7 +263,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
@@ -275,7 +275,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\nopen Def\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
@@ -287,7 +287,6 @@ public class DefinitionToOcaml implements Serializable {
 
     public String constants() {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Gmp\n");
         sb.append("type sort = \n");
         if (fastCompilation) {
             sb.append("Sort of string\n");
@@ -421,7 +420,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (List (_,k1,l1)), (List (_,k2,l2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then compare_klist l1 l2 else v\n" +
                 "    | (Set (_,k1,s1)), (Set (_,k2,s2)) -> let v = Pervasives.compare k1 k2 in if v = 0 then (KSet.compare) s1 s2 else v\n" +
                 "    | (Int i1), (Int i2) -> Z.compare i1 i2\n" +
-                "    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> let v = e2 - e1 in if v = 0 then let v2 = p2 - p1 in if v2 = 0 then FR.compare f1 f2 else v2 else v\n" +
+                "    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> let v = e2 - e1 in if v = 0 then let v2 = p2 - p1 in if v2 = 0 then Gmp.FR.compare f1 f2 else v2 else v\n" +
                 "    | (String s1), (String s2) -> Pervasives.compare s1 s2\n" +
                 "    | (Bool b1), (Bool b2) -> if b1 = b2 then 0 else if b1 then -1 else 1\n" +
                 "    | Bottom, Bottom -> 0\n");
@@ -534,8 +533,17 @@ public class DefinitionToOcaml implements Serializable {
         for (String i : integerConstants) {
             sb.append("let ");
             encodeStringToIntConst(sb, i);
-            sb.append(" = lazy (Int (Z.from_string \"").append(i).append("\"))\n");
+            sb.append(" = lazy (Int (Z.of_string \"").append(i).append("\"))\n");
         }
+        forEachKLabel(t -> {
+            if (t._2() == 0) {
+                sb.append("let const");
+                encodeStringToAlphanumeric(sb, t._1().name());
+                sb.append(" = KApply0(");
+                encodeStringToIdentifier(sb, t._1());
+                sb.append(")\n");
+            }
+        });
         return sb.toString();
     }
 
@@ -558,7 +566,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("            | List of sort * klabel * t list\n");
         sb.append("            | Set of sort * klabel * s\n");
         sb.append("            | Int of Z.t\n");
-        sb.append("            | Float of FR.t * int * int\n");
+        sb.append("            | Float of Gmp.FR.t * int * int\n");
         sb.append("            | String of string\n");
         sb.append("            | Bool of bool\n");
         sb.append("            | Bottom\n");
@@ -584,7 +592,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String definition() {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Gmp\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\n");
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
@@ -1459,13 +1467,19 @@ public class DefinitionToOcaml implements Serializable {
                     applyTuple(k.klist().items());
                     sb.append(")");
                 } else {
-                    sb.append("KApply").append(k.klist().size()).append("(");
-                    apply(k.klabel());
-                    if (k.klist().size() > 0) {
-                        sb.append(",");
-                        applyTuple(k.klist().items());
+                    if (k.klist().size() == 0 && rhs) {
+                        //intern constants for faster comparison
+                        sb.append("const");
+                        encodeStringToAlphanumeric(sb, k.klabel().name());
+                    } else {
+                        sb.append("KApply").append(k.klist().size()).append("(");
+                        apply(k.klabel());
+                        if (k.klist().size() > 0) {
+                            sb.append(",");
+                            applyTuple(k.klist().items());
+                        }
+                        sb.append(")");
                     }
-                    sb.append(")");
                 }
             }
             return null;

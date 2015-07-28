@@ -1,4 +1,3 @@
-open Gmp
 open Constants
 
 module KMap = Map.Make(K)
@@ -31,7 +30,7 @@ let rec list_range (c: k list * int * int) : k list = match c with
 | (head :: tail, 0, len) -> head :: list_range(tail, 0, len - 1)
 | (_ :: tail, n, len) -> list_range(tail, n - 1, len)
 | ([], _, _) -> raise(Failure "list_range")
-let float_to_string (f: FR.t) : string = if FR.is_nan f then "NaN" else if FR.is_inf f then if FR.sgn f > 0 then "Infinity" else "-Infinity" else FR.to_string_base_digits GMP_RNDN 10 0 f
+let float_to_string (f: Gmp.FR.t) : string = if Gmp.FR.is_nan f then "NaN" else if Gmp.FR.is_inf f then if Gmp.FR.sgn f > 0 then "Infinity" else "-Infinity" else Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f
 let k_of_list lbl l = match l with 
   [] -> denormalize (KApply((unit_for lbl),[]))
 | hd :: tl -> List.fold_left (fun list el -> denormalize (KApply(lbl, [list] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (denormalize (KApply((el_for lbl),[hd]))) tl
@@ -65,10 +64,10 @@ let print_subst (out: out_channel) (c: k Subst.t) : unit =
 let emin (exp: int) (prec: int) : int = (- (1 lsl (exp - 1))) + 4 - prec
 let emax (exp: int) : int = 1 lsl (exp - 1)
 let round_to_range (c: kitem) : kitem = match c with 
-    Float(f,e,p) -> let (cr, t) = (FR.check_range p GMP_RNDN (emin e p) (emax e) f) in Float((FR.subnormalize cr t GMP_RNDN),e,p)
+    Float(f,e,p) -> let (cr, t) = (Gmp.FR.check_range p Gmp.GMP_RNDN (emin e p) (emax e) f) in Float((Gmp.FR.subnormalize cr t Gmp.GMP_RNDN),e,p)
   | _ -> raise (Invalid_argument "round_to_range")
 let curr_fd : Z.t ref = ref (Z.of_int 3)
-let file_descriptors = let m = Hashtbl.create 5 in Hashtbl.add m (Z.from_int 0) Unix.stdin; Hashtbl.add m (Z.from_int 1) Unix.stdout; Hashtbl.add m (Z.from_int 2) Unix.stderr; m
+let file_descriptors = let m = Hashtbl.create 5 in Hashtbl.add m (Z.of_int 0) Unix.stdin; Hashtbl.add m (Z.of_int 1) Unix.stdout; Hashtbl.add m (Z.of_int 2) Unix.stderr; m
 let default_file_perm = let v = Unix.umask 0 in let _ = Unix.umask v in (lnot v) land 0o777
 let convert_open_flags (s: string) : Unix.open_flag list = 
   match s with 
@@ -76,6 +75,14 @@ let convert_open_flags (s: string) : Unix.open_flag list =
     | "w" -> [Unix.O_WRONLY] 
     | "rw" -> [Unix.O_RDWR]
     | _ -> raise (Invalid_argument "convert_open_flags")
+let to_string_base (base: int) (i: Z.t) : string = match base with
+  10 -> Z.format "%d" i
+| 2 -> Z.format "%b" i
+| 8 -> Z.format "%o" i
+| 16 -> Z.format "%x" i
+| _ -> raise Not_implemented
+let to_zarith (i: Gmp.Z.t) : Z.t = Z.of_string (Gmp.Z.to_string i)
+let from_zarith (i: Z.t) : Gmp.Z.t = Gmp.Z.from_string (Z.to_string i)
 
 module MAP =
 struct
@@ -241,7 +248,7 @@ struct
       [Int i] -> Unix.close (Hashtbl.find file_descriptors i); []
     | _ -> raise Not_implemented
   let hook_getc c lbl sort config ff = match c with
-      [Int i] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.from_int (Char.code (Bytes.get b 0)))]
+      [Int i] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.of_int (Char.code (Bytes.get b 0)))]
     | _ -> raise Not_implemented
   let hook_open c lbl sort config ff = match c with
       [String path], [String flags] -> 
@@ -347,13 +354,13 @@ struct
       [Int i] -> [String (Z.to_string i)]
     | _ -> raise Not_implemented
   let hook_string2int c lbl sort config ff = match c with
-      [String s] -> [Int (Z.from_string s)]
+      [String s] -> [Int (Z.of_string s)]
     | _ -> raise Not_implemented
   let hook_string2base c lbl sort config ff = match c with
-      [String s], [Int i] -> [Int (Z.from_string_base (Z.to_int i) s)]
+      [String s], [Int i] -> [Int (Z.of_string_base (Z.to_int i) s)]
     | _ -> raise Not_implemented
   let hook_base2string c lbl sort config ff = match c with
-      [Int i], [Int base] -> [String (Z.to_string_base (Z.to_int base) i)]
+      [Int i], [Int base] -> [String (to_string_base (Z.to_int base) i)]
     | _ -> raise Not_implemented
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
   let hook_float2string c lbl sort config ff = raise Not_implemented
@@ -371,22 +378,22 @@ end
 module INT =
 struct
   let hook_tmod c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.tdiv_r a b)]
+      [Int a], [Int b] -> [Int (Z.rem a b)]
     | _ -> raise Not_implemented
   let hook_add c lbl sort config ff = match c with
       [Int a], [Int b] -> [Int (Z.add a b)]
     | _ -> raise Not_implemented
   let hook_le c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) <= 0)]
+      [Int a], [Int b] -> [Bool (Z.leq a b)]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) = 0)]
+      [Int a], [Int b] -> [Bool (Z.equal a b)]
     | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) <> 0)]
+      [Int a], [Int b] -> [Bool (not (Z.equal a b))]
     | _ -> raise Not_implemented
   let hook_and c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.band a b)]
+      [Int a], [Int b] -> [Int (Z.logand a b)]
     | _ -> raise Not_implemented
   let hook_mul c lbl sort config ff = match c with
       [Int a], [Int b] -> [Int (Z.mul a b)]
@@ -395,34 +402,34 @@ struct
       [Int a], [Int b] -> [Int (Z.sub a b)]
     | _ -> raise Not_implemented
   let hook_tdiv c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.tdiv_q a b)]
+      [Int a], [Int b] -> [Int (Z.div a b)]
     | _ -> raise Not_implemented
   let hook_shl c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.mul_2exp a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.shift_left a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_lt c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) < 0)]
+      [Int a], [Int b] -> [Bool (Z.lt a b)]
     | _ -> raise Not_implemented
   let hook_ge c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) >= 0)]
+      [Int a], [Int b] -> [Bool (Z.geq a b)]
     | _ -> raise Not_implemented
   let hook_shr c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.fdiv_q_2exp a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.shift_right a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_gt c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Bool ((Z.compare a b) > 0)]
+      [Int a], [Int b] -> [Bool (Z.gt a b)]
     | _ -> raise Not_implemented
   let hook_pow c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.pow_ui a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (Z.pow a (Z.to_int b))]
     | _ -> raise Not_implemented
   let hook_xor c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.bxor a b)]
+      [Int a], [Int b] -> [Int (Z.logxor a b)]
     | _ -> raise Not_implemented
   let hook_or c lbl sort config ff = match c with
-      [Int a], [Int b] -> [Int (Z.bior a b)]
+      [Int a], [Int b] -> [Int (Z.logor a b)]
     | _ -> raise Not_implemented
   let hook_not c lbl sort config ff = match c with
-      [Int a] -> [Int (Z.bcom a)]
+      [Int a] -> [Int (Z.lognot a)]
     | _ -> raise Not_implemented
   let hook_abs c lbl sort config ff = match c with
       [Int a] -> [Int (Z.abs a)]
@@ -440,103 +447,103 @@ end
 module FLOAT =
 struct
   let hook_isNaN c lbl sort config ff = match c with
-      [Float (f,_,_)] -> [Bool (FR.is_nan f)]
+      [Float (f,_,_)] -> [Bool (Gmp.FR.is_nan f)]
     | _ -> raise Not_implemented
   let hook_maxValue c lbl sort config ff = match c with
       [Int prec], [Int exp] -> let e = Z.to_int exp and p = Z.to_int prec in
-        [round_to_range(Float ((FR.nexttoward (emin e p) (emax e) (FR.from_string_prec_base p GMP_RNDN 10 "inf") FR.zero),e,p))]
+        [round_to_range(Float ((Gmp.FR.nexttoward (emin e p) (emax e) (Gmp.FR.from_string_prec_base p Gmp.GMP_RNDN 10 "inf") Gmp.FR.zero),e,p))]
     | _ -> raise Not_implemented
   let hook_minValue c lbl sort config ff = match c with
       [Int prec], [Int exp] -> let e = Z.to_int exp and p = Z.to_int prec in
-        [round_to_range(Float ((FR.nexttoward (emin e p) (emax e) FR.zero (FR.from_string_prec_base p GMP_RNDN 10 "inf")),e,p))]
+        [round_to_range(Float ((Gmp.FR.nexttoward (emin e p) (emax e) Gmp.FR.zero (Gmp.FR.from_string_prec_base p Gmp.GMP_RNDN 10 "inf")),e,p))]
     | _ -> raise Not_implemented
   let hook_round c lbl sort config ff = match c with
       [Float (f,_,_)], [Int prec], [Int exp] ->
         [round_to_range (Float (f,(Z.to_int exp),(Z.to_int prec)))]
     | _ -> raise Not_implemented
   let hook_abs c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.abs_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.abs_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_ceil c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDU f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.rint_prec p Gmp.GMP_RNDU f),e,p))]
     | _ -> raise Not_implemented
   let hook_floor c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.rint_prec p GMP_RNDD f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.rint_prec p Gmp.GMP_RNDD f),e,p))]
     | _ -> raise Not_implemented
   let hook_acos c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.acos_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.acos_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_asin c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.asin_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.asin_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_atan c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.atan_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.atan_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_cos c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.cos_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.cos_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_sin c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.sin_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.sin_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_tan c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.tan_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.tan_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_exp c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.exp_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.exp_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_log c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.log_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.log_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_neg c lbl sort config ff = match c with
-      [Float (f,e,p)] -> [round_to_range(Float ((FR.neg_prec p GMP_RNDN f),e,p))]
+      [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.neg_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_add c lbl sort config ff = match c with
       [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
-        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.add_prec p1 GMP_RNDN f1 f2),e1,p1))]
+        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.add_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_sub c lbl sort config ff = match c with
       [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
-        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.sub_prec p1 GMP_RNDN f1 f2),e1,p1))]
+        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.sub_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_mul c lbl sort config ff = match c with
       [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
-        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.mul_prec p1 GMP_RNDN f1 f2),e1,p1))]
+        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.mul_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_div c lbl sort config ff = match c with
       [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
-        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.div_prec p1 GMP_RNDN f1 f2),e1,p1))]
+        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.div_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_pow c lbl sort config ff = match c with
       [Float (f1,e1,p1)], [Float (f2,e2,p2)]
-        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((FR.pow_prec p1 GMP_RNDN f1 f2),e1,p1))]
+        when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.pow_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_eq c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.equal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (Gmp.FR.equal f1 f2)]
     | _ -> raise Not_implemented
   let hook_lt c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.less f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (Gmp.FR.less f1 f2)]
     | _ -> raise Not_implemented
   let hook_le c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.lessequal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (Gmp.FR.lessequal f1 f2)]
     | _ -> raise Not_implemented
   let hook_gt c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.greater f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (Gmp.FR.greater f1 f2)]
     | _ -> raise Not_implemented
   let hook_ge c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (FR.greaterequal f1 f2)]
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)] -> [Bool (Gmp.FR.greaterequal f1 f2)]
     | _ -> raise Not_implemented
   let hook_precision c lbl sort config ff = match c with
-      [Float (_,_,p)] -> [Int (Z.from_int p)]
+      [Float (_,_,p)] -> [Int (Z.of_int p)]
     | _ -> raise Not_implemented
   let hook_exponentBits c lbl sort config ff = match c with
-      [Float (_,e,_)] -> [Int (Z.from_int e)]
+      [Float (_,e,_)] -> [Int (Z.of_int e)]
     | _ -> raise Not_implemented
   let hook_float2int c lbl sort config ff = match c with
-      [Float (f,_,_)] -> [Int (FR.to_z_f f)]
+      [Float (f,_,_)] -> [Int (to_zarith (Gmp.FR.to_z_f f))]
     | _ -> raise Not_implemented
   let hook_int2float c lbl sort config ff = match c with
       [Int i], [Int prec], [Int exp] -> 
-        [round_to_range(Float ((FR.from_z_prec (Z.to_int prec) GMP_RNDN i),(Z.to_int exp),(Z.to_int prec)))]
+        [round_to_range(Float ((Gmp.FR.from_z_prec (Z.to_int prec) Gmp.GMP_RNDN (from_zarith i)),(Z.to_int exp),(Z.to_int prec)))]
     | _ -> raise Not_implemented
   let hook_min c lbl sort config ff = raise Not_implemented
   let hook_max c lbl sort config ff = raise Not_implemented
