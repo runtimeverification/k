@@ -187,8 +187,6 @@ public class AbstractKMachine {
 
         @Override
         public CellCollection transform(CellCollection cellCollection) {
-            assert cellCollection.isConcreteCollection();
-
             boolean changed = false;
             CellCollection.Builder builder = CellCollection.builder(context.definition());
             for (CellCollection.Cell cell : cellCollection.cells().values()) {
