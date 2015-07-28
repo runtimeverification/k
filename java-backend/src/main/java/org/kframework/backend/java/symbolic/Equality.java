@@ -117,7 +117,7 @@ public class Equality implements Serializable {
             && leftHandSide.equals(rightHandSide);
     }
 
-    private boolean isFalse() {
+    public boolean isFalse() {
         return context.global().equalityOps.isFalse(this);
     }
 
@@ -191,6 +191,13 @@ public class Equality implements Serializable {
             Definition definition = definitionProvider.get();
             Term leftHandSide = equality.leftHandSide;
             Term rightHandSide = equality.rightHandSide;
+
+            if (leftHandSide.isGround() && leftHandSide.isNormal()
+                    && rightHandSide.isGround() && rightHandSide.isNormal()) {
+                return leftHandSide.hashCode() != rightHandSide.hashCode()
+                        || !leftHandSide.equals(rightHandSide);
+            }
+
             // TODO(YilongL): why do you want to build a false equality (i.e., determined by SymbolicUnifier) in the first place?
             if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom) {
                 return true;
