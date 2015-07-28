@@ -160,6 +160,15 @@ public class KRun implements Transformation<Void, Void> {
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
         }
+        if (options.io()) {
+            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
+            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
+        } else {
+            // TODO(daejunpark): support tty or have generic getStdinBuffer
+            String stdin = InitialConfigurationProvider.getStdinBuffer(true);
+            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
+            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
+        }
         return plugConfigVars(compiledDef, output);
     }
 

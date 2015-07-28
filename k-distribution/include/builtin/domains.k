@@ -524,21 +524,39 @@ module K-IO
                   | #ostream(Int)
   syntax Stream ::= "#noIO"
 
-  //TODO(dwightguth): add back support for stream cells
-/*
-  rule ListItem(#ostream(_))
+  configuration <stdin>  ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
+  configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
+//configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
+
+  rule [stdoutBufferFloat]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        `ListItem(F:Float) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#ostream(_))
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferInt]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
        `ListItem(I:Int) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#ostream(_))
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferString]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String S))
        `ListItem(S:String) => .List`
-       _:List [stdout, stderr]
+       _:List
+       </stdout>
+       // [stdout, stderr]
 
+  /*
   rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        `ListItem(F:Float) => .List`
        _:List [stdout, stderr]
@@ -548,55 +566,79 @@ module K-IO
   rule ListItem(#buffer(Buffer:String => Buffer +String S))
        `ListItem(S:String) => .List`
        _:List [stdout, stderr]
-
+  */
 
   // Send first char from the buffer to the server
-  rule ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
+  rule [stdoutWrite]:
+       <stdout>
+       ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
+       ListItem("on")
        ListItem(#buffer(S:String => ""))
        _:List
-    requires S =/=String "" [stdout, stderr]
+       </stdout>
+    requires S =/=String "" // [stdout, stderr]
 
   // read one character at a time until we read whitespace
-  rule ListItem(#parseInput(_:String, Delimiters:String))
+  rule [stdinGetc]:
+       <stdin>
+       ListItem(#parseInput(_:String, Delimiters:String))
        ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem("on")
        ListItem(#istream(N:Int))
-    requires findChar(S, Delimiters, 0) ==Int -1 [stdin]
+       </stdin>
+    requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
 
   // when we reach whitespace, if it parses create a ListItem
-  rule `ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)`
+  rule [stdinParseString]:
+       <stdin>
+       `ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)`
        ListItem(#buffer(S:String => ""))
        _:List
-    requires findChar(S, Delimiters, 0) =/=Int -1 [stdin]
+       </stdin>
+    requires findChar(S, Delimiters, 0) =/=Int -1 // [stdin]
 
   // a hack: handle the case when we read integers without the help of the IO server
-  rule `ListItem(#parseInput("Int", Delimiters:String))
+  rule [stdinParseInt]:
+       <stdin>
+       `ListItem(#parseInput("Int", Delimiters:String))
        => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0))))`
        ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
+       _:List
+       </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool lengthString(S) >Int 1 [stdin]
+       andBool lengthString(S) >Int 1 // [stdin]
 
-  rule `ListItem(#parseInput(Sort:String, Delimiters:String))
+  rule [stdinParseArbitrarySort]:
+       <stdin>
+       `ListItem(#parseInput(Sort:String, Delimiters:String))
        => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort))`
        ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
        _:List
+       </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
        andBool Sort =/=String "String"
-       andBool lengthString(S) >Int 1 [stdin]
+       andBool Sort =/=String "Int"
+       andBool lengthString(S) >Int 1 // [stdin]
 
-  rule ListItem(#parseInput(Sort:String, Delimiters:String))
+  rule [stdinTrim]:
+       <stdin>
+       ListItem(#parseInput(Sort:String, Delimiters:String))
        ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
        _:List
+       </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
        andBool Sort =/=String "String"
-       andBool lengthString(S) <=Int 1 [stdin]
+       andBool lengthString(S) <=Int 1 // [stdin]
 
+  /*
   rule ListItem(#buffer(_))
        `ListItem(#noIO) ListItem(#istream(_:Int)) => .List` [stdin]
 
   rule `ListItem(#ostream(_:Int)) ListItem(#noIO) => .List`
        ListItem(#buffer(_))
        _:List [stdout, stderr]
-*/
+  */
+
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2

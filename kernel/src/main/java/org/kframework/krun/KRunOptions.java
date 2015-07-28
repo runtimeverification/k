@@ -125,6 +125,9 @@ public final class KRunOptions {
                 }
                 result.put("PGM", Pair.of(pgm(), parser(mainModuleName)));
             }
+            if (configVars.containsKey("STDIN") || configVars.containsKey("IO")) {
+                throw KEMException.criticalError("Cannot specify -cSTDIN or -cIO which are reserved for the builtin K-IO module.");
+            }
             return result;
         }
 

@@ -88,7 +88,10 @@ module CONFIG-CELLS
   imports KCELLS
   imports RULE-LISTS
   syntax #CellName ::= r"[a-zA-Z0-9\\-]+"  [token]
+
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
+  syntax Cell ::= "<" #CellName "/>" [klabel(#ioCell)]
+
   syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
                            | ""                            [klabel(#cellPropertyListTerminator)]
   syntax #CellProperty ::= #CellName "=" KString           [klabel(#cellProperty)]
