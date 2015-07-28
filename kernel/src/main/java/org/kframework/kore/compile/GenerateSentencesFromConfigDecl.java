@@ -236,9 +236,23 @@ public class GenerateSentencesFromConfigDecl {
                 cellProperties.addAll(configAtt));
 
         if (multiplicity == Multiplicity.STAR) {
+            // syntax CellBag [hook(BAG.Bag)]
             // syntax CellBag ::= Cell
-            // syntax CellBag ::= ".CellBag"
-            // syntax CellBag  ::= CellBag CellBag [assoc, unit(.CellBag)]
+            // syntax CellBag ::= ".CellBag" [hook(BAG.unit), function]
+            // syntax CellBag ::= CellBagItem(Cell) [hook(BAG.element), function]
+            // syntax CellBag  ::= CellBag CellBag [assoc, comm, unit(.CellBag), element(CellBagItem), wrapElement(<cell>), hook(BAG.concat), function]
+            // -or-
+            // syntax CellSet [hook(SET.Set)]
+            // syntax CellSet ::= Cell
+            // syntax CellSet ::= ".CellSet" [hook(SET.unit), function]
+            // syntax CellSet ::= CellSetItem(Cell) [hook(SET.element), function]
+            // syntax CellSet ::= CellSet CellSet [assoc, conmm, idem, unit(.CellSet), element(CellSetItem), wrapElement(<cell>), hook(SET.concat), function]
+            // -or-
+            // syntax CellList [hook(LIST.List)]
+            // syntax CellList ::= Cell
+            // syntax CellList ::= ".CellList" [hook(LIST.unit), function]
+            // syntax CellList ::= CellListItem(Cell) [hook(LIST.element), function]
+            // syntax CellList ::= CellList CellList [assoc, unit(.CellList), element(CellListItem), wrapElement(<cell>), hook(LIST.concat), function]
             String type = cellProperties.<String>getOptional("type").orElse("Bag");
             Sort bagSort = Sort(sortName + type);
             Att bagAtt = Att()
@@ -246,9 +260,9 @@ public class GenerateSentencesFromConfigDecl {
                     .add("element", bagSort.name() + "Item")
                     .add("wrapElement", "<" + cellName + ">")
                     .add(Attribute.UNIT_KEY, "." + bagSort.name())
-                    .add(Attribute.HOOK_KEY, type + ":__")
+                    .add(Attribute.HOOK_KEY, type.toUpperCase() + ".concat")
                     .add(Attribute.FUNCTION_KEY);
-            String unitHook = type + ":." + type, elementHook = type + ":" + type + "Item";
+            String unitHook = type.toUpperCase() + ".unit", elementHook = type.toUpperCase() + ".element";
             switch(type) {
             case "Set":
                 bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
@@ -259,7 +273,7 @@ public class GenerateSentencesFromConfigDecl {
             default:
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName + ". Should be one of: Set, Bag, List");
             }
-            SyntaxSort sortDecl = SyntaxSort(bagSort, Att().add("hook", type));
+            SyntaxSort sortDecl = SyntaxSort(bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));

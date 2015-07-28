@@ -1,13 +1,12 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.loader.Context;
 
 import java.io.Serializable;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 
 /**
@@ -46,21 +45,21 @@ public class DataStructureSort implements Serializable {
      */
     public static final Map<Sort, ImmutableMap<Label, String>> LABELS = ImmutableMap.of(
             Sort.BAG, ImmutableMap.of(
-                    Label.CONSTRUCTOR, "__",
-                    Label.ELEMENT, "BagItem",
-                    Label.UNIT, ".Bag"),
+                    Label.CONSTRUCTOR, "concat",
+                    Label.ELEMENT, "element",
+                    Label.UNIT, "unit"),
             Sort.LIST, ImmutableMap.of(
-                    Label.CONSTRUCTOR, "__",
-                    Label.ELEMENT, "ListItem",
-                    Label.UNIT, ".List"),
+                    Label.CONSTRUCTOR, "concat",
+                    Label.ELEMENT, "element",
+                    Label.UNIT, "unit"),
             Sort.MAP, ImmutableMap.of(
-                    Label.CONSTRUCTOR, "__",
-                    Label.ELEMENT, "_|->_",
-                    Label.UNIT, ".Map"),
+                    Label.CONSTRUCTOR, "concat",
+                    Label.ELEMENT, "element",
+                    Label.UNIT, "unit"),
             Sort.SET, ImmutableMap.of(
-                    Label.CONSTRUCTOR, "__",
-                    Label.ELEMENT, "SetItem",
-                    Label.UNIT, ".Set"));
+                    Label.CONSTRUCTOR, "concat",
+                    Label.ELEMENT, "element",
+                    Label.UNIT, "unit"));
 
     public static final Sort DEFAULT_LIST_SORT = Sort.LIST;
     public static final Sort DEFAULT_MAP_SORT = Sort.MAP;

@@ -40,7 +40,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     m.definedSorts.filter(m.subsorts.directlyGreaterThan(n, _))
   }
 
-  private def getCellBagSortsOfCell(n: Sort): Set[Sort] = {
+  override def getCellBagSortsOfCell(n: Sort): Set[Sort] = {
     m.definedSorts.filter(m.subsorts.directlyLessThan(n, _)).intersect(cellBagSorts)
   }
 

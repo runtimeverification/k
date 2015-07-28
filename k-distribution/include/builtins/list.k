@@ -38,25 +38,25 @@ module LIST
 
   /*@ Construct a new List as the concatenation of two Lists. This is similar to
    the append "@" operation in many functional programming languages. */
-  syntax List ::= List List               [left, function, hook(List:__), klabel('_List_), smtlib(smt_seq_concat)]
+  syntax List ::= List List               [left, function, hook(LIST.concat), klabel('_List_), smtlib(smt_seq_concat)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(List:.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, hook(LIST.unit), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, hook(List:ListItem), smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(K)             [function, hook(LIST.element), smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
    (-1 is the last element). */
-  syntax K ::= List "[" Int "]"           [function, hook(List:get), klabel(List:get)]
+  syntax K ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get)]
 
   /*@ Remove elements from the beginning and the end of the List. */
-  syntax List ::= range(List, Int, Int)   [function, hook(List:range), klabel(List:range)]
+  syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range)]
 
   /*@ Check element membership in the given list */
-  syntax Bool ::= K "in" List             [function, hook(List:in), klabel('_inList_)]
+  syntax Bool ::= K "in" List             [function, hook(LIST.in), klabel('_inList_)]
 
   /*@ Get the list length */
-  syntax Int ::= size(List)               [function, hook(Collection:size), klabel ('sizeList), smtlib(smt_seq_len)]
+  syntax Int ::= size(List)               [function, hook(LIST.size), klabel ('sizeList), smtlib(smt_seq_len)]
 endmodule
 

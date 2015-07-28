@@ -24,4 +24,6 @@ trait Rewriter {
   def execute(k: kore.K, depth: Optional[Integer]): kore.K
 
   def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
+
+  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]]
 }

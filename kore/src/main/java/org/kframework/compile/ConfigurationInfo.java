@@ -4,6 +4,7 @@ package org.kframework.compile;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import scala.collection.immutable.Set;
 
 import java.util.List;
 
@@ -35,6 +36,13 @@ public interface ConfigurationInfo {
 
     /** True for cells which contain other cells */
     boolean isParentCell(Sort k);
+
+    /** Set of cell bag sorts (e.g. ThreadCellBag) associated with a multiplicity * cell (e.g. ThreadCell).
+     *  Should not in most cases return more than one sort, but a user can write productions that would cause
+     *  this method to return multiple sorts, e.g. if a particular * cell appears in multiple bags in different
+     *  parts of a configuration.
+     */
+    Set<Sort> getCellBagSortsOfCell(Sort k);
 
     /** The declared sort of the contents of a leaf cell */
     Sort leafCellType(Sort k);

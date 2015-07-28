@@ -11,11 +11,14 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.koreparser.KoreParser;
+import scala.Tuple2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import java.util.function.Function;
 
 import static org.kframework.kore.KORE.*;
 
-@DefinitionScoped
+@RequestScoped
 public class OcamlRewriter implements Function<Module, Rewriter> {
 
     private final FileUtil files;
@@ -35,11 +38,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     private final DefinitionToOcaml converter;
 
     @Inject
-    public OcamlRewriter(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions, CompiledDefinition def) {
+    public OcamlRewriter(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions, CompiledDefinition def, InitializeDefinition init) {
         this.files = files;
         this.def = def;
         this.converter = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions);
-        converter.convert(def);
+        converter.initialize(init.serialized, def);
     }
 
     @Override
@@ -62,26 +65,39 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 String ocaml = converter.match(k, rule, files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("match.ml", ocaml);
                 String output = compileAndExecOcaml("match.ml");
-                String[] lines = output.split("\n");
-                int count = Integer.parseInt(lines[0]);
-                int line = 1;
-                List<Map<KVariable, K>> list = new ArrayList<>();
-                for (int i = 0; i < count; i++) {
-                    Map<KVariable, K> map = new HashMap<>();
-                    list.add(map);
-                    for (; line < lines.length; line += 2) {
-                        if (lines[line].equals("|")) {
-                            line++;
-                            break;
-                        }
-                        KVariable key = KVariable(lines[line]);
-                        K value = parseOcamlOutput(lines[line+1]);
-                        map.put(key, value);
-                    }
-                }
-                return list;
+                return parseOcamlSearchOutput(output);
+            }
+
+            @Override
+            public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+                String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
+                files.saveToTemp("pgm.ml", ocaml);
+                String output = compileAndExecOcaml("pgm.ml");
+                String subst = files.loadFromTemp("run.subst");
+                return Tuple2.apply(parseOcamlOutput(output), parseOcamlSearchOutput(subst));
             }
         };
+    }
+
+    private List<Map<KVariable, K>> parseOcamlSearchOutput(String output) {
+        String[] lines = output.split("\n");
+        int count = Integer.parseInt(lines[0]);
+        int line = 1;
+        List<Map<KVariable, K>> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Map<KVariable, K> map = new HashMap<>();
+            list.add(map);
+            for (; line < lines.length; line += 2) {
+                if (lines[line].equals("|")) {
+                    line++;
+                    break;
+                }
+                KVariable key = KVariable(lines[line]);
+                K value = parseOcamlOutput(lines[line+1]);
+                map.put(key, value);
+            }
+        }
+        return list;
     }
 
     private K parseOcamlOutput(String output) {
@@ -92,9 +108,17 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         try {
             ProcessBuilder pb = files.getProcessBuilder();
             if (DefinitionToOcaml.ocamlopt) {
-                pb = pb.command("ocamlopt.opt", "-o", "a.out", "gmp.cmxa", "str.cmxa", "unix.cmxa", "-safe-string", files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(), name);
+                pb = pb.command("ocamlopt.opt", "-g", "-o", "a.out", "gmp.cmxa", "str.cmxa", "unix.cmxa", "-safe-string",
+                        files.resolveKompiled("constants.cmx").getAbsolutePath(), files.resolveKompiled("prelude.cmx").getAbsolutePath(),
+                        files.resolveKompiled("def.cmx").getAbsolutePath(),
+                        "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        name);
             } else {
-                pb = pb.command("ocamlc.opt", "-o", "a.out", "-g", "gmp.cma", "str.cma", "unix.cma", "-safe-string", files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(), name);
+                pb = pb.command("ocamlc.opt", "-g", "-o", "a.out", "gmp.cma", "str.cma", "unix.cma", "-safe-string",
+                        files.resolveKompiled("constants.cmo").getAbsolutePath(), files.resolveKompiled("prelude.cmo").getAbsolutePath(),
+                        files.resolveKompiled("def.cmo").getAbsolutePath(),
+                        "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        name);
             }
             Process p = pb.directory(files.resolveTemp("."))
                     .redirectError(files.resolveTemp("compile.err"))
@@ -123,28 +147,39 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                             Thread.sleep(100);
                         }
                     }
-                    while ((count = System.in.read(buffer)) > 0) {
-                        p2.getOutputStream().write(buffer, 0, count);
-                    }
                 } catch (IOException | InterruptedException e) {}
             });
             Thread out = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getInputStream().read(buffer)) >= 0) {
-                        System.out.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getInputStream().available() > 0) {
+                            count = p2.getInputStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.out.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {}
+                } catch (IOException | InterruptedException e) {}
             });
             Thread err = new Thread(() -> {
                 int count;
                 byte[] buffer = new byte[8192];
                 try {
-                    while ((count = p2.getErrorStream().read(buffer)) >= 0) {
-                        System.err.write(buffer, 0, count);
+                    while (true) {
+                        if (p2.getErrorStream().available() > 0) {
+                            count = p2.getErrorStream().read(buffer);
+                            if (count < 0)
+                                break;
+                            System.err.write(buffer, 0, count);
+                        } else {
+                            Thread.sleep(100);
+                        }
                     }
-                } catch (IOException e) {}
+                } catch (IOException | InterruptedException e) {}
             });
             in.start();
             out.start();
@@ -152,6 +187,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
             exit = p2.waitFor();
             in.interrupt();
+            out.interrupt();
+            err.interrupt();
             in.join();
             out.join();
             err.join();
@@ -166,6 +203,16 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw KEMException.criticalError("Ocaml process interrupted.", e);
+        }
+    }
+
+    @DefinitionScoped
+    public static class InitializeDefinition {
+        private final DefinitionToOcaml serialized;
+
+        @Inject
+        public InitializeDefinition(BinaryLoader loader, FileUtil files) {
+            serialized = loader.loadOrDie(DefinitionToOcaml.class, files.resolveKompiled("ocaml_converter.bin"));
         }
     }
 }

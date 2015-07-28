@@ -23,51 +23,51 @@ module STRING-HOOKS
   imports FLOAT-HOOKS
 
 
-  syntax String ::= String "+String" String    [function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(#STRING:_+String_)]
+  syntax String ::= String "+String" String    [function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
 
-  syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
+  syntax Bool ::= String "==String" String [function, left, hook(STRING.eq)]
 
-  syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
-  syntax String ::= "chrChar" "(" Int ")"      [function, klabel(chrChar), hook(#STRING:chrChar)]
-  syntax Int ::= "ordChar" "(" String ")"      [function, klabel(ordChar), hook(#STRING:ordChar)]
+  syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(STRING.length)]
+  syntax String ::= "chrChar" "(" Int ")"      [function, klabel(chrChar), hook(STRING.chr)]
+  syntax Int ::= "ordChar" "(" String ")"      [function, klabel(ordChar), hook(STRING.ord)]
 
-  syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
-  syntax Int ::= "findString" "(" String "," String "," Int ")"   [function, klabel(findString), hook(#STRING:findString)]
-  syntax Int ::= "rfindString" "(" String "," String "," Int ")"  [function, klabel(rfindString), hook(#STRING:rfindString)]
-  syntax Int ::= "findChar" "(" String "," String "," Int ")"     [function, klabel(findChar), hook(#STRING:findChar)]
-  syntax Int ::= "rfindChar" "(" String "," String "," Int ")"    [function, klabel(rfindChar), hook(#STRING:rfindChar)]
+  syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(STRING.substr)]
+  syntax Int ::= "findString" "(" String "," String "," Int ")"   [function, klabel(findString), hook(STRING.find)]
+  syntax Int ::= "rfindString" "(" String "," String "," Int ")"  [function, klabel(rfindString), hook(STRING.rfind)]
+  syntax Int ::= "findChar" "(" String "," String "," Int ")"     [function, klabel(findChar), hook(STRING.findChar)]
+  syntax Int ::= "rfindChar" "(" String "," String "," Int ")"    [function, klabel(rfindChar), hook(STRING.rfindChar)]
 
-  syntax String ::= "Float2String" "(" Float ")"            [function, klabel(Float2String), hook(#CONVERSION:float2string)]
-  syntax String ::= "Float2String" "(" Float "," String ")" [function, klabel(FloatFormat), hook(#CONVERSION:floatFormat)]
-  syntax Float ::= "String2Float" "(" String ")"            [function, klabel(String2Float), hook(#CONVERSION:string2float)]
-  syntax Int ::= "String2Int" "(" String ")"                [function, klabel(String2Int), hook(#CONVERSION:string2int)]
-  syntax String ::= "Int2String" "(" Int ")"                [function, klabel(Int2String), hook(#CONVERSION:int2string)]
-  syntax String ::= "Base2String" "(" Int "," Int ")"       [function, klabel(Base2String), hook(#CONVERSION:base2string)]
-  syntax Int ::= "String2Base" "(" String "," Int ")"       [function, klabel(String2Base), hook(#CONVERSION:string2base)]
+  syntax String ::= "Float2String" "(" Float ")"            [function, klabel(Float2String), hook(STRING.float2string)]
+  syntax String ::= "Float2String" "(" Float "," String ")" [function, klabel(FloatFormat), hook(STRING.floatFormat)]
+  syntax Float ::= "String2Float" "(" String ")"            [function, klabel(String2Float), hook(STRING.string2float)]
+  syntax Int ::= "String2Int" "(" String ")"                [function, klabel(String2Int), hook(STRING.string2int)]
+  syntax String ::= "Int2String" "(" Int ")"                [function, klabel(Int2String), hook(STRING.int2string)]
+  syntax String ::= "Base2String" "(" Int "," Int ")"       [function, klabel(Base2String), hook(STRING.base2string)]
+  syntax Int ::= "String2Base" "(" String "," Int ")"       [function, klabel(String2Base), hook(STRING.string2base)]
 
 
   syntax String ::= KLabel2String(KLabel) [function]
   syntax KLabel ::= String2KLabel(String) [function]
 
-  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(#STRING:replaceAll)]
-  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(#STRING:replace)]
-  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, hook(#STRING:replaceFirst)]
-  syntax Int ::= "countAllOccurences" "(" String "," String ")"            [function, hook(#STRING:countAllOccurences)]
+  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(STRING.replaceAll)]
+  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(STRING.replace)]
+  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, hook(STRING.replaceFirst)]
+  syntax Int ::= "countAllOccurrences" "(" String "," String ")"            [function, hook(STRING.countAllOccurrences)]
 
   syntax String ::=  "trim" "(" String ")" [function]
   syntax String ::= "ltrim" "(" String ")" [function]
   syntax String ::= "rtrim" "(" String ")" [function]
 
-  syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
+  syntax Bool ::= String "=/=String" String      [function, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
-  syntax Bool ::= String "<String" String  [function, hook(#STRING:_<String_)]
-                | String "<=String" String [function, hook(#STRING:_<=String_)]
-                | String ">String" String  [function, hook(#STRING:_>String_)]
-                | String ">=String" String [function, hook(#STRING:_>=String_)]
+  syntax Bool ::= String "<String" String  [function, hook(STRING.lt)]
+                | String "<=String" String [function, hook(STRING.le)]
+                | String ">String" String  [function, hook(STRING.gt)]
+                | String ">=String" String [function, hook(STRING.ge)]
 
-  syntax String ::= categoryChar(String)       [function, hook(#STRING:categoryChar)]
-                  | directionalityChar(String) [function, hook(#STRING:directionalityChar)]
+  syntax String ::= categoryChar(String)       [function, hook(STRING.categoryChar)]
+                  | directionalityChar(String) [function, hook(STRING.directionalityChar)]
 
   rule S1:String <=String S2:String => notBool(S2 <String S1)
   rule S1:String >String S2:String => S2 <String S1
@@ -104,9 +104,9 @@ module STRING-HOOKS
       => (ordChar(C) >=Int ordChar("0"))
            andBool (ordChar(C) <=Int ordChar("9")) when isChar(C)
 
-  rule countAllOccurences(Source:String, ToCount:String) => 0
+  rule countAllOccurrences(Source:String, ToCount:String) => 0
             when findString(Source, ToCount, 0) <Int 0
-  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
+  rule countAllOccurrences(Source:String, ToCount:String) => 1 +Int countAllOccurrences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
             when findString(Source, ToCount, 0) >=Int 0
 
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
@@ -121,7 +121,7 @@ module STRING-HOOKS
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
         when Count >Int 0
   rule replace(Source:K, _, _, 0) => Source
-  rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
+  rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
   rule ltrim(S:String) => ltrim(replaceFirst(S, " ", "")) when findString(S, " ", 0) ==Int 0
   rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0
@@ -133,11 +133,11 @@ module STRING-HOOKS
 
   rule trim(S:K) => ltrim(rtrim(S))
 
-  syntax KItem ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken), hook(#CONVERSION:string2token)]
+  syntax KItem ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken), hook(STRING.string2token)]
   rule #parseToken("Int", S:String) => String2Int(S)
   rule #parseToken("Float", S:String) => String2Float(S)
   rule #parseToken("String", S:String) => S
   rule #parseToken("Char", S:String) => String2Char(S)
 
-  syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(#CONVERSION:token2string)]
+  syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(STRING.token2string)]
 endmodule

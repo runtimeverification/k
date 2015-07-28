@@ -6,16 +6,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
-import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
-import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
+import org.kframework.parser.concrete2kore.disambiguation.*;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
@@ -51,7 +42,7 @@ public class ParseInModule implements Serializable {
      * original production, so disambiguation can be done safely.
      */
     private final Module parsingModule;
-    private Grammar grammar = null;
+    private volatile Grammar grammar = null;
     private final boolean strict;
     ParseInModule(Module seedModule) {
         this(seedModule, seedModule, seedModule, seedModule, true);
@@ -94,12 +85,17 @@ public class ParseInModule implements Serializable {
         return parseString(input, startSymbol, source, 1, 1);
     }
 
+    private void getGrammar() {
+        Grammar g = grammar;
+        if (g == null) {
+            g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule);
+            grammar = g;
+        }
+    }
+
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
-        synchronized (seedModule) { // grammar generation needs to happen only once, therefore the synchronization
-            if (grammar == null) // build by need
-                grammar = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule);
-        }
+        getGrammar();
 
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
         Set<ParseFailedException> warn = new AmbFilter().warningUnit();
@@ -142,6 +138,8 @@ public class ParseInModule implements Serializable {
 
         Term rez3 = new PreferAvoidVisitor().apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
+        warn = new AmbFilter().mergeWarnings(rez2._2(), warn);
+        rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
         warn = new AmbFilter().mergeWarnings(rez2._2(), warn);
         rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 

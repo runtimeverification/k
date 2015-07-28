@@ -350,7 +350,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
                 Term t = tc.get(0);
                 boolean strictSortEquality = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(0, rez.right().get());
@@ -359,7 +359,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, inferSortChecks).apply(t);
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc = tc.with(j, rez.right().get());
@@ -375,11 +375,13 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         private class ApplyTypeCheck2 extends SetsTransformerWithErrors<ParseFailedException> {
             private final Sort sort;
+            private final boolean hasCastAlready;
             private final boolean strictSortEquality;
             private final boolean addCast;
 
-            public ApplyTypeCheck2(Sort sort, boolean strictSortEquality, boolean addCast) {
+            public ApplyTypeCheck2(Sort sort, boolean hasCastAlready, boolean strictSortEquality, boolean addCast) {
                 this.sort = sort;
+                this.hasCastAlready = hasCastAlready;
                 this.strictSortEquality = strictSortEquality;
                 this.addCast = addCast;
             }
@@ -402,18 +404,31 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().get(), c.location().get());
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
                         }
-                        if (addCast) {
-                            Production cast = productions.apply(KLabel("#SemanticCastTo" + declared.name())).head();
-                            return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
-                        }
-                    } else if (c.value().equals(MetaK.Constants.anyVarSymbol) && !sort.equals(Sorts.K()) && !sort.equals(Sorts.KList()) && addCast) {
+                        return wrapTermWithCast(c, declared);
+                    } else if (c.value().equals(MetaK.Constants.anyVarSymbol) && !sort.equals(Sorts.K()) && !sort.equals(Sorts.KList())) {
                         //infer anonymous variables only based on their immediate context
-                        Production cast = productions.apply(KLabel("#SemanticCastTo" + sort.name())).head();
-                        return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
+                        return wrapTermWithCast(c, sort);
                     }
                 }
                 return Right.apply(c);
             }
+
+            private Either<Set<ParseFailedException>, Term> wrapTermWithCast(Constant c, Sort declared) {
+                Production cast;
+                if (addCast) {
+                    cast = productions.apply(KLabel("#SemanticCastTo" + declared.name())).head();
+                } else if (!hasCastAlready) {
+                    cast = stream(productions.apply(KLabel("#SyntacticCast"))).filter(p -> p.sort().equals(declared)).findAny().get();
+                } else {
+                    cast = null;
+                }
+                if (cast == null) {
+                    return Right.apply(c);
+                } else {
+                    return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
+                }
+            }
+
         }
     }
 

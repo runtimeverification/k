@@ -331,7 +331,7 @@ public class Grammar implements Serializable {
         /** Counter for generating unique ids for the state. */
         private static int counter = 0;
         /** The unique id of this state. */
-        public final int unique = counter++;
+        public final int unique;
 
         /** A back reference to the NonTerminal that this state is part of. */
         public final NonTerminal nt;
@@ -369,6 +369,9 @@ public class Grammar implements Serializable {
         }
 
         public State(String name, NonTerminal nt) {
+            synchronized (State.class) {
+                unique = counter++;
+            }
             assert nt != null;
             this.name = name + "[" + this.unique + "]";
             this.nt = nt;

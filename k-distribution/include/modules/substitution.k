@@ -6,7 +6,7 @@ module SUBSTITUTION
 
   syntax Variable //sort declaration used by substitution hook
 
-  syntax K ::= K "[" K "/" K "]"  [function, hook(Substitution:userSubstitution), impure]
+  syntax K ::= K "[" K "/" K "]"  [function, hook(SUBSTITUTION.userSubstitution), impure]
   syntax K ::= K "[" Map "]" [function]
   syntax Set ::= freeVariables(KList)  [function, hook(Substitution:freeVariables), latex({\it FV}({#1})), impure]
   syntax K ::= freshVariables(Set, K) [function, hook(MetaK:freshVariables), impure]

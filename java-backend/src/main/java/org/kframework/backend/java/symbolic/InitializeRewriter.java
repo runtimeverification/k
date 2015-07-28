@@ -28,6 +28,7 @@ import org.kframework.utils.inject.Builtins;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
+import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 import java.lang.invoke.MethodHandle;
@@ -112,6 +113,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<Map<KVariable, K>> match(K k, Rule rule) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+            K res = execute(k, depth);
+            return Tuple2.apply(res, match(res, rule));
         }
     }
 

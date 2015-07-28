@@ -171,7 +171,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
 
-  lazy val freshFunctionFor: Map[Sort, KLabel] =
+  @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
     productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")) )
       .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
       if (set.size > 1)
@@ -294,7 +294,8 @@ RegexTerminalToString {
 case class Terminal(value: String, followRegex: String) extends TerminalLike // hooked
 with TerminalToString {
   lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
-  lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
+  lazy val followPattern =
+    new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
   lazy val precedePattern = new RunAutomaton(BasicAutomata.makeEmpty(), false)
 }
 
