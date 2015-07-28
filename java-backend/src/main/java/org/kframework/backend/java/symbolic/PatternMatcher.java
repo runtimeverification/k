@@ -197,6 +197,10 @@ public class PatternMatcher extends AbstractUnifier {
     void add(Term term, Term variableTerm) {
         assert variableTerm instanceof Variable;
         Variable variable = (Variable) variableTerm;
+        if (variable.equals(term)) {
+            return;
+        }
+
         /* retrieve the exact element when the term is some singleton collection */
         if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.downKind(term);
