@@ -518,65 +518,27 @@ module K-IO
                 | "#stdout" [function]
                 | "#stderr" [function]
 
-  syntax Stream ::= #parseInput(String, String)
+  rule #stdin => 0
+  rule #stdout => 1
+  rule #stderr => 2
+
   syntax Stream ::= #buffer(K)
+
+// ------------------------------
+// System
+
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+
+endmodule
+
+module STDIN-STREAM
+  imports K-IO
+
   syntax Stream ::= #istream(Int)
-                  | #ostream(Int)
-  syntax Stream ::= "#noIO"
+  syntax Stream ::= #parseInput(String, String)
 
-  configuration <stdin>  ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
-  configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
-//configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
-
-  rule [stdoutBufferFloat]:
-       <stdout>
-       ListItem(#ostream(_))
-       ListItem(_)
-       ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
-       `ListItem(F:Float) => .List`
-       _:List
-       </stdout>
-       // [stdout, stderr]
-  rule [stdoutBufferInt]:
-       <stdout>
-       ListItem(#ostream(_))
-       ListItem(_)
-       ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
-       `ListItem(I:Int) => .List`
-       _:List
-       </stdout>
-       // [stdout, stderr]
-  rule [stdoutBufferString]:
-       <stdout>
-       ListItem(#ostream(_))
-       ListItem(_)
-       ListItem(#buffer(Buffer:String => Buffer +String S))
-       `ListItem(S:String) => .List`
-       _:List
-       </stdout>
-       // [stdout, stderr]
-
-  /*
-  rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
-       `ListItem(F:Float) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
-       `ListItem(I:Int) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#buffer(Buffer:String => Buffer +String S))
-       `ListItem(S:String) => .List`
-       _:List [stdout, stderr]
-  */
-
-  // Send first char from the buffer to the server
-  rule [stdoutWrite]:
-       <stdout>
-       ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
-       ListItem("on")
-       ListItem(#buffer(S:String => ""))
-       _:List
-       </stdout>
-    requires S =/=String "" // [stdout, stderr]
+  configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
   // read one character at a time until we read whitespace
   rule [stdinGetc]:
@@ -631,22 +593,80 @@ module K-IO
        andBool lengthString(S) <=Int 1 // [stdin]
 
   /*
+  syntax Stream ::= "#noIO"
+
   rule ListItem(#buffer(_))
        `ListItem(#noIO) ListItem(#istream(_:Int)) => .List` [stdin]
+  */
+
+endmodule
+
+module STDOUT-STREAM
+  imports K-IO
+
+  syntax Stream ::= #ostream(Int)
+
+  configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
+//configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
+
+  rule [stdoutBufferFloat]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
+       ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
+       `ListItem(F:Float) => .List`
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferInt]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
+       ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
+       `ListItem(I:Int) => .List`
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferString]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
+       ListItem(#buffer(Buffer:String => Buffer +String S))
+       `ListItem(S:String) => .List`
+       _:List
+       </stdout>
+       // [stdout, stderr]
+
+  // Send first char from the buffer to the server
+  rule [stdoutWrite]:
+       <stdout>
+       ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
+       ListItem("on")
+       ListItem(#buffer(S:String => ""))
+       _:List
+       </stdout>
+    requires S =/=String "" // [stdout, stderr]
+
+
+
+  /*
+  syntax Stream ::= "#noIO"
+
+  rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
+       `ListItem(F:Float) => .List`
+       _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
+       `ListItem(I:Int) => .List`
+       _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String S))
+       `ListItem(S:String) => .List`
+       _:List [stdout, stderr]
 
   rule `ListItem(#ostream(_:Int)) ListItem(#noIO) => .List`
        ListItem(#buffer(_))
        _:List [stdout, stderr]
   */
 
-  rule #stdin => 0
-  rule #stdout => 1
-  rule #stderr => 2
 
-// ------------------------------
-// System
-
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
 endmodule
