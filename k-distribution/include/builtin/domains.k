@@ -647,8 +647,6 @@ module STDOUT-STREAM
        </stdout>
     requires S =/=String "" // [stdout, stderr]
 
-
-
   /*
   syntax Stream ::= "#noIO"
 
@@ -666,7 +664,5 @@ module STDOUT-STREAM
        ListItem(#buffer(_))
        _:List [stdout, stderr]
   */
-
-
 
 endmodule
