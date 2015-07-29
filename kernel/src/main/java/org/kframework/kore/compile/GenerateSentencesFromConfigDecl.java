@@ -113,7 +113,18 @@ public class GenerateSentencesFromConfigDecl {
                         if (label.sort().equals(Sort("#CellName"))) {
                             String cellName = label.s();
                             Sort sort = Sort(getSortOfCell(cellName));
-                            return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), KVariable("Init")));
+                            Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
+                            if (initializerProduction.isDefined()) {
+                                if (initializerProduction.get().size() == 1) { // should be only a single initializer
+                                    if (initializerProduction.get().head().items().size() == 1) {
+                                        // XCell ::= "initXCell"
+                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))));
+                                    } else if (initializerProduction.get().head().items().size() == 4) {
+                                        // XCell ::= "initXCell" "(" Map ")"
+                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), KVariable("Init")));
+                                    }
+                                }
+                            }
                         }
                     }
                 }
