@@ -171,7 +171,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(MapBuiltin node, Void _void)  {
-            throw new AssertionError("should always flatten before compiling data structures");
+            return node;
         }
 
         @Override
