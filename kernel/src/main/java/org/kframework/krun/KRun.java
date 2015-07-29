@@ -167,7 +167,6 @@ public class KRun implements Transformation<Void, Void> {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
-            // TODO(daejunpark): support tty or have generic getStdinBuffer
             String stdin = InitialConfigurationProvider.getStdinBuffer(tty);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
