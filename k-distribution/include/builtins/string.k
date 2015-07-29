@@ -61,10 +61,10 @@ module STRING-HOOKS
   syntax Bool ::= String "=/=String" String      [function, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
-  syntax Bool ::= String "<String" String  [function, hook(STRING.lt)]
-                | String "<=String" String [function, hook(STRING.le)]
-                | String ">String" String  [function, hook(STRING.gt)]
-                | String ">=String" String [function, hook(STRING.ge)]
+  syntax Bool ::= String "<String" String     [function, hook(STRING.lt), smtlib(string_lt)]
+                | String "<=String" String    [function, hook(STRING.le), smtlib(string_le)]
+                | String ">String" String     [function, hook(STRING.gt), smtlib(string_gt)]
+                | String ">=String" String    [function, hook(STRING.ge), smtlib(string_ge)]
 
   syntax String ::= categoryChar(String)       [function, hook(STRING.categoryChar)]
                   | directionalityChar(String) [function, hook(STRING.directionalityChar)]
