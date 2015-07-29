@@ -4,6 +4,7 @@ package org.kframework.debugger;
 
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
+import org.kframework.krun.tools.Debugger;
 
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,12 @@ public interface KDebug {
     /**
      * Take a certain number of steps from the current state.
      *
-     * @param steps The number of steps to take
-     * @return DebuggerState Ob ject depicting the state debugger was in
+     * @param initialState The state to begin stepping from.
+     * @param steps        The number of steps to take
+     * @return DebuggerState The new state arrived upon.
      * after the operation.
      */
-    public DebuggerState step(int steps);
+    public DebuggerState step(DebuggerState initialState, int steps);
 
     /**
      * Take specified number of steps backwards from current state.

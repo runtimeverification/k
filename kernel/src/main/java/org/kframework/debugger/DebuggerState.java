@@ -31,10 +31,6 @@ public class DebuggerState {
         return stepNum;
     }
 
-    public void setStepNum(int stepNum) {
-        this.stepNum = stepNum;
-    }
-
     public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
         this.checkpointMap = new TreeMap<>(checkpointMap);
         this.currentK = currentK;
@@ -46,6 +42,18 @@ public class DebuggerState {
         this.currentK = copyState.getCurrentK();
         this.stepNum = copyState.getStepNum();
 
+    }
+
+    void setCheckpointMap(NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
+        this.checkpointMap = checkpointMap;
+    }
+
+    void setCurrentK(K currentK) {
+        this.currentK = currentK;
+    }
+
+    void setStepNum(int stepNum) {
+        this.stepNum = stepNum;
     }
 
     public K getCurrentK() {

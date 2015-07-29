@@ -13,7 +13,7 @@ import static org.kframework.krun.KRun.*;
  * Created by Manasvi on 7/22/15.
  * <p>
  * Classes concerned with TUI commands go under this class.
- * Commands must extend {@link org.kframework.krun.modes.DebugMode.Command}.
+ * Commands must implement {@link org.kframework.krun.modes.DebugMode.Command}.
  */
 public class Commands {
 

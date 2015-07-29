@@ -5,6 +5,7 @@ package org.kframework.debugger;
 import org.kframework.Rewriter;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
+import org.kframework.krun.tools.Debugger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,21 +51,19 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public DebuggerState step(int steps) {
-        K currentK = activeState.getCurrentK();
-        int activeStateCheckpoint = activeState.getStepNum();
-        int lastCheckpoint = activeState.getlastMapCheckpoint();
-        DebuggerState nextActiveState;
-        stateList.remove(activeState);
+    public DebuggerState step(DebuggerState initialState, int steps) {
+        K currentK = initialState.getCurrentK();
+        int activeStateCheckpoint = initialState.getStepNum();
+        int lastCheckpoint = initialState.getlastMapCheckpoint();
         /* Not enough steps for a new checkpoint */
         if (activeStateCheckpoint + steps < lastCheckpoint + checkpointInterval) {
             currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
             activeStateCheckpoint += steps;
-            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
-            nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
-            stateList.add(activeStateNum, nextActiveState);
-            activeState = nextActiveState;
-            return nextActiveState;
+            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = initialState.getCheckpointMap();
+            initialState.setCheckpointMap(checkpointMap);
+            initialState.setCurrentK(currentK);
+            initialState.setStepNum(activeStateCheckpoint);
+            return initialState;
         }
         /* Move to the next Checkpoint */
         if (lastCheckpoint + checkpointInterval - activeStateCheckpoint < 0) {

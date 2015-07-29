@@ -16,9 +16,8 @@ import java.io.Reader;
 import java.util.Optional;
 import org.kframework.krun.modes.DebugMode.Command;
 
-
-
 import static org.kframework.krun.modes.DebugMode.Commands.*;
+
 public class DebuggerCommandParser {
     public static Command parseCommand(String command) throws NumberFormatException, ParseException
     {
@@ -40,16 +39,16 @@ SKIP :
 
 TOKEN: /*RESERVED TOKENS */
 {
-      <STEP: (["s", "S"])| "step" >
-   |  <BACKSTEP:  (["b", "B"])| "back-step">
-   |  <JUMPTO: (["j", "J"])| "jump-to">
-   |  <QUIT: "quit" | "abort" | "exit">
-   |  <CHECKPOINT: "set-chkpt">
-   |  <RESUME: "resume">
-   |  <PEEK: "p" | "peek">
-   |  <NUMBER: (["0" - "9"])+>
-   |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
-   |  <NEWLINE : "\n" | "\r\n">
+       <STEP: (["s", "S"])| "step" >
+    |  <BACKSTEP:  (["b", "B"])| "back-step">
+    |  <JUMPTO: (["j", "J"])| "jump-to">
+    |  <QUIT: "quit" | "abort" | "exit">
+    |  <CHECKPOINT: "set-chkpt">
+    |  <RESUME: "resume">
+    |  <PEEK: "p" | "peek">
+    |  <NUMBER: (["0" - "9"])+>
+    |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
+    |  <NEWLINE : "\n" | "\r\n">
 
 }
 
