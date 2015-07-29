@@ -260,6 +260,8 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
 
   def arity: Int = items.count(_.isInstanceOf[NonTerminal])
+
+  def nonterminal(i: Int): NonTerminal = items.filter(_.isInstanceOf[NonTerminal])(i).asInstanceOf[NonTerminal]
 }
 
 object Production {
