@@ -390,7 +390,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (hd1 :: tl1), (hd2 :: tl2) -> let v = compare_kitem hd1 hd2 in if v = 0 then compare tl1 tl2 else v\n" +
                 "    | (hd1 :: tl1), _ -> -1\n" +
                 "    | _ -> 1\n" +
-                "  and compare_kitem c1 c2 = match (c1, c2) with\n");
+                "  and compare_kitem c1 c2 = if c1 == c2 then 0 else match (c1, c2) with\n");
         for(long arity : arities) {
             sb.append("    | KApply").append(arity).append("(lbl1");
             for (int i = 0; i < arity; i++) {
@@ -739,7 +739,8 @@ public class DefinitionToOcaml implements Serializable {
                     conn = "and ";
                 } else if (functionLabel.name().isEmpty()) {
                     //placeholder for eval function;
-                    sb.append("and eval (c: normal_kitem) (config: k) : k = match c with KApply(lbl, kl) -> (match lbl with \n");
+                    sb.append(conn);
+                    sb.append("eval (c: normal_kitem) (config: k) : k = match c with KApply(lbl, kl) -> (match lbl with \n");
                     for (KLabel label : Sets.union(functions, anywhereKLabels)) {
                         sb.append("|");
                         encodeStringToIdentifier(sb, label);
