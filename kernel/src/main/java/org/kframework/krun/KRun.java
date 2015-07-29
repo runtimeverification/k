@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
@@ -49,10 +50,12 @@ public class KRun implements Transformation<Void, Void> {
 
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final TTYInfo tty;
 
-    public KRun(KExceptionManager kem, FileUtil files) {
+    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty) {
         this.kem = kem;
         this.files = files;
+        this.tty = tty;
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
@@ -165,7 +168,7 @@ public class KRun implements Transformation<Void, Void> {
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
             // TODO(daejunpark): support tty or have generic getStdinBuffer
-            String stdin = InitialConfigurationProvider.getStdinBuffer(true);
+            String stdin = InitialConfigurationProvider.getStdinBuffer(tty);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }

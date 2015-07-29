@@ -98,7 +98,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
             }
             output.put("$stdin", StringBuiltin.EMPTY);
         } else {
-            String stdin = getStdinBuffer(tty.stdin);
+            String stdin = getStdinBuffer(tty);
             KApp noIO = KApp.of(KLabelConstant.of("'#noIO"));
             DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
             if (myList != null) {
@@ -112,7 +112,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
         return plug(output, cfg);
     }
 
-    public static String getStdinBuffer(boolean ttyStdin) {
+    public static String getStdinBuffer(TTYInfo tty) {
         String buffer = "";
 
         try {
@@ -121,7 +121,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
             // detect if the input comes from console or redirected
             // from a pipeline
 
-            if ((Main.isNailgun() && !ttyStdin)
+            if ((Main.isNailgun() && !tty.stdin)
                     || (!Main.isNailgun() && br.ready())) {
                 buffer = br.readLine();
             }
