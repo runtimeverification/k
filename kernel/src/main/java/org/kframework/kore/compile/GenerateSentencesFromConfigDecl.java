@@ -105,7 +105,7 @@ public class GenerateSentencesFromConfigDecl {
                     }
                 }
                 throw KEMException.compilerError("Malformed cell in configuration declaration.", term);
-            } else if (kapp.klabel().name().equals("#ioCell")) {
+            } else if (kapp.klabel().name().equals("#externalCell")) {
                 if (kapp.klist().size() == 1) {
                     K startLabel = kapp.klist().items().get(0);
                     if (startLabel instanceof KToken) {
