@@ -37,11 +37,5 @@ module SET
 
   /*@ Get an arbitrarily chosen element of the Set */
   syntax K ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
-
-  /* set difference axioms */
-  // TODO(AndreiS): remove this if not used
-  //rule S1:Set -Set (SetItem(K:K) S2:Set) => S1 -Set S2
-  //when notBool(K in S1)
-  //rule S:Set -Set .Set => S
 endmodule
 
