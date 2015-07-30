@@ -148,13 +148,6 @@ public class SymbolicRewriter {
                 LinkedHashSet<Rule> rules = Sets.newLinkedHashSet(strategy.next());
                 rules.removeAll(disabledRules.get(subject));
 
-                totalRules += rules.size();
-                kRules += rules.stream().filter(Rule::containsKCell).count();
-                typeRules += rules.stream()
-                        .filter(r -> !r.leftHandSide().getCellContentsByName(CellLabel.of("type")).isEmpty())
-                        .filter(r -> !r.containsKCell())
-                        .count();
-
                 ArrayList<Pair<ConstrainedTerm, Rule>> internalResults = Lists.newArrayList();
                 ArrayList<Rule> failedRules = Lists.newArrayList();
                 Stream<List<Pair<ConstrainedTerm, Rule>>> resultsStream = rules.stream()
