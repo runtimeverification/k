@@ -50,12 +50,12 @@ public class KRun implements Transformation<Void, Void> {
 
     private final KExceptionManager kem;
     private final FileUtil files;
-    private final TTYInfo tty;
+    private final boolean ttyStdin;
 
-    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty) {
+    public KRun(KExceptionManager kem, FileUtil files, boolean ttyStdin) {
         this.kem = kem;
         this.files = files;
-        this.tty = tty;
+        this.ttyStdin = ttyStdin;
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
@@ -167,7 +167,7 @@ public class KRun implements Transformation<Void, Void> {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
-            String stdin = InitialConfigurationProvider.getStdinBuffer(tty);
+            String stdin = InitialConfigurationProvider.getStdinBuffer(ttyStdin);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
