@@ -98,6 +98,9 @@ public class Rule extends JavaSymbolicObject {
 
     private final boolean modifyCellStructure;
 
+    private final Set<CellLabel> readCells;
+    private final Set<CellLabel> writeCells;
+
     private final Set<Variable> matchingVariables;
 
     // TODO(YilongL): make it final
@@ -244,6 +247,24 @@ public class Rule extends JavaSymbolicObject {
             modifyCellStructure = true;
         }
         this.modifyCellStructure = modifyCellStructure;
+
+        if (compiledForFastRewriting) {
+            final ImmutableSet.Builder<CellLabel> readBuilder = ImmutableSet.builder();
+            lhsOfReadCells.keySet().stream().forEach(c -> {
+                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                        .forEach(s -> readBuilder.add(CellLabel.of(s)));
+            });
+            readCells = readBuilder.build();
+            final ImmutableSet.Builder<CellLabel> writeBuilder = ImmutableSet.builder();
+            rhsOfWriteCells.keySet().stream().forEach(c -> {
+                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                        .forEach(s -> writeBuilder.add(CellLabel.of(s)));
+            });
+            writeCells = writeBuilder.build();
+
+        } else {
+            readCells = writeCells = null;
+        }
 
         Set<Variable> choiceVariables = new HashSet<>();
         if (compiledForFastRewriting) {
@@ -476,6 +497,14 @@ public class Rule extends JavaSymbolicObject {
      */
     public boolean modifyCellStructure() {
         return modifyCellStructure;
+    }
+
+    public Set<CellLabel> readCells() {
+        return readCells;
+    }
+
+    public Set<CellLabel> writeCells() {
+        return writeCells;
     }
 
     public Set<Variable> matchingVariables() {
