@@ -14,7 +14,6 @@ module MAP
   syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel('_Map_), assoc, comm, unit(.Map), element(_|->_)]
   /*@  Construct an empty Map */
   syntax Map ::= ".Map"                         [function, hook(MAP.unit), latex(\dotCt{Map})]
-  syntax Map ::= "(" Map ")" [bracket]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
@@ -145,7 +144,6 @@ module LIST
   /*@ Construct an empty List: */
   syntax List ::= ".List"                 [function, hook(LIST.unit), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
-  syntax List ::= "(" List ")" [bracket]
   /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)             [function, hook(LIST.element), smtlib(smt_seq_elem)]
 
