@@ -108,17 +108,17 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         try {
             ProcessBuilder pb = files.getProcessBuilder();
             if (DefinitionToOcaml.ocamlopt) {
-                pb = pb.command("ocamlopt.opt", "-g", "-o", "a.out", "gmp.cmxa", "zarith.cmxa", "str.cmxa", "unix.cmxa", "-safe-string",
+                pb = pb.command("ocamlfind", "ocamlopt", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cmxa", "unix.cmxa", "-safe-string",
                         files.resolveKompiled("constants.cmx").getAbsolutePath(), files.resolveKompiled("prelude.cmx").getAbsolutePath(),
-                        files.resolveKompiled("def.cmx").getAbsolutePath(),
-                        "-I", "+gmp", "-I", "+zarith", "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
                         name, "-inline", "20", "-nodynlink");
+                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
             } else {
-                pb = pb.command("ocamlc.opt", "-g", "-o", "a.out", "gmp.cma", "zarith.cma", "str.cma", "unix.cma", "-safe-string",
+                pb = pb.command("ocamlfind", "ocamlc", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cma", "unix.cma", "-safe-string",
                         files.resolveKompiled("constants.cmo").getAbsolutePath(), files.resolveKompiled("prelude.cmo").getAbsolutePath(),
-                        files.resolveKompiled("def.cmo").getAbsolutePath(),
-                        "-I", "+gmp", "-I", "+zarith", "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
                         name);
+                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
             }
             Process p = pb.directory(files.resolveTemp("."))
                     .redirectError(files.resolveTemp("compile.err"))
