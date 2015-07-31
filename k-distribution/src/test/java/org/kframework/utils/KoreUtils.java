@@ -80,7 +80,7 @@ public class KoreUtils {
 
     public K getParsed(String program, Source source) throws IOException, URISyntaxException {
         K parsed = programParser.apply(program, source);
-        KRun krun = new KRun(kem, FileUtil.testFileUtil());
+        KRun krun = new KRun(kem, FileUtil.testFileUtil(), true);
         return krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsed));
 
     }

@@ -63,5 +63,10 @@
            programs="external/tests"
            results="external/tests" />
 
+  <include file="kore-io/tests/config.xml"
+           directory="kore-io"
+           programs="kore-io/tests"
+           results="kore-io/tests" />
+
 </tests>
 

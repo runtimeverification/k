@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.kil.Sort;
+import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
@@ -31,15 +32,18 @@ public class BuiltinIOOperations {
     private final FileSystem fs;
     private final Provider<KILtoBackendJavaKILTransformer> kilTransformer;
     private final Provider<RunProcess> rp;
+    private final KRunOptions kRunOptions;
 
     @Inject
     public BuiltinIOOperations(
             FileSystem fs,
             Provider<KILtoBackendJavaKILTransformer> kilTransformer,
-            Provider<RunProcess> rp) {
+            Provider<RunProcess> rp,
+            KRunOptions kRunOptions) {
         this.fs = fs;
         this.kilTransformer = kilTransformer;
         this.rp = rp;
+        this.kRunOptions = kRunOptions;
     }
 
     public Term open(StringToken term1, StringToken term2, TermContext termContext) {
@@ -109,7 +113,12 @@ public class BuiltinIOOperations {
     public Term write(IntToken term1, StringToken term2, TermContext termContext) {
         try {
             fs.get(term1.longValue()).write(term2.byteArrayValue());
-            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
+            // TODO(daejunpark): hack: should implement the injection mechanism in kore
+            if (kRunOptions.experimental.kore) {
+                return KSequence.EMPTY;
+            } else {
+                return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
+            }
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {

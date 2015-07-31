@@ -20,6 +20,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.DefinitionScope;
@@ -86,6 +87,7 @@ public class KRunFrontEnd extends FrontEnd {
         private final CompiledDefinition compiledDef;
         private final Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter;
         private final ExecutionMode executionMode;
+        private final TTYInfo tty;
 
         @Inject
         public NewKRunFrontEnd(
@@ -94,17 +96,19 @@ public class KRunFrontEnd extends FrontEnd {
                 @Main FileUtil files,
                 @Main CompiledDefinition compiledDef,
                 @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter,
-                @Main ExecutionMode executionMode) {
+                @Main ExecutionMode executionMode,
+                TTYInfo tty) {
             this.kem = kem;
             this.krunOptions = krunOptions;
             this.files = files;
             this.compiledDef = compiledDef;
             this.initializeRewriter = initializeRewriter;
             this.executionMode = executionMode;
+            this.tty = tty;
         }
 
         public int run() {
-            return new KRun(kem, files).run(compiledDef,
+            return new KRun(kem, files, tty.stdin).run(compiledDef,
                     krunOptions,
                     initializeRewriter,
                     executionMode);

@@ -105,6 +105,30 @@ public class GenerateSentencesFromConfigDecl {
                     }
                 }
                 throw KEMException.compilerError("Malformed cell in configuration declaration.", term);
+            } else if (kapp.klabel().name().equals("#externalCell")) {
+                if (kapp.klist().size() == 1) {
+                    K startLabel = kapp.klist().items().get(0);
+                    if (startLabel instanceof KToken) {
+                        KToken label = (KToken) startLabel;
+                        if (label.sort().equals(Sort("#CellName"))) {
+                            String cellName = label.s();
+                            Sort sort = Sort(getSortOfCell(cellName));
+                            Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
+                            if (initializerProduction.isDefined()) {
+                                if (initializerProduction.get().size() == 1) { // should be only a single initializer
+                                    if (initializerProduction.get().head().items().size() == 1) {
+                                        // XCell ::= "initXCell"
+                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))));
+                                    } else if (initializerProduction.get().head().items().size() == 4) {
+                                        // XCell ::= "initXCell" "(" Map ")"
+                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), KVariable("Init")));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                throw KEMException.compilerError("Malformed io cell in configuration declaration.", term);
             } else if (kapp.klabel().name().equals("#cells")) {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
@@ -142,6 +166,10 @@ public class GenerateSentencesFromConfigDecl {
         } else {
             throw KEMException.compilerError("Unexpected value found in configuration declaration, expected KToken, KSequence, or KApply", term);
         }
+    }
+
+    private static String getInitLabel(Sort sort) {
+        return "init" + sort.name();
     }
 
     /**
@@ -222,7 +250,7 @@ public class GenerateSentencesFromConfigDecl {
         // -or-
         // syntax Cell ::= initCell(Map) [initializer, function]
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
-        String initLabel = "init" + sort.name();
+        String initLabel = getInitLabel(sort);
         Sentence initializer;
         Rule initializerRule;
         if (hasConfigurationVariable) {
