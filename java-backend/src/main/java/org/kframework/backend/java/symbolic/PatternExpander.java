@@ -49,7 +49,6 @@ public class PatternExpander extends CopyOnWriteTransformer {
             return kItem;
         }
         KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
-        KList kList = (KList) kItem.kList();
 
         List<ConstrainedTerm> results = new ArrayList<>();
         Term inputKList = KList.concatenate(kItem.getPatternInput());
@@ -69,6 +68,13 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 ConjunctiveFormula globalConstraint = unificationConstraint
                         .addAll(constraint.equalities())
                         .addAll(rule.requires())
+                        .simplify();
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                    continue;
+                }
+                globalConstraint = globalConstraint
+                        .add(outputKList, ruleOutputKList)
+                        .addAll(rule.ensures())
                         .simplify();
                 if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
