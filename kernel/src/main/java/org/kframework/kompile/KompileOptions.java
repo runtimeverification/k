@@ -26,11 +26,17 @@ public class KompileOptions implements Serializable {
     @Parameter(description="<file>")
     private List<String> parameters;
 
+    private File mainDefinitionFile;
+
     public File mainDefinitionFile() {
-        if (parameters == null || parameters.size() == 0) {
-            throw KEMException.criticalError("You have to provide exactly one main file in order to compile.");
+        File m = mainDefinitionFile;
+        if (m == null) {
+            if (parameters == null || parameters.size() == 0) {
+                throw KEMException.criticalError("You have to provide exactly one main file in order to compile.");
+            }
+            m = mainDefinitionFile = files.get().resolveWorkingDirectory(parameters.get(0));
         }
-        return files.get().resolveWorkingDirectory(parameters.get(0));
+        return m;
     }
 
     private transient Provider<FileUtil> files;
