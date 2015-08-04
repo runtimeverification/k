@@ -62,6 +62,7 @@ module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
 let emin (exp: int) (prec: int) : int = (- (1 lsl (exp - 1))) + 4 - prec
+let emin_normal (exp: int) : int = (- (1 lsl (exp - 1))) + 2
 let emax (exp: int) : int = 1 lsl (exp - 1)
 let round_to_range (c: kitem) : kitem = match c with 
     Float(f,e,p) -> let (cr, t) = (Gmp.FR.check_range p Gmp.GMP_RNDN (emin e p) (emax e) f) in Float((Gmp.FR.subnormalize cr t Gmp.GMP_RNDN),e,p)
@@ -83,6 +84,20 @@ let to_string_base (base: int) (i: Z.t) : string = match base with
 | _ -> raise Not_implemented
 let to_zarith (i: Gmp.Z.t) : Z.t = Z.of_string (Gmp.Z.to_string i)
 let from_zarith (i: Z.t) : Gmp.Z.t = Gmp.Z.from_string (Z.to_string i)
+
+let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t option =
+ let (digits, exp) = Gmp.FR.to_string_exp_base_digits Gmp.GMP_RNDN 2 prec f in match digits with 
+ | "@Inf@" -> false, (emax exp), Some Z.zero
+ | "-@Inf@" -> true, (emax exp), Some Z.zero
+ | "@NaN@" -> false, (emax exp), None
+ | "-@NaN@" -> true, (emax exp), None
+ | _ -> let min_exp = emin_normal e in
+ let significand = Z.of_string digits in
+ let scaled_significand = if exp < min_exp then 
+   (Z.shift_right significand (min_exp - (exp - 1))) else 
+   significand in
+ let true_exp = if exp < min_exp then min_exp else exp in
+ (String.get digits 0 = '-'), true_exp, Some scaled_significand
 
 module MAP =
 struct
@@ -549,8 +564,15 @@ struct
   let hook_max c lbl sort config ff = raise Not_implemented
   let hook_rem c lbl sort config ff = raise Not_implemented
   let hook_root c lbl sort config ff = raise Not_implemented
-  let hook_sign c lbl sort config ff = raise Not_implemented
-  let hook_significand c lbl sort config ff = raise Not_implemented
+  let hook_sign c lbl sort config ff = match c with
+      [Float (f,e,p)] -> (match deconstruct_float f e p with (s,_,_) -> [Bool s])
+    | _ -> raise Not_implemented
+  let hook_significand c lbl sort config ff = match c with
+      [Float (f,e,p)] -> (match deconstruct_float f e p with (_, _, Some s) -> [Int s] 
+        | _ -> raise Not_implemented)
+    | _ -> raise Not_implemented
   let hook_atan2 c lbl sort config ff = raise Not_implemented
-  let hook_exponent c lbl sort config ff = raise Not_implemented
+  let hook_exponent c lbl sort config ff = match c with
+      [Float (f,e,p)] -> (match deconstruct_float f e p with (_, exp, _) -> [Int (Z.of_int exp)])
+    | _ -> raise Not_implemented
 end
