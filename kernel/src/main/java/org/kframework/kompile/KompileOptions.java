@@ -28,15 +28,14 @@ public class KompileOptions implements Serializable {
 
     private File mainDefinitionFile;
 
-    public File mainDefinitionFile() {
-        File m = mainDefinitionFile;
-        if (m == null) {
+    public synchronized File mainDefinitionFile() {
+        if (mainDefinitionFile == null) {
             if (parameters == null || parameters.size() == 0) {
                 throw KEMException.criticalError("You have to provide exactly one main file in order to compile.");
             }
-            m = mainDefinitionFile = files.get().resolveWorkingDirectory(parameters.get(0));
+            mainDefinitionFile = files.get().resolveWorkingDirectory(parameters.get(0));
         }
-        return m;
+        return mainDefinitionFile;
     }
 
     private transient Provider<FileUtil> files;
