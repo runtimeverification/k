@@ -72,7 +72,6 @@ public class DefinitionLoadingModule extends AbstractModule {
         // a hack, but it's good enough for what we need from it, which is a temporary solution
         if (files.get().resolveKompiled("compiled.bin").exists()) {
             KompileOptions res = compiledDef.get().kompileOptions;
-            res.setFiles(files);
             return res;
         } else {
             Context res = context.get();
