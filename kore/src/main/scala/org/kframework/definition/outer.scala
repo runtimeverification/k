@@ -137,6 +137,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
+  val usedCellSorts: Set[Sort] = productions.flatMap {p => p.items.collect{case NonTerminal(s) => s}
+     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))}
 
   lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") =>
     srt })
@@ -184,7 +186,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
     case p@Production(_, items, _) =>
-      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) => nt }
       if (!res.isEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
       res

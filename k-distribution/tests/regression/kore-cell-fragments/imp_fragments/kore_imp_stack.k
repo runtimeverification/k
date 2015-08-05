@@ -43,7 +43,7 @@ module IMP
   syntax KResult ::= Int | Bool
   syntax Ints ::= List{Int,","} [klabel(appInts)]
 
-  syntax KItem ::= restore(Id,K)
+  syntax KItem ::= restore(Id,TCellFragment)
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm:K </k>

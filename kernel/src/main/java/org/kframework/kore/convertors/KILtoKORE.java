@@ -264,7 +264,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
 
-        org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getSort());
+        org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getRealSort());
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
@@ -299,7 +299,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
-                            items.add(NonTerminal(apply(((NonTerminal) it).getSort())));
+                            items.add(NonTerminal(apply(((NonTerminal) it).getRealSort())));
                         } else if (it instanceof UserList) {
                             throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
