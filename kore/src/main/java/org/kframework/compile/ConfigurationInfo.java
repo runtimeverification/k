@@ -50,6 +50,16 @@ public interface ConfigurationInfo {
     /** The label for a cell */
     KLabel getCellLabel(Sort k);
 
+    /** The label for a fragment of a cell, only defined for parent cells. */
+    KLabel getCellFragmentLabel(Sort k);
+
+    /**
+     * The constant label to use as an argument of a cell fragment,
+     * when the cell fragment did not capture cells of the argument type.
+     * Only defined for child cells of multiplicity other than *.
+     */
+    KLabel getCellAbsentLabel(Sort cellSort);
+
     /** Returns a term which is the default cell of sort k,
      * probably an initializer macro */
     K getDefaultCell(Sort k);

@@ -24,7 +24,16 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
   private val cellSorts: Set[Sort] = cellProductions.keySet
   private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
-  val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
+  private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
+
+  private val cellFragmentLabel: Map[String,KLabel] =
+    m.productions.filter(_.att.contains("cellFragment"))
+      .map(p => (p.att.get("cellFragment",classOf[String]).get,p.klabel.get)).toMap
+  private val cellAbsentLabel: Map[String,KLabel] =
+    m.productions.filter(_.att.contains("cellOptAbsent"))
+      .map (p => (p.att.get("cellOptAbsent",classOf[String]).get,p.klabel.get)).toMap
+
+
   private val cellInitializer: Map[Sort, KApply] =
     m.productions.filter(p => cellSorts(p.sort) && p.att.contains("initializer"))
       .map(p => (p.sort, KApply(p.klabel.get))).toMap
@@ -98,6 +107,9 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   }
 
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
+
+  override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k.name)
+  override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k.name)
 
   override def getRootCell: Sort = topCell
   override def getComputationCell: Sort = mainCell

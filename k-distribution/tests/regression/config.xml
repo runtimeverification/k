@@ -68,5 +68,8 @@
            programs="kore-io/tests"
            results="kore-io/tests" />
 
+  <include file="kore-cell-fragments/imp_fragments/config.xml"
+           directory="kore-cell-fragments/imp_fragments/" />
+
 </tests>
 
