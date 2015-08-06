@@ -10,6 +10,8 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.Terminal;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -106,7 +108,20 @@ public class GenerateSentencesFromConfigDeclTest {
                         BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
                 Rule(KRewrite(KApply(KLabel("initOptCell")),
                                 IncompleteCellUtils.make(KLabel("<opt>"), false, KApply(KLabel(".Opt")), false)),
-                        BooleanUtils.TRUE, BooleanUtils.TRUE, Att()));
+                        BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
+                Production("<threads>-fragment", Sort("ThreadsCellFragment"),
+                        Seq(Terminal("<threads>-fragment"),NonTerminal(Sort("ThreadCellBag")),Terminal("</threads>-fragment")),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY,"ThreadsCell")),
+                Production("<thread>-fragment", Sort("ThreadCellFragment"),
+                        Seq(Terminal("<thread>-fragment"),NonTerminal(Sort("KCellOpt")),NonTerminal(Sort("OptCellOpt")),Terminal("</thread>-fragment")),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY,"ThreadCell")),
+                Production(Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
+                Production("noOptCell", Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, "OptCell")),
+                Production(Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
+                Production("noKCell", Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, "KCell"))
+            );
+        assertEquals(Set(),reference.$amp$tilde(gen));
+        assertEquals(Set(), gen.$amp$tilde(reference));
         assertEquals(reference, gen);
     }
 

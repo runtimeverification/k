@@ -35,13 +35,19 @@ public class Attribute<T> extends ASTNode {
     public static final String LEMMA_KEY = "lemma";
     public static final String TRUSTED_KEY = "trusted";
     public static final String SIMPLIFICATION_KEY = "simplification";
+
     public static final String FRESH_GENERATOR = "freshGenerator";
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String EXPONENT_KEY = "exponent";
     public static final String SIGNIFICAND_KEY = "significand";
     public static final String SMTLIB_KEY = "smtlib";
     public static final String SMT_LEMMA_KEY = "smt-lemma";
+    // Used to direct configuration abstraction,
+    // generated when translating configuration declaration to productions.
     public static final String CELL_KEY = "cell";
+    public static final String CELL_FRAGMENT_KEY = "cellFragment";
+    public static final String CELL_OPT_ABSENT_KEY = "cellOptAbsent";
+
     public static final String EQUALITY_KEY = "equality";
     public static final String ARITY_KEY = "arity";
     public static final String IMPURE_KEY = "impure";
