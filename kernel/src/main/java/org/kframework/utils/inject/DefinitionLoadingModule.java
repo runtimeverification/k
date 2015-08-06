@@ -75,7 +75,6 @@ public class DefinitionLoadingModule extends AbstractModule {
             return res;
         } else {
             Context res = context.get();
-            res.kompileOptions.setFiles(files);
             return res.kompileOptions;
         }
     }
