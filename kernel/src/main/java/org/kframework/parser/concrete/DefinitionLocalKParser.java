@@ -45,7 +45,7 @@ public class DefinitionLocalKParser {
                 }
             });
 
-    private static Class<?> resourceDomain;
+    private volatile static Class<?> resourceDomain;
 
     public static Class<?> init(File kompiled) {
         ClassLoader cl;
