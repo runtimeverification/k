@@ -347,4 +347,36 @@ public class RuleGrammarTest {
         parseProgram("0()", def, "Exp", 0, false);
         parseProgram("0[]", def, "Exp", 0, true);
     }
+
+    // test inference with overloading.
+    // regression test for issue #1586
+    @Test
+    public void test21() {
+        String def = "" +
+                "module TEST " +
+                "syntax A ::= B | \"a\" " +
+                "syntax B ::= \"b\" " +
+                "syntax TA ::= TB | t(A) [klabel(t)] " +
+                "syntax TB ::= t(B) [klabel(t)] " +
+                "endmodule";
+        parseRule("t(Y) => .K", def, 0, true); // incorrect result, should infer a type
+        parseRule("t(_) => .K", def, 1, false); // incorrect result, this is reporting an ambiguity.
+    }
+
+    // test inference with complicated ambiguity
+    // regression test for issue #1603
+    @Test
+    public void test22() {
+        String def = "" +
+                "module TEST\n" +
+                "syntax T ::= \"wrap\" M [klabel(wrapM)] | \"wrap\" X [klabel(wrapX)]\n" +
+                "syntax A\n" +
+                "syntax B\n" +
+                "syntax M ::= A | B\n" +
+                "syntax N ::= A | B | X // make A and B both maximal in the intersection of N and M\n" +
+                "syntax X\n" +
+                "syntax KItem ::= label(N,T)\n" +
+                "endmodule";
+        parseRule("X => label(X,wrap X)", def, 1, false); // incorect result, this should be an error.
+    }
 }
