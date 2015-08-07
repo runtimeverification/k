@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +38,14 @@ import org.kframework.utils.file.JarInfo;
  */
 public class DefinitionLocalKParser {
 
-    private static final Map<File, Class<?>> impl = new LinkedHashMap<File, Class<?>>() {
-        protected boolean removeEldestEntry(Map.Entry<File,java.lang.Class<?>> eldest) {
-            return size() > Runtime.getRuntime().availableProcessors() * 2;
-        }
-    };
+    private static final Map<File, Class<?>> impl = Collections.synchronizedMap(
+            new LinkedHashMap<File, Class<?>>() {
+                protected boolean removeEldestEntry(Map.Entry<File, java.lang.Class<?>> eldest) {
+                    return size() > Runtime.getRuntime().availableProcessors() * 2;
+                }
+            });
 
-    private static Class<?> resourceDomain;
+    private volatile static Class<?> resourceDomain;
 
     public static Class<?> init(File kompiled) {
         ClassLoader cl;
