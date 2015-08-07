@@ -108,17 +108,17 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         try {
             ProcessBuilder pb = files.getProcessBuilder();
             if (DefinitionToOcaml.ocamlopt) {
-                pb = pb.command("ocamlopt.opt", "-g", "-o", "a.out", "gmp.cmxa", "str.cmxa", "unix.cmxa", "-safe-string",
+                pb = pb.command("ocamlfind", "ocamlopt", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cmxa", "unix.cmxa", "-safe-string",
                         files.resolveKompiled("constants.cmx").getAbsolutePath(), files.resolveKompiled("prelude.cmx").getAbsolutePath(),
-                        files.resolveKompiled("def.cmx").getAbsolutePath(),
-                        "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        name);
+                        files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        name, "-inline", "20", "-nodynlink");
+                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
             } else {
-                pb = pb.command("ocamlc.opt", "-g", "-o", "a.out", "gmp.cma", "str.cma", "unix.cma", "-safe-string",
+                pb = pb.command("ocamlfind", "ocamlc", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cma", "unix.cma", "-safe-string",
                         files.resolveKompiled("constants.cmo").getAbsolutePath(), files.resolveKompiled("prelude.cmo").getAbsolutePath(),
-                        files.resolveKompiled("def.cmo").getAbsolutePath(),
-                        "-I", "+gmp", "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
                         name);
+                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
             }
             Process p = pb.directory(files.resolveTemp("."))
                     .redirectError(files.resolveTemp("compile.err"))
@@ -154,14 +154,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 byte[] buffer = new byte[8192];
                 try {
                     while (true) {
-                        if (p2.getInputStream().available() > 0) {
-                            count = p2.getInputStream().read(buffer);
-                            if (count < 0)
-                                break;
-                            System.out.write(buffer, 0, count);
-                        } else {
+                        count = p2.getInputStream().read(buffer);
+                        if (count < 0)
+                            break;
+                        System.out.write(buffer, 0, count);
+                        if (p2.getInputStream().available() == 0)
                             Thread.sleep(100);
-                        }
                     }
                 } catch (IOException | InterruptedException e) {}
             });
@@ -170,14 +168,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 byte[] buffer = new byte[8192];
                 try {
                     while (true) {
-                        if (p2.getErrorStream().available() > 0) {
-                            count = p2.getErrorStream().read(buffer);
-                            if (count < 0)
-                                break;
-                            System.err.write(buffer, 0, count);
-                        } else {
+                        count = p2.getErrorStream().read(buffer);
+                        if (count < 0)
+                            break;
+                        System.err.write(buffer, 0, count);
+                        if (p2.getErrorStream().available() == 0)
                             Thread.sleep(100);
-                        }
                     }
                 } catch (IOException | InterruptedException e) {}
             });
@@ -187,8 +183,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
             exit = p2.waitFor();
             in.interrupt();
-            out.interrupt();
-            err.interrupt();
             in.join();
             out.join();
             err.join();
