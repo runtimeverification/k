@@ -360,7 +360,7 @@ public class RuleGrammarTest {
                 "syntax TB ::= t(B) [klabel(t)] " +
                 "endmodule";
         parseRule("t(Y) => .K", def, 0, true); // incorrect result, should infer a type
-        parseRule("t(_) => .K", def, 1, false); // incorrect result, this is reporting an ambiguity.
+        parseRule("t(_) => .K", def, 0, true); // incorrect result, should infer a type
     }
 
     // test inference with complicated ambiguity
