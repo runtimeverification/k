@@ -30,9 +30,12 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -56,6 +59,69 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         this.sortSet = sortSet;
         this.productions = productions;
         this.inferSortChecks = inferSortChecks;
+    }
+
+    /** return the subset of maximal elements of {@code sorts} */
+    private Set<Sort> maximal(Collection<Sort> sorts) {
+        Set<Sort> maxSorts = new HashSet<>();
+
+        nextsort:
+        for (Sort vv1 : sorts) {
+            for (Sort vv2 : sorts)
+                if (subsorts.lessThan(vv1, vv2))
+                    continue nextsort;
+            maxSorts.add(vv1);
+        }
+        return maxSorts;
+    }
+
+    /** Return the set of all known sorts which are a lower bound on
+     * all sorts in {@code bounds}, leaving out internal sorts below "KBott".
+     */
+    private Set<Sort> lowerBounds(Collection<Sort> bounds) {
+        Set<Sort> mins = new HashSet<>();
+        nextsort:
+        for (Sort sort : iterable(sortSet)) { // for every declared sort
+            if (subsorts.lessThanEq(sort, Sort("KBott")))
+                continue;
+            for (Sort bound : bounds)
+                if (!subsorts.greaterThanEq(bound, sort))
+                    continue nextsort;
+            mins.add(sort);
+        }
+        return mins;
+    }
+
+    // When passed a mutable List {@code sets} of nonempty subsets of {@code universe},
+    // returns a set containing at least one item in common with each of the sets.
+    // Empties {@code sets}.
+    private <T> Set<T> hittingSet(Set<T> universe, List<Set<T>> sets) {
+        assert sets.stream().allMatch(s -> !s.isEmpty());
+        Set<T> hittingSet = new HashSet<>();
+        while (!sets.isEmpty()) {
+            T maxItem = null;
+            int maxCount = 0;
+            for (T item : universe) {
+                int count = 0;
+                for (Set<T> s : sets) {
+                    if (s.contains(item)) {
+                        ++count;
+                    }
+                }
+                if (count > maxCount) {
+                    maxItem = item;
+                    maxCount = count;
+                }
+            }
+            hittingSet.add(maxItem);
+            ListIterator<Set<T>> li = sets.listIterator();
+            while (li.hasNext()) {
+                if (li.next().contains(maxItem)) {
+                    li.remove();
+                }
+            }
+        }
+        return hittingSet;
     }
 
     static final class VarKey {
@@ -139,53 +205,18 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
             Set<Multimap<VarKey, Sort>> solutions = new HashSet<>();
             VarKey fails = null;
-            Set<Sort> failsAmb = null;
-            VarKey failsAmbName = null;
             for (Multimap<VarKey, Sort> variant : vars2.vars) {
                 // take each solution and do GLB on every variable
                 Multimap<VarKey, Sort> solution = HashMultimap.create();
                 for (VarKey key : variant.keySet()) {
                     Collection<Sort> values = variant.get(key);
-                    Set<Sort> mins = new HashSet<>();
-                    for (Sort sort : iterable(sortSet)) { // for every declared sort
-                        if (subsorts.lessThanEq(sort, Sort("KBott")))
-                            continue;
-                        boolean min = true;
-                        for (Sort var : values) {
-                            if (!subsorts.greaterThanEq(var, sort)) {
-                                min = false;
-                                break;
-                            }
-                        }
-                        if (min)
-                            mins.add(sort);
-                    }
+                    Set<Sort> mins = lowerBounds(values);
                     if (mins.size() == 0) {
                         fails = key;
                         solution.clear();
                         break;
-                    } else if (mins.size() > 1) {
-                        java.util.Set<Sort> maxSorts = new HashSet<>();
-
-                        for (Sort vv1 : mins) {
-                            boolean maxSort = true;
-                            for (Sort vv2 : mins)
-                                if (subsorts.lessThan(vv1, vv2))
-                                    maxSort = false;
-                            if (maxSort)
-                                maxSorts.add(vv1);
-                        }
-
-                        if (maxSorts.size() == 1)
-                            solution.putAll(key, maxSorts);
-                        else {
-                            failsAmb = maxSorts;
-                            failsAmbName = key;
-                            solution.clear();
-                            break;
-                        }
                     } else {
-                        solution.putAll(key, mins);
+                        solution.putAll(key, maximal(mins));
                     }
                 }
                 // I found a solution that fits everywhere, then store it for disambiguation
@@ -194,28 +225,87 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
             if (!vars2.vars.isEmpty()) {
                 if (solutions.size() == 0) {
-                    if (fails != null) {
-                        String msg = "Could not infer a sort for variable " + fails + " to match every location.";
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
-                        return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                    assert fails != null;
+                    String msg = "Could not infer a sort for variable " + fails + " to match every location.";
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                }
 
-                    } else {
-                        // Failure when in the same solution I can't find a unique sort for a specific variable.
-                        String msg = "Could not infer a unique sort for variable " + failsAmbName + ".";
+                // If multiple parses were typeable, check that all have the same set of variables
+                if (solutions.size() > 1) {
+                    Set<VarKey> allVars = new HashSet<>();
+                    Set<VarKey> commonVars = null;
+                    for (Multimap<VarKey, Sort> solution : solutions) {
+                        Set<VarKey> theseVars = solution.keySet();
+                        allVars.addAll(theseVars);
+                        if (commonVars == null) {
+                            commonVars = new HashSet<>(theseVars);
+                        } else {
+                            commonVars.retainAll(theseVars);
+                        }
+                    }
+                    if (!allVars.equals(commonVars)) {
+                        String msg = "Possible parses have different sets of variables. "
+                                + "Each of these may or may not be a variable, depending on the parse:";
+                        allVars.removeAll(commonVars);
+                        for (VarKey v : allVars) {
+                            msg += " " + v;
+                        }
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), this.warningUnit());
+                    }
+                }
+
+                // Now check that each variable has a unique maximal possible sort.
+                Multimap<VarKey,Sort> varBounds;
+                if (solutions.size() > 1) {
+                    varBounds = HashMultimap.create();
+                    for (Multimap<VarKey, Sort> solution : solutions) {
+                        varBounds.putAll(solution);
+                    }
+                } else {
+                    varBounds = solutions.iterator().next();
+                }
+                Multimap<VarKey,Sort> solution = HashMultimap.create();
+                for (VarKey k : varBounds.keySet()) {
+                    Set<Sort> sorts = maximal(varBounds.get(k));
+                    if (sorts.size() > 1) {
+                        String msg = "Could not infer a unique sort for variable " + k + ".";
                         msg += " Possible sorts: ";
-                        for (Sort vv1 : failsAmb)
+                        for (Sort vv1 : sorts)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
                         KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
-
                     }
-                } else if (solutions.size() == 1) {
+                    solution.putAll(k, sorts);
+                }
+
+                if (!solutions.contains(solution)) {
+                    List<Set<VarKey>> badVars = new ArrayList<>(solutions.size());
+                    for (Multimap<VarKey,Sort> badSolution : solutions) {
+                        HashSet<VarKey> myBadVars = new HashSet<>();
+                        for (VarKey k : badSolution.keySet()) {
+                            if (!badSolution.get(k).equals(solution.get(k))) {
+                                myBadVars.add(k);
+                            }
+                        }
+                        badVars.add(myBadVars);
+                    }
+                    Set<VarKey> reportVars = hittingSet(solution.keySet(), badVars);
+                    String msg = "Could not infer unique sorts. Each variable has a unique greatest possible sort,"
+                            +" but these cannot all be assigned simultaneously: ";
+                    for (VarKey v : solution.keySet()) {
+                        msg+= v+" : "+solution.get(v).iterator().next()+", ";
+                    }
+                    msg = msg.substring(0, msg.length() - 2);
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                } else {
                     //System.out.println("solutions = " + solutions);
-                    Multimap<VarKey, Sort> sol1 = solutions.iterator().next();
                     decl.clear();
-                    for (VarKey key : sol1.keySet()) {
-                        Sort sort = sol1.get(key).iterator().next();
+                    for (VarKey key : solution.keySet()) {
+                        Sort sort = solution.get(key).iterator().next();
                         decl.put(key, sort);
                         if (!key.isAnyVar()) {
                             String msg = "Variable " + key + " was not declared. Assuming sort " + sort + ".";
@@ -227,34 +317,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (!decl.isEmpty()) {
                         t = new ApplyTypeCheck(decl).apply(t).right().get();
                     }
-                } else {
-                    Multimap<VarKey, Sort> collect = HashMultimap.create();
-                    for (Multimap<VarKey, Sort> sol : solutions) {
-                        collect.putAll(sol);
-                    }
-                    for (VarKey key : collect.keySet()) {
-                        Collection<Sort> values = collect.get(key);
-                        if (values.size() > 1) {
-                            String msg = "Could not infer a unique sort for variable " + key + ".";
-                            msg += " Possible sorts: ";
-                            for (Sort vv1 : values)
-                                msg += vv1 + ", ";
-                            msg = msg.substring(0, msg.length() - 2);
-                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
-                            return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
-                        }
-                    }
-                    // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
-                    // In rare cases (couldn't think of one right now) it may be that the
-                    // solution may be different because of different variable names
-
-                    // Ok, I found one example now. In C with unified-builtins, the follow restriction for ==Set doesn't work
-                    // and it creates multiple parses with different amounts of variables
-                    // This makes it that I can't disambiguate properly
-                    // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
-                    String msg = "Parser: failed to infer sorts for variables.\n    Please file a bug report at https://github.com/kframework/k/issues.";
-                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
-                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
         }

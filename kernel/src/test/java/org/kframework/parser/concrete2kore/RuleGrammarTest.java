@@ -359,8 +359,8 @@ public class RuleGrammarTest {
                 "syntax TA ::= TB | t(A) [klabel(t)] " +
                 "syntax TB ::= t(B) [klabel(t)] " +
                 "endmodule";
-        parseRule("t(Y) => .K", def, 0, true); // incorrect result, should infer a type
-        parseRule("t(_) => .K", def, 0, true); // incorrect result, should infer a type
+        parseRule("t(Y) => .K", def, 1, false);
+        parseRule("t(_) => .K", def, 0, false);
     }
 
     // test inference with complicated ambiguity
@@ -377,6 +377,6 @@ public class RuleGrammarTest {
                 "syntax X\n" +
                 "syntax KItem ::= label(N,T)\n" +
                 "endmodule";
-        parseRule("X => label(X,wrap X)", def, 1, false); // incorect result, this should be an error.
+        parseRule("X => label(X,wrap X)", def, 0, true);
     }
 }
