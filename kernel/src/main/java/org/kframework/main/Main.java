@@ -56,7 +56,7 @@ public class Main {
         invalidJarArguments();
     }
 
-    private static boolean isNailgun;
+    private static volatile boolean isNailgun;
 
     public static boolean isNailgun() {
         return isNailgun;
