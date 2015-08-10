@@ -25,7 +25,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinList node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeRight = 0;
@@ -53,7 +53,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinMap node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -74,7 +74,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinSet node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -94,7 +94,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(CellCollection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -122,7 +122,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KItem node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.kList().accept(this);
@@ -140,7 +140,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KLabelFreezer node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
@@ -151,7 +151,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KList node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int size = 0;
@@ -171,7 +171,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KSequence node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int size = 0;
@@ -192,7 +192,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KItemProjection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
@@ -204,7 +204,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KLabelInjection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
@@ -215,7 +215,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(InjectedKLabel node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.injectedKLabel().accept(this);

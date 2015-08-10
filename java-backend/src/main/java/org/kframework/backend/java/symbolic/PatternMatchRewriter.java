@@ -1,14 +1,9 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import org.kframework.backend.java.indexing.IndexingCellsCollector;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.CellCollection;
@@ -27,9 +22,13 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PatternMatchRewriter {
 
@@ -295,9 +294,7 @@ public class PatternMatchRewriter {
     }
 
     private final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution, TermContext termContext) {
-        Term rhs = rule.cellsToCopy().contains(DataStructures.getCellEntry(rule.rightHandSide()).cellLabel()) ?
-                DeepCloner.clone(rule.rightHandSide()) :
-                rule.rightHandSide();
+        Term rhs = DeepCloner.clone(rule.rightHandSide());
         Term result = rhs.copyOnShareSubstAndEval(substitution,
                 rule.reusableVariables().elementSet(), termContext);
         termContext.setTopTerm(result);
