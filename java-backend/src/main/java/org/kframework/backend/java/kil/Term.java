@@ -31,7 +31,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     protected final Kind kind;
     // protected final boolean normalized;
 
-    private Boolean mutable = null;
+    private volatile Boolean mutable;
 
     protected Term(Kind kind) {
         super();
@@ -83,10 +83,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      *         {@code false}
      */
     public final boolean isMutable() {
-        if (mutable == null) {
-            mutable = computeMutability();
+        Boolean m = mutable;
+        if (m == null) {
+            mutable = m = computeMutability();
         }
-        return mutable;
+        return m;
     }
 
     /**
@@ -227,11 +228,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public final int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Utils.NO_HASHCODE && !isMutable()) {
             h = computeHash();
             h = h == 0 ? 1 : h;
-            if (!isMutable())
-                hashCode = h;
+            hashCode = h;
         }
         return h;
     }

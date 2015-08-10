@@ -33,6 +33,8 @@ class TestConfiguration implements ConfigurationInfo {
     Map<Sort, K> units = Maps.newHashMap();
     Map<Sort, KLabel> concats = Maps.newHashMap();
     Map<Sort, KLabel> cellLabels = Maps.newHashMap();
+    Map<Sort, KLabel> cellFragmentLabels = Maps.newHashMap();
+    Map<Sort, KLabel> cellAbsentLabels = Maps.newHashMap();
 
     public void addCell(String parent, String child, String label) {
         addCell(parent, child, label, Multiplicity.ONE);
@@ -45,6 +47,13 @@ class TestConfiguration implements ConfigurationInfo {
     }
     public void addCell(String parent, String child, String label, Multiplicity m, Sort contents) {
         if (parent != null) {
+            if (!children.containsKey(Sort(parent))) {
+                // create a fragment label for the parent cell.
+                cellFragmentLabels.put(Sort(parent),KLabel(cellLabels.get(Sort(parent)).name()+"-fragment"));
+            }
+            if (m != Multiplicity.STAR) {
+                cellAbsentLabels.put(Sort(child),KLabel("no"+child));
+            }
             parents.put(Sort(child), Sort(parent));
             children.put(Sort(parent), Sort(child));
             levels.put(Sort(child), 1 + levels.get(Sort(parent)));
@@ -113,6 +122,12 @@ class TestConfiguration implements ConfigurationInfo {
     public KLabel getCellLabel(Sort k) {
         return cellLabels.get(k);
     }
+
+    @Override
+    public KLabel getCellFragmentLabel(Sort k) { return cellFragmentLabels.get(k); }
+
+    @Override
+    public KLabel getCellAbsentLabel(Sort k) { return cellAbsentLabels.get(k); }
 
     @Override
     public K getDefaultCell(Sort k) {

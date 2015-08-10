@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -103,7 +104,7 @@ public class ResolveContexts {
         }
         items.remove(items.size() - 1);
         items.add(Terminal(")"));
-        Production freezer = Production(freezerLabel.name(), input.sortFor().apply(((KApply) context.body()).klabel()), immutable(items), Att());
+        Production freezer = Production(freezerLabel.name(), mutable(input.sortFor()).getOrDefault(((KApply) context.body()).klabel(), Sorts.KItem()), immutable(items), Att());
         K frozen = KApply(freezerLabel, h.vars.stream().map(v -> (K) v).collect(Collections.toList()));
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(h.heated, frozen)), requires, BooleanUtils.TRUE, context.att().add("heat")),

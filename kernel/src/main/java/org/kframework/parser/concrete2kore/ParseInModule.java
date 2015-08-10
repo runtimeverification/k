@@ -4,8 +4,10 @@ package org.kframework.parser.concrete2kore;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
+import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
+import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.disambiguation.*;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
@@ -80,7 +82,7 @@ public class ParseInModule implements Serializable {
      * @param startSymbol    the start symbol from which to parse.
      * @return the Term representation of the parsed input.
      */
-    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
+    public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
         return parseString(input, startSymbol, source, 1, 1);
     }
@@ -93,8 +95,35 @@ public class ParseInModule implements Serializable {
         }
     }
 
-    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+    public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
+        parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+        final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
+                = parseStringTerm(input, startSymbol, source, startLine, startColumn);
+        Either<Set<ParseFailedException>, K> parseInfo;
+        if (result._1().isLeft()) {
+            parseInfo = Left.apply(result._1().left().get());
+        } else {
+            parseInfo = Right.apply(TreeNodesToKORE.apply(result._1().right().get()));
+        }
+        return new Tuple2<>(parseInfo, result._2());
+    }
+
+    /**
+     * Parse the given input. This function is private because the final disambiguation
+     * in {@link AmbFilter} eliminates ambiguities that will be equivalent only after
+     * calling {@link TreeNodesToKORE#apply(Term)}, but returns a result that is
+     * somewhat arbitrary as an actual parser {@link Term}.
+     * Fortunately all callers want the result as a K, and can use the public
+     * version of this method.
+     * @param input
+     * @param startSymbol
+     * @param source
+     * @param startLine
+     * @param startColumn
+     * @return
+     */
+    private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
+            parseStringTerm(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
         getGrammar();
 
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());

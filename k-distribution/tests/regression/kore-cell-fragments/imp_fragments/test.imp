@@ -1,0 +1,1 @@
+int X,Y; push(1) local(X){ push(2) X = pop()+pop();} Y=pop();

@@ -165,8 +165,12 @@ public class CloseCells {
             for (K item : contents) {
                 if (item instanceof KRewrite) {
                     KRewrite rw = (KRewrite) item;
-                    filterRequired(requiredLeft, rw.left());
-                    filterRequired(requiredRight, rw.right());
+                    for (K leftItem : IncompleteCellUtils.flattenCells(rw.left())) {
+                        filterRequired(requiredLeft, leftItem);
+                    }
+                    for (K rightItem : IncompleteCellUtils.flattenCells(rw.right())) {
+                        filterRequired(requiredRight, rightItem);
+                    }
                 } else {
                     filterRequired(requiredLeft, item);
                     filterRequired(requiredRight, item);

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+  <tests>
+    <test
+        definition="kore_imp++.k"
+        programs="."
+        extension="imp"
+        results="." >
+      <kompile-option name="--kore"/>
+      <kompile-option name="--main-module" value="IMP" />
+      <all-programs>
+        <krun-option name="--kore" />
+        <krun-option name="--smt" value="none" />
+        <krun-option name="--output" value="none" />
+      </all-programs>
+    </test>
+  </tests>

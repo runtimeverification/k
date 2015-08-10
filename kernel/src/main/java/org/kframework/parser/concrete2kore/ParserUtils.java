@@ -87,8 +87,7 @@ public class ParserUtils {
                                     Sort startSymbol,
                                     Source source,
                                     ParseInModule kastModule) {
-        Term cleaned = kastModule.parseString(theTextToParse, startSymbol, source)._1().right().get();
-        return TreeNodesToKORE.apply(cleaned);
+        return kastModule.parseString(theTextToParse, startSymbol, source)._1().right().get();
     }
 
     /**

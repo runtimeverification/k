@@ -43,10 +43,19 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
-            Process ocamlopt = files.getProcessBuilder()
-                    .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
-                            "-safe-string", "-w", "-26-11",
-                            "constants.ml", "prelude.ml", "def.ml")
+            ProcessBuilder pb = files.getProcessBuilder();
+            if (DefinitionToOcaml.ocamlopt) {
+                pb.command("ocamlfind", "ocamlopt", "-c", "-g", "-package", "gmp", "-package", "zarith",
+                        "-safe-string", "-w", "-26-11",
+                        "constants.ml", "prelude.ml", "def.ml", "-inline", "20", "-nodynlink")
+                .environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+            } else {
+                pb.command("ocamlfind", "ocamlc", "-c", "-g", "-package", "gmp", "-package", "zarith",
+                        "-safe-string", "-w", "-26-11",
+                        "constants.ml", "prelude.ml", "def.ml")
+                        .environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+            }
+            Process ocamlopt = pb
                     .directory(files.resolveKompiled("."))
                     .inheritIO()
                     .start();

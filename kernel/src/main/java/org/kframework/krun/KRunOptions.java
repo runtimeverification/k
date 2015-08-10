@@ -85,7 +85,7 @@ public final class KRunOptions {
 
         @DynamicParameter(names={"--config-parser", "-p"}, description="Command used to parse " +
                 "configuration variables. Default is \"kast --parser ground -e\". See description of " +
-                "--parser. For example, -cpPGM=\"kast\" specifies that the configuration variable $PGM " +
+                "--parser. For example, -pPGM=\"kast\" specifies that the configuration variable $PGM " +
                 "should be parsed with the command \"kast\".")
         private Map<String, String> configVarParsers = new HashMap<>();
 

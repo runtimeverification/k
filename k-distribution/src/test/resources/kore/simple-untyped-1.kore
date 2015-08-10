@@ -422,11 +422,11 @@ module SIMPLE-UNTYPED
   syntax ControlCell ::= "initControl"  [initializer, klabel(initControl)]
   rule initControl() => `<control>`(initFstack(),initXStack())  [macro]
 
-  syntax ControlCellFragment ::= FStack
-  syntax ControlCellFragment ::= XStack
-  syntax ControlCellFragment ::= ".ControlCellFragment" [klabel(.ControlCellFragment)]
-  syntax ControlCellFragment ::= ControlCellFragment ControlCellFragment
-    [assoc, comm, unit(.ControlCellFragment), klabel(_ControlCellFragment_)]
+  syntax ControlCellFragment ::= "<control>-fragment" FStackOpt XStackOpt "</control>-fragment" [klabel(<control>-fragment), cellFragment(ControlCell)]
+  syntax FStackOpt ::= FStack
+  syntax FStackOpt ::= "noFStack" [cellAbsent(FStack)]
+  syntax XStackOpt ::= XStack
+  syntax XStackOpt ::= "noXStack" [cellAbsent(XStack)]
 
   syntax FStack ::= "<fstack>" List "</fstack>"  [cell, color("blue"),klabel(<fstack>)]
   syntax FStack ::= "initFStack" [initializer, klabel(initFStack)]
@@ -629,7 +629,7 @@ module SIMPLE-UNTYPED
                `_andBool_`(`IsVals`(Vs),
                `_andBool_`(`IsK`(K),
                `_andBool_`(`IsMap`(Env),
-               `_andBool_`(`IsBag`(C) // TODO: why inferred as Bag despite ControlCellFragment above?
+               `_andBool_`(`IsControlCellFragment`(C)
                           ,`IsMap`(GEnv)))))))
 
   rule #cellBracket(

@@ -28,8 +28,11 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
 import scala.Tuple3;
+import scala.collection.Seq;
 import scala.collection.immutable.Set;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,6 +54,12 @@ public class GenerateSentencesFromConfigDecl {
      * sort to represent a bag of those cells.
      * Cells of multiplicity ? desugar into an initializer production, an initializer rule, a cell production, and an
      * empty production indicating the absence of that cell.
+     * Cells with children additionally generate a *CellFragment sort with the same arity as the cell production,
+     *  but the arguments made optional by generating additional sorts.
+     * Cells which have parents and are not multiplicity * generate a CellOpt sort which is a supersort of the cell sort
+     *  and has an additional production name like {@code <cell>-absent}. (For a cell with multiplicitly ? this is
+     *  necessary to distinguish a fragment that did capture the state of the cell when it wasn't present, from
+     *  a cell fragment that didn't even try to capture the cell).
      *
      * Currently the implementation does not handle initializer rules; we will address this eventually.
      * @param body The body of the configuration declaration.
@@ -97,7 +106,8 @@ public class GenerateSentencesFromConfigDecl {
                                 Tuple3<Set<Sentence>, List<Sort>, K> childResult = genInternal(
                                         cellContents, null, cfgAtt, m);
 
-                                Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(multiplicity, cfgAtt, m, cellName, cellProperties,
+                                boolean isLeafCell = childResult._1().isEmpty();
+                                Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(isLeafCell, multiplicity, cfgAtt, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigVariable(cellContents));
                                 return Tuple3.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3());
                             }
@@ -213,6 +223,7 @@ public class GenerateSentencesFromConfigDecl {
 
     /**
      * Generates the sentences associated with a particular cell.
+     * @param isLeaf true if this cell has no child cells.
      * @param multiplicity The multiplicity of the cell
      * @param configAtt The attributes on the configuration declaration.
      * @param m The module containing the configuration.
@@ -229,6 +240,7 @@ public class GenerateSentencesFromConfigDecl {
      * this cell in the initializer of its parent cell.
      */
     private static Tuple3<Set<Sentence>, Sort, K> computeSentencesOfWellFormedCell(
+            boolean isLeaf,
             Multiplicity multiplicity,
             Att configAtt,
             Module m,
@@ -246,10 +258,16 @@ public class GenerateSentencesFromConfigDecl {
                 .map(Constructors::NonTerminal)), Stream.of(Terminal("</" + cellName + ">")))
                 .collect(Collectors.toList());
 
+        java.util.Set<Sentence> sentences = new HashSet<Sentence>();
+
+        // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
+        Production cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
+                cellProperties.addAll(configAtt));
+        sentences.add(cellProduction);
+
         // syntax Cell ::= "initCell" [initializer, function]
         // -or-
         // syntax Cell ::= initCell(Map) [initializer, function]
-        // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         String initLabel = getInitLabel(sort);
         Sentence initializer;
         Rule initializerRule;
@@ -260,9 +278,43 @@ public class GenerateSentencesFromConfigDecl {
             initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
         }
-        Production cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
-                cellProperties.addAll(configAtt));
+        sentences.add(initializer);
+        sentences.add(initializerRule);
 
+        if (!isLeaf) {
+            // syntax CellFragment ::= <cellName>-fragment Child1CellOpt Child2CellOpt ... ChildNCellOpt </cellName>-fragment [cellFragment(Cell)]
+            // syntax Child1CellOpt[cellFragmentOpt(Child1Cell)] ::= Child1Cell | "noChild1Cell"[cellFragmentOptAbsent]
+            // ...
+            // syntax ChildNCellOpt[cellFragmentOpt(ChildNCell)] ::= ChildNCell | "noChildNCell"[cellFragmentOptAbsent]
+
+            // The "CellOpt" sorts are added for cells of multiplicitly other than * to allow representing fragments
+            // that didn't try to capture the corresponding cell, from a cell fragment variable written next to
+            // an explicit pattern for some cells.
+            // We don't need to add those sorts for cells of multiplicitly *, because explicit patterns in the
+            // context of a cell fragment variable can never be sure to capture all copies of such a cell.
+            Sort fragmentSort = Sort(sortName+"Fragment");
+            List<ProductionItem> fragmentItems = new ArrayList<ProductionItem>(2+childSorts.size());
+            fragmentItems.add(Terminal("<"+cellName+">-fragment"));
+            for (Sort childSort : childSorts) {
+                if (!childSort.name().endsWith("Cell")) {
+                    // child was a multiplicity * List/Bag/Set
+                    fragmentItems.add(NonTerminal(childSort));
+                } else {
+                    Sort childOptSort = Sort(childSort.name()+"Opt");
+                    fragmentItems.add(NonTerminal(childOptSort));
+
+                    sentences.add(Production(childOptSort, List(NonTerminal(childSort))));
+                    sentences.add(Production("no"+childSort.name(), childOptSort, List(Terminal("no"+childSort.name())),
+                            Att().add(Attribute.CELL_OPT_ABSENT_KEY,childSort.name())));
+                }
+            }
+            fragmentItems.add(Terminal("</"+cellName+">-fragment"));
+            sentences.add(Production("<" + cellName + ">-fragment", fragmentSort, immutable(fragmentItems),
+                    Att().add(Attribute.CELL_FRAGMENT_KEY, sortName)));
+        }
+
+        Sort cellsSort;
+        K rhs;
         if (multiplicity == Multiplicity.STAR) {
             // syntax CellBag [hook(BAG.Bag)]
             // syntax CellBag ::= Cell
@@ -307,32 +359,40 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     bagAtt);
+            sentences.add(sortDecl);
+            sentences.add(bagSubsort);
+            sentences.add(bagElement);
+            sentences.add(bagUnit);
+            sentences.add(bag);
             // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
-            K rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
-            return Tuple3.apply(Set(initializer, initializerRule, sortDecl, cellProduction, bagSubsort, bagUnit, bagElement, bag), bagSort, rhs);
+            cellsSort = bagSort;
+            rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
+            // add UNIT_KEY attribute to cell production.
             cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+            sentences.add(cellUnit);
+            sentences.add(cellProduction);
             // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
-            K rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
-            return Tuple3.apply(Set(initializer, initializerRule, cellProduction, cellUnit), sort, rhs);
+            cellsSort = sort;
+            rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
         } else {
             // rule initCell => <cell> initChildren... </cell>
             // -or-
             // rule initCell(Init) => <cell> initChildren(Init)... </cell>
-            K rhs;
+            cellsSort = sort;
             if (hasConfigurationVariable) {
                 rhs = KApply(KLabel(initLabel), KVariable("Init"));
             } else {
                 rhs = KApply(KLabel(initLabel));
             }
-            return Tuple3.apply(Set(initializer, initializerRule, cellProduction), sort, rhs);
         }
+        return Tuple3.apply(immutable(sentences),cellsSort,rhs);
     }
 
     /**
