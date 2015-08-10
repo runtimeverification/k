@@ -22,11 +22,14 @@ import scala.Tuple2;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.kore.KORE.*;
 
@@ -41,7 +44,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     public OcamlRewriter(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions, CompiledDefinition def, InitializeDefinition init) {
         this.files = files;
         this.def = def;
-        this.converter = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions);
+        this.converter = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions, null);
         converter.initialize(init.serialized, def);
     }
 
@@ -107,17 +110,33 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     private String compileAndExecOcaml(String name) {
         try {
             ProcessBuilder pb = files.getProcessBuilder();
-            if (DefinitionToOcaml.ocamlopt) {
-                pb = pb.command("ocamlfind", "ocamlopt", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cmxa", "unix.cmxa", "-safe-string",
-                        files.resolveKompiled("constants.cmx").getAbsolutePath(), files.resolveKompiled("prelude.cmx").getAbsolutePath(),
-                        files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        name, "-inline", "20", "-nodynlink");
+            List<String> args = new ArrayList<>(Arrays.asList("-g", "-o", "a.out", "-package", "gmp", "-package", "zarith",
+                    "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
+            args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
+            if (converter.options.ocamlopt) {
+                args.add(0, "ocamlfind");
+                args.add(1, "ocamlopt");
+                if (!converter.options.noLinkPrelude) {
+                    args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
+                    args.add(files.resolveKompiled("prelude.cmx").getAbsolutePath());
+                }
+                args.addAll(Arrays.asList(files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        name));
+                args.add("-inline");
+                args.add("20");
+                args.add("-nodynlink");
+                pb = pb.command(args);
                 pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
             } else {
-                pb = pb.command("ocamlfind", "ocamlc", "-g", "-o", "a.out", "-package", "gmp", "-package", "zarith", "-linkpkg", "str.cma", "unix.cma", "-safe-string",
-                        files.resolveKompiled("constants.cmo").getAbsolutePath(), files.resolveKompiled("prelude.cmo").getAbsolutePath(),
-                        files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        name);
+                args.add(0, "ocamlfind");
+                args.add(1, "ocamlc");
+                if (!converter.options.noLinkPrelude) {
+                    args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
+                    args.add(files.resolveKompiled("prelude.cmo").getAbsolutePath());
+                }
+                args.addAll(Arrays.asList(files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        name));
+                pb = pb.command(args);
                 pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
             }
             Process p = pb.directory(files.resolveTemp("."))

@@ -29,7 +29,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> candidate = null;
         for (Term t : amb.items()) {
             candidate = this.apply(t);
-            K next = TreeNodesToKORE.apply(candidate._1().right().get());
+            K next = TreeNodesToKORE.apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
             if (last != null) {
                 if (!last.equals(next)) {
                     equal = false;
