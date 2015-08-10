@@ -83,10 +83,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      *         {@code false}
      */
     public final boolean isMutable() {
-        if (mutable == null) {
-            mutable = computeMutability();
+        Boolean m = mutable;
+        if (m == null) {
+            mutable = m = computeMutability();
         }
-        return mutable;
+        return m;
     }
 
     /**
