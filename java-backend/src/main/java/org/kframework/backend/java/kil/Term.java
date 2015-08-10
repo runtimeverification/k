@@ -31,7 +31,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     protected final Kind kind;
     // protected final boolean normalized;
 
-    private volatile Boolean mutable;
+    private Boolean mutable = null;
 
     protected Term(Kind kind) {
         super();
