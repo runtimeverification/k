@@ -372,9 +372,10 @@ public class GenerateSentencesFromConfigDecl {
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
-            // add UNIT_KEY attribute to cell production.
-            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
             sentences.add(cellUnit);
+            // add UNIT_KEY attribute to cell production.
+            sentences.remove(cellProduction);
+            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
             sentences.add(cellProduction);
             // rule initCell => .CellBag
             // -or-
