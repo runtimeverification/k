@@ -61,20 +61,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         this.inferSortChecks = inferSortChecks;
     }
 
-    /** return the subset of maximal elements of {@code sorts} */
-    private Set<Sort> maximal(Collection<Sort> sorts) {
-        Set<Sort> maxSorts = new HashSet<>();
-
-        nextsort:
-        for (Sort vv1 : sorts) {
-            for (Sort vv2 : sorts)
-                if (subsorts.lessThan(vv1, vv2))
-                    continue nextsort;
-            maxSorts.add(vv1);
-        }
-        return maxSorts;
-    }
-
     /** Return the set of all known sorts which are a lower bound on
      * all sorts in {@code bounds}, leaving out internal sorts below "KBott".
      */
@@ -216,7 +202,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         solution.clear();
                         break;
                     } else {
-                        solution.putAll(key, maximal(mins));
+                        solution.putAll(key, subsorts.maximal(mins));
                     }
                 }
                 // I found a solution that fits everywhere, then store it for disambiguation
@@ -268,7 +254,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 }
                 Multimap<VarKey,Sort> solution = HashMultimap.create();
                 for (VarKey k : varBounds.keySet()) {
-                    Set<Sort> sorts = maximal(varBounds.get(k));
+                    Set<Sort> sorts = subsorts.maximal(varBounds.get(k));
                     if (sorts.size() > 1) {
                         String msg = "Could not infer a unique sort for variable " + k + ".";
                         msg += " Possible sorts: ";
