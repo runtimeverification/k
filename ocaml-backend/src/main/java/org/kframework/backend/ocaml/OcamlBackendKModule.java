@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.main.AbstractKModule;
@@ -20,16 +21,24 @@ import java.util.function.Function;
 public class OcamlBackendKModule extends AbstractKModule {
 
     @Override
+    public List<Pair<Class<?>, Boolean>> kompileOptions() {
+        return Collections.singletonList(Pair.of(OcamlOptions.class, true));
+    }
+
+    @Override
     public List<Module> getKompileModules() {
-        return Collections.singletonList(new AbstractModule() {
+        List<Module> mods = super.getKompileModules();
+        mods.add(new AbstractModule() {
             @Override
             protected void configure() {
 
                 MapBinder<String, Consumer<CompiledDefinition>> mapBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {});
+                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {
+                });
                 mapBinder.addBinding("ocaml").to(OcamlBackend.class);
             }
         });
+        return mods;
     }
 
     @Override

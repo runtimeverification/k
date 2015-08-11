@@ -12,6 +12,8 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
@@ -67,9 +69,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -87,17 +92,21 @@ public class DefinitionToOcaml implements Serializable {
     private transient final GlobalOptions globalOptions;
     private transient final KompileOptions kompileOptions;
     private transient ExpandMacros expandMacros;
+    public OcamlOptions options;
 
-    public DefinitionToOcaml(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
+    public DefinitionToOcaml(
+            KExceptionManager kem,
+            FileUtil files,
+            GlobalOptions globalOptions,
+            KompileOptions kompileOptions,
+            OcamlOptions options) {
         this.kem = kem;
         this.files = files;
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
         this.sortHooks = defSortHooks;
+        this.options = options;
     }
-    public static final boolean ocamlopt = true;
-    public static final boolean fastCompilation = false;
-    public static final boolean profileRules = false;
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
     public static final String BOOL = encodeStringToIdentifier(Sort("Bool"));
@@ -185,6 +194,8 @@ public class DefinitionToOcaml implements Serializable {
         collectionFor = serialized.collectionFor;
         functions = serialized.functions;
         anywhereKLabels = serialized.anywhereKLabels;
+        options = serialized.options;
+        constants = serialized.constants;
         expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
         sortHooks = userSortHooks;
     }
@@ -288,30 +299,22 @@ public class DefinitionToOcaml implements Serializable {
     public String constants() {
         StringBuilder sb = new StringBuilder();
         sb.append("type sort = \n");
-        if (fastCompilation) {
-            sb.append("Sort of string\n");
-        } else {
-            for (Sort s : iterable(mainModule.definedSorts())) {
-                sb.append("|");
-                encodeStringToIdentifier(sb, s);
-                sb.append("\n");
-            }
-            if (!mainModule.definedSorts().contains(Sorts.String())) {
-                sb.append("|SortString\n");
-            }
-            if (!mainModule.definedSorts().contains(Sorts.Float())) {
-                sb.append("|SortFloat\n");
-            }
+        for (Sort s : iterable(mainModule.definedSorts())) {
+            sb.append("|");
+            encodeStringToIdentifier(sb, s);
+            sb.append("\n");
+        }
+        if (!mainModule.definedSorts().contains(Sorts.String())) {
+            sb.append("|SortString\n");
+        }
+        if (!mainModule.definedSorts().contains(Sorts.Float())) {
+            sb.append("|SortFloat\n");
         }
         sb.append("type klabel = \n");
-        if (fastCompilation) {
-            sb.append("KLabel of string\n");
-        } else {
-            for (KLabel label : iterable(mainModule.definedKLabels())) {
-                sb.append("|");
-                encodeStringToIdentifier(sb, label);
-                sb.append("\n");
-            }
+        for (KLabel label : iterable(mainModule.definedKLabels())) {
+            sb.append("|");
+            encodeStringToIdentifier(sb, label);
+            sb.append("\n");
         }
         sb.append("let print_sort(c: sort) : string = match c with \n");
         for (Sort s : iterable(mainModule.definedSorts())) {
@@ -321,9 +324,6 @@ public class DefinitionToOcaml implements Serializable {
             sb.append(enquoteString(s.name()));
             sb.append("\n");
         }
-        if (fastCompilation) {
-            sb.append("| Sort s -> raise (Invalid_argument s)\n");
-        }
         sb.append("let print_klabel(c: klabel) : string = match c with \n");
         for (KLabel label : iterable(mainModule.definedKLabels())) {
             sb.append("|");
@@ -331,9 +331,6 @@ public class DefinitionToOcaml implements Serializable {
             sb.append(" -> ");
             sb.append(enquoteString(ToKast.apply(label)));
             sb.append("\n");
-        }
-        if (fastCompilation) {
-            sb.append("| KLabel s -> raise (Invalid_argument s)\n");
         }
         sb.append("let collection_for (c: klabel) : klabel = match c with \n");
         for (Map.Entry<KLabel, KLabel> entry : collectionFor.entrySet()) {
@@ -590,6 +587,31 @@ public class DefinitionToOcaml implements Serializable {
         }
     }
 
+    private static <V> Set<V> ancestors(
+            Collection<? extends V> startNodes, DirectedGraph<V, ?> graph)
+    {
+        Queue<V> queue = new LinkedList<V>();
+        Set<V> visited = new LinkedHashSet<V>();
+        queue.addAll(startNodes);
+        visited.addAll(startNodes);
+        while(!queue.isEmpty())
+        {
+            V v = queue.poll();
+            Collection<V> neighbors = graph.getPredecessors(v);
+            for (V n : neighbors)
+            {
+                if (!visited.contains(n))
+                {
+                    queue.offer(n);
+                    visited.add(n);
+                }
+            }
+        }
+        return visited;
+    }
+
+    private Set<KLabel> constants;
+
     public String definition() {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\n");
@@ -626,7 +648,9 @@ public class DefinitionToOcaml implements Serializable {
         //compute fixed point. The only hook that actually requires this argument is KREFLECTION.fresh, so we will automatically
         //add the real definition of this function before we declare any function that requires it.
         sb.append("let freshFunction (sort: string) (config: k) (counter: Z.t) : k = [Bottom]");
-        Set<KLabel> constants = functions.stream().filter(lbl -> !mainModule.attributesFor().apply(lbl).contains(Attribute.IMPURE_KEY) && stream(mainModule.productionsFor().apply(lbl)).filter(p -> p.arity() == 0).findAny().isPresent()).collect(Collectors.toSet());
+        Set<KLabel> impurities = functions.stream().filter(lbl -> mainModule.attributesFor().apply(lbl).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        impurities.addAll(ancestors(impurities, dependencies));
+        constants = functions.stream().filter(lbl -> !impurities.contains(lbl) && stream(mainModule.productionsFor().apply(lbl)).filter(p -> p.arity() == 0).findAny().isPresent()).collect(Collectors.toSet());
 
         for (List<KLabel> component : functionOrder) {
             String conn;
@@ -680,9 +704,12 @@ public class DefinitionToOcaml implements Serializable {
                     sb.append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
-                    if (hookNamespaces.contains(namespace)) {
-                        sb.append("| _ -> try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction\n");
-                        sb.append("with Not_implemented -> match c with \n");
+                    if (hookNamespaces.contains(namespace) || options.hookNamespaces.contains(namespace)) {
+                        sb.append("| _ -> try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction");
+                        if (mainModule.attributesFor().apply(functionLabel).contains("canTakeSteps")) {
+                            sb.append(" eval");
+                        }
+                        sb.append("\nwith Not_implemented -> match c with \n");
                     } else if (!hook.equals(".")) {
                         kem.registerCompilerWarning("missing entry for hook " + hook);
                     }
@@ -771,9 +798,6 @@ public class DefinitionToOcaml implements Serializable {
         if (groupedByLookup.containsKey(false)) {
             for (Rule r : groupedByLookup.get(false)) {
                 ruleNum = convert(r, sb, RuleType.REGULAR, ruleNum);
-                if (fastCompilation) {
-                    sb.append("| _ -> match c with \n");
-                }
             }
         }
         sb.append("| _ -> lookups_step c c (-1)\n");
@@ -796,6 +820,8 @@ public class DefinitionToOcaml implements Serializable {
             predecessors[i] = new ArrayList<>();
         }
 
+        dependencies = new DirectedSparseGraph<>();
+
         class GetPredecessors extends VisitKORE {
             private final KLabel current;
             private final String hook;
@@ -809,15 +835,18 @@ public class DefinitionToOcaml implements Serializable {
             public Void apply(KApply k) {
                 if (functions.contains(k.klabel()) || anywhereKLabels.contains(k.klabel())) {
                     predecessors[mapping.get(current)].add(mapping.get(k.klabel()));
+                    dependencies.addEdge(new Object(), current, k.klabel());
                     if (hook.equals("KREFLECTION.fresh")) {
                         for (KLabel freshFunction : iterable(mainModule.freshFunctionFor().values())) {
                             predecessors[mapping.get(current)].add(mapping.get(freshFunction));
+                            dependencies.addEdge(new Object(), current, freshFunction);
                         }
                     }
                 }
                 if (k.klabel() instanceof KVariable) {
                     // this function requires a call to eval, so we need to add the dummy dependency
                     predecessors[mapping.get(current)].add(mapping.get(KLabel("")));
+                    dependencies.addEdge(new Object(), current, KLabel(""));
                 }
                 return super.apply(k);
             }
@@ -830,8 +859,14 @@ public class DefinitionToOcaml implements Serializable {
         }
 
         for (KLabel label : Sets.union(functions, anywhereKLabels)) {
+            if (mainModule.attributesFor().apply(label).contains("canTakeSteps")) {
+                // this function requires a call to eval, so we need to add the dummy dependency
+                predecessors[mapping.get(label)].add(mapping.get(KLabel("")));
+                dependencies.addEdge(new Object(), label, KLabel(""));
+            }
             //eval depends on everything
             predecessors[mapping.get(KLabel(""))].add(mapping.get(label));
+            dependencies.addEdge(new Object(), KLabel(""), label);
         }
 
         List<List<Integer>> components = new SCCTarjan().scc(predecessors);
@@ -840,6 +875,8 @@ public class DefinitionToOcaml implements Serializable {
                 .map(i -> mapping.inverse().get(i)).collect(Collectors.toList()))
                 .collect(Collectors.toList());
     }
+
+    private transient DirectedGraph<KLabel, Object> dependencies;
 
     private int getArity(KLabel functionLabel) {
         Set<Integer> arities = stream(mainModule.productionsFor().apply(functionLabel)).map(Production::arity).collect(Collectors.toSet());
@@ -873,9 +910,6 @@ public class DefinitionToOcaml implements Serializable {
             } else {
                 ruleNum = convert(r, sb, type, ruleNum);
             }
-            if (fastCompilation) {
-                sb.append("| _ -> match c with \n");
-            }
         }
     }
 
@@ -897,21 +931,13 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private static void encodeStringToIdentifier(StringBuilder sb, KLabel name) {
-        if (fastCompilation) {
-            sb.append("KLabel(\"").append(name.name().replace("\"", "\\\"")).append("\")");
-        } else {
-            sb.append("Lbl");
-            encodeStringToAlphanumeric(sb, name.name());
-        }
+        sb.append("Lbl");
+        encodeStringToAlphanumeric(sb, name.name());
     }
 
     private static void encodeStringToIdentifier(StringBuilder sb, Sort name) {
-        if (fastCompilation) {
-            sb.append("(Sort \"").append(name.name().replace("\"", "\\\"")).append("\")");
-        } else {
-            sb.append("Sort");
-            encodeStringToAlphanumeric(sb, name.name());
-        }
+        sb.append("Sort");
+        encodeStringToAlphanumeric(sb, name.name());
     }
 
     private static String encodeStringToIdentifier(Sort name) {
@@ -1061,16 +1087,13 @@ public class DefinitionToOcaml implements Serializable {
                         sb.append(lookups.get(0).pattern);
                         lookups.remove(0);
                         sb.append(" when guard < ").append(ruleNum);
-                        if (profileRules && ruleType == RuleType.REGULAR) {
+                        if (options.profileRules && ruleType == RuleType.REGULAR) {
                             sb.append("&& ((print_string \"trying ").append(ruleType.name().toLowerCase()).append(" rule ").append(ruleNum).append("\\n\");true)");
                         }
                         String suffix = convertSideCondition(sb, r.requires(), vars, lookups, lookups.size() > 0, ruleType, ruleNum);
                         sb.append(" -> ");
                         convertRHS(sb, ruleType, RewriteToTop.toRight(r.body()), vars, suffix, ruleNum);
                         ruleNum++;
-                        if (fastCompilation) {
-                            sb.append("| _ -> match e with \n");
-                        }
                     }
                 }
                 sb.append(head.suffix);
@@ -1082,7 +1105,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("| ");
             convertLHS(sb, ruleType, RewriteToTop.toLeft(r.body()), globalVars);
             sb.append(" when guard < ").append(ruleNum);
-            if (profileRules && ruleType == RuleType.REGULAR) {
+            if (options.profileRules && ruleType == RuleType.REGULAR) {
                 sb.append("&& ((print_string \"trying ").append(ruleType.name().toLowerCase()).append(" rule ").append(ruleNum).append("\\n\");true)");
             }
 
@@ -1206,7 +1229,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void convertRHS(StringBuilder sb, RuleType type, K right, VarInfo vars, String suffix, int ruleNum) {
-        if (profileRules && type == RuleType.REGULAR) {
+        if (options.profileRules && type == RuleType.REGULAR) {
             sb.append("print_string \"succeeded ").append(type.name().toLowerCase()).append(" rule ").append(ruleNum).append("\\n\"; ");
         }
         /*if (type == RuleType.ANYWHERE) {
@@ -1657,7 +1680,7 @@ public class DefinitionToOcaml implements Serializable {
                 }
                 inBooleanExp = false;
                 sb.append("(");
-                if (k.klist().items().size() > 0 || mainModule.attributesFor().apply(k.klabel()).contains(Attribute.IMPURE_KEY)) {
+                if (k.klist().items().size() > 0 || !constants.contains(k.klabel())) {
                     encodeStringToFunction(sb, k.klabel());
                     sb.append("(");
                     applyTuple(k.klist().items());

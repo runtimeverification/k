@@ -120,11 +120,13 @@ public class GenerateSortPredicateRules {
                 res.add(r);
             }
         });
-        stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).filter(nonProtectingSubsorts::contains).distinct().forEach(s -> {
+        stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).distinct().forEach(s -> {
             res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KApply(KLabel("#KToken"), KToken(s.name(), Sorts.KString()), KVariable("_"))), BooleanUtils.TRUE),
                     BooleanUtils.TRUE,
                     BooleanUtils.TRUE));
-            res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
+            if (nonProtectingSubsorts.contains(s)) {
+                res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
+            }
         });
         res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
         return res.stream();
