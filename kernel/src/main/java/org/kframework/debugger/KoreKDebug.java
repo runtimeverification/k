@@ -178,8 +178,12 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
-        stateNum.orElse(activeStateIndex);
-        configurationNum.orElse(stateList.get(activeStateIndex).getStepNum());
-        return jumpTo(stateNum.get(), configurationNum.get());
+        int concreteStateNum = stateNum.orElse(activeStateIndex);
+        int concreteConfigurationNum = configurationNum.orElse(stateList.get(activeStateIndex).getStepNum());
+        DebuggerState temp = stateList.get(concreteStateNum);
+        DebuggerState peekState = jumpTo(concreteStateNum, concreteConfigurationNum);
+        stateList.remove(concreteStateNum);
+        stateList.add(concreteStateNum, temp);
+        return peekState;
     }
 }
