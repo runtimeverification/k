@@ -2,8 +2,8 @@
 
 package org.kframework.kil;
 
-import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.loader.Constants;
@@ -21,7 +21,7 @@ public class KLabelConstant extends KLabel {
     /**
      * HashMap caches the constants to ensure uniqueness.
      */
-    private static final HashMap<String, KLabelConstant> cache = new HashMap<>();
+    private static final ConcurrentHashMap<String, KLabelConstant> cache = new ConcurrentHashMap<>();
 
     /*
      * Useful constants.
@@ -53,13 +53,7 @@ public class KLabelConstant extends KLabel {
      */
     public static KLabelConstant of(String label) {
         assert label != null;
-
-        KLabelConstant kLabelConstant = cache.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label);
-            cache.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
+        return cache.computeIfAbsent(label, x -> new KLabelConstant(x));
     }
 
     /**

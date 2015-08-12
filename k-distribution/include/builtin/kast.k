@@ -14,7 +14,7 @@ module BASIC-K
 endmodule
 
 module KSTRING
-  syntax KString ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fa-f]{2})|([\\\\][u][0-9a-fa-f]{4})|([\\\\][u][0-9a-fa-f]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
+  syntax KString ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
   // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
 endmodule
 
@@ -88,7 +88,10 @@ module CONFIG-CELLS
   imports KCELLS
   imports RULE-LISTS
   syntax #CellName ::= r"[a-zA-Z0-9\\-]+"  [token]
+
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
+  syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell)]
+
   syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
                            | ""                            [klabel(#cellPropertyListTerminator)]
   syntax #CellProperty ::= #CellName "=" KString           [klabel(#cellProperty)]

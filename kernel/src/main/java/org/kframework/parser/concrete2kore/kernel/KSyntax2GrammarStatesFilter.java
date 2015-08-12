@@ -43,6 +43,9 @@ public class KSyntax2GrammarStatesFilter {
         for (Sort sort : iterable(module.definedSorts())) {
             grammar.add(new NonTerminal(sort.name()));
         }
+        for (Sort sort : iterable(module.usedCellSorts())) {
+            grammar.add(new NonTerminal(sort.name()));
+        }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
         stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).forEach((sort, prods) -> processProductions(sort, prods, grammar, rejects));

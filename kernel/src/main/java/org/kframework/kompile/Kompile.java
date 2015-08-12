@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,8 +87,8 @@ public class Kompile {
     private final KompileOptions kompileOptions;
     private final Stopwatch sw;
 
-    private int parsedBubbles = 0;
-    private int cachedBubbles = 0;
+    private final AtomicInteger parsedBubbles = new AtomicInteger(0);
+    private final AtomicInteger cachedBubbles = new AtomicInteger(0);
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
         this.files = files;
@@ -123,7 +124,7 @@ public class Kompile {
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
-        sw.printIntermediate("Parse definition [" + parsedBubbles + "/" + (parsedBubbles + cachedBubbles) + " rules]");
+        sw.printIntermediate("Parse definition [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
 
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict()::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts()::resolve, "resolving context sentences");
@@ -293,7 +294,13 @@ public class Kompile {
                         configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                 .collect(Collections.toSet());
 
-        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(def.getModule("MAP").get())), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
+        Module mapModule;
+        if (def.getModule("MAP").isDefined()) {
+            mapModule = def.getModule("MAP").get();
+        } else {
+            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module "+module.name());
+        }
+        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
     }
 
     private Module resolveBubbles(Module module) {
@@ -396,18 +403,18 @@ public class Kompile {
         int startLine = b.att().<Integer>get("contentStartLine").get();
         int startColumn = b.att().<Integer>get("contentStartColumn").get();
         String source = b.att().<String>get("Source").get();
-        Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> result;
+        Tuple2<Either<java.util.Set<ParseFailedException>, K>, java.util.Set<ParseFailedException>> result;
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
-            cachedBubbles++;
+            cachedBubbles.getAndIncrement();
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
             result = parser.parseString(b.contents(), START_SYMBOL, Source.apply(source), startLine, startColumn);
-            parsedBubbles++;
+            parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
-                KApply k = (KApply)TreeNodesToKORE.down(TreeNodesToKORE.apply(result._1().right().get()));
+                KApply k = (KApply)TreeNodesToKORE.down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove("Source").remove("Location")));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);

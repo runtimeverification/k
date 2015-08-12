@@ -12,7 +12,12 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by dwightguth on 5/27/15.
@@ -23,18 +28,20 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
     private final FileUtil files;
     private final GlobalOptions globalOptions;
     private final KompileOptions kompileOptions;
+    private final OcamlOptions options;
 
     @Inject
-    public OcamlBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
+    public OcamlBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions, OcamlOptions options) {
         this.kem = kem;
         this.files = files;
         this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
+        this.options = options;
     }
 
     @Override
     public void accept(CompiledDefinition compiledDefinition) {
-        DefinitionToOcaml def = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions);
+        DefinitionToOcaml def = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions, options);
         def.initialize(compiledDefinition);
         String ocaml = def.constants();
         files.saveToKompiled("constants.ml", ocaml);
@@ -43,16 +50,31 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
-            Process ocamlopt = files.getProcessBuilder()
-                    .command((DefinitionToOcaml.ocamlopt ? "ocamlopt.opt" : "ocamlc.opt"), "-c", "-g", "-I", "+gmp",
-                            "-safe-string", "-w", "-26-11",
-                            "constants.ml", "prelude.ml", "def.ml")
-                    .directory(files.resolveKompiled("."))
-                    .inheritIO()
-                    .start();
-            int exit = ocamlopt.waitFor();
-            if (exit != 0) {
-                throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+            ProcessBuilder pb = files.getProcessBuilder();
+            List<String> args = new ArrayList<>(Arrays.asList("-c", "-g", "-package", "gmp", "-package", "zarith",
+                "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml"));
+            args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
+            if (!options.genMLOnly) {
+                if (options.ocamlopt) {
+                    args.add(0, "ocamlfind");
+                    args.add(1, "ocamlopt");
+                    args.add("-inline");
+                    args.add("20");
+                    args.add("-nodynlink");
+                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+                } else {
+                    args.add(0, "ocamlfind");
+                    args.add(1, "ocamlc");
+                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+                }
+                Process ocamlopt = pb
+                        .directory(files.resolveKompiled("."))
+                        .inheritIO()
+                        .start();
+                int exit = ocamlopt.waitFor();
+                if (exit != 0) {
+                    throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
@@ -49,10 +50,12 @@ public class KRun implements Transformation<Void, Void> {
 
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final boolean ttyStdin;
 
-    public KRun(KExceptionManager kem, FileUtil files) {
+    public KRun(KExceptionManager kem, FileUtil files, boolean ttyStdin) {
         this.kem = kem;
         this.files = files;
+        this.ttyStdin = ttyStdin;
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
@@ -161,6 +164,14 @@ public class KRun implements Transformation<Void, Void> {
             Sort sort = Sorts.K();
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
+        }
+        if (options.io()) {
+            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
+            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
+        } else {
+            String stdin = InitialConfigurationProvider.getStdinBuffer(ttyStdin);
+            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
+            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
         return plugConfigVars(compiledDef, output);
     }

@@ -60,6 +60,15 @@ public class ConcretizationInfo {
         Sort s = labels.getCodomain(cellLabel);
         return cfg.isCell(s) ? s : null;
     }
+    public KLabel getCellFragmentLabel(KLabel cellLabel) {
+        Sort s = labels.getCodomain(cellLabel);
+        return cfg.getCellFragmentLabel(s);
+    }
+
+    public K getCellAbsentTerm(Sort cellSort) {
+        KLabel l = cfg.getCellAbsentLabel(cellSort);
+        return l == null ? null : KApply(l);
+    }
 
     public boolean isCell(KLabel klabel) {
         Sort s = labels.getCodomain(klabel);

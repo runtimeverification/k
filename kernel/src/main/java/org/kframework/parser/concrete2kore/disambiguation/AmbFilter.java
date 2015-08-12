@@ -1,10 +1,12 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import org.kframework.kore.K;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
+import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -22,6 +24,24 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
 
     @Override
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> apply(Ambiguity amb) {
+        K last = null;
+        boolean equal = true;
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> candidate = null;
+        for (Term t : amb.items()) {
+            candidate = this.apply(t);
+            K next = TreeNodesToKORE.apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
+            if (last != null) {
+                if (!last.equals(next)) {
+                    equal = false;
+                    break;
+                }
+            }
+            last = next;
+        }
+        if(equal) {
+            // all ambiguities have the same abstract syntax, so just pick one
+            return candidate;
+        }
 
         String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 

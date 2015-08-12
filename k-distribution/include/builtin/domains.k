@@ -46,6 +46,8 @@ module MAP
   /*@ Get a Set consisting of all keys in the Map:*/
   syntax Set ::= keys(Map)                      [function, hook(MAP.keys)]
 
+  syntax Bool ::= K "in_keys" "(" Map ")"       [function, hook(MAP.in_keys)]
+
   /*@ Get a List consisting of all values in the Map: */
   syntax List ::= values(Map)                   [function, hook(MAP.values)]
 
@@ -367,7 +369,7 @@ module STRING-SYNTAX
   //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
   //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
   syntax String [hook(STRING.String)]
-  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][u][0-9a-fA-F]{8}))*[\\\"]"      [token]
+  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 
 module STRING
@@ -517,26 +519,137 @@ module K-IO
                 | "#stdout" [function]
                 | "#stderr" [function]
 
-  syntax Stream ::= #parseInput(String, String)
+  rule #stdin => 0
+  rule #stdout => 1
+  rule #stderr => 2
+
   syntax Stream ::= #buffer(K)
+
+// ------------------------------
+// System
+
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+
+endmodule
+
+module STDIN-STREAM
+  imports K-IO
+
   syntax Stream ::= #istream(Int)
-                  | #ostream(Int)
+  syntax Stream ::= #parseInput(String, String)
+
+  configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
+
+  // read one character at a time until we read whitespace
+  rule [stdinGetc]:
+       <stdin>
+       ListItem(#parseInput(_:String, Delimiters:String))
+       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem("on")
+       ListItem(#istream(N:Int))
+       </stdin>
+    requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
+
+  // when we reach whitespace, if it parses create a ListItem
+  rule [stdinParseString]:
+       <stdin>
+       `ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)`
+       ListItem(#buffer(S:String => ""))
+       _:List
+       </stdin>
+    requires findChar(S, Delimiters, 0) =/=Int -1 // [stdin]
+
+  // a hack: handle the case when we read integers without the help of the IO server
+  rule [stdinParseInt]:
+       <stdin>
+       `ListItem(#parseInput("Int", Delimiters:String))
+       => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0))))`
+       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
+       _:List
+       </stdin>
+    requires findChar(S, Delimiters, 0) =/=Int -1
+       andBool lengthString(S) >Int 1 // [stdin]
+
+  rule [stdinParseArbitrarySort]:
+       <stdin>
+       `ListItem(#parseInput(Sort:String, Delimiters:String))
+       => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort))`
+       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
+       _:List
+       </stdin>
+    requires findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
+       andBool Sort =/=String "Int"
+       andBool lengthString(S) >Int 1 // [stdin]
+
+  rule [stdinTrim]:
+       <stdin>
+       ListItem(#parseInput(Sort:String, Delimiters:String))
+       ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
+       _:List
+       </stdin>
+    requires findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
+       andBool lengthString(S) <=Int 1 // [stdin]
+
+  /*
   syntax Stream ::= "#noIO"
 
-  //TODO(dwightguth): add back support for stream cells
-/*
-  rule ListItem(#ostream(_))
+  rule ListItem(#buffer(_))
+       `ListItem(#noIO) ListItem(#istream(_:Int)) => .List` [stdin]
+  */
+
+endmodule
+
+module STDOUT-STREAM
+  imports K-IO
+
+  syntax Stream ::= #ostream(Int)
+
+  configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
+//configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
+
+  rule [stdoutBufferFloat]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        `ListItem(F:Float) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#ostream(_))
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferInt]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
        `ListItem(I:Int) => .List`
-       _:List [stdout, stderr]
-  rule ListItem(#ostream(_))
+       _:List
+       </stdout>
+       // [stdout, stderr]
+  rule [stdoutBufferString]:
+       <stdout>
+       ListItem(#ostream(_))
+       ListItem(_)
        ListItem(#buffer(Buffer:String => Buffer +String S))
        `ListItem(S:String) => .List`
-       _:List [stdout, stderr]
+       _:List
+       </stdout>
+       // [stdout, stderr]
+
+  // Send first char from the buffer to the server
+  rule [stdoutWrite]:
+       <stdout>
+       ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
+       ListItem("on")
+       ListItem(#buffer(S:String => ""))
+       _:List
+       </stdout>
+    requires S =/=String "" // [stdout, stderr]
+
+  /*
+  syntax Stream ::= "#noIO"
 
   rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        `ListItem(F:Float) => .List`
@@ -548,62 +661,9 @@ module K-IO
        `ListItem(S:String) => .List`
        _:List [stdout, stderr]
 
-
-  // Send first char from the buffer to the server
-  rule ListItem(#ostream(`.K => #write(N, S)` ~> N:Int))
-       ListItem(#buffer(S:String => ""))
-       _:List
-    requires S =/=String "" [stdout, stderr]
-
-  // read one character at a time until we read whitespace
-  rule ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
-       ListItem(#istream(N:Int))
-    requires findChar(S, Delimiters, 0) ==Int -1 [stdin]
-
-  // when we reach whitespace, if it parses create a ListItem
-  rule `ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)`
-       ListItem(#buffer(S:String => ""))
-       _:List
-    requires findChar(S, Delimiters, 0) =/=Int -1 [stdin]
-
-  // a hack: handle the case when we read integers without the help of the IO server
-  rule `ListItem(#parseInput("Int", Delimiters:String))
-       => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0))))`
-       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool lengthString(S) >Int 1 [stdin]
-
-  rule `ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort))`
-       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
-       _:List
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort =/=String "String"
-       andBool lengthString(S) >Int 1 [stdin]
-
-  rule ListItem(#parseInput(Sort:String, Delimiters:String))
-       ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
-       _:List
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort =/=String "String"
-       andBool lengthString(S) <=Int 1 [stdin]
-
-  rule ListItem(#buffer(_))
-       `ListItem(#noIO) ListItem(#istream(_:Int)) => .List` [stdin]
-
   rule `ListItem(#ostream(_:Int)) ListItem(#noIO) => .List`
        ListItem(#buffer(_))
        _:List [stdout, stderr]
-*/
-  rule #stdin => 0
-  rule #stdout => 1
-  rule #stderr => 2
-
-// ------------------------------
-// System
-
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+  */
 
 endmodule

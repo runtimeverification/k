@@ -4,11 +4,13 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kore.KToken;
+import org.kframework.utils.StringUtil;
 
 
 /**
@@ -25,6 +27,8 @@ public abstract class Token extends Term implements KoreRepresentation, Immutabl
             return IntToken.of(value);
         } else if (sort.equals(FloatToken.SORT)) {
             return FloatToken.of(value);
+        } else if (sort.equals(StringToken.SORT)) {
+            return StringToken.of(StringUtil.unquoteKString(value));
         } else {
             return UninterpretedToken.of(sort, value);
         }

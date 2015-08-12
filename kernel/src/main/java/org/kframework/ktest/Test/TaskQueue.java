@@ -87,7 +87,7 @@ public class TaskQueue {
      * Time when lastly finished task finishes.
      * Set using {@link java.lang.System#currentTimeMillis}.
      */
-    private long lastTestFinished;
+    private volatile long lastTestFinished;
 
     public TaskQueue(KTestOptions options) {
         this.options = options;

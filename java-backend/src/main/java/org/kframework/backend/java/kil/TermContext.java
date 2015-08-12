@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 
 import java.math.BigInteger;
 
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -18,6 +19,7 @@ public class TermContext extends JavaSymbolicObject {
     private final GlobalContext global;
 
     private Term topTerm;
+    private ConjunctiveFormula topConstraint;
 
     private TermContext(GlobalContext global) {
         this.global = global;
@@ -65,6 +67,14 @@ public class TermContext extends JavaSymbolicObject {
 
     public void setTopTerm(Term topTerm) {
         this.topTerm = topTerm;
+    }
+
+    public ConjunctiveFormula getTopConstraint() {
+        return topConstraint;
+    }
+
+    public void setTopConstraint(ConjunctiveFormula topConstraint) {
+        this.topConstraint = topConstraint;
     }
 
     @Override

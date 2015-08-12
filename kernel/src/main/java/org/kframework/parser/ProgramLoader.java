@@ -20,6 +20,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.K;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -153,7 +154,7 @@ public class ProgramLoader {
             org.kframework.definition.Definition baseK = org.kframework.definition.Definition.apply(m, m, Set(m), Att());
             Module newSynMod = new Module(synMod.name() + "-PROGRAM-LISTS", Set(synMod, m), Set(), null);
             ParseInModule parser = new RuleGrammarGenerator(baseK, options.strict()).getCombinedGrammar(newSynMod);
-            Tuple2<Either<Set<ParseFailedException>, org.kframework.parser.Term>, Set<ParseFailedException>> parsed
+            Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> parsed
                     = parser.parseString(FileUtil.read(content), Sort(startSymbol.getName()), source);
             for (ParseFailedException warn : parsed._2()) {
                 kem.addKException(warn.getKException());
@@ -164,7 +165,7 @@ public class ProgramLoader {
                 throw parsed._1().left().get().iterator().next();
             }
 
-            out = new KOREtoKIL().convertK(TreeNodesToKORE.apply(parsed._1().right().get()));
+            out = new KOREtoKIL().convertK(parsed._1().right().get());
         } else {
             out = loadPgmAst(FileUtil.read(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);

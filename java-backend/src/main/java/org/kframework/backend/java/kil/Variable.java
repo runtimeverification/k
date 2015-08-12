@@ -12,6 +12,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -22,7 +23,7 @@ import java.util.Set;
 public class Variable extends Term implements Immutable, org.kframework.kore.KVariable {
 
     protected static final String VARIABLE_PREFIX = "_";
-    protected static int counter = 0;
+    protected static AtomicInteger counter = new AtomicInteger(0);
     private static MapCache<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new MapCache<>();
 
     /**
@@ -48,8 +49,8 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
      *            the given sort
      * @return the fresh variable
      */
-    public static synchronized Variable getAnonVariable(Sort sort) {
-        return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
+    public static Variable getAnonVariable(Sort sort) {
+        return new Variable(VARIABLE_PREFIX + counter.getAndIncrement(), sort, true);
     }
 
     /* TODO(AndreiS): cache the variables */
@@ -161,11 +162,14 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
     Object readResolve() {
         if (anonymous) {
             int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
-            if (id < counter) {
-                return deserializationAnonymousVariableMap.get(Pair.of(id, sort), this::getFreshCopy);
-            } else {
-                counter = id + 1;
-                return this;
+            /* keep polling the counter until we acquire `id` successfully or we know that
+            * `id` has been used and this anonymous variable must be renamed */
+            for (int c = counter.get(); ; ) {
+                if (id < c) {
+                    return deserializationAnonymousVariableMap.get(Pair.of(id, sort), this::getFreshCopy);
+                } else if (counter.compareAndSet(c, id + 1)) {
+                    return this;
+                }
             }
         } else {
             return this;

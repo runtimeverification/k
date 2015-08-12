@@ -179,6 +179,11 @@ public class RuleGrammarGenerator {
                     Production p2 = Production(Sort("Cell"), Seq(NonTerminal(p.sort())));
                     return Stream.of(p1, p2);
                 }
+                if(s instanceof Production && (s.att().contains("cellFragment"))) {
+                    Production p = (Production)s;
+                    Production p1 = Production(Sort("Cell"), Seq(NonTerminal(p.sort())));
+                    return Stream.of(p,p1);
+                }
                 return Stream.of(s);
             }).collect(Collectors.toSet());
         } else

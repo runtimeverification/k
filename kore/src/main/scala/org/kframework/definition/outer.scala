@@ -64,25 +64,27 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .map { case (l, ps) => (l, ps) }
 
   lazy val definedKLabels: Set[KLabel] =
-    (productionsFor.keys.toSet | klabelsDefinedInRules).filter(!_.isInstanceOf[KVariable])
+    (productionsFor.keys.toSet | klabelsDefinedInRules.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
-  private lazy val klabelsDefinedInRules: Set[KLabel] = {
-    val transformer = new KORETransformer[Set[KLabel]] {
-      override def apply(k: KApply): Set[KLabel] = k.klist.items.asScala.flatMap(apply).toSet + k.klabel
+  private def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map{ case (k,v) => k -> (v + map1.getOrElse(k,0)) }
 
-      override def apply(k: KRewrite): Set[KLabel] = apply(k.left) | apply(k.right)
+  lazy val klabelsDefinedInRules: Map[KLabel, Int] = {
+    val transformer = new KORETransformer[Map[KLabel, Int]] {
+      override def apply(k: KApply): Map[KLabel, Int] = mergeMultiset(k.klist.items.asScala.map(apply).fold(Map())(mergeMultiset), Map((k.klabel, 1)))
 
-      override def apply(k: KToken): Set[KLabel] = Set()
+      override def apply(k: KRewrite): Map[KLabel, Int] = mergeMultiset(apply(k.left), apply(k.right))
 
-      override def apply(k: KVariable): Set[KLabel] = Set()
+      override def apply(k: KToken): Map[KLabel, Int] = Map()
 
-      override def apply(k: KSequence): Set[KLabel] = k.items.asScala.flatMap(apply).toSet
+      override def apply(k: KVariable): Map[KLabel, Int] = Map()
 
-      override def apply(k: InjectedKLabel): Set[KLabel] = Set(k.klabel)
+      override def apply(k: KSequence): Map[KLabel, Int] = k.items.asScala.map(apply).fold(Map())(mergeMultiset)
+
+      override def apply(k: InjectedKLabel): Map[KLabel, Int] = Map((k.klabel, 1))
     }
-    rules.flatMap(r => {
-      transformer.apply(r.body) | transformer.apply(r.requires) | transformer.apply(r.ensures)
-    })
+    rules.map(r => {
+      mergeMultiset(transformer.apply(r.body), mergeMultiset(transformer.apply(r.requires), transformer.apply(r.ensures)))
+    }).fold(Map())(mergeMultiset)
   }
 
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
@@ -137,6 +139,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
+  val usedCellSorts: Set[Sort] = productions.flatMap {p => p.items.collect{case NonTerminal(s) => s}
+     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))}
 
   lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") =>
     srt })
@@ -184,7 +188,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
     case p@Production(_, items, _) =>
-      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) => nt }
+      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) => nt }
       if (!res.isEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
       res
@@ -256,6 +260,10 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
   def isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
+
+  def arity: Int = items.count(_.isInstanceOf[NonTerminal])
+
+  def nonterminal(i: Int): NonTerminal = items.filter(_.isInstanceOf[NonTerminal])(i).asInstanceOf[NonTerminal]
 }
 
 object Production {
