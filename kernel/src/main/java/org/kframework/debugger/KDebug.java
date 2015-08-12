@@ -27,12 +27,12 @@ public interface KDebug {
     /**
      * Take a certain number of steps from the current state.
      *
-     * @param initialState The state to begin stepping from.
+     * @param initialState The StateId of the state to begin taking steps from. Steps are always taken from the last encountered configuration.
      * @param steps        The number of steps to take
      * @return DebuggerState The new state arrived upon.
      * after the operation.
      */
-    public DebuggerState step(DebuggerState initialState, int steps);
+    public DebuggerState step(int initialState, int steps);
 
     /**
      * Take specified number of steps backwards from current state.
@@ -41,14 +41,14 @@ public interface KDebug {
      * @return DebuggerState Oject depicting the state debugger was in
      * after the operation.
      */
-    public DebuggerState backStep(int steps);
+    public DebuggerState backStep(int initialState, int steps);
 
     /**
      * Go to a certain state in your the execution trace.
      *
      * @param stateNum The id of the state you're wanting to go to.
      */
-    public DebuggerState jumpTo(int stateNum);
+    public DebuggerState jumpTo(int stateNum, int ConfigurationNum);
 
 
     /**
