@@ -5,8 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.name.Names;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.main.AbstractKModule;
@@ -20,8 +19,6 @@ import java.util.function.Function;
  * Created by dwightguth on 5/27/15.
  */
 public class OcamlBackendKModule extends AbstractKModule {
-
-    private int OCAML_CHECKPOINT_INTERVAL = 1000000;
 
     @Override
     public List<Pair<Class<?>, Boolean>> kompileOptions() {
@@ -37,7 +34,7 @@ public class OcamlBackendKModule extends AbstractKModule {
 
                 MapBinder<String, Consumer<CompiledDefinition>> mapBinder = MapBinder.newMapBinder(
                         binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {
-                });
+                        });
                 mapBinder.addBinding("ocaml").to(OcamlBackend.class);
             }
         });
@@ -53,11 +50,6 @@ public class OcamlBackendKModule extends AbstractKModule {
                 MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
                         binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                         });
-
-                MapBinder<String, Integer> checkpointIntervalMap = MapBinder.newMapBinder(
-                        binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
-
-                checkpointIntervalMap.addBinding("ocaml").toInstance(new Integer(OCAML_CHECKPOINT_INTERVAL));
                 rewriterBinder.addBinding("ocaml").to(OcamlRewriter.class);
             }
         });
