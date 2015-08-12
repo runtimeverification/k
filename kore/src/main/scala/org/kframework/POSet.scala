@@ -110,8 +110,7 @@ class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
 
   def maximal(sorts : util.Collection[T]) : util.Set[T] = {
     import scala.collection.JavaConversions._
-    val sorts2 : Iterable[T] = sorts;
-    maximal(sorts2)
+    maximal(sorts : Iterable[T])
   }
 
   override def toString() = {
