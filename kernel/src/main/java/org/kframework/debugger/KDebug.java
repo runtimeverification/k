@@ -92,7 +92,7 @@ public interface KDebug {
      *
      * @return The DebuggerState object corresponding to the Active State
      */
-    public DebuggerState getActiveState();
+    public int getActiveState();
 
     /**
      * Allows the user to peek at a particular configuration/state, without changing the current state.

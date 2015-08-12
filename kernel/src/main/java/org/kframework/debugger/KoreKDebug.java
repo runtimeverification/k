@@ -159,14 +159,14 @@ public class KoreKDebug implements KDebug {
         if (newActiveState == null) {
             return activeStateIndex;
         }
-        activeStateIndex= stateNum;
+        activeStateIndex = stateNum;
         configurationNum.ifPresent(configNum -> jumpTo(stateNum, configNum));
         return stateNum;
     }
 
     @Override
-    public DebuggerState getActiveState() {
-        return stateList.get(activeStateIndex);
+    public int getActiveState() {
+        return activeStateIndex;
     }
 
     @Override
@@ -178,15 +178,13 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
-        DebuggerState requestedState;
+        DebuggerState requestedState = stateList.get(activeStateIndex);
         if (stateNum.isPresent()) {
             int concreteStateNum = stateNum.get();
             if (concreteStateNum < 0 || concreteStateNum >= stateList.size()) {
                 return null;
             }
             requestedState = stateList.get(concreteStateNum);
-        } else {
-            requestedState = getActiveState();
         }
         if (configurationNum.isPresent()) {
             Integer concreteConfigurationNum = configurationNum.get();

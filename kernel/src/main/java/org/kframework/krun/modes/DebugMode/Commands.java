@@ -27,7 +27,7 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            session.step(stepCount);
+            session.step(session.getActiveState(), stepCount);
             System.out.println(stepCount + " Step(s) Taken");
         }
     }
