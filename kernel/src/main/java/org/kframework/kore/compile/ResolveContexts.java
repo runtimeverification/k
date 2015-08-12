@@ -111,12 +111,7 @@ public class ResolveContexts {
             items.remove(items.size() - 1);
         }
         items.add(Terminal(")"));
-        Production freezer;
-        if (body instanceof KApply) {
-            freezer = Production(freezerLabel.name(), mutable(input.sortFor()).getOrDefault(((KApply) context.body()).klabel(), Sorts.KItem()), immutable(items), Att());
-        } else {
-            freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
-        }
+        Production freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(heated, frozen)), requires, BooleanUtils.TRUE, context.att().add("heat")),
