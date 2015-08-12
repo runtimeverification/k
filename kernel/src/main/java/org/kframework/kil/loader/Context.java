@@ -80,6 +80,7 @@ public class Context implements Serializable {
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
+    public HashMap<Sort, Sort> smtSortFlattening = new HashMap<>();
 
     private BiMap<String, Production> conses;
 
@@ -482,6 +483,18 @@ public class Context implements Serializable {
             }
 
             freshFunctionNames.put(production.getSort(), production.getKLabel());
+        }
+    }
+
+    public void makeSMTSortFlatteningMap(Set<Production> freshProductions) {
+        for (Production production : freshProductions) {
+            if (!production.isSubsort()) {
+                throw KExceptionManager.compilerError(
+                        "unexpected tag [smt-sort-flatten] for non-subsort production " + production,
+                        production);
+            }
+
+            smtSortFlattening.put(production.getSort(), production.getSubsort());
         }
     }
 

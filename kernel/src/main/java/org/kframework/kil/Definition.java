@@ -128,6 +128,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
 
         context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
+        context.makeSMTSortFlatteningMap(this.getSyntaxByTag(Attribute.SMT_SORT_FLATTEN, context));
     }
 
     public Module getSingletonModule() {
