@@ -618,7 +618,7 @@ public class DefinitionToOcaml implements Serializable {
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
-        for (Rule r : iterable(mainModule.rules())) {
+        stream(mainModule.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KSequence) {
                 KSequence kseq = (KSequence) left;
@@ -633,7 +633,7 @@ public class DefinitionToOcaml implements Serializable {
                     }
                 }
             }
-        }
+        });
         functions = new HashSet<>(functionRules.keySet());
         for (Production p : iterable(mainModule.productions())) {
             if (p.att().contains(Attribute.FUNCTION_KEY)) {
