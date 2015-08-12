@@ -286,7 +286,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                     functionsBuilder.build(),
                     variablesBuilder.build(),
                     context);
-            return builtinMap.baseTerms().size() == 1 && builtinMap.concreteSize() == 0 ?
+            return builtinMap.baseTerms().size() == 1 && builtinMap.collectionVariables().size() == 1 && builtinMap.concreteSize() == 0 ?
                     builtinMap.baseTerms().iterator().next() : builtinMap;
         }
     }
