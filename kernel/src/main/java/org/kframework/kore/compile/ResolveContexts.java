@@ -61,27 +61,28 @@ public class ResolveContexts {
     }
 
     private Stream<? extends Sentence> resolve(Context context, Module input) {
-        class Holder {
-            K heated;
-            SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
-        }
-        Holder h = new Holder();
+        final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
         K body = context.body();
         K requires = context.requires();
-        new VisitKORE() {
+        K heated = new VisitKORE() {
+            K heated;
+            public K process(K k) {
+                apply(k);
+                return heated;
+            }
             @Override
             public Void apply(KRewrite k) {
-                if (h.heated != null) {
+                if (heated != null) {
                     throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
                 }
-                h.heated = k.right();
+                heated = k.right();
                 return super.apply(k);
             }
 
             @Override
             public Void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
-                    h.vars.put(k, k);
+                    vars.put(k, k);
                 }
                 return super.apply(k);
             }
@@ -89,12 +90,12 @@ public class ResolveContexts {
             @Override
             public Void apply(KApply k) {
                 if (k.klabel() instanceof KVariable)
-                    h.vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
+                    vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
                 return super.apply(k);
             }
-        }.apply(body);
-        if (h.heated == null) {
-            h.heated = ResolveStrict.HOLE;
+        }.process(body);
+        if (heated == null) {
+            heated = ResolveStrict.HOLE;
         }
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
@@ -102,7 +103,7 @@ public class ResolveContexts {
         KLabel freezerLabel = getUniqueFreezerLabel(input);
         items.add(Terminal(freezerLabel.name()));
         items.add(Terminal("("));
-        for (int i = 0; i < h.vars.size(); i++) {
+        for (int i = 0; i < vars.size(); i++) {
             items.add(NonTerminal(Sort("K")));
             items.add(Terminal(","));
         }
@@ -114,9 +115,9 @@ public class ResolveContexts {
         } else {
             freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
         }
-        K frozen = KApply(freezerLabel, h.vars.values().stream().collect(Collections.toList()));
+        K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(KRewrite(cooled, KSequence(h.heated, frozen)), requires, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(KRewrite(KSequence(h.heated, frozen), cooled), requires, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(KRewrite(cooled, KSequence(heated, frozen)), requires, BooleanUtils.TRUE, context.att().add("heat")),
+                Rule(KRewrite(KSequence(heated, frozen), cooled), requires, BooleanUtils.TRUE, context.att().add("cool")));
     }
 }
