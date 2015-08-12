@@ -107,7 +107,9 @@ public class ResolveContexts {
             items.add(NonTerminal(Sort("K")));
             items.add(Terminal(","));
         }
-        items.remove(items.size() - 1);
+        if (vars.size() > 0) {
+            items.remove(items.size() - 1);
+        }
         items.add(Terminal(")"));
         Production freezer;
         if (body instanceof KApply) {
