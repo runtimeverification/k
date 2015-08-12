@@ -85,7 +85,7 @@ public interface KDebug {
      * @param configurationNum The configuration within the state
      * @return DebuggerState object containing the State of the debugger. Null if operation fails.
      */
-    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum);
+    public int setState(int stateNum, Optional<Integer> configurationNum);
 
     /**
      * Returns the state the activated state the debugger is in at the moment
@@ -107,4 +107,13 @@ public interface KDebug {
      */
     public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum);
 
+
+    /**
+     * Create a copy of a state, and make debugger aware of the copy.
+     * @param stateNum of the state you'd like to copy
+     * @return
+     */
+    public DebuggerState createCopy(int stateNum);
+
 }
+

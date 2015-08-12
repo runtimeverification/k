@@ -25,7 +25,6 @@ public class KoreKDebug implements KDebug {
     private Rewriter rewriter;
     private int checkpointInterval;
 
-
     /**
      * Start a Debugger Session. The initial Configuration becomes a part of the new and only state of the Debugger
      *
@@ -155,23 +154,24 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum) {
+    public int setState(int stateNum, Optional<Integer> configurationNum) {
         DebuggerState newActiveState = stateList.get(stateNum);
         if (newActiveState == null) {
-            return null;
+            return activeStateIndex;
         }
         activeStateIndex= stateNum;
         configurationNum.ifPresent(configNum -> jumpTo(stateNum, configNum));
-        return activeState;
+        return stateNum;
     }
 
     @Override
     public DebuggerState getActiveState() {
-        return activeState;
+        return stateList.get(activeStateIndex);
     }
 
-    private DebuggerState createCopyState(DebuggerState copyState) {
-        DebuggerState newState = new DebuggerState(activeState);
+    @Override
+    public DebuggerState createCopy(int stateNum) {
+        DebuggerState newState = new DebuggerState(stateList.get(stateNum));
         stateList.add(newState);
         return newState;
     }
@@ -186,15 +186,14 @@ public class KoreKDebug implements KDebug {
             }
             requestedState = stateList.get(concreteStateNum);
         } else {
-            requestedState = activeState;
+            requestedState = getActiveState();
         }
         if (configurationNum.isPresent()) {
             Integer concreteConfigurationNum = configurationNum.get();
             if (concreteConfigurationNum < 0) {
                 return null;
             }
-            activeState = createCopyState(requestedState);
-            return jumpTo(concreteConfigurationNum);
+            return jumpTo(stateNum.get(), configurationNum.get());
         }
         return requestedState;
     }
