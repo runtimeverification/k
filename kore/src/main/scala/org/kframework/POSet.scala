@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework
 
+import java.util
 import java.util.Optional
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
@@ -99,6 +100,17 @@ class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
             def compare(x: T, y: T) = if (x < y) -1 else if (x > y) 1 else 0
           }))
     }
+  }
+
+  /** Return the subset of items from the argument which are not
+    * less then any other item.
+    */
+  def maximal(sorts : Iterable[T]) : Set[T] =
+    sorts.filter(s1 => !sorts.exists(s2 => lessThan(s1,s2))).toSet
+
+  def maximal(sorts : util.Collection[T]) : util.Set[T] = {
+    import scala.collection.JavaConversions._
+    maximal(sorts : Iterable[T])
   }
 
   override def toString() = {
