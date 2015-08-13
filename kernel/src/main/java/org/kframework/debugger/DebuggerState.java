@@ -30,36 +30,29 @@ public class DebuggerState {
     public int getStepNum() {
         return stepNum;
     }
+    private boolean isLeafState;
 
-    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
+    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, RewriterCheckpoint> checkpointMap, boolean isLeafState) {
         this.checkpointMap = new TreeMap<>(checkpointMap);
         this.currentK = currentK;
         this.stepNum = stepNum;
+        this.isLeafState = isLeafState;
     }
 
     public DebuggerState(DebuggerState copyState) {
         this.checkpointMap = new TreeMap<>(copyState.getCheckpointMap());
         this.currentK = copyState.getCurrentK();
         this.stepNum = copyState.getStepNum();
-
-    }
-
-    void setCheckpointMap(NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
-        this.checkpointMap = checkpointMap;
-    }
-
-    void setCurrentK(K currentK) {
-        this.currentK = currentK;
-    }
-
-    void setStepNum(int stepNum) {
-        this.stepNum = stepNum;
+        this.isLeafState = copyState.isLeafState();
     }
 
     public K getCurrentK() {
         return currentK;
     }
 
+    public boolean isLeafState() {
+        return isLeafState;
+    }
 
     /**
      * Get the last checkpoint from the Map.
