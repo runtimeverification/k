@@ -50,8 +50,9 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
         this.stepsTaken = stepsTaken;
     }
 
-
-
+    public Optional<Integer> getStepsTaken() {
+        return stepsTaken;
+    }
 
     public abstract Term getRawResult();
 

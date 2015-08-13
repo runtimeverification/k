@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.Rewriter;
+import org.kframework.RewriterResult;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -106,11 +107,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public K execute(K k, Optional<Integer> depth) {
+        public RewriterResult execute(K k, Optional<Integer> depth) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
-            return result.getJavaKilTerm();
+            return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
         }
 
         @Override
@@ -131,7 +132,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
 
         public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
-            K res = execute(k, depth);
+            K res = execute(k, depth).k();
             return Tuple2.apply(res, match(res, rule));
         }
 

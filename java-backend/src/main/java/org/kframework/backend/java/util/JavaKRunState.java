@@ -20,8 +20,8 @@ public class JavaKRunState extends KRunState {
 
     private Context context;
 
-    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter) {
-        super(null, counter, Optional.empty());
+    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter, Optional<Integer> stepsTaken) {
+        super(null, counter, stepsTaken);
         this.context = context;
         this.constrainedTerm = constrainedTerm;
         this.javaTerm = constrainedTerm.term();
