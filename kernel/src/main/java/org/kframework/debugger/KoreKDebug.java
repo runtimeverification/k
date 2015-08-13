@@ -37,7 +37,7 @@ public class KoreKDebug implements KDebug {
         this.checkpointInterval = checkpointInterval;
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, new RewriterCheckpoint(initialK));
-        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap, false);
+        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
         stateList.add(initialState);
         activeStateIndex = DEFAULT_ID;
     }
@@ -70,14 +70,14 @@ public class KoreKDebug implements KDebug {
             return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
         }
         activeStateCheckpoint += steps;
-        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, false);
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
         stateList.add(nextState);
         return nextState;
     }
 
     private DebuggerState getDebuggerState(int currentStateIndex, int activeStateCheckpoint, RewriterResult result, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
         activeStateCheckpoint += result.rewriteSteps().get();
-        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, true);
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
         stateList.add(currentStateIndex, nextState);
         return nextState;
     }
@@ -99,7 +99,7 @@ public class KoreKDebug implements KDebug {
         }
 
         int floorKey = relevantEntry.getKey();
-        currentState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)), false);
+        currentState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
         stateList.remove(initialStateNum);
         stateList.add(initialStateNum, currentState);
         return step(initialStateNum, target - floorKey);

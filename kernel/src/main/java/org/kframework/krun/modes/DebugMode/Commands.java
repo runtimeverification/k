@@ -30,7 +30,11 @@ public class Commands {
             int activeStateId = session.getActiveStateId();
             DebuggerState prevState = session.getStates().get(activeStateId);
             DebuggerState steppedState = session.step(activeStateId, stepCount);
-            if(steppedState.isLeafState())
+            int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
+            if (effectiveStepCount < stepCount) {
+                System.out.println("Attempted " + stepCount + "step(s). " + "Took " + effectiveStepCount + "steps(s)");
+                System.out.println("KDebug may have encountered a final configuration");
+            }
             System.out.println(stepCount + " Step(s) Taken");
         }
     }
