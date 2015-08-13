@@ -37,7 +37,7 @@ public class KoreKDebug implements KDebug {
         this.checkpointInterval = checkpointInterval;
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, new RewriterCheckpoint(initialK));
-        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap, );
+        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap, false);
         stateList.add(initialState);
         activeStateIndex = DEFAULT_ID;
     }
@@ -53,47 +53,31 @@ public class KoreKDebug implements KDebug {
         stateList.remove(currentStateIndex);
         K currentK = currentState.getCurrentK();
         int activeStateCheckpoint = currentState.getStepNum();
-        int lastCheckpoint = currentState.getlastMapCheckpoint();
-        DebuggerState nextState;
         RewriterResult result;
-        /* Not enough steps for a new checkpoint */
-        if (activeStateCheckpoint + steps < lastCheckpoint + checkpointInterval) {
-            result = rewriter.execute(currentK, Optional.of(new Integer(steps)));
-            activeStateCheckpoint += result.rewriteSteps().orElse(steps);
-            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
-            nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, isLeafState(steps, result));
-            stateList.add(currentStateIndex, nextState);
-            return nextState;
-        }
-        /* Move to the next Checkpoint */
-        int remSteps = lastCheckpoint + checkpointInterval - activeStateCheckpoint;
-        if (remSteps < 0) {
-            /* Case when checkpointInterval has been modified */
-            lastCheckpoint = (activeStateCheckpoint / checkpointInterval) * checkpointInterval;
-        }
-        remSteps = lastCheckpoint + checkpointInterval - activeStateCheckpoint;
-        result = rewriter.execute(currentK, Optional.of(remSteps));
-        if (isLeafState(remSteps, result)) {
-            
-        }
-        currentK = result.k();
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
-        steps -= remSteps;
-        activeStateCheckpoint = lastCheckpoint + checkpointInterval;
-        checkpointMap.put(new Integer(activeStateCheckpoint), new RewriterCheckpoint(currentK));
-        /* Register Checkpoints and Proceed. Take Jumps equal to the Checkpoint Interval */
         while (steps > checkpointInterval) {
-            activeStateCheckpoint += checkpointInterval;
-            RewriterCheckpoint newCheckpoint = new RewriterCheckpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))).k());
+            result = rewriter.execute(currentK, Optional.of(checkpointInterval));
+            if (isLeafState(checkpointInterval, result)) {
+                return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+            }
             steps -= checkpointInterval;
-            checkpointMap.put(new Integer(activeStateCheckpoint), newCheckpoint);
-            currentK = newCheckpoint.getCheckpointK();
+            activeStateCheckpoint += checkpointInterval;
+            checkpointMap.put(activeStateCheckpoint, new RewriterCheckpoint(result.k()));
+            currentK = result.k();
         }
-
-        /* Final remaining steps */
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(steps))).k();
+        result = rewriter.execute(currentK, Optional.of(steps));
+        if (isLeafState(steps, result)) {
+            return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+        }
         activeStateCheckpoint += steps;
-        nextState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap, );
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, false);
+        stateList.add(nextState);
+        return nextState;
+    }
+
+    private DebuggerState getDebuggerState(int currentStateIndex, int activeStateCheckpoint, RewriterResult result, NavigableMap<Integer, RewriterCheckpoint> checkpointMap) {
+        activeStateCheckpoint += result.rewriteSteps().get();
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, true);
         stateList.add(currentStateIndex, nextState);
         return nextState;
     }
@@ -115,7 +99,7 @@ public class KoreKDebug implements KDebug {
         }
 
         int floorKey = relevantEntry.getKey();
-        currentState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)), );
+        currentState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)), false);
         stateList.remove(initialStateNum);
         stateList.add(initialStateNum, currentState);
         return step(initialStateNum, target - floorKey);
@@ -176,7 +160,7 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public int getActiveState() {
+    public int getActiveStateId() {
         return activeStateIndex;
     }
 

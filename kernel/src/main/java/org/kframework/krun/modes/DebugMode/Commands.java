@@ -27,7 +27,10 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            session.step(session.getActiveState(), stepCount);
+            int activeStateId = session.getActiveStateId();
+            DebuggerState prevState = session.getStates().get(activeStateId);
+            DebuggerState steppedState = session.step(activeStateId, stepCount);
+            if(steppedState.isLeafState())
             System.out.println(stepCount + " Step(s) Taken");
         }
     }
