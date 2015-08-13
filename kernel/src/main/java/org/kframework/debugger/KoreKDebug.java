@@ -61,18 +61,24 @@ public class KoreKDebug implements KDebug {
             result = rewriter.execute(currentK, Optional.of(new Integer(steps)));
             activeStateCheckpoint += result.rewriteSteps().orElse(steps);
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
-            nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, result.rewriteSteps().orElse(-1) < steps);
+            nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, isLeafState(steps, result));
             stateList.add(currentStateIndex, nextState);
             return nextState;
         }
         /* Move to the next Checkpoint */
-        if (lastCheckpoint + checkpointInterval - activeStateCheckpoint < 0) {
+        int remSteps = lastCheckpoint + checkpointInterval - activeStateCheckpoint;
+        if (remSteps < 0) {
             /* Case when checkpointInterval has been modified */
             lastCheckpoint = (activeStateCheckpoint / checkpointInterval) * checkpointInterval;
         }
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(lastCheckpoint + checkpointInterval - activeStateCheckpoint))).k();
+        remSteps = lastCheckpoint + checkpointInterval - activeStateCheckpoint;
+        result = rewriter.execute(currentK, Optional.of(remSteps));
+        if (isLeafState(remSteps, result)) {
+            
+        }
+        currentK = result.k();
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
-        steps -= lastCheckpoint + checkpointInterval - activeStateCheckpoint;
+        steps -= remSteps;
         activeStateCheckpoint = lastCheckpoint + checkpointInterval;
         checkpointMap.put(new Integer(activeStateCheckpoint), new RewriterCheckpoint(currentK));
         /* Register Checkpoints and Proceed. Take Jumps equal to the Checkpoint Interval */
@@ -90,6 +96,10 @@ public class KoreKDebug implements KDebug {
         nextState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap, );
         stateList.add(currentStateIndex, nextState);
         return nextState;
+    }
+
+    private boolean isLeafState(int steps, RewriterResult result) {
+        return result.rewriteSteps().isPresent() && result.rewriteSteps().get() < steps;
     }
 
     @Override
