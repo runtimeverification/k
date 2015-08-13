@@ -50,10 +50,10 @@ and print_kitem(c: normal_kitem) : string = match c with
 | KApply(klabel, klist) -> print_klabel(klabel) ^ "(" ^ print_klist(klist) ^ ")"
 | KItem (KToken(sort, s)) -> "#token(\"" ^ (String.escaped s) ^ "\", \"" ^ print_sort(sort) ^ "\")"
 | KItem (InjectedKLabel(klabel)) -> "#klabel(" ^ print_klabel(klabel) ^ ")"
-| KItem (Bool(b)) -> print_kitem(KItem (KToken(Constants.boolSort, string_of_bool(b))))
-| KItem (String(s)) -> print_kitem(KItem (KToken(Constants.stringSort, "\"" ^ (String.escaped s) ^ "\"")))
-| KItem (Int(i)) -> print_kitem(KItem (KToken(Constants.intSort, Z.to_string(i))))
-| KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(Constants.floatSort, float_to_string(f))))
+| KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
+| KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
+| KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
+| KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
 | KItem (Bottom) -> "`#Bottom`(.KList)"
 | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
 | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
@@ -99,6 +99,30 @@ let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t opti
  let true_exp = if exp < min_exp then min_exp else exp in
  (String.get digits 0 = '-'), true_exp, Some scaled_significand
 
+let float_regexp = Str.regexp "(.*)[pP]([0-9]+)[xX]([0-9]+)"
+
+let unescape_k_string (str: string) =
+  let str = String.sub str 1 (String.length str - 2) in
+  Scanf.unescaped str
+
+let parse_float (str: string) : int * int * string = 
+  if Str.string_match float_regexp str 0 then
+    let prec = int_of_string (Str.matched_group 2 str) in
+    let exp = int_of_string (Str.matched_group 3 str) in
+    (prec, exp, (Str.matched_group 1 str))
+  else let last_idx = String.length str - 1 in
+  let last = String.get str last_idx in match last with
+  | 'f' | 'F' -> (24, 8, String.sub str 0 last_idx)
+  | 'd' | 'D' -> (53, 11, String.sub str 0 last_idx)
+  | _ -> (53, 11, str)
+
+let ktoken (s: sort) (str: string) : kitem = match s with
+| SortInt -> Int (Z.of_string str)
+| SortFloat -> let (p,e,f) = parse_float str in (round_to_range(Float ((Gmp.FR.from_string_prec_base p Gmp.GMP_RNDN 10 f), e, p)))
+| SortString -> String (unescape_k_string str)
+| SortBool -> Bool (bool_of_string str)
+| _ -> KToken(s,str)
+
 module MAP =
 struct
 
@@ -130,13 +154,13 @@ struct
         when (l1 = l2) -> [Map (s,l1,(KMap.filter (fun k v -> try (compare (KMap.find k k2) v) <> 0 with Not_found -> true) k1))]
     | _ -> raise Not_implemented
   let hook_keys c lbl sort config ff = match c with 
-      [Map (_,_,k1)] -> [Set (Constants.setSort, Constants.setConcatLabel,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
+      [Map (_,_,k1)] -> [Set (SortSet, Lbl_Set_,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
     | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
       (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
     | _ -> raise Not_implemented
   let hook_values c lbl sort config ff = match c with 
-      [Map (_,_,k1)] -> [List (Constants.listSort, Constants.listConcatLabel,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
+      [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
     | _ -> raise Not_implemented
   let hook_choice c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> (match KMap.choose k1 with (k, _) -> k)

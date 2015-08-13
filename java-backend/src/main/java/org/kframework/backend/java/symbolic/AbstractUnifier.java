@@ -1,36 +1,15 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.InjectedKLabel;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Profiler;
-import org.kframework.utils.errorsystem.KEMException;
+import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.util.DoubleLinkedList;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.lang3.tuple.Pair;
-import com.google.common.collect.Multimap;
 
 
 /**
@@ -68,8 +47,8 @@ public abstract class AbstractUnifier implements Unifier {
         }
     }
 
-    private final Deque<Pair<Term, Term>> tasks = new ArrayDeque<>();
-    private final Deque<Pair<Term, Term>> taskBuffer = new ArrayDeque<>();
+    private final DoubleLinkedList<Pair<Term, Term>> tasks = new DoubleLinkedList<>();
+    private final DoubleLinkedList<Pair<Term, Term>> taskBuffer = new DoubleLinkedList<>();
 
     protected boolean failed = false;
 
@@ -78,7 +57,7 @@ public abstract class AbstractUnifier implements Unifier {
     protected TermContext termContext;
 
     void addUnificationTask(Term term, Term otherTerm) {
-        taskBuffer.push(Pair.of(term, otherTerm));
+        taskBuffer.add(Pair.of(term, otherTerm));
     }
 
     /**
@@ -213,9 +192,7 @@ public abstract class AbstractUnifier implements Unifier {
     }
 
     private void flushTaskBuffer() {
-        while (!taskBuffer.isEmpty()) {
-            tasks.push(taskBuffer.pop());
-        }
+        tasks.pushAll(taskBuffer);
     }
 
     abstract void add(Term left, Term right);
