@@ -43,7 +43,7 @@ public class KRunExecutionMode implements ExecutionMode {
             Tuple2<K, List<Map<KVariable, K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
             return Tuple2.apply(res._1(), KRun.getExitCode(kem, res._2()));
         }
-        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
+        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k();
     }
 }
 

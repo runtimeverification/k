@@ -57,7 +57,7 @@ public class KoreKDebug implements KDebug {
         DebuggerState nextState;
         /* Not enough steps for a new checkpoint */
         if (activeStateCheckpoint + steps < lastCheckpoint + checkpointInterval) {
-            currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
+            currentK = rewriter.execute(currentK, Optional.of(new Integer(steps))).k();
             activeStateCheckpoint += steps;
             NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
             nextState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
@@ -69,7 +69,7 @@ public class KoreKDebug implements KDebug {
             /* Case when checkpointInterval has been modified */
             lastCheckpoint = (activeStateCheckpoint / checkpointInterval) * checkpointInterval;
         }
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(lastCheckpoint + checkpointInterval - activeStateCheckpoint)));
+        currentK = rewriter.execute(currentK, Optional.of(new Integer(lastCheckpoint + checkpointInterval - activeStateCheckpoint))).k();
         NavigableMap<Integer, RewriterCheckpoint> checkpointMap = currentState.getCheckpointMap();
         steps -= lastCheckpoint + checkpointInterval - activeStateCheckpoint;
         activeStateCheckpoint = lastCheckpoint + checkpointInterval;
@@ -77,14 +77,14 @@ public class KoreKDebug implements KDebug {
         /* Register Checkpoints and Proceed. Take Jumps equal to the Checkpoint Interval */
         while (steps > checkpointInterval) {
             activeStateCheckpoint += checkpointInterval;
-            RewriterCheckpoint newCheckpoint = new RewriterCheckpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))));
+            RewriterCheckpoint newCheckpoint = new RewriterCheckpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))).k());
             steps -= checkpointInterval;
             checkpointMap.put(new Integer(activeStateCheckpoint), newCheckpoint);
             currentK = newCheckpoint.getCheckpointK();
         }
 
         /* Final remaining steps */
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
+        currentK = rewriter.execute(currentK, Optional.of(new Integer(steps))).k();
         activeStateCheckpoint += steps;
         nextState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
         stateList.add(currentStateIndex, nextState);
@@ -150,7 +150,7 @@ public class KoreKDebug implements KDebug {
     }
 
     private boolean isFinalResult(K currK) {
-        return currK.equals(rewriter.execute(currK, Optional.of(1)));
+        return currK.equals(rewriter.execute(currK, Optional.of(1)).k());
     }
 
     @Override
