@@ -27,6 +27,17 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
      */
     protected int stateId;
 
+    /**
+     * Value to denote non-availability of state.
+     */
+    private static int NOT_AVAILABLE = -1;
+
+    /**
+     * If number of steps taken is available, then this field denotes the value.
+     * Negative value indicates non-availability of data.
+     */
+    private int stepsTaken;
+
     @RequestScoped
     public static class Counter {
         private int nextState;
@@ -36,6 +47,9 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
         this.rawResult = rawResult;
         this.stateId = counter.nextState++;
     }
+
+
+
 
     public abstract Term getRawResult();
 

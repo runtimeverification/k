@@ -20,7 +20,7 @@ trait Rewriter {
    * - for symbolic execution, it can return any formula with symbolic constraints
    * - for search, it returns an Or with multiple ground terms as children
    */
-  def execute(k: kore.K, depth: Optional[Integer]): kore.K
+  def execute(k: kore.K, depth: Optional[Integer]): RewriterResult
 
 
   def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
