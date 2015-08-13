@@ -53,10 +53,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     }
 
 
-
-
-
-
     private ConsoleReader getConsoleReader() {
         ConsoleReader reader;
         try {
@@ -86,6 +82,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             try {
                 String input = reader.readLine("KDebug>");
                 Command command = parseCommand(input);
+                if (command instanceof Commands.QuitCommand) {
+                    break;
+                }
                 command.runCommand(debugger, compiledDefinition);
             } catch (ParseException parseException) {
                 System.out.println(parseException.getMessage());
@@ -93,7 +92,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println("Error Formatting Number");
             } catch (IOException inputException) {
                 System.out.println("Error Interacting with Console");
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }

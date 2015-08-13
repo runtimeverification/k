@@ -133,10 +133,12 @@ public class KoreKDebug implements KDebug {
     @Override
     public DebuggerState resume() {
         DebuggerState activeState = stateList.get(activeStateIndex);
+        DebuggerState steppedState = activeState;
         do {
-            step(activeStateIndex, checkpointInterval);
-        } while (!isFinalResult(activeState.getCurrentK()));
-        return activeState;
+            activeState = steppedState;
+            steppedState = step(activeStateIndex, checkpointInterval);
+        } while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval);
+        return steppedState;
     }
 
     @Override
@@ -144,19 +146,16 @@ public class KoreKDebug implements KDebug {
         return new ArrayList<>(stateList);
     }
 
-    private boolean isFinalResult(K currK) {
-        return currK.equals(rewriter.execute(currK, Optional.of(1)).k());
-    }
 
     @Override
-    public int setState(int stateNum, Optional<Integer> configurationNum) {
+    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum) {
         DebuggerState newActiveState = stateList.get(stateNum);
         if (newActiveState == null) {
-            return activeStateIndex;
+            return null;
         }
         activeStateIndex = stateNum;
         configurationNum.ifPresent(configNum -> jumpTo(stateNum, configNum));
-        return stateNum;
+        return stateList.get(activeStateIndex);
     }
 
     @Override

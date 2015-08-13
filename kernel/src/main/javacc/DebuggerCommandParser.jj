@@ -64,10 +64,12 @@ Command command() throws NumberFormatException:
     |   LOOKAHEAD(3)
         <PEEK> (stateNum = parseNum()) (configurationNum = parseNum()) {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
     |   <PEEK> (configurationNum = parseNum())? {return new PeekCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
-    |   <BACKSTEP> (<NUMBER>)?
-    |   <JUMPTO> <NUMBER>
+    |   <BACKSTEP> (stepCount = parseNum())? {return new BackStepCommand(stepCount);}
+    |   LOOKAHEAD(3)
+        <JUMPTO> (stateNum = parseNum()) (configurationNum = parseNum()) {return new JumpToCommand(Optional.of(stateNum), Optional.of(configurationNum));}
+    |   <JUMPTO> (configurationNum = parseNum())? {return new JumpToCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
     |   <CHECKPOINT> <NUMBER>
-    |   <QUIT>
+    |   <QUIT> {return new QuitCommand();}
     |   <RESUME>
 }
 

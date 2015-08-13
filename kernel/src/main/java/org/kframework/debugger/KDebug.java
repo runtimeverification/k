@@ -2,6 +2,7 @@
 package org.kframework.debugger;
 
 
+import jdk.nashorn.internal.runtime.Debug;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 import org.kframework.krun.tools.Debugger;
@@ -85,7 +86,7 @@ public interface KDebug {
      * @param configurationNum The configuration within the state
      * @return DebuggerState object containing the State of the debugger. Null if operation fails.
      */
-    public int setState(int stateNum, Optional<Integer> configurationNum);
+    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum);
 
     /**
      * Returns the state the activated state the debugger is in at the moment
