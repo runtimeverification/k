@@ -5,6 +5,7 @@ import org.kframework.kil.Term;
 import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 public abstract class KRunState implements Serializable, Comparable<KRunState>, KRunResult {
 
@@ -34,18 +35,19 @@ public abstract class KRunState implements Serializable, Comparable<KRunState>, 
 
     /**
      * If number of steps taken is available, then this field denotes the value.
-     * Negative value indicates non-availability of data.
+     * Empty if data not available.
      */
-    private int stepsTaken;
+    private Optional<Integer> stepsTaken;
 
     @RequestScoped
     public static class Counter {
         private int nextState;
     }
 
-    public KRunState(Term rawResult, Counter counter) {
+    public KRunState(Term rawResult, Counter counter, Optional<Integer> stepsTaken) {
         this.rawResult = rawResult;
         this.stateId = counter.nextState++;
+        this.stepsTaken = stepsTaken;
     }
 
 
