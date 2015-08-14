@@ -32,11 +32,11 @@ public class Commands {
             DebuggerState steppedState = session.step(activeStateId, stepCount);
             int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
             if (effectiveStepCount < stepCount) {
-                System.out.println("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s)");
-                System.out.println("KDebug may have encountered a final configuration");
+                System.out.println("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).");
+                System.out.println("KDebug may have encountered a final configuration.");
                 return;
             }
-            System.out.println(stepCount + " Step(s) Taken");
+            System.out.println(stepCount + " Step(s) Taken.");
         }
     }
 
@@ -74,12 +74,12 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
             int activeStateId = session.getActiveStateId();
             if ((backStepCount-1) > activeStateId) {
-                System.out.println("Number of Configuration(s) is " + (activeStateId + 1) + " Back Step Count must be in range [0, " + activeStateId + "]");
+                System.out.println("Number of Configuration(s) is " + (activeStateId + 1) + " Step Count to go back must be in range [0, " + activeStateId + "]");
                 return;
             }
             DebuggerState backSteppedState = session.backStep(activeStateId, backStepCount);
             if (backSteppedState == null) {
-                System.out.println("Couldn't retrieve previous state");
+                System.out.println("Already at Start State, cannot go any further back");
                 return;
             }
             System.out.println("Took -" + backStepCount + " step(s)");

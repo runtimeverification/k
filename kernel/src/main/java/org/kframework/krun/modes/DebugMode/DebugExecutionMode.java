@@ -96,6 +96,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println(e.getMessage());
             }
         }
-
+        return null;
     }
 }

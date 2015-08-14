@@ -70,7 +70,7 @@ Command command() throws NumberFormatException:
     |   <JUMPTO> (configurationNum = parseNum())? {return new JumpToCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
     |   <CHECKPOINT> <NUMBER>
     |   <QUIT> {return new QuitCommand();}
-    |   <RESUME>
+    |   <RESUME> {return new ResumeCommand();}
 }
 
 Command parseCommand() throws NumberFormatException:
