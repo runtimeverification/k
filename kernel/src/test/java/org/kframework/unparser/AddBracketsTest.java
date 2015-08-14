@@ -60,7 +60,7 @@ public class AddBracketsTest {
 
 
     private String unparseTerm(K input, Module test) {
-        return KOREToTreeNodes.toString(new AddBrackets(test).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
+        return KOREToTreeNodes.toString(new AddBrackets(test).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
     }
 
 

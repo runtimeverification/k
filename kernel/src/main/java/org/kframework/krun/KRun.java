@@ -180,7 +180,7 @@ public class KRun implements Transformation<Void, Void> {
     private static String unparseTerm(K input, Module test) {
         return KOREToTreeNodes.toString(
                 new AddBrackets(test).addBrackets((ProductionReference)
-                        KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
+                        KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
     }
 
     @Override
