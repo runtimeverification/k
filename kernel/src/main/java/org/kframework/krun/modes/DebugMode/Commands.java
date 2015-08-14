@@ -129,4 +129,17 @@ public class Commands {
             System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
         }
     }
+
+    public static class WatchCommand implements Command {
+        private String pattern;
+
+        public WatchCommand(String pattern) {
+            this.pattern = pattern;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            System.out.println("got pattern " + pattern);
+        }
+    }
 }
