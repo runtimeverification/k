@@ -121,6 +121,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     args.add(files.resolveKompiled("prelude.cmx").getAbsolutePath());
                 }
                 args.addAll(Arrays.asList(files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        files.resolveKompiled("parser.cmx").getAbsolutePath(), files.resolveKompiled("lexer.cmx").getAbsolutePath(),
                         name));
                 args.add("-inline");
                 args.add("20");
@@ -135,6 +136,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     args.add(files.resolveKompiled("prelude.cmo").getAbsolutePath());
                 }
                 args.addAll(Arrays.asList(files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                        files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
                         name));
                 pb = pb.command(args);
                 pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");

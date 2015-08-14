@@ -50,9 +50,19 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
+            FileUtils.copyFile(files.resolveKBase("include/ocaml/lexer.mll"), files.resolveKompiled("lexer.mll"));
+            FileUtils.copyFile(files.resolveKBase("include/ocaml/parser.mly"), files.resolveKompiled("parser.mly"));
             ProcessBuilder pb = files.getProcessBuilder();
+            int exit = pb.command("ocamllex", "lexer.mll").directory(files.resolveKompiled(".")).inheritIO().start().waitFor();
+            if (exit != 0) {
+                throw KEMException.criticalError("ocamllex returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+            }
+            exit = pb.command("ocamlyacc", "parser.mly").directory(files.resolveKompiled(".")).inheritIO().start().waitFor();
+            if (exit != 0) {
+                throw KEMException.criticalError("ocamlyacc returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+            }
             List<String> args = new ArrayList<>(Arrays.asList("-c", "-g", "-package", "gmp", "-package", "zarith",
-                "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml"));
+                "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml", "parser.mli", "parser.ml", "lexer.ml"));
             args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
             if (!options.genMLOnly) {
                 if (options.ocamlopt) {
@@ -71,7 +81,7 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
                         .directory(files.resolveKompiled("."))
                         .inheritIO()
                         .start();
-                int exit = ocamlopt.waitFor();
+                exit = ocamlopt.waitFor();
                 if (exit != 0) {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }

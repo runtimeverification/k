@@ -109,15 +109,6 @@ public class DefinitionToOcaml implements Serializable {
     }
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
-    public static final String BOOL = encodeStringToIdentifier(Sort("Bool"));
-    public static final String STRING = encodeStringToIdentifier(Sort("String"));
-    public static final String INT = encodeStringToIdentifier(Sort("Int"));
-    public static final String FLOAT = encodeStringToIdentifier(Sort("Float"));
-    public static final String SET = encodeStringToIdentifier(Sort("Set"));
-    public static final String SET_CONCAT = encodeStringToIdentifier(KLabel("_Set_"));
-    public static final String LIST = encodeStringToIdentifier(Sort("List"));
-    public static final String LIST_CONCAT = encodeStringToIdentifier(KLabel("_List_"));
-
     public static final String postlude = "let run c n=\n" +
             "  try let rec go c n = if n = 0 then c else go (step c) (n - 1)\n" +
             "      in go c n\n" +
@@ -266,9 +257,9 @@ public class DefinitionToOcaml implements Serializable {
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" in output_string out (print_k(try(run(");
-        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
-        sb.append(") (").append(depth).append(")) with Stuck c' -> c'))");
+        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" in output_string out (print_k(try(run(Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append("\n) (").append(depth).append(")) with Stuck c' -> c'))");
         return sb.toString();
     }
 
@@ -278,8 +269,8 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append("in (try print_subst out (try_match(");
-        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
+        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append("in (try print_subst out (try_match(Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
         sb.append("\n)) with Stuck c -> output_string out \"0\\n\")");
         return sb.toString();
     }
@@ -290,8 +281,8 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" and subst = open_out ").append(enquoteString(substFile)).append(" in (try print_subst subst (try_match(let res = run(");
-        convert(sb, true, new VarInfo(), false, false).apply(new LiftToKSequence().lift(expandMacros.expand(k)));
+        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" and subst = open_out ").append(enquoteString(substFile)).append(" in (try print_subst subst (try_match(let res = run(Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
         sb.append("\n) (").append(depth).append(") in output_string out (print_k(res)); res)) with Stuck c -> output_string out (print_k(c)); output_string subst \"0\\n\")");
         return sb.toString();
     }
@@ -332,6 +323,24 @@ public class DefinitionToOcaml implements Serializable {
             sb.append(enquoteString(ToKast.apply(label)));
             sb.append("\n");
         }
+        sb.append("let parse_sort(c: string) : sort = match c with \n");
+        for (Sort s : iterable(mainModule.definedSorts())) {
+            sb.append("|");
+            sb.append(enquoteString(s.name()));
+            sb.append(" -> ");
+            encodeStringToIdentifier(sb, s);
+            sb.append("\n");
+        }
+        sb.append("| _ -> invalid_arg (\"parse_sort: \" ^ c)\n");
+        sb.append("let parse_klabel(c: string) : klabel = match c with \n");
+        for (KLabel label : iterable(mainModule.definedKLabels())) {
+            sb.append("|");
+            sb.append(enquoteString(label.name()));
+            sb.append(" -> ");
+            encodeStringToIdentifier(sb, label);
+            sb.append("\n");
+        }
+        sb.append("| _ -> invalid_arg (\"parse_klabel: \" ^ c)\n");
         sb.append("let collection_for (c: klabel) : klabel = match c with \n");
         for (Map.Entry<KLabel, KLabel> entry : collectionFor.entrySet()) {
             sb.append("|");
@@ -340,6 +349,7 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToIdentifier(sb, entry.getValue());
             sb.append("\n");
         }
+        sb.append("| _ -> invalid_arg \"collection_for\"\n");
         sb.append("let unit_for (c: klabel) : klabel = match c with \n");
         for (KLabel label : collectionFor.values().stream().collect(Collectors.toSet())) {
             sb.append("|");
@@ -348,6 +358,7 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToIdentifier(sb, KLabel(mainModule.attributesFor().apply(label).<String>get(Attribute.UNIT_KEY).get()));
             sb.append("\n");
         }
+        sb.append("| _ -> invalid_arg \"unit_for\"\n");
         sb.append("let el_for (c: klabel) : klabel = match c with \n");
         for (KLabel label : collectionFor.values().stream().collect(Collectors.toSet())) {
             sb.append("|");
@@ -356,14 +367,7 @@ public class DefinitionToOcaml implements Serializable {
             encodeStringToIdentifier(sb, KLabel(mainModule.attributesFor().apply(label).<String>get("element").get()));
             sb.append("\n");
         }
-        sb.append("let boolSort = ").append(BOOL);
-        sb.append("\n and stringSort = ").append(STRING);
-        sb.append("\n and intSort = ").append(INT);
-        sb.append("\n and floatSort = ").append(FLOAT);
-        sb.append("\n and setSort = ").append(SET);
-        sb.append("\n and setConcatLabel = ").append(SET_CONCAT);
-        sb.append("\n and listSort = ").append(LIST);
-        sb.append("\n and listConcatLabel = ").append(LIST_CONCAT);
+        sb.append("| _ -> invalid_arg \"el_for\"\n");
         sb.append("\n\nmodule type S =\n");
         sb.append("sig\n");
         sb.append("  type m\n");
