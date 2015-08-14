@@ -79,7 +79,7 @@ public class Commands {
             }
             DebuggerState backSteppedState = session.backStep(activeStateId, backStepCount);
             if (backSteppedState == null) {
-                System.out.println("Already at Start State, cannot go any further back");
+                System.out.println("Already at Start State, Cannot take steps.");
                 return;
             }
             System.out.println("Took -" + backStepCount + " step(s)");
