@@ -55,7 +55,7 @@ public class TstKDebugOnKORE_IT {
         debuggerSession.step(debuggerSession.getActiveStateId(), forward);
         K debugResult = trans.apply(debuggerSession.backStep(debuggerSession.getActiveStateId(), backward).getCurrentK());
         K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(forward - backward))));
-        assertEquals("Normal and Debug results don't match, when normal takes 25 steps, and debugger goes back 25 steps", expectedResult, debugResult);
+        assertEquals("Normal and Debug results don't match, when jump back called with random number of steps", expectedResult, debugResult);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TstKDebugOnKORE_IT {
         int stateNum = getRandomSteps(20, 50);
         K debugResult = trans.apply(debuggerSession.jumpTo(debuggerSession.getActiveStateId(), stateNum).getCurrentK());
         K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(stateNum))));
-        assertEquals("Normal and Debug results don't match, when normal takes 50 steps, and debugger jumps to state 50", expectedResult, debugResult);
+        assertEquals("Normal and Debug results don't match, when jump called with random number of steps", expectedResult, debugResult);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class TstKDebugOnKORE_IT {
         debuggerSession.step(debuggerSession.getActiveStateId(), steps1);
         K debugResult = trans.apply(debuggerSession.step(debuggerSession.getActiveStateId(), steps2).getCurrentK());
         K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps1 + steps2))));
-        assertEquals("Normal and Debug results don't match, when normal takes 20 steps, and debugger 10 steps in ongoing session", expectedResult, debugResult);
+        assertEquals("Normal and Debug results don't match, when multiple random steps taken", expectedResult, debugResult);
     }
 
 
