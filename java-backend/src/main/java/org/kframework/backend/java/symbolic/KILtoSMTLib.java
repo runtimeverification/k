@@ -166,20 +166,13 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             /* bool2int */
             "smt_bool2int");
 
-    /**
-     * Flag set to true if it is sounds to skip equalities that cannot be translated.
-     */
-    private final boolean skipEqualities;
-    private final HashSet<Variable> variables;
-    private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
-
     public static String translateConstraint(ConjunctiveFormula constraint) {
         KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.termContext());
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
-        return getSortAndFunctionDeclarations(constraint.termContext().definition(), transformer.variables())
-             + getAxioms(constraint.termContext())
-             + transformer.getConstantDeclarations(transformer.variables())
-             + "(assert " + expression + ")";
+        return transformer.getSortAndFunctionDeclarations(transformer.variables())
+                + transformer.getAxioms()
+                + transformer.getConstantDeclarations(transformer.variables())
+                + "(assert " + expression + ")";
     }
 
     public static String translateImplication(
@@ -191,10 +184,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
-        sb.append(getSortAndFunctionDeclarations(
-                leftHandSide.termContext().definition(),
+        sb.append(leftTransformer.getSortAndFunctionDeclarations(
                 Sets.union(leftTransformer.variables(), rightTransformer.variables())));
-        sb.append(getAxioms(leftHandSide.termContext()));
+        sb.append(leftTransformer.getAxioms());
         sb.append(leftTransformer.getConstantDeclarations(Sets.difference(
                 Sets.union(leftTransformer.variables(), rightTransformer.variables()),
                 rightHandSideOnlyVariables)));
@@ -217,7 +209,21 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getSortAndFunctionDeclarations(Definition definition, Set<Variable> variables) {
+    /**
+     * Flag set to true if it is sounds to skip equalities that cannot be translated.
+     */
+    private final boolean skipEqualities;
+    private final HashSet<Variable> variables;
+    private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
+
+    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
+        super(context);
+        this.skipEqualities = skipEqualities;
+        variables = new HashSet<>();
+    }
+
+
+    private String getSortAndFunctionDeclarations(Set<Variable> variables) {
         Set<Sort> sorts = new HashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
@@ -228,7 +234,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 SortSignature signature = kLabel.signatures().iterator().next();
                 sorts.add(renameSort(signature.result()));
                 signature.parameters().stream()
-                        .map(KILtoSMTLib::renameSort)
+                        .map(this::renameSort)
                         .forEach(sorts::add);
             }
         }
@@ -265,7 +271,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getAxioms(TermContext context) {
+    private String getAxioms() {
         StringBuilder sb = new StringBuilder();
         for (Rule rule : context.definition().functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
@@ -354,18 +360,13 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    private static Sort renameSort(Sort sort) {
+    private Sort renameSort(Sort sort) {
+        sort = definition.smtSortFlattening().getOrDefault(sort, sort);
         if (sort == Sort.LIST) {
             return Sort.of("IntSeq");
         } else {
             return sort;
         }
-    }
-
-    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
-        super(context);
-        this.skipEqualities = skipEqualities;
-        variables = new HashSet<>();
     }
 
     /**

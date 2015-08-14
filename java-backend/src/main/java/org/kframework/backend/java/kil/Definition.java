@@ -69,6 +69,7 @@ public class Definition extends JavaSymbolicObject {
         public final SetMultimap<String, SortSignature> signatures;
         public final ImmutableMap<String, Attributes> kLabelAttributes;
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
+        public final Map<Sort, Sort> smtSortFlattening;
         public final ConfigurationStructureMap configurationStructureMap;
 
         private DefinitionData(
@@ -78,6 +79,7 @@ public class Definition extends JavaSymbolicObject {
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Attributes> kLabelAttributes,
                 Map<org.kframework.kil.Sort, String> freshFunctionNames,
+                Map<Sort, Sort> smtSortFlattening,
                 ConfigurationStructureMap configurationStructureMap) {
             this.subsorts = subsorts;
             this.builtinSorts = builtinSorts;
@@ -85,6 +87,7 @@ public class Definition extends JavaSymbolicObject {
             this.signatures = signatures;
             this.kLabelAttributes = kLabelAttributes;
             this.freshFunctionNames = freshFunctionNames;
+            this.smtSortFlattening = smtSortFlattening;
             this.configurationStructureMap = configurationStructureMap;
         }
     }
@@ -183,6 +186,7 @@ public class Definition extends JavaSymbolicObject {
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
                 context.freshFunctionNames,
+                context.smtSortFlattening.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), e -> Sort.of(e.getValue()))),
                 context.getConfigurationStructureMap());
         this.context = context;
     }
@@ -220,6 +224,7 @@ public class Definition extends JavaSymbolicObject {
                 getDataStructureSorts(module),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
+                null,
                 null,
                 null);
         context = null;
@@ -443,6 +448,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
         return definitionData.freshFunctionNames;
+    }
+
+    public Map<Sort, Sort> smtSortFlattening() {
+        return definitionData.smtSortFlattening;
     }
 
     public DefinitionData definitionData() {
