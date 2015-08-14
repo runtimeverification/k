@@ -180,4 +180,9 @@ public class KoreKDebug implements KDebug {
         stateList.add(concreteStateNum, temp);
         return peekState;
     }
+
+    @Override
+    public DebuggerState getActiveState() {
+        return stateList.get(activeStateIndex);
+    }
 }

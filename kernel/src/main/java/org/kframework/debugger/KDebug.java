@@ -116,5 +116,10 @@ public interface KDebug {
      */
     public DebuggerState createCopy(int stateNum);
 
+    /**
+     * Return the Active state
+     * @return Debugger State that's active
+     */
+    public DebuggerState getActiveState();
 }
 

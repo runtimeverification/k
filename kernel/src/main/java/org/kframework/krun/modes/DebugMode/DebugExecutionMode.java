@@ -80,7 +80,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
         while (true) {
             try {
-                String input = reader.readLine("KDebug>");
+                String input = reader.readLine("KDebug> ");
                 Command command = parseCommand(input);
                 if (command instanceof Commands.QuitCommand) {
                     break;

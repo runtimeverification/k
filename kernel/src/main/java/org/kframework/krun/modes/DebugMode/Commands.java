@@ -72,12 +72,12 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            int activeStateId = session.getActiveStateId();
-            if ((backStepCount-1) > activeStateId) {
-                System.out.println("Number of Configuration(s) is " + (activeStateId + 1) + " Step Count to go back must be in range [0, " + activeStateId + "]");
+            int activeConfigurationId = session.getActiveState().getStepNum();
+            if ((backStepCount - 1) > activeConfigurationId) {
+                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + " Step Count to go back must be in range [0, " + activeConfigurationId + "]");
                 return;
             }
-            DebuggerState backSteppedState = session.backStep(activeStateId, backStepCount);
+            DebuggerState backSteppedState = session.backStep(activeConfigurationId, backStepCount);
             if (backSteppedState == null) {
                 System.out.println("Already at Start State, Cannot take steps.");
                 return;
