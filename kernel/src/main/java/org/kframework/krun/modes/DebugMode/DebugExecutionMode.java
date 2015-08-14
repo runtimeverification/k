@@ -92,8 +92,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println("Error Formatting Number");
             } catch (IOException inputException) {
                 System.out.println("Error Interacting with Console");
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
             }
         }
         return null;
