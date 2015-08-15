@@ -494,7 +494,7 @@ public class Context implements Serializable {
                         production);
             }
 
-            smtSortFlattening.put(production.getSort(), production.getSubsort());
+            smtSortFlattening.put(production.getSubsort(), production.getSort());
         }
     }
 
