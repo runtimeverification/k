@@ -74,7 +74,7 @@ module MINT
 
   /*
    * Arithmetic and comparison operations
-   *   op   does not interprets th operands as either signed or unsigned
+   *   op   does not interprets the operands as either signed or unsigned
    *   sop  interprets the operands as signed
    *   uop  interprets the operands as unsigned
    */
@@ -112,7 +112,12 @@ module MINT
                 | smulMInt(MInt, MInt)    [function, hook(MINT.smul)]
                 | umulMInt(MInt, MInt)    [function, hook(MINT.umul)]
 
-  /* Shift operations; the second operand must be non-negative */
+  /*
+   * Shift operations; the second operand must be non-negative
+   *
+   * ashrMInt   arithmetic shift: filling with leftmost bit (sign extension)
+   * lshrMInt   logical shift: filling with zeros
+   */
   syntax MInt ::= shlMInt(MInt, Int)    [function, hook(MINT.shl), smtlib(bvshl)]
                 | ashrMInt(MInt, Int)   [function, hook(MINT.ashr)]
                 | lshrMInt(MInt, Int)   [function, hook(MINT.lshr), smtlib(bvlshr)]
@@ -141,21 +146,23 @@ module MINT
                 | sMinMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #1 #2))]
 
   /*
-   * Returns a machine integer with the underlying bits the bits of the first
+   * Returns a machine integer with the underlying bits; the bits of the first
    * machine integer concatenated with the bits of the second machine integer.
    * The bits of the first machine integer are on the more significant
-   * positions.
+   * positions. The resulting bit width is the sum of two inputs' bit widths.
    */
   syntax MInt ::= concatenateMInt(MInt, MInt)   [function, hook(MINT.concatenate), smtlib((concat #2 #1))]
 
   /*
-   * Returns a machine integer with the underlying bits the bits of the given
+   * Returns a machine integer with the underlying bits of the given
    * machine integer in the given range. The bit on position 0 is the most
    * significant bit.
    */
   syntax MInt ::= extractMInt(MInt, Int, Int)   [function, hook(MINT.extract), smtlib(extract)]
 
   /*
+   * digitsOfMInt(mInt, digitBitWidth, count)
+   *
    * Returns a list of the first digits representing the given machine integer,
    * each digit a machine integer on the given bitwidth. Useful for serializing
    * a integer to a sequence of bytes.
