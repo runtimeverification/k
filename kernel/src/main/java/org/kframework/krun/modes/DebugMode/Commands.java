@@ -139,7 +139,7 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            System.out.println("got pattern " + pattern);
+            
         }
     }
 }

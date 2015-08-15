@@ -47,21 +47,16 @@ TOKEN: /*RESERVED TOKENS */
     |  <RESUME: "resume" | "run" | "r">
     |  <WATCH: "watch">
     |  <PEEK: "p" | "peek">
+    |  <WATCH: "watch"> : PATTERN_STATE
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
     |  <NEWLINE : "\n" | "\r\n">
 
 }
 
-TOKEN:
-{
-    <PATTERN_QUOTE : "'"> : PATTERN_STATE
-}
-
 <PATTERN_STATE> TOKEN:
 {
-        <ENDQUOTE : <PATTERN_QUOTE>> : DEFAULT
-    |   <PATTERN : (~["'"])+>
+       <PATTERN : (~[])+> : DEFAULT
 }
 
 
@@ -82,7 +77,7 @@ Command command() throws NumberFormatException:
     |   <CHECKPOINT> <NUMBER>
     |   <QUIT> {return new QuitCommand();}
     |   <RESUME> {return new ResumeCommand();}
-    |   <WATCH> <PATTERN_QUOTE> (pattern = parsePattern()) <ENDQUOTE> {return new WatchCommand(pattern);}
+    |   <WATCH> (pattern = parsePattern()) {return new WatchCommand(pattern);}
 }
 
 String parsePattern():

@@ -105,5 +105,13 @@ public interface KDebug {
      * @return Debugger State that's active
      */
     public DebuggerState getActiveState();
+
+    /**
+     * Match the pattern with the specified configuration, and return the substitution attained.
+     *
+     * @param pattern String specifying that pattern to be matched
+     * @return The substitution
+     */
+    public Map<? extends K, ? extends K> match(String pattern);
 }
 

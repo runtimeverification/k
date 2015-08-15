@@ -26,7 +26,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 

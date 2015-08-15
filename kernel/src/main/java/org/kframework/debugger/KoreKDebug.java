@@ -4,8 +4,14 @@ package org.kframework.debugger;
 
 import org.kframework.Rewriter;
 import org.kframework.RewriterResult;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Rule;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.krun.KRun;
+import org.kframework.krun.KRunOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,10 @@ public class KoreKDebug implements KDebug {
     private int activeStateIndex;
     private Rewriter rewriter;
     private int checkpointInterval;
+    private FileUtil files;
+    private final KExceptionManager kem;
+    private KRunOptions options;
+    private CompiledDefinition compiledDef;
 
     /**
      * Start a Debugger Session. The initial Configuration becomes a part of the new and only state of the Debugger
@@ -31,15 +41,20 @@ public class KoreKDebug implements KDebug {
      * @param initialK The initial Configuration.
      * @param rewriter The Rewriter being used.
      */
-    public KoreKDebug(K initialK, Rewriter rewriter, int checkpointInterval) {
+    public KoreKDebug(K initialK, Rewriter rewriter, int checkpointInterval, FileUtil files, KExceptionManager kem, KRunOptions options, CompiledDefinition compiledDef) {
         this.stateList = new ArrayList<>();
         this.rewriter = rewriter;
         this.checkpointInterval = checkpointInterval;
+        this.files = files;
+        this.kem = kem;
+        this.options = options;
+        this.compiledDef = compiledDef;
         NavigableMap<Integer, K> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, initialK);
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
         stateList.add(initialState);
         activeStateIndex = DEFAULT_ID;
+
     }
 
     @Override
@@ -172,5 +187,12 @@ public class KoreKDebug implements KDebug {
     @Override
     public DebuggerState getActiveState() {
         return stateList.get(activeStateIndex);
+    }
+
+    @Override
+    public Map<? extends K, ? extends K> match(String pattern) {
+
+        Rule parsedPattern = KRun.pattern(files, kem, pattern, options, compiledDef, Source.apply("Deugger TUI"));
+        return null;
     }
 }
