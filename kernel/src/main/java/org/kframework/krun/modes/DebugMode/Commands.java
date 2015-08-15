@@ -5,7 +5,9 @@ import org.kframework.backend.unparser.OutputModes;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kore.K;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.kframework.krun.KRun.*;
@@ -139,7 +141,7 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            
+            Map<K, K> subst = (Map<K, K>) session.match(pattern);
         }
     }
 }
