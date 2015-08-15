@@ -255,7 +255,6 @@ module INT
                  Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
                > left:
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
-               > "(" Int ")"                    [bracket]
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
                | "absInt" "(" Int ")"           [function, smtlib(int_abs), klabel(absInt), hook(INT.abs)]
@@ -706,10 +705,10 @@ module MINT
                | smaxMInt(Int)    [function]
                | uminMInt(Int)    [function]
                | umaxMInt(Int)    [function]
-  rule sminMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
-  rule smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
+  rule sminMInt(N:Int) => 0 -Int `1 <<Int `N -Int 1``
+  rule smaxMInt(N:Int) => `1 <<Int `N -Int 1`` -Int 1
   rule uminMInt(_:Int) => 0
-  rule umaxMInt(N:Int) => (1 <<Int N) -Int 1
+  rule umaxMInt(N:Int) => `1 <<Int N` -Int 1
 
   /*@
    * Functions checking whether a given integer can be represented on as signed
@@ -852,7 +851,7 @@ module MINT
     digitsOfMInt(MI:MInt, N:Int, M:Int)
   =>
     digitsOfMInt(MI, N, M -Int 1)
-    ListItem(extractMInt(MI, (N *Int (M -Int 1)), (N *Int M)))
+    ListItem(extractMInt(MI, N *Int `M -Int 1`, N *Int M))
   when M >Int 0
   rule digitsOfMInt(_:MInt, _:Int, 0) => .List
 
