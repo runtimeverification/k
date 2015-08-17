@@ -86,14 +86,14 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                     break;
                 }
                 command.runCommand(debugger, compiledDefinition);
+            } catch (KEMException e) {
+                System.out.println(e.getMessage());
             } catch (ParseException parseException) {
                 System.out.println(parseException.getMessage());
             } catch (NumberFormatException numberException) {
                 System.out.println("Could not parse \"foo\" as number");
             } catch (IOException inputException) {
                 KEMException.criticalError("Failed to read input from console");
-            } catch (KEMException e) {
-                System.out.println(e.getMessage());
             }
         }
         return null;

@@ -4,6 +4,7 @@ package org.kframework.debugger;
 
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -112,6 +113,6 @@ public interface KDebug {
      * @param pattern String specifying that pattern to be matched
      * @return The substitution
      */
-    public Map<? extends K, ? extends K> match(String pattern);
+    public List<Map<KVariable, K>> match(String pattern);
 }
 

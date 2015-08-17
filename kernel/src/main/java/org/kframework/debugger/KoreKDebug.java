@@ -191,10 +191,10 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public Map<? extends K, ? extends K> match(String pattern) {
+    public List<Map<KVariable ,K>> match(String pattern) {
         System.out.println("Got Pattern: " + pattern);
         Rule parsedPattern = KRun.pattern(files, kem, pattern, options, compiledDef, Source.apply("Debugger TUI"));
         List<Map<KVariable, K>> subst = rewriter.match(getActiveState().getCurrentK(), parsedPattern);
-        return null;
+        return subst;
     }
 }
