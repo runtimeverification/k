@@ -19,20 +19,25 @@ object KOREToTreeNodes {
       mod.productionsFor(KLabel(a.klabel.name)).find(_.items.filter(_.isInstanceOf[NonTerminal]).size == a.klist.size).get, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
   }
 
-  def up(t: K): K = t match {
+  def up(mod: Module)(t: K): K = t match {
     case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
-    case t: KToken => t
+    case t: KToken =>
+      if (mod.tokenProductionsFor.contains(Sort(t.sort.name))) {
+        t
+      } else {
+        KApply(KLabel("#KToken"), KList(KToken(t.s, Sorts.KString, t.att), KToken(t.sort.name, Sorts.KString, t.att)), t.att)
+      }
     case s: KSequence =>
       if (s.items.size() == 0)
         KApply(KLabel("#EmptyK"), KList(), s.att)
       else
-        upList(s.items.asScala).reduce((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
-    case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(r.left), up(r.right)), r.att)
-    case t: KApply => KApply(t.klabel, upList(t.klist.items.asScala), t.att)
+        upList(mod)(s.items.asScala).reduce((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
+    case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
+    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
   }
 
-  def upList(items: Seq[K]): Seq[K] = {
-    items map up _
+  def upList(mod: Module)(items: Seq[K]): Seq[K] = {
+    items map up(mod) _
   }
 
   def toString(t: Term): String = t match {

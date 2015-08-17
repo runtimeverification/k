@@ -10,7 +10,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
@@ -129,7 +128,7 @@ public class KRun implements Transformation<Void, Void> {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
         }
-        return new Kompile(compiledDef.kompileOptions, files, kem).compileRule(compiledDef, pattern, source);
+        return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
 
@@ -181,7 +180,7 @@ public class KRun implements Transformation<Void, Void> {
     private static String unparseTerm(K input, Module test) {
         return KOREToTreeNodes.toString(
                 new AddBrackets(test).addBrackets((ProductionReference)
-                        KOREToTreeNodes.apply(KOREToTreeNodes.up(input), test)));
+                        KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
     }
 
     @Override
