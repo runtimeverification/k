@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -191,8 +192,9 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public Map<? extends K, ? extends K> match(String pattern) {
+        System.out.println("Got Pattern: " + pattern);
+        Rule parsedPattern = KRun.pattern(files, kem, pattern, options, compiledDef, Source.apply("Debugger TUI"));
+        List<Map<KVariable, K>> subst = rewriter.match(getActiveState().getCurrentK(), parsedPattern);
 
-        Rule parsedPattern = KRun.pattern(files, kem, pattern, options, compiledDef, Source.apply("Deugger TUI"));
-        return null;
     }
 }
