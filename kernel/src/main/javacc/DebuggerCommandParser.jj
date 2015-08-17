@@ -43,8 +43,8 @@ TOKEN: /*RESERVED TOKENS */
     |  <BACKSTEP:  (["b", "B"])| "back-step">
     |  <JUMPTO: (["j", "J"])| "jump-to">
     |  <QUIT: "quit" | "abort" | "exit">
-    |  <CHECKPOINT: "set-chkpt">
-    |  <RESUME: "resume">
+    |  <CHECKPOINT: "checkpoint" | "ch">
+    |  <RESUME: "resume" | "run" | "r">
     |  <PEEK: "p" | "peek">
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
@@ -61,9 +61,7 @@ Command command() throws NumberFormatException:
 }
 {
         <STEP> (stepCount = parseNum())? {return new StepCommand(stepCount);}
-    |   LOOKAHEAD(3)
-        <PEEK> (stateNum = parseNum()) (configurationNum = parseNum()) {return new PeekCommand(Optional.of(stateNum), Optional.of(configurationNum));}
-    |   <PEEK> (configurationNum = parseNum())? {return new PeekCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
+    |   <PEEK> {return new PeekCommand();}
     |   <BACKSTEP> (stepCount = parseNum())? {return new BackStepCommand(stepCount);}
     |   LOOKAHEAD(3)
         <JUMPTO> (stateNum = parseNum()) (configurationNum = parseNum()) {return new JumpToCommand(Optional.of(stateNum), Optional.of(configurationNum));}

@@ -57,7 +57,7 @@ public class KoreKDebug implements KDebug {
         NavigableMap<Integer, K> checkpointMap = currentState.getCheckpointMap();
         while (steps > checkpointInterval) {
             result = rewriter.execute(currentK, Optional.of(checkpointInterval));
-            if (isLeafState(checkpointInterval, result)) {
+            if (isFinalState(checkpointInterval, result)) {
                 return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
             }
             steps -= checkpointInterval;
@@ -66,7 +66,7 @@ public class KoreKDebug implements KDebug {
             currentK = result.k();
         }
         result = rewriter.execute(currentK, Optional.of(steps));
-        if (isLeafState(steps, result)) {
+        if (isFinalState(steps, result)) {
             return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
         }
         activeStateCheckpoint += steps;
@@ -82,7 +82,7 @@ public class KoreKDebug implements KDebug {
         return nextState;
     }
 
-    private boolean isLeafState(int steps, RewriterResult result) {
+    private boolean isFinalState(int steps, RewriterResult result) {
         return result.rewriteSteps().isPresent() && result.rewriteSteps().get() < steps;
     }
 
@@ -123,10 +123,7 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public List<? extends Map<? extends K, ? extends K>> search(Optional<Integer> startStateId, Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds) {
-        if (startStateId.isPresent()) {
-            jumpTo(activeStateIndex, startStateId.get());
-        }
+    public List<? extends Map<? extends K, ? extends K>> search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds) {
         return rewriter.search(stateList.get(activeStateIndex).getCurrentK(), depth, bounds, searchPattern);
     }
 
@@ -148,14 +145,13 @@ public class KoreKDebug implements KDebug {
 
 
     @Override
-    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum) {
+    public DebuggerState setState(int stateNum) {
         DebuggerState newActiveState = stateList.get(stateNum);
         if (newActiveState == null) {
             return null;
         }
         activeStateIndex = stateNum;
-        configurationNum.ifPresent(configNum -> jumpTo(stateNum, configNum));
-        return stateList.get(activeStateIndex);
+        return newActiveState;
     }
 
     @Override
@@ -168,17 +164,6 @@ public class KoreKDebug implements KDebug {
         DebuggerState newState = new DebuggerState(stateList.get(stateNum));
         stateList.add(newState);
         return newState;
-    }
-
-    @Override
-    public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
-        int concreteStateNum = stateNum.orElse(activeStateIndex);
-        int concreteConfigurationNum = configurationNum.orElse(stateList.get(activeStateIndex).getStepNum());
-        DebuggerState temp = stateList.get(concreteStateNum);
-        DebuggerState peekState = jumpTo(concreteStateNum, concreteConfigurationNum);
-        stateList.remove(concreteStateNum);
-        stateList.add(concreteStateNum, temp);
-        return peekState;
     }
 
     @Override

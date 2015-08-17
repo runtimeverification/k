@@ -21,11 +21,11 @@ import java.util.TreeMap;
  */
 public class DebuggerState {
 
-    private NavigableMap<Integer, K> checkpointMap;
+    private final NavigableMap<Integer, K> checkpointMap;
 
-    private K currentK;
+    private final K currentK;
 
-    private int stepNum;
+    private final int stepNum;
 
     public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, K> checkpointMap) {
         this.checkpointMap = new TreeMap<>(checkpointMap);

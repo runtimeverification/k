@@ -77,7 +77,6 @@ public class KRun implements Transformation<Void, Void> {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-
                 Rule exitCodePattern = pattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
@@ -150,7 +149,6 @@ public class KRun implements Transformation<Void, Void> {
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
     }
-
 
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {

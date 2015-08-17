@@ -34,7 +34,7 @@ public class Commands {
             int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
             if (effectiveStepCount < stepCount) {
                 System.out.println("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).");
-                System.out.println("KDebug may have encountered a final configuration.");
+                System.out.println("Final State Reached");
                 return;
             }
             System.out.println(stepCount + " Step(s) Taken.");
@@ -43,18 +43,9 @@ public class Commands {
 
     public static class PeekCommand implements Command {
 
-        private Optional<Integer> stateNum;
-
-        private Optional<Integer> configurationNum;
-
-        public PeekCommand(Optional<Integer> stateNum, Optional<Integer> configurationNum) {
-            this.stateNum = stateNum;
-            this.configurationNum = configurationNum;
-        }
-
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            DebuggerState requestedState = session.peek(stateNum, configurationNum);
+            DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
                 prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), requestedState.getCurrentK());
             } else {
@@ -100,12 +91,21 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            DebuggerState nextState = session.setState(stateNum.orElse(session.getActiveStateId()), configurationNum);
+            int requestedState = stateNum.orElse(session.getActiveStateId());
+            DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
-                System.out.println("Error Selecting State. State unchanged");
-                return;
+                System.out.println("Requested State couldn't be selected");
+            } else if (!configurationNum.isPresent()) {
+                System.out.println("Selected State " + requestedState);
+            } else {
+                int requestedConfig = configurationNum.orElse(nextState.getStepNum());
+                DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
+                if (finalState == null) {
+                    System.out.println("Requested configuration couldn't be selected.");
+                } else {
+                    System.out.println("Selected State " + requestedState + " and configuration " + requestedConfig);
+                }
             }
-            System.out.println("Selected State " + session.getActiveStateId());
         }
 
     }

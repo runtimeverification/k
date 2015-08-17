@@ -341,7 +341,7 @@ public class Context implements Serializable {
             throw KEMException.criticalError(msg);
         }
         subsorts.transitiveClosure();
-        // detect if lists are subsorted (Vals ids < Exps)
+        // detect if lists are subsorted (Vals Ids < Exps)
         for (Production prod1 : listProductions.values()) {
             for (Production prod2 : listProductions.values()) {
                 Sort sort1 = ((UserList) prod1.getItems().get(0)).getSort();

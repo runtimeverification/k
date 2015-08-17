@@ -2,10 +2,8 @@
 package org.kframework.debugger;
 
 
-import jdk.nashorn.internal.runtime.Debug;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
-import org.kframework.krun.tools.Debugger;
 
 import java.util.List;
 import java.util.Map;
@@ -56,14 +54,12 @@ public interface KDebug {
      * Perform a search of the model to find ground configurations that match a
      * specified pattern
      *
-     * @param startStateId  StateId to begin searching for a state from. If not specified, the default state of the
-     *                      the current Debugger instance is used.
      * @param searchPattern Pattern the use wishes to search for.
      * @param depth         Max depth to explore in the model. Empty parameter enables unbounded depth.
      * @param bounds        Max number of solutions to report. Empty parameter means unbounded.
      * @return
      */
-    public List<? extends Map<? extends K, ? extends K>> search(Optional<Integer> startStateId, Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
+    public List<? extends Map<? extends K, ? extends K>> search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
 
     /**
      * Resume the execution of the program until a final Configuration is reached.
@@ -82,11 +78,10 @@ public interface KDebug {
     /**
      * Specified a State and a Configuration, makes it the active state with configuration.
      *
-     * @param stateNum         The state number
-     * @param configurationNum The configuration within the state
+     * @param stateNum The state number
      * @return DebuggerState object containing the State of the debugger. Null if operation fails.
      */
-    public DebuggerState setState(int stateNum, Optional<Integer> configurationNum);
+    public DebuggerState setState(int stateNum);
 
     /**
      * Returns the state the activated state the debugger is in at the moment
@@ -95,22 +90,10 @@ public interface KDebug {
      */
     public int getActiveStateId();
 
-    /**
-     * Allows the user to peek at a particular configuration/state, without changing the current state.
-     * <p>
-     * Return null if configuration not present.
-     *
-     * @param stateNum         The state to peek at. Empty for current state.
-     * @param configurationNum The configuration to peek it. Empty to look at current configuration.
-     *                         That is, if called with both empty state and configuration numbers, will
-     *                         return the current state.
-     * @return
-     */
-    public DebuggerState peek(Optional<Integer> stateNum, Optional<Integer> configurationNum);
-
 
     /**
      * Create a copy of a state, and make debugger aware of the copy.
+     *
      * @param stateNum of the state you'd like to copy
      * @return
      */
@@ -118,6 +101,7 @@ public interface KDebug {
 
     /**
      * Return the Active state
+     *
      * @return Debugger State that's active
      */
     public DebuggerState getActiveState();
