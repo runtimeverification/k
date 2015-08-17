@@ -94,16 +94,19 @@ public class Commands {
             int requestedState = stateNum.orElse(session.getActiveStateId());
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
-                System.out.println("Requested State couldn't be selected");
+                System.out.println("State Number specified does not exist");
             } else if (!configurationNum.isPresent()) {
                 System.out.println("Selected State " + requestedState);
             } else {
                 int requestedConfig = configurationNum.orElse(nextState.getStepNum());
                 DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
                 if (finalState == null) {
-                    System.out.println("Requested configuration couldn't be selected.");
+                    System.out.println("Requested Step Number couldn't be selected.");
+                } else if (!stateNum.isPresent()) {
+                    System.out.println("Jumped to Step Number " + requestedConfig);
                 } else {
-                    System.out.println("Selected State " + requestedState + " and configuration " + requestedConfig);
+                    System.out.println("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig);
+
                 }
             }
         }

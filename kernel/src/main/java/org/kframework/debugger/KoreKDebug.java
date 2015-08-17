@@ -146,6 +146,9 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState setState(int stateNum) {
+        if (stateNum > stateList.size() - 1) {
+            return null;
+        }
         DebuggerState newActiveState = stateList.get(stateNum);
         if (newActiveState == null) {
             return null;

@@ -89,9 +89,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             } catch (ParseException parseException) {
                 System.out.println(parseException.getMessage());
             } catch (NumberFormatException numberException) {
-                System.out.println("Could not parse \"foo\" as number" + numberException);
+                System.out.println("Could not parse \"foo\" as number");
             } catch (IOException inputException) {
-                System.out.println("Error Interacting with Console");
+                KEMException.criticalError("Failed to read input from console");
             } catch (KEMException e) {
                 System.out.println(e.getMessage());
             }
