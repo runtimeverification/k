@@ -45,7 +45,6 @@ TOKEN: /*RESERVED TOKENS */
     |  <QUIT: "quit" | "abort" | "exit">
     |  <CHECKPOINT: "checkpoint" | "ch">
     |  <RESUME: "resume" | "run" | "r">
-    |  <WATCH: "watch">
     |  <PEEK: "p" | "peek">
     |  <WATCH: "watch"> : PATTERN_STATE
     |  <NUMBER: (["0" - "9"])+>
