@@ -71,7 +71,7 @@ public class KoreKDebug implements KDebug {
         int activeStateCheckpoint = currentState.getStepNum();
         RewriterResult result;
         NavigableMap<Integer, K> checkpointMap = currentState.getCheckpointMap();
-        while (steps > checkpointInterval) {
+        while (steps >= checkpointInterval) {
             result = rewriter.execute(currentK, Optional.of(checkpointInterval));
             if (isFinalState(checkpointInterval, result)) {
                 return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);

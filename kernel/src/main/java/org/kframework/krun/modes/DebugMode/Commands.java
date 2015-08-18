@@ -68,7 +68,7 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
             int activeConfigurationId = session.getActiveState().getStepNum();
             if ((backStepCount - 1) > activeConfigurationId) {
-                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + "]");
+                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
                 return;
             }
             DebuggerState backSteppedState = session.backStep(session.getActiveStateId(), backStepCount);
@@ -131,6 +131,26 @@ public class Commands {
             System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
         }
     }
+
+    public static class CheckpointCommand implements Command {
+        private int checkpointInterval;
+
+        public CheckpointCommand(int checkpointInterval) {
+            this.checkpointInterval = checkpointInterval;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            if (checkpointInterval <= 0) {
+                System.out.println("Checkpoint Value must be >= 1");
+                return;
+            }
+            session.setCheckpointInterval(checkpointInterval);
+            System.out.println("Checkpointing Interval set to " + checkpointInterval);
+            return;
+        }
+    }
+
 
     public static class WatchCommand implements Command {
         private String pattern;
