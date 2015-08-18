@@ -66,7 +66,7 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
             int activeConfigurationId = session.getActiveState().getStepNum();
             if ((backStepCount - 1) > activeConfigurationId) {
-                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + "]");
+                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
                 return;
             }
             DebuggerState backSteppedState = session.backStep(session.getActiveStateId(), backStepCount);
