@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 source "$(dirname "$0")/setenv"
 ulimit -s `ulimit -H -s`
-if [ -z "$K_OPTS" ];
-  then export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation"
-fi
+export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation $K_OPTS"
 if "$(dirname "$0")/checkJava"; then
   if [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
     NG=ng.exe
