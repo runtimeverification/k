@@ -90,7 +90,7 @@ public class KoreUtils {
         InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
         try {
             InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
-            K kResult = init.apply(compiledDef.executionModule()).execute(parsedPgm, depth).k();
+            K kResult = init.apply(compiledDef.executionModule()).execute(parsedPgm, depth);
             return kResult;
         } finally {
             requestScope.exit();

@@ -3,7 +3,6 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.kframework.Rewriter;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -57,11 +56,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return new Rewriter() {
             @Override
-            public RewriterResult execute(K k, Optional<Integer> depth) {
+            public K execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");
-                return new RewriterResult(Optional.<Integer>empty(), parseOcamlOutput(output));
+                return parseOcamlOutput(output);
             }
 
             @Override
@@ -79,11 +78,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 String output = compileAndExecOcaml("pgm.ml");
                 String subst = files.loadFromTemp("run.subst");
                 return Tuple2.apply(parseOcamlOutput(output), parseOcamlSearchOutput(subst));
-            }
-
-            @Override
-            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-                throw new UnsupportedOperationException();
             }
         };
     }

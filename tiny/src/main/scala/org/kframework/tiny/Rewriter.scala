@@ -1,12 +1,11 @@
 package org.kframework.tiny
 
 
-import java.util
 import java.util.Optional
 
-import org.kframework.kore.KVariable
+import org.kframework.definition
 import org.kframework.kore.Unapply.KLabel
-import org.kframework.{RewriterResult, definition, kore}
+import org.kframework.kore
 
 import scala.collection.parallel.ParIterable
 
@@ -36,9 +35,6 @@ object SimpleIndex extends (K => Option[String]) {
 class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) extends org.kframework.Rewriter {
   def this(module: definition.Module) = this(module, KIndex)
 
-
-  override def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: definition.Rule): util.List[_ <: util.Map[_ <: KVariable, _ <: kore.K]] = throw new UnsupportedOperationException
-
   val cons = new Constructors(module)
 
   import cons._
@@ -54,7 +50,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
 
   val indexedRules: Map[String, ParIterable[Rule]] = {
     module.rules
-      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX")}
+      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
       .map { case (k, ruleSet) =>
       (k, ruleSet
         .map(createRule)
@@ -63,15 +59,15 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
   }
 
   val executeRules = module.rules
-    .map { r => ExecuteRule(convert(r.body), convert(r.requires))}
+    .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
     .seq.view.par
 
   val indexedExecuteRules: Map[String, ParIterable[Rule]] = {
     module.rules
-      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX")}
+      .groupBy { r => index(convert(r.body)).getOrElse("NOINDEX") }
       .map { case (k, ruleSet) =>
       (k, ruleSet
-        .map { r => ExecuteRule(convert(r.body), convert(r.requires))}
+        .map { r => ExecuteRule(convert(r.body), convert(r.requires)) }
         .seq.view.par)
     }
   }
@@ -86,7 +82,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
     })
 
     val res = prioritized
-      .flatMap { r => totalTriedRules += 1; r(k)}
+      .flatMap { r => totalTriedRules += 1; r(k) }
 
     res.seq.toSet
   }
@@ -115,24 +111,20 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
         case None => None
       }
     }
-      .find {
-      _.isInstanceOf[Some[_]]
-    }
+      .find {_.isInstanceOf[Some[_]]}
       .getOrElse(None)
     //    println("RESULT:\n    " + res.mkString("\n    "))
     res
   }
 
-  def execute(k: kore.K, depth: Optional[Integer]): RewriterResult = execute(cons.convert(k))
-
+  def execute(k: kore.K, depth: Optional[Integer]): kore.K = execute(cons.convert(k))
   def `match`(k: kore.K, rule: definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = throw new UnsupportedOperationException
-
   def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: definition.Rule): Tuple2[kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]] = {
-    val res = execute(k, depth).k
+    val res = execute(k, depth)
     Tuple2(res, `match`(res, rule))
   }
 
-  def execute(k: K): RewriterResult = {
+  def execute(k: K): K = {
     var steps = 0
     var time = System.nanoTime()
     var current: K = k
@@ -154,7 +146,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
       }
     } while (current != prev)
     println(steps)
-    new RewriterResult(Optional.of(steps), current)
+    current
   }
 
   def rewrite(k: kore.K)(implicit sofar: Set[kore.K] = Set()): Set[kore.K] = {
@@ -174,11 +166,7 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
   def search(k: K, pattern: K)(implicit sofar: Set[K] = Set()): Either[Set[K], K] = {
     val newKs = (rewriteStep(k) &~ sofar).toStream
 
-    newKs find {
-      pattern.matcher(_).normalize == True
-    } map {
-      Right(_)
-    } getOrElse {
+    newKs find {pattern.matcher(_).normalize == True} map {Right(_)} getOrElse {
       if (newKs.size == 0)
         Left(Set[K]())
       else {
