@@ -72,7 +72,7 @@ public class SymbolicRewriter {
         KRunState initialState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            initialState = new JavaKRunState(constrainedTerm, context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
             executionGraph.addVertex(initialState);
         }
         for (step = 0; step != bound; ++step) {
@@ -82,7 +82,7 @@ public class SymbolicRewriter {
             KRunState finalState = null;
             if (result != null) {
                 if (computeGraph) {
-                    finalState = new JavaKRunState(result, context, counter);
+                    finalState = new JavaKRunState(result, context, counter, Optional.of(step));
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
                     executionGraph.addEdge(javaTransition, initialState, finalState);
@@ -100,7 +100,7 @@ public class SymbolicRewriter {
         }
 
         if (initialState == null) {
-            initialState = new JavaKRunState(constrainedTerm, context, counter);
+            initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
         }
         return initialState;
     }
@@ -358,9 +358,9 @@ public class SymbolicRewriter {
 
     /**
      *
-     * @param initialTerm
      * @param targetTerm not implemented yet
      * @param rules not implemented yet
+     * @param initialTerm
      * @param pattern the pattern we are searching for
      * @param bound a negative value specifies no bound
      * @param depth a negative value specifies no bound
@@ -371,8 +371,6 @@ public class SymbolicRewriter {
      */
     public List<Substitution<Variable,Term>> search(
             Term initialTerm,
-            Term targetTerm,
-            List<Rule> rules,
             Rule pattern,
             int bound,
             int depth,

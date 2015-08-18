@@ -8,6 +8,8 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import org.kframework.Rewriter;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -34,6 +36,7 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -69,6 +72,12 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             MapBinder<String, Prover> proverBinder = MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
             proverBinder.addBinding("java").to(JavaSymbolicProver.class);
+
+            MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
+                    binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
+            checkPointBinder.addBinding("java").toInstance(new Integer(500));
+
+            //bind(Map.class).annotatedWith(Names.named("checkpointIntervalMap")).toInstance((Map) checkPointBinder);
 
             MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);

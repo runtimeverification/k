@@ -8,6 +8,8 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunState;
 
+import java.util.Optional;
+
 /**
  * Backend Specific Functionality added to the
  * Generic KRunState
@@ -18,21 +20,21 @@ public class JavaKRunState extends KRunState {
 
     private Context context;
 
-    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter) {
-        super(null, counter);
+    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter, Optional<Integer> stepsTaken) {
+        super(null, counter, stepsTaken);
         this.context = context;
         this.constrainedTerm = constrainedTerm;
         this.javaTerm = constrainedTerm.term();
     }
 
     public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
-        super(null, counter);
+        super(null, counter, Optional.empty());
         this.context = context;
         this.javaTerm = javaTerm;
     }
 
     public JavaKRunState(Term term, Counter counter) {
-        super(term, counter);
+        super(term, counter, Optional.empty());
     }
 
 

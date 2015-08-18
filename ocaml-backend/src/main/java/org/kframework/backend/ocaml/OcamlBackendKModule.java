@@ -34,7 +34,7 @@ public class OcamlBackendKModule extends AbstractKModule {
 
                 MapBinder<String, Consumer<CompiledDefinition>> mapBinder = MapBinder.newMapBinder(
                         binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {
-                });
+                        });
                 mapBinder.addBinding("ocaml").to(OcamlBackend.class);
             }
         });

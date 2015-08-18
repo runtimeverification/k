@@ -131,6 +131,7 @@ public class KRun implements Transformation<Void, Void> {
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
+
     public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
         switch (output) {
         case KAST:
@@ -147,7 +148,6 @@ public class KRun implements Transformation<Void, Void> {
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
     }
-
 
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
