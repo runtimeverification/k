@@ -129,4 +129,23 @@ public class Commands {
             System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
         }
     }
+
+    public static class CheckpointCommand implements Command {
+        private int checkpointInterval;
+
+        public CheckpointCommand(int checkpointInterval) {
+            this.checkpointInterval = checkpointInterval;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            if (checkpointInterval <= 0) {
+                System.out.println("Checkpoint Value must be >= 1");
+                return;
+            }
+            session.setCheckpointInterval(checkpointInterval);
+            System.out.println("Checkpointing Interval set to " + checkpointInterval);
+            return;
+        }
+    }
 }

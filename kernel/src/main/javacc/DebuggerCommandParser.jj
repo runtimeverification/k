@@ -58,6 +58,7 @@ Command command() throws NumberFormatException:
     int stepCount = 1;
     Integer stateNum = null;
     Integer configurationNum = null;
+    int checkpointVal;
 }
 {
         <STEP> (stepCount = parseNum())? {return new StepCommand(stepCount);}
@@ -66,9 +67,9 @@ Command command() throws NumberFormatException:
     |   LOOKAHEAD(3)
         <JUMPTO> (stateNum = parseNum()) (configurationNum = parseNum()) {return new JumpToCommand(Optional.of(stateNum), Optional.of(configurationNum));}
     |   <JUMPTO> (configurationNum = parseNum())? {return new JumpToCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
-    |   <CHECKPOINT> <NUMBER>
     |   <QUIT> {return new QuitCommand();}
     |   <RESUME> {return new ResumeCommand();}
+    |   <CHECKPOINT> (checkpointVal = parseNum()){return new CheckpointCommand(checkpointVal);}
 }
 
 Command parseCommand() throws NumberFormatException:
