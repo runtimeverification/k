@@ -46,7 +46,7 @@ public class Konsole {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             cmd = br.readLine();
             if (cmd.startsWith("rw")) {
-                K result = rewriter.execute(programParser.apply(cmd.substring(2), Source.apply("<command line>")), Optional.empty()).k();
+                K result = rewriter.execute(programParser.apply(cmd.substring(2), Source.apply("<command line>")), Optional.empty());
                 System.out.println("=> " + result);
             } else if (cmd.equals("exit")) {
                 break;

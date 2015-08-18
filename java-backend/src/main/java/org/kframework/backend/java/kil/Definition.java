@@ -271,7 +271,33 @@ public class Definition extends JavaSymbolicObject {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(termContext);
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
-                addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));
+                org.kframework.definition.Rule rule = (org.kframework.definition.Rule) s;
+                K leftHandSide = RewriteToTop.toLeft(rule.body());
+                org.kframework.kil.Rule oldRule = new org.kframework.kil.Rule();
+                oldRule.setAttributes(new KOREtoKIL().convertAttributes(rule.att()));
+                Location loc = rule.att().getOptional(Location.class).orElse(null);
+                Source source = rule.att().getOptional(Source.class).orElse(null);
+                oldRule.setLocation(loc);
+                oldRule.setSource(source);
+                if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply)leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
+                    oldRule.putAttribute(Attribute.FUNCTION_KEY, "");
+                }
+                addRule(new Rule(
+                        "",
+                        transformer.convert(leftHandSide),
+                        transformer.convert(RewriteToTop.toRight(rule.body())),
+                        Collections.singletonList(transformer.convert(rule.requires())),
+                        Collections.singletonList(transformer.convert(rule.ensures())),
+                        Collections.emptySet(),
+                        Collections.emptySet(),
+                        ConjunctiveFormula.of(termContext),
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        oldRule,
+                        termContext));
             }
         });
     }

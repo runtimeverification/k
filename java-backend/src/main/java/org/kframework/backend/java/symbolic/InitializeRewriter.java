@@ -4,25 +4,22 @@ package org.kframework.backend.java.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.Rewriter;
-import org.kframework.RewriterResult;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.definition.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -58,7 +55,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final KRunOptions krunOptions;
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
-    private static int NEGATIVE_VALUE = -1;
 
     @Inject
     public InitializeRewriter(
@@ -101,43 +97,30 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         private final KExceptionManager kem;
 
         public SymbolicRewriterGlue(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
-            this.rewriter = new SymbolicRewriter(definition, kompileOptions, javaOptions, new KRunState.Counter());
+            this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
             this.rewritingContext = rewritingContext;
             this.kem = kem;
         }
 
         @Override
-        public RewriterResult execute(K k, Optional<Integer> depth) {
+        public K execute(K k, Optional<Integer> depth) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
-            return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
+            return result.getJavaKilTerm();
         }
 
         @Override
-        public List<Map<KVariable, K>> match(K k, org.kframework.definition.Rule rule) {
+        public List<Map<KVariable, K>> match(K k, Rule rule) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(TermContext.of(rewritingContext));
-            Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
-            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
-            List<Substitution<Variable, Term>> searchResults;
-            searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
-                    SearchType.STAR, TermContext.of(rewritingContext), false);
-            return searchResults;
-        }
-
-
         public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
-            K res = execute(k, depth).k();
+            K res = execute(k, depth);
             return Tuple2.apply(res, match(res, rule));
         }
-
     }
-
 
     @DefinitionScoped
     public static class InitializeDefinition {

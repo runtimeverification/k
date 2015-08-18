@@ -319,6 +319,8 @@ public class PatternMatchRewriter {
 
     public List<Substitution<Variable,Term>> search(
             Term initialTerm,
+            Term targetTerm,
+            List<Rule> rules,
             Rule pattern,
             int bound,
             int depth,
