@@ -13,6 +13,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
@@ -44,7 +45,7 @@ import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.krun.modes.DebugExecutionMode;
+import org.kframework.krun.modes.DebugMode.DebugExecutionMode;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.modes.KRunExecutionMode;
 import org.kframework.krun.tools.Debugger;
@@ -299,6 +300,17 @@ public class KRunModule extends AbstractModule {
                     files.resolveKompiled("configuration.bin"));
             sw.printIntermediate("Reading configuration from binary");
             return cfg;
+        }
+
+
+        @Provides
+        @Named("checkpointIntervalValue")
+        Integer getCheckpointLength(KompileOptions options, @Named("checkpointIntervalMap") Map<String, Integer> map) {
+            Integer checkpointInterval = map.get(options.backend);
+            if (checkpointInterval == null) {
+                return new Integer(50);
+            }
+            return checkpointInterval;
         }
     }
 
