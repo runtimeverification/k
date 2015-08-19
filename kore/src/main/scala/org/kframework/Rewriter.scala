@@ -23,7 +23,7 @@ trait Rewriter {
   def execute(k: kore.K, depth: Optional[Integer]): RewriterResult
 
 
-  def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
+  def `match`(k: kore.K, rule: Rule): List[Map[kore.KVariable, kore.K]]
 
 
   /**

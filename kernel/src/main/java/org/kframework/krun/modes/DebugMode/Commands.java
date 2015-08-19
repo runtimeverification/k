@@ -2,13 +2,15 @@
 package org.kframework.krun.modes.DebugMode;
 
 import org.kframework.backend.unparser.OutputModes;
+import org.kframework.debugger.DebuggerMatchResult;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.compile.VisitKORE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,16 +166,36 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            List<Map<KVariable, K>> substList = session.match(pattern);
+            DebuggerMatchResult result = session.match(pattern);
+            CommandUtils.prettyPrintSubstitution(result, compiledDefinition);
+        }
+
+    }
+
+    private static class CommandUtils {
+        private static void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
+            List<KVariable> varList = new ArrayList<>();
+            new VisitKORE() {
+                @Override
+                public Void apply(KVariable k) {
+                    varList.add(k);
+                    return super.apply(k);
+                }
+            }.apply(result.getParsedRule().body());
+
+            List<Map<KVariable, K>> substList = result.getSubstitutions();
             if (substList != null) {
                 int i = 1;
-                for(Map<KVariable, K> subst : substList) {
+                for (Map<KVariable, K> subst : substList) {
                     for (Map.Entry<KVariable, K> var : subst.entrySet()) {
-                        System.out.println("Substitution " + i);
-                        prettyPrint(compiledDefinition, OutputModes.PRETTY, x -> System.out.println(x), var.getKey());
-                        prettyPrint(compiledDefinition, OutputModes.PRETTY, x -> System.out.println(x), var.getValue());
-                        i++;
+                        KVariable kvar = (KVariable) var.getKey();
+                        if (varList.get(0).equals(kvar)) {
+                            prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.print(s), var.getKey());
+                            System.out.print(" ---> ");
+                            prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), var.getValue());
+                        }
                     }
+                    i++;
                 }
             }
         }

@@ -75,7 +75,7 @@ public class KRun implements Transformation<Void, Void> {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = pattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
             }
@@ -123,13 +123,16 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static Rule pattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+    public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
         }
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
+    public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
+        return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
+    }
 
     public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
         switch (output) {

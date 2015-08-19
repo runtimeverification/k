@@ -113,6 +113,6 @@ public interface KDebug {
      * @param pattern String specifying that pattern to be matched
      * @return The substitution
      */
-    public List<Map<KVariable, K>> match(String pattern);
+    public DebuggerMatchResult match(String pattern);
 }
 
