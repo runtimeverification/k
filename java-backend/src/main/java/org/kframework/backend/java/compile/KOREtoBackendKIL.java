@@ -26,6 +26,7 @@ import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.definition.Module;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Cell;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -204,4 +205,19 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     public static CellLabel kLabel2cellLabel(String kLabel) {
         return CellLabel.of(kLabel.substring(1, kLabel.length() - 1));
     }
+
+    public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {
+        switch (multiplicity) {
+        case ONE:
+            return ConfigurationInfo.Multiplicity.ONE;
+        case ANY:
+        case SOME:
+            return ConfigurationInfo.Multiplicity.STAR;
+        case MAYBE:
+            return ConfigurationInfo.Multiplicity.OPTIONAL;
+        default:
+            throw new IllegalArgumentException(multiplicity.toString());
+        }
+    }
+
 }

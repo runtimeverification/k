@@ -195,7 +195,7 @@ public class Definition extends JavaSymbolicObject {
                 context.smtSortFlattening.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), e -> Sort.of(e.getValue()))),
                 context.getConfigurationStructureMap().entrySet().stream().collect(Collectors.toMap(
                         e -> CellLabel.of(e.getKey()),
-                        e -> ConfigurationInfo.Multiplicity.of(e.getValue().multiplicity.toString()))),
+                        e -> KOREtoBackendKIL.kil2koreMultiplicity(e.getValue().multiplicity))),
                 context.getConfigurationStructureMap());
         this.context = context;
     }
