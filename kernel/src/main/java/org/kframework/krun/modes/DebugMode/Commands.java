@@ -6,7 +6,10 @@ import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KVariable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -161,7 +164,18 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
-            Map<K, K> subst = (Map<K, K>) session.match(pattern);
+            List<Map<KVariable, K>> substList = session.match(pattern);
+            if (substList != null) {
+                int i = 1;
+                for(Map<KVariable, K> subst : substList) {
+                    for (Map.Entry<KVariable, K> var : subst.entrySet()) {
+                        System.out.println("Substitution " + i);
+                        prettyPrint(compiledDefinition, OutputModes.PRETTY, x -> System.out.println(x), var.getKey());
+                        prettyPrint(compiledDefinition, OutputModes.PRETTY, x -> System.out.println(x), var.getValue());
+                        i++;
+                    }
+                }
+            }
         }
     }
 }
