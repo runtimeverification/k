@@ -214,8 +214,7 @@ public class RuleGrammarGenerator {
                                     });
                             // add follow restrictions for the characters that might produce ambiguities
                             if (!follow.isEmpty()) {
-                                String restriction = follow.stream().map(StringUtil::escapeAutomatonRegex).reduce((s1, s2) -> "(" + s1 + ")|(" + s2 + ")").get();
-                                return Terminal.apply(t.value(), restriction);
+                                return Terminal.apply(t.value(), follow.stream().collect(toList()));
                             }
                         }
                         return pi;

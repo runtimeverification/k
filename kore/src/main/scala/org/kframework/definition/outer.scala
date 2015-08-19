@@ -299,11 +299,12 @@ RegexTerminalToString {
   }
 }
 
-case class Terminal(value: String, followRegex: String) extends TerminalLike // hooked
+case class Terminal(value: String, followRegex: Seq[String]) extends TerminalLike // hooked
 with TerminalToString {
+  def this(value: String) = this(value, Seq())
   lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
   lazy val followPattern =
-    new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
+    new RunAutomaton(BasicAutomata.makeStringUnion(followRegex.toArray : _*), false)
   lazy val precedePattern = new RunAutomaton(BasicAutomata.makeEmpty(), false)
 }
 
