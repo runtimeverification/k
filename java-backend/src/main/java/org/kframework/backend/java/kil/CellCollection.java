@@ -8,6 +8,7 @@ import com.google.common.collect.Multiset;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
+import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
@@ -138,15 +139,13 @@ public class CellCollection extends Collection {
     private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Definition definition) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
-            if (definition.getConfigurationStructureMap().containsKey(cellLabel.name())) {
-                if (definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
-                    count++;
-                } else {
-                    if (cells.get(cellLabel).size() != 1) {
-                        throw KEMException.criticalError("Cell label " + cellLabel + " does not have "
-                                + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
-                                + "\nExamine the last rule applied to determine the source of the error.");
-                    }
+            if (definition.cellMultiplicity(cellLabel) == ConfigurationInfo.Multiplicity.STAR) {
+                count++;
+            } else {
+                if (cells.get(cellLabel).size() != 1) {
+                    throw KEMException.criticalError("Cell label " + cellLabel + " does not have "
+                            + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
+                            + "\nExamine the last rule applied to determine the source of the error.");
                 }
             }
         }

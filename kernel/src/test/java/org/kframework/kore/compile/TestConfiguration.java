@@ -8,10 +8,10 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import scala.collection.immutable.Set;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -124,6 +124,15 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
+    public Sort getCellSort(KLabel kLabel) {
+        if (kLabel != null) {
+            return cellLabels.entrySet().stream().filter(e -> kLabel.equals(e.getValue())).map(Map.Entry::getKey).findAny().orElseGet(null);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public KLabel getCellFragmentLabel(Sort k) { return cellFragmentLabels.get(k); }
 
     @Override
@@ -150,13 +159,18 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
+    public Set<Sort> getCellSorts() {
+        return cellLabels.keySet();
+    }
+
+    @Override
     public K getUnit(Sort k) { return units.get(k); }
 
     @Override
     public KLabel getConcat(Sort k) { return concats.get(k); }
 
     @Override
-    public Set<Sort> getCellBagSortsOfCell(Sort k) {
+    public scala.collection.immutable.Set<Sort> getCellBagSortsOfCell(Sort k) {
         return Set(Sort(k.name() + "Bag"));
     }
 }

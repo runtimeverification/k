@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
+import org.kframework.compile.ConfigurationInfo;
 
 
 /**
@@ -558,7 +559,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (definition.cellMultiplicity(cellLabel) != ConfigurationInfo.Multiplicity.STAR) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     addUnificationTask(cellCollection.get(cellLabel).iterator().next().content(),
