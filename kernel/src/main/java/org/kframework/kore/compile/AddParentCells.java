@@ -180,7 +180,7 @@ public class AddParentCells {
                 }
             }
             return Optional.empty();
-        } else {
+        } else if (k instanceof  KRewrite) {
             KRewrite rew = (KRewrite) k;
             List<K> cells = IncompleteCellUtils.flattenCells(rew.left());
             cells.addAll(IncompleteCellUtils.flattenCells(rew.right()));
@@ -198,25 +198,31 @@ public class AddParentCells {
                 // else level is already correct
             }
             return level;
+        } else {
+            return Optional.empty();
         }
     }
 
     Optional<KLabel> getParent(K k) {
         if (k instanceof KApply) {
-            if (((KApply) k).klabel().equals(KLabel("#cells"))) {
-                List<K> items = ((KApply) k).klist().items();
+            final KApply app = (KApply) k;
+            if (app.klabel().equals(KLabel("#cells"))) {
+                List<K> items = app.klist().items();
                 if (items.isEmpty()) {
                     return Optional.empty();
                 }
                 Optional<KLabel> parent = getParent(items.get(0));
                 for (K item : items) {
                     if (!parent.equals(getParent(item))) {
-                        throw KEMException.criticalError("Can't mix cells with different parents levels under a rewrite");
+                        throw KEMException.criticalError("Can't mix items with different parent cells under a rewrite," +
+                                " found "+items.get(0)+" and "+item, k);
                     }
                 }
                 return parent;
+            } else if (cfg.isCell(app.klabel())) {
+                return Optional.of(cfg.getParent(app.klabel()));
             } else {
-                return Optional.of(cfg.getParent(((KApply) k).klabel()));
+                return Optional.empty();
             }
         } else if (k instanceof KVariable) {
             Sort sort = Sort(k.att().<String>get(Attribute.SORT_KEY).get());
