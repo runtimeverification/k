@@ -10,6 +10,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
+import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
@@ -39,13 +40,22 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     private final FileUtil files;
     private final CompiledDefinition def;
     private final DefinitionToOcaml converter;
+    private final KRunOptions options;
 
     @Inject
-    public OcamlRewriter(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions, CompiledDefinition def, InitializeDefinition init) {
+    public OcamlRewriter(
+            KExceptionManager kem,
+            FileUtil files,
+            GlobalOptions globalOptions,
+            KompileOptions kompileOptions,
+            CompiledDefinition def,
+            InitializeDefinition init,
+            KRunOptions options) {
         this.files = files;
         this.def = def;
         this.converter = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions, null);
         converter.initialize(init.serialized, def);
+        this.options = options;
     }
 
     @Override
@@ -113,6 +123,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             List<String> args = new ArrayList<>(Arrays.asList("-g", "-o", "a.out", "-package", "gmp", "-package", "zarith",
                     "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
             args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
+            args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
             if (converter.options.ocamlopt) {
                 args.add(0, "ocamlfind");
                 args.add(1, "ocamlopt");
