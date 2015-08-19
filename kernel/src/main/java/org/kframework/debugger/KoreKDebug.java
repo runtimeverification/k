@@ -3,6 +3,8 @@ package org.kframework.debugger;
 
 
 import org.kframework.Rewriter;
+import org.kframework.RewriterResult;
+import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 
 import java.util.ArrayList;
@@ -18,12 +20,10 @@ import java.util.TreeMap;
 public class KoreKDebug implements KDebug {
 
     private final int DEFAULT_ID = 0;
-    private final int DEFAULT_CHECKPOINT_SIZE = 50;
     private List<DebuggerState> stateList;
-    private DebuggerState activeState;
+    private int activeStateIndex;
     private Rewriter rewriter;
     private int checkpointInterval;
-
 
     /**
      * Start a Debugger Session. The initial Configuration becomes a part of the new and only state of the Debugger
@@ -31,15 +31,15 @@ public class KoreKDebug implements KDebug {
      * @param initialK The initial Configuration.
      * @param rewriter The Rewriter being used.
      */
-    public KoreKDebug(K initialK, Rewriter rewriter) {
+    public KoreKDebug(K initialK, Rewriter rewriter, int checkpointInterval) {
         this.stateList = new ArrayList<>();
-        this.checkpointInterval = DEFAULT_CHECKPOINT_SIZE;
         this.rewriter = rewriter;
-        NavigableMap<Integer, RewriterCheckpoint> checkpointMap = new TreeMap<>();
-        checkpointMap.put(DEFAULT_ID, new RewriterCheckpoint(initialK));
+        this.checkpointInterval = checkpointInterval;
+        NavigableMap<Integer, K> checkpointMap = new TreeMap<>();
+        checkpointMap.put(DEFAULT_ID, initialK);
         DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
         stateList.add(initialState);
-        activeState = initialState;
+        activeStateIndex = DEFAULT_ID;
     }
 
     @Override
@@ -48,79 +48,129 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public DebuggerState step(int steps) {
-        K currentK = activeState.getCurrentK();
-        int activeStateCheckpoint = activeState.getStepNum();
-        int lastCheckpoint = activeState.getlastMapCheckpoint();
-        DebuggerState nextActiveState;
-        stateList.remove(activeState);
-        /* Not enough steps for a new checkpoint */
-        if (activeStateCheckpoint + steps < lastCheckpoint + checkpointInterval) {
-            currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
-            activeStateCheckpoint += steps;
-            NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
-            nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
-            stateList.add(nextActiveState);
-            activeState = nextActiveState;
-            return nextActiveState;
-        }
-        /* Move to the next Checkpoint */
-        if (lastCheckpoint + checkpointInterval - activeStateCheckpoint < 0) {
-            /* Case when checkpointInterval has been modified */
-            lastCheckpoint = (activeStateCheckpoint / checkpointInterval) * checkpointInterval;
-        }
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(lastCheckpoint + checkpointInterval - activeStateCheckpoint)));
-        NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
-        steps -= lastCheckpoint + checkpointInterval - activeStateCheckpoint;
-        activeStateCheckpoint = lastCheckpoint + checkpointInterval;
-        checkpointMap.put(new Integer(activeStateCheckpoint), new RewriterCheckpoint(currentK));
-
-        /* Register Checkpoints and Proceed. Take Jumps equal to the Checkpoint Interval */
+    public DebuggerState step(int currentStateIndex, int steps) {
+        DebuggerState currentState = stateList.get(currentStateIndex);
+        stateList.remove(currentStateIndex);
+        K currentK = currentState.getCurrentK();
+        int activeStateCheckpoint = currentState.getStepNum();
+        RewriterResult result;
+        NavigableMap<Integer, K> checkpointMap = currentState.getCheckpointMap();
         while (steps >= checkpointInterval) {
-            activeStateCheckpoint += checkpointInterval;
-            RewriterCheckpoint newCheckpoint = new RewriterCheckpoint(rewriter.execute(currentK, Optional.of(new Integer(checkpointInterval))));
+            result = rewriter.execute(currentK, Optional.of(checkpointInterval));
+            if (isFinalState(checkpointInterval, result)) {
+                return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+            }
             steps -= checkpointInterval;
-            checkpointMap.put(new Integer(activeStateCheckpoint), newCheckpoint);
-            currentK = newCheckpoint.getCheckpointK();
+            activeStateCheckpoint += checkpointInterval;
+            checkpointMap.put(activeStateCheckpoint, result.k());
+            currentK = result.k();
         }
-
-        /* Final remaining steps */
-        currentK = rewriter.execute(currentK, Optional.of(new Integer(steps)));
+        result = rewriter.execute(currentK, Optional.of(steps));
+        if (isFinalState(steps, result)) {
+            return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+        }
         activeStateCheckpoint += steps;
-        nextActiveState = new DebuggerState(currentK, activeStateCheckpoint, checkpointMap);
-        activeState = nextActiveState;
-        stateList.add(activeState);
-        return nextActiveState;
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
+        stateList.add(nextState);
+        return nextState;
+    }
+
+    private DebuggerState getDebuggerState(int currentStateIndex, int activeStateCheckpoint, RewriterResult result, NavigableMap<Integer, K> checkpointMap) {
+        activeStateCheckpoint += result.rewriteSteps().get();
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
+        stateList.add(currentStateIndex, nextState);
+        return nextState;
+    }
+
+    private boolean isFinalState(int steps, RewriterResult result) {
+        return result.rewriteSteps().isPresent() && result.rewriteSteps().get() < steps;
     }
 
     @Override
-    public DebuggerState backStep(int steps) {
-        int currentCheckpoint = activeState.getStepNum();
-        int target  = currentCheckpoint - steps;
-        NavigableMap<Integer, RewriterCheckpoint> currMap = activeState.getCheckpointMap();
-        Map.Entry<Integer, RewriterCheckpoint> relevantEntry= currMap.floorEntry(target);
+    public DebuggerState backStep(int initialStateNum, int steps) {
+        DebuggerState currentState = stateList.get(initialStateNum);
+        int currentCheckpoint = currentState.getStepNum();
+        int target = currentCheckpoint - steps;
+        NavigableMap<Integer, K> currMap = currentState.getCheckpointMap();
+        Map.Entry<Integer, K> relevantEntry = currMap.floorEntry(target);
         if (relevantEntry == null) {
             /* Invalid Operation, no need to change the state */
             return null;
         }
 
         int floorKey = relevantEntry.getKey();
-        stateList.remove(activeState);
-        activeState = new DebuggerState(relevantEntry.getValue().getCheckpointK(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
-        return step(target - floorKey);
+        currentState = new DebuggerState(relevantEntry.getValue(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
+        stateList.remove(initialStateNum);
+        stateList.add(initialStateNum, currentState);
+        return step(initialStateNum, target - floorKey);
     }
 
     @Override
-    public DebuggerState jumpTo(int stateNum) {
-        NavigableMap<Integer, RewriterCheckpoint> checkpointMap = activeState.getCheckpointMap();
+    public DebuggerState jumpTo(int initialStateNum, int configurationNum) {
+        DebuggerState currentState = stateList.get(initialStateNum);
+        NavigableMap<Integer, K> checkpointMap = currentState.getCheckpointMap();
         int firstKey = checkpointMap.firstKey();
-        if (stateNum < firstKey) {
+        if (configurationNum < firstKey) {
             return null;
         }
-        int lastKey = activeState.getStepNum();
-        if (stateNum >= lastKey) {
-            return step(stateNum - lastKey);
+        int lastKey = currentState.getStepNum();
+        stateList.remove(initialStateNum);
+        stateList.add(currentState);
+        if (configurationNum >= lastKey) {
+            return step(initialStateNum, configurationNum - lastKey);
         }
-        return backStep(lastKey - stateNum);
+        return backStep(initialStateNum, lastKey - configurationNum);
+    }
+
+    @Override
+    public List<? extends Map<? extends K, ? extends K>> search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds) {
+        return rewriter.search(stateList.get(activeStateIndex).getCurrentK(), depth, bounds, searchPattern);
+    }
+
+    @Override
+    public DebuggerState resume() {
+        DebuggerState activeState = stateList.get(activeStateIndex);
+        DebuggerState steppedState = activeState;
+        do {
+            activeState = steppedState;
+            steppedState = step(activeStateIndex, checkpointInterval);
+        } while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval);
+        return steppedState;
+    }
+
+    @Override
+    public List<DebuggerState> getStates() {
+        return new ArrayList<>(stateList);
+    }
+
+
+    @Override
+    public DebuggerState setState(int stateNum) {
+        if (stateNum > stateList.size() - 1) {
+            return null;
+        }
+        DebuggerState newActiveState = stateList.get(stateNum);
+        if (newActiveState == null) {
+            return null;
+        }
+        activeStateIndex = stateNum;
+        return newActiveState;
+    }
+
+    @Override
+    public int getActiveStateId() {
+        return activeStateIndex;
+    }
+
+    @Override
+    public DebuggerState createCopy(int stateNum) {
+        DebuggerState newState = new DebuggerState(stateList.get(stateNum));
+        stateList.add(newState);
+        return newState;
+    }
+
+    @Override
+    public DebuggerState getActiveState() {
+        return stateList.get(activeStateIndex);
     }
 }

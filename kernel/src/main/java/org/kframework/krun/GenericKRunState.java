@@ -5,13 +5,15 @@ import org.kframework.kil.Term;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SemanticEqual;
 
+import java.util.Optional;
+
 /**
  * Generic KRunState object. Can be used for used for storing generic Terms.
  */
 public class GenericKRunState extends KRunState{
 
     public GenericKRunState(Term term, Counter counter) {
-        super(term, counter);
+        super(term, counter, Optional.empty());
 
     }
     @Override

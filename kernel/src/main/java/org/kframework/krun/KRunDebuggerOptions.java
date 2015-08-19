@@ -23,6 +23,9 @@ public final class KRunDebuggerOptions {
     public final CommandSetCheckpoint setCheckpoint = new CommandSetCheckpoint();
     public final CommandBackStep backStep = new CommandBackStep();
     public final CommandJumpTo jumpTo = new CommandJumpTo();
+    public final CommandStepAll stepAll = new CommandStepAll();
+    public final CommandGetStates getStates = new CommandGetStates();
+    public final CommandPeek peek = new CommandPeek();
 
     @Parameters(commandNames="help", commandDescription="Display help on the available commands")
     public static final class CommandHelp {
@@ -38,18 +41,11 @@ public final class KRunDebuggerOptions {
         public int numSteps = 1;
     }
 
-    @Parameters(commandNames={"search", "step-all"}, commandDescription="Search one or more steps from the current state")
-    public static final class CommandSearch {
+    @Parameters(commandNames={"step-all"}, commandDescription="Take one or more steps from the current state")
+    public static final class CommandStepAll {
 
         @Parameter(names="-s", description="Number of steps to step")
-        public int numSteps = 1;
-    }
-
-    @Parameters(commandNames="select", commandDescription="Select a particular state as the current state")
-    public static final class CommandSelect {
-
-        @Parameter(names="-s", description="State ID to select", required=true)
-        public int stateId;
+        public int numStepsAll = 1;
     }
 
     @Parameters(commandNames={"show-graph", "show-search-graph"}, commandDescription="Displays the search graph of states in the execution trace")
@@ -124,6 +120,39 @@ public final class KRunDebuggerOptions {
         @Parameter(names="-s", description="State Number to jump to", required=true)
         public int stateNum;
     }
+
+    @Parameters(commandNames = {"search"}, commandDescription = "Search for a substitution matching a given pattern")
+    public static final class CommandSearch {
+
+        @Parameter(names = "-s", description = "Pattern String", required = true)
+        public String patternStr;
+
+    }
+
+    @Parameters(commandNames = {"get-states"}, commandDescription = "Get all the paths traversed so far")
+    public static final class CommandGetStates {
+
+    }
+
+    @Parameters(commandNames = {"select"}, commandDescription = "Select a state from States observed so far")
+    public static final class CommandSelect {
+
+        @Parameter(names = "-s", description = "<State Id> [Configuration Id]", variableArity = true)
+        public List<Integer> ids;
+
+        public int stateId() {return ids.get(0);}
+
+    }
+
+    @Parameters(commandNames = {"peek"}, commandDescription = "Display information from a state observed so far")
+    public static final class CommandPeek {
+
+        @Parameter(names = "-s", description = "<State Id> [Configuration Id]", variableArity = true)
+        public List<Integer> peekIds;
+
+    }
+
+
 
 
 }
