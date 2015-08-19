@@ -13,12 +13,9 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
@@ -33,10 +30,6 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
-import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -238,7 +231,7 @@ public class Definition extends JavaSymbolicObject {
                 null,
                 null,
                 configurationInfo.getCellSorts().stream().collect(Collectors.toMap(
-                        s -> KOREtoBackendKIL.kLabel2cellLabel(configurationInfo.getCellLabel(s).name()),
+                        s -> CellLabel.of(configurationInfo.getCellLabel(s).name()),
                         configurationInfo::getMultiplicity)),
                 null);
         context = null;

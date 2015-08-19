@@ -126,7 +126,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         Assoc.flatten(klabel, klist.items(), module).stream().forEach(k -> {
             if (k instanceof KApply) {
                 builder.put(
-                        kLabel2cellLabel(((KApply) k).klabel().name()),
+                        CellLabel.of(((KApply) k).klabel().name()),
                         KList(((KApply) k).klist().items()));
             } else if (k instanceof KVariable) {
                 // TODO(AndreiS): ensure the ... variables do not have sort K
@@ -150,9 +150,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             Option<Att> attOption = module.attributesFor().get(klabel);
             if (attOption.isDefined() && attOption.get().contains(Attribute.CELL_BAG))
                 return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
-            else if (definition.cellMultiplicity(kLabel2cellLabel(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
+            else if (definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(
-                        CellCollection.builder(definition).put(kLabel2cellLabel(klabel.name()), KList(klist.items())).build(),
+                        CellCollection.builder(definition).put(CellLabel.of(klabel.name()), KList(klist.items())).build(),
                         context);
             else
                 return KApply1(klabel, klist, k.att());
@@ -201,10 +201,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     }
 
-
-    public static CellLabel kLabel2cellLabel(String kLabel) {
-        return CellLabel.of(kLabel.substring(1, kLabel.length() - 1));
-    }
 
     public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {
         switch (multiplicity) {
