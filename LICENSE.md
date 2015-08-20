@@ -5,7 +5,7 @@ The K Release License
 University of Illinois/NCSA
 Open Source License
 
-Copyright (c) 2009-2013 University of Illinois at Urbana-Champaign.
+Copyright (c) 2009-2015 University of Illinois at Urbana-Champaign.
 All rights reserved.
 
 Developed by:
