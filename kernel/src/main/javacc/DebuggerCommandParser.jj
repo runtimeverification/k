@@ -46,7 +46,7 @@ TOKEN: /*RESERVED TOKENS */
     |  <CHECKPOINT: "checkpoint" | "ch">
     |  <RESUME: "resume" | "run" | "r">
     |  <PEEK: "p" | "peek">
-    |  <WATCH: "watch"> : PATTERN_STATE
+    |  <SHOW: "show"> : PATTERN_STATE
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
     |  <NEWLINE : "\n" | "\r\n">
@@ -77,7 +77,7 @@ Command command() throws NumberFormatException:
     |   <QUIT> {return new QuitCommand();}
     |   <RESUME> {return new ResumeCommand();}
     |   <CHECKPOINT> (checkpointVal = parseNum()) {return new CheckpointCommand(checkpointVal);}
-    |   <WATCH> (pattern = parsePattern()) {return new WatchCommand(pattern);}
+    |   <SHOW> (pattern = parsePattern()) {return new ShowCommand(pattern);}
 }
 
 String parsePattern():

@@ -157,10 +157,10 @@ public class Commands {
     }
 
 
-    public static class WatchCommand implements Command {
+    public static class ShowCommand implements Command {
         private String pattern;
 
-        public WatchCommand(String pattern) {
+        public ShowCommand(String pattern) {
             this.pattern = pattern;
         }
 
@@ -173,8 +173,31 @@ public class Commands {
     }
 
     private static class CommandUtils {
+
         private static void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
-            List<KVariable> varList = new ArrayList<>();
+            List<Map<KVariable, K>> substList = result.getSubstitutions();
+
+            if (substList.isEmpty()) {
+                System.out.println("No Substitution Found");
+                return;
+            }
+
+            /* Change Required Since Equals Doesn't Observe Reflexivity */
+            List<KVariable> varList = new ArrayList() {
+                @Override
+                public int indexOf(Object o) {
+                    if (o == null) {
+                        for (int i = 0; i < this.size(); i++)
+                            if (this.get(i) == null)
+                                return i;
+                    } else {
+                        for (int i = 0; i < this.size(); i++)
+                            if (this.get(i).equals(o))
+                                return i;
+                    }
+                    return -1;
+                }
+            };
             new VisitKORE() {
                 @Override
                 public Void apply(KVariable k) {
@@ -183,21 +206,18 @@ public class Commands {
                 }
             }.apply(result.getParsedRule().body());
 
-            List<Map<KVariable, K>> substList = result.getSubstitutions();
-            if (substList != null) {
-                int i = 1;
-                for (Map<KVariable, K> subst : substList) {
-                    for (Map.Entry<KVariable, K> var : subst.entrySet()) {
-                        KVariable kvar = (KVariable) var.getKey();
-                        if (varList.get(0).equals(kvar)) {
-                            prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.print(s), var.getKey());
-                            System.out.print(" ---> ");
-                            prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), var.getValue());
-                        }
-                    }
-                    i++;
-                }
-            }
+            substList.stream()
+                    .forEach(map ->
+                            map.entrySet()
+                                    .stream()
+                                    .filter(x -> varList.contains(x.getKey()))
+                                    .forEach(x -> {
+                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.print(s), x.getKey());
+                                        System.out.print(" ---> ");
+                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), x.getValue());
+                                    }));
+
+
         }
     }
 }
