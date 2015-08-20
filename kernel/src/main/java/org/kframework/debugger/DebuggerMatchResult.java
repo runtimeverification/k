@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.debugger;
 
 import org.kframework.definition.Rule;
