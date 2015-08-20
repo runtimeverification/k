@@ -19,6 +19,7 @@ import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -308,5 +309,9 @@ public final class KRunOptions {
 
         @Parameter(names="--kore", description="Execute with the new pipeline.")
         public boolean kore = false;
+
+        @Parameter(names="--native-libraries", description="Native libraries to link the rewrite engine against. Useful in defining rewriter plugins.",
+                listConverter=StringListConverter.class)
+        public List<String> nativeLibraries = Collections.emptyList();
     }
 }
