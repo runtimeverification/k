@@ -114,5 +114,13 @@ public interface KDebug {
      * @return The substitution
      */
     public DebuggerMatchResult match(String pattern);
+
+    /**
+     * Given a pattern, as it as a watch so that it can be retrieved later.
+     *
+     * The Debugger maintains watches as part of the DebuggerState. Every State has a watch
+     * associated with it. On copying the state, watches are also copied.
+     */
+    public void addWatch(String pattern);
 }
 

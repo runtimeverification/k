@@ -4,6 +4,8 @@ package org.kframework.debugger;
 import org.kframework.kore.K;
 import org.kframework.krun.tools.Debugger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -23,18 +25,22 @@ public class DebuggerState {
 
     private final NavigableMap<Integer, K> checkpointMap;
 
+    private final List<DebuggerMatchResult> watchList;
+
     private final K currentK;
 
     private final int stepNum;
 
-    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, K> checkpointMap) {
+    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, K> checkpointMap, List<DebuggerMatchResult> watchList) {
         this.checkpointMap = new TreeMap<>(checkpointMap);
+        this.watchList = new ArrayList<>(watchList);
         this.currentK = currentK;
         this.stepNum = stepNum;
     }
 
     public DebuggerState(DebuggerState copyState) {
-        this.checkpointMap = new TreeMap<>(copyState.getCheckpointMap());
+        this.checkpointMap = copyState.getCheckpointMap();
+        this.watchList = copyState.getWatchList();
         this.currentK = copyState.getCurrentK();
         this.stepNum = copyState.getStepNum();
     }
@@ -55,6 +61,10 @@ public class DebuggerState {
      */
     public int getlastMapCheckpoint() {
         return checkpointMap.lastKey();
+    }
+
+    public List<DebuggerMatchResult> getWatchList() {
+        return new ArrayList(watchList);
     }
 
     public NavigableMap<Integer, K> getCheckpointMap() {

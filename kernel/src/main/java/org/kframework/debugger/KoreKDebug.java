@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * Kore Based Debugger Implementation.
@@ -52,10 +53,10 @@ public class KoreKDebug implements KDebug {
         this.compiledDef = compiledDef;
         NavigableMap<Integer, K> checkpointMap = new TreeMap<>();
         checkpointMap.put(DEFAULT_ID, initialK);
-        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap);
+        List<DebuggerMatchResult> watchList = new ArrayList<>();
+        DebuggerState initialState = new DebuggerState(initialK, DEFAULT_ID, checkpointMap, watchList);
         stateList.add(initialState);
         activeStateIndex = DEFAULT_ID;
-
     }
 
     @Override
@@ -71,10 +72,11 @@ public class KoreKDebug implements KDebug {
         int activeStateCheckpoint = currentState.getStepNum();
         RewriterResult result;
         NavigableMap<Integer, K> checkpointMap = currentState.getCheckpointMap();
+        List<DebuggerMatchResult> origWatchList = currentState.getWatchList();
         while (steps >= checkpointInterval) {
             result = rewriter.execute(currentK, Optional.of(checkpointInterval));
             if (isFinalState(checkpointInterval, result)) {
-                return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+                return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap, origWatchList);
             }
             steps -= checkpointInterval;
             activeStateCheckpoint += checkpointInterval;
@@ -83,17 +85,35 @@ public class KoreKDebug implements KDebug {
         }
         result = rewriter.execute(currentK, Optional.of(steps));
         if (isFinalState(steps, result)) {
-            return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap);
+            return getDebuggerState(currentStateIndex, activeStateCheckpoint, result, checkpointMap, origWatchList);
         }
         activeStateCheckpoint += steps;
-        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
+        List<DebuggerMatchResult> watchList = updateWatchList(origWatchList, result.k());
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, watchList);
         stateList.add(nextState);
         return nextState;
     }
 
-    private DebuggerState getDebuggerState(int currentStateIndex, int activeStateCheckpoint, RewriterResult result, NavigableMap<Integer, K> checkpointMap) {
+    private List<DebuggerMatchResult> updateWatchList(List<DebuggerMatchResult> originalList, K finalK) {
+        return originalList.stream()
+                .map(x -> {
+                    DebuggerMatchResult result = new DebuggerMatchResult(
+                            rewriter.match(finalK, x.getCompiledRule()),
+                            x.getParsedRule(),
+                            x.getCompiledRule());
+                    return result;
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private DebuggerState getDebuggerState(int currentStateIndex,
+                                           int activeStateCheckpoint,
+                                           RewriterResult result,
+                                           NavigableMap<Integer, K> checkpointMap,
+                                           List<DebuggerMatchResult> originalWatchList) {
         activeStateCheckpoint += result.rewriteSteps().get();
-        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap);
+        List<DebuggerMatchResult> watchList = updateWatchList(originalWatchList, result.k());
+        DebuggerState nextState = new DebuggerState(result.k(), activeStateCheckpoint, checkpointMap, watchList);
         stateList.add(currentStateIndex, nextState);
         return nextState;
     }
@@ -115,7 +135,8 @@ public class KoreKDebug implements KDebug {
         }
 
         int floorKey = relevantEntry.getKey();
-        currentState = new DebuggerState(relevantEntry.getValue(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)));
+        List<DebuggerMatchResult> watchList = updateWatchList(currentState.getWatchList(), relevantEntry.getValue());
+        currentState = new DebuggerState(relevantEntry.getValue(), floorKey, new TreeMap<>(currMap.headMap(floorKey, true)), watchList);
         stateList.remove(initialStateNum);
         stateList.add(initialStateNum, currentState);
         return step(initialStateNum, target - floorKey);
@@ -197,5 +218,19 @@ public class KoreKDebug implements KDebug {
         Rule parsedPattern = KRun.parsePattern(files, kem, pattern, compiledDef, Source.apply(DebuggerSource));
         List<Map<KVariable, K>> subst = rewriter.match(getActiveState().getCurrentK(), compiledPattern);
         return new DebuggerMatchResult(subst, parsedPattern, compiledPattern);
+    }
+
+    @Override
+    public void addWatch(String pattern) {
+        DebuggerMatchResult matchResult = match(pattern);
+        DebuggerState activeState = stateList.remove(activeStateIndex);
+        List<DebuggerMatchResult> watchList = activeState.getWatchList();
+        watchList.add(matchResult);
+        DebuggerState nextState = new DebuggerState(
+                activeState.getCurrentK(),
+                activeState.getStepNum(),
+                activeState.getCheckpointMap(),
+                watchList);
+        stateList.add(activeStateIndex, nextState);
     }
 }

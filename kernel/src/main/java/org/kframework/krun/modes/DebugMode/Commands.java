@@ -45,6 +45,7 @@ public class Commands {
                 return;
             }
             System.out.println(stepCount + " Step(s) Taken.");
+            CommandUtils.displayWatches(steppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -218,6 +219,17 @@ public class Commands {
                                     }));
 
 
+        }
+
+        private static void displayWatches(List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
+            if (watches.isEmpty()) {
+                return;
+            }
+            System.out.println("Watches:");
+            watches.stream().forEach(x -> {
+                prettyPrint(compiledDefinition, OutputModes.PRETTY, rule -> System.out.println(rule), (K) x.getCompiledRule());
+                prettyPrintSubstitution(x, compiledDefinition);
+            });
         }
     }
 }
