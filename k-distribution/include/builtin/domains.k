@@ -281,6 +281,8 @@ module INT
 
   syntax Int ::= freshInt(Int)    [freshGenerator, function]
   rule freshInt(I:Int) => I
+
+  syntax Int ::= "randomRandom" "(" Int ")" [function, klabel(randomRandom), hook(INT.random)]
 endmodule
 
 module FLOAT-SYNTAX
