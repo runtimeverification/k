@@ -1,3 +1,0 @@
-10 f+ (((fix f (lambda x . (fif (x f== 0) fthen 0 felse 
-                  (L2FExp label : (x f+ ((f (
-                  x f- 1))))))))) (10 f- 1))

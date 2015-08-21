@@ -1,5 +1,0 @@
-((fix f (lambda x . (lambda y . fif (x f== 0) fthen
-                                  y
-                                felse
-                                  (L2FExp mylabel : ((f (x f- 1)) (y f+ x))))))
-                                     #symInt(n)) 0

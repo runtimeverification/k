@@ -1,5 +1,0 @@
-skip ~> ( while i i< n do (
-       ( s := s i+ i ;
-         i := i i+ 1 ) ;
-       LStmt mylabel : skip
-))

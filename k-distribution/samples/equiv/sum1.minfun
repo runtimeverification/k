@@ -1,1 +1,0 @@
-(fix myfunction (lambda x . (fif (x f== 0) fthen 0 felse (x f+ (L2FExp mylabel : (myfunction (x f- 1))))))) 9
