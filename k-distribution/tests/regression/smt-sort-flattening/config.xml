@@ -8,7 +8,6 @@
         extension="test">
     <all-programs>
       <krun-option name="--symbolic-execution" />
-      <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
 </tests>
