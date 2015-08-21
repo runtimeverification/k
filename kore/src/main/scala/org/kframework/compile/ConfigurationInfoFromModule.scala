@@ -1,11 +1,9 @@
 package org.kframework.compile
 
 import java.util
-import java.util.Optional
 
 import org.kframework.POSet
-import org.kframework.kore.KORE.{KLabel, KList, KApply}
-import org.kframework.utils.errorsystem.KEMException
+import org.kframework.kore.KORE.{KLabel, KApply}
 
 import scala.collection.JavaConverters._
 
@@ -118,7 +116,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getComputationCell: Sort = mainCell
   override def getCellSorts: util.Set[Sort] = cellSorts.asJava
 
-  override def getUnit(k: Sort): K = {
+  override def getUnit(k: Sort): KApply = {
     if (getMultiplicity(k) == Multiplicity.OPTIONAL)
       KApply(KLabel(cellProductions(k).att.get[String]("unit").get))
     else {

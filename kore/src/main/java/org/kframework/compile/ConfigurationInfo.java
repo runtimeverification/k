@@ -2,9 +2,9 @@
 package org.kframework.compile;
 
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import scala.Option;
 
 import java.util.List;
 import java.util.Set;
@@ -78,7 +78,7 @@ public interface ConfigurationInfo {
     Set<Sort> getCellSorts();
 
     /** Returns the unit of a * or ? cell. */
-    K getUnit(Sort k);
+    KApply getUnit(Sort k);
 
     /** Returns the concatenation operation of a multiplicity * cell. */
     KLabel getConcat(Sort k);

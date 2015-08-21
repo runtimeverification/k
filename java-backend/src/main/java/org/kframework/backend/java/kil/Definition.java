@@ -67,6 +67,7 @@ public class Definition extends JavaSymbolicObject {
         public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
         public final Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity;
+        public final ConfigurationInfo configurationInfo;
         public final ConfigurationStructureMap configurationStructureMap;
 
         private DefinitionData(
@@ -78,6 +79,7 @@ public class Definition extends JavaSymbolicObject {
                 Map<org.kframework.kil.Sort, String> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening,
                 Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity,
+                ConfigurationInfo configurationInfo,
                 ConfigurationStructureMap configurationStructureMap) {
             this.subsorts = subsorts;
             this.builtinSorts = builtinSorts;
@@ -87,6 +89,7 @@ public class Definition extends JavaSymbolicObject {
             this.freshFunctionNames = freshFunctionNames;
             this.smtSortFlattening = smtSortFlattening;
             this.cellLabelMultiplicity = cellLabelMultiplicity;
+            this.configurationInfo = configurationInfo;
             this.configurationStructureMap = configurationStructureMap;
         }
     }
@@ -189,6 +192,7 @@ public class Definition extends JavaSymbolicObject {
                 context.getConfigurationStructureMap().entrySet().stream().collect(Collectors.toMap(
                         e -> CellLabel.of(e.getKey()),
                         e -> KOREtoBackendKIL.kil2koreMultiplicity(e.getValue().multiplicity))),
+                null,
                 context.getConfigurationStructureMap());
         this.context = context;
     }
@@ -233,6 +237,7 @@ public class Definition extends JavaSymbolicObject {
                 configurationInfo.getCellSorts().stream().collect(Collectors.toMap(
                         s -> CellLabel.of(configurationInfo.getCellLabel(s).name()),
                         configurationInfo::getMultiplicity)),
+                configurationInfo,
                 null);
         context = null;
 
@@ -463,6 +468,10 @@ public class Definition extends JavaSymbolicObject {
 
     public ConfigurationInfo.Multiplicity cellMultiplicity(CellLabel label) {
         return definitionData.cellLabelMultiplicity.get(label);
+    }
+
+    public ConfigurationInfo configurationInfo() {
+        return definitionData.configurationInfo;
     }
 
     public DefinitionData definitionData() {

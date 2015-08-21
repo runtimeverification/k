@@ -6,6 +6,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 
@@ -30,7 +31,7 @@ class TestConfiguration implements ConfigurationInfo {
 
     Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
     Map<Sort, K> defaultCells = Maps.newHashMap();
-    Map<Sort, K> units = Maps.newHashMap();
+    Map<Sort, KApply> units = Maps.newHashMap();
     Map<Sort, KLabel> concats = Maps.newHashMap();
     Map<Sort, KLabel> cellLabels = Maps.newHashMap();
     Map<Sort, KLabel> cellFragmentLabels = Maps.newHashMap();
@@ -71,7 +72,7 @@ class TestConfiguration implements ConfigurationInfo {
         defaultCells.put(Sort(cell),term);
     }
 
-    public void addUnit(String cell, K term) { units.put(Sort(cell), term); }
+    public void addUnit(String cell, KApply term) { units.put(Sort(cell), term); }
 
     public void addConcat(String cell, KLabel label) { concats.put(Sort(cell), label); }
 
@@ -164,7 +165,7 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
-    public K getUnit(Sort k) { return units.get(k); }
+    public KApply getUnit(Sort k) { return units.get(k); }
 
     @Override
     public KLabel getConcat(Sort k) { return concats.get(k); }
