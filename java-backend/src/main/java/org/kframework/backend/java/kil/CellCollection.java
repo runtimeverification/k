@@ -81,7 +81,8 @@ public class CellCollection extends Collection {
     public static final CellCollection EMPTY = new CellCollection(
             ImmutableListMultimap.of(),
             ImmutableMultiset.of(),
-            false);
+            false,
+            null);
 
     /**
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
@@ -97,6 +98,8 @@ public class CellCollection extends Collection {
      */
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasMultiplicityCell;
+
+    private final Definition definition;
 
     public static CellCollection singleton(CellLabel cellLabel, Term content, Definition definition) {
         return (CellCollection) builder(definition).put(cellLabel, content).build();
@@ -119,17 +122,19 @@ public class CellCollection extends Collection {
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             Definition definition) {
-        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0);
+        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0, definition);
     }
 
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
-            boolean hasMultiplicityCell) {
+            boolean hasMultiplicityCell,
+            Definition definition) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;
+        this.definition = definition;
     }
 
     private static Variable computeFrame(Multiset<Variable> collectionVariables) {
