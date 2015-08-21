@@ -71,10 +71,10 @@
   <include file="kore-cell-fragments/imp_fragments/config.xml"
            directory="kore-cell-fragments/imp_fragments/" />
 
-  <include file="smt-sort-flattening/config.xml"
+<!--  <include file="smt-sort-flattening/config.xml"
            directory="smt-sort-flattening"
            programs="smt-sort-flattening"
-           results="smt-sort-flattening" />
+           results="smt-sort-flattening" />-->
 
 </tests>
 
