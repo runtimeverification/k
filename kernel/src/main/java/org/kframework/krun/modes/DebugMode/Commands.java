@@ -49,6 +49,24 @@ public class Commands {
         }
     }
 
+    public static class WatchCommand implements Command {
+        private Optional<String> pattern;
+
+        public WatchCommand(Optional<String> pattern) {
+            this.pattern = pattern;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            pattern.ifPresent(pattern -> {
+                session.addWatch(pattern);
+            });
+            CommandUtils.displayWatches(
+                    session.getActiveState().getWatchList(),
+                    compiledDefinition
+            );
+        }
+    }
     public static class PeekCommand implements Command {
 
         @Override
@@ -83,6 +101,7 @@ public class Commands {
                 return;
             }
             System.out.println("Took -" + backStepCount + " step(s)");
+            CommandUtils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -103,20 +122,24 @@ public class Commands {
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
                 System.out.println("State Number specified does not exist");
+                return;
             } else if (!configurationNum.isPresent()) {
                 System.out.println("Selected State " + requestedState);
             } else {
-                int requestedConfig = configurationNum.orElse(nextState.getStepNum());
+                int requestedConfig = configurationNum.get();
                 DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
                 if (finalState == null) {
                     System.out.println("Requested Step Number couldn't be selected.");
+                    return;
                 } else if (!stateNum.isPresent()) {
                     System.out.println("Jumped to Step Number " + requestedConfig);
                 } else {
                     System.out.println("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig);
-
                 }
+                CommandUtils.displayWatches(finalState.getWatchList(), compiledDefinition);
+                return;
             }
+            CommandUtils.displayWatches(nextState.getWatchList(), compiledDefinition);
         }
 
     }
@@ -135,6 +158,7 @@ public class Commands {
             DebuggerState currentState = session.getStates().get(session.getActiveStateId());
             DebuggerState finalState = session.resume();
             System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
+            CommandUtils.displayWatches(finalState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -183,26 +207,12 @@ public class Commands {
                 return;
             }
 
-            /* Change Required Since Equals Doesn't Observe Reflexivity */
-            List<KVariable> varList = new ArrayList() {
-                @Override
-                public int indexOf(Object o) {
-                    if (o == null) {
-                        for (int i = 0; i < this.size(); i++)
-                            if (this.get(i) == null)
-                                return i;
-                    } else {
-                        for (int i = 0; i < this.size(); i++)
-                            if (this.get(i).equals(o))
-                                return i;
-                    }
-                    return -1;
-                }
-            };
+            List<String> varList = new ArrayList<>();
             new VisitKORE() {
                 @Override
                 public Void apply(KVariable k) {
-                    varList.add(k);
+                    /* Not Observing reflexivity Rule requires comparison by name */
+                    varList.add(k.name());
                     return super.apply(k);
                 }
             }.apply(result.getParsedRule().body());
@@ -211,7 +221,7 @@ public class Commands {
                     .forEach(map ->
                             map.entrySet()
                                     .stream()
-                                    .filter(x -> varList.contains(x.getKey()))
+                                    .filter(x -> varList.contains(x.getKey().name()))
                                     .forEach(x -> {
                                         prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.print(s), x.getKey());
                                         System.out.print(" ---> ");
@@ -227,7 +237,7 @@ public class Commands {
             }
             System.out.println("Watches:");
             watches.stream().forEach(x -> {
-                prettyPrint(compiledDefinition, OutputModes.PRETTY, rule -> System.out.println(rule), (K) x.getCompiledRule());
+                System.out.println("Pattern : " + x.getPattern());
                 prettyPrintSubstitution(x, compiledDefinition);
             });
         }

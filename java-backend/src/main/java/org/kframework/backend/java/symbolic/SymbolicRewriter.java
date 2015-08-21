@@ -400,7 +400,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+            //System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
             return searchResults;
         }
 
@@ -417,7 +417,7 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                //System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }

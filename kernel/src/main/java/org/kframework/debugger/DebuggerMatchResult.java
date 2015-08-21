@@ -16,11 +16,13 @@ public class DebuggerMatchResult {
     private final List<Map<KVariable, K>> substitutions;
     private final Rule parsedRule;
     private final Rule compiledRule;
+    private final String pattern;
 
-    public DebuggerMatchResult(List<Map<KVariable, K>> substitutions, Rule parsedRule, Rule compiledRule) {
+    public DebuggerMatchResult(List<Map<KVariable, K>> substitutions, Rule parsedRule, Rule compiledRule, String pattern) {
         this.substitutions = substitutions;
         this.parsedRule = parsedRule;
         this.compiledRule = compiledRule;
+        this.pattern = pattern;
     }
 
     public Rule getCompiledRule() {
@@ -34,4 +36,9 @@ public class DebuggerMatchResult {
     public List<Map<KVariable, K>> getSubstitutions() {
         return substitutions;
     }
+
+    public String getPattern() {
+        return pattern;
+    }
 }
+
