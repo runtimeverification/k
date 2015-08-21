@@ -5,7 +5,7 @@
   <groupId>org.kframework.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.6-SNAPSHOT</version>
+  <version>3.6</version>
   <name>K Framework Tool Parent</name>
 
   <modules>
@@ -21,7 +21,7 @@
 
   <scm>
     <connection>scm:git:https://github.com/kframework/k.git</connection>
-    <tag>HEAD</tag>
+    <tag>v3.6</tag>
   </scm>
 
   <repositories>
