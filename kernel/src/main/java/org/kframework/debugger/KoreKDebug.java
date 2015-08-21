@@ -237,7 +237,7 @@ public class KoreKDebug implements KDebug {
         String DebuggerSource = "Debugger TUI";
         Rule compiledPattern = KRun.compilePattern(files, kem, pattern, options, compiledDef, Source.apply(DebuggerSource));
         Rule parsedPattern = KRun.parsePattern(files, kem, pattern, compiledDef, Source.apply(DebuggerSource));
-        List<Map<KVariable, K>> subst = rewriter.match(getActiveState().getCurrentK(), compiledPattern);
+        List<? extends Map<? extends KVariable, ? extends K>> subst = rewriter.match(getActiveState().getCurrentK(), compiledPattern);
         return new DebuggerMatchResult(subst, parsedPattern, compiledPattern, pattern);
     }
 

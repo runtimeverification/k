@@ -200,7 +200,7 @@ public class Commands {
     private static class CommandUtils {
 
         private static void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
-            List<Map<KVariable, K>> substList = result.getSubstitutions();
+            List<? extends Map<? extends KVariable, ? extends K>> substList = result.getSubstitutions();
 
             if (substList.isEmpty()) {
                 System.out.println("No Substitution Found");

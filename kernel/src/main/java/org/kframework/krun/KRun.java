@@ -76,7 +76,7 @@ public class KRun implements Transformation<Void, Void> {
 
             if (options.exitCodePattern != null) {
                 Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
-                List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
+                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
             }
         } else if (result instanceof Tuple2) {
@@ -90,7 +90,7 @@ public class KRun implements Transformation<Void, Void> {
         return 0;
     }
 
-    public static int getExitCode(KExceptionManager kem, List<Map<KVariable, K>> res) {
+    public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
         if (res.size() != 1) {
             kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
             return 112;

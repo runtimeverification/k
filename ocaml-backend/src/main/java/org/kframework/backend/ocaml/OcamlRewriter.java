@@ -83,7 +83,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
-            public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+            public Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
                 String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");

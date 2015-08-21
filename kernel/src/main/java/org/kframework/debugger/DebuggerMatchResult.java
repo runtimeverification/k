@@ -13,12 +13,12 @@ import java.util.Map;
  * Represents the result of a match on a configuration
  */
 public class DebuggerMatchResult {
-    private final List<Map<KVariable, K>> substitutions;
+    private final List<? extends Map<? extends KVariable, ? extends K>> substitutions;
     private final Rule parsedRule;
     private final Rule compiledRule;
     private final String pattern;
 
-    public DebuggerMatchResult(List<Map<KVariable, K>> substitutions, Rule parsedRule, Rule compiledRule, String pattern) {
+    public DebuggerMatchResult(List<? extends Map<? extends KVariable, ? extends K>> substitutions, Rule parsedRule, Rule compiledRule, String pattern) {
         this.substitutions = substitutions;
         this.parsedRule = parsedRule;
         this.compiledRule = compiledRule;
@@ -33,7 +33,7 @@ public class DebuggerMatchResult {
         return parsedRule;
     }
 
-    public List<Map<KVariable, K>> getSubstitutions() {
+    public List<? extends Map<? extends KVariable, ?extends K>> getSubstitutions() {
         return substitutions;
     }
 

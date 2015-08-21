@@ -51,6 +51,7 @@ TOKEN: /*RESERVED TOKENS */
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
     |  <NEWLINE : "\n" | "\r\n">
+    |  <UNACCEPTED : (~[" "])+>
 
 }
 

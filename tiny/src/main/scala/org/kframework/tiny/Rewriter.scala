@@ -125,9 +125,9 @@ class Rewriter(module: definition.Module, index: K => Option[String] = KIndex) e
 
   def execute(k: kore.K, depth: Optional[Integer]): RewriterResult = execute(cons.convert(k))
 
-  def `match`(k: kore.K, rule: definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = throw new UnsupportedOperationException
+  def `match`(k: kore.K, rule: definition.Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = throw new UnsupportedOperationException
 
-  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: definition.Rule): Tuple2[kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]] = {
+  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: definition.Rule): Tuple2[kore.K, java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]]= {
     val res = execute(k, depth).k
     Tuple2(res, `match`(res, rule))
   }
