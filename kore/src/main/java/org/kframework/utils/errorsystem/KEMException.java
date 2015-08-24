@@ -22,6 +22,10 @@ public class KEMException extends RuntimeException {
         this.exception = e;
     }
 
+    public static KEMException debuggerError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.DEBUGGER, message, null, null, null);
+    }
+
     public static KEMException criticalError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, null);
     }

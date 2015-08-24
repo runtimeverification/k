@@ -122,6 +122,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println("File " + srcFile + " Line " + lineCount);
                 System.out.println(e.getMessage());
             } catch (KEMException e) {
+                System.out.println("File " + srcFile + " Line " + lineCount);
                 System.out.println(e.getMessage());
             }
         }
