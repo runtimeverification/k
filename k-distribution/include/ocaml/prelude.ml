@@ -482,10 +482,11 @@ struct
       [Int a], [Int b] -> [Int (Z.min a b)]
     | _ -> raise Not_implemented
   let hook_rand c lbl sort config ff = match c with
-      [Int max] -> let mpz = Gmp.Z.unrandomm Gmp.RNG.default max in
+      [Int max] -> let mpz = Gmp.Z.urandomm Gmp.RNG.default (from_zarith max) in
           [Int (to_zarith mpz)]
     | _ -> raise Not_implemented
-  let hook_srand c lbl sort config ff = raise Not_implemented
+  let hook_srand c lbl sort config ff = match c with
+      [Int seed] -> let () = Gmp.Z.randseed Gmp.RNG.default (from_zarith seed) in []
   let hook_ediv c lbl sort config ff = raise Not_implemented
   let hook_emod c lbl sort config ff = raise Not_implemented
 end
