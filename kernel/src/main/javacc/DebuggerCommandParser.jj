@@ -91,7 +91,7 @@ Command command() throws NumberFormatException:
     |   <REMWATCH> (stateNum = parseNum()) {return new RemoveWatchCommand(stateNum);}
     |   <COPY> (stateNum = parseNum()) {return new CopyCommand(stateNum);}
     |   <GETSTATE> {return new GetStatesCommand();}
-    |   <SELECT> (stateNum = parseNum()) {return new SelectCommand(stateNum);}"
+    |   <SELECT> (stateNum = parseNum()) {return new SelectCommand(stateNum);}
 }
 
 String parsePattern():
