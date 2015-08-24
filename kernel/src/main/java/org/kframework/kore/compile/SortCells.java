@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -56,6 +55,7 @@ import static org.kframework.kore.KORE.*;
  * expression involving the split variables, using the cell fragment productions
  * introduced along with the cell labels.
  */
+// TODO handle cell rewrites
 public class SortCells {
     private final ConcretizationInfo cfg;
     private final KExceptionManager kem;
@@ -116,7 +116,7 @@ public class SortCells {
             if (parentCell == null) {
                 parentCell = cell;
             } else if (!parentCell.equals(cell)) {
-                throw KEMException.criticalError("Cell variable "+var+" used under two cells, "
+                throw KEMException.criticalError("Cell variable used under two cells, "
                         + parentCell + " and " + cell);
             }
             if (remainingCells == null) {
@@ -135,7 +135,7 @@ public class SortCells {
                     if (s != null && cfg.getMultiplicity(s) != Multiplicity.STAR) {
                         remainingCells.remove(s);
                     }
-                } else if (item instanceof KVariable && !item.equals(var)) {
+                } else if (item instanceof KVariable) {
                     if (item.att().contains(Attribute.SORT_KEY)) {
                         Sort sort = Sort(item.att().<String>get(Attribute.SORT_KEY).get());
                         remainingCells.remove(sort);
@@ -208,67 +208,55 @@ public class SortCells {
         variables.clear(); previousVars.clear(); counter = 0;
     }
 
+    private KRewrite rhsOf = null;
+
     private void analyzeVars(K term) {
         new VisitKORE() {
-            private boolean inRhs = false;
-
-            private Stream<K> streamCells(K term) {
-                return IncompleteCellUtils.flattenCells(term).stream();
-            }
-
-            private K left(K term) {
-                if (term instanceof KRewrite) {
-                    return ((KRewrite)term).left();
-                } else {
-                    return term;
-                }
-            }
-            private K right(K term) {
-                if (term instanceof KRewrite) {
-                    return ((KRewrite)term).right();
-                } else {
-                    return term;
-                }
-            }
-
             @Override
             public Void apply(KApply k) {
                 if (cfg.isParentCell(k.klabel())) {
-                    processSide(k, k.klist().stream()
-                            .flatMap(this::streamCells).map(this::left).flatMap(this::streamCells)
-                            .collect(Collectors.toList()));
-                    inRhs = true;
-                    processSide(k, k.klist().stream()
-                            .flatMap(this::streamCells).map(this::right).flatMap(this::streamCells)
-                            .collect(Collectors.toList()));
-                    inRhs = false;
-                }
-                return super.apply(k);
-            }
-
-            private void processSide(KApply parentCell, List<K> items) {
-                Map<KVariable, List<K>> vars = new HashMap<>();
-                List<KVariable> bagVars = new ArrayList<>();
-                for (K item : items) {
-                    if (item instanceof KVariable) {
-                        KVariable var = (KVariable)item;
+                    Map<KVariable, List<K>> leftVars = new HashMap<>();
+                    Map<KVariable, List<K>> rightVars = new HashMap<>();
+                    for (K item : k.klist().items()) {
+                        prepareVarNeighbors(leftVars, item);
+                        prepareVarNeighbors(rightVars, item);
+                        if (item instanceof KRewrite) {
+                            KRewrite rw = (KRewrite) item;
+                            prepareVarNeighbors(leftVars, rw.left());
+                            prepareVarNeighbors(rightVars, rw.right());
+                        }
+                    }
+                    Set<KVariable> nonACVars = new HashSet<>();
+                    for (KVariable var : leftVars.keySet()) {
                         if (var.att().contains(Attribute.SORT_KEY)) {
                             Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
-                            if (!cfg.cfg.isCell(sort)) {
-                                bagVars.add(var);
-                            }
+                            if (cfg.cfg.isCell(sort))
+                                nonACVars.add(var);
                         }
+                    }
+                    if (rhsOf == null && leftVars.size() - nonACVars.size() > 1) {
+                        throw KEMException.compilerError(
+                                "AC matching of multiple cell variables not yet supported. "
+                                        + "encountered variables " + Sets.difference(leftVars.keySet(), nonACVars) + " in cell " + k, k);
+                    }
+                    for (K item : k.klist().items()) {
+                        computeVarNeighbors(leftVars, rightVars, item);
+                    }
+                    for(Map.Entry<KVariable, List<K>> entry : rightVars.entrySet()) {
+                        if (leftVars.containsKey(entry.getKey())) {
+                            leftVars.get(entry.getKey()).addAll(entry.getValue());
+                        } else {
+                            leftVars.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    for (KVariable var : leftVars.keySet()) {
                         if (!variables.containsKey(var)) {
                             variables.put(var, new VarInfo());
                         }
-                        variables.get(var).addOccurances(parentCell.klabel(), var, items);
+                        variables.get(var).addOccurances(k.klabel(), var, leftVars.get(var));
                     }
                 }
-                if (!inRhs && bagVars.size() > 1) {
-                    throw KEMException.compilerError(
-                            "AC matching of multiple cell variables not yet supported. "
-                                    + "encountered variables " + bagVars + " in cell " + parentCell.klabel(), parentCell);
-                }
+                return super.apply(k);
             }
 
             private void prepareVarNeighbors(Map<KVariable, List<K>> vars, K item) {
@@ -277,12 +265,32 @@ public class SortCells {
                 }
             }
 
+            private void computeVarNeighbors(Map<KVariable, List<K>> leftVars, Map<KVariable, List<K>> rightVars, K item) {
+                if (item instanceof KVariable) {
+                    leftVars.entrySet().stream().filter(var -> !var.getKey().equals(item))
+                            .forEach(e -> e.getValue().add(item));
+                    rightVars.entrySet().stream().filter(var -> !var.getKey().equals(item))
+                            .forEach(e -> e.getValue().add(item));
+                } else if (item instanceof KRewrite) {
+                    KRewrite rw = (KRewrite) item;
+                    leftVars.entrySet().stream().forEach(e -> {
+                        computeVarNeighbors(leftVars, Collections.emptyMap(), rw.left());
+                    });
+                    rightVars.entrySet().stream().forEach(e -> {
+                        computeVarNeighbors(Collections.emptyMap(), rightVars, rw.right());
+                    });
+                } else {
+                    leftVars.entrySet().stream().forEach(e -> e.getValue().add(item));
+                    rightVars.entrySet().stream().forEach(e -> e.getValue().add(item));
+                }
+            }
+
             @Override
             public Void apply(KRewrite k) {
                 apply(k.left());
-                inRhs = true;
+                rhsOf = k;
                 apply(k.right());
-                inRhs = false;
+                rhsOf = null;
                 return null;
             }
 

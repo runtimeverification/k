@@ -1,5 +1,0 @@
-#symInt(a) ~> (#freezer ((fix f (lambda x . (lambda y . fif (x f== 0) fthen
-                                  y
-                                felse
-                                  ((f (x f- 1)) L2FExp mylabel : (y f+ x)))))
-                                     #symInt(n)) HOLE)(.KList)

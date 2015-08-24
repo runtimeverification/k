@@ -11,11 +11,42 @@
   Java backend is deemed a suitable complete replacement for maude.
 - Removed the `K_NAILGUN` environment variable: K now uses nailgun whenever
   it is able to connect to a K server.
+- Added an option `-w2e` to convert all warnings that are not suppressed by the current warning level into errors.
+- `K_OPTS` environment variable now overrides default JVM settings instead of replacing them.
+- Many other bugfixes too numerous to list exhaustively. Refer to pull requests on GitHub or contact
+  a K developer for more specific details.
+
+## K Language Syntax ##
+
+- Users may now use both "requires" and "require", and both "imports" and "import".
+- Non-anonymous variables may now contain underscore characters.
+- Added an "initial" cell attribute whose effect is to ensure that a multiplicity ? or *
+  cell is part of the initial configuration even if it contains no configuration variables.
+
+## Kompile ##
+
+- The `--directory` option now defaults to a value equal to the directory containing
+  the main definition file, rather than the current working directory.
 
 ## KRun ##
 
 - `krun --output raw` has been removed. If you are interested in disabling
   pretty-printing, it is recommended that you try `krun --output kast`.
+- KRun is now much faster. For a complete list of updates, refer to closed pull requests
+  on GitHub.
+- Added the `--exit-code` flag, which specifies a pattern that is matched once rewriting
+  terminates in order to determine a value to return as the exit code of KRun. For more
+  details on how this works, refer to the manual.
+- Modified the behavior of `--output pretty` so that several of the more computation-intensive tasks were not performed. Users interested in the old behavior may now use the new `--output sound`.
+
+## Standard Library ##
+
+- Added `maxValueFloat` and `minValueFloat` functions returning the highest and lowest-magnitude floats for a particular precision and exponent range.
+- Added an `isInfinite` function which returns whether a particular float represents one
+  of the infinities.
+- Added a `#configuration` function which returns the current subject configuration being rewritten.
+- Fixed random number generation function.
+- Added a 2-argument Float2String method that takes a MPFR printf format string to use to format the floating point number.
 
 ## Developer API ##
 
@@ -27,11 +58,24 @@
   take a class literal instead of an object. The object is constructed from
   the class by dependency injection (i.e. via a 0-args or `@Inject`-annotated
   constructor)
+- The LTL model checker interface (currently in use by a third-party plugin) now accepts
+  LTL formulas in the form of a string and is expected to parse them internally using
+  a plugin-specific format.
+- External parsers are now expected to output abstract syntax using the new KORE syntax
+  found in k-distribution/include/builtin/kast.k
 
 ## Java Backend ##
 
 - Removed `--pattern-matching` flag and made this behavior the default. Added
   `--symbolic-execution` flag, preserving old behavior.
+- Added the `--audit-step` flag. Users may specify a step of execution in the java
+  backend with `--audit-step` and a rule with `--audit-line` and `--audit-file`.
+  The rewriter will then output information indicating whether the rule at that
+  location was executed successfully at that step and if not, why not.
+- `--statistics on` now prints information on the time spent executing
+  the top 10 most expensive-to-compute functions.
+- Many improvements made to the K verifier. K verifier is now capable of verifying
+  C programs using the C semantics.
 
 # K Framework 3.5 (released 2014-12-19) #
 

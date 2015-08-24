@@ -1,4 +1,4 @@
-% Copyright (c) 2012-2014 K Team. All Rights Reserved.
+% Copyright (c) 2012-2015 K Team. All Rights Reserved.
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{k}[2012/02/14 Package for typesetting K Framework definitions http://k-framework.org]
 
@@ -732,7 +732,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
   % Parameters #4 and #5 determine whether the west and east arc are curved
   % or straight ("whole" or "ruptured").
 
-  \begin{tikzpicture}[baseline=(cell content.base)]
+  \begin{tikzpicture}[baseline=(cell label.base)]
     \begin{scope}[inner sep=0pt,outer sep=0pt,anchor=base west]
       % Beside the cell content, also draw an empty node a bit wider than
       % the cell label.  That way, the cell body will always be wide enough
@@ -916,8 +916,7 @@ rectangle,rectangle
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 
 \newcommand{\ksentence}[7][]{%
-\wrapRules{%
-  \rulebox{%
+  \par\indent
   \k@ruleLabel{#3}{#2}\hspace{1em}$%
   \ifthenelse{\equal{#1}{}}{}{%  
    \left(% 
@@ -927,7 +926,6 @@ rectangle,rectangle
    \right)% 
   }%
     $%
-  }%
   \ifthenelse{\equal{#5}{}}{}{%
     \whenReq{#5}%
   }%
@@ -938,7 +936,7 @@ rectangle,rectangle
   \ifthenelse{\equal{#7}{}}{}{%  
    \ruleAttributes{#7}% 
   }%
-}%
+  \par\ \par
 }
 
 \newcommand{\krule}[6][]{%

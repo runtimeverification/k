@@ -1,28 +1,14 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.compile;
 
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.KilProperty;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.BuiltinLookup;
-import org.kframework.kil.ListBuiltin;
-import org.kframework.kil.ListLookup;
-import org.kframework.kil.ListUpdate;
-import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.MapLookup;
-import org.kframework.kil.MapUpdate;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.SetBuiltin;
-import org.kframework.kil.SetLookup;
-import org.kframework.kil.SetUpdate;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,8 +18,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -288,9 +272,9 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
+                        "Unexpected non-list term found. Terms of sort List must consist only of "
+                                + "list elements and at most one variable of sort List. Did you specify .K "
+                                + "when you meant .List?",
                         this,
                         location);
             }
@@ -388,9 +372,9 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
+                        "Unexpected non-map term found. Terms of sort Map must consist only of "
+                                + "map elements and at most one variable of sort Map. Did you specify .K "
+                                + "when you meant .Map?",
                         this, location);
             }
 
@@ -467,9 +451,9 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
                 throw KExceptionManager.criticalError(
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
+                        "Unexpected non-set term found. Terms of sort Set must consist only of "
+                                + "set elements and at most one variable of sort Set. Did you specify .K "
+                                + "when you meant .Set?",
                         this, location);
             }
 

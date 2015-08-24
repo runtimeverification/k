@@ -2,10 +2,11 @@
 
 package org.kframework.kore.convertors;
 
-import java.io.IOException;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.definition.Module;
+
+import java.io.IOException;
 
 public class TestParserOnKORE extends BaseTest {
 
@@ -24,7 +25,7 @@ public class TestParserOnKORE extends BaseTest {
         return "-expected.k";
     }
 
-    @Test public void simpleRuleKORE() throws IOException {
+    @Test @Ignore public void simpleRuleKORE() throws IOException {
         outerOnlyTest();
     }
 }
