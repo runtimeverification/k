@@ -10,5 +10,5 @@ import org.kframework.kompile.CompiledDefinition;
  */
 public interface Command {
 
-    public void runCommand(KDebug session, CompiledDefinition compiledDefinition);
+    public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput);
 }

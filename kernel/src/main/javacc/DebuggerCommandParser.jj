@@ -83,7 +83,7 @@ Command command() throws NumberFormatException:
     |   <SHOW> (pattern = parsePattern()) {return new ShowCommand(pattern);}
     |   LOOKAHEAD(2)
         <WATCH> (pattern = parsePattern())? {return new WatchCommand(Optional.ofNullable(pattern));}
-    |   <SOURCE> (pattern = parsePattern()) {return new SourceCommand(pattern);}
+    |   <SOURCE> (pattern = parsePattern()) {return new SourceCommand(pattern.trim());}
 }
 
 String parsePattern():

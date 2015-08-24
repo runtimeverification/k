@@ -22,11 +22,14 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.kframework.utils.debugparser.DebuggerCommandParser.*;
+import static org.kframework.utils.file.FileUtil.*;
 
 /**
  * Created by Manasvi on 6/10/15.
@@ -87,15 +90,17 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 }
                 if (command instanceof Commands.SourceCommand) {
                     String source = ((Commands.SourceCommand) command).getSourceFile();
-                    processSourceCommand(source);
+                    processSourceCommand(source, debugger, compiledDefinition);
                 }
-                command.runCommand(debugger, compiledDefinition);
+                command.runCommand(debugger, compiledDefinition, false);
             } catch (KEMException e) {
                 System.out.println(e.getMessage());
             } catch (ParseException parseException) {
                 System.out.println(parseException.getMessage());
             } catch (NumberFormatException numberException) {
                 System.out.println("Could not parse \"foo\" as number");
+            } catch (FileNotFoundException fileNotFound) {
+                System.out.println(fileNotFound.getMessage());
             } catch (IOException inputException) {
                 KEMException.criticalError("Failed to read input from console");
             }
@@ -103,7 +108,13 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         return null;
     }
 
-    private void processSourceCommand(String srcFile) {
-        System.out.println("Got File " + srcFile);
+    private void processSourceCommand(String srcFile, KDebug debugger, CompiledDefinition compiledDef)
+            throws FileNotFoundException, ParseException {
+
+        String contents = read(new FileReader(srcFile));
+        for (String line : contents.split(System.getProperty("line.separator"))) {
+            Command command = parseCommand(line);
+            command.runCommand(debugger, compiledDef, false);
+        }
     }
 }

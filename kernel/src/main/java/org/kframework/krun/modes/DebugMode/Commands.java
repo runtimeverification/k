@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.kframework.krun.KRun.*;
 
@@ -34,17 +35,18 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             int activeStateId = session.getActiveStateId();
             DebuggerState prevState = session.getStates().get(activeStateId);
             DebuggerState steppedState = session.step(activeStateId, stepCount);
             int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
             if (effectiveStepCount < stepCount) {
-                System.out.println("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).");
-                System.out.println("Final State Reached");
+                CommandUtils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
+                        s -> System.out.println(s), disableOutput);
+                CommandUtils.print("Final State Reached", s -> System.out.println(s), disableOutput);
                 return;
             }
-            System.out.println(stepCount + " Step(s) Taken.");
+            CommandUtils.print
             CommandUtils.displayWatches(steppedState.getWatchList(), compiledDefinition);
         }
     }
@@ -57,7 +59,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             pattern.ifPresent(pattern -> {
                 session.addWatch(pattern);
             });
@@ -70,7 +72,7 @@ public class Commands {
     public static class PeekCommand implements Command {
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
                 prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), requestedState.getCurrentK());
@@ -89,7 +91,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             int activeConfigurationId = session.getActiveState().getStepNum();
             if ((backStepCount - 1) > activeConfigurationId) {
                 System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
@@ -117,7 +119,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             int requestedState = stateNum.orElse(session.getActiveStateId());
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
@@ -147,14 +149,14 @@ public class Commands {
     public static class QuitCommand implements Command {
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             return;
         }
     }
 
     public static class ResumeCommand implements Command {
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             DebuggerState currentState = session.getStates().get(session.getActiveStateId());
             DebuggerState finalState = session.resume();
             System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
@@ -170,7 +172,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             if (checkpointInterval <= 0) {
                 System.out.println("Checkpoint Value must be >= 1");
                 return;
@@ -190,7 +192,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             DebuggerMatchResult result = session.match(pattern);
             CommandUtils.prettyPrintSubstitution(result, compiledDefinition);
         }
@@ -209,14 +211,19 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             return;
         }
     }
 
     private static class CommandUtils {
+        private boolean disableOutput;
 
-        private static void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
+        private CommandUtils(boolean disableOutput) {
+            this.disableOutput = disableOutput;
+        }
+
+        private void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
             List<? extends Map<? extends KVariable, ? extends K>> substList = result.getSubstitutions();
 
             if (substList.isEmpty()) {
@@ -248,7 +255,13 @@ public class Commands {
 
         }
 
-        private static void displayWatches(List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
+        private void print(String printString, Consumer<String> printer, boolean disableOutput) {
+            if (!disableOutput) {
+                printer.accept(printString);
+            }
+        }
+
+        private void displayWatches(List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
             if (watches.isEmpty()) {
                 return;
             }
