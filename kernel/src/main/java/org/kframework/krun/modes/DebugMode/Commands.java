@@ -82,7 +82,6 @@ public class Commands {
                 prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> utils.print(s, y -> System.out.println(y)), requestedState.getCurrentK());
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
-                //utils.print("Requested State/Configuration Unreachable", x -> System.out.println(x));
             }
         }
     }
@@ -101,15 +100,11 @@ public class Commands {
             CommandUtils utils = new CommandUtils(disableOutput);
             if ((backStepCount - 1) > activeConfigurationId) {
                 throw KEMException.debuggerError("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
-//                utils.print("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")",
-//                        x -> System.out.println(x));
-//                return;
+
             }
             DebuggerState backSteppedState = session.backStep(session.getActiveStateId(), backStepCount);
             if (backSteppedState == null) {
                 throw KEMException.debuggerError("\"Already at Start State, Cannot take steps.\",");
-//                utils.print("Already at Start State, Cannot take steps.", y -> System.out.println(y));
-//                return;
             }
             utils.print("Took -" + backStepCount + " step(s)", s -> System.out.println(s));
             utils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
@@ -134,7 +129,6 @@ public class Commands {
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
                 throw KEMException.debuggerError("State Number specified does not exist\"");
-//                utils.print("State Number specified does not exist", s -> System.out.println(s));
             } else if (!configurationNum.isPresent()) {
                 utils.print("Selected State " + requestedState, s -> System.out.println(s));
             } else {
@@ -142,8 +136,6 @@ public class Commands {
                 DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
                 if (finalState == null) {
                     throw KEMException.debuggerError("Requested Step Number couldn't be selected.");
-//                    utils.print("Requested Step Number couldn't be selected.", s -> System.out.println(s));
-//                    return;
                 } else if (!stateNum.isPresent()) {
                     utils.print("Jumped to Step Number " + requestedConfig, s -> System.out.println(s));
                 } else {
@@ -189,8 +181,6 @@ public class Commands {
             CommandUtils utils = new CommandUtils(disableOutput);
             if (checkpointInterval <= 0) {
                 KEMException.debuggerError("Checkpoint Value must be >= 1");
-//                utils.print("Checkpoint Value must be >= 1", s -> System.out.println(s));
-//                return;
             }
             session.setCheckpointInterval(checkpointInterval);
             utils.print("Checkpointing Interval set to " + checkpointInterval, s -> System.out.println(s));

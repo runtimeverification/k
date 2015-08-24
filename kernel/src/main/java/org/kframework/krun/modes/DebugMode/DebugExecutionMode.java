@@ -80,6 +80,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
         while (true) {
             try {
                 String input = reader.readLine("KDebug> ");
+                if (input.isEmpty()) {
+                    continue;
+                }
                 Command command = parseCommand(input);
                 if (command instanceof Commands.QuitCommand) {
                     break;
@@ -87,6 +90,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 if (command instanceof Commands.SourceCommand) {
                     String source = ((Commands.SourceCommand) command).getSourceFile();
                     processSourceCommand(source, debugger, compiledDefinition);
+                    System.out.println("File " + source + " Sourced");
                 }
                 command.runCommand(debugger, compiledDefinition, false);
             } catch (KEMException e) {
