@@ -36,18 +36,19 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            CommandUtils utils = new CommandUtils(disableOutput);
             int activeStateId = session.getActiveStateId();
             DebuggerState prevState = session.getStates().get(activeStateId);
             DebuggerState steppedState = session.step(activeStateId, stepCount);
             int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
             if (effectiveStepCount < stepCount) {
-                CommandUtils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
-                        s -> System.out.println(s), disableOutput);
-                CommandUtils.print("Final State Reached", s -> System.out.println(s), disableOutput);
+                utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
+                        s -> System.out.println(s));
+                utils.print("Final State Reached", s -> System.out.println(s));
                 return;
             }
-            CommandUtils.print
-            CommandUtils.displayWatches(steppedState.getWatchList(), compiledDefinition);
+            utils.print(stepCount + " Step(s) Taken.", s -> System.out.println(s));
+            utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -60,10 +61,11 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            CommandUtils utils = new CommandUtils(disableOutput);
             pattern.ifPresent(pattern -> {
                 session.addWatch(pattern);
             });
-            CommandUtils.displayWatches(
+            utils.displayWatches(
                     session.getActiveState().getWatchList(),
                     compiledDefinition
             );
@@ -73,11 +75,12 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            CommandUtils utils = new CommandUtils(disableOutput);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), requestedState.getCurrentK());
+                prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> utils.print(s, y -> System.out.println(y)), requestedState.getCurrentK());
             } else {
-                System.out.println("Requested State/Configuration Unreachable");
+                utils.print("Requested State/Configuration Unreachable", x -> System.out.println(x));
             }
         }
     }
@@ -93,17 +96,19 @@ public class Commands {
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             int activeConfigurationId = session.getActiveState().getStepNum();
+            CommandUtils utils = new CommandUtils(disableOutput);
             if ((backStepCount - 1) > activeConfigurationId) {
-                System.out.println("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
+                utils.print("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")",
+                        x -> System.out.println(x));
                 return;
             }
             DebuggerState backSteppedState = session.backStep(session.getActiveStateId(), backStepCount);
             if (backSteppedState == null) {
-                System.out.println("Already at Start State, Cannot take steps.");
+                utils.print("Already at Start State, Cannot take steps.", y -> System.out.println(y));
                 return;
             }
-            System.out.println("Took -" + backStepCount + " step(s)");
-            CommandUtils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
+            utils.print("Took -" + backStepCount + " step(s)", s -> System.out.println(s));
+            utils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -121,27 +126,29 @@ public class Commands {
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             int requestedState = stateNum.orElse(session.getActiveStateId());
+            CommandUtils utils = new CommandUtils(disableOutput);
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
-                System.out.println("State Number specified does not exist");
+                utils.print("State Number specified does not exist", s -> System.out.println(s));
                 return;
             } else if (!configurationNum.isPresent()) {
-                System.out.println("Selected State " + requestedState);
+                utils.print("Selected State " + requestedState, s -> System.out.println(s));
             } else {
                 int requestedConfig = configurationNum.get();
                 DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
                 if (finalState == null) {
-                    System.out.println("Requested Step Number couldn't be selected.");
+                    utils.print("Requested Step Number couldn't be selected.", s -> System.out.println(s));
                     return;
                 } else if (!stateNum.isPresent()) {
-                    System.out.println("Jumped to Step Number " + requestedConfig);
+                    utils.print("Jumped to Step Number " + requestedConfig, s -> System.out.println(s));
                 } else {
-                    System.out.println("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig);
+                    utils.print("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig,
+                             x -> System.out.println(x));
                 }
-                CommandUtils.displayWatches(finalState.getWatchList(), compiledDefinition);
+                utils.displayWatches(finalState.getWatchList(), compiledDefinition);
                 return;
             }
-            CommandUtils.displayWatches(nextState.getWatchList(), compiledDefinition);
+            utils.displayWatches(nextState.getWatchList(), compiledDefinition);
         }
 
     }
@@ -159,8 +166,9 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             DebuggerState currentState = session.getStates().get(session.getActiveStateId());
             DebuggerState finalState = session.resume();
-            System.out.println(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken");
-            CommandUtils.displayWatches(finalState.getWatchList(), compiledDefinition);
+            CommandUtils utils = new CommandUtils(disableOutput);
+            utils.print(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken", s -> System.out.println(s));
+            utils.displayWatches(finalState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -173,12 +181,13 @@ public class Commands {
 
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            CommandUtils utils = new CommandUtils(disableOutput);
             if (checkpointInterval <= 0) {
-                System.out.println("Checkpoint Value must be >= 1");
+                utils.print("Checkpoint Value must be >= 1", s -> System.out.println(s));
                 return;
             }
             session.setCheckpointInterval(checkpointInterval);
-            System.out.println("Checkpointing Interval set to " + checkpointInterval);
+            utils.print("Checkpointing Interval set to " + checkpointInterval, s -> System.out.println(s));
             return;
         }
     }
@@ -194,7 +203,8 @@ public class Commands {
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             DebuggerMatchResult result = session.match(pattern);
-            CommandUtils.prettyPrintSubstitution(result, compiledDefinition);
+            CommandUtils utils = new CommandUtils(disableOutput);
+            utils.prettyPrintSubstitution(result, compiledDefinition);
         }
 
     }
@@ -247,15 +257,15 @@ public class Commands {
                                     .stream()
                                     .filter(x -> varList.contains(x.getKey().name()))
                                     .forEach(x -> {
-                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.print(s), x.getKey());
-                                        System.out.print(" ---> ");
-                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s), x.getValue());
+                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> print(s, cons -> System.out.print(cons)), x.getKey());
+                                        print(" ----> ", cons -> System.out.print(cons));
+                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> print(s, cons -> System.out.println(cons)), x.getValue());
                                     }));
 
 
         }
 
-        private void print(String printString, Consumer<String> printer, boolean disableOutput) {
+        private void print(String printString, Consumer<String> printer) {
             if (!disableOutput) {
                 printer.accept(printString);
             }
@@ -265,9 +275,9 @@ public class Commands {
             if (watches.isEmpty()) {
                 return;
             }
-            System.out.println("Watches:");
+            print("Watches:", x -> System.out.println(x));
             watches.stream().forEach(x -> {
-                System.out.println("Pattern : " + x.getPattern());
+                print("Pattern : " + x.getPattern(), y -> System.out.println(y));
                 prettyPrintSubstitution(x, compiledDefinition);
             });
         }

@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun.modes.DebugMode;
 
-import com.beust.jcommander.JCommander;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import jline.ArgumentCompletor;
@@ -43,9 +42,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     private final FileUtil files;
     private int checkpointInterval;
 
-    private static Object command(JCommander jc) {
-        return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
-    }
 
     @Inject
     public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files, @Named("checkpointIntervalValue") Integer checkpointInterval) {
@@ -112,9 +108,23 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             throws FileNotFoundException, ParseException {
 
         String contents = read(new FileReader(srcFile));
+        Command command;
+        int lineCount = 0;
         for (String line : contents.split(System.getProperty("line.separator"))) {
-            Command command = parseCommand(line);
-            command.runCommand(debugger, compiledDef, false);
+            lineCount++;
+            try {
+                if (line.isEmpty()) {
+                    continue;
+                }
+                command = parseCommand(line);
+                command.runCommand(debugger, compiledDef, true);
+            } catch (ParseException e) {
+                System.out.println("File " + srcFile + " Line " + lineCount);
+                System.out.println(e.getMessage());
+            } catch (KEMException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
+
 }
