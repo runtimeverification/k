@@ -46,8 +46,10 @@ TOKEN: /*RESERVED TOKENS */
     |  <CHECKPOINT: "checkpoint" | "ch">
     |  <RESUME: "resume" | "run" | "r">
     |  <PEEK: "p" | "peek">
+    |  <REMWATCH: "remwatch" | "xwatch">
     |  <SHOW: "show"> : STRING_STATE
     |  <SOURCE:"source"> : STRING_STATE
+    |  <COPY: "copy" | "cp">
     |  <WATCH: "watch" | "w"> : STRING_STATE
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
@@ -84,6 +86,8 @@ Command command() throws NumberFormatException:
     |   LOOKAHEAD(2)
         <WATCH> (pattern = parsePattern())? {return new WatchCommand(Optional.ofNullable(pattern));}
     |   <SOURCE> (pattern = parsePattern()) {return new SourceCommand(pattern.trim());}
+    |   <REMWATCH> (stateNum = parseNum()) {return new RemoveWatchCommand(stateNum - 1);}
+    |   <COPY> (stateNum = parseNum()) {return new CopyCommand(stateNum - 1);}
 }
 
 String parsePattern():

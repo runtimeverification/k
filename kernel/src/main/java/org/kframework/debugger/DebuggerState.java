@@ -41,8 +41,8 @@ public class DebuggerState {
     }
 
     public DebuggerState(DebuggerState copyState) {
-        this.checkpointMap = copyState.getCheckpointMap();
-        this.watchList = copyState.getWatchList();
+        this.checkpointMap = new TreeMap<>(copyState.getCheckpointMap());
+        this.watchList = new ArrayList<>(copyState.getWatchList());
         this.currentK = copyState.getCurrentK();
         this.stepNum = copyState.getStepNum();
     }

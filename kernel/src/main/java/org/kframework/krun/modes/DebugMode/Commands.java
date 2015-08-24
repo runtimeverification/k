@@ -72,6 +72,7 @@ public class Commands {
             );
         }
     }
+
     public static class PeekCommand implements Command {
 
         @Override
@@ -140,7 +141,7 @@ public class Commands {
                     utils.print("Jumped to Step Number " + requestedConfig, s -> System.out.println(s));
                 } else {
                     utils.print("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig,
-                             x -> System.out.println(x));
+                            x -> System.out.println(x));
                 }
                 utils.displayWatches(finalState.getWatchList(), compiledDefinition);
                 return;
@@ -219,6 +220,40 @@ public class Commands {
         @Override
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
             return;
+        }
+    }
+
+    public static class RemoveWatchCommand implements Command {
+        private int watchNum;
+
+        public RemoveWatchCommand(int watchNum) {
+            this.watchNum = watchNum;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            if (session.removeWatch(watchNum) < 0) {
+                throw KEMException.debuggerError("Watch Doesn't Exists");
+            }
+            CommandUtils utils = new CommandUtils(disableOutput);
+            utils.print("Watch " + (watchNum + 1) + "removed", x -> System.out.println(x));
+        }
+    }
+
+    public static class CopyCommand implements Command {
+        private int stateNum;
+
+        public CopyCommand(int stateNum) {
+            this.stateNum = stateNum;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+            if (session.createCopy(stateNum) == null) {
+                throw KEMException.debuggerError("StateNumber Speicified doesn't exist");
+            }
+            CommandUtils utils = new CommandUtils(disableOutput);
+            utils.print("Selected State " + stateNum, s -> System.out.println(s));
         }
     }
 

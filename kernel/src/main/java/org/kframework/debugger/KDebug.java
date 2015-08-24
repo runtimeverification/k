@@ -117,10 +117,18 @@ public interface KDebug {
 
     /**
      * Given a pattern, as it as a watch so that it can be retrieved later.
-     *
+     * <p>
      * The Debugger maintains watches as part of the DebuggerState. Every State has a watch
      * associated with it. On copying the state, watches are also copied.
      */
     public void addWatch(String pattern);
+
+    /**
+     * Given a watch number that identifies a watch, removes the watch from the list of watches.
+     *
+     * @param watchNum Then number of watch to be removed.
+     * @return The watch number of the watch removed, or -1 if watch not found in the list.
+     */
+    public int removeWatch(int watchNum);
 }
 

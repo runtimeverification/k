@@ -254,4 +254,24 @@ public class KoreKDebug implements KDebug {
                 watchList);
         stateList.add(activeStateIndex, nextState);
     }
+
+    @Override
+    public int removeWatch(int watchNum) {
+        DebuggerState currActiveState = stateList.remove(activeStateIndex);
+        List<DebuggerMatchResult> watchList = currActiveState.getWatchList();
+        if (watchNum <= 0 || watchNum >= watchList.size()) {
+            return -1;
+        }
+        List<DebuggerMatchResult> updatedList = new ArrayList<>(watchList);
+        updatedList.remove(watchNum);
+        stateList.add(activeStateIndex,
+                new DebuggerState(
+                        currActiveState.getCurrentK(),
+                        currActiveState.getStepNum(),
+                        new TreeMap<Integer, K>(currActiveState.getCheckpointMap()),
+                        updatedList)
+
+        );
+        return watchNum;
+    }
 }
