@@ -67,7 +67,7 @@ public class JavaSymbolicProver implements Prover {
 
         CounterGetter counterGetter = new CounterGetter(context);
         counterGetter.visitNode(module);
-        BigInteger counter = counterGetter.counter;
+        BigInteger counter = counterGetter.counter.add(BigInteger.ONE);
 
         SymbolicRewriter symbolicRewriter = executor.getSymbolicRewriter();
         List<ConstrainedTerm> proofResults = new ArrayList<>();
