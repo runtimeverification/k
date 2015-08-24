@@ -60,10 +60,11 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             throw KEMException.internalError("IO error detected interacting with console", e);
         }
         reader.setBellEnabled(false);
-
+        String [] commandList = {"Step", "s", "S", "b", "B", "backStep", "j", "J", "jump-to", "quit", "abort", "exit",
+        "checkpoint", "ch", "resume", "run", "r", "p", "peek", "remwatch", "xwatch", "show", "get-states", "gs", "select",
+        "source", "src", "copy", "cp", "watch", "w"};
         List<Completor> argCompletor = new LinkedList<Completor>();
-        argCompletor.add(new SimpleCompletor(new String[]{"help",
-                "exit", "step", "jump-to", "back-step", "resume", "run"}));
+        argCompletor.add(new SimpleCompletor(commandList));
         argCompletor.add(new FileNameCompletor());
         List<Completor> completors = new LinkedList<Completor>();
         completors.add(new ArgumentCompletor(argCompletor));

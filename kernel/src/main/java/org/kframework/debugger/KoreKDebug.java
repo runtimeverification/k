@@ -222,8 +222,11 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public DebuggerState createCopy(int stateNum) {
+        if (stateList.size() <= stateNum || stateNum < 0) {
+            return null;
+        }
         DebuggerState newState = new DebuggerState(stateList.get(stateNum));
-        stateList.add(newState);
+        stateList.add(stateList.size() - 1, newState);
         return newState;
     }
 
@@ -257,18 +260,19 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public int removeWatch(int watchNum) {
-        DebuggerState currActiveState = stateList.remove(activeStateIndex);
+        DebuggerState currActiveState = stateList.get(activeStateIndex);
         List<DebuggerMatchResult> watchList = currActiveState.getWatchList();
-        if (watchNum <= 0 || watchNum >= watchList.size()) {
+        if (watchNum < 0 || watchNum >= watchList.size()) {
             return -1;
         }
+        stateList.remove(currActiveState);
         List<DebuggerMatchResult> updatedList = new ArrayList<>(watchList);
         updatedList.remove(watchNum);
         stateList.add(activeStateIndex,
                 new DebuggerState(
                         currActiveState.getCurrentK(),
                         currActiveState.getStepNum(),
-                        new TreeMap<Integer, K>(currActiveState.getCheckpointMap()),
+                        new TreeMap<>(currActiveState.getCheckpointMap()),
                         updatedList)
 
         );
