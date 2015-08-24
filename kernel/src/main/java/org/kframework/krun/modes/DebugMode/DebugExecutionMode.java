@@ -85,6 +85,10 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 if (command instanceof Commands.QuitCommand) {
                     break;
                 }
+                if (command instanceof Commands.SourceCommand) {
+                    String source = ((Commands.SourceCommand) command).getSourceFile();
+                    processSourceCommand(source);
+                }
                 command.runCommand(debugger, compiledDefinition);
             } catch (KEMException e) {
                 System.out.println(e.getMessage());
@@ -97,5 +101,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
             }
         }
         return null;
+    }
+
+    private void processSourceCommand(String srcFile) {
+        System.out.println("Got File " + srcFile);
     }
 }

@@ -46,8 +46,9 @@ TOKEN: /*RESERVED TOKENS */
     |  <CHECKPOINT: "checkpoint" | "ch">
     |  <RESUME: "resume" | "run" | "r">
     |  <PEEK: "p" | "peek">
-    |  <SHOW: "show"> : PATTERN_STATE
-    |  <WATCH: "watch" | "w"> : PATTERN_STATE
+    |  <SHOW: "show"> : STRING_STATE
+    |  <SOURCE:"source"> : STRING_STATE
+    |  <WATCH: "watch" | "w"> : STRING_STATE
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
     |  <NEWLINE : "\n" | "\r\n">
@@ -55,7 +56,7 @@ TOKEN: /*RESERVED TOKENS */
 
 }
 
-<PATTERN_STATE> TOKEN:
+<STRING_STATE> TOKEN:
 {
        <PATTERN : (~[])+> : DEFAULT
 }
@@ -82,6 +83,7 @@ Command command() throws NumberFormatException:
     |   <SHOW> (pattern = parsePattern()) {return new ShowCommand(pattern);}
     |   LOOKAHEAD(2)
         <WATCH> (pattern = parsePattern())? {return new WatchCommand(Optional.ofNullable(pattern));}
+    |   <SOURCE> (pattern = parsePattern()) {return new SourceCommand(pattern);}
 }
 
 String parsePattern():

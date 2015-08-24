@@ -197,6 +197,23 @@ public class Commands {
 
     }
 
+    public static class SourceCommand implements Command {
+        private String sourceFile;
+
+        public SourceCommand(String sourceFile) {
+            this.sourceFile = sourceFile;
+        }
+
+        public String getSourceFile() {
+            return sourceFile;
+        }
+
+        @Override
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition) {
+            return;
+        }
+    }
+
     private static class CommandUtils {
 
         private static void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
