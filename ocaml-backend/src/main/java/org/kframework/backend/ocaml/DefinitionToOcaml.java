@@ -290,16 +290,15 @@ public class DefinitionToOcaml implements Serializable {
     public String constants() {
         StringBuilder sb = new StringBuilder();
         sb.append("type sort = \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        Set<Sort> sorts = mutable(mainModule.definedSorts());
+        sorts.add(Sorts.Bool());
+        sorts.add(Sorts.Int());
+        sorts.add(Sorts.String());
+        sorts.add(Sorts.Float());
+        for (Sort s : sorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, s);
             sb.append("\n");
-        }
-        if (!mainModule.definedSorts().contains(Sorts.String())) {
-            sb.append("|SortString\n");
-        }
-        if (!mainModule.definedSorts().contains(Sorts.Float())) {
-            sb.append("|SortFloat\n");
         }
         sb.append("type klabel = \n");
         for (KLabel label : iterable(mainModule.definedKLabels())) {
@@ -308,7 +307,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n");
         }
         sb.append("let print_sort(c: sort) : string = match c with \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        for (Sort s : sorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, s);
             sb.append(" -> ");
@@ -324,7 +323,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n");
         }
         sb.append("let parse_sort(c: string) : sort = match c with \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        for (Sort s : sorts) {
             sb.append("|");
             sb.append(enquoteString(s.name()));
             sb.append(" -> ");

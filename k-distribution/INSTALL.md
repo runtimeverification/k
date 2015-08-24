@@ -24,6 +24,14 @@ Here are instructions for installing K from the release zip/tgz archive.
     listings, marginnote, microtype, ms, pdfcomment, pgf (up-to-date), preview, 
     soul, stmaryrd, times, titlesec, ucs, url, xcolor, and xkeyval.
 
+5. (Optional) OCAML:
+  * To use the OCAML backend requires an installation of the OCAML package
+    manager OPAM. Instructions on installing OPAM are available here:
+    (https://opam.ocaml.org/doc/Install.html)
+  * Once opam is installed, you can prepare the installation to run
+    the OCAML backend by running the "k-configure-opam" script found
+    in the lib directory.
+
 --------------------------------------------------------------------------
 
 We present some instructions for installing TeX Live on Unix-like machines.
