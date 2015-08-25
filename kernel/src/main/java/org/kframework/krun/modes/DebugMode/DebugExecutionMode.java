@@ -16,6 +16,7 @@ import org.kframework.debugger.KoreKDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
+import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.utils.debugparser.ParseException;
 import org.kframework.utils.errorsystem.KEMException;
@@ -42,15 +43,17 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     private final KRunOptions kRunOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final FileSystem fileSystem;
     private int checkpointInterval;
 
 
     @Inject
-    public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files, @Named("checkpointIntervalValue") Integer checkpointInterval) {
+    public DebugExecutionMode(KRunOptions kRunOptions, KExceptionManager kem, FileUtil files, @Named("checkpointIntervalValue") Integer checkpointInterval, FileSystem fileSystem) {
         this.kRunOptions = kRunOptions;
         this.kem = kem;
         this.files = files;
         this.checkpointInterval = checkpointInterval;
+        this.fileSystem = fileSystem;
     }
 
 
@@ -120,7 +123,7 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
     private void processSourceCommand(String srcFile, KDebug debugger, CompiledDefinition compiledDef)
             throws FileNotFoundException, ParseException {
-
+        srcFile = srcFile.replaceFirst("^~", System.getProperty("user.home"));
         String contents = read(new FileReader(srcFile));
         Command command;
         int lineCount = 0;
