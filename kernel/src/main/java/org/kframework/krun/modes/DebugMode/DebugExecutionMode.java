@@ -86,9 +86,9 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
     public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval, files, kem, kRunOptions, compiledDefinition);
 
+        ConsoleReader reader = getConsoleReader();
         while (true) {
             try {
-                ConsoleReader reader = getConsoleReader();
                 String input = reader.readLine("KDebug> ");
                 if (input.isEmpty()) {
                     continue;
@@ -113,9 +113,6 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println(fileNotFound.getMessage());
             } catch (IOException inputException) {
                 KEMException.criticalError("Failed to read input from console");
-            } catch (IncompatibleClassChangeError error) {
-                System.out.println(error.getMessage());
-                return null;
             }
         }
         return null;

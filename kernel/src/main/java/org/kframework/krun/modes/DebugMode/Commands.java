@@ -147,7 +147,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(disableOutput);
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
-                throw KEMException.debuggerError("State Number specified does not exist\"");
+                throw KEMException.debuggerError("State Number specified does not exist");
             } else if (!configurationNum.isPresent()) {
                 utils.print("Selected State " + requestedState, s -> System.out.println(s));
             } else {
