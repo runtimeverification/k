@@ -94,7 +94,7 @@ object Reflection {
   def findMethod(obj: Any, methodName: String, givenArgsLists: Seq[Seq[Class[Any]]]): (MethodSymbol, Seq[Seq[Either[Class[_], MethodMirror]]]) = {
     val instanceMirror = m.reflect(obj)
 
-    val methodTermName = newTermName(methodName)
+    val methodTermName = TermName(methodName)
     val typeSignature = instanceMirror.symbol.typeSignature
     val termSymbol = typeSignature member methodTermName
 
@@ -102,7 +102,7 @@ object Reflection {
       throw new NoSuchMethodException("Could not find method: " + methodName)
 
     def valueFor(name: String, p: Symbol, i: Int): Option[MethodMirror] = {
-      val defarg = typeSignature member newTermName(s"$name$$default$$${i + 1}")
+      val defarg = typeSignature member TermName(s"$name$$default$$${i + 1}")
       if (defarg != NoSymbol) {
         Some(instanceMirror reflectMethod defarg.asMethod)
       } else

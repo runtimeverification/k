@@ -58,6 +58,10 @@
         <configuration>
           <args>
             <arg>-Xexperimental</arg>
+            <arg>-feature</arg>
+            <arg>-deprecation</arg>
+            <arg>-language:implicitConversions</arg>
+            <arg>-language:postfixOps</arg>
           </args>
         </configuration>
       </plugin>

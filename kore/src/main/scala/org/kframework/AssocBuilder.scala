@@ -2,9 +2,8 @@
 
 package org.kframework
 
-import scala.reflect.ClassTag
 import scala.collection.mutable.Builder
-import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
 
 trait Associative[With]
 
@@ -12,6 +11,8 @@ class AssocBuilder[A, R, AssocIn <: { def iterator: Iterator[A] }: ClassTag](val
   def +=(elem: A): this.type = {
     val elementClass = elem.getClass()
     val collectionClass = implicitly[ClassTag[AssocIn]].runtimeClass
+
+    import scala.language.reflectiveCalls
 
     if (collectionClass.isAssignableFrom(elementClass)) {
       elem.asInstanceOf[AssocIn].iterator.foreach { e => this += e }

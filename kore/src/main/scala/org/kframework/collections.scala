@@ -66,6 +66,8 @@ Combiner[T, R] {
 
   def result(): R = b.result()
 
+  import scala.language.reflectiveCalls
+
   def iterator() = b.result().iterator
 }
 
