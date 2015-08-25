@@ -487,6 +487,10 @@ module K-REFLECTION
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
 
+  // meaningful only for the purposes of compilation to a binary, otherwise
+  // undefined
+  syntax List ::= "#argv" [function, hook(KREFLECTION.argv)]
+
 endmodule
 
 module K-IO

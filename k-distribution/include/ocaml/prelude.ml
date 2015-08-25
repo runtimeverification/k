@@ -126,6 +126,11 @@ let ktoken (s: sort) (str: string) : kitem = match s with
 | SortBool -> Bool (bool_of_string str)
 | _ -> KToken(s,str)
 
+let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> match (v, res) with
+    [Int i], None -> Some (Z.to_int i)
+  | [Int i], Some _ -> failwith "Bad exit code pattern"
+  | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
+
 module MAP =
 struct
 
@@ -269,6 +274,8 @@ struct
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
+  let hook_argv c lbl sort config ff = match c with
+      () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) Sys.argv []))]
 end
 
 module KEQUAL =

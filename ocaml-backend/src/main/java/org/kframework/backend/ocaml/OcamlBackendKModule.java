@@ -8,7 +8,9 @@ import com.google.inject.multibindings.MapBinder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.AbstractKModule;
+import org.kframework.transformation.ToolActivation;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,11 @@ public class OcamlBackendKModule extends AbstractKModule {
     @Override
     public List<Pair<Class<?>, Boolean>> kompileOptions() {
         return Collections.singletonList(Pair.of(OcamlOptions.class, true));
+    }
+
+    @Override
+    public List<Pair<Class<?>, Boolean>> krunOptions() {
+        return Collections.singletonList(Pair.of(OcamlKRunOptions.class, true));
     }
 
     @Override
@@ -51,6 +58,11 @@ public class OcamlBackendKModule extends AbstractKModule {
                         binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                         });
                 rewriterBinder.addBinding("ocaml").to(OcamlRewriter.class);
+
+                MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
+                        ToolActivation.class, ExecutionMode.class);
+
+                executionBinder.addBinding(new ToolActivation.OptionActivation("--ocaml-compile")).to(OcamlCompileExecutionMode.class);
             }
         });
     }
