@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -63,6 +65,10 @@ public class JavaSymbolicProver implements Prover {
             rules.add(freshRule);
         }
 
+        CounterGetter counterGetter = new CounterGetter(context);
+        counterGetter.visitNode(module);
+        BigInteger counter = counterGetter.counter.add(BigInteger.ONE);
+
         SymbolicRewriter symbolicRewriter = executor.getSymbolicRewriter();
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
@@ -70,6 +76,7 @@ public class JavaSymbolicProver implements Prover {
                 continue;
             }
 
+            termContext.setCounter(counter);
             Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
@@ -106,4 +113,21 @@ public class JavaSymbolicProver implements Prover {
         }
         return module;
     }
+
+    private static class CounterGetter extends org.kframework.kil.visitors.BasicVisitor {
+
+        public BigInteger counter = BigInteger.ZERO;
+
+        public CounterGetter(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Void visit(IntBuiltin intBuiltin, Void _void) {
+            counter = counter.max(intBuiltin.bigIntegerValue());
+            return null;
+        }
+
+    }
+
 }
