@@ -1,19 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import jline.ArgumentCompletor;
-import jline.Completor;
-import jline.ConsoleReader;
-import jline.FileNameCompletor;
-import jline.MultiCompletor;
-import jline.SimpleCompletor;
-
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+import com.google.inject.Inject;
+import jline.console.ConsoleReader;
+import jline.console.completer.AggregateCompleter;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.FileNameCompleter;
+import jline.console.completer.StringsCompleter;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.kframework.backend.unparser.PrintTransition;
@@ -38,16 +34,19 @@ import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-import com.google.inject.Inject;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 public interface Debugger {
 
     /**
-    Get the current graph of the explored state space in the transition system.
-    @return A graph whose nodes and edges describe the explored state of the program.
-    */
+     * Get the current graph of the explored state space in the transition system.
+     *
+     * @return A graph whose nodes and edges describe the explored state of the program.
+     */
     public abstract KRunGraph getGraph();
 
     /**
@@ -56,64 +55,71 @@ public interface Debugger {
     public abstract void setGraph(KRunGraph graph);
 
     /**
-    Get the state number of the currently selected state.
-    @return An unique integer identifying the currently selected state; null if no state is selected
-    */
+     * Get the state number of the currently selected state.
+     *
+     * @return An unique integer identifying the currently selected state; null if no state is selected
+     */
     public abstract Integer getCurrentState();
 
     /**
-    Set the selected state of the debugger.
-    @param stateNum An integer uniquely identifying the state to select; null to deselect current
-    state.
-    @exception IllegalArgumentException Thrown if the specified state is not a valid state in the
-    graph (or null)
-    */
+     * Set the selected state of the debugger.
+     *
+     * @param stateNum An integer uniquely identifying the state to select; null to deselect current
+     *                 state.
+     * @throws IllegalArgumentException Thrown if the specified state is not a valid state in the
+     *                                  graph (or null)
+     */
     public abstract void setCurrentState(Integer stateNum);
 
     /**
-    Get a state by its state number.
-    @param stateNum An integer uniquely identifying the state to select
-    @return The node in the explored state graph with the specified state number.
-    @exception IllegalArgumentException Thrown if the state number is not in the graph
-    */
+     * Get a state by its state number.
+     *
+     * @param stateNum An integer uniquely identifying the state to select
+     * @return The node in the explored state graph with the specified state number.
+     * @throws IllegalArgumentException Thrown if the state number is not in the graph
+     */
     public abstract KRunState getState(int stateNum);
 
     /**
-    Get the edge connecting two states.
-    @param state1 The integral state number of the origin state of the edge.
-    @param state2 The integral state number of the destination state of the edge.
-    @exception IllegalArgumentException Thrown if no edge connects state1 and state2
-    @return Information concerning the transition in the transition system which connected state1 to
-    state2
-    */
+     * Get the edge connecting two states.
+     *
+     * @param state1 The integral state number of the origin state of the edge.
+     * @param state2 The integral state number of the destination state of the edge.
+     * @return Information concerning the transition in the transition system which connected state1 to
+     * state2
+     * @throws IllegalArgumentException Thrown if no edge connects state1 and state2
+     */
     public abstract Transition getEdge(int state1, int state2);
 
     /**
-    Step a particular number of transitions. This function returns when the specified number of
-    steps have been taken, or when rewriting has terminated.
-    @param steps The maximum number of transitions to follow through (0 to stop before first
-    transition)
-    */
+     * Step a particular number of transitions. This function returns when the specified number of
+     * steps have been taken, or when rewriting has terminated.
+     *
+     * @param steps The maximum number of transitions to follow through (0 to stop before first
+     *              transition)
+     */
     public abstract void step(int steps) throws KRunExecutionException;
 
     /**
-    Explore the complete search graph from the currently selected state forward a specified number
-    of steps.
-    @param steps The maximum depth of the search to perform.
-    @return A set of all new states discovered by the stepper after searching the specified number
-    of steps.
-    */
+     * Explore the complete search graph from the currently selected state forward a specified number
+     * of steps.
+     *
+     * @param steps The maximum depth of the search to perform.
+     * @return A set of all new states discovered by the stepper after searching the specified number
+     * of steps.
+     */
     public abstract SearchResults stepAll(int steps) throws KRunExecutionException;
 
     /**
-    Explore the search graph one step at a time until rewriting terminates.
-    */
+     * Explore the search graph one step at a time until rewriting terminates.
+     */
     public abstract void resume() throws KRunExecutionException;
 
     /**
-    Read a string and append it to the buffer for stdin.
-    @param s The string to append to stdin.
-    */
+     * Read a string and append it to the buffer for stdin.
+     *
+     * @param s The string to append to stdin.
+     */
     public abstract void readFromStdin(String s);
 
     /**
@@ -126,10 +132,14 @@ public interface Debugger {
         private final Term initialConfiguration;
         private final KompileOptions kompileOptions;
         private final BinaryLoader loader;
-        @InjectGeneric private Transformation<KRunState, String> statePrinter;
-        @InjectGeneric private Transformation<SearchResults, String> searchPrinter;
-        @InjectGeneric private Transformation<KRunGraph, String> graphPrinter;
-        @InjectGeneric private Transformation<Transition, String> transitionPrinter;
+        @InjectGeneric
+        private Transformation<KRunState, String> statePrinter;
+        @InjectGeneric
+        private Transformation<SearchResults, String> searchPrinter;
+        @InjectGeneric
+        private Transformation<KRunGraph, String> graphPrinter;
+        @InjectGeneric
+        private Transformation<Transition, String> transitionPrinter;
         private final Debugger debugger;
         private final Context context;
         private final FileUtil files;
@@ -190,14 +200,14 @@ public interface Debugger {
             // commandline by using the JLine library
             reader.setBellEnabled(false);
 
-            List<Completor> argCompletor = new LinkedList<Completor>();
-            argCompletor.add(new SimpleCompletor(new String[] { "help",
+            List<Completer> argCompletor = new LinkedList<Completer>();
+            argCompletor.add(new StringsCompleter(new String[]{"help",
                     "exit", "resume", "step", "search", "select",
-                    "show-graph", "show-state", "show-transition", "save", "load", "read" }));
-            argCompletor.add(new FileNameCompletor());
-            List<Completor> completors = new LinkedList<Completor>();
-            completors.add(new ArgumentCompletor(argCompletor));
-            reader.addCompletor(new MultiCompletor(completors));
+                    "show-graph", "show-state", "show-transition", "save", "load", "read"}));
+            argCompletor.add(new FileNameCompleter());
+            List<Completer> completors = new LinkedList<Completer>();
+            completors.add(new ArgumentCompleter(argCompletor));
+            reader.addCompleter(new AggregateCompleter(completors));
 
             try {
                 debugger.start(initialConfiguration);
