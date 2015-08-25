@@ -38,26 +38,29 @@ let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else 
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
-let rec print_klist(c: k list) : string = match c with
-| [] -> ".KList"
-| e::[] -> print_k(e)
-| e1::e2::l -> print_k(e1) ^ ", " ^ print_klist(e2::l)
-and print_k(c: k) : string = match c with
-| [] -> ".K"
-| e::[] -> print_kitem(normalize e)
-| e1::e2::l -> print_kitem(normalize e1) ^ " ~> " ^ print_k(e2::l)
-and print_kitem(c: normal_kitem) : string = match c with
-| KApply(klabel, klist) -> print_klabel(klabel) ^ "(" ^ print_klist(klist) ^ ")"
-| KItem (KToken(sort, s)) -> "#token(\"" ^ (String.escaped s) ^ "\", \"" ^ print_sort(sort) ^ "\")"
-| KItem (InjectedKLabel(klabel)) -> "#klabel(" ^ print_klabel(klabel) ^ ")"
-| KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
-| KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
-| KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
-| KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
-| KItem (Bottom) -> "`#Bottom`(.KList)"
-| KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
-| KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
-| KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+let print_k (c: k) : string = let buf = Buffer.create 16 in
+  let rec print_klist(c: k list) : unit = match c with
+  | [] -> Buffer.add_string buf ".KList"
+  | e::[] -> print_k(e)
+  | e1::e2::l -> print_k(e1); Buffer.add_string buf ", "; print_klist(e2::l)
+  and print_k(c: k) : unit = match c with
+  | [] -> Buffer.add_string buf ".K"
+  | e::[] -> print_kitem(normalize e)
+  | e1::e2::l -> print_kitem(normalize e1); Buffer.add_string buf " ~> "; print_k(e2::l)
+  and print_kitem(c: normal_kitem) : unit = match c with
+  | KApply(klabel, klist) -> Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf '('; print_klist(klist); Buffer.add_char buf ')'
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (String.escaped s); 
+        Buffer.add_string buf "\", \""; Buffer.add_string buf (print_sort sort); Buffer.add_string buf "\")"
+  | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
+  | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
+  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
+  | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
+  | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
+  | KItem (Bottom) -> Buffer.add_string buf "`#Bottom`(.KList)"
+  | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
+  | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
+  | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+  in print_k c; Buffer.contents buf
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
