@@ -57,7 +57,7 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.11.6</scala.version>
+    <scala.version>2.11.7</scala.version>
   </properties>
 
   <dependencies>
