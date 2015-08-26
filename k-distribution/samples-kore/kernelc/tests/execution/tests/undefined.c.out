@@ -1,0 +1,45 @@
+<config>
+    <struct>
+        listNode |-> 
+            (next |-> struct listNode *
+            value |-> int)
+    </struct>
+    <fun>
+        main |-> functionBody ( .EvaluatedExpressions , int , { .Statements 
+          (({ struct listNode * x ; ((x = ( struct listNode * ) malloc ( 
+          sizeof ( struct listNode ) ) ;) (printf ( "%d\n", (x -> value) ) ;
+          ) (return 0 ;)) }) (return tv ( void , undef ) ;)) } )
+    </fun>
+    <k>
+        * tv ( int * , member ( 2 , value ) ) ~> HOLE, .EvaluatedExpressions
+           ~> "%d\n", HOLE ~> printf ( HOLE ) ~> HOLE ; ~> (return 0 ;) 
+          .Statements ~> .Map ~> .List ~> (return tv ( void , undef ) ;) 
+          .Statements
+    </k>
+    <env>
+        x |-> tv ( struct listNode * * , object ( 1 ) )
+    </env>
+    <locals>
+        ListItem ( tv ( struct listNode * * , object ( 1 ) ) )
+    </locals>
+    <fun-id>
+        main
+    </fun-id>
+    <stack>
+        ListItem ( callStackFrame ( .K , .Map , .List ,  ) )
+    </stack>
+    <heap>
+        object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) )
+        object ( 2 ) |-> 
+            (next |-> tv ( struct listNode * , undef )
+            value |-> tv ( int , undef ))
+    </heap>
+    <in>
+        ListItem ( #buffer ( "" ) )
+        ListItem ( #istream ( 0 ) )
+    </in>
+    <out>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( #buffer ( "" ) )
+    </out>
+</config>
