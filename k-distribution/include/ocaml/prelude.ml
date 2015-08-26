@@ -136,10 +136,8 @@ struct
 
   let hook_element c lbl sort config ff = match c with 
       k1, k2 -> [Map (sort,(collection_for lbl),(KMap.singleton k1 k2))]
-    | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with 
       () -> [Map (sort,(collection_for lbl),KMap.empty)]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with 
       ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
         when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
@@ -200,10 +198,8 @@ struct
     | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with
       () -> [Set (sort,(collection_for lbl),KSet.empty)]
-    | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
       k -> [Set (sort,(collection_for lbl),(KSet.singleton k))]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
       [Set (sort,l1,s1)], [Set (_,l2,s2)] when (l1 = l2) -> [Set (sort,l1,(KSet.union s1 s2))]
     | _ -> raise Not_implemented
@@ -228,10 +224,8 @@ module LIST =
 struct
   let hook_unit c lbl sort config ff = match c with
       () -> [List (sort,(collection_for lbl),[])]
-    | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
       k -> [List (sort,(collection_for lbl),[k])]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
       [List (s,lbl1,l1)], [List (_,lbl2,l2)] when (lbl1 = lbl2) -> [List (s,lbl1,(l1 @ l2))]
     | _ -> raise Not_implemented
@@ -270,7 +264,6 @@ struct
     | _ -> [Bottom]
   let hook_configuration c lbl sort config ff = match c with
       () -> config
-    | _ -> raise Not_implemented
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
@@ -282,10 +275,8 @@ module KEQUAL =
 struct
   let hook_eq c lbl sort config ff = match c with
       k1, k2 -> [Bool ((compare k1 k2) = 0)]
-    | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
       k1, k2 -> [Bool ((compare k1 k2) <> 0)]
-    | _ -> raise Not_implemented
   let hook_ite c lbl sort config ff = match c with
       [Bool t], k1, k2 -> if t then k1 else k2
     | _ -> raise Not_implemented
