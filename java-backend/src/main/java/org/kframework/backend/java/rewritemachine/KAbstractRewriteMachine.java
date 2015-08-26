@@ -109,6 +109,8 @@ public class KAbstractRewriteMachine {
             Map<Variable, Term> solution, Set<Variable> reusableVariables, TermContext context,
             boolean doClone) {
 
+        /* Special case for one-instruction lists that can be resolved without a stack;
+         * The code falls through the general case. */
         if (rhsInstructions.size() == 1) {
             RHSInstruction instruction = rhsInstructions.get(0);
             switch (instruction.type()) {
@@ -121,8 +123,6 @@ public class KAbstractRewriteMachine {
                     content = var;
                 }
                 return content;
-            default:
-                throw new AssertionError("unreachable");
             }
         }
 
