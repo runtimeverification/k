@@ -99,6 +99,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
+            public List<K> proveRule(Rule ruleToProve, List<Rule> allRules) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
                 throw new UnsupportedOperationException();
             }
