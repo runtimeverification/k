@@ -144,6 +144,10 @@ public class KoreKDebug implements KDebug {
         return result.rewriteSteps().isPresent() && result.rewriteSteps().get() < steps;
     }
 
+    private boolean isFinalConfiguration(K config) {
+        return rewriter.execute(config, Optional.of(1)).equals(config);
+    }
+
     @Override
     public DebuggerState backStep(int initialStateNum, int steps) {
         DebuggerState currentState = stateList.get(initialStateNum);
@@ -192,7 +196,7 @@ public class KoreKDebug implements KDebug {
         do {
             activeState = steppedState;
             steppedState = step(activeStateIndex, checkpointInterval);
-        } while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval);
+        } while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval && !isFinalConfiguration(steppedState.getCurrentK()));
         return steppedState;
     }
 
