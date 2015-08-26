@@ -12,11 +12,14 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
+import org.kframework.kore.KApply;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -27,7 +30,7 @@ import java.util.Set;
  * @author AndreiS
  *
  */
-public class CellCollection extends Collection {
+public class CellCollection extends Collection implements CollectionInternalRepresentation {
 
     public static class Cell implements Serializable {
         private final CellLabel cellLabel;
@@ -235,6 +238,39 @@ public class CellCollection extends Collection {
     @Override
     public boolean isExactSort() {
         return true;
+    }
+
+    @Override
+    public List<Term> getKComponents() {
+        return cells.values().stream()
+                .map(c -> new KItem(
+                        KLabelConstant.of(c.cellLabel.name(), definition),
+                        KList.concatenate(c.content),
+                        sort(),
+                        true))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public KLabel constructorLabel() {
+        org.kframework.kore.KLabel kLabel = definition.configurationInfo().getConcat(getCellSort());
+        return KLabelConstant.of(kLabel.name(), definition);
+    }
+
+    @Override
+    public Term unit() {
+        org.kframework.kore.KApply kApply = definition.configurationInfo().getUnit(getCellSort());
+        return new KItem(
+                KLabelConstant.of(kApply.klabel().name(), definition),
+                KList.EMPTY,
+                sort(),
+                true);
+    }
+
+    private org.kframework.kore.Sort getCellSort() {
+        assert hasMultiplicityCell;
+        return definition.configurationInfo().getCellSort(
+                KLabelConstant.of(cells.keys().iterator().next().name(), definition));
     }
 
     @Override
