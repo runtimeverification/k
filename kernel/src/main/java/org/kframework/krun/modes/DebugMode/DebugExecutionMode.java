@@ -4,6 +4,7 @@ package org.kframework.krun.modes.DebugMode;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import jline.console.ConsoleReader;
+import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -113,6 +114,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
                 System.out.println(fileNotFound.getMessage());
             } catch (IOException inputException) {
                 KEMException.criticalError("Failed to read input from console");
+            } catch (UserInterruptException | NullPointerException interrupt) {
+                return null;
             }
         }
         return null;

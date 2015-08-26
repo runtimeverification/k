@@ -303,7 +303,7 @@ public class Commands {
         private void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
             List<? extends Map<? extends KVariable, ? extends K>> substList = result.getSubstitutions();
 
-            if (substList.isEmpty()) {
+            if (substList.isEmpty() && !disableOutput) {
                 System.out.println("No Substitution Found");
                 return;
             }
