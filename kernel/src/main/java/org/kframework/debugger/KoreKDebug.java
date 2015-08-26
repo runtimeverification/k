@@ -130,12 +130,11 @@ public class KoreKDebug implements KDebug {
         List<DebuggerMatchResult> modifiableList = new ArrayList<>(originalList);
         return modifiableList.stream()
                 .map(x -> {
-                    DebuggerMatchResult result = new DebuggerMatchResult(
+                    return new DebuggerMatchResult(
                             rewriter.match(finalK, x.getCompiledRule()),
                             x.getParsedRule(),
                             x.getCompiledRule(),
                             x.getPattern());
-                    return result;
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -196,7 +195,8 @@ public class KoreKDebug implements KDebug {
         do {
             activeState = steppedState;
             steppedState = step(activeStateIndex, checkpointInterval);
-        } while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval && !isFinalConfiguration(steppedState.getCurrentK()));
+        }
+        while (steppedState.getStepNum() - activeState.getStepNum() >= checkpointInterval && !isFinalConfiguration(steppedState.getCurrentK()));
         return steppedState;
     }
 
@@ -240,8 +240,8 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public DebuggerMatchResult match(String pattern) {
-        String DebuggerSource = "Debugger TUI";
+    public DebuggerMatchResult match(String pattern, String source) {
+        String DebuggerSource = source;
         Rule compiledPattern = KRun.compilePattern(files, kem, pattern, options, compiledDef, Source.apply(DebuggerSource));
         Rule parsedPattern = KRun.parsePattern(files, kem, pattern, compiledDef, Source.apply(DebuggerSource));
         List<? extends Map<? extends KVariable, ? extends K>> subst = rewriter.match(getActiveState().getCurrentK(), compiledPattern);
@@ -249,8 +249,8 @@ public class KoreKDebug implements KDebug {
     }
 
     @Override
-    public void addWatch(String pattern) {
-        DebuggerMatchResult matchResult = match(pattern);
+    public void addWatch(String pattern, String watchSource) {
+        DebuggerMatchResult matchResult = match(pattern, watchSource);
         DebuggerState activeState = stateList.remove(activeStateIndex);
         List<DebuggerMatchResult> watchList = new ArrayList<>(activeState.getWatchList());
         watchList.add(matchResult);

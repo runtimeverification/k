@@ -36,8 +36,8 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
-            CommandUtils utils = new CommandUtils(disableOutput);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
+            CommandUtils utils = new CommandUtils(isSource);
             int activeStateId = session.getActiveStateId();
             DebuggerState prevState = session.getStates().get(activeStateId);
             DebuggerState steppedState = session.step(activeStateId, stepCount);
@@ -61,10 +61,14 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
-            CommandUtils utils = new CommandUtils(disableOutput);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
+            CommandUtils utils = new CommandUtils(isSource);
             pattern.ifPresent(pattern -> {
-                session.addWatch(pattern);
+                if(isSource) {
+                    session.addWatch(pattern, "<Source File>");
+                } else {
+                    session.addWatch(pattern, "<Command Line>");
+                }
             });
             utils.displayWatches(
                     session.getActiveState().getWatchList(),
@@ -76,8 +80,8 @@ public class Commands {
     public static class PeekCommand implements Command {
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
-            CommandUtils utils = new CommandUtils(disableOutput);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
+            CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
                 prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> utils.print(s, y -> System.out.println(y)), requestedState.getCurrentK());
@@ -96,9 +100,9 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             int activeConfigurationId = session.getActiveState().getStepNum();
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             if (backStepCount > 1 && (backStepCount) > activeConfigurationId) {
                 throw KEMException.debuggerError("Number of Configuration(s) is " + (activeConfigurationId + 1) + ". Step Count to go back must be in range [0, " + (activeConfigurationId + 1) + ")");
 
@@ -120,12 +124,12 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             DebuggerState selectedState = session.setState(stateNum);
             if (selectedState == null) {
                 throw KEMException.debuggerError("Requested State not Present in List of states");
             }
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             utils.print("Selected State " + stateNum, s -> System.out.println(s));
         }
     }
@@ -142,9 +146,9 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             int requestedState = stateNum.orElse(session.getActiveStateId());
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             DebuggerState nextState = session.setState(requestedState);
             if (nextState == null) {
                 throw KEMException.debuggerError("State Number specified does not exist");
@@ -172,17 +176,17 @@ public class Commands {
     public static class QuitCommand implements Command {
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             return;
         }
     }
 
     public static class ResumeCommand implements Command {
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             DebuggerState currentState = session.getStates().get(session.getActiveStateId());
             DebuggerState finalState = session.resume();
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             utils.print(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken", s -> System.out.println(s));
             utils.displayWatches(finalState.getWatchList(), compiledDefinition);
         }
@@ -196,8 +200,8 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
-            CommandUtils utils = new CommandUtils(disableOutput);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
+            CommandUtils utils = new CommandUtils(isSource);
             if (checkpointInterval <= 0) {
                 KEMException.debuggerError("Checkpoint Value must be >= 1");
             }
@@ -216,9 +220,9 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
-            DebuggerMatchResult result = session.match(pattern);
-            CommandUtils utils = new CommandUtils(disableOutput);
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
+            DebuggerMatchResult result = session.match(pattern, "<Command Line>");
+            CommandUtils utils = new CommandUtils(isSource);
             utils.prettyPrintSubstitution(result, compiledDefinition);
         }
 
@@ -236,7 +240,7 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             return;
         }
     }
@@ -249,11 +253,11 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             if (session.removeWatch(watchNum) < 0) {
                 throw KEMException.debuggerError("Watch Doesn't Exists");
             }
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             utils.print("Watch " + (watchNum) + " removed", x -> System.out.println(x));
         }
     }
@@ -266,22 +270,22 @@ public class Commands {
         }
 
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             if (session.createCopy(stateNum) == null) {
                 throw KEMException.debuggerError("StateNumber Speicified doesn't exist");
             }
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             utils.print("Copied State " + stateNum, s -> System.out.println(s));
         }
     }
 
     public static class GetStatesCommand implements Command {
         @Override
-        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean disableOutput) {
+        public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             List<DebuggerState> stateList = session.getStates();
             int activeStateIndex = session.getActiveStateId();
             int i = 0;
-            CommandUtils utils = new CommandUtils(disableOutput);
+            CommandUtils utils = new CommandUtils(isSource);
             for (DebuggerState state : stateList) {
                 if (i == activeStateIndex) {
                     utils.print("State " + (i++) + "*", s -> System.out.println(s));
@@ -296,8 +300,8 @@ public class Commands {
     private static class CommandUtils {
         private boolean disableOutput;
 
-        private CommandUtils(boolean disableOutput) {
-            this.disableOutput = disableOutput;
+        private CommandUtils(boolean isSource) {
+            this.disableOutput= isSource;
         }
 
         private void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
