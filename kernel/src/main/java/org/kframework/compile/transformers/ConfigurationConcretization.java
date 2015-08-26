@@ -36,7 +36,8 @@ public class ConfigurationConcretization extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Cell node, Void _void)  {
         node = (Cell) super.visit(node, _void);
-        if (node.getEllipses() == Cell.Ellipses.NONE || !config.get(node).hasChildren()) {
+        if (node.getEllipses() == Cell.Ellipses.NONE || !config.get(node).hasChildren()
+                || config.get(node).hasMultiplicityStarChildren()) {
             return node;
         }
 
