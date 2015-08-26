@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.kframework.Rewriter;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
@@ -15,6 +16,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 
@@ -44,7 +46,10 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
         String content = files.loadFromWorkingDirectory(proofFile);
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
         Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile), true);
-        List<Rule> rules = stream(mod.rules()).map(r -> kompile.compileRule(compiledDefinition, ))
-        return null;
+        List<Rule> rules = stream(mod.rules())
+                .map(r -> /* TODO(andreistefanescu): perform preprocessing) */ r)
+                .map(r -> kompile.compileRule(compiledDefinition, r))
+                .collect(Collectors.toList());
+        return rules.stream().filter(r -> !r.att().contains(Attribute.TRUSTED_KEY)).flatMap(r -> rewriter.proveRule(r, rules).stream()).collect(Collectors.toList());
     }
 }

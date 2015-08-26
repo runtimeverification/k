@@ -100,7 +100,7 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).compileRule(this, p, source,
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseAndCompileRule(this, p, source,
                 Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
     }
 

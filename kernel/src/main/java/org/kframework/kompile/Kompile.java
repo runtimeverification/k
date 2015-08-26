@@ -407,12 +407,16 @@ public class Kompile {
         return upRule(res.iterator().next());
     }
 
-    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
-        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+    public Rule compileRule(CompiledDefinition compiledDef, Rule parsedRule) {
         return (Rule) func(new ResolveAnonVar()::resolve)
                 .andThen(func(new ResolveSemanticCasts()::resolve))
                 .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))
-                .apply(parsed);
+                .apply(parsedRule);
+    }
+
+    public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
+        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+        return compileRule(compiledDef, parsed);
     }
 
     private Rule upRule(K contents) {
