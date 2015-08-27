@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module LIST-PATTERN
-  imports MAP
   imports KERNELC-SEMANTICS
   imports INT-LIST
 

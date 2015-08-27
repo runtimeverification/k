@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module TREE-PATTERN
-  imports MAP
   imports KERNELC-SEMANTICS
   imports INT-SET
   imports LIST-PATTERN
@@ -11,7 +10,7 @@ module TREE-PATTERN
 
   syntax IntSet ::= "tree_keys" "(" Tree ")"    [function, smtlib(smt_tree_keys)]
   rule tree_keys(node(I:Int, TL:Tree, TR:Tree))
-    => { I } U (tree_keys(TL) U tree_keys(TR))
+    => { I } U tree_keys(TL) U tree_keys(TR)
   rule tree_keys(leaf) => .IntSet
   syntax Int ::= "tree_height" "(" Tree ")"     [function, smtlib(smt_tree_height)]
 
@@ -83,7 +82,7 @@ module TREE-PATTERN
   syntax TreeSeq ::= Tree "::TS" TreeSeq
                    | ".TreeSeq"
                    > TreeSeq "@TS" TreeSeq      [function, left]
-  rule (T ::TS TS1) @TS TS2 => T ::TS (TS1 @TS TS2)
+  rule `T ::TS TS1` @TS TS2 => T ::TS `TS1 @TS TS2`
   rule .TreeSeq @TS TS => TS
 
   syntax Map ::= "treeList" "(" Pointer ")" "(" TreeSeq ")"    [pattern(1)]

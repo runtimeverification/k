@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module KERNELC-SEMANTICS
+module KERNELC-CONFIGURATION
   imports KERNELC-COMMON-SYNTAX
   imports BOOL
   imports INT
@@ -11,6 +11,41 @@ module KERNELC-SEMANTICS
   imports SET
   imports K-IO
 
+
+  /*
+   * KernelC configuration
+   */
+  configuration
+    <config>
+      <struct> .Map </struct>
+      <fun> .Map </fun>
+
+      <k> $PGM:File:K ~> main(.Expressions) </k>
+      <env> .Map </env>
+      <locals> .List </locals>
+      //<fun-id> String2Id("") </fun-id>
+      <fun-id> main </fun-id>
+      <stack> .List </stack>
+
+      <heap> .Map </heap>
+
+      <in stream="stdin"> .List </in>
+      <out stream="stdout"> .List </out>
+    </config>
+endmodule
+
+
+module KERNELC-SEMANTICS
+  imports KERNELC-CONFIGURATION
+
+
+  /*
+   * Bracket declarations
+   */
+  /* declare () as map bracket in KernelC */
+  syntax Map ::= "(" Map ")"    [bracket]
+
+
   /*
    * Macros
    */
@@ -20,6 +55,12 @@ module KERNELC-SEMANTICS
   /* block without declarations macro (for use in the semantics only) */
   syntax Block ::= "{" Statements "}"
   rule { Ss:Statements } => { .VariableDeclarations Ss }    [macro]
+
+
+  /*
+   * KernelC results
+   */
+  syntax KResult ::= EvaluatedExpression
 
 
   /*
@@ -120,7 +161,7 @@ module KERNELC-SEMANTICS
 
   syntax KItem ::= deleteLocals(List)
   rule
-    <k> deleteLocals((ListItem(tv(_:Type, P:Pointer)) => .List) L:List) ...</k>
+    <k> deleteLocals(`ListItem(tv(_:Type, P:Pointer)) => .List` L:List) ...</k>
     <heap>... P |-> _ => .Map...</heap>
     [structural]
   rule deleteLocals(.List) => .K    [structural]
@@ -346,26 +387,26 @@ module KERNELC-SEMANTICS
   /*
    * Pointer conversions
    */
-  rule tv(T1:Type **, _:Pointer) = tv((T2:Type * => T1 *), null);
+  rule tv(T1:Type **, _:Pointer) = tv(T2:Type * => T1 *, null);
     requires T1 =/=K T2
     [structural]
-  rule tv(T1:Type *, _:Pointer) == tv((T2:Type * => T1 *), null)
+  rule tv(T1:Type *, _:Pointer) == tv(T2:Type * => T1 *, null)
     requires T1 =/=K T2
     [structural]
-  rule tv((T1:Type * => T2 *), null) == tv(T2:Type *, _:Pointer)
+  rule tv(T1:Type * => T2 *, null) == tv(T2:Type *, _:Pointer)
     requires T1 =/=K T2
     [structural]
-  rule tv(T1:Type *, _:Pointer) != tv((T2:Type * => T1 *), null)
+  rule tv(T1:Type *, _:Pointer) != tv(T2:Type * => T1 *, null)
     requires T1 =/=K T2
     [structural]
-  rule tv((T1:Type * => T2 *), null) != tv(T2:Type *, _:Pointer)
+  rule tv(T1:Type * => T2 *, null) != tv(T2:Type *, _:Pointer)
     requires T1 =/=K T2
     [structural]
   rule
     <fun>...
       Callee |-> functionBody(_:ParameterDeclarations, T2:Type *, _:Block)
     ...</fun>
-    <k> return tv((T1:Type * => T2 *), null); ...</k>
+    <k> return tv(T1:Type * => T2 *, null); ...</k>
     <fun-id> Callee:Id </fun-id>
     [structural]
 
@@ -448,15 +489,15 @@ module KERNELC-SEMANTICS
   syntax VariableDeclarations ::= declareParameters(ParameterDeclarations)
     [function]
   rule declareParameters(T:Type X:Id, PDs:ParameterDeclarations)
-    => T X; declareParameters(PDs)
+    => `T X; declareParameters(PDs)`
   rule declareParameters(.ParameterDeclarations) => .VariableDeclarations
 
   syntax Statements ::=
     bindParameters(ParameterDeclarations, EvaluatedExpressions, Block)
     [function]
   rule bindParameters(
-          (_:Type X:Id, PDs:ParameterDeclarations),
-          (TV:TypedValue, EEs:EvaluatedExpressions),
+          `_:Type X:Id, PDs:ParameterDeclarations`,
+          `TV:TypedValue, EEs:EvaluatedExpressions`,
           B:Block)
     => X = TV; bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
