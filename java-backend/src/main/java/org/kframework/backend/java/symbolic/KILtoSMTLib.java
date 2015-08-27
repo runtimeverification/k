@@ -50,7 +50,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.of("MIntSet"),
             Sort.of("FloatSet"),
             Sort.of("StringSet"),
-            Sort.of("IntSeq"));
+            Sort.of("IntSeq"),
+            Sort.of("MIntSeq"),
+            Sort.of("FloatSeq"),
+            Sort.of("StringSeq"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
             Sort.LIST,
             Sort.SET,
