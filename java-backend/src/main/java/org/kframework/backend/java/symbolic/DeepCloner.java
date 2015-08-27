@@ -25,7 +25,7 @@ public class DeepCloner {
         cloner.dontCloneInstanceOf(TermContext.class);
     }
 
-    public static Term clone(Term term) {
+    public static synchronized Term clone(Term term) {
         Profiler.startTimer(Profiler.DEEP_CLONE_TIMER);
         Term deepClone = cloner.deepClone(term);
         Profiler.stopTimer(Profiler.DEEP_CLONE_TIMER);
