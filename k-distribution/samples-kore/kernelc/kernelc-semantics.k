@@ -1,7 +1,15 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module KERNELC-SEMANTICS
-  imports KERNELC-SYNTAX
+  imports KERNELC-COMMON-SYNTAX
+  imports BOOL
+  imports INT
+  imports FLOAT
+  imports STRING
+  imports LIST
+  imports MAP
+  imports SET
+  imports K-IO
 
   /*
    * Macros

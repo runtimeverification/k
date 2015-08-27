@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module INT-SET
+  imports INT
+
   syntax IntSet ::= IntSet "U" IntSet           [function, left, smtlib(smt_set_cup)]
                   | ".IntSet"                   [function, smtlib(smt_set_emp)]
                   | "{" Int "}"                 [function, smtlib(smt_set_ele), klabel(smt_set_ele)]

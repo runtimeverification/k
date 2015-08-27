@@ -1,6 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module KERNELC-SYNTAX
+module KERNELC-COMMON-SYNTAX
+  imports BOOL-SYNTAX
+  imports INT-SYNTAX
+  imports FLOAT-SYNTAX
+  imports STRING-SYNTAX
+  imports EMPTY-ID
+
   syntax File ::= Globals
 
   syntax Global ::= FunctionDefinition
@@ -121,3 +127,9 @@ module KERNELC-SYNTAX
               | "p" [token] | "n" [token] | "s" [token] | "l" [token] | "ln" [token] | "tn" [token] | "sn" [token] | "temp" [token]
               | "min" [token] | "iterx" [token] | "itery" [token] | "change" [token]
 endmodule
+
+module KERNELC-SYNTAX
+  imports KERNELC-COMMON-SYNTAX
+  imports ID
+endmodule
+

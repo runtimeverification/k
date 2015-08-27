@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module INT-LIST
+  imports INT
   imports LIST
   imports INT-SET
 

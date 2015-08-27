@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-require "modules/verification_lemmas.k"
+//require "modules/verification_lemmas.k"
+require "domains.k"
 require "kernelc-syntax.k"
 require "kernelc-semantics.k"
 require "patterns/int_set.k"
@@ -9,11 +10,10 @@ require "patterns/tree_pattern.k"
 require "tests/cd2d/cdd_spec_aux.k"
 
 module KERNELC
-  imports KERNELC-SYNTAX
   imports KERNELC-SEMANTICS
   imports LIST-PATTERN
   imports TREE-PATTERN
-  imports VERIFICATION_LEMMAS
+  //imports VERIFICATION_LEMMAS
   imports CDD-SPEC-AUX
 
   /*
@@ -24,7 +24,7 @@ module KERNELC
       <struct> .Map </struct>
       <fun> .Map </fun>
 
-      <k> $PGM:File ~> main(.Expressions) </k>
+      <k> $PGM:File:K ~> main(.Expressions) </k>
       <env> .Map </env>
       <locals> .List </locals>
       <fun-id> String2Id("") </fun-id>
