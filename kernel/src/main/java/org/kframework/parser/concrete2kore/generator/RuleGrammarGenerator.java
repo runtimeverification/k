@@ -206,6 +206,8 @@ public class RuleGrammarGenerator {
                     List<ProductionItem> items = stream(p.items()).map(pi -> {
                         if (pi instanceof Terminal) {
                             Terminal t = (Terminal) pi;
+                            if (t.value().trim().equals(""))
+                                return pi;
                             Set<String> follow = new HashSet<>();
                             terminals.prefixMap(t.value()).keySet().stream().filter(biggerString -> !t.value().equals(biggerString))
                                     .forEach(biggerString -> {
