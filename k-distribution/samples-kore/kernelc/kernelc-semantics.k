@@ -71,8 +71,6 @@ module KERNELC-SEMANTICS
                                | Bool
                                | String
   syntax EvaluatedExpressions ::= List{EvaluatedExpression, ","}
-  // TODO(RaduM): remove this when automated list subsorting works
-  syntax Expressions ::= EvaluatedExpressions
 
   syntax TypedValue ::= "tv" "(" Type "," Value ")"
   syntax Value ::= Int
@@ -504,4 +502,12 @@ module KERNELC-SEMANTICS
     => X = TV; bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
     => B .Statements
+
+
+  /*
+   * KORE hacks
+   */
+  // TODO(RaduM): remove this when automated list subsorting works
+  syntax Expressions ::= EvaluatedExpressions
+  syntax KResult ::= EvaluatedExpressions
 endmodule

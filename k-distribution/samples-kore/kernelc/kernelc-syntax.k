@@ -14,16 +14,18 @@ module KERNELC-COMMON-SYNTAX
                   | StructDeclaration
                   | "#include" "<" "stdlib.h" ">"
                   | "#include" "<" "stdio.h" ">"
-  syntax Globals ::= List{Global, ""}
+  syntax Globals ::= List{Global, ""}   [klabel(_Globals_)]
 
   syntax FunctionDefinition ::= Type Id "(" ParameterDeclarations ")" Block
   syntax FunctionDeclaration ::= Type Id "(" ParameterDeclarations ")" ";"
   syntax ParameterDeclaration ::= Type Id
   syntax ParameterDeclarations ::= List{ParameterDeclaration, ","}
+    [klabel(_ParameterDeclarations_)]
   syntax StructDeclaration ::= "struct" Id "{" VariableDeclarations "}" ";"
 
   syntax VariableDeclaration ::= Type Id ";"
   syntax VariableDeclarations ::= List{VariableDeclaration, ""}
+    [klabel(_VariableDeclarations_)]
 
   syntax Type ::= IntType
                 | FloatType
