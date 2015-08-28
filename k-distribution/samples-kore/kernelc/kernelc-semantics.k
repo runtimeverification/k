@@ -71,6 +71,8 @@ module KERNELC-SEMANTICS
                                | Bool
                                | String
   syntax EvaluatedExpressions ::= List{EvaluatedExpression, ","}
+  // TODO(RaduM): remove this when automated list subsorting works
+  syntax Expressions ::= EvaluatedExpressions
 
   syntax TypedValue ::= "tv" "(" Type "," Value ")"
   syntax Value ::= Int
