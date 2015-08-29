@@ -54,6 +54,7 @@ public class Attribute<T> extends ASTNode {
     public static final String IMPURE_KEY = "impure";
     public static final String STRICT_KEY = "strict";
     public static final String SEQSTRICT_KEY = "seqstrict";
+    public static final String CELL_BAG = "cell-bag";
 
     public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");

@@ -73,7 +73,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 SyntaxSort(Sort("ThreadCellBag"), Att().add("hook", "BAG.Bag")),
                 Production("_ThreadCellBag_", Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
-                        Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag")
+                        Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag").add("cell-bag","")
                                 .add("element","ThreadCellBagItem").add("wrapElement","<thread>")
                                 .add("function").add("hook","BAG.concat")),
                 Production(".ThreadCellBag", Sort("ThreadCellBag"),
