@@ -388,8 +388,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         List<KItem> otherRemainingPatterns = new ArrayList<>();
         for (KItem pattern : patterns) {
             for (KItem otherPattern : otherPatterns) {
-                if (pattern.getPatternInput().equals(otherPattern.getPatternInput())
-                        && pattern.kLabel().equals(otherPattern.kLabel())) {
+                if (pattern.kLabel().equals(otherPattern.kLabel())
+                        && pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
                     List<Term> patternOutput = pattern.getPatternOutput();
                     List<Term> otherPatternOutput = otherPattern.getPatternOutput();
                     for (int i = 0; i < patternOutput.size(); ++i) {
