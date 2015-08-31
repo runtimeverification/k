@@ -38,26 +38,29 @@ let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else 
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
-let rec print_klist(c: k list) : string = match c with
-| [] -> ".KList"
-| e::[] -> print_k(e)
-| e1::e2::l -> print_k(e1) ^ ", " ^ print_klist(e2::l)
-and print_k(c: k) : string = match c with
-| [] -> ".K"
-| e::[] -> print_kitem(normalize e)
-| e1::e2::l -> print_kitem(normalize e1) ^ " ~> " ^ print_k(e2::l)
-and print_kitem(c: normal_kitem) : string = match c with
-| KApply(klabel, klist) -> print_klabel(klabel) ^ "(" ^ print_klist(klist) ^ ")"
-| KItem (KToken(sort, s)) -> "#token(\"" ^ (String.escaped s) ^ "\", \"" ^ print_sort(sort) ^ "\")"
-| KItem (InjectedKLabel(klabel)) -> "#klabel(" ^ print_klabel(klabel) ^ ")"
-| KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
-| KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
-| KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
-| KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
-| KItem (Bottom) -> "`#Bottom`(.KList)"
-| KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
-| KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
-| KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+let print_k (c: k) : string = let buf = Buffer.create 16 in
+  let rec print_klist(c: k list) : unit = match c with
+  | [] -> Buffer.add_string buf ".KList"
+  | e::[] -> print_k(e)
+  | e1::e2::l -> print_k(e1); Buffer.add_string buf ", "; print_klist(e2::l)
+  and print_k(c: k) : unit = match c with
+  | [] -> Buffer.add_string buf ".K"
+  | e::[] -> print_kitem(normalize e)
+  | e1::e2::l -> print_kitem(normalize e1); Buffer.add_string buf " ~> "; print_k(e2::l)
+  and print_kitem(c: normal_kitem) : unit = match c with
+  | KApply(klabel, klist) -> Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf '('; print_klist(klist); Buffer.add_char buf ')'
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (String.escaped s); 
+        Buffer.add_string buf "\", \""; Buffer.add_string buf (print_sort sort); Buffer.add_string buf "\")"
+  | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
+  | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
+  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
+  | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
+  | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
+  | KItem (Bottom) -> Buffer.add_string buf "`#Bottom`(.KList)"
+  | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
+  | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
+  | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+  in print_k c; Buffer.contents buf
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
@@ -123,15 +126,18 @@ let ktoken (s: sort) (str: string) : kitem = match s with
 | SortBool -> Bool (bool_of_string str)
 | _ -> KToken(s,str)
 
+let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> match (v, res) with
+    [Int i], None -> Some (Z.to_int i)
+  | [Int i], Some _ -> failwith "Bad exit code pattern"
+  | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
+
 module MAP =
 struct
 
   let hook_element c lbl sort config ff = match c with 
       k1, k2 -> [Map (sort,(collection_for lbl),(KMap.singleton k1 k2))]
-    | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with 
       () -> [Map (sort,(collection_for lbl),KMap.empty)]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with 
       ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
         when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
@@ -192,10 +198,8 @@ struct
     | _ -> raise Not_implemented
   let hook_unit c lbl sort config ff = match c with
       () -> [Set (sort,(collection_for lbl),KSet.empty)]
-    | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
       k -> [Set (sort,(collection_for lbl),(KSet.singleton k))]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
       [Set (sort,l1,s1)], [Set (_,l2,s2)] when (l1 = l2) -> [Set (sort,l1,(KSet.union s1 s2))]
     | _ -> raise Not_implemented
@@ -220,10 +224,8 @@ module LIST =
 struct
   let hook_unit c lbl sort config ff = match c with
       () -> [List (sort,(collection_for lbl),[])]
-    | _ -> raise Not_implemented
   let hook_element c lbl sort config ff = match c with
       k -> [List (sort,(collection_for lbl),[k])]
-    | _ -> raise Not_implemented
   let hook_concat c lbl sort config ff = match c with
       [List (s,lbl1,l1)], [List (_,lbl2,l2)] when (lbl1 = lbl2) -> [List (s,lbl1,(l1 @ l2))]
     | _ -> raise Not_implemented
@@ -262,20 +264,19 @@ struct
     | _ -> [Bottom]
   let hook_configuration c lbl sort config ff = match c with
       () -> config
-    | _ -> raise Not_implemented
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
+  let hook_argv c lbl sort config ff = match c with
+      () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) Sys.argv []))]
 end
 
 module KEQUAL =
 struct
   let hook_eq c lbl sort config ff = match c with
       k1, k2 -> [Bool ((compare k1 k2) = 0)]
-    | _ -> raise Not_implemented
   let hook_ne c lbl sort config ff = match c with
       k1, k2 -> [Bool ((compare k1 k2) <> 0)]
-    | _ -> raise Not_implemented
   let hook_ite c lbl sort config ff = match c with
       [Bool t], k1, k2 -> if t then k1 else k2
     | _ -> raise Not_implemented
