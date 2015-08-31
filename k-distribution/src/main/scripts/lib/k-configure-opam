@@ -1,0 +1,5 @@
+#!/bin/sh
+opam init
+opam switch 4.03.0+trunk
+opam repository add k "$(dirname "$0")/opam"
+opam install mlgmp.20150824 zarith
