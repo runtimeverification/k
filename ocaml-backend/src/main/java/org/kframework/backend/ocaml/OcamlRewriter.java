@@ -22,6 +22,7 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,8 +212,17 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
         args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
         args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
+        String ocamlfind = "ocamlfind";
+        String ocamlc = "ocamlc.opt";
+        String ocamlopt = "ocamlopt.opt";
+        String env = files.getEnv().get("K_OCAML_HOME");
+        if (env != null) {
+            ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
+            ocamlc = new File(files.resolveWorkingDirectory(env), "ocamlc.opt").getAbsolutePath();
+            ocamlopt = new File(files.resolveWorkingDirectory(env), "ocamlopt.opt").getAbsolutePath();
+        }
         if (converter.options.ocamlopt) {
-            args.add(0, "ocamlfind");
+            args.add(0, ocamlfind);
             args.add(1, "ocamlopt");
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
@@ -225,9 +235,9 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             args.add("20");
             args.add("-nodynlink");
             pb = pb.command(args);
-            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=" + ocamlopt);
         } else {
-            args.add(0, "ocamlfind");
+            args.add(0, ocamlfind);
             args.add(1, "ocamlc");
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
@@ -237,7 +247,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
                     name));
             pb = pb.command(args);
-            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=" + ocamlc);
         }
         Process p = pb.directory(files.resolveTemp("."))
                 .redirectError(files.resolveTemp("compile.err"))

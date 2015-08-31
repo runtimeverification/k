@@ -11,6 +11,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,23 +66,32 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
                 "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml", "parser.mli", "parser.ml", "lexer.ml"));
             args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
             if (!options.genMLOnly) {
+                String ocamlfind = "ocamlfind";
+                String ocamlc = "ocamlc.opt";
+                String ocamlopt = "ocamlopt.opt";
+                String env = files.getEnv().get("K_OCAML_HOME");
+                if (env != null) {
+                    ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
+                    ocamlc = new File(files.resolveWorkingDirectory(env), "ocamlc.opt").getAbsolutePath();
+                    ocamlopt = new File(files.resolveWorkingDirectory(env), "ocamlopt.opt").getAbsolutePath();
+                }
                 if (options.ocamlopt) {
-                    args.add(0, "ocamlfind");
+                    args.add(0, ocamlfind);
                     args.add(1, "ocamlopt");
                     args.add("-inline");
                     args.add("20");
                     args.add("-nodynlink");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlopt=" + ocamlopt);
                 } else {
-                    args.add(0, "ocamlfind");
+                    args.add(0, ocamlfind);
                     args.add(1, "ocamlc");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlc=" + ocamlc);
                 }
-                Process ocamlopt = pb
+                Process p = pb
                         .directory(files.resolveKompiled("."))
                         .inheritIO()
                         .start();
-                exit = ocamlopt.waitFor();
+                exit = p.waitFor();
                 if (exit != 0) {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }

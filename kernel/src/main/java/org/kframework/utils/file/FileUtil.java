@@ -67,6 +67,10 @@ public class FileUtil {
         return pb;
     }
 
+    public Map<String, String> getEnv() {
+        return env;
+    }
+
     public void deleteTempDir() {
         if (!options.debug) {
             try {
