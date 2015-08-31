@@ -15,21 +15,11 @@ public interface KItemRepresentation extends KoreRepresentation, KApply {
         return ((KItem) toKore()).kList();
     }
 
-    @Override
     default org.kframework.kore.KLabel klabel() {
-        if (kLabel() instanceof KLabelInjection) {
-            return ((KApply) ((KLabelInjection) kLabel()).term()).klabel();
-        } else {
-            return (KLabel) kLabel();
-        }
+        return (KLabel) kLabel();
     }
 
-    @Override
     default org.kframework.kore.KList klist() {
-        if (kLabel() instanceof KLabelInjection) {
-            return ((KApply) ((KLabelInjection) kLabel()).term()).klist();
-        } else {
-            return (KList) kList();
-        }
+        return (KList) kList();
     }
 }

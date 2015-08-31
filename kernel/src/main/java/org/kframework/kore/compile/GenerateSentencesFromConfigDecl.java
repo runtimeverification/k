@@ -348,7 +348,6 @@ public class GenerateSentencesFromConfigDecl {
                 bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
             case "Bag":
                 bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "");
-                bagAtt = bagAtt.add(Attribute.CELL_BAG, "");
             case "List":
                 break;
             default:
@@ -480,9 +479,14 @@ public class GenerateSentencesFromConfigDecl {
     private static Multiplicity convertStringMultiplicity(Option<String> multiplicity, K body) {
         if (multiplicity.isEmpty())
             return Multiplicity.ONE;
-        try {
-            return Multiplicity.of(multiplicity.get());
-        } catch (IllegalArgumentException _) {
+        switch(multiplicity.get()) {
+        case "1":
+            return Multiplicity.ONE;
+        case "*":
+            return Multiplicity.STAR;
+        case "?":
+            return Multiplicity.OPTIONAL;
+        default:
             throw KEMException.compilerError("Invalid multiplicity found in cell: " + multiplicity.get(), body);
         }
     }

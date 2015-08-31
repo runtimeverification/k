@@ -2,12 +2,11 @@
 package org.kframework.compile;
 
 import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import scala.collection.immutable.Set;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Information about the configuration structure used
@@ -43,16 +42,13 @@ public interface ConfigurationInfo {
      *  this method to return multiple sorts, e.g. if a particular * cell appears in multiple bags in different
      *  parts of a configuration.
      */
-    scala.collection.immutable.Set<Sort> getCellBagSortsOfCell(Sort k);
+    Set<Sort> getCellBagSortsOfCell(Sort k);
 
     /** The declared sort of the contents of a leaf cell */
     Sort leafCellType(Sort k);
 
     /** The label for a cell */
     KLabel getCellLabel(Sort k);
-
-    /** The cell for a label */
-    Sort getCellSort(KLabel kLabel);
 
     /** The label for a fragment of a cell, only defined for parent cells. */
     KLabel getCellFragmentLabel(Sort k);
@@ -74,11 +70,9 @@ public interface ConfigurationInfo {
     Sort getRootCell();
     /** Return the declared computation cell, by default the k cell */
     Sort getComputationCell();
-    /** Returns the set of cell sorts in this configuration */
-    Set<Sort> getCellSorts();
 
     /** Returns the unit of a * or ? cell. */
-    KApply getUnit(Sort k);
+    K getUnit(Sort k);
 
     /** Returns the concatenation operation of a multiplicity * cell. */
     KLabel getConcat(Sort k);
@@ -90,19 +84,5 @@ public interface ConfigurationInfo {
         /** This cell is optional but may not be repeated */
         OPTIONAL,
         /** This cell may occur any number of times, zero or more */
-        STAR;
-
-        public static Multiplicity of(String multiplicity) {
-            switch(multiplicity) {
-            case "1":
-                return ConfigurationInfo.Multiplicity.ONE;
-            case "*":
-                return ConfigurationInfo.Multiplicity.STAR;
-            case "?":
-                return ConfigurationInfo.Multiplicity.OPTIONAL;
-            default:
-                throw new IllegalArgumentException(multiplicity);
-            }
-        }
-    }
+        STAR}
 }

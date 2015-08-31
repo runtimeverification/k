@@ -63,7 +63,7 @@ public class KItem extends Term implements KItemRepresentation {
     private Boolean anywhereApplicable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        return of(kLabel, kList, termContext, null, null);
+           return of(kLabel, kList, termContext, null, null);
     }
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
@@ -76,15 +76,11 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
-        this(kLabel, kList, sort, isExactSort, null, null);
+        this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
     }
 
-    public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Source source, Location location) {
-        this(kLabel, kList, sort, isExactSort, Collections.singleton(sort), source, location);
-    }
-
-    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts, Source source, Location location) {
-        super(Kind.KITEM, source, location);
+    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts) {
+        super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
         this.sort = sort;
@@ -92,6 +88,17 @@ public class KItem extends Term implements KItemRepresentation {
         this.possibleSorts = possibleSorts;
         this.termContext = null;
         this.enableCache = false;
+    }
+
+    private KItem(Term kLabel, Term kList, boolean enableCache, TermContext termContext, Source source, Location location) {
+        super(Kind.KITEM, source, location);
+        this.kLabel = kLabel;
+        this.kList = kList;
+        this.sort = null;
+        this.isExactSort = false;
+        this.possibleSorts = null;
+        this.termContext = termContext;
+        this.enableCache = enableCache;
     }
 
     private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location) {
