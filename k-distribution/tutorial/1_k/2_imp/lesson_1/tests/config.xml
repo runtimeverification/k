@@ -8,7 +8,11 @@
       results="."
       extension="imp"
       >
-    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--kore" />
+    <all-programs>
+      <krun-option name="--kore" />
+      <krun-option name="--parser" value="kast --kore --sort Pgm" />
+    </all-programs>
   </test>
 </tests>
 
