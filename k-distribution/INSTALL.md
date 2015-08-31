@@ -3,7 +3,7 @@ Here are instructions for installing K from the release zip/tgz archive.
 
 1. Prerequisites:
   * Java Runtime Edition version 8 or higher
-    (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+    http://www.oracle.com/technetwork/java/javase/downloads/index.html
     * To make sure java is installed properly, call `java -version` in a terminal.
 
 2. Install:
@@ -27,10 +27,11 @@ Here are instructions for installing K from the release zip/tgz archive.
 5. (Optional) OCAML:
   * To use the OCAML backend requires an installation of the OCAML package
     manager OPAM. Instructions on installing OPAM are available here:
-    (https://opam.ocaml.org/doc/Install.html)
+    https://opam.ocaml.org/doc/Install.html
   * Once opam is installed, you can prepare the installation to run
     the OCAML backend by running the "k-configure-opam" script found
-    in the lib directory.
+    in the lib directory. You will also need to run ``eval `opam config env` ``
+    afterwards to update your environment.
 
 --------------------------------------------------------------------------
 
