@@ -8,18 +8,14 @@ import com.google.common.collect.Multiset;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
-import org.kframework.kore.KApply;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 /**
@@ -30,7 +26,7 @@ import java.util.stream.Collectors;
  * @author AndreiS
  *
  */
-public class CellCollection extends Collection implements CollectionInternalRepresentation {
+public class CellCollection extends Collection {
 
     public static class Cell implements Serializable {
         private final CellLabel cellLabel;
@@ -84,8 +80,7 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     public static final CellCollection EMPTY = new CellCollection(
             ImmutableListMultimap.of(),
             ImmutableMultiset.of(),
-            false,
-            null);
+            false);
 
     /**
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
@@ -101,8 +96,6 @@ public class CellCollection extends Collection implements CollectionInternalRepr
      */
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasMultiplicityCell;
-
-    private final Definition definition;
 
     public static CellCollection singleton(CellLabel cellLabel, Term content, Definition definition) {
         return (CellCollection) builder(definition).put(cellLabel, content).build();
@@ -125,19 +118,17 @@ public class CellCollection extends Collection implements CollectionInternalRepr
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             Definition definition) {
-        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0, definition);
+        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0);
     }
 
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
-            boolean hasMultiplicityCell,
-            Definition definition) {
+            boolean hasMultiplicityCell) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;
-        this.definition = definition;
     }
 
     private static Variable computeFrame(Multiset<Variable> collectionVariables) {
@@ -147,13 +138,15 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Definition definition) {
         int count = 0;
         for (CellLabel cellLabel : cells.keySet()) {
-            if (definition.cellMultiplicity(cellLabel) == ConfigurationInfo.Multiplicity.STAR) {
-                count++;
-            } else {
-                if (cells.get(cellLabel).size() != 1) {
-                    throw KEMException.criticalError("Cell label " + cellLabel + " does not have "
-                            + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
-                            + "\nExamine the last rule applied to determine the source of the error.");
+            if (definition.getConfigurationStructureMap().containsKey(cellLabel.name())) {
+                if (definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                    count++;
+                } else {
+                    if (cells.get(cellLabel).size() != 1) {
+                        throw KEMException.criticalError("Cell label " + cellLabel + " does not have "
+                                + "multiplicity='*', but multiple cells found: " + cells.get(cellLabel)
+                                + "\nExamine the last rule applied to determine the source of the error.");
+                    }
                 }
             }
         }
@@ -238,39 +231,6 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     @Override
     public boolean isExactSort() {
         return true;
-    }
-
-    @Override
-    public List<Term> getKComponents() {
-        return cells.values().stream()
-                .map(c -> new KItem(
-                        KLabelConstant.of(c.cellLabel.name(), definition),
-                        KList.concatenate(c.content),
-                        sort(),
-                        true))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public KLabel constructorLabel() {
-        org.kframework.kore.KLabel kLabel = definition.configurationInfo().getConcat(getCellSort());
-        return KLabelConstant.of(kLabel.name(), definition);
-    }
-
-    @Override
-    public Term unit() {
-        org.kframework.kore.KApply kApply = definition.configurationInfo().getUnit(getCellSort());
-        return new KItem(
-                KLabelConstant.of(kApply.klabel().name(), definition),
-                KList.EMPTY,
-                sort(),
-                true);
-    }
-
-    private org.kframework.kore.Sort getCellSort() {
-        assert hasMultiplicityCell;
-        return definition.configurationInfo().getCellSort(
-                KLabelConstant.of(cells.keys().iterator().next().name(), definition));
     }
 
     @Override

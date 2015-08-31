@@ -11,7 +11,6 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.RewriteEngineUtils;
-import org.kframework.compile.ConfigurationInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -481,7 +480,7 @@ public class PatternMatcher extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (termContext.definition().cellMultiplicity(cellLabel) != ConfigurationInfo.Multiplicity.STAR) {
+                if (!termContext.definition().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     addUnificationTask(cellCollection.get(cellLabel).iterator().next().content(),

@@ -3,7 +3,8 @@ package org.kframework.compile
 import java.util
 
 import org.kframework.POSet
-import org.kframework.kore.KORE.{KLabel, KApply}
+import org.kframework.kore.KORE.{KLabel, KList, KApply}
+import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
 
@@ -24,7 +25,6 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellSorts: Set[Sort] = cellProductions.keySet
   private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
   private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
-  private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
   private val cellFragmentLabel: Map[String,KLabel] =
     m.productions.filter(_.att.contains("cellFragment"))
@@ -107,16 +107,14 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   }
 
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
-  override def getCellSort(kLabel: KLabel): Sort = cellLabelsToSorts(kLabel)
 
   override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k.name)
   override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k.name)
 
   override def getRootCell: Sort = topCell
   override def getComputationCell: Sort = mainCell
-  override def getCellSorts: util.Set[Sort] = cellSorts.asJava
 
-  override def getUnit(k: Sort): KApply = {
+  override def getUnit(k: Sort): K = {
     if (getMultiplicity(k) == Multiplicity.OPTIONAL)
       KApply(KLabel(cellProductions(k).att.get[String]("unit").get))
     else {
