@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -304,18 +305,18 @@ public class Proc<T> implements Runnable {
     }
 
     private ProcStatus wait(final Process proc) throws InterruptedException {
-        final boolean[] timeout = {false};
+        final AtomicBoolean timeout = new AtomicBoolean(false);
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 proc.destroy();
-                timeout[0] = true;
+                timeout.set(true);
             }
         }, options.getTimeout());
         int ret = proc.waitFor();
         timer.cancel();
-        return new ProcStatus(ret, timeout[0]);
+        return new ProcStatus(ret, timeout.get());
     }
 
     /**
