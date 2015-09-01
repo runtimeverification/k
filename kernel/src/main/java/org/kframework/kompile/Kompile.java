@@ -112,6 +112,10 @@ public class Kompile {
         this(kompileOptions, files, kem, sw, true);
     }
 
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
+        return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
+    }
+
     /**
      * Executes the Kompile tool. This tool accesses a
      *
