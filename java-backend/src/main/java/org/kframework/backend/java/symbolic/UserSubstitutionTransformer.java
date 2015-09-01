@@ -152,7 +152,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                      }
                  }
                  for (Term boundVar : capturingVars) {
-                     Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
+                     Term freshBoundVar = FreshOperations.freshOfSort(boundVar.sort(), context);
                      freshSubstitution.put(keyIndex, boundVar, freshBoundVar);
                  }
              }

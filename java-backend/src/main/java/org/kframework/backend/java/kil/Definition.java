@@ -34,6 +34,7 @@ import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class Definition extends JavaSymbolicObject {
         public final Map<org.kframework.kore.Sort, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
         public final ImmutableMap<String, Attributes> kLabelAttributes;
-        public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
+        public final Map<Sort, String> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
         public final Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity;
         public final ConfigurationInfo configurationInfo;
@@ -76,7 +77,7 @@ public class Definition extends JavaSymbolicObject {
                 Map<org.kframework.kore.Sort, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Attributes> kLabelAttributes,
-                Map<org.kframework.kil.Sort, String> freshFunctionNames,
+                Map<Sort, String> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening,
                 Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity,
                 ConfigurationInfo configurationInfo,
@@ -187,7 +188,7 @@ public class Definition extends JavaSymbolicObject {
                 context.getDataStructureSorts().entrySet().stream().collect(Collectors.toMap(e -> Sort(e.getKey().getName()), Map.Entry::getValue)),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                context.freshFunctionNames,
+                context.freshFunctionNames.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), Map.Entry::getValue)),
                 context.smtSortFlattening.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), e -> Sort.of(e.getValue()))),
                 context.getConfigurationStructureMap().entrySet().stream().collect(Collectors.toMap(
                         e -> CellLabel.of(e.getKey()),
@@ -232,7 +233,9 @@ public class Definition extends JavaSymbolicObject {
                 getDataStructureSorts(module),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                null,
+                JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
+                        e -> Sort.of(e.getKey().name()),
+                        e -> e.getValue().name())),
                 null,
                 configurationInfo.getCellSorts().stream().collect(Collectors.toMap(
                         s -> CellLabel.of(configurationInfo.getCellLabel(s).name()),
@@ -458,7 +461,7 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.dataStructureSorts.get(Sort(sort.name()));
     }
 
-    public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
+    public Map<Sort, String> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 
