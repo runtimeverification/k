@@ -27,7 +27,6 @@ import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class KompileFrontEnd extends FrontEnd {
 
@@ -43,7 +42,7 @@ public class KompileFrontEnd extends FrontEnd {
     private final Context context;
     private final KompileOptions options;
     private final Provider<Backend> backend;
-    private final Provider<Consumer<CompiledDefinition>> koreBackend;
+    private final Provider<org.kframework.kore.compile.Backend> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -57,7 +56,7 @@ public class KompileFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             Provider<Backend> backend,
-            Provider<Consumer<CompiledDefinition>> koreBackend,
+            Provider<org.kframework.kore.compile.Backend> koreBackend,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader,
@@ -86,7 +85,7 @@ public class KompileFrontEnd extends FrontEnd {
         if (options.experimental.kore) {
             Kompile kompile = new Kompile(options, files, kem, sw);
             //TODO(dwightguth): handle start symbols
-            CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K());
+            CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
             loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
             koreBackend.get().accept(def);
             sw.printIntermediate("Save to disk");

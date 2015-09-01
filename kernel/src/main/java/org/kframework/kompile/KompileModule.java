@@ -44,7 +44,7 @@ public class KompileModule extends AbstractModule {
                 binder(), String.class, Backend.class);
 
         MapBinder.newMapBinder(
-                binder(), TypeLiteral.get(String.class), new TypeLiteral<Consumer<CompiledDefinition>>() {});
+                binder(), String.class, org.kframework.kore.compile.Backend.class);
     }
 
     @Provides
@@ -93,8 +93,8 @@ public class KompileModule extends AbstractModule {
     }
 
     @Provides
-    Consumer<CompiledDefinition> getKoreBackend(KompileOptions options, Map<String, Consumer<CompiledDefinition>> map, KExceptionManager kem) {
-        Consumer<CompiledDefinition> backend = map.get(options.backend);
+    org.kframework.kore.compile.Backend getKoreBackend(KompileOptions options, Map<String, org.kframework.kore.compile.Backend> map, KExceptionManager kem) {
+        org.kframework.kore.compile.Backend backend = map.get(options.backend);
         if (backend == null) {
             throw KEMException.criticalError("Invalid backend: " + options.backend
                     + ". It should be one of " + map.keySet());
