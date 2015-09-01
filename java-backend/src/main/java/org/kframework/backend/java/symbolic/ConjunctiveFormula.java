@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -484,6 +485,30 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         } else {
             return null;
         }
+    }
+
+    public ConjunctiveFormula resolveNonDeterministicLookups() {
+        ConjunctiveFormula result = this;
+        for (Equality equality : equalities) {
+            result = resolveNonDeterministicLookup(result, equality.leftHandSide());
+            result = resolveNonDeterministicLookup(result, equality.rightHandSide());
+        }
+        return result;
+    }
+
+    private ConjunctiveFormula resolveNonDeterministicLookup(ConjunctiveFormula result, Term term) {
+        if (DataStructures.isLookup(term)
+                && DataStructures.getLookupBase(term) instanceof BuiltinMap
+                && ((BuiltinMap) DataStructures.getLookupBase(term)).isConcreteCollection()) {
+            result = result.add(new DisjunctiveFormula((
+                    (BuiltinMap) DataStructures.getLookupBase(term)).getEntries().keySet().stream()
+                        .map(key -> new Equality(DataStructures.getLookupKey(term), key, context))
+                        .filter(e -> !e.isFalse())
+                        .map(e -> ConjunctiveFormula.of(context).add(e))
+                        .collect(Collectors.toList()),
+                    context));
+        }
+        return result;
     }
 
     /**

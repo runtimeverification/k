@@ -59,6 +59,13 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         this.options = options;
     }
 
+    OcamlRewriter(FileUtil files, DefinitionToOcaml converter, KRunOptions options) {
+        this.files = files;
+        this.def = null;
+        this.converter = converter;
+        this.options = options;
+    }
+
     @Override
     public Rewriter apply(Module module) {
         if (!module.equals(def.executionModule())) {
@@ -125,48 +132,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
     private String compileAndExecOcaml(String name) {
         try {
-            ProcessBuilder pb = files.getProcessBuilder();
-            List<String> args = new ArrayList<>(Arrays.asList("-g", "-o", "a.out", "-package", "gmp", "-package", "zarith",
-                    "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
-            args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
-            args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
-            if (converter.options.ocamlopt) {
-                args.add(0, "ocamlfind");
-                args.add(1, "ocamlopt");
-                if (!converter.options.noLinkPrelude) {
-                    args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
-                    args.add(files.resolveKompiled("prelude.cmx").getAbsolutePath());
-                }
-                args.addAll(Arrays.asList(files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        files.resolveKompiled("parser.cmx").getAbsolutePath(), files.resolveKompiled("lexer.cmx").getAbsolutePath(),
-                        name));
-                args.add("-inline");
-                args.add("20");
-                args.add("-nodynlink");
-                pb = pb.command(args);
-                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
-            } else {
-                args.add(0, "ocamlfind");
-                args.add(1, "ocamlc");
-                if (!converter.options.noLinkPrelude) {
-                    args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
-                    args.add(files.resolveKompiled("prelude.cmo").getAbsolutePath());
-                }
-                args.addAll(Arrays.asList(files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
-                        files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
-                        name));
-                pb = pb.command(args);
-                pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
-            }
-            Process p = pb.directory(files.resolveTemp("."))
-                    .redirectError(files.resolveTemp("compile.err"))
-                    .redirectOutput(files.resolveTemp("compile.out"))
-                    .start();
-            int exit = p.waitFor();
-            if (exit != 0) {
-                System.err.println(files.loadFromTemp("compile.err"));
-                throw KEMException.criticalError("Failed to compile program to ocaml. See output for error information.");
-            }
+            compileOcaml(name);
+            int exit;
             Process p2 = files.getProcessBuilder()
                     .command(files.resolveTemp("a.out").getAbsolutePath())
                     .start();
@@ -238,9 +205,54 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
     }
 
+    void compileOcaml(String name) throws IOException, InterruptedException {
+        ProcessBuilder pb = files.getProcessBuilder();
+        List<String> args = new ArrayList<>(Arrays.asList("-g", "-o", "a.out", "-package", "gmp", "-package", "zarith",
+                "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
+        args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
+        args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
+        if (converter.options.ocamlopt) {
+            args.add(0, "ocamlfind");
+            args.add(1, "ocamlopt");
+            if (!converter.options.noLinkPrelude) {
+                args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("prelude.cmx").getAbsolutePath());
+            }
+            args.addAll(Arrays.asList(files.resolveKompiled("def.cmx").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                    files.resolveKompiled("parser.cmx").getAbsolutePath(), files.resolveKompiled("lexer.cmx").getAbsolutePath(),
+                    name));
+            args.add("-inline");
+            args.add("20");
+            args.add("-nodynlink");
+            pb = pb.command(args);
+            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+        } else {
+            args.add(0, "ocamlfind");
+            args.add(1, "ocamlc");
+            if (!converter.options.noLinkPrelude) {
+                args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("prelude.cmo").getAbsolutePath());
+            }
+            args.addAll(Arrays.asList(files.resolveKompiled("def.cmo").getAbsolutePath(), "-I", files.resolveKompiled(".").getAbsolutePath(),
+                    files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
+                    name));
+            pb = pb.command(args);
+            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+        }
+        Process p = pb.directory(files.resolveTemp("."))
+                .redirectError(files.resolveTemp("compile.err"))
+                .redirectOutput(files.resolveTemp("compile.out"))
+                .start();
+        int exit = p.waitFor();
+        if (exit != 0) {
+            System.err.println(files.loadFromTemp("compile.err"));
+            throw KEMException.criticalError("Failed to compile program to ocaml. See output for error information.");
+        }
+    }
+
     @DefinitionScoped
     public static class InitializeDefinition {
-        private final DefinitionToOcaml serialized;
+        final DefinitionToOcaml serialized;
 
         @Inject
         public InitializeDefinition(BinaryLoader loader, FileUtil files) {

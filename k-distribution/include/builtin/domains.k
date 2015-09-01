@@ -281,6 +281,9 @@ module INT
 
   syntax Int ::= freshInt(Int)    [freshGenerator, function]
   rule freshInt(I:Int) => I
+
+  syntax Int ::= randInt(Int) [function, hook(INT.rand)]
+  syntax K ::= srandInt(Int) [function, hook(INT.srand)]
 endmodule
 
 module FLOAT-SYNTAX
@@ -483,6 +486,10 @@ module K-REFLECTION
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
+
+  // meaningful only for the purposes of compilation to a binary, otherwise
+  // undefined
+  syntax List ::= "#argv" [function, hook(KREFLECTION.argv)]
 
 endmodule
 

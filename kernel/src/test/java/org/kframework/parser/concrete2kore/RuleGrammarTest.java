@@ -380,4 +380,17 @@ public class RuleGrammarTest {
                 "endmodule";
         parseRule("X => label(X,wrap X)", def, 0, true);
     }
+
+    // automatic follow restriction should not be added for empty terminals
+    // regression test for issue #1575
+    @Test
+    public void test23() {
+        String def = "" +
+                "module TEST " +
+                "syntax Stmts ::= Stmt \"\" Stmts\n" +
+                "                 | \".Stmts\"\n" +
+                "  syntax Stmt  ::= \"a\"" +
+                "endmodule";
+        parseRule("a .Stmts", def, 0, false);
+    }
 }

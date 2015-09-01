@@ -43,4 +43,9 @@ public class ConfigurationStructure implements Serializable {
     public boolean hasChildren() {
         return !sons.isEmpty();
     }
+
+    public boolean hasMultiplicityStarChildren() {
+        return sons.keySet().stream()
+                .anyMatch(l -> sons.get(l).multiplicity != Cell.Multiplicity.ONE);
+    }
 }

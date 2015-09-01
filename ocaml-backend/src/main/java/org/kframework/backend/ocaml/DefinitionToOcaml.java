@@ -287,19 +287,38 @@ public class DefinitionToOcaml implements Serializable {
         return sb.toString();
     }
 
+    public String ocamlCompile(K k, Rule exitCode, Integer dumpExitCode) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
+        sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
+        convertFunction(Collections.singletonList(convert(exitCode)), sb, "try_match", RuleType.PATTERN);
+        sb.append("| _ -> raise(Stuck c)\n");
+        sb.append("let _ = let res = run(Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append("\n) (-1) in let subst = try_match(res) in\n");
+        sb.append("let code = get_exit_code subst in\n");
+        if (dumpExitCode != null) {
+            sb.append("(if code = ").append(dumpExitCode).append(" then\n");
+            sb.append("(print_string \"Execution failed (configuration dumped)\\n\";\n");
+            sb.append("let out = open_out \"config\" in output_string out (print_k res))\n");
+            sb.append("else ());\n");
+        }
+        sb.append("exit code\n");
+        return sb.toString();
+    }
+
     public String constants() {
         StringBuilder sb = new StringBuilder();
         sb.append("type sort = \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        Set<Sort> sorts = mutable(mainModule.definedSorts());
+        sorts.add(Sorts.Bool());
+        sorts.add(Sorts.Int());
+        sorts.add(Sorts.String());
+        sorts.add(Sorts.Float());
+        for (Sort s : sorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, s);
             sb.append("\n");
-        }
-        if (!mainModule.definedSorts().contains(Sorts.String())) {
-            sb.append("|SortString\n");
-        }
-        if (!mainModule.definedSorts().contains(Sorts.Float())) {
-            sb.append("|SortFloat\n");
         }
         sb.append("type klabel = \n");
         for (KLabel label : iterable(mainModule.definedKLabels())) {
@@ -308,7 +327,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n");
         }
         sb.append("let print_sort(c: sort) : string = match c with \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        for (Sort s : sorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, s);
             sb.append(" -> ");
@@ -324,7 +343,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n");
         }
         sb.append("let parse_sort(c: string) : sort = match c with \n");
-        for (Sort s : iterable(mainModule.definedSorts())) {
+        for (Sort s : sorts) {
             sb.append("|");
             sb.append(enquoteString(s.name()));
             sb.append(" -> ");
@@ -694,6 +713,7 @@ public class DefinitionToOcaml implements Serializable {
                         encodeStringToFunction(sb, freshFunction);
                         sb.append(" ([Int counter]) config (-1))\n");
                     }
+                    sb.append("| _ -> invalid_arg (\"Cannot find fresh function for sort \" ^ sort)");
                 }
                 if (functions.contains(functionLabel)) {
                     sb.append(conn);
