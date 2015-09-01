@@ -170,20 +170,21 @@ module KERNELC-SEMANTICS
   /*
    * If/choice
    */
-  rule if (E:Expression) S1:Statement else S2:Statement
-    => expression2bool(E) ~> if (HOLE) S1 else S2
+  syntax KItem ::= "#wrap2" "(" K "," K ")"
+  rule if (HOLE:Expression) S1:Statement else S2:Statement
+    => expression2bool(HOLE) ~> #wrap2(S1, S2)
     [heat]
-  rule B:Bool ~> if (HOLE) S1:Statement else S2:Statement
-    => if (B) S1 else S2
+  rule HOLE:Bool ~> #wrap2(S1:Statement, S2:Statement)
+    => if (HOLE) S1 else S2
     [cool]
   rule if( true) S:Statement else _:Statement => S    [structural]
   rule if(false) _:Statement else S:Statement => S    [structural]
 
-  rule E1:Expression ? E2:Expression : E3:Expression
-    => expression2bool(E1) ~> HOLE ? E2 : E3
+  rule HOLE:Expression ? E1:Expression : E2:Expression
+    => expression2bool(HOLE) ~> #wrap2(E1, E2)
     [heat]
-  rule B:Bool ~> HOLE ? E1:Expression : E2:Expression
-    => B ? E1 : E2
+  rule HOLE:Bool ~> #wrap2(E1:Expression, E2:Expression)
+    => HOLE ? E1 : E2
     [cool]
   rule  true ? E:Expression : _:Expression => E   [structural]
   rule false ? _:Expression : E:Expression => E   [structural]
@@ -196,6 +197,7 @@ module KERNELC-SEMANTICS
   /*
    * while
    */
+  //rule while (E:Expression) S:Statement => if (E) { S while(E) S }
   rule while (E:Expression) S:Statement => if (E) { S while(E) S }
     [structural]
 
@@ -209,7 +211,9 @@ module KERNELC-SEMANTICS
       Callee |-> functionBody(PDs:ParameterDeclarations, _:Type, B:Block)
     ...</fun>
     <k>
-      Callee:Id(EEs:EvaluatedExpressions) ~> K
+      // TODO(RaduM): fix the bug with the extra .List{","} terminator
+      // Callee:Id(EEs:EvaluatedExpressions) ~> K
+      `_(_)`(Callee:Id, EEs:EvaluatedExpressions) ~> K
     =>
       { declareParameters(PDs) bindParameters(PDs, EEs, B) }
     </k>
@@ -276,8 +280,9 @@ module KERNELC-SEMANTICS
     [transition]
 
   /* memory write */
-  rule E1:Expression = E2:EvaluatedExpression; => &E1 ~> HOLE = E2;   [heat]
-  rule TV:TypedValue ~> HOLE = E:EvaluatedExpression; => TV = E;      [cool]
+  syntax KItem ::= "#wrap1" "(" K ")"
+  rule HOLE:Expression = E:EvaluatedExpression; => &HOLE ~> #wrap1(E)   [heat]
+  rule HOLE:TypedValue ~> #wrap1(E:EvaluatedExpression) => HOLE = E;    [cool]
   rule
     <k> tv(T:Type *, object(I:Int)) = tv(T, V:Value); => .K ...</k>
     <heap>... object(I) |-> tv(T, _:Value => V) ...</heap>
@@ -380,6 +385,8 @@ module KERNELC-SEMANTICS
   /*
    * Cast
    */
+  rule (T:Type) HOLE:Expression => HOLE ~> #wrap1(T)    [heat]
+  rule HOLE:TypedValue ~> #wrap1(T:Type) => (T) HOLE    [cool]
   // TODO: cast is disabled for now
   //rule (T) tv(_, V) => tv(T, V) [structural]
 
@@ -430,7 +437,7 @@ module KERNELC-SEMANTICS
   // TODO: check why the HOLE below does not become a freezer
   rule
     <k>
-      malloc(tv(int, Size:Int)) ~> (struct S:Id *) HOLE:>Expression
+      malloc(tv(int, Size:Int)) ~> #wrap1(struct S:Id *)
     =>
       tv(struct S *, object(!I:Int))
     ...</k>

@@ -63,7 +63,7 @@ module KERNELC-COMMON-SYNTAX
     | "*" Expression                                    [seqstrict]
     | "&" Expression
     | "sizeof" "(" Type ")"
-    > "(" Type ")" Expression                           [seqstrict(2)]
+    > "(" Type ")" Expression
     > left:
       Expression "*" Expression                         [seqstrict]
     | Expression "/" Expression                         [seqstrict]
