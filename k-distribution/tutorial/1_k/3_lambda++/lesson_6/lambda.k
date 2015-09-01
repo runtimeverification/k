@@ -7,6 +7,8 @@
 \organization{University of Illinois at Urbana-Champaign}
 */
 
+require "domains.k"
+
 /*@ \section{Abstract}
 This file contains an environment-based \K semantic definition of LAMBDA++, an
 extension of the LAMBDA language (defined in Tutorial 1) with a \texttt{callcc}
@@ -28,6 +30,12 @@ module.  Type kompile --help to see how to tell the parser which syntax to use.
 */
 
 module LAMBDA-SYNTAX
+  imports LAMBDA-COMMON
+  imports ID
+endmodule
+
+module LAMBDA-COMMON
+  imports DOMAINS-COMMON
 /*@ \section{Syntax}
 We move all the LAMBDA++ syntax here. */
 
@@ -58,7 +66,8 @@ endmodule
 
 
 module LAMBDA
-  imports LAMBDA-SYNTAX
+  imports LAMBDA-COMMON
+  imports DOMAINS
 
 /*@ \section{Semantics}
 The next module contains the semantics of all the LAMBDA++ constructs,
@@ -80,7 +89,7 @@ an environment cell, and a store cell.  An environment binds variable names
 to locations, and a store binds locations to values. */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Exp </k>
+                  <k color="green"> $PGM:Exp:K </k>
                   <env color="blue"> .Map </env>
                   <store color="red"> .Map </store>
                 </T>
@@ -115,7 +124,7 @@ The environment-recovery computation item defined below is useful in many
 semantics, like it was above.  It is so useful, that there are discussions
 in the \K team to add it to the set of pre-defined \K features. */
 
-  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> `Rho => .K` ...</k> <env> _ => Rho </env>
     [structural]
 
 /*@ \subsection{Arithmetic Constructs}
@@ -171,6 +180,6 @@ supposed to be executed.  Forget the environment and you get a wrong
 
   syntax Val ::= cc(Map,K)
     [latex(\textsf{closure}_{\texttt{callcc}}({#1},{#2}))]
-  rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
+  rule <k> `callcc V:Val => V cc(Rho,K)` ~> K </k> <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
 endmodule
