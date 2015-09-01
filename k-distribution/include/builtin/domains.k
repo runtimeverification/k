@@ -1,4 +1,27 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
+module DOMAINS-COMMON
+  imports EMPTY-ID
+  imports INT-SYNTAX
+  imports BOOL-SYNTAX
+  imports STRING-SYNTAX
+endmodule
+
+module DOMAINS-SYNTAX
+  imports DOMAINS-COMMON
+  imports ID
+endmodule
+
+module DOMAINS
+  imports INT
+  imports BOOL
+  imports STRING
+  imports K
+  imports K-IO
+  imports LIST
+  imports MAP
+  imports SET
+endmodule
+
 module MAP
   imports LIST
   imports SET
