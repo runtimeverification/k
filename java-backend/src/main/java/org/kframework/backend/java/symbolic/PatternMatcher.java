@@ -546,9 +546,7 @@ public class PatternMatcher extends AbstractUnifier {
                 }
 
                 if (otherFrame != null) {
-                    CellCollection.Builder builder = CellCollection.builder(
-                            cellCollection.cellSort(),
-                            termContext.definition());
+                    CellCollection.Builder builder = cellCollection.builder();
                     for (int i = 0; i < cells.length; ++i) {
                         if (!generator.isSelected(i)) {
                             builder.add(cells[i]);

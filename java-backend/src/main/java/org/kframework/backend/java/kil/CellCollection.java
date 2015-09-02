@@ -223,7 +223,7 @@ public class CellCollection extends Collection implements CollectionInternalRepr
      * labels.
      */
     public Term removeAll(Set<CellLabel> removeLabels) {
-        Builder builder = builder(cellSort, definition);
+        Builder builder = builder();
         cells.keySet().stream()
                 .filter(label -> !removeLabels.contains(label))
                 .forEach(label -> builder.addAll(cells.get(label)));
@@ -344,8 +344,12 @@ public class CellCollection extends Collection implements CollectionInternalRepr
         return transformer.transform(this);
     }
 
-    public static Builder builder(org.kframework.kore.Sort collectionSort, Definition definition) {
-        return new Builder(collectionSort, definition);
+    public Builder builder() {
+        return new Builder(cellSort, definition);
+    }
+
+    public static Builder builder(org.kframework.kore.Sort cellSort, Definition definition) {
+        return new Builder(cellSort, definition);
     }
 
     public static class Builder {

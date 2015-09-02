@@ -187,7 +187,7 @@ public class AbstractKMachine {
         @Override
         public CellCollection transform(CellCollection cellCollection) {
             boolean changed = false;
-            CellCollection.Builder builder = CellCollection.builder(cellCollection.cellSort(), context.definition());
+            CellCollection.Builder builder = cellCollection.builder();
             for (CellCollection.Cell cell : cellCollection.cells().values()) {
                 CellCollection selectedCell = (CellCollection) substitution.get(Rule.getChoiceVariableForCell(cell.cellLabel()));
                 if (selectedCell != null && !cell.equals(selectedCell.cells().values().iterator().next())) {
