@@ -19,11 +19,11 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,16 +71,16 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
             while (m.regionStart() < m.regionEnd()) {
                 if (!m.lookingAt()) {
-                    throw KExceptionManager.criticalError(
+                    throw KEMException.criticalError(
                             "could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\"");
                 }
                 if (m.end() < m.regionEnd()) {
                     if (!m.group(4).equals(",")) {
-                        throw KExceptionManager.criticalError("expecting ',' at the end \"" + m.group() + "\"");
+                        throw KEMException.criticalError("expecting ',' at the end \"" + m.group() + "\"");
                     }
                 } else {
                     if (!m.group(4).equals("")) {
-                        throw KExceptionManager.criticalError("unexpected ',' at the end \"" + m.group() + "\"");
+                        throw KEMException.criticalError("unexpected ',' at the end \"" + m.group() + "\"");
                     }
                 }
 
@@ -103,8 +103,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod, context)),
                     BoolBuiltin.TRUE, context);
             rule.addAttribute(Attribute.ANYWHERE);
-            rule.setSource(Sources.generatedBy(ResolveBinder.class));
-            items.add(rule);
 
             Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
 
@@ -114,8 +112,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bndIdx + 1));
                 rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
-                rule.setSource(Sources.generatedBy(ResolveBinder.class));
-                items.add(rule);
                 //String bndSort = prod.getChildSort(bndIdx - 1);
                 // (AndreiS): the bounded sort is no longer automatically
                 // considered to be subsorted to Variable; Variable must be
@@ -131,8 +127,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 list.getContents().add(IntBuiltin.kAppOf(bodyIdx + 1));
                 rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE, context);
                 rule.addAttribute(Attribute.ANYWHERE);
-                rule.setSource(Sources.generatedBy(ResolveBinder.class));
-                items.add(rule);
             }
         }
 

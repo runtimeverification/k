@@ -54,6 +54,7 @@
 (declare-fun smt_seq_nil () IntSeq)
 (declare-fun smt_seq_len (IntSeq) Int)
 
+(declare-fun smt_seq_sum (IntSeq) Int)
 (declare-fun smt_seq2set (IntSeq) IntSet)
 (declare-fun smt_seq_sorted (IntSeq) Bool)
 
@@ -61,3 +62,10 @@
 	:pattern ((smt_seq_sorted (smt_seq_concat s1 s2)))
 	:pattern ((smt_seq_sorted s1) (smt_seq_sorted s2))
 )))
+
+(assert (forall ((e Int)) (= (smt_seq_sorted (smt_seq_elem e)) true)))
+(assert (= (smt_seq_sorted smt_seq_nil) true))
+
+(assert (forall ((s IntSeq)) (>= (smt_seq_len s) 0)))
+
+(assert (forall ((e Int) (s IntSet)) (not (= (smt_set_cup (smt_set_ele e) s) smt_set_emp))))

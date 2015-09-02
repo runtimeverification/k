@@ -108,7 +108,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions. */
 
-  syntax Id ::= "main"
+  syntax Id ::= "main" [token]
 
 /*@ \subsection{Types}
 Primitive, array and function types, as well as lists (or tuples) of types.

@@ -1,25 +1,23 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.ListUtils;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -27,7 +25,7 @@ import com.google.common.collect.Lists;
  *
  * @author: YilongL
  */
-public class BuiltinList extends Collection {
+public class BuiltinList extends Collection implements KItemCollection {
 
     private static enum BaseTermType {
         VARIABLE, FUNCTION, PATTERN, LIST;
@@ -183,16 +181,6 @@ public class BuiltinList extends Collection {
             }
         }
         return false;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override
@@ -413,7 +401,7 @@ public class BuiltinList extends Collection {
          */
         public void concatenate(Term term) {
             if (!term.sort().equals(Sort.LIST)) {
-                throw KExceptionManager.criticalError("unexpected sort "
+                throw KEMException.criticalError("unexpected sort "
                         + term.sort() + " of concatenated term " + term
                         + "; expected " + Sort.LIST);
             }

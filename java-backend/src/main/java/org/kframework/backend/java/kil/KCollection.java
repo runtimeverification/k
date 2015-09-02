@@ -107,11 +107,6 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
     }
 
     @Override
-    public List<Term> getKComponents() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }

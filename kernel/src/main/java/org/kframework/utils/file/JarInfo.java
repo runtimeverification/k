@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import com.google.inject.Inject;
@@ -8,10 +9,9 @@ import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
+import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.jar.Manifest;
 
@@ -38,6 +38,31 @@ public class JarInfo {
         return null;
     }
 
+    /**
+     * Returns the absolute path of the includes directory.
+     * Paths are computed relative to the location this class is running from.
+     * When it is run from a jar file it assumes it is in a k installation
+     * at lib/java/*.jar.
+     * When it is run from a .class file it assumes it is running within the
+     * K source project, from a class in kernel/target/classes/, and
+     * returns a path to k-distribution/include
+     *
+     * @return
+     */
+    public static Path getKIncludeDir() {
+        Path path;
+        try {
+            path = Paths.get(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        if (!path.toFile().getAbsolutePath().endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
+            return path.getParent().resolve("../../k-distribution/include");
+        } else {
+            return path.getParent().resolve("../../include");
+        }
+    }
+
     private final KExceptionManager kem;
 
     @Inject
@@ -62,7 +87,7 @@ public class JarInfo {
             System.out.println("Git branch: " + branch);
             System.out.println("Build date: " + date.toString());
         } catch (IOException e) {
-            throw KExceptionManager.internalError("Could not load version info. Check your build system?");
+            throw KEMException.internalError("Could not load version info. Check your build system?");
         }
     }
 }

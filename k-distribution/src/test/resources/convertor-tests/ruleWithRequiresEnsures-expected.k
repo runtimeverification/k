@@ -1,8 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-
-module TEST [org.kframework.attributes.Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"9"),#token(Int,"9"))]
-  syntax Exp [org.kframework.attributes.Location(#token(Int,"4"),#token(Int,"3"),#token(Int,"4"),#token(Int,"12"))]
-  rule A=>A requires '_andBool_(A,isExp(A)) ensures A [org.kframework.attributes.Location(#token(Int,"8"),#token(Int,"3"),#token(Int,"8"),#token(Int,"38"))]
-  rule A=>A requires '_andBool_(A,isExp(A)) ensures #token(Bool,"true") [org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"3"),#token(Int,"6"),#token(Int,"28"))]
-  rule A=>A requires '_andBool_(#token(Bool,"true"),isExp(A)) ensures A [org.kframework.attributes.Location(#token(Int,"7"),#token(Int,"3"),#token(Int,"7"),#token(Int,"27"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("9",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
+  syntax Exp [Location(#token("4",Int),#token("3",Int),#token("4",Int),#token("12",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
+  rule =>(A,A) requires _andBool_(A,isExp(A)) ensures A [Location(#token("8",Int),#token("3",Int),#token("8",Int),#token("38",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
+  rule =>(A,A) requires _andBool_(A,isExp(A)) ensures #token("true",Bool) [Location(#token("6",Int),#token("3",Int),#token("6",Int),#token("28",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
+  rule =>(A,A) requires _andBool_(#token("true",Bool),isExp(A)) ensures A [Location(#token("7",Int),#token("3",Int),#token("7",Int),#token("27",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
 endmodule

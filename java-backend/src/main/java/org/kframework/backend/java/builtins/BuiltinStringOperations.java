@@ -52,7 +52,7 @@ public class BuiltinStringOperations {
 
     public static IntToken ord(StringToken term, TermContext context) {
         if (term.stringValue().codePointCount(0, term.stringValue().length()) != 1) {
-            throw new IllegalArgumentException();
+            return null;
         }
         return IntToken.of(term.stringValue().codePointAt(0));
     }
@@ -60,15 +60,23 @@ public class BuiltinStringOperations {
     public static StringToken chr(IntToken term, TermContext context) {
         //safe because we know it's in the unicode code range or it will throw
         int codePoint = term.intValue();
-        StringUtil.throwIfSurrogatePair(codePoint);
-        char[] chars = Character.toChars(codePoint);
-        return StringToken.of(new String(chars));
+        try {
+            StringUtil.throwIfSurrogatePair(codePoint);
+            char[] chars = Character.toChars(codePoint);
+            return StringToken.of(new String(chars));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public static StringToken substr(StringToken term, IntToken start, IntToken end, TermContext context) {
         int beginOffset = term.stringValue().offsetByCodePoints(0, start.intValue());
         int endOffset = term.stringValue().offsetByCodePoints(0, end.intValue());
-        return StringToken.of(term.stringValue().substring(beginOffset, endOffset));
+        try {
+            return StringToken.of(term.stringValue().substring(beginOffset, endOffset));
+        } catch (StringIndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     public static IntToken find(StringToken term1, StringToken term2, IntToken idx, TermContext context) {
@@ -96,7 +104,11 @@ public class BuiltinStringOperations {
     }
 
     public static IntToken string2int(StringToken term, TermContext context) {
-        return IntToken.of(term.stringValue());
+        try {
+            return IntToken.of(term.stringValue());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public static IntToken string2base(StringToken term, IntToken base, TermContext context) {
@@ -116,7 +128,11 @@ public class BuiltinStringOperations {
     }
 
     public static StringToken float2string(FloatToken term, TermContext context) {
-        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue()));
+        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue(), term.bigFloatValue()::toString));
+    }
+
+    public static StringToken floatFormat(FloatToken term, StringToken format, TermContext context) {
+        return StringToken.of(FloatBuiltin.printKFloat(term.bigFloatValue(), () -> term.bigFloatValue().toString(format.stringValue())));
     }
 
     public static StringToken int2string(IntToken term, TermContext context) {

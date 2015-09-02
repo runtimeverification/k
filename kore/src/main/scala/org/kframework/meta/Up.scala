@@ -7,7 +7,7 @@ import org.kframework.kore._
 import collection.JavaConverters._
 import org.kframework.kore
 
-class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K]) extends (Any => K) {
+class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[String]) extends (Any => K) {
 
   import cons._
 
@@ -22,20 +22,16 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K]) extends (Any => 
     o match {
       case o: List[_] => 'List(o map apply: _*)
       case o: Set[_] => 'Set(o map apply toList: _*)
+      case att: Att => 'Att(att.att.toSeq.asInstanceOf[Seq[K]] :_*)
 
       // Primitives
-      case o: Int => cons.KToken(Sorts.Int, o.toString, Att())
-      case o: String => cons.KToken(Sorts.KString, o.toString, Att())
-      case o: Boolean => cons.KToken(Sorts.Bool, o.toString, Att())
+      case o: Int => cons.KToken(o.toString, Sorts.Int, Att())
+      case o: String => cons.KToken(o.toString, Sorts.KString, Att())
+      case o: Boolean => cons.KToken(o.toString, Sorts.Bool, Att())
 
-      case o: Associativity.Value => cons.KToken(cons.Sort("Associativity"), o.toString, Att())
-      case o: java.io.File => cons.KToken(cons.Sort("File"), o.toString, Att())
-
-      // Already K
-      case o: K => o
-
-      case o: Sort => 'Sort(cons.KToken(Sorts.KString, o.name, Att()))
-
+      case o: Associativity.Value => cons.KToken(o.toString, cons.Sort("Associativity"), Att())
+      case o: java.io.File => cons.KToken(o.toString, cons.Sort("File"), Att())
+        
       // Fallback to reflection
       case o: Product =>
         val elements = o.productIterator.toList
@@ -46,6 +42,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K]) extends (Any => 
   }
 
   def processName(arg: String) = {
-    arg.replace("org.kframework.definition.", "").replace("org.kframework.koreimplementation.", "")
+    imports.foldLeft(arg) { (klabel, theImport) => klabel.replaceAll(theImport + ".", "") }
+    //    arg.replace("org.kframework.definition.", "").replace("org.kframework.koreimplementation.", "")
   }
 }

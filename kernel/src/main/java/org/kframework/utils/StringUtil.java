@@ -26,8 +26,6 @@ public class StringUtil {
             throw new IllegalArgumentException("Expected to find " + delimiter + " at the end of string: " + str);
         }
         for (int i = 1; i < str.length() - 1; i++) {
-            if (str.charAt(i) > 0xFF)
-                throw new IllegalArgumentException("Unicode characters not supported here:" + str);
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '\\')
                     sb.append('\\');
@@ -82,7 +80,7 @@ public class StringUtil {
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
             if (codepoint > 0xFF) {
-                throw new IllegalArgumentException("Unicode characters not supported here:" + value);
+                result.appendCodePoint(codepoint);
             } else if (codepoint == delimiter) {
                 result.append("\\" + delimiter);
             } else if (codepoint == '\\') {
@@ -627,7 +625,7 @@ public class StringUtil {
             throw new IllegalArgumentException("Expected to find " + delimiter + " at the end of string: " + str);
         }
         for (int i = 1; i < str.length() - 1; i++) {
-            if (str.charAt(i) > 0xFF || str.charAt(i) == 0x7F || str.charAt(i) < 32)
+            if (str.charAt(i) == 0x7F || str.charAt(i) < 32)
                 throw new IllegalArgumentException("Special characters not supported here:" + str);
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '\\')
@@ -658,14 +656,14 @@ public class StringUtil {
         result.append(delimiter);
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
-            if (codepoint > 0xFF || codepoint == 0x7F || codepoint < 32) {
+            if (codepoint == 0x7F || codepoint < 32) {
                 throw new IllegalArgumentException("Special characters not supported here:" + value);
             } else if (codepoint == delimiter) {
                 result.append("\\" + delimiter);
             } else if (codepoint == '\\') {
                 result.append("\\\\");
             } else {
-                result.append((char)codepoint);
+                result.appendCodePoint(codepoint);
             }
         }
         result.append(delimiter);

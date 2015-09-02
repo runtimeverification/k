@@ -9,10 +9,10 @@ import scala.collection.JavaConverters._
 trait ScalaSugar[K <: kore.K] {
   self: Constructors[K] =>
 
-  implicit def stringToToken(s: String) = KToken(Sorts.String, s, Att())
-  def stringToId(s: String): K = KToken(Sorts.Id, s, Att())
+  implicit def stringToToken(s: String) = KToken(s, Sorts.String, Att())
+  def stringToId(s: String): K = KToken(s, Sorts.Id, Att())
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
-  implicit def intToToken(n: Int): K = KToken(Sorts.Int, n.toString, Att())
+  implicit def intToToken(n: Int): K = KToken(n.toString, Sorts.Int, Att())
 
   implicit class ApplicableKLabel(klabel: KLabel) {
     def apply(l: K*): K = KApply(klabel, l: _*)
@@ -26,10 +26,15 @@ trait ScalaSugar[K <: kore.K] {
     def ~>(other: K) = KSequence(Seq(k, other).asJava, Att())
     def ==>(other: K) = KRewrite(k, other, Att())
     def +(other: K) = KLabel("+")(k, other)
+    def -(other: K) = KLabel("-")(k, other)
+    def *(other: K) = KLabel("*")(k, other)
+    def /(other: K) = KLabel("/")(k, other)
+    def &(other: K) = KLabel("&")(k, other)
+    def ~(other: K) = KLabel("~")(k, other)
     def &&(other: K) = KLabel(Labels.And)(k, other)
     def ||(other: K) = KLabel(Labels.Or)(k, other)
   }
 
   def KList[KK <: K](ks: Seq[KK]): KList = KList(ks.asJava)
-  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): KApply = KApply(klabel, KList(ks), att)
+  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): K = KApply(klabel, KList(ks), att)
 }

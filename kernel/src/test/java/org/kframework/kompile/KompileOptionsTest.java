@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kframework.backend.Backends;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.mockito.Matchers;
@@ -52,7 +53,7 @@ public class KompileOptionsTest {
         options.syntaxModule();
     }
 
-    @Test(expected=KExceptionManager.KEMException.class)
+    @Test(expected=KEMException.class)
     public void testNoDefinition() throws Exception {
         parse();
     }

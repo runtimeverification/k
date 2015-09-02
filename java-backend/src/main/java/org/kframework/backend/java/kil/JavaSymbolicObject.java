@@ -10,8 +10,8 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.visitors.Visitor;
 
 import java.io.Serializable;
@@ -19,6 +19,9 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.pcollections.HashTreePSet;
+import org.pcollections.PSet;
 
 
 /**
@@ -42,9 +45,10 @@ public abstract class JavaSymbolicObject extends ASTNode
      * an entire tree of data all at once. if we want to eke out extra performance later, we can
      * adopt the same pattern used for hashCode, which is also safe and potentially a tiny bit faster.
      */
-    volatile transient Set<Variable> variableSet = null;
+    volatile transient PSet<Variable> variableSet = null;
+    volatile transient Boolean isGround = null;
+    volatile transient Boolean isNormal = null;
     volatile transient Set<Term> userVariableSet = null;
-    volatile transient Set<Term> functionKLabels = null;
 
     protected JavaSymbolicObject() {
         super();
@@ -52,13 +56,6 @@ public abstract class JavaSymbolicObject extends ASTNode
 
     protected JavaSymbolicObject(Source source, Location location) {
         super(location, source);
-    }
-
-    /**
-     * Returns {@code true} if this JavaSymbolicObject does not contain any variables.
-     */
-    public boolean isGround() {
-        return variableSet().isEmpty();
     }
 
     /**
@@ -113,39 +110,51 @@ public abstract class JavaSymbolicObject extends ASTNode
     }
 
     /**
-     * Returns a {@code Set} view of the variables in this
+     * Returns a lazily computed {@code Set} view of the variables in this
      * {@code JavaSymbolicObject}.
-     * <p>
-     * When the set of variables has not been computed, this method will do the
-     * computation instead of simply returning {@code null} as in
-     * {@link JavaSymbolicObject#getVariableSet()}.
      */
-    public Set<Variable> variableSet() {
+    public PSet<Variable> variableSet() {
         if (variableSet == null) {
-            final Map<JavaSymbolicObject, Set<Variable>> intermediate = new IdentityHashMap<>();
-            IncrementalCollector<Variable> visitor = new IncrementalCollector<>(
-                    (set, term) -> term.variableSet = set,
-                    term -> term.variableSet,
-                    intermediate,
-                    new LocalVisitor() {
-                        @Override
-                        public void visit(Variable variable) {
-                            intermediate.get(variable).add(variable);
-                        }
-                    });
-            accept(visitor);
-            variableSet = visitor.getResultSet();
+            if (isGround == null || !isGround) {
+                new VariableSetFieldInitializer().visitNode(this);
+            } else {
+                variableSet = HashTreePSet.empty();
+            }
         }
-        return Collections.unmodifiableSet(variableSet);
+        return variableSet;
     }
 
-     /**
+    /**
+     * Returns {@code true} if this JavaSymbolicObject does not contain any variables.
+     */
+    public boolean isGround() {
+        if (isGround == null) {
+            if (variableSet == null) {
+                new IsGroundFieldInitializer().visitNode(this);
+            } else {
+                isGround = variableSet.isEmpty();
+            }
+        }
+        return isGround;
+    }
+
+    /**
+     * Returns true if this {@code JavaSymbolicObject} has no functions or
+     * patterns, false otherwise.
+     */
+    public boolean isNormal() {
+        if (isNormal == null) {
+            new IsNormalFieldInitializer().visitNode(this);
+        }
+        return isNormal;
+    }
+
+    /**
      * Returns a {@code Set} view of the user variables (ie terms of sort Variable) in this
      * {@code JavaSymbolicObject}.
      * <p>
      * When the set of user variables has not been computed, this method will do the
-     * computation instead of simply returning {@code null}
-     * {@link JavaSymbolicObject#getUserVariableSet()}.
+     * computation.
      */
     public Set<Term> userVariableSet(TermContext context) {
         if (userVariableSet == null) {
@@ -168,41 +177,6 @@ public abstract class JavaSymbolicObject extends ASTNode
         return Collections.unmodifiableSet(userVariableSet);
     }
 
-
-
-    /**
-     * Returns true if this {@code JavaSymbolicObject} has no functions or
-     * patterns, false otherwise.
-     * <p>
-     * When the set of variables has not been computed, this method will do the
-     * computation instead of simply returning {@code null}.
-     */
-    public boolean isNormal() {
-        if (functionKLabels == null) {
-            final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
-            IncrementalCollector<Term> visitor = new IncrementalCollector<>(
-                    (set, term) -> term.functionKLabels = set,
-                    term -> term.functionKLabels,
-                    intermediate,
-                    new LocalVisitor() {
-                        @Override
-                        public void visit(KItem kItem) {
-                            if (kItem.isSymbolic()) {
-                                intermediate.get(kItem).add(kItem.kLabel());
-                            }
-                        }
-
-                        @Override
-                        public void visit(KItemProjection projection) {
-                            intermediate.get(projection).add(projection);
-                        }
-                    });
-            accept(visitor);
-            functionKLabels = visitor.getResultSet();
-        }
-        return functionKLabels.size() == 0;
-    }
-
     @Override
     public ASTNode shallowCopy() {
         throw new UnsupportedOperationException();
@@ -212,28 +186,6 @@ public abstract class JavaSymbolicObject extends ASTNode
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the cached set of variables in this {@code JavaSymbolicObject}.
-     *
-     * @return a set of variables in this {@code JavaSymbolicObject} if they
-     *         have been computed; otherwise, {@code null}
-     * @see JavaSymbolicObject#variableSet()
-     */
-    public Set<Variable> getVariableSet() {
-        return variableSet;
-    }
-
-    /**
-     * Gets the cached set of variables in this {@code JavaSymbolicObject}.
-     *
-     * @return a set of variables in this {@code JavaSymbolicObject} if they
-     *         have been computed; otherwise, {@code null}
-     * @see JavaSymbolicObject#variableSet()
-     */
-    public Set<Term> getUserVariableSet() {
-        return userVariableSet;
     }
 
     // TODO(YilongL): remove the comments below to enforce that every subclass

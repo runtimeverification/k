@@ -1,26 +1,27 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import com.google.inject.Inject;
+import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Source;
+import org.kframework.backend.Backend;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.Require;
+import org.kframework.kil.loader.Context;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.kframework.backend.Backend;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.Require;
-import org.kframework.kil.Sources;
-import org.kframework.kil.loader.Context;
-import org.kframework.main.GlobalOptions;
-import org.kframework.parser.outer.Outer;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
-import com.google.inject.Inject;
 
 public class OuterParser {
     private List<DefinitionItem> moduleItems;
@@ -53,16 +54,15 @@ public class OuterParser {
     /**
      * Given a file, this method parses it and creates a list of modules from all of the included files.
      */
-    public void slurp(String fileName, Context context) {
+    public void slurp(File file, Context context) {
         moduleItems = new ArrayList<DefinitionItem>();
         modulesMap = new HashMap<String, Module>();
         filePaths = new ArrayList<String>();
 
         try {
             // parse first the file given at console for fast failure in case of error
-            File file = files.resolveWorkingDirectory(fileName);
             if (!file.exists())
-                throw KExceptionManager.criticalError(missingFileMsg + fileName + " given at console.");
+                throw KEMException.criticalError(missingFileMsg + file.getPath() + " given at console.");
 
             slurp2(file, context, false);
 
@@ -73,7 +73,7 @@ public class OuterParser {
 
                 File autoinclude = files.resolveKBase("include/" + autoincludedFile);
                 if (!autoinclude.exists())
-                    throw KExceptionManager.criticalError(missingFileMsg + autoinclude + " autoimported for every definition ");
+                    throw KEMException.criticalError(missingFileMsg + autoinclude + " autoimported for every definition ");
 
                 slurp2(autoinclude, context, true);
                 moduleItems.addAll(tempmi);
@@ -81,7 +81,7 @@ public class OuterParser {
 
             setMainFile(file);
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Exception: "+ e);
+            throw KEMException.criticalError("Exception: " + e);
         }
     }
 
@@ -92,14 +92,14 @@ public class OuterParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Outer.parse(Sources.fromFile(file), FileUtils.readFileToString(file), context);
+            List<DefinitionItem> defItemList = Outer.parse(Source.apply(file.getPath()), FileUtils.readFileToString(file), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {
                 if (di instanceof Require) {
                     Require req = (Require) di;
 
-                    File newFile = new File(file.getCanonicalFile().getParentFile(), req.getValue());
+                    File newFile = file.toPath().resolveSibling(req.getValue()).toFile();
                     boolean predefinedRequirement = predefined;
                     if (!newFile.exists()) {
                         predefinedRequirement = true;

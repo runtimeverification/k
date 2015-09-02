@@ -1,10 +1,10 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
+import org.kframework.attributes.Source;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
-import org.kframework.kil.Source;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;

@@ -84,7 +84,7 @@ module WCET-SYNTAX
   an immediate or the contents of a register into anothe register. The bgt and bge instructions
   complete our set of conditional jump instructions.*/
 
-  syntax Id ::= "main"
+  syntax Id ::= "main" [token]
   //@ "main" is a special program label denoting the entry point of the program.
 
   syntax Insts ::= Inst | Inst Insts

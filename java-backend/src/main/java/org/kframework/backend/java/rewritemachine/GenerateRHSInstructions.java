@@ -1,35 +1,18 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.rewritemachine;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimaps;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KItemProjection;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor.ConstructorType;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimaps;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class GenerateRHSInstructions extends BottomUpVisitor {
 
@@ -42,7 +25,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinList node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeRight = 0;
@@ -70,7 +53,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinMap node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -91,7 +74,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinSet node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -111,7 +94,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(CellCollection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int sizeBase = 0;
@@ -128,7 +111,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
             }
             Collections.reverse(cellLabels);
             rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(
-                    ConstructorType.CELL_COLLECTION, sizeBase, cellLabels)));
+                    ConstructorType.CELL_COLLECTION, sizeBase, cellLabels, node.cellSort())));
         }
     }
 
@@ -139,7 +122,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KItem node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.kList().accept(this);
@@ -157,7 +140,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KLabelFreezer node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
@@ -168,7 +151,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KList node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int size = 0;
@@ -188,7 +171,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KSequence node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             int size = 0;
@@ -209,7 +192,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KItemProjection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
@@ -221,12 +204,23 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(KLabelInjection node) {
-        if (node.isGround() && node.isNormal()) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
             node.term().accept(this);
             rhsSchedule.add(RHSInstruction.CONSTRUCT(
                     new Constructor(ConstructorType.KLABEL_INJECTION)));
+        }
+    }
+
+    @Override
+    public void visit(InjectedKLabel node) {
+        if (node.isGround() && node.isNormal() && !node.isMutable()) {
+            rhsSchedule.add(RHSInstruction.PUSH(node));
+        } else {
+            node.injectedKLabel().accept(this);
+            rhsSchedule.add(RHSInstruction.CONSTRUCT(
+                    new Constructor(ConstructorType.INJECTED_KLABEL)));
         }
     }
 

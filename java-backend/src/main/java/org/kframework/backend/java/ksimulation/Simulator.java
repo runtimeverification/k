@@ -7,7 +7,7 @@ import org.kframework.kil.Attributes;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.transformation.Transformation;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Spec;
 
@@ -28,7 +28,7 @@ public class Simulator implements Transformation<Void, KRunResult> {
 
     @Override
     public KRunProofResult<?> run(Void v, Attributes a) {
-        throw KExceptionManager.criticalError("--simulation is not currently supported");
+        throw KEMException.criticalError("--simulation is not currently supported");
     }
 
     @Override

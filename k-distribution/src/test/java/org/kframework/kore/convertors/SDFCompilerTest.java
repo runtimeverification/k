@@ -2,15 +2,7 @@
 
 package org.kframework.kore.convertors;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-
+import com.google.inject.util.Providers;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.kil.Definition;
@@ -26,9 +18,16 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-
-import com.google.inject.util.Providers;
 import org.kframework.utils.file.JarInfo;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class SDFCompilerTest extends BaseTestCase {
 
@@ -60,9 +59,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
         context.globalOptions = globalOptions;
 
         FileUtil fileUtil = new FileUtil(tempDir.toFile(), Providers.of(definitionDir),
-                definitionDir, Providers.of(kompiledDir), globalOptions);
-
-        context.files = fileUtil;
+                definitionDir, Providers.of(kompiledDir), globalOptions, System.getenv());
 
         String path = new File(JarInfo.getKBase() + "/lib/native/").getAbsolutePath()
                 + "/" + OS.current().name().toLowerCase() + "/";
@@ -87,7 +84,7 @@ public abstract class SDFCompilerTest extends BaseTestCase {
         kompileOptions.experimental = new Experimental();
         kompileOptions.experimental.legacyKast = false;
 
-        BinaryLoader binaryLoader = new BinaryLoader(kem, null);
+        BinaryLoader binaryLoader = new BinaryLoader(kem);
 
         Definition parsedKIL = new DefinitionLoader(new Stopwatch(globalOptions), binaryLoader,
                 kem, new OuterParser(globalOptions, autoinclude, "autoinclude-java.k", fileUtil, kem),

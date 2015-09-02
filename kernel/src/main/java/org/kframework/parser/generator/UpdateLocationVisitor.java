@@ -1,9 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import org.kframework.attributes.Location;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Location;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class UpdateLocationVisitor extends BasicVisitor {
@@ -34,10 +33,10 @@ public class UpdateLocationVisitor extends BasicVisitor {
         if (loc == null) {
             return null;
         }
-        int startLine   = loc.lineStart;
-        int startColumn = loc.columnStart;
-        int endLine     = loc.lineEnd;
-        int endColumn   = loc.columnEnd;
+        int startLine   = loc.startLine();
+        int startColumn = loc.startColumn();
+        int endLine     = loc.endLine();
+        int endColumn   = loc.endColumn();
 
         int columnOffset = currentStartColumn - cachedStartColumn;
         int lineOffset = currentStartLine - cachedStartLine;

@@ -2,6 +2,7 @@
 package org.kframework.main;
 
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -50,19 +51,19 @@ public abstract class FrontEnd {
                 try {
                     retval = run();
                 } catch (ParameterException e) {
-                    throw KExceptionManager.criticalError(e.getMessage(), e);
+                    throw KEMException.criticalError(e.getMessage(), e);
                 } finally {
                     files.deleteTempDir();
                 }
                 kem.print();
             }
-        } catch (KExceptionManager.KEMException e) {
+        } catch (KEMException e) {
             // terminated with errors, so we need to return nonzero error code.
             retval = 113;
             if (globalOptions.debug) {
                 e.printStackTrace();
             }
-            e.register(kem);
+            kem.registerThrown(e);
             kem.print();
         }
         return retval;

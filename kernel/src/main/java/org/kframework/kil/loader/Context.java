@@ -16,8 +16,8 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 
 import java.io.Serializable;
@@ -77,11 +77,10 @@ public class Context implements Serializable {
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
     public Map<String, Sort> configVarSorts = new HashMap<>();
-    @Deprecated
-    public transient FileUtil files;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
+    public HashMap<Sort, Sort> smtSortFlattening = new HashMap<>();
 
     private BiMap<String, Production> conses;
 
@@ -339,7 +338,7 @@ public class Context implements Serializable {
             for (Sort sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
-            throw KExceptionManager.criticalError(msg);
+            throw KEMException.criticalError(msg);
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
@@ -451,9 +450,9 @@ public class Context implements Serializable {
     public DataStructureSort getDefaultListDataStructureSort() {
         DataStructureSort list = dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
         if (list == null) {
-            throw KExceptionManager.internalError(
+            throw KEMException.internalError(
                     "A sort List must exist and be recognized as a data structure sort."
-                    + " Installation is corrupt or --no-prelude used with incomplete definition.");
+                            + " Installation is corrupt or --no-prelude used with incomplete definition.");
         }
         return list;
     }
@@ -484,6 +483,18 @@ public class Context implements Serializable {
             }
 
             freshFunctionNames.put(production.getSort(), production.getKLabel());
+        }
+    }
+
+    public void makeSMTSortFlatteningMap(Set<Production> freshProductions) {
+        for (Production production : freshProductions) {
+            if (!production.isSubsort()) {
+                throw KExceptionManager.compilerError(
+                        "unexpected tag [smt-sort-flatten] for non-subsort production " + production,
+                        production);
+            }
+
+            smtSortFlattening.put(production.getSubsort(), production.getSort());
         }
     }
 

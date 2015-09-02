@@ -1,5 +1,7 @@
 package org.kframework.parser
 
+import java.util
+
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.kore
@@ -14,42 +16,66 @@ object TreeNodesToKORE {
   import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
-    case Constant(s, p, l) => KToken(p.sort, s, locationToAtt(l.get()))
-    case TermCons(items, p, l) => KApply(p.klabel.get, KList(items.asScala map apply asJava), locationToAtt(l.get()))
-    case Ambiguity(items, l) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
+    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location.get(), c.source.get()))
+    case t@TermCons(items, p) => KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
+    case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
   }
 
   def down(t: K): K = t match {
-    case t@KToken(sort, s) if sort == Sorts.KVariable =>
+    case t@KToken(s, sort) if sort == Sorts.KVariable =>
       KVariable(s.trim, t.att)
 
     case t: kore.KToken => t
-    case t@KApply(KLabel("#KRewrite"), items: kore.KList) =>
-      val it = items.items.iterator
+
+    case t@KApply(KLabel("#KSequence"), items) =>
+      KSequence(downList(items).asJava, t.att)
+    case KApply(KLabel("#EmptyK"), items) if items.isEmpty =>
+      KSequence(List.empty[K].asJava, t.att)
+
+    case t@KApply(KLabel("#KRewrite"), items) =>
+      val it = items.iterator
       val res = KRewrite(down(it.next()), down(it.next()), t.att)
       assert(!it.hasNext)
       res
 
+
     case t@KApply(KLabel("#KApply"), items) =>
-      val theKList = items.tail.head match {
-        case t@KApply(KLabel("#KList"), items) => KList((items map down _).asJava)
-        case c: KToken => KList(down(c))
-      }
-      KApply(
-        KLabel(items(0).asInstanceOf[KToken].s),
-        theKList, t.att)
+      KApply(downKLabel(items(0)),
+        KList(downList(Assoc.flatten(KLabel("#KList"), items.tail, KLabel("#EmptyKList")))), t.att)
+
+    case t@KApply(KLabel("#WrappedKLabel"), items) =>
+      InjectedKLabel(downKLabel(items(0)), t.att)
 
     case t@KApply(KLabel("#KToken"), items) =>
-      def removeQuotes(s: String) = s.drop(1).dropRight(1)
+      def removeQuotes(s: String) = s.drop(1).dropRight(1).replace("\\\"", "\"")
 
-      KToken(Sort(removeQuotes(items(0).asInstanceOf[Constant].value)),
-        removeQuotes(items.tail.head.asInstanceOf[Constant].value))
+      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), Sort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
 
-    case t@KApply(l, items) => KApply(l, KList((items map down _).asJava), t.att)
+    case t@KApply(l, items) =>
+      KApply(l, KList((items map down _).asJava), t.att)
   }
 
-  val up = new Up(KORE)
+  def unquote(t: K): String = {
+    t.asInstanceOf[KToken].s.stripPrefix("`").stripSuffix("`")
+  }
 
-  def locationToAtt(l: Location): Att =
-    Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)))
+  def downList(items: Seq[K]): Seq[K] = {
+    items map down _
+  }
+
+  def downKLabel(t: K): KLabel = t match {
+    case t@KToken(s, sort) if sort == Sorts.KVariable =>
+      KVariable(s.trim, t.att)
+
+    case t@KToken(s, sort) if sort == Sorts.KLabel =>
+      KLabel(unquote(t))
+
+    case t@KApply(KLabel(s), items) if s.startsWith("#SemanticCastTo") =>
+      downKLabel(items.head)
+  }
+
+  val up = new Up(KORE, Set())
+
+  def locationToAtt(l: Location, s: Source): Att =
+    Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)), up(Source(s.source)))
 }

@@ -64,6 +64,11 @@ public class TestCase {
     private Set<KTestStep> skips;
 
     /**
+     * Wether to forward the --warnings-to-errors parameter to tests.
+     */
+    private boolean warnings2errors;
+
+    /**
      * Script to be executed before testing, only valid on Posix system.
      * {@code null} if not available.
      */
@@ -101,7 +106,8 @@ public class TestCase {
                     Set<KTestStep> skips, KTestOptions options,
                     KExceptionManager kem,
                     FileUtil files,
-                    Map<String, String> env) {
+                    Map<String, String> env,
+                    boolean warnings2errors) {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -116,6 +122,7 @@ public class TestCase {
         this.kem = kem;
         this.files = files;
         this.env = env;
+        this.warnings2errors = warnings2errors;
 
         setKompileDirArg();
         setKompileDirFullPath();
@@ -147,7 +154,7 @@ public class TestCase {
                 cmdArgs.getExtensions().toArray(new String[cmdArgs.getExtensions().size()]),
                 cmdArgs.getExcludes().toArray(new String[cmdArgs.getExcludes().size()]),
                 results, emptyOpts, emptyProfile, emptyOptsMap,
-                new HashSet<>(), cmdArgs, kem, files, env);
+                new HashSet<>(), cmdArgs, kem, files, env, false);
     }
 
     public boolean isDefinitionKompiled() {
@@ -162,21 +169,21 @@ public class TestCase {
         if (posixInitScript == null) {
             return null;
         }
-        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options, kem, env);
+        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options, kem, env, warnings2errors);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs kompile command of the test case.
      */
     public Proc<TestCase> getKompileProc() {
-        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options, kem, env);
+        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options, kem, env, warnings2errors);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs PDF command of the test case.
      */
     public Proc<TestCase> getPDFProc() {
-        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options, kem, env);
+        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options, kem, env, warnings2errors);
     }
 
     /**
@@ -234,7 +241,7 @@ public class TestCase {
             }
             Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
                     outputContentsAnn, errorContentsAnn, matcher, program.defPath, options,
-                    program.outputFile, program.newOutputFile, kem, env);
+                    program.outputFile, program.newOutputFile, kem, env,  warnings2errors);
             procs.add(p);
         }
 
@@ -452,8 +459,13 @@ public class TestCase {
                     // skip excluded files
                     boolean exclude = false;
                     for (String excludedPattern : excludes)
-                            if (pgmFilePath.contains(excludedPattern))
-                                exclude = true;
+                        if (pgmFilePath.contains(excludedPattern)) {
+                            if (options.isVerbose()) {
+                                System.out.format("Excluding file %s (matching pattern: \"%s\")%n",
+                                        pgmFilePath, excludedPattern);
+                            }
+                            exclude = true;
+                        }
                     if (exclude)
                         continue;
 
@@ -549,5 +561,13 @@ public class TestCase {
         Set<T> ret = new HashSet<>();
         Collections.addAll(ret, arr);
         return ret;
+    }
+
+    public boolean isWarnings2errors() {
+        return warnings2errors;
+    }
+
+    public void setWarnings2errors(boolean warnings2errors) {
+        this.warnings2errors = warnings2errors;
     }
 }

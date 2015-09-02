@@ -1,13 +1,25 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-
+import com.beust.jcommander.JCommander;
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
+import com.google.inject.throwingproviders.ThrowingProviderBinder;
+import org.kframework.Rewriter;
 import org.kframework.backend.unparser.BinaryOutputMode;
+import org.kframework.backend.unparser.ConcretizeTerm;
 import org.kframework.backend.unparser.KASTOutputMode;
 import org.kframework.backend.unparser.NoOutputMode;
 import org.kframework.backend.unparser.OutputModes;
@@ -33,14 +45,18 @@ import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+import org.kframework.krun.modes.DebugMode.DebugExecutionMode;
+import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.krun.modes.KRunExecutionMode;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.krun.tools.Prover;
+import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.Tool;
+import org.kframework.parser.TermLoader;
 import org.kframework.transformation.ActivatedTransformationProvider;
 import org.kframework.transformation.BasicTransformationProvider;
 import org.kframework.transformation.ToolActivation;
@@ -50,6 +66,7 @@ import org.kframework.transformation.TransformationMembersInjector;
 import org.kframework.transformation.TransformationProvider;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
@@ -61,20 +78,11 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.AbstractModule;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matchers;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.spi.TypeEncounter;
-import com.google.inject.spi.TypeListener;
-import com.google.inject.throwingproviders.ThrowingProviderBinder;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class KRunModule extends AbstractModule {
 
@@ -98,10 +106,10 @@ public class KRunModule extends AbstractModule {
             public <I> void hear(TypeLiteral<I> typeLiteral, TypeEncounter<I> typeEncounter) {
                 for (Field field : typeLiteral.getRawType().getDeclaredFields()) {
                     if (field.getType() == Transformation.class && field.isAnnotationPresent(InjectGeneric.class)) {
-                      TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
-                      TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
-                      TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
-                      typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral))));
+                        TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
+                        TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
+                        TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
+                        typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral))));
                     }
                 }
             }
@@ -193,19 +201,33 @@ public class KRunModule extends AbstractModule {
             MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);
 
+            MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                    binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                    });
+
             MapBinder.newMapBinder(
                     binder(), String.class, LtlModelChecker.class);
 
             MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
 
+            //TODO(cos): move to tiny module
+            rewriterBinder.addBinding("tiny").toInstance(m -> new org.kframework.tiny.Rewriter(m));
+
             bind(Debugger.class).to(ExecutorDebugger.class);
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class).in(RequestScoped.class);
 
             bind(FileUtil.class);
+            bind(TermLoader.class);
+            bind(ConcretizeTerm.class);
 
             bind(FileSystem.class).to(PortableFileSystem.class);
+
+            MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
+                    ToolActivation.class, ExecutionMode.class);
+
+            executionBinder.addBinding(new ToolActivation.OptionActivation("--debugger")).to(DebugExecutionMode.class);
 
         }
 
@@ -218,7 +240,17 @@ public class KRunModule extends AbstractModule {
         Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map, KExceptionManager kem) {
             Provider<Executor> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                        + map.keySet());
+            }
+            return provider.get();
+        }
+
+        @Provides
+        Function<org.kframework.definition.Module, Rewriter> getRewriter(KompileOptions options, Map<String, Provider<Function<org.kframework.definition.Module, Rewriter>>> map, KExceptionManager kem) {
+            Provider<Function<org.kframework.definition.Module, Rewriter>> provider = map.get(options.backend);
+            if (provider == null) {
+                throw KEMException.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -228,17 +260,35 @@ public class KRunModule extends AbstractModule {
         LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map, KExceptionManager kem) {
             Provider<LtlModelChecker> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
         }
 
         @Provides
+        ExecutionMode getExecutionMode(JCommander jc, Map<ToolActivation, Provider<ExecutionMode>> map, KRunOptions kRunOptions, KExceptionManager kem, FileUtil files) {
+            ExecutionMode res = null;
+            ToolActivation previous = null;
+            for (Map.Entry<ToolActivation, Provider<ExecutionMode>> entry : map.entrySet()) {
+                if (entry.getKey().isActive(jc)) {
+                    if (res != null) {
+                        throw KEMException.criticalError("Multiple tool activations found: " + entry.getKey() + " and " + previous);
+                    }
+                    res = entry.getValue().get();
+                    previous = entry.getKey();
+                }
+            }
+            if (res == null)
+                res = new KRunExecutionMode(kRunOptions, kem, files);
+            return res;
+        }
+
+        @Provides
         Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map, KExceptionManager kem) {
             Provider<Prover> provider = map.get(options.backend);
             if (provider == null) {
-                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
+                throw KEMException.criticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -250,6 +300,17 @@ public class KRunModule extends AbstractModule {
                     files.resolveKompiled("configuration.bin"));
             sw.printIntermediate("Reading configuration from binary");
             return cfg;
+        }
+
+
+        @Provides
+        @Named("checkpointIntervalValue")
+        Integer getCheckpointLength(KompileOptions options, @Named("checkpointIntervalMap") Map<String, Integer> map) {
+            Integer checkpointInterval = map.get(options.backend);
+            if (checkpointInterval == null) {
+                return new Integer(50);
+            }
+            return checkpointInterval;
         }
     }
 

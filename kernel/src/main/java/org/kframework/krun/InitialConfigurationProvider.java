@@ -1,12 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.transformers.Cell2DataStructure;
@@ -26,11 +22,15 @@ import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.Main;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.TTYInfo;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InitialConfigurationProvider implements Provider<Term> {
 
@@ -71,13 +71,13 @@ public class InitialConfigurationProvider implements Provider<Term> {
 
         if (options.term()) {
             sw.printIntermediate("Parse term");
-            return rp.runParser(options.parser(context),
-                    options.pgm(), false, null, context);
+            return rp.runParser(options.parser(),
+                    options.pgm(), false, null);
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
         for (Map.Entry<String, Pair<String, String>> entry
-                : options.configVars(context).entrySet()) {
+                : options.configVars().entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
@@ -86,7 +86,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                         "User specified configuration variable " + name + " which does not exist.");
             }
             Sort sort = context.configVarSorts.get(name);
-            Term parsed = rp.runParser(parser, value, false, sort, context);
+            Term parsed = rp.runParser(parser, value, false, sort);
             parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
             output.put("$" + name, parsed);
         }
@@ -98,7 +98,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
             }
             output.put("$stdin", StringBuiltin.EMPTY);
         } else {
-            String stdin = getStdinBuffer();
+            String stdin = getStdinBuffer(tty.stdin);
             KApp noIO = KApp.of(KLabelConstant.of("'#noIO"));
             DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
             if (myList != null) {
@@ -112,7 +112,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
         return plug(output, cfg);
     }
 
-    private String getStdinBuffer() {
+    public static String getStdinBuffer(boolean ttyStdin) {
         String buffer = "";
 
         try {
@@ -121,12 +121,12 @@ public class InitialConfigurationProvider implements Provider<Term> {
             // detect if the input comes from console or redirected
             // from a pipeline
 
-            if ((Main.isNailgun() && !tty.stdin)
+            if ((Main.isNailgun() && !ttyStdin)
                     || (!Main.isNailgun() && br.ready())) {
                 buffer = br.readLine();
             }
         } catch (IOException e) {
-            throw KExceptionManager.internalError("IO error detected reading from stdin", e);
+            throw KEMException.internalError("IO error detected reading from stdin", e);
         }
         if (buffer == null) {
             return "";

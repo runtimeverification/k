@@ -3,10 +3,10 @@ package org.kframework.krun.tools;
 
 import java.util.Set;
 
+import org.kframework.attributes.Source;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
-import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
@@ -16,7 +16,7 @@ import org.kframework.krun.api.KRunResult;
 import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
@@ -57,7 +57,7 @@ public interface Prover {
                 @Main Term initialConfiguration,
                 @Main Prover prover,
                 @Main FileUtil files,
-                TermLoader termLoader) {
+                @Main TermLoader termLoader) {
             this.options = options;
             this.context = context;
             this.sw = sw;
@@ -74,7 +74,7 @@ public interface Prover {
                 String proofFile = options.experimental.prove;
                 String content = files.loadFromWorkingDirectory(proofFile);
                 Definition parsed = termLoader.parseString(content,
-                        Sources.fromFile(files.resolveWorkingDirectory(proofFile)), context);
+                        Source.apply(files.resolveWorkingDirectory(proofFile).getAbsolutePath()));
                 Module mod = parsed.getSingletonModule();
                 mod = prover.preprocess(mod, initialConfiguration);
                 sw.printIntermediate("Preprocess specification rules");
@@ -82,7 +82,7 @@ public interface Prover {
                 sw.printIntermediate("Proof total");
                 return result;
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
         }
 

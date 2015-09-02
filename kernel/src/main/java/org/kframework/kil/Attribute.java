@@ -1,15 +1,14 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Visitor;
-
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.visitors.Visitor;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 /**
  * Represents either an explicit attribute on a {@link Rule} or {@link Production},
@@ -21,6 +20,11 @@ public class Attribute<T> extends ASTNode {
 
     public static final String BUILTIN_KEY = "builtin";
     public static final String FUNCTION_KEY = "function";
+    public static final String ASSOCIATIVE_KEY = "assoc";
+    public static final String COMMUTATIVE_KEY = "comm";
+    public static final String IDEMPOTENT_KEY = "idem";
+    public static final String UNIT_KEY = "unit";
+    public static final String SORT_KEY = "sort";
     public static final String PREDICATE_KEY = "predicate";
     public static final String STREAM_KEY = "stream";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;
@@ -31,16 +35,25 @@ public class Attribute<T> extends ASTNode {
     public static final String LEMMA_KEY = "lemma";
     public static final String TRUSTED_KEY = "trusted";
     public static final String SIMPLIFICATION_KEY = "simplification";
+
     public static final String FRESH_GENERATOR = "freshGenerator";
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String EXPONENT_KEY = "exponent";
     public static final String SIGNIFICAND_KEY = "significand";
     public static final String SMTLIB_KEY = "smtlib";
     public static final String SMT_LEMMA_KEY = "smt-lemma";
+    public static final String SMT_SORT_FLATTEN = "smt-sort-flatten";
+    // Used to direct configuration abstraction,
+    // generated when translating configuration declaration to productions.
     public static final String CELL_KEY = "cell";
+    public static final String CELL_FRAGMENT_KEY = "cellFragment";
+    public static final String CELL_OPT_ABSENT_KEY = "cellOptAbsent";
+
     public static final String EQUALITY_KEY = "equality";
     public static final String ARITY_KEY = "arity";
     public static final String IMPURE_KEY = "impure";
+    public static final String STRICT_KEY = "strict";
+    public static final String SEQSTRICT_KEY = "seqstrict";
 
     public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
     public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");

@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.visitors.Visitor;
 
 /*

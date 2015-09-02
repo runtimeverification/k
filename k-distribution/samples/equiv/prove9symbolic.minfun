@@ -1,7 +1,0 @@
-((fix f (lambda x . (lambda y . fif (x f== 0) fthen
-                                  y
-                                felse
-(let nx be x f- 1 in
-				   (let ny be y f+ x in
-                                    (LFExp mylabel : ((f nx) ny)))))))
-                                     #symInt(ni)) #symInt(se)

@@ -1,22 +1,21 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
+import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.kil.Attributes;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 
-import com.google.inject.Inject;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class WriteOutput implements Transformation<InputStream, Void> {
 
@@ -40,11 +39,11 @@ public class WriteOutput implements Transformation<InputStream, Void> {
             }
             OutputStream out = null;
             try {
-                if (options.experimental.outputFile == null) {
+                if (options.outputFile == null) {
                     out = System.out;
                 } else {
                     out = new AnsiOutputStream(new BufferedOutputStream(new FileOutputStream(
-                            files.resolveWorkingDirectory(options.experimental.outputFile))));
+                            files.resolveWorkingDirectory(options.outputFile))));
                 }
                 out.write(firstByte);
                 IOUtils.copy(output, out);
@@ -61,7 +60,7 @@ public class WriteOutput implements Transformation<InputStream, Void> {
             }
             return null;
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("IO error writing output of krun.", e);
+            throw KEMException.criticalError("IO error writing output of krun.", e);
         } finally {
             sw.printIntermediate("Write output to file");
         }

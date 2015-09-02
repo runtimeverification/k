@@ -3,14 +3,14 @@ package org.kframework.backend.unparser;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Source;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunGraph;

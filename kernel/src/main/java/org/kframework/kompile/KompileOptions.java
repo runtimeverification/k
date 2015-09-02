@@ -1,23 +1,24 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.*;
-
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.File;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RequestScoped
 public class KompileOptions implements Serializable {
@@ -25,11 +26,16 @@ public class KompileOptions implements Serializable {
     @Parameter(description="<file>")
     private List<String> parameters;
 
-    public File mainDefinitionFile() {
-        if (parameters == null || parameters.size() == 0) {
-            throw KExceptionManager.criticalError("You have to provide exactly one main file in order to compile.");
+    private File mainDefinitionFile;
+
+    public synchronized File mainDefinitionFile() {
+        if (mainDefinitionFile == null) {
+            if (parameters == null || parameters.size() == 0) {
+                throw KEMException.criticalError("You have to provide exactly one main file in order to compile.");
+            }
+            mainDefinitionFile = files.get().resolveWorkingDirectory(parameters.get(0));
         }
-        return files.get().resolveWorkingDirectory(parameters.get(0));
+        return mainDefinitionFile;
     }
 
     private transient Provider<FileUtil> files;
@@ -105,6 +111,11 @@ public class KompileOptions implements Serializable {
 
     public static final String DEFAULT_TRANSITION = "transition";
 
+    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort.")
+    private boolean nonStrict;
+
+    public boolean strict() { return !nonStrict; }
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
@@ -131,5 +142,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--legacy-kast", description="Compile with settings based on the old KAST structure")
         public boolean legacyKast = false;
+
+        @Parameter(names="--kore", description="Compile with the new pipeline.")
+        public boolean kore = false;
     }
 }

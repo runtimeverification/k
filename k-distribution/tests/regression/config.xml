@@ -26,6 +26,7 @@
       programs="lint"
       results="lint"
       extension="test"
+      skip="pdf"
       >
     <kompile-option name="-w" value="all" />
       <all-programs>
@@ -61,6 +62,24 @@
            directory="external"
            programs="external/tests"
            results="external/tests" />
+
+  <include file="kore-io/tests/config.xml"
+           directory="kore-io"
+           programs="kore-io/tests"
+           results="kore-io/tests" />
+
+  <include file="ocamlbackend/tests/config.xml"
+           directory="ocamlbackend"
+           programs="ocamlbackend/tests"
+           results="ocamlbackend/tests" />
+
+  <include file="kore-cell-fragments/imp_fragments/config.xml"
+           directory="kore-cell-fragments/imp_fragments/" />
+
+<!--  <include file="smt-sort-flattening/config.xml"
+           directory="smt-sort-flattening"
+           programs="smt-sort-flattening"
+           results="smt-sort-flattening" />-->
 
 </tests>
 

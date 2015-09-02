@@ -1,10 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 public enum OS {
     OSX(true), LINUX(true), UNKNOWN(false), WINDOWS(false);
@@ -29,9 +26,9 @@ public enum OS {
 
     public String getNativeExecutable(String executable) {
         if (this == UNKNOWN) {
-            throw KExceptionManager.internalError(
+            throw KEMException.internalError(
                     "Unknown OS type. " + System.getProperty("os.name") + " not recognized. " +
-                    "Please contact K developers with details of your OS.");
+                            "Please contact K developers with details of your OS.");
         }
         if (this == WINDOWS) {
             executable = executable + ".exe";

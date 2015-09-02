@@ -6,6 +6,8 @@ package org.kframework.parser.outer;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.kore.K;
+import org.kframework.kore.KORE;
+import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParserUtils;
 
 import java.io.File;
@@ -16,9 +18,9 @@ public class EKoreToKoreTest {
     @Test
     @Ignore
     public void test() throws URISyntaxException {
-        CharSequence theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
+        String theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModule = "KORE";
-        String startSymbol = "KDefinition";
+        Sort startSymbol = KORE.Sort("KDefinition");
         File definitionFile = new File(this.getClass().getResource("/e-kore.k").toURI()).getAbsoluteFile();
 
         K kBody = ParserUtils.parseWithFile(theTextToParse, mainModule, startSymbol, definitionFile);

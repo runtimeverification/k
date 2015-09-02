@@ -26,7 +26,7 @@ import org.kframework.kil.UserList;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +34,7 @@ import java.util.Set;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
@@ -43,8 +44,16 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BOOL,
             Sort.INT,
             Sort.BIT_VECTOR,
-            Sort.of("IntSet"), Sort.of("MIntSet"),
-            Sort.of("IntSeq"));
+            Sort.of("Float"),
+            Sort.of("String"),
+            Sort.of("IntSet"),
+            Sort.of("MIntSet"),
+            Sort.of("FloatSet"),
+            Sort.of("StringSet"),
+            Sort.of("IntSeq"),
+            Sort.of("MIntSeq"),
+            Sort.of("FloatSeq"),
+            Sort.of("StringSeq"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
             Sort.LIST,
             Sort.SET,
@@ -108,6 +117,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "bv2int",
             /* bit vector extras */
             "mint_signed_of_unsigned",
+            /* string theory */
+            "string_lt",
+            "string_le",
+            "string_gt",
+            "string_ge",
             /* set theory */
             "smt_set_mem", "smt_miset_mem",
             "smt_set_add", "smt_miset_add",
@@ -120,30 +134,49 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "smt_set_sub", "smt_miset_sub",
             "smt_set_lt", "smt_miset_lt",
             "smt_set_le", "smt_miset_le",
+            /* float set theory */
+            "float_set_mem",
+            "float_set_add",
+            "float_set_emp",
+            "float_set_cup",
+            "float_set_cap",
+            "float_set_com",
+            "float_set_ele",
+            "float_set_dif",
+            "float_set_sub",
+            "float_set_lt",
+            "float_set_le",
+            /* string set theory */
+            "string_set_mem",
+            "string_set_add",
+            "string_set_emp",
+            "string_set_cup",
+            "string_set_cap",
+            "string_set_com",
+            "string_set_ele",
+            "string_set_dif",
+            "string_set_sub",
+            "string_set_lt",
+            "string_set_le",
             /* associative sequence theory */
             "smt_seq_concat",
             "smt_seq_elem",
             "smt_seq_nil",
             "smt_seq_len",
+            "smt_seq_sum",
             "smt_seq2set",
             "smt_seq_sorted",
             "smt_seq_filter",
             /* bool2int */
             "smt_bool2int");
 
-    /**
-     * Flag set to true if it is sounds to skip equalities that cannot be translated.
-     */
-    private final boolean skipEqualities;
-    private final HashSet<Variable> variables;
-
     public static String translateConstraint(ConjunctiveFormula constraint) {
         KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.termContext());
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
-        return getSortAndFunctionDeclarations(constraint.termContext().definition(), transformer.variables())
-             + getAxioms(constraint.termContext())
-             + getConstantDeclarations(transformer.variables())
-             + "(assert " + expression + ")";
+        return transformer.getSortAndFunctionDeclarations(transformer.variables())
+                + transformer.getAxioms()
+                + transformer.getConstantDeclarations(transformer.variables())
+                + "(assert " + expression + ")";
     }
 
     public static String translateImplication(
@@ -155,11 +188,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
-        sb.append(getSortAndFunctionDeclarations(
-                leftHandSide.termContext().definition(),
+        sb.append(leftTransformer.getSortAndFunctionDeclarations(
                 Sets.union(leftTransformer.variables(), rightTransformer.variables())));
-        sb.append(getAxioms(leftHandSide.termContext()));
-        sb.append(getConstantDeclarations(Sets.difference(
+        sb.append(leftTransformer.getAxioms());
+        sb.append(leftTransformer.getConstantDeclarations(Sets.difference(
                 Sets.union(leftTransformer.variables(), rightTransformer.variables()),
                 rightHandSideOnlyVariables)));
         sb.append("(assert (and ");
@@ -170,7 +202,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 rightHandSideOnlyVariables);
         if (!rightHandSideOnlyVariables.isEmpty()) {
             sb.append("(exists (");
-            sb.append(getQuantifiedVariables(rightHandSideOnlyVariables));
+            sb.append(leftTransformer.getQuantifiedVariables(rightHandSideOnlyVariables));
             sb.append(") ");
         }
         sb.append(rightExpression);
@@ -181,7 +213,21 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getSortAndFunctionDeclarations(Definition definition, Set<Variable> variables) {
+    /**
+     * Flag set to true if it is sounds to skip equalities that cannot be translated.
+     */
+    private final boolean skipEqualities;
+    private final HashSet<Variable> variables;
+    private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
+
+    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
+        super(context);
+        this.skipEqualities = skipEqualities;
+        variables = new HashSet<>();
+    }
+
+
+    private String getSortAndFunctionDeclarations(Set<Variable> variables) {
         Set<Sort> sorts = new HashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
@@ -192,7 +238,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 SortSignature signature = kLabel.signatures().iterator().next();
                 sorts.add(renameSort(signature.result()));
                 signature.parameters().stream()
-                        .map(KILtoSMTLib::renameSort)
+                        .map(this::renameSort)
                         .forEach(sorts::add);
             }
         }
@@ -229,7 +275,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getAxioms(TermContext context) {
+    private String getAxioms() {
         StringBuilder sb = new StringBuilder();
         for (Rule rule : context.definition().functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
@@ -240,7 +286,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                     sb.append("(assert ");
                     if (!transformer.variables().isEmpty()) {
                         sb.append("(forall (");
-                        sb.append(getQuantifiedVariables(transformer.variables()));
+                        sb.append(transformer.getQuantifiedVariables(transformer.variables()));
                         sb.append(") ");
                         //sb.append(") (! ");
                     }
@@ -262,7 +308,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getConstantDeclarations(Set<Variable> variables) {
+    private String getConstantDeclarations(Set<Variable> variables) {
         StringBuilder sb = new StringBuilder();
         for (Variable variable : variables) {
             sb.append("(declare-fun ");
@@ -277,7 +323,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getQuantifiedVariables(Set<Variable> variables) {
+    private String getQuantifiedVariables(Set<Variable> variables) {
         StringBuilder sb = new StringBuilder();
         for (Variable variable : variables) {
             sb.append("(");
@@ -292,7 +338,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getSortName(ASTNode node) {
+    private String getSortName(ASTNode node) {
         Sort s;
         if (node instanceof NonTerminal) {
             s = Sort.of(((NonTerminal) node).getSort());
@@ -310,7 +356,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
             return "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")";
-        } else if (s == Sort.FLOAT) {
+        } else if (s == Sort.FLOAT && !context.global().krunOptions.experimental.smt.floatsAsPO) {
             Pair<Integer, Integer> pair = FloatToken.getExponentAndSignificandOrDie(node);
             return "(_ FP " + pair.getLeft() + " " + pair.getRight() + ")";
         } else {
@@ -318,7 +364,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    private static Sort renameSort(Sort sort) {
+    private Sort renameSort(Sort sort) {
+        sort = definition.smtSortFlattening().getOrDefault(sort, sort);
         if (sort == Sort.LIST) {
             return Sort.of("IntSeq");
         } else {
@@ -326,17 +373,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
-        super(context);
-        this.skipEqualities = skipEqualities;
-        variables = new HashSet<>();
-    }
-
     /**
-     * Returns an unmodifiable view of the sets of variables occurring during the translation.
+     * Returns an unmodifiable view of the set of variables occurring during the translation.
      */
     public Set<Variable> variables() {
-        return Collections.unmodifiableSet(variables);
+        return Sets.union(variables, ImmutableSet.copyOf(termAbstractionMap.values()));
     }
 
     /**
@@ -363,8 +404,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         boolean isEmptyAdd = true;
         for (Equality equality : equalities) {
             try {
-                String left = ((SMTLibTerm) equality.leftHandSide().accept(this)).expression();
-                String right = ((SMTLibTerm) equality.rightHandSide().accept(this)).expression();
+                String left = translateTerm(equality.leftHandSide());
+                String right = translateTerm(equality.rightHandSide());
                 sb.append(" (= ");
                 sb.append(left);
                 sb.append(" ");
@@ -388,6 +429,23 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return new SMTLibTerm(sb.toString());
     }
 
+    public String translateTerm(Term term) {
+        try {
+            return ((SMTLibTerm) term.accept(this)).expression();
+        } catch (UnsupportedOperationException e) {
+            if (skipEqualities){
+                Variable variable = termAbstractionMap.get(term);
+                if (variable == null) {
+                    variable = Variable.getAnonVariable(term.sort());
+                    termAbstractionMap.put(term, variable);
+                }
+                return variable.name();
+            } else {
+                throw e;
+            }
+        }
+    }
+
     @Override
     public ASTNode transform(KItem kItem) {
         if (!(kItem.kLabel() instanceof KLabelConstant)) {
@@ -407,6 +465,38 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         String label = kLabel.smtlib();
         if (label == null) {
             throw new UnsupportedOperationException("missing SMTLib translation for " + kLabel);
+        }
+
+        if (context.global().krunOptions.experimental.smt.floatsAsPO) {
+            switch (kLabel.label()) {
+                case "'_<Float_":
+                    label = "float_lt";
+                    break;
+                case "'_<=Float_":
+                    label = "float_le";
+                    break;
+                case "'_>Float_":
+                    label = "float_gt";
+                    break;
+                case "'_>=Float_":
+                    label = "float_ge";
+                    break;
+                case "'maxFloat":
+                    label = "float_max";
+                    break;
+                case "'minFloat":
+                    label = "float_min";
+                    break;
+                case "'_==Float_":
+                    label = "=";
+                    break;
+                case "'_=/=Float_":
+                    label = "(not (= #1 #2))";
+                    break;
+                case "'isNaN":
+                    label = "(= #1 float_nan)";
+                    break;
+            }
         }
 
         if (label.startsWith("(")) {
@@ -462,6 +552,12 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(FloatToken floatToken) {
+        if (context.global().krunOptions.experimental.smt.floatsAsPO
+                && (floatToken.bigFloatValue().isPositiveZero() || floatToken.bigFloatValue().isNegativeZero())) {
+            return new SMTLibTerm("float_zero");
+        }
+        assert !context.global().krunOptions.experimental.smt.floatsAsPO;
+
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",

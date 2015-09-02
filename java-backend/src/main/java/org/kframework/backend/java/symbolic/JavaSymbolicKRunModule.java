@@ -1,12 +1,21 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.List;
-
+import com.beust.jcommander.JCommander;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import org.kframework.Rewriter;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.ksimulation.Simulator;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
@@ -26,17 +35,15 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec;
 
-import com.beust.jcommander.JCommander;
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
     @Override
     protected void configure() {
+        bind(Stage.class).toInstance(Stage.REWRITING);
 
         bind(JavaExecutionOptions.class).in(RequestScoped.class);
         bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(false);
@@ -60,14 +67,27 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
             bind(SymbolicRewriter.class);
             bind(GlobalContext.class);
+            bind(InitializeRewriter.class);
 
             MapBinder<String, Prover> proverBinder = MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
             proverBinder.addBinding("java").to(JavaSymbolicProver.class);
 
+            MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
+                    binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
+            checkPointBinder.addBinding("java").toInstance(new Integer(500));
+
+            //bind(Map.class).annotatedWith(Names.named("checkpointIntervalMap")).toInstance((Map) checkPointBinder);
+
             MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);
             executorBinder.addBinding("java").to(JavaSymbolicExecutor.class);
+
+            MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                    binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                    });
+            rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+
         }
 
         @Provides @DefinitionScoped
@@ -80,8 +100,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
             def.setContext(context);
-            def.setGlobalOptions(context.globalOptions);
-            def.setKRunOptions(context.krunOptions);
             def.setKem(kem);
             sw.printIntermediate("Deserialize internal definition representation");
             return def;

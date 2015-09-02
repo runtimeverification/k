@@ -9,6 +9,7 @@ import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.*;
@@ -59,7 +60,7 @@ public class ConfigFileParser {
             validator.validate(xmlFile);
         } catch (SAXException e) {
             // unfortunately validator doesn't provide error locations so all we can say is this
-            throw KExceptionManager.criticalError(
+            throw KEMException.criticalError(
                     "Invalid config file formatting. Refer to the K manual for details. "
                             + e.getMessage(), e);
         }
@@ -179,7 +180,7 @@ public class ConfigFileParser {
             configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env, kem, files);
         } catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
             // I'm not happy with that part ...
-            throw new InvalidConfigError("error occured while parsing included file " + file +
+            throw new InvalidConfigError("error occurred while parsing included file " + file +
                     ":\n" + e.getMessage(), location);
         }
 
@@ -212,6 +213,12 @@ public class ConfigFileParser {
         for (TestCase tc : ret)
             tc.validate();
         return ret;
+    }
+
+    private void overrideW2e(List<TestCase> tests, boolean w2e) {
+        for (TestCase tc : tests) {
+            tc.setWarnings2errors(w2e);
+        }
     }
 
     private void overrideSkips(List<TestCase> tests, Set<KTestStep> skips) {
@@ -288,6 +295,13 @@ public class ConfigFileParser {
         String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
         Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
         String posixOnly = parsePosixOnly(testAttrs.getNamedItem("posixInitScript"));
+        boolean warnings2errors;
+        if (testAttrs.getNamedItem("warnings2errors") != null) {
+            warnings2errors = Boolean.parseBoolean(testAttrs.getNamedItem("warnings2errors").getNodeValue());
+        } else {
+            warnings2errors = cmdArgs.isWarnings2errors();
+        }
+
 
         // handle children of `test' node
         NodeList childNodes = testNode.getChildNodes();
@@ -297,7 +311,7 @@ public class ConfigFileParser {
         Map<String, ProgramProfile> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
-                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs, kem, files, env);
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs, kem, files, env, warnings2errors);
         if (posixOnly != null) {
             ret.setPosixInitScript(posixOnly);
         }

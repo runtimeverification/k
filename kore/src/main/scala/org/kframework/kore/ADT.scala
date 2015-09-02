@@ -24,7 +24,7 @@ object ADT {
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
     override def equals(that: Any) = that match {
-      case s: KSequence => s.elements == elements && s.att == att
+      case s: KSequence => s.elements == elements
       case _ => false
     }
   }
@@ -45,7 +45,7 @@ object ADT {
     override def toString = name
   }
 
-  case class KToken(sort: kore.Sort, s: String, att: Att = Att()) extends kore.KToken
+  case class KToken(s: String, sort: kore.Sort, att: Att = Att()) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
     elements foreach { e => assert(e.isInstanceOf[K]) }

@@ -6,10 +6,10 @@ import java.util.Comparator;
 
 import org.apache.commons.collections4.comparators.ComparableComparator;
 import org.apache.commons.collections4.comparators.NullComparator;
-import org.kframework.kil.Location;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 

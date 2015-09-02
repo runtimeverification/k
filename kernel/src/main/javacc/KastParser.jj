@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 options {
   STATIC = false;
   UNICODE_INPUT = true;
@@ -14,13 +14,13 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.Location;
+import org.kframework.attributes.Location;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -33,11 +33,11 @@ public class KastParser {
 		try {
 			return parser.k();
 		} catch (ParseException e) {
-      		throw KExceptionManager.innerParserError(e.getMessage(), e, source,
+      		throw KEMException.innerParserError(e.getMessage(), e, source,
       			new Location(e.currentToken.beginLine, e.currentToken.beginColumn,
       			             e.currentToken.endLine, e.currentToken.endColumn));
         } catch (TokenMgrError e) {
-            throw KExceptionManager.innerParserError(e.getMessage(), e, source, null);
+            throw KEMException.innerParserError(e.getMessage(), e, source, null);
         }
 	}
 
@@ -93,7 +93,8 @@ MORE :
 }
 
 <ID_KLABEL_STATE > MORE :
-{    <["a"-"z", "A"-"Z", "0"-"9"]>
+{
+    <["a"-"z", "A"-"Z", "0"-"9"]>
 }
 
 <ID_KLABEL_STATE> TOKEN :

@@ -1,6 +1,0 @@
-<k>
-  lambda _id0 . lambda x . lambda y . x y _id0
-</k>
-<nextId>
-  1
-</nextId>

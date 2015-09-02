@@ -10,13 +10,22 @@ import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
@@ -78,6 +87,8 @@ public class Proc<T> implements Runnable {
      */
     private final File newOutputFile;
 
+    private final boolean warnings2errors;
+
     /**
      * Whether the process succeeded or not.
      */
@@ -119,7 +130,7 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, File inputFile, String procInput,
                 Annotated<String, File> expectedOut, Annotated<String, File> expectedErr,
                 StringMatcher strComparator, File workingDir, KTestOptions options,
-                File outputFile, File newOutputFile, KExceptionManager kem, Map<String, String> env) {
+                File outputFile, File newOutputFile, KExceptionManager kem, Map<String, String> env, boolean warnings2errors) {
         this.obj = obj;
         this.args = args;
         this.inputFile = inputFile;
@@ -132,27 +143,45 @@ public class Proc<T> implements Runnable {
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
         this.kem = kem;
-        this.env = env;
+        this.env = new HashMap<>(env);
         success = options.dry;
+        this.warnings2errors = warnings2errors;
+        // add the /bin directory to the PATH if not there already
+        String binDir = ExecNames.getBinDirectory();
+        // windows is case insensitive w.r.t environment variables, so first find the exact match
+        String path = this.env.keySet().stream().filter(key -> key.toUpperCase().equals("PATH")).findFirst().orElseGet(() -> "PATH");
+        if (this.env.containsKey(path)) {
+            String allPaths = this.env.get(path);
+            if (!allPaths.contains(binDir))
+                this.env.put(path, allPaths + File.pathSeparator + binDir);
+        } else {
+            this.env.put(path, binDir);
+        }
     }
 
-    public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem, Map<String, String> env) {
+    public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem, Map<String, String> env, boolean warnings2errors) {
         this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), workingDir,
-                options, null, null, kem, env);
+                options, null, null, kem, env, warnings2errors);
     }
 
     @Override
     public void run() {
+        // pass the --warnings-to-errors flag to all processes if specified to ktest
+        String[] warningsArgs = args;
+        if (warnings2errors) {
+            warningsArgs = Arrays.copyOf(args, args.length + 1);
+            warningsArgs[args.length] = "--warnings-to-errors";
+        }
         if (options.getDebug()) {
-            String[] debugArgs = Arrays.copyOf(args, args.length + 1);
-            debugArgs[args.length] = "--debug";
+            String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
+            debugArgs[warningsArgs.length] = "--debug";
             if (expectedErr != null) {
                 // We want to use --debug and compare error outputs too. In this case we need to
                 // make two runs:
                 // 1) We pass --debug and collect output with stack trace.
                 // 2) We don't pass --debug and use output for comparison.
                 ProcOutput debugOutput = runProc(debugArgs);
-                procOutput = runProc(args);
+                procOutput = runProc(warningsArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, debugOutput);
                 }
@@ -164,7 +193,7 @@ public class Proc<T> implements Runnable {
                 }
             }
         } else {
-            procOutput = runProc(args);
+            procOutput = runProc(warningsArgs);
             if (!options.dry) {
                 handlePgmResult(procOutput, null);
             }
@@ -276,18 +305,18 @@ public class Proc<T> implements Runnable {
     }
 
     private ProcStatus wait(final Process proc) throws InterruptedException {
-        final boolean[] timeout = {false};
+        final AtomicBoolean timeout = new AtomicBoolean(false);
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 proc.destroy();
-                timeout[0] = true;
+                timeout.set(true);
             }
         }, options.getTimeout());
         int ret = proc.waitFor();
         timer.cancel();
-        return new ProcStatus(ret, timeout[0]);
+        return new ProcStatus(ret, timeout.get());
     }
 
     /**
@@ -296,7 +325,7 @@ public class Proc<T> implements Runnable {
      */
     private void handlePgmResult(ProcOutput normalOutput, ProcOutput debugOutput) {
         String red = ColorUtil.RgbToAnsi(
-                Color.RED, options.getColorSetting(), options.getTerminalColor());
+                "red", options.getColorSetting(), options.getTerminalColor());
         String logStr = toLogString(args);
         if (normalOutput.returnCode == 0) {
 

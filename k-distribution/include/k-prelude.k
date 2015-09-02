@@ -15,6 +15,8 @@ module K-TECHNIQUE
     syntax KLabel
     syntax Bag
     syntax BagItem
+    syntax KList ::= K
+    syntax K ::= KItem
 endmodule
 
 module K-LISTK-EXTRAS
@@ -40,7 +42,7 @@ endmodule
 
 module K-DESTRUCTORS
   imports K-TECHNIQUE
-  syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_), impure]
+  syntax KLabel ::= "getKLabel" K  [function, hook(KREFLECTION.getKLabel), impure]
   rule getKLabel(L:KLabel(_:KList)) => L
 
 endmodule
@@ -72,7 +74,7 @@ endmodule
 module K-REFLECTION
   imports K-TECHNIQUE
 
-  syntax Bag ::= "#configuration" [function, impure, hook(MetaK:#configuration)]
+  syntax Bag ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
 
 endmodule
 

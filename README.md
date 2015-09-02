@@ -3,9 +3,8 @@ This is a readme file for the developers.
 
 # Prerequisites
 
-## Java Development Kit (required JDK8 or higher)
-You can follow the instructions http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html depending on
-the type of your machine.
+## Java Development Kit (required JDK8 version 8u45 or higher)
+You can download the JDK at http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
@@ -80,8 +79,8 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux64`
 
 ## Eclipse
 To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
-command line. Then go to
-File->Import->General->Existing projects into workspace, and select
+command line, and then go into each of the `kore' and `tiny' directories and run `sbt eclipse'.
+Then start eclipse and go to File->Import->General->Existing projects into workspace, and select
 the directory of the installation. You should only add the leaves to the workspace, because
 eclipse does not support hierarchical projects.
 

@@ -1,0 +1,1 @@
+cat $1 | grep exec | sed 's/.*\['\'// | sed s/\'\].*// | sed "s/' '--warnings-to-errors' '--debug//" | sort | uniq -c | grep "^ *1" | grep "bin/krun"

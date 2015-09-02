@@ -14,7 +14,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.*;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.*;
 
@@ -33,7 +33,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
         if (substitution.isEmpty()) return term;
         for (Term var : substitution.keySet()) {
             if (!context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, var.sort())) {
-                throw KExceptionManager.criticalError("All keys in substitution should be variables, found " + var + " of sort " + var.sort());
+                throw KEMException.criticalError("All keys in substitution should be variables, found " + var + " of sort " + var.sort());
             }
         }
         UserSubstitutionTransformer transformer = new UserSubstitutionTransformer(substitution, context);

@@ -9,7 +9,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 
-public class ColorUtil {
+public final class ColorUtil {
+
+    private ColorUtil() {}
 
     private static Map<String, Color> colors;
 
@@ -35,10 +37,10 @@ public class ColorUtil {
         return Collections.unmodifiableMap(colors);
     }
 
-    private static void initColors(Color terminalColor) {
+    private static void initColors(String terminalColor) {
         colors = initColors();
-        ansiColorsToTerminalCodes = initAnsiColors(terminalColor);
-        eightBitColorsToTerminalCodes = initEightBitColors(terminalColor);
+        ansiColorsToTerminalCodes = initAnsiColors(colors.get(terminalColor));
+        eightBitColorsToTerminalCodes = initEightBitColors(colors.get(terminalColor));
         colorToCodeConvertCache = initColorToCodeConvertCache();
     }
 
@@ -377,15 +379,15 @@ public class ColorUtil {
         return "\u001b[38;5;" + code + "m";
     }
 
-    public synchronized static String RgbToAnsi(Color rgb, ColorSetting colorSetting, Color terminalColor) {
+    public synchronized static String RgbToAnsi(String rgb, ColorSetting colorSetting, String terminalColor) {
         initColors(terminalColor); //init static maps if needed
         switch(colorSetting) {
             case OFF:
                 return "";
             case ON:
-                return getClosestTerminalCode(rgb, ansiColorsToTerminalCodes, terminalColor);
+                return getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes, colors.get(terminalColor));
             case EXTENDED:
-                return getClosestTerminalCode(rgb, eightBitColorsToTerminalCodes, terminalColor);
+                return getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes, colors.get(terminalColor));
             default:
                 throw new UnsupportedOperationException("colorSettung: " + colorSetting);
         }

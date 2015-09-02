@@ -60,11 +60,6 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     @Override
-    public Term toKore() {
-        return toKore(context);
-    }
-
-    @Override
     public List<Term> getKComponents() {
         return conjunctions.stream().map(ConjunctiveFormula::toKore).collect(Collectors.toList());
     }
@@ -111,16 +106,6 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        throw new UnsupportedOperationException();
     }
 
 }

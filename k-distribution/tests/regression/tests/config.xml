@@ -34,6 +34,7 @@
       <krun-option name="-d" value="java_kompiled" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
+      <krun-option name="--parser" value="kast -s Stmts" />
     </program>
     <program name="test9.issue">
       <krun-option name="-d" value="java_kompiled" />
@@ -44,6 +45,7 @@
       <krun-option name="-d" value="java_kompiled" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
+      <krun-option name="--parser" value="kast -s Stmts" />
     </program>
     <program name="test27.test">
       <krun-option name="-d" value="java_kompiled" />
@@ -60,12 +62,14 @@
       <krun-option name="--smt" value="none" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+      <krun-option name="--parser" value="kast -s Stmts" />
     </program>
     <program name="test13.issue">
       <krun-option name="-d" value="java_kompiled" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+      <krun-option name="--parser" value="kast -s Stmts" />
     </program>
     <program name="test14.issue">
       <krun-option name="-d" value="java_kompiled" />

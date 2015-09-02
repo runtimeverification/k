@@ -7,6 +7,7 @@ import org.kframework.compile.transformers.AddInjections;
 import org.kframework.compile.transformers.AddKCell;
 import org.kframework.compile.transformers.AddTopCellRules;
 import org.kframework.compile.transformers.Cell2DataStructure;
+import org.kframework.compile.transformers.ConfigurationConcretization;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
@@ -45,6 +46,7 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new AddInjections(context));
         add(new FlattenTerms(context));
         add(new ResolveContextAbstraction(context, kem));
+        add(new ConfigurationConcretization(context));
         add(new ResolveOpenCells(context));
         add(new ResolveRewrite(context));
         add(new Cell2DataStructure(context));

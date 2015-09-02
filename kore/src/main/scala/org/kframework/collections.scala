@@ -2,6 +2,8 @@
 
 package org.kframework
 
+import java.util
+
 import collection.JavaConverters._
 import java.util.stream.StreamSupport
 import scala.collection.mutable.Builder
@@ -18,12 +20,20 @@ object Collections {
   def immutable[T](s: Array[T]): Seq[T] = s
 
   def mutable[T](s: List[T]): java.util.List[T] = s.asJava
-  def mutable[T](s: Set[T]): java.util.Set[T] = s.asJava
+  def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
+  def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = s.asJava
+  def mutable[T](s: Set[T]): java.util.Set[T] = {
+    val x = new util.HashSet[T]()
+    x.addAll(s.asJava)
+    x
+  }
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
   //  def stream[T](c: Collection[T]): java.util.stream.Stream[T] = c.stream
   def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
+
+  def map[T](s: Set[T], f: java.util.function.Function[T, T]): Set[T] = s.map(x => f(x))
 
   @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
   @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)

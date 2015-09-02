@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.*;
 import org.w3c.dom.events.Event;
@@ -128,7 +128,7 @@ public class ConfigPreProcessor extends XMLFilterImpl {
                 return resolveEnvVars(m.replaceFirst(val));
             } else {
                 String msg = "The variable is not defined in the system environment: " + var;
-                throw KExceptionManager.criticalError(msg);
+                throw KEMException.criticalError(msg);
             }
         } else {
             return str;

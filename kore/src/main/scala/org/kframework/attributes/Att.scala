@@ -3,24 +3,52 @@ package org.kframework.attributes
 import org.kframework.Collections._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{K, KORE}
-import org.kframework.meta.Down
+import org.kframework.kore.{KApply, K, KORE}
+import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
 
 case class Att(att: Set[K]) extends AttributesToString {
-  def getK(key: String): Option[K] = {
-    att.collectFirst({
-      case t@KApply(KLabel(`key`), List(v)) => v
-    })
-  }
 
-  val down = Down(Set("scala.collection.immutable"))
+  val attMap: Map[String, KApply] = att map {
+    case t@KApply(KLabel(key), _) => (key, t)
+  } toMap
 
-  def get[T](key: String): Option[T] = getK(key) map down map { _.asInstanceOf[T] }
+  def getKValue(key: String): Option[K] = attMap.get(key) collect { case t@KApply(KLabel(`key`), List(v)) => v }
+
+  def getK(key: String): Option[K] = attMap.get(key) map { case t@KApply(KLabel(`key`), _) => t }
+
+  def get[T](key: String): Option[T] =
+    getKValue(key).orElse(getK(key))
+      .map(Att.down)
+      .map {_.asInstanceOf[T]}
+
+  def get[T](key: String, cls: Class[T]): Option[T] =
+    getKValue(key).orElse(getK(key))
+      .map(Att.down)
+      .map { x =>
+        if (cls.isInstance(x))
+          x.asInstanceOf[T]
+        else
+          getK(key).map(Att.down).map { _.asInstanceOf[T] }.get
+      }
+
+  def get[T](cls: Class[T]): Option[T] = get(cls.getName, cls)
 
   def getOptional[T](label: String): java.util.Optional[T] =
     get[T](label) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[T]()
+    }
+
+  def getOptional[T](label: String, cls: Class[T]): java.util.Optional[T] =
+    get[T](label, cls) match {
+      case Some(s) => java.util.Optional.of(s);
+      case None => java.util.Optional.empty[T]()
+    }
+
+  def getOptional[T](cls: Class[T]): java.util.Optional[T] =
+    get[T](cls) match {
       case Some(s) => java.util.Optional.of(s);
       case None => java.util.Optional.empty[T]()
     }
@@ -31,19 +59,24 @@ case class Att(att: Set[K]) extends AttributesToString {
       case z => false
     }
 
+  def +(o: Any) = new Att(att + Att.up(o))
   def +(k: K): Att = new Att(att + k)
   def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
-  def +(kv: (String, String)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(KORE.KToken(Sorts.KString, kv._2,
-    Att())), Att()))
+  def +(kv: (String, Any)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(Att.up(kv._2)), Att()))
   def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
+  def add(o: Any): Att = this + o
   def add(k: K): Att = this + k
   def add(k: String): Att = this + k
-  def add(key: String, value: String): Att = this + (key -> value)
+  def add(key: String, value: Any): Att = this + (key -> value)
 
   def stream = att.asJava.stream
   def addAll(that: Att) = this ++ that
+
+  def remove(k: String): Att = new Att(att filter { case KApply(KLabel(`k`), _) => false; case _ => true })
+
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this);
 }
 
 trait KeyWithType
@@ -51,8 +84,12 @@ trait KeyWithType
 object Att {
   @annotation.varargs def apply(atts: K*): Att = Att(atts.toSet)
 
+  val includes = Set("scala.collection.immutable", "org.kframework.attributes")
+  val down = Down(includes)
+  val up = new Up(KORE, includes)
+
   implicit def asK(key: String, value: String) =
-    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(Sorts.KString, value, Att())))), Att())
+    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
 }
 
 trait AttributesToString {
@@ -61,7 +98,7 @@ trait AttributesToString {
   override def toString() =
     "[" +
       (this.filteredAtt map {
-        case KApply(KLabel(keyName), KList(KToken(_, value))) => keyName + "(" + value + ")"
+        case KApply(KLabel(keyName), KList(KToken(value, _))) => keyName + "(" + value + ")"
         case x => x.toString
       }).toList.sorted.mkString(" ") +
       "]"
@@ -71,6 +108,6 @@ trait AttributesToString {
   }
 
   lazy val filteredAtt: List[K] =
-    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy { _.toString }
+    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy {_.toString}
   // TODO: remove along with KIL to KORE to KIL convertors
 }

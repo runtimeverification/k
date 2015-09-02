@@ -16,6 +16,8 @@ public class Constants {
     public static final String BODY = "body";
     public static final String REWRITE = "rewrite";
     public static final String LEFT = "left";
+    public static final String AUTOREJECT = "autoReject";
+    public static final String REJECT2 = "reject2";
     public static final String TERM = "term";
     public static final String SYN = "Syn";
     public static final String BRACKET = "bracket";
@@ -77,6 +79,7 @@ public class Constants {
     public static final String ANYWHERE = "anywhere";
     public static final String REGEX = "regex";
     public static final String SOURCE_ATTR = "source";
+    public static final String ORIGINAL_PRD = "originalPrd";
 
     // Streams
     public static final String STDIN = "stdin";

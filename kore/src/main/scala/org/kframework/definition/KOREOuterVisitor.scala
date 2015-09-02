@@ -2,13 +2,10 @@
 
 package org.kframework.definition
 
-import scala.collection.immutable.Nil
-
 trait KOREOuterTransformer[T] extends ((OuterKORE) => T) with java.util.function.Function[OuterKORE, T] {
 
   def apply(e: OuterKORE): T = e match {
     case d: Definition => apply(d)
-    case r: Require => apply(r)
     case m: Module => apply(m)
     case nt: NonTerminal => apply(nt)
     case t: Terminal => apply(t)
@@ -19,12 +16,10 @@ trait KOREOuterTransformer[T] extends ((OuterKORE) => T) with java.util.function
     case s: SyntaxPriority => apply(s)
     case s: SyntaxAssociativity => apply(s)
     case r: Rule => apply(r)
-    case i: Import => apply(i)
     case c: ModuleComment => apply(c)
   }
 
   def apply(d: Definition): T
-  def apply(r: Require): T
   def apply(m: Module): T
   def apply(nt: NonTerminal): T
   def apply(t: Terminal): T
@@ -35,7 +30,6 @@ trait KOREOuterTransformer[T] extends ((OuterKORE) => T) with java.util.function
   def apply(s: SyntaxPriority): T
   def apply(s: SyntaxAssociativity): T
   def apply(r: Rule): T
-  def apply(i: Import): T
   def apply(c: ModuleComment): T
 
 }

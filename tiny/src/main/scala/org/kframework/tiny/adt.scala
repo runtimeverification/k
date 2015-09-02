@@ -5,6 +5,7 @@ import java.util.concurrent.Callable
 import com.google.common.cache.CacheBuilder
 import org.kframework._
 import org.kframework.attributes.Att
+import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT
 import org.kframework.tiny.matcher._
 
@@ -24,28 +25,27 @@ trait K extends kore.K {
   def att: Att
   def matcher(right: K): Matcher
   final def normalize(implicit theory: Theory): K = {
-    if (this.isNormal)
+    //    println(this + " ... " + NormalizationCaching.cache.size())
+    if (this.isNormal) {
       this
-    else
-      NormalizationCaching.cache.get(this, new Callable[K] {
+    } else {
+      //      println("normalizing")
+      val res = NormalizationCaching.cache.get(this, new Callable[K] {
         override def call(): K = {
           val inner = normalizeInner
-          val res = theory.normalize(inner)
-          res.isNormal = true
-          res
+          //          val res = theory.normalize(inner)
+          inner.isNormal = true
+          inner
         }
       })
+      res
+    }
   }
   protected[this] def normalizeInner(implicit theory: Theory): K
 
   def isGround: Boolean
 
   var isNormal = false
-  lazy val cachedHashCode = computeHashCode
-
-  override def hashCode = cachedHashCode
-
-  def computeHashCode: Int
 
   def isFalse: Boolean = false
 }
@@ -62,7 +62,7 @@ trait KApp extends {} with kore.KApply with K {
   def size: Int = children.size
   def children: Iterable[K]
 
-  lazy val isGround = !(children exists { !_.isGround })
+  lazy val isGround = !(children exists {!_.isGround})
 
   val klabel: Label
   // The KApp seen as a KApply -- Set(2, Set(3, 4)) is normalized, but klist = KList(2, Set(3, 4))
@@ -85,7 +85,7 @@ trait KApp extends {} with kore.KApply with K {
 trait PlainNormalization {
   self: KApp =>
   def normalizeInner(implicit theory: Theory): K =
-    klabel((children map { _.normalize }).toSeq, att)
+    klabel((children map {_.normalize}).toSeq, att)
 }
 
 /**
@@ -94,6 +94,7 @@ trait PlainNormalization {
 trait KLeaf extends K {
   def copy(att: Att): KLeaf
   def normalizeInner(implicit theory: Theory): K = this
+  isNormal = true
 }
 
 /**
@@ -103,8 +104,8 @@ trait KAssocApp extends KApp with PlainNormalization {
   val klabel: KAssocAppLabel
 
   def head: K = children.head
-  def tail: KAssocApp = klabel.construct(children.tail, att)
-  def map(f: K => K): KAssocApp = klabel.construct(children.map(f), att)
+  def tail: K = klabel.construct(children.tail, att)
+  def map(f: K => K): K = klabel.construct(children.map(f), att)
 
   override def matcher(right: K): Matcher = KAssocAppMatcher(this, right)
 }
@@ -118,7 +119,7 @@ trait KRegularApp extends KApp {
  * KApp with fixed arity. It is defined using a non-associative operator.
  */
 trait KProduct extends KRegularApp with Product {
-  val children = productIterator collect { case k: K => k } toIterable
+  val children = productIterator collect { case k: K => k } toList
 }
 
 /**
@@ -127,7 +128,6 @@ trait KProduct extends KRegularApp with Product {
  */
 trait KTok extends kore.KToken with KLeaf {
   override def matcher(right: K): Matcher = EqualsMatcher(this, right)
-  def computeHashCode = this.sort.hashCode * 19 + this.s.hashCode
   val isGround = true
 }
 
@@ -143,7 +143,6 @@ case class KVar(name: String, att: Att = Att()) extends kore.KVariable with KLea
   def copy(att: Att): KVar = KVar(name, att)
   override def matcher(right: K): Matcher = KVarMatcher(this, right)
   override def toString = name
-  def computeHashCode = name.hashCode
 
   lazy val isGround = false
 }
@@ -163,7 +162,26 @@ case class NativeBinaryOp[T, R](val klabel: NativeBinaryOpLabel[T, R], val child
   extends KRegularApp {
   override def normalizeInner(implicit theory: Theory): K = children match {
     case Seq(TypedKTok(s1, v1: T, _), TypedKTok(s2, v2: T, _)) if s1 == s2 =>
-      TypedKTok(klabel.resSort, klabel.f(v1, v2))
+      try {
+        val res = klabel.f(v1, v2)
+        if (klabel.resSort != Sorts.Bool)
+          TypedKTok(klabel.resSort, res)
+        else res match {
+          // ugly hack
+          case true => And()
+          case false => Or()
+        }
+      } catch {
+        case e: ArithmeticException => False
+      }
+    case _ => this
+  }
+}
+
+case class NativeUnaryOp[T, R](val klabel: NativeUnaryOpLabel[T, R], val children: Seq[K], val att: Att = Att())
+  extends KRegularApp {
+  override def normalizeInner(implicit theory: Theory): K = children match {
+    case Seq(TypedKTok(s, v: T, _)) => TypedKTok(klabel.resSort, klabel.f(v))
     case _ => this
   }
 }
@@ -178,6 +196,8 @@ final class KSeq private(val children: Seq[K], val att: Att)
   extends kore.KSequence with KAssocApp with PlainNormalization {
   val klabel = KSeq
   def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
+
+  override def computeHashCode = super[KAssocApp].computeHashCode
 }
 
 case class KRewrite(val left: K, val right: K, val att: Att = Att()) extends
@@ -189,6 +209,8 @@ case class InjectedLabel(klabel: Label, att: Att) extends kore.InjectedKLabel wi
   override def copy(att: Att): KLeaf = InjectedLabel(klabel, att)
   val sort: Sort = InjectedLabel.sort
   val s: String = klabel.toString
+
+  override def computeHashCode = super[InjectedKLabel].computeHashCode
 }
 
 object InjectedLabel {
@@ -203,13 +225,11 @@ trait Label extends kore.KLabel {
   def apply(l: Seq[K], att: Att): K =
     construct(l, att)
 
-  def construct(l: Iterable[K], att: Att): KApp
+  def construct(l: Iterable[K], att: Att): K
   @annotation.varargs def apply(l: K*): K = apply(l, Att())
   def att: Att
 
   override def toString = name
-
-  lazy override val hashCode = name.hashCode
 
   override def equals(that: Any) = super.equals(that)
 }
@@ -231,13 +251,16 @@ trait KProduct2Label extends KRegularAppLabel {
 }
 
 trait KAssocAppLabel extends Label {
-  def construct(l: Iterable[K], att: Att): KAssocApp = {
-    val b = newBuilder(att)
-    l foreach b.+=
-    b.result()
-  }
+  def construct(l: Iterable[K], att: Att): K =
+    if (l.size == 1)
+      return l.head
+    else {
+      val b = newBuilder(att)
+      l foreach b.+=
+      b.result()
+    }
   def newBuilder(att: Att): mutable.Builder[K, KAssocApp] =
-    new KAppAssocBuilder(ListBuffer[K](), this).mapResult { constructFromFlattened(_, att) }
+    new KAppAssocBuilder(ListBuffer[K](), this).mapResult {constructFromFlattened(_, att)}
   def constructFromFlattened(l: Seq[K], att: Att): KAssocApp
 }
 
@@ -263,12 +286,16 @@ case class NativeBinaryOpLabel[T, R](name: String, att: Att, f: (T, T) => R, res
   override def construct(l: Iterable[K], att: Att): NativeBinaryOp[T, R] = new NativeBinaryOp(this, l.toSeq, att)
 }
 
+case class NativeUnaryOpLabel[T, R](name: String, att: Att, f: T => R, resSort: Sort) extends KRegularAppLabel {
+  override def construct(l: Iterable[K], att: Att): NativeUnaryOp[T, R] = new NativeUnaryOp(this, l.toSeq, att)
+}
+
 case class RegularKAssocAppLabel(name: String, att: Att) extends KAssocAppLabel {
   override def constructFromFlattened(l: Seq[K], att: Att): KAssocApp = new RegularKAssocApp(this, l, att)
 }
 
 object KSeq extends {
-  val name = "~>";
+  val name = "#KSequence";
   val att = Att()
 } with KAssocAppLabel {
   /* required */

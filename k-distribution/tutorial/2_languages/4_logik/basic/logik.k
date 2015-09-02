@@ -219,8 +219,8 @@ used in Prolog (variables start with \_ or capital letter, while literals
 start with lower case letters): */
 
 
-  syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel]
-  syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel]
+  syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel, autoReject, token]
+  syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel, autoReject, token]
 
 /*@ \section{Configuration}
 

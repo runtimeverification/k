@@ -1,6 +1,9 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.ktest.CmdArgs;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorOptions;
 import org.kframework.krun.ColorSetting;
@@ -16,10 +19,6 @@ import org.kframework.utils.options.OnOffConverter;
 import org.kframework.utils.options.PositiveInteger;
 import org.kframework.utils.options.StringListConverter;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.ParametersDelegate;
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -188,6 +187,11 @@ public class KTestOptions {
      */
     private boolean debug = false;
 
+    /**
+     * Enable warnings to errors conversion. When enabled, KTest passes -w2e to spawned processes.
+     */
+    private boolean warnings2errors = false;
+
     public final long start = System.currentTimeMillis();
 
     public KTestOptions() {}
@@ -215,6 +219,7 @@ public class KTestOptions {
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
         this.debug = obj.debug;
+        this.warnings2errors = obj.warnings2errors;
     }
 
     /**
@@ -286,7 +291,7 @@ public class KTestOptions {
         return color.color();
     }
 
-    public Color getTerminalColor() {
+    public String getTerminalColor() {
         return color.terminalColor();
     }
 
@@ -324,6 +329,14 @@ public class KTestOptions {
 
     public int getThreads() {
         return threads;
+    }
+
+    public boolean isWarnings2errors() {
+        return warnings2errors;
+    }
+
+    public void setWarnings2errors(boolean warnings2errors) {
+        this.warnings2errors = warnings2errors;
     }
 
     public void setDebug(boolean debug) {

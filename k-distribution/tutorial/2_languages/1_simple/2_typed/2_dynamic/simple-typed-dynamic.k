@@ -30,7 +30,7 @@ SIMPLE.  However, the \K strictness attributes are like those of the untyped
 SIMPLE, to capture the desired evaluation strategies of the various language
 constructs. */
 
-  syntax Id ::= "main"
+  syntax Id ::= "main" [token]
 
 //@ \subsection{Types}
 

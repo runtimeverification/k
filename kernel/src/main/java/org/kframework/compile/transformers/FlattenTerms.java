@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
@@ -169,7 +171,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(MapBuiltin node, Void _void)  {
-            throw new AssertionError("should always flatten before compiling data structures");
+            return node;
         }
 
         @Override

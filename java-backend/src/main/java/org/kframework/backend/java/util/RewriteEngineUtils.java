@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Substitution;
@@ -108,7 +109,7 @@ public class RewriteEngineUtils {
 
                     Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
 
-                    PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
+                    PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), true, context);
                     if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
                         if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                             resolved = true;
@@ -141,6 +142,12 @@ public class RewriteEngineUtils {
                 // condition
                 Term evaluatedReq = KAbstractRewriteMachine.construct(rule.instructionsOfRequires().get(i), crntSubst, null, context, false);
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
+                    if (!evaluatedReq.isGround()
+                            && context.getTopConstraint() != null
+                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet())) {
+                        i++;
+                        continue;
+                    }
                     if (RuleAuditing.isAuditBegun()) {
                         System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
                     }

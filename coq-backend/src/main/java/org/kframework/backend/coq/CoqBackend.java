@@ -18,7 +18,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
@@ -65,10 +65,10 @@ public class CoqBackend extends BasicBackend {
                 return;
             }
             if (result != 0) {
-                throw KExceptionManager.criticalError("Error generating Coq syntax definition");
+                throw KEMException.criticalError("Error generating Coq syntax definition");
             }
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Error generating Coq syntax definition", e);
+            throw KEMException.criticalError("Error generating Coq syntax definition", e);
         }
         try {
             Process p = pb.get().command(kcoq,"rules","--lang-name",langName,"--recursive",
@@ -83,10 +83,10 @@ public class CoqBackend extends BasicBackend {
                 return;
             }
             if (result != 0) {
-                throw KExceptionManager.criticalError("Error generating Coq rules definition");
+                throw KEMException.criticalError("Error generating Coq rules definition");
             }
         } catch (IOException e) {
-            throw KExceptionManager.criticalError("Error generating Coq rules definition", e);
+            throw KEMException.criticalError("Error generating Coq rules definition", e);
         }
     }
 

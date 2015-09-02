@@ -1,10 +1,12 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import org.kframework.kore.K;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
+import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -22,6 +24,24 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
 
     @Override
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> apply(Ambiguity amb) {
+        K last = null;
+        boolean equal = true;
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> candidate = null;
+        for (Term t : amb.items()) {
+            candidate = this.apply(t);
+            K next = TreeNodesToKORE.apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
+            if (last != null) {
+                if (!last.equals(next)) {
+                    equal = false;
+                    break;
+                }
+            }
+            last = next;
+        }
+        if(equal) {
+            // all ambiguities have the same abstract syntax, so just pick one
+            return candidate;
+        }
 
         String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 
@@ -30,7 +50,6 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
             Term elem = (Term) amb.items().toArray()[i];
             if (elem instanceof ProductionReference) {
                 ProductionReference tc = (ProductionReference) elem;
-                msg += tc.production().sort() + " ::= ";
                 msg += tc.production().toString();
             }
             // TODO: use the unparser
@@ -40,7 +59,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
         }
         // TODO: add location information
         ParseFailedException w = new ParseFailedException(
-                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, null, amb.items().iterator().next().location().get()));
+                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
 
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = this.apply(amb.items().iterator().next());
         return new Tuple2<>(Right.apply(rez._1().right().get()), this.mergeWarnings(this.makeWarningSet(w), rez._2()));

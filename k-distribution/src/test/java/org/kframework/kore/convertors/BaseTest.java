@@ -2,21 +2,21 @@
 
 package org.kframework.kore.convertors;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.kframework.attributes.Source;
+import org.kframework.kil.Definition;
+import org.kframework.kil.loader.CollectProductionsVisitor;
+import org.kframework.kil.loader.Context;
+import org.kframework.parser.outer.Outer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.util.function.Function;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Rule;
-import org.junit.rules.TestName;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Sources;
-import org.kframework.kil.loader.Context;
-import org.kframework.parser.outer.Outer;
+import static org.junit.Assert.assertEquals;
 
 public abstract class BaseTest extends SDFCompilerTest {
 
@@ -44,12 +44,12 @@ public abstract class BaseTest extends SDFCompilerTest {
         public DefinitionWithContext(Definition d, Context c) {
             this.definition = d;
             this.context = c;
+            new CollectProductionsVisitor(c).visitNode(d);
         }
     }
 
-    private File testResource(String baseName) {
-        return new File(new File("k-distribution/src/test/resources" + baseName)
-                .getAbsoluteFile().toString().replace("k-distribution" + File.separator + "k-distribution", "k-distribution"));
+    protected File testResource(String baseName) {
+        return new File("src/test/resources" + baseName);
         // a bit of a hack to get around not having a clear working directory
         // Eclipse runs tests within k/k-distribution, IntelliJ within /k
     }
@@ -103,10 +103,11 @@ public abstract class BaseTest extends SDFCompilerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        def.setItems(Outer.parse(Sources.generatedBy(TstKILtoKOREIT.class), definitionText, null));
+        def.setItems(Outer.parse(Source.apply(definitionFile.getPath()), definitionText, null));
         def.setMainModule("TEST");
         def.setMainSyntaxModule("TEST");
-        return new DefinitionWithContext(def, null);
+        Context context = new Context();
+        return new DefinitionWithContext(def, context);
     }
 
     private String clean(String definitionText) {

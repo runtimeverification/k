@@ -1,9 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-
-module TEST [org.kframework.attributes.Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"10"),#token(Int,"9"))]
-  syntax Bool ::= #Bool [org.kframework.attributes.Location(#token(Int,"6"),#token(Int,"19"),#token(Int,"6"),#token(Int,"23"))]
-  syntax #Bool ::= "true" [org.kframework.attributes.Location(#token(Int,"4"),#token(Int,"20"),#token(Int,"4"),#token(Int,"25"))]
-  syntax #Bool ::= "false" [org.kframework.attributes.Location(#token(Int,"5"),#token(Int,"20"),#token(Int,"5"),#token(Int,"26"))]
-  rule #token(#Bool,"true")=>INJECTED-KLIST() requires '_andBool_(#token(Bool,"true"),#token(Bool,"true")) ensures #token(Bool,"true") [org.kframework.attributes.Location(#token(Int,"8"),#token(Int,"3"),#token(Int,"8"),#token(Int,"21"))]
-  rule #token(#Bool,"true")=>INJECTED-KLIST(#token(#Bool,"true")) requires '_andBool_(#token(Bool,"true"),#token(Bool,"true")) ensures #token(Bool,"true") [org.kframework.attributes.Location(#token(Int,"9"),#token(Int,"3"),#token(Int,"9"),#token(Int,"29"))]
+module TEST [Location(#token("3",Int),#token("1",Int),#token("10",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
+  syntax Bool ::= #Bool [Location(#token("6",Int),#token("19",Int),#token("6",Int),#token("23",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
+  syntax #Bool ::= "true" [Location(#token("4",Int),#token("20",Int),#token("4",Int),#token("25",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString)) klabel(#token("true",KString))]
+  syntax #Bool ::= "false" [Location(#token("5",Int),#token("20",Int),#token("5",Int),#token("26",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString)) klabel(#token("false",KString))]
+  rule =>(#token("true",#Bool),INJECTED-KLIST()) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("8",Int),#token("3",Int),#token("8",Int),#token("21",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
+  rule =>(#token("true",#Bool),INJECTED-KLIST(#token("true",#Bool))) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("9",Int),#token("3",Int),#token("9",Int),#token("29",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
 endmodule

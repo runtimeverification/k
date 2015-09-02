@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework
 
+import java.util
 import java.util.Optional
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
@@ -8,10 +9,10 @@ case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkStri
 /**
  * A partially ordered set based on an initial set of direct relations.
  */
-class POSet[T](directRelations: Set[(T, T)]) {
+class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
 
   // convert the input set of relations to Map form for performance
-  private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet }
+  private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet } map identity
 
   /**
    * Internal private method. Computes the transitive closer of the initial relations.
@@ -40,7 +41,7 @@ class POSet[T](directRelations: Set[(T, T)]) {
    */
   private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
     val currentPath = path :+ current
-    val succs = directRelationsMap(current)
+    val succs = directRelationsMap.getOrElse(current, Set())
     if (succs.contains(start))
       throw new CircularityException(currentPath :+ start)
 
@@ -59,13 +60,15 @@ class POSet[T](directRelations: Set[(T, T)]) {
   /**
    * Returns true if x < y
    */
-  def lessThen(x: T, y: T): Boolean = <(x, y)
-  def lessThenEq(x: T, y: T): Boolean = <(x, y) | x == y
+  def lessThan(x: T, y: T): Boolean = <(x, y)
+  def lessThanEq(x: T, y: T): Boolean = <(x, y) | x == y
+  def directlyLessThan(x: T, y: T): Boolean = directRelationsMap.get(x).exists(_.contains(y))
   /**
    * Returns true if y < x
    */
-  def greaterThen(x: T, y: T): Boolean = >(x, y)
-  def greaterThenEq(x: T, y: T): Boolean = >(x, y) | x == y
+  def greaterThan(x: T, y: T): Boolean = >(x, y)
+  def greaterThanEq(x: T, y: T): Boolean = >(x, y) | x == y
+  def directlyGreaterThan(x: T, y: T): Boolean = directRelationsMap.get(y).exists(_.contains(x))
   /**
    * Returns true if y < x or y < x
    */
@@ -97,6 +100,17 @@ class POSet[T](directRelations: Set[(T, T)]) {
             def compare(x: T, y: T) = if (x < y) -1 else if (x > y) 1 else 0
           }))
     }
+  }
+
+  /** Return the subset of items from the argument which are not
+    * less then any other item.
+    */
+  def maximal(sorts : Iterable[T]) : Set[T] =
+    sorts.filter(s1 => !sorts.exists(s2 => lessThan(s1,s2))).toSet
+
+  def maximal(sorts : util.Collection[T]) : util.Set[T] = {
+    import scala.collection.JavaConversions._
+    maximal(sorts : Iterable[T])
   }
 
   override def toString() = {

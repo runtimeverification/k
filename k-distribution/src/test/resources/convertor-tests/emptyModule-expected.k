@@ -1,5 +1,3 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-
-module TEST [org.kframework.attributes.Location(#token(Int,"3"),#token(Int,"1"),#token(Int,"5"),#token(Int,"9"))]
-
+module TEST [Location(#token("3",Int),#token("1",Int),#token("5",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/emptyModule.k",KString))]
 endmodule

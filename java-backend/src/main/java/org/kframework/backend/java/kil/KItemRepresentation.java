@@ -2,12 +2,34 @@
 package org.kframework.backend.java.kil;
 
 
-public interface KItemRepresentation extends KoreRepresentation {
+import org.kframework.kore.*;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KList;
+
+public interface KItemRepresentation extends KoreRepresentation, KApply {
     default Term kLabel() {
         return ((KItem) toKore()).kLabel();
     }
 
     default Term kList() {
-        return ((KItem) toKore()).kLabel();
+        return ((KItem) toKore()).kList();
+    }
+
+    @Override
+    default org.kframework.kore.KLabel klabel() {
+        if (kLabel() instanceof KLabelInjection) {
+            return ((KApply) ((KLabelInjection) kLabel()).term()).klabel();
+        } else {
+            return (KLabel) kLabel();
+        }
+    }
+
+    @Override
+    default org.kframework.kore.KList klist() {
+        if (kLabel() instanceof KLabelInjection) {
+            return ((KApply) ((KLabelInjection) kLabel()).term()).klist();
+        } else {
+            return (KList) KCollection.upKind(kList(), Kind.KLIST);
+        }
     }
 }

@@ -1,12 +1,10 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
+
 import java.io.File;
-
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
-import org.kframework.kil.Sources;
-
 
 /**
  * See http://javacoalface.blogspot.com/2011/04/line-and-column-numbers-in-xml-dom.html
@@ -22,7 +20,7 @@ public class LocationData {
             int startColumn, int endLine, int endColumn) {
         super();
         this.location = new Location(startLine, startColumn, endLine, endColumn);
-        this.source = Sources.fromFile(systemId);
+        this.source = Source.apply(systemId.getAbsolutePath());
     }
 
     public LocationData() {

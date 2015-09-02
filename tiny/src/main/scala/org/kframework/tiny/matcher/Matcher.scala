@@ -45,7 +45,10 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
   val klabel = KRegularAppMatcher
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
-    And(ksL.zip(ksR) map { case (k1, k2) => k1.matcher(k2) }: _*)
+    And(ksL.zip(ksR) map {case (k1, k2) =>
+      assert(k2.isGround, "Trying to create KRegularAppMatcher(...(" + k1 + "    ,    " + k2 + ")...)")
+      k1.matcher(k2)
+    }: _*)
 
   override def isFalse = (left, right) match {
     case (KApp(label, _, _), KApp(label2, _, _)) => label != label2
@@ -58,8 +61,9 @@ object KRegularAppMatcher extends MatcherLabel {
     KRegularAppMatcher(k1.asInstanceOf[KRegularApp], k2)
 }
 
-case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
-  val klabel = KAssocAppMatcher
+trait AssocMatchContents {
+  val leftKLabel: Label
+  val rightAtt: Att
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K = {
     val res = (ksL, ksR) match {
@@ -72,15 +76,21 @@ case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher {
           case (List(oneElement), suffix) =>
             And(headL.matcher(oneElement), matchContents(tailL, suffix))
           case (prefix, suffix) =>
-            And(headL.matcher(left.klabel(prefix, right.att)), matchContents(tailL, suffix))
+            And(headL.matcher(leftKLabel(prefix, rightAtt)), matchContents(tailL, suffix))
         }
-          .fold(False)({ (a, b) => Or(a, b) })
+          .fold(False: K)({ (a, b) => Or(a, b) })
 
       case other => False
     }
     res
   }
+}
 
+case class KAssocAppMatcher(left: KAssocApp, right: K) extends KAppMatcher with AssocMatchContents {
+  val klabel = KAssocAppMatcher
+  val leftKLabel = left.klabel
+
+  val rightAtt = right.att
   override def isFalse = (left, right) match {
     case (KApp(label, Seq(), _), KApp(label2, Seq(), _)) => label != label2
     case _ => false
@@ -95,7 +105,7 @@ object KAssocAppMatcher extends MatcherLabel {
 case class KVarMatcher(left: KVar, right: K) extends Matcher {
   val klabel = KVarMatcher
 
-  assert(!right.isInstanceOf[KVar])
+  assert(!right.isInstanceOf[KVar], "Trying to create KVarMatcher(" + left + "," + right + ")")
 
   override def normalizeInner(implicit theory: Theory): K =
     Binding(left, right.normalize)

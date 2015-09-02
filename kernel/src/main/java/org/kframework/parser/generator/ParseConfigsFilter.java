@@ -3,17 +3,15 @@ package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -34,6 +32,7 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,14 +45,16 @@ import java.util.Formatter;
 public class ParseConfigsFilter extends ParseForestTransformer {
 
     private final KExceptionManager kem;
+    private final FileUtil files;
 
-    public ParseConfigsFilter(Context context, KExceptionManager kem) {
+    public ParseConfigsFilter(Context context, KExceptionManager kem, FileUtil files) {
         super("Parse Configurations", context);
         this.kem = kem;
+        this.files = files;
     }
 
-    public ParseConfigsFilter(Context context, boolean checkInclusion, KExceptionManager kem) {
-        this(context, kem);
+    public ParseConfigsFilter(Context context, boolean checkInclusion, KExceptionManager kem, FileUtil files) {
+        this(context, kem, files);
         this.checkInclusion = checkInclusion;
     }
 
@@ -73,12 +74,12 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             String parsed = null;
             if (ss.containsAttribute("koreimplementation")) {
                 long startTime = System.currentTimeMillis();
-                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), context.files.resolveKompiled("."));
+                parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKoreString(ss.getContent(), files.resolveKompiled("."));
                 if (context.globalOptions.verbose)
                     System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
             } else {
                 try {
-                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), context.files.resolveKompiled("."));
+                    parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKConfigString(ss.getContent(), files.resolveKompiled("."));
                 // DISABLE EXCEPTION CHECKSTYLE
                 } catch (RuntimeException e) {
                     String msg = "SDF failed to parse a configuration by throwing: " + e.getCause().getLocalizedMessage();
@@ -130,9 +131,9 @@ public class ParseConfigsFilter extends ParseForestTransformer {
             config = new AmbFilter(context, kem).visitNode(config);
 
             if (context.globalOptions.debug) {
-                File file = context.files.resolveTemp("timing.log");
+                File file = files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-                    throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());
+                    throw KEMException.criticalError("Could not create directory " + file.getParentFile());
                 }
                 try (Formatter f = new Formatter(new FileWriter(file, true))) {
                     f.format("Parsing config: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());

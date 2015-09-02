@@ -1,0 +1,203 @@
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Represents the grammar of the KSEQ module in kast.k
+options {
+  STATIC = false;
+  UNICODE_INPUT = true;
+  SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+  TOKEN_MANAGER_USES_PARSER = true;
+  // FORCE_LA_CHECK = true; // Useful for development, but causes a warning in Production()
+}
+
+PARSER_BEGIN(KoreParser)
+package org.kframework.utils.koreparser;
+
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
+import org.kframework.kore.K;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KList;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
+
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.kframework.kore.KORE.*;
+
+public class KoreParser {
+	public static K parse(String kast, Source source) {
+		KoreParser parser = new KoreParser(new StringReader(kast));
+		try {
+			return parser.k();
+		} catch (ParseException e) {
+			throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+                    + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+                    // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+                      .map(new Function<int[], String>() {
+                        public String apply(int[] is) {
+                          StringBuilder sb = new StringBuilder();
+                          for (int i : is) {
+                            sb.append(e.tokenImage[i]);
+                            sb.append(" ");
+                          }
+                          sb.deleteCharAt(sb.length() - 1);
+                          return sb.toString();
+                        }
+                      }).collect(Collectors.toList()).toString(), e, source,
+                    new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
+        } catch (TokenMgrError e) {
+            throw KEMException.innerParserError(e.getMessage(), e, source, null);
+        }
+	}
+
+}
+PARSER_END(KoreParser)
+
+SKIP :
+{
+	" "
+|	"\t"
+|	"\r"
+|	"\n"
+}
+
+TOKEN :
+{
+	<KSEQ: "~>">
+|	<DOTK: ".::K" | ".K">
+|	<LPAREN: "(">
+|	<RPAREN: ")">
+|	<COMMA: ",">
+|	<DOTKLIST: ".::KList" | ".KList">
+|	<TOKENLABEL: "#token">
+|   <KLABELLABEL: "#klabel">
+|   <ID_KLABEL: ["#","a"-"z"](["a"-"z","A"-"Z","0"-"9"])*>
+}
+
+MORE :
+{
+	"\"": STRING_STATE
+|	"`": KLABEL_STATE
+}
+
+<STRING_STATE> MORE :
+{
+	<"\\" ~[]>
+|	<~["\"", "\\"]>
+}
+
+<STRING_STATE> TOKEN :
+{
+	<STRING: "\"">: DEFAULT
+}
+
+<KLABEL_STATE> MORE :
+{
+	<"\\" ~[]>
+|	<~["`", "\\"]>
+}
+
+<KLABEL_STATE> TOKEN :
+{
+	<KLABEL: "`">: DEFAULT
+}
+
+K k() :
+{
+	List<K> items = new ArrayList<K>();
+	K current;
+}
+{
+	current = kitem()
+	{
+		items.add(current);
+	}
+	(<KSEQ> current = kitem()
+	{
+		items.add(current);
+	}
+	)*
+	{
+	    if (items.size() == 1)
+	        return items.get(0);
+		return KSequence(items);
+	}
+|	<DOTK>
+	{
+		return KSequence();
+	}
+}
+
+K kitem() :
+{
+	KLabel label;
+	KList list;
+	String sort;
+	String value;
+}
+{
+	label = klabel() <LPAREN> list
+	 = klist() <RPAREN>
+	{
+		return KApply(label, list);
+	}
+|   <KLABELLABEL> <LPAREN> label = klabel() <RPAREN>
+    {
+        return InjectedKLabel(label);
+    }
+| 	<TOKENLABEL> <LPAREN> <STRING>
+	{
+		value = StringUtil.unquoteCString(token.image);
+	}
+	<COMMA> <STRING>
+	{
+		sort = StringUtil.unquoteCString(token.image);
+	}
+	<RPAREN>
+	{
+		return KToken(value, Sort(sort));
+	}
+}
+
+KList klist() :
+{
+	List<K> items = new ArrayList<K>();
+	K current;
+}
+{
+	current = k()
+	{
+		items.add(current);
+	}
+	((LOOKAHEAD(2) <COMMA> | <COMMA> <COMMA>) current = k()
+	{
+		items.add(current);
+	}
+	)*
+	{
+		return KList(items);
+	}
+|	<DOTKLIST>
+	{
+		return KList();
+	}
+}
+
+KLabel klabel() :
+{
+}
+{
+	<KLABEL>
+	{
+		return KLabel(StringUtil.unescapeKoreKLabel(token.image));
+	}
+|   <ID_KLABEL>
+    {
+        return KLabel(token.image);
+    }
+}

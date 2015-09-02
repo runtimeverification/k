@@ -36,22 +36,22 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
     @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
-        if (!tc.production().isSyntacticSubsort()) {
+        if (!tc.production().isSyntacticSubsort() && !tc.production().att().contains("bracket")) {
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities, leftAssoc, rightAssoc).apply(tc.items().get(0));
+                        new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities, leftAssoc, rightAssoc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(0, rez.right().get());
+                tc = tc.with(0, rez.right().get());
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
-                        new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities, leftAssoc, rightAssoc).apply(tc.items().get(last));
+                        new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities, leftAssoc, rightAssoc).apply(tc.get(last));
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(last, rez.right().get());
+                tc = tc.with(last, rez.right().get());
             }
         }
         return super.apply(tc);
@@ -78,22 +78,24 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
         }
 
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
+            if (tc.production().att().contains("bracket")) return Right.apply(tc);
+            //if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
+            //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
             Tag parentLabel = new Tag(parent.production().klabel().get().name());
             Tag localLabel = new Tag(tc.production().klabel().get().name());
-            // TODO: add location information
-            if (priorities.lessThen(parentLabel, localLabel)) {
+            if (priorities.lessThan(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
             if (leftAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.RIGHT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, tc.location().get());
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
                 return Left.apply(Sets.newHashSet(new PriorityException(kex)));
             }
 

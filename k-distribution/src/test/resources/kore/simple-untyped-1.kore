@@ -35,7 +35,7 @@ Constants look very bad like true(.::KList), and it's trivial to fix kore.k to a
 module BUILTIN-SYNTAX-HOOKS
   syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
   syntax Int ::= #Int
-  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*")]
+  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules, regex("(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"), autoReject]
   syntax #Bool ::= "true" [klabel(true)]
   syntax #Bool ::= "false" [klabel(false)]
   syntax Bool ::= #Bool
@@ -422,11 +422,11 @@ module SIMPLE-UNTYPED
   syntax ControlCell ::= "initControl"  [initializer, klabel(initControl)]
   rule initControl() => `<control>`(initFstack(),initXStack())  [macro]
 
-  syntax ControlCellFragment ::= FStack
-  syntax ControlCellFragment ::= XStack
-  syntax ControlCellFragment ::= ".ControlCellFragment" [klabel(.ControlCellFragment)]
-  syntax ControlCellFragment ::= ControlCellFragment ControlCellFragment
-    [assoc, comm, unit(.ControlCellFragment), klabel(_ControlCellFragment_)]
+  syntax ControlCellFragment ::= "<control>-fragment" FStackOpt XStackOpt "</control>-fragment" [klabel(<control>-fragment), cellFragment(ControlCell)]
+  syntax FStackOpt ::= FStack
+  syntax FStackOpt ::= "noFStack" [cellAbsent(FStack)]
+  syntax XStackOpt ::= XStack
+  syntax XStackOpt ::= "noXStack" [cellAbsent(XStack)]
 
   syntax FStack ::= "<fstack>" List "</fstack>"  [cell, color("blue"),klabel(<fstack>)]
   syntax FStack ::= "initFStack" [initializer, klabel(initFStack)]
@@ -522,7 +522,7 @@ module SIMPLE-UNTYPED
                     ,`.List{"_,_"}`())),
         `{_}`(
           `for(__;_)_`(`var_;`(`_,_`(`_=_`(`$1`(),#token("Int","0")),`.List{"_,_"}`()))
-                      ,`_<=_`(`$2`(),`_-_`(N1,#token("Int","1")))
+                      ,`_<=_`(`$2`(),`_-_`(N1,#token("1","Int")))
                       ,`++_`(`$1`()),
             `{_}`(`__`(
                `var_;`(`_,_`(`_[_]`(`$2`(),`_,_`(N2,Vs)),`.List{"_,_"}`())),
@@ -537,7 +537,7 @@ module SIMPLE-UNTYPED
      `<k>`(`function_(_)_`(F,Xs,S) => .::K , #dots()),
      `<env>`(Env => `_[_<-_]`(Env,F,L)),
      `<store>`(#dots(), `.Map`() => `_|->_`(L,lambda(Xs, S)), #dots()),
-     `<nextLoc>`(L => `_+Int_`(L,#token("Int","1")))
+     `<nextLoc>`(L => `_+Int_`(L,#token("1","Int")))
      )
     requires `_andBool_`(`IsId`(F),
              `_andBool_`(`IsIds`(Xs),
@@ -548,7 +548,7 @@ module SIMPLE-UNTYPED
   syntax KItem ::= "execute" [klabel(execute)]
 
   rule #cellBracket(
-     `<k>`(execute() => `_;`(`_(_)`(#token("Id","main"),`.List{"_,_"}`()))),
+     `<k>`(execute() => `_;`(`_(_)`(#token("main","Id"),`.List{"_,_"}`()))),
      `<env>`(Env),
      `<genv>`(`.Map`() => Env)
      )
@@ -567,8 +567,8 @@ module SIMPLE-UNTYPED
   // rule lvalue(Wild) ~> #freezer(`++_`(#HOLE())) => `++_`(Wild)
 
   rule #cellBracket(
-      `<k>`(`++_`(loc(L)) => `_+Int_`(I,#token("Int","1")), #dots()),
-      `<store>`(#dots(), `_|->_`(L, I => `_+Int_`(I,#token("Int","1"))), #dots())
+      `<k>`(`++_`(loc(L)) => `_+Int_`(I,#token("1","Int")), #dots()),
+      `<store>`(#dots(), `_|->_`(L, I => `_+Int_`(I,#token("1","Int"))), #dots())
       )
       requires `_andBool_`(`IsInt`(L),`IsInt`(I)) [increment]
 
@@ -577,10 +577,10 @@ module SIMPLE-UNTYPED
   rule `_-_`(I1,I2) => `_-Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
   rule `_*_`(I1,I2) => `_*Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
   rule `_/_`(I1,I2) => `_/Int_`(I1,I2)
-     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("Int","0"))))
+     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("0","Int"))))
   rule `_%_`(I1,I2) => `_%Int_`(I1,I2)
-     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("Int","0"))))
-  rule `-_`(I) => `_-Int_`(#token("Int","0"),I) requires `IsInt`(I)
+     requires `_andBool_`(`IsInt`(I1),`_andBool_`(`IsInt`(I2),`_=/=K_`(I2,#token("0","Int"))))
+  rule `-_`(I) => `_-Int_`(#token("0","Int"),I) requires `IsInt`(I)
   rule `_<_`(I1,I2) => `_<Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
   rule `_<=_`(I1,I2) => `_<=Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
   rule `_>_`(I1,I2 )=> `_>Int_`(I1,I2) requires `_andBool_`(`IsInt`(I1),`IsInt`(I2))
@@ -629,7 +629,7 @@ module SIMPLE-UNTYPED
                `_andBool_`(`IsVals`(Vs),
                `_andBool_`(`IsK`(K),
                `_andBool_`(`IsMap`(Env),
-               `_andBool_`(`IsBag`(C) // TODO: why inferred as Bag despite ControlCellFragment above?
+               `_andBool_`(`IsControlCellFragment`(C)
                           ,`IsMap`(GEnv)))))))
 
   rule #cellBracket(
@@ -765,7 +765,7 @@ module SIMPLE-UNTYPED
 
   rule #cellBracket(
       `<k>`(acquire(V) => .::K, #dots()),
-      `<holds>`(#dots(), `.Map`() => `_|->_`(V,#token("Int","0")), #dots()),
+      `<holds>`(#dots(), `.Map`() => `_|->_`(V,#token("0","Int")), #dots()),
       `<busy>`(`_Set_`(Busy, `.Set`() => `SetItem`(V)))
     ) requires `_andBool_`(`IsVal`(V),
                `_andBool_`(`IsSet`(Busy),
@@ -773,19 +773,19 @@ module SIMPLE-UNTYPED
 
   rule #cellBracket(
       `<k>`(acquire(V) => .::K, #dots()),
-      `<holds>`(#dots(), `_|->_`(V, N => `_+Int_`(N,#token("Int","1"))), #dots())
+      `<holds>`(#dots(), `_|->_`(V, N => `_+Int_`(N,#token("1","Int"))), #dots())
     ) requires `_andBool_`(`IsVal`(V),`IsInt`(N))
 
   rule #cellBracket(
       `<k>`(release(V) => .::K, #dots()),
-      `<holds>`(#dots(), `_|->_`(V, N => `_-Int_`(N, #token("Int","1"))), #dots())
+      `<holds>`(#dots(), `_|->_`(V, N => `_-Int_`(N, #token("1","Int"))), #dots())
     ) requires `_andBool_`(`IsVal`(V),
                `_andBool_`(`IsInt`(N),
-                           `_>Int_`(N, #token("Int","0"))))
+                           `_>Int_`(N, #token("0","Int"))))
 
   rule #cellBracket(
       `<k>`(release(V) => .::K, #dots()),
-      `<holds>`(#dots(), `_|->_`(V,#token("Int","0")) => `.Map`(), #dots()),
+      `<holds>`(#dots(), `_|->_`(V,#token("0","Int")) => `.Map`(), #dots()),
       `<busy>`(#dots(), `SetItem`(V) => `.Set`(), #dots())
     ) requires `IsVal`(V)
 
@@ -846,7 +846,7 @@ module SIMPLE-UNTYPED
                          `_>Int_`(N,M))))
   rule `_..._|->_`(N,M,K)
     => `_Map_`(`_|->_`(N,K),
-               `_..._|->_`(`_+Int_`(N,#token("Int","1")),M,K))
+               `_..._|->_`(`_+Int_`(N,#token("1","Int")),M,K))
     requires `_andBool_`(`IsInt`(N),
              `_andBool_`(`IsInt`(M),
              `_andBool_`(`IsK`(K),

@@ -2,17 +2,16 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
-import org.kframework.backend.java.symbolic.Matchable;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
+import org.kframework.kore.convertors.KILtoInnerKORE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +25,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Transformable, Matchable, Unifiable, Comparable<Term>,
+public abstract class Term extends JavaSymbolicObject implements Transformable, Comparable<Term>,
         org.kframework.kore.K {
 
     protected final Kind kind;
@@ -84,10 +83,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      *         {@code false}
      */
     public final boolean isMutable() {
-        if (mutable == null) {
-            mutable = computeMutability();
+        Boolean m = mutable;
+        if (m == null) {
+            mutable = m = computeMutability();
         }
-        return mutable;
+        return m;
     }
 
     /**
@@ -228,7 +228,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public final int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Utils.NO_HASHCODE && !isMutable()) {
             h = computeHash();
             h = h == 0 ? 1 : h;
             hashCode = h;
@@ -246,6 +246,9 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public abstract boolean equals(Object object);
 
     public Att att() {
-        return Att.apply();
+        return new KILtoInnerKORE(null, true).convertAttributes(this);
     }
+
+    public Location location() { return getLocation(); }
+    public Source source() { return getSource(); }
 }

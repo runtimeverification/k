@@ -14,10 +14,9 @@ import org.kframework.kore._
 
 object Constructors {
 
-  def Definition(requires: Set[Require], modules: Set[Module]) =
-    definition.Definition(requires, modules)
+  def Definition(mainModule: Module, syntaxModule: Module, modules: Set[Module]) =
+    definition.Definition(mainModule, syntaxModule, modules)
 
-  def Require(file: java.io.File) = definition.Require(file)
   def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)
 
@@ -29,9 +28,10 @@ object Constructors {
   def Production(klabel: String, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
   def Production(klabel: String, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
 
-  def Terminal(s: String) = definition.Terminal(s)
+  def Terminal(s: String) = definition.Terminal(s, Seq())
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort)
-  def RegexTerminal(regexString: String) = definition.RegexTerminal(regexString)
+  def RegexTerminal(regexString: String) = definition.RegexTerminal("#", regexString, "#")
+  def RegexTerminal(precedeRegexString: String, regexString: String, followRegexString: String) = definition.RegexTerminal(precedeRegexString, regexString, followRegexString)
 
   def Tag(s: String) = definition.Tag(s)
 

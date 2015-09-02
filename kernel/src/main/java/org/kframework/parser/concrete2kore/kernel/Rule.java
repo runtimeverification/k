@@ -1,17 +1,20 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import dk.brics.automaton.Automaton;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
+import org.kframework.definition.Production;
+import org.kframework.parser.Constant;
+import org.kframework.parser.KList;
+import org.kframework.parser.Term;
+import org.kframework.parser.TermCons;
+import org.pcollections.ConsPStack;
+
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.beust.jcommander.internal.Lists;
-import org.kframework.attributes.Location;
-import org.kframework.definition.Production;
-import org.kframework.parser.*;
 
 /**
  * An action that transforms an AST into another AST
@@ -32,32 +35,29 @@ public abstract class Rule implements Serializable {
                 this.column = column;
             }
         }
+        public final Source source;
         public final Location start;
         public final Location end;
         public final CharSequence input;
-        public MetaData(Location start, Location end, CharSequence input) {
-            assert start != null && end != null;
+        public MetaData(Source source, Location start, Location end, CharSequence input) {
+            assert start != null && end != null && source != null;
+            this.source = source;
             this.start = start;
             this.end = end;
             this.input = input;
         }
     }
 
-    /**
-     * A rule who's action does not depend on the context in which the parse occurs.
-     */
-    public static abstract class ContextFreeRule extends Rule {
-        public abstract Set<KList> apply(Set<KList> set, MetaData metaData);
-    }
+    public abstract Set<Term> apply(Set<Term> set, MetaData metaData);
 
     /**
      * Helper class for rules that treat each KList passed to apply() independently from each other
      */
-    public static abstract class KListRule extends ContextFreeRule {
-        public Set<KList> apply(Set<KList> set, MetaData metaData) {
-            Set<KList> result = new HashSet<>();
-            for (KList klist : set) {
-                KList newKList = this.apply(klist, metaData);
+    public static abstract class KListRule extends Rule {
+        public Set<Term> apply(Set<Term> set, MetaData metaData) {
+            Set<Term> result = new HashSet<>();
+            for (Term klist : set) {
+                Term newKList = this.apply((KList)klist, metaData);
                 if (newKList != null) {
                     result.add(newKList);
                 }
@@ -72,63 +72,34 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        public WrapLabelRule(Production label) {
+        public final Automaton rejectPattern;
+        private final Set<String> rejects;
+        public WrapLabelRule(Production label, Automaton rejectPattern, Set<String> rejects) {
             assert label != null;
             this.label = label;
+            this.rejectPattern = rejectPattern;
+            this.rejects = rejects;
+        }
+        public WrapLabelRule(Production label) {
+            this(label, null, new HashSet<>());
         }
         protected KList apply(KList klist, MetaData metaData) {
-            //Term term = new KApp(label, klist);
             Term term;
+            Location loc = new Location(metaData.start.line, metaData.start.column, metaData.end.line, metaData.end.column);
+            Source source = metaData.source;
             if (label.att().contains("token")) {
-                // TODO: radum, figure out how to reject constants from here.
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                term = Constant.apply(value, label, Optional.empty());
-            } else {
-                term = TermCons.apply(klist.items(), label, Optional.empty());
-            }
-            return new KList(Lists.newArrayList(term), Optional.empty());
-        }
-    }
-
-    /**
-     * Helper class for rules that consider only the last few elements of a KList
-     */
-    public static abstract class SuffixRule extends KListRule {
-        /** Returns true iff a KList should be rejected if it doesn't have enough elements */
-        protected abstract boolean rejectSmallKLists();
-        /** Returns the number of elements at the end of a KList to consider */
-        protected abstract int getSuffixLength();
-        /** Transforms the last getSuffixLength() elements of a KList.
-         * Returns 'null' if the parse should be rejected.
-         * Returns 'suffix' if the original parse should be used.
-         */
-        protected abstract List<Term> applySuffix(List<Term> suffix, MetaData metaData);
-
-        protected KList apply(KList klist, MetaData metaData) {
-            List<Term> terms = klist.items();
-            int i = terms.size() - this.getSuffixLength();
-            if (i < 0) {
-                return this.rejectSmallKLists() ? null : klist;
-            } else {
-                List<Term> suffix = new ArrayList<>();
-                for (; i < terms.size(); i++) {
-                    suffix.add(terms.get(i));
+                if (rejectPattern != null && rejectPattern.run(value)) {
+                    return null;
                 }
-                List<Term> result = this.applySuffix(suffix, metaData);
-                if (result == null) { return null; }
-                else if (result == suffix) { return klist; }
-                else {
-                    KList prefix = KList.apply(klist);
-                    for (int j = terms.size() - 1;
-                         j >= terms.size() - this.getSuffixLength(); j--) {
-                        prefix.items().remove(j);
-                    }
-                    for (Term term : result) {
-                        prefix.add(term);
-                    }
-                    return prefix;
+                if (rejects.contains(value)) {
+                    return null;
                 }
+                term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
+            } else {
+                term = TermCons.apply(klist.items(), label, loc, source);
             }
+            return new KList(ConsPStack.singleton(term));
         }
     }
 
@@ -136,82 +107,16 @@ public abstract class Rule implements Serializable {
      * Delete the last few elements added to the KList.
      * Usually used to remove whitespace and tokens
      */
-    public static class DeleteRule extends SuffixRule {
+    public static class DeleteRule extends KListRule {
         private final int length;
-        private final boolean reject;
-        public DeleteRule(int length, boolean reject) {
-            this.length = length; this.reject = reject;
+        public DeleteRule(int length) {
+            this.length = length;
         }
 
-        protected boolean rejectSmallKLists() { return reject; }
-        protected int getSuffixLength() { return length; }
-        protected List<Term> applySuffix(List<Term> terms, MetaData metaData) {
-            return new ArrayList<>();
+
+        @Override
+        protected KList apply(KList set, MetaData metaData) {
+            return set.remove(length);
         }
     }
-
-    /**
-     * Appends a term to the KList in a parse.
-     * This is useful if you are putting labels down before parsing children.
-     */
-    public static class InsertRule extends SuffixRule {
-        private final Term term;
-        public InsertRule(Term term) { assert term != null; this.term = term; }
-        protected boolean rejectSmallKLists() { return false; }
-        protected int getSuffixLength() { return 0; }
-        public List<Term> applySuffix(List<Term> set, MetaData metaData) {
-            return Lists.newArrayList(term);
-        }
-    }
-
-    /**
-     * Annotates the last term from the KList with location information.
-     */
-    public static class AddLocationRule extends SuffixRule {
-        protected boolean rejectSmallKLists() { return false; }
-        protected int getSuffixLength() { return 1; }
-        public List<Term> applySuffix(List<Term> terms, MetaData metaData) {
-            Term newTerm = terms.get(0).shallowCopy(
-                    new Location(metaData.start.line, metaData.start.column,
-                                 metaData.end.line, metaData.end.column));
-            return Lists.newArrayList(newTerm);
-        }
-    }
-
-    /*  // for adding a non-constant to a label that was added before the fact
-        class AdoptionRule extends ContextFreeRule {
-            private boolean reject;
-            public Set<KList> apply(Set<KList> set) {
-                Set<KList> result = new HashSet<>();
-                for (KList klist : set) {
-                    List<Term> contents = klist.getContents();
-                    if (contents.size() >= 2) {
-                        KList newKList = new KList(klist);
-                        Term oldFinal = newKList.getContents().remove(contents);
-                        Term oldPreFinal = newKList.getContents().remove(...);
-                        if (oldPreFinal instanceof KApp) {
-                            assert ((KApp) oldPreFinal).getChild() instanceof KList : "unimplemented"; // TODO
-                            Term newFinal = new KApp(((KApp) oldPreFinal).getLabel(),
-                                KList.append((KList) ((KApp) oldPreFinal).getChild(), oldFinal));
-                            newKList.add(newFinal);
-                            result.add(newKList);
-                        } else if (!reject) { result.add(klist); }
-                    } else if (!reject) { return.add(klist); }
-                }
-            }
-        }
-        */
-
-    /**
-     * TODO: implement this
-     */
-    public static abstract class ContextSensitiveRule extends Rule {
-        abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
-    }
-
-    /*
-    public static class CheckLabelContextRule extends ContextSensitiveRule {
-        private boolean positive;
-    }
-    */
 }

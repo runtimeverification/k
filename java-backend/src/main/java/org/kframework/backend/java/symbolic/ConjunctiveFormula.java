@@ -1,16 +1,22 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
@@ -30,13 +36,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A conjunction of equalities (between terms with variables) and disjunctions
@@ -63,6 +62,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 formula.equalities,
                 formula.disjunctions,
                 formula.truthValue,
+                formula.falsifyingEquality,
                 formula.context);
     }
 
@@ -94,6 +94,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private final TruthValue truthValue;
 
+    private final Equality falsifyingEquality;
+
     private transient final TermContext context;
 
     public ConjunctiveFormula(
@@ -101,6 +103,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             TruthValue truthValue,
+            Equality falsifyingEquality,
             TermContext context) {
         super(Kind.KITEM);
 
@@ -108,7 +111,17 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.equalities = equalities;
         this.disjunctions = disjunctions;
         this.truthValue = truthValue;
+        this.falsifyingEquality = falsifyingEquality;
         this.context = context;
+    }
+
+    public ConjunctiveFormula(
+            Substitution<Variable, Term> substitution,
+            PersistentUniqueList<Equality> equalities,
+            PersistentUniqueList<DisjunctiveFormula> disjunctions,
+            TruthValue truthValue,
+            TermContext context) {
+        this(substitution, equalities, disjunctions, truthValue, null, context);
     }
 
     public Substitution<Variable, Term> substitution() {
@@ -157,12 +170,80 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public ConjunctiveFormula add(Equality equality) {
+        /* simplify andBool */
+        if (equality.leftHandSide() instanceof KItem
+                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'_andBool_")
+                && equality.rightHandSide().equals(BoolToken.TRUE)) {
+            return this
+                    .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(0), BoolToken.TRUE)
+                    .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(1), BoolToken.TRUE);
+        }
+        if (equality.rightHandSide() instanceof KItem
+                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'_andBool_")
+                && equality.leftHandSide().equals(BoolToken.TRUE)) {
+            return this
+                    .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(0), BoolToken.TRUE)
+                    .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(1), BoolToken.TRUE);
+        }
+
+        /* simplify orBool */
+        if (equality.leftHandSide() instanceof KItem
+                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'_orBool_")
+                && equality.rightHandSide().equals(BoolToken.FALSE)) {
+            return this
+                    .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(0), BoolToken.FALSE)
+                    .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(1), BoolToken.FALSE);
+        }
+        if (equality.rightHandSide() instanceof KItem
+                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'_orBool_")
+                && equality.leftHandSide().equals(BoolToken.FALSE)) {
+            return this
+                    .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(0), BoolToken.FALSE)
+                    .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(1), BoolToken.FALSE);
+        }
+
+        /* simplify notBool */
+        if (equality.leftHandSide() instanceof KItem
+                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'notBool_")
+                && equality.rightHandSide() instanceof BoolToken) {
+            return this.add(
+                    ((KList) ((KItem) equality.leftHandSide()).kList()).get(0),
+                    BoolToken.of(!((BoolToken) equality.rightHandSide()).booleanValue()));
+        }
+        if (equality.rightHandSide() instanceof KItem
+                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'notBool_")
+                && equality.leftHandSide() instanceof BoolToken) {
+            return this.add(
+                    ((KList) ((KItem) equality.rightHandSide()).kList()).get(0),
+                    BoolToken.of(!((BoolToken) equality.leftHandSide()).booleanValue()));
+        }
+
         return new ConjunctiveFormula(
                 substitution,
                 equalities.plus(equality),
                 disjunctions,
                 truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
+                falsifyingEquality,
                 context);
+    }
+
+    public ConjunctiveFormula unsafeAddVariableBinding(Variable variable, Term term) {
+        // these assertions are commented out for performance reasons
+        //assert term.substituteAndEvaluate(substitution, context) == term;
+        //assert !term.variableSet().contains(variable);
+        Term previousTerm = substitution.get(variable);
+        if (previousTerm == null) {
+            return new ConjunctiveFormula(
+                    substitution.plus(variable, term),
+                    equalities,
+                    disjunctions,
+                    truthValue,
+                    context);
+        } else if (previousTerm.equals(term)) {
+            return this;
+        } else {
+            return falsify(substitution, equalities, disjunctions, new Equality(previousTerm, term, context));
+        }
     }
 
     public ConjunctiveFormula add(Term leftHandSide, Term rightHandSide) {
@@ -175,6 +256,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 equalities,
                 disjunctions.plus(disjunction),
                 truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
+                falsifyingEquality,
                 context);
     }
 
@@ -289,7 +371,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                                 partialSimplification,
                                 context);
                         if (!unifier.symbolicUnify(leftHandSide, rightHandSide)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
+                            return falsify(
+                                    substitution,
+                                    equalities,
+                                    disjunctions,
+                                    new Equality(
+                                            unifier.unificationFailureLeftHandSide(),
+                                            unifier.unificationFailureRightHandSide(),
+                                            context));
                         }
                         // TODO(AndreiS): fix this in a general way
                         if (unifier.constraint().equalities.contains(equality)) {
@@ -373,6 +462,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 equalities,
                 disjunctions,
                 TruthValue.FALSE,
+                equality,
                 context);
     }
 
@@ -395,6 +485,30 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         } else {
             return null;
         }
+    }
+
+    public ConjunctiveFormula resolveNonDeterministicLookups() {
+        ConjunctiveFormula result = this;
+        for (Equality equality : equalities) {
+            result = resolveNonDeterministicLookup(result, equality.leftHandSide());
+            result = resolveNonDeterministicLookup(result, equality.rightHandSide());
+        }
+        return result;
+    }
+
+    private ConjunctiveFormula resolveNonDeterministicLookup(ConjunctiveFormula result, Term term) {
+        if (DataStructures.isLookup(term)
+                && DataStructures.getLookupBase(term) instanceof BuiltinMap
+                && ((BuiltinMap) DataStructures.getLookupBase(term)).isConcreteCollection()) {
+            result = result.add(new DisjunctiveFormula((
+                    (BuiltinMap) DataStructures.getLookupBase(term)).getEntries().keySet().stream()
+                        .map(key -> new Equality(DataStructures.getLookupKey(term), key, context))
+                        .filter(e -> !e.isFalse())
+                        .map(e -> ConjunctiveFormula.of(context).add(e))
+                        .collect(Collectors.toList()),
+                    context));
+        }
+        return result;
     }
 
     /**
@@ -432,8 +546,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     orientationSubstitution = orientationSubstitution
                             .plus(entry.getKey(), replacement.get())
                             .plus(replacement.get(), entry.getKey());
-                } else {
-                    return null;
                 }
             }
         }
@@ -482,7 +594,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (context.definition().globalOptions().debug) {
+            if (context.global().globalOptions.debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
@@ -490,7 +602,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -502,7 +614,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
@@ -511,12 +623,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (!impliesSMT(left,right, rightOnlyVariables)) {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.definition().globalOptions().debug) {
+                if (context.global().globalOptions.debug) {
                     System.err.println("Proved!");
                 }
             }
@@ -600,11 +712,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     @Override
-    public Term toKore() {
-        return toKore(context);
-    }
-
-    @Override
     public List<Term> getKComponents() {
         Stream<Term> stream = Stream.concat(
                 Stream.concat(
@@ -629,6 +736,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + disjunctions.hashCode();
         return hashCode;
     }
 
@@ -661,16 +769,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -30,7 +30,22 @@ public class ConfigurationStructure implements Serializable {
         return multiplicity == Cell.Multiplicity.ANY || multiplicity == Cell.Multiplicity.SOME;
     }
 
+    /**
+     * Returns {@code true} if this cell should be present in the initial configuration or
+     * on the right-hand side of rewrites.
+     */
+    public boolean isDefaultCell() {
+        return multiplicity == Cell.Multiplicity.ONE
+                || multiplicity == Cell.Multiplicity.SOME
+                || cell.containsCellAttribute("initial");
+    }
+
     public boolean hasChildren() {
         return !sons.isEmpty();
+    }
+
+    public boolean hasMultiplicityStarChildren() {
+        return sons.keySet().stream()
+                .anyMatch(l -> sons.get(l).multiplicity != Cell.Multiplicity.ONE);
     }
 }

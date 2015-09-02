@@ -6,16 +6,16 @@ import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generic class representing an (uninterpreted) token.
  */
 public class GenericToken extends Token {
     /* Token cache */
-    private static Map<GenericToken, GenericToken> tokenCache = new HashMap<GenericToken, GenericToken>();
+    private static Map<GenericToken, GenericToken> tokenCache = new ConcurrentHashMap<>();
     /* KApp cache */
-    private static Map<GenericToken, KApp> kAppCache = new HashMap<GenericToken, KApp>();
+    private static Map<GenericToken, KApp> kAppCache = new ConcurrentHashMap<>();
 
     /**
      * Returns a {@link GenericToken} of the given sort with the given value.
@@ -26,13 +26,7 @@ public class GenericToken extends Token {
      * @return
      */
     public static GenericToken of(Sort sort, String value) {
-        GenericToken genericToken = new GenericToken(sort, value);
-        GenericToken cachedGenericToken = tokenCache.get(genericToken);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = genericToken;
-            tokenCache.put(genericToken, cachedGenericToken);
-        }
-        return cachedGenericToken;
+        return tokenCache.computeIfAbsent(new GenericToken(sort, value), x -> x);
     }
 
     /**
@@ -44,13 +38,7 @@ public class GenericToken extends Token {
      * @return
      */
     public static KApp kAppOf(Sort sort, String value) {
-        GenericToken genericToken = new GenericToken(sort, value);
-        KApp kApp = kAppCache.get(genericToken);
-        if (kApp == null) {
-            kApp = KApp.of(genericToken);
-            kAppCache.put(genericToken, kApp);
-        }
-        return kApp;
+        return kAppCache.computeIfAbsent(new GenericToken(sort, value), KApp::of);
     }
 
     private final Sort tokenSort;

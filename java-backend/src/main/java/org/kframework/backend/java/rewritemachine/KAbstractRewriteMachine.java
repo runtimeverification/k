@@ -1,6 +1,19 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.rewritemachine;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections4.ListUtils;
+import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.CellCollection.Cell;
+import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
+import org.kframework.backend.java.symbolic.DeepCloner;
+import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
+import org.kframework.backend.java.symbolic.Substitution;
+import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.RewriteEngineUtils;
+
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
@@ -8,34 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.collections4.ListUtils;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellCollection.Cell;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KItemProjection;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
-import org.kframework.backend.java.symbolic.DeepCloner;
-import org.kframework.backend.java.symbolic.NonACPatternMatcher;
-import org.kframework.backend.java.symbolic.Substitution;
-import org.kframework.backend.java.symbolic.RuleAuditing;
-import org.kframework.backend.java.util.Profiler;
-import org.kframework.backend.java.util.RewriteEngineUtils;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * K abstract rewrite machine. Given a subject term and a rewrite rule, the
@@ -62,7 +47,7 @@ public class KAbstractRewriteMachine {
     private boolean success = true;
     private boolean isStarNested = false;
 
-    private final NonACPatternMatcher patternMatcher;
+    private final PatternMatcher matcher;
 
     private final TermContext context;
 
@@ -71,7 +56,7 @@ public class KAbstractRewriteMachine {
         this.subject = subject;
         this.instructions = rule.matchingInstructions();
         this.context = context;
-        this.patternMatcher = new NonACPatternMatcher(context);
+        this.matcher = new PatternMatcher(false, true, context);
     }
 
     public static boolean rewrite(Rule rule, CellCollection.Cell subject, TermContext context) {
@@ -124,20 +109,20 @@ public class KAbstractRewriteMachine {
             Map<Variable, Term> solution, Set<Variable> reusableVariables, TermContext context,
             boolean doClone) {
 
+        /* Special case for one-instruction lists that can be resolved without a stack;
+         * The code falls through the general case. */
         if (rhsInstructions.size() == 1) {
             RHSInstruction instruction = rhsInstructions.get(0);
             switch (instruction.type()) {
             case PUSH:
                 return instruction.term();
             case SUBST:
-                Term var = instruction.term();
+                Variable var = (Variable) instruction.term();
                 Term content = solution.get(var);
                 if (content == null) {
                     content = var;
                 }
                 return content;
-            default:
-                throw new AssertionError("unreachable");
             }
         }
 
@@ -204,6 +189,9 @@ public class KAbstractRewriteMachine {
                 case KLABEL_INJECTION:
                     stack.push(new KLabelInjection(stack.pop()));
                     break;
+                case INJECTED_KLABEL:
+                    stack.push(new InjectedKLabel(stack.pop()));
+                    break;
                 case KLIST:
                     KList.Builder builder3 = KList.builder();
                     for (int i = 0; i < constructor.size1(); i++) {
@@ -219,9 +207,11 @@ public class KAbstractRewriteMachine {
                     stack.push(builder4.build());
                     break;
                 case CELL_COLLECTION:
-                    CellCollection.Builder builder5 = CellCollection.builder(context.definition());
+                    CellCollection.Builder builder5 = CellCollection.builder(
+                            constructor.cellCollectionSort(),
+                            context.definition());
                     for (CellLabel cellLabel : constructor.cellLabels()) {
-                        builder5.add(new Cell(cellLabel, stack.pop()));
+                        builder5.put(cellLabel, stack.pop());
                     }
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder5.concatenate(stack.pop());
@@ -267,14 +257,11 @@ public class KAbstractRewriteMachine {
             Profiler.startTimer(Profiler.PATTERN_MATCH_TIMER);
             /* there should be no AC-matching under the crntCell (violated rule
              * has been filtered out by the compiler) */
-            Map<Variable, Term> subst = patternMatcher.patternMatch(
-                    crntCell.content(),
-                    getReadCellLHS(cellLabel));
-
-            if (subst == null) {
+            if (!matcher.patternMatch(crntCell.content(), getReadCellLHS(cellLabel))) {
                 success = false;
             } else {
-                Substitution<Variable, Term> composedSubst = fExtSubst.substitution().plusAll(subst);
+                Substitution<Variable, Term> composedSubst = fExtSubst.substitution()
+                        .plusAll(matcher.substitution());
                 if (composedSubst == null) {
                     success = false;
                 } else {

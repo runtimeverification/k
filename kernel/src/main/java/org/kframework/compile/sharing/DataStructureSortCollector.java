@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.text.WordUtils;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
@@ -10,8 +12,6 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
 
 
 /**
@@ -78,13 +78,13 @@ public class DataStructureSortCollector extends BasicVisitor {
             return null;
         }
 
-        String[] strings = hookAttribute.split(":");
+        String[] strings = hookAttribute.split("\\.");
         if (strings.length != 2) {
             /* TODO: print error message */
             return null;
         }
 
-        Sort type = Sort.of(strings[0]);
+        Sort type = Sort.of(WordUtils.capitalize(strings[0].toLowerCase()));
         String operator = strings[1];
         if (!DataStructureSort.TYPES.contains(type)) {
             /* not a builtin collection */

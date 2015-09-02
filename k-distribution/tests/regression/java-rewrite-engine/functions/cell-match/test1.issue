@@ -1,0 +1,3 @@
+init(3,thinks);
+check(1,eats);
+init(1,eats)

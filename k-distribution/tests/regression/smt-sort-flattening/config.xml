@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+<tests>
+  <test definition="test.k"
+        programs="."
+        results="."
+        skip="pdf"
+        extension="test">
+    <all-programs>
+      <krun-option name="--symbolic-execution" />
+    </all-programs>
+  </test>
+</tests>

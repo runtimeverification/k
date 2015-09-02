@@ -49,7 +49,6 @@ public class PatternExpander extends CopyOnWriteTransformer {
             return kItem;
         }
         KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
-        KList kList = (KList) kItem.kList();
 
         List<ConstrainedTerm> results = new ArrayList<>();
         Term inputKList = KList.concatenate(kItem.getPatternInput());
@@ -73,10 +72,17 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
                 }
+                globalConstraint = globalConstraint
+                        .add(outputKList, ruleOutputKList)
+                        .addAll(rule.ensures())
+                        .simplify();
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                    continue;
+                }
             } else {
                 Set<Variable> existVariables = ruleInputKList.variableSet();
                 unificationConstraint = unificationConstraint.orientSubstitution(existVariables);
-                if (unificationConstraint == null || !unificationConstraint.isMatching(existVariables)) {
+                if (!unificationConstraint.isMatching(existVariables)) {
                     continue;
                 }
 
@@ -95,7 +101,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .addAll(rule.ensures())
                     .simplify();
             if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
-                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint));
+                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false));
             }
         }
 

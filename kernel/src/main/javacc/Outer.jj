@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2015 K Team. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
@@ -158,7 +158,7 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Location;
+import org.kframework.attributes.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
@@ -171,7 +171,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Source;
+import org.kframework.attributes.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -182,7 +182,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -190,8 +190,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // Comments get processed in an odd order that may cause them to be
 // out of order.  Thus we sort module items by their *end* position so
@@ -199,8 +202,8 @@ import java.util.regex.Pattern;
 // but commends between module items are put between the module items.
 class EndPositionComparator implements Comparator<ModuleItem> {
   public int compare(ModuleItem o1, ModuleItem o2) {
-    int endLine1 = o1.getLocation().lineEnd, endCol1 = o1.getLocation().columnEnd;
-    int endLine2 = o2.getLocation().lineEnd, endCol2 = o2.getLocation().columnEnd;
+    int endLine1 = o1.getLocation().endLine(), endCol1 = o1.getLocation().endColumn();
+    int endLine2 = o2.getLocation().endLine(), endCol2 = o2.getLocation().endColumn();
     if (endLine1 < endLine2 || endLine1 == endLine2 && endCol1 < endCol2) return -1;
     if (endLine1 > endLine2 || endLine1 == endLine2 && endCol1 > endCol2) return 1;
     return 0;
@@ -223,11 +226,24 @@ public class Outer {
     try {
       return parser.Start();
     } catch (ParseException e) {
-      // TODO: report location
-      throw KExceptionManager.outerParserError(e.getMessage(), e, source,
-      	new Location(e.currentToken.beginLine, e.currentToken.beginColumn, e.currentToken.endLine, e.currentToken.endColumn));
+      throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+            + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+            // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+              .map(new Function<int[], String>() {
+                public String apply(int[] is) {
+                  StringBuilder sb = new StringBuilder();
+                  for (int i : is) {
+                    sb.append(e.tokenImage[i]);
+                    sb.append(" ");
+                  }
+                  sb.deleteCharAt(sb.length() - 1);
+                  return sb.toString();
+                }
+              }).collect(Collectors.toList()).toString(), e, source,
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
     } catch (TokenMgrError e) {
-      throw KExceptionManager.outerParserError(e.getMessage(), e, source, null);
+      // TODO: report location
+      throw KEMException.outerParserError(e.getMessage(), e, source, null);
     }
   }
 
@@ -261,9 +277,7 @@ public class Outer {
   uses of this function).
   */
   private <T extends ASTNode> T markLoc(Location locPrefix, T node) {
-    locPrefix.lineEnd = token.endLine;
-    locPrefix.columnEnd = token.endColumn;
-    return markLocExplicit(locPrefix, node);
+    return markLocExplicit(Location.apply(locPrefix.startLine(), locPrefix.startColumn(), token.endLine, token.endColumn), node);
   }
 
   /** Marks 'node' with the location in 'loc'.Returns 'node' (which
@@ -416,7 +430,7 @@ PARSER_END(Outer)
 <DEFAULT> SPECIAL_TOKEN :
 {
   <COMMENT: ( "//" (~["\n", "\r"])* ("\n" | "\r")
-            | "/*" (~["*"] | "*" ~["/"])* "*/")> { parser.comment(matchedToken); }
+            | "/*" (~["*"] | ("*")+ ~["/","*"])* ("*")+ "/")> { parser.comment(matchedToken); }
 }
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
@@ -438,6 +452,7 @@ PARSER_END(Outer)
 | <MODULE: "module"> : MODNAME_STATE
 | <INTERFACE: "interface"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
+| <IMPORTS2: "import"> : MODNAME_STATE
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
@@ -469,6 +484,7 @@ PARSER_END(Outer)
 | "Token"
 
 | "require"
+| "requires"
 
 | <UPPER_ID: ("#")?["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
 | <LOWER_ID: ("#")?["a"-"z"](["a"-"z", "A"-"Z", "0"-"9"])*>
@@ -651,7 +667,7 @@ void Element(StringBuilder reg, StringBuilder follow) :
 void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 {
 ( <STRING>  { sb.append(specialAndImage()); follow.setLength(0); }
-| <ID>      { sb.append(specialAndImage()+"Dz"); follow.setLength(0); }
+| <ID>      { sb.append(StringUtil.escapeSort(specialAndImage())+"Dz"); follow.setLength(0); }
 | Group(sb, REGEX_STATE) { follow.append(sb); }
 | "{"       { sb.append(specialAndImage()); }
   Element(sb, follow)
@@ -773,7 +789,7 @@ List<DefinitionItem> Start() : {}
 void Require(List<DefinitionItem> items) :
 { Location loc = startLoc(); String str; }
 {
-  "require" str = String() { items.add(markLoc(loc, new Require(str))); }
+  ("require" | "requires") str = String() { items.add(markLoc(loc, new Require(str))); }
 }
 
 /** Parses a Module and adds it to items */
@@ -792,7 +808,7 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 /** Parses an Import and adds it to module */
 void Import(Module module): { Location loc = startLoc(); }
 {
-  "imports" <MODNAME>
+  ("imports" | "import") <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image()))); }
 }
 

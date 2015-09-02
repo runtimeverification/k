@@ -2,7 +2,6 @@
 package org.kframework.krun.tools;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.kframework.backend.unparser.PrintSearchResult;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -29,11 +28,10 @@ import org.kframework.krun.api.SearchType;
 import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.inject.Main;
-
-import com.google.inject.Inject;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,17 +49,6 @@ public interface Executor {
     term
     */
     public abstract RewriteRelation run(Term cfg, boolean computeGraph) throws KRunExecutionException;
-
-    /**
-     Execute a term in normal execution mode until it cannot rewrite any further
-     @param initialState The KRunState containing the backend specific term to rewrite
-     @param computeGraph Specified as true if the graph of execution needs to be calculated.
-     @return An object containing both metadata about krun's execution, information about
-     the exit state of the execution, and the graph if computeGraph was true.
-     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
-     term
-     */
-    public abstract RewriteRelation run(KRunState initialState, boolean computeGraph) throws KRunExecutionException;
 
     /**
     Perform a breadth-first search of the transition system starting at a particular term.
@@ -99,25 +86,6 @@ public interface Executor {
     */
     public abstract RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
 
-    /**
-     Execute a term in normal-execution mode for a specified number of steps. Takes as input a KRunState, and instead of
-     performing the Generic Kil to backend Kil operation, uses the backend Kil from the state.
-     @param initialState The KRunState containing the backend  K term to rewrite
-     @param steps The maximum number of transitions to execute for (zero if you want to rewrite
-     @param computeGraph If true, all the states and transitions involved in the execution are
-     returned in the result.
-     only until the first transition)
-     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
-     term
-     @exception UnsupportedOperationException The backend implementing this interface does not
-     support bounded stepping
-     @return An object containing both metadata about krun's execution, information about
-     the resulting term after executing the specified number of steps (or fewer if no further
-     rewrites are possible), and the execution graph if computeGraph was true.
-     */
-
-    public abstract RewriteRelation step(KRunState initialState, int steps, boolean computeGraph) throws KRunExecutionException;
-
     public static class Tool implements Transformation<Void, KRunResult> {
 
         public static final String EXIT_CODE = "exitCode";
@@ -137,7 +105,7 @@ public interface Executor {
                 @Main Context context,
                 KExceptionManager kem,
                 @Main Executor executor,
-                TermLoader loader) {
+                @Main TermLoader loader) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
@@ -157,7 +125,7 @@ public interface Executor {
                     return execute(a);
                 }
             } catch (KRunExecutionException e) {
-                throw KExceptionManager.criticalError(e.getMessage(), e);
+                throw KEMException.criticalError(e.getMessage(), e);
             }
         }
 
@@ -203,13 +171,12 @@ public interface Executor {
             }
             ASTNode pattern = pattern(options.pattern);
             if (options.exitCodePattern != null) {
-                Term res = result.getRawResult();
-                a.add(Integer.class, Executor.Tool.EXIT_CODE, getExitCode(res));
+                a.add(Integer.class, Executor.Tool.EXIT_CODE, getExitCode(result.toBackendTerm()));
             }
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
                 Term res = result.getRawResult();
-                return executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
+                return executor.search(0, 0, SearchType.FINAL, searchPattern.patternRule, result.toBackendTerm(), searchPattern.steps, false);
             }
             return result;
         }
@@ -217,7 +184,7 @@ public interface Executor {
         private int getExitCode(Term res) throws KRunExecutionException {
             ASTNode exitCodePattern = pattern(options.exitCodePattern);
             SearchPattern searchPattern = new SearchPattern(exitCodePattern);
-            SearchResults results = executor.search(1, 1, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
+            SearchResults results = executor.search(0, 0, SearchType.FINAL, searchPattern.patternRule, res, searchPattern.steps, false);
             if (results.getSolutions().size() != 1) {
                 kem.registerCriticalWarning("Found " + results.getSolutions().size() + " solutions to exit code pattern. Returning 112.");
                 return 112;
@@ -243,7 +210,7 @@ public interface Executor {
                 return null;
             }
             if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
-                throw KExceptionManager.criticalError("Pattern matching is not supported by model checking or proving");
+                throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
             }
             String patternToParse = pattern;
             if (pattern == null) {
@@ -258,8 +225,7 @@ public interface Executor {
             return loader.parsePattern(
                     patternToParse,
                     null,
-                    Sort.BAG,
-                    context);
+                    Sort.BAG);
         }
 
         @Override

@@ -1,0 +1,398 @@
+diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
+--- mlgmp_ref/mlgmp/config.h	2002-07-29 20:31:12.000000000 -0500
++++ mlgmp/config.h	2015-08-24 14:57:01.047794438 -0500
+@@ -3,6 +3,7 @@
+ #define NDEBUG
+ #undef TRACE
+ 
++#include <stdint.h>
+ #include <gmp.h>
+ #ifdef USE_MPFR
+ #include <mpfr.h>
+@@ -58,11 +59,11 @@
+ #define MPFR_SIZE_ARCH32 16
+ #define MPFR_SIZE_ARCH64 24
+ 
+-extern void serialize_int_4(int32 i);
++extern void serialize_int_4(int32_t i);
+ extern void serialize_block_1(void * data, long len);
+ 
+-extern uint32 deserialize_uint_4(void);
+-extern int32 deserialize_sint_4(void);
++extern uint32_t deserialize_uint_4(void);
++extern int32_t deserialize_sint_4(void);
+ extern void deserialize_block_1(void * data, long len);
+ 
+ #endif /* SERIALIZE */
+diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
+--- mlgmp_ref/mlgmp/gmp.ml	2012-02-24 01:48:47.000000000 -0600
++++ mlgmp/gmp.ml	2015-08-24 14:59:12.227793244 -0500
+@@ -1,7 +1,8 @@
+ (*
+  * ML GMP - Interface between Objective Caml and GNU MP
+  * Copyright (C) 2001 David MONNIAUX
+- * to_string_base_digits Copyright (c) 2005 Olivier BUISSOU
++ * to_string_base_digits Copyright (c) 2005 Olivier BUISSOU 
++ * portions modified by Runtime Verification, Inc on 8/24/2015
+  * 
+  * This software is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Library General Public
+@@ -206,6 +207,8 @@
+ 
+ (* missing set/clear bit *)
+ 
++  external randseed: state: RNG.randstate_t->seed: t->unit =
++    "_mlgmp_z_randseed";;
+   external urandomb: state: RNG.randstate_t->nbits: int->t =
+     "_mlgmp_z_urandomb";;
+   external urandomm: state: RNG.randstate_t->n: t->t =
+@@ -512,6 +515,14 @@
+       = "_mlgmp_fr_exp";;
+   external exp2_prec : prec: int -> mode: rounding_mode -> t->t
+       = "_mlgmp_fr_exp2";;
++  external exp10_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_exp10";;
++  external log_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log";;
++  external log2_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log2";;
++  external log10_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log10";;
+   external pow_prec : prec: int -> mode: rounding_mode -> t->t->t
+       = "_mlgmp_fr_pow";;
+   external pow_prec_ui : prec: int -> mode: rounding_mode -> t->int->t
+@@ -527,11 +538,26 @@
+   external trunc_prec : prec: int -> t -> t = "_mlgmp_fr_trunc";;
+   external rint_prec : prec:int -> mode:rounding_mode -> t -> t = "_mlgmp_fr_rint"
+ 
++  external check_range :
++      prec:int -> mode:rounding_mode -> emin:int -> emax:int -> t -> t * int
++      = "_mlgmp_fr_check_range";;
++  external subnormalize :
++      t -> ternary:int -> mode:rounding_mode -> t
++      = "_mlgmp_fr_subnormalize";;
++  external nexttoward : emin:int -> emax:int -> t -> t -> t = "_mlgmp_fr_nexttoward"
++
+   external cmp : t->t->int = "_mlgmp_fr_cmp";;
+   external compare : t->t->int = "_mlgmp_fr_cmp";;
+   external sgn : t->int = "_mlgmp_fr_sgn";;
+   external eq : t->t-> prec: int->bool = "_mlgmp_fr_eq";;
+   external is_nan : t->bool = "_mlgmp_fr_is_nan";;
++  external is_inf : t->bool = "_mlgmp_fr_is_inf";;
++
++  external equal : t -> t -> bool = "_mlgmp_fr_equal";;
++  external greater : t -> t -> bool = "_mlgmp_fr_greater";;
++  external greaterequal : t -> t -> bool = "_mlgmp_fr_greaterequal";;
++  external less : t -> t -> bool = "_mlgmp_fr_less";;
++  external lessequal : t -> t -> bool = "_mlgmp_fr_lessequal";;
+ 
+   external urandomb : prec: int -> state: RNG.randstate_t -> t=
+     "_mlgmp_fr_urandomb";;
+@@ -589,6 +615,10 @@
+   let sqrt = default sqrt_prec
+   let exp = default exp_prec
+   let exp2 = default exp2_prec
++  let exp10 = default exp10_prec
++  let log = default log_prec
++  let log2 = default log2_prec
++  let log10 = default log10_prec
+   let pow = default pow_prec
+   let pow_ui = default pow_prec_ui
+ 
+@@ -597,8 +627,6 @@
+   let trunc = default_rnd trunc_prec
+   let rint = default rint_prec
+ 
+-  let equal x y = eq x y ~prec: 90;;
+-
+   let to_string_base_digits ~mode: mode
+      ~base: base ~digits: digits x =
+    let mantissa, exponent =
+diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
+--- mlgmp_ref/mlgmp/gmp.mli	2012-02-24 01:48:02.000000000 -0600
++++ mlgmp/gmp.mli	2015-08-24 10:27:37.239941497 -0500
+@@ -128,6 +128,8 @@
+     external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
+     external scan0 : t -> int -> int = "_mlgmp_z_scan0"
+     external scan1 : t -> int -> int = "_mlgmp_z_scan1"
++    external randseed : state:RNG.randstate_t -> seed:t -> unit
++      = "_mlgmp_z_randseed"
+     external urandomb : state:RNG.randstate_t -> nbits:int -> t
+       = "_mlgmp_z_urandomb"
+     external urandomm : state:RNG.randstate_t -> n:t -> t
+@@ -339,11 +341,25 @@
+     external floor_prec : prec:int -> t -> t = "_mlgmp_fr_floor"
+     external trunc_prec : prec:int -> t -> t = "_mlgmp_fr_trunc"
+     external rint_prec : prec:int -> mode:rounding_mode -> t -> t = "_mlgmp_fr_rint"
++    external check_range : 
++      prec:int -> mode:rounding_mode -> emin:int -> emax:int -> t -> t * int 
++      = "_mlgmp_fr_check_range"
++    external subnormalize : 
++      t -> ternary:int -> mode:rounding_mode -> t
++      = "_mlgmp_fr_subnormalize"
++    external nexttoward : emin:int -> emax:int -> t -> t -> t = "_mlgmp_fr_nexttoward"
+     external cmp : t -> t -> int = "_mlgmp_fr_cmp"
+     external compare : t -> t -> int = "_mlgmp_fr_cmp"
+     external sgn : t -> int = "_mlgmp_fr_sgn"
+     external eq : t -> t -> prec:int -> bool = "_mlgmp_fr_eq"
+     external is_nan : t -> bool = "_mlgmp_fr_is_nan"
++    external is_inf : t -> bool = "_mlgmp_fr_is_inf"
++    external equal : t -> t -> bool = "_mlgmp_fr_equal"
++    external greater : t -> t -> bool = "_mlgmp_fr_greater"
++    external greaterequal : t -> t -> bool = "_mlgmp_fr_greaterequal"
++    external less : t -> t -> bool = "_mlgmp_fr_less"
++    external lessequal : t -> t -> bool = "_mlgmp_fr_lessequal"
++
+     external urandomb : prec:int -> state:RNG.randstate_t -> t
+       = "_mlgmp_fr_urandomb"
+     val from_z : Z.t -> t
+@@ -389,6 +405,10 @@
+       = "_mlgmp_fr_exp";;
+   external exp2_prec : prec: int -> mode: rounding_mode -> t->t
+       = "_mlgmp_fr_exp2";;
++  external log_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log";;
++  external log2_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log2";;
+   external pow_prec : prec: int -> mode: rounding_mode -> t->t->t
+       = "_mlgmp_fr_pow";;
+   external pow_prec_ui : prec: int -> mode: rounding_mode -> t->int->t
+@@ -418,6 +438,10 @@
+     val sqrt : t -> t
+     val exp : t -> t
+     val exp2 : t -> t
++    val exp10 : t -> t
++    val log : t -> t
++    val log2 : t -> t
++    val log10 : t -> t
+     val pow : t -> t -> t
+     val pow_ui : t -> int -> t
+ 
+@@ -425,7 +449,6 @@
+     val ceil : t -> t
+     val trunc : t -> t
+     val rint : t -> t
+-    val equal : t -> t -> bool
+     val to_string_base_digits :
+       mode:rounding_mode -> base:int -> digits:int -> t -> string
+     val to_string : t -> string
+diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
+--- mlgmp_ref/mlgmp/Makefile	2012-02-24 02:17:29.000000000 -0600
++++ mlgmp/Makefile	2015-07-03 14:16:37.332146281 -0500
+@@ -36,7 +36,7 @@
+ all:	$(LIBS) tests
+ 
+ install: all
+-	-mkdir $(DESTDIR)
++	-mkdir -p $(DESTDIR)
+ 	cp $(LIBS) gmp.mli $(DESTDIR)
+ 
+ tests:	$(LIBS) $(TESTS)
+@@ -68,7 +68,7 @@
+ 	$(RANLIB) $@
+ 
+ gmp.cma: gmp.cmo libmlgmp.a
+-	$(OCAMLC) $(OCAMLFLAGS) -a gmp.cmo -cclib -lmlgmp $(LIBFLAGS) -o $@
++	$(OCAMLC) $(OCAMLFLAGS) -custom -a gmp.cmo -cclib -lmlgmp $(LIBFLAGS) -o $@
+ 
+ gmp.a gmp.cmxa: gmp.cmx libmlgmp.a
+ 	$(OCAMLOPT) $(OCAMLFLAGS) -a gmp.cmx -cclib -lmlgmp  $(LIBFLAGS) -o $@
+@@ -91,7 +91,7 @@
+ 	$(OCAMLOPT) $+ -o $@
+ 
+ test_suite:	gmp.cma test_suite.cmo
+-	$(OCAMLC) -custom $+ -o $@
++	$(OCAMLC)  $+ -o $@
+ 
+ test_suite.opt:	gmp.cmxa test_suite.cmx
+ 	$(OCAMLOPT) $+ -o $@
+diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
+--- mlgmp_ref/mlgmp/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
++++ mlgmp/mlgmp_fr.c	2015-07-10 12:28:04.656728771 -0500
+@@ -296,12 +296,82 @@
+ fr_unary_op(sqrt)
+ fr_unary_op(exp)
+ fr_unary_op(exp2)
++fr_unary_op(exp10)
++fr_unary_op(log)
++fr_unary_op(log2)
++fr_unary_op(log10)
+ 
+ fr_unary_op(rint)
+ fr_rounding_op(ceil)
+ fr_rounding_op(floor)
+ fr_rounding_op(trunc)
+ 
++/*** Round to exponent range */
++
++value _mlgmp_fr_check_range(value prec, value mode, value emin, value emax, value a)
++{
++#ifdef USE_MPFR
++  CAMLparam5(prec, mode, emin, emax, a);
++  CAMLlocal2(r, tuple);
++  r=alloc_init_mpfr(prec);
++  int t = mpfr_set(*mpfr_val(r), *mpfr_val(a), Mode_val(mode));
++  mpfr_exp_t last_emin = mpfr_get_emin();
++  mpfr_exp_t last_emax = mpfr_get_emax();
++  mpfr_set_emin(Long_val(emin));
++  mpfr_set_emax(Long_val(emax));
++  t = mpfr_check_range(*mpfr_val(r), t, Mode_val(mode));
++  mpfr_set_emin(last_emin);
++  mpfr_set_emax(last_emax);
++  tuple = alloc_tuple(2);
++  Store_field(tuple, 0, r);
++  Store_field(tuple, 1, Val_int(t));
++  CAMLreturn(tuple);
++#else
++  unimplemented(check_range);
++#endif
++}
++
++/*** Subnormalize */
++
++value _mlgmp_fr_subnormalize(value a, value ternary, value mode)
++{
++#ifdef USE_MPFR
++  CAMLparam3(a, ternary, mode);
++  CAMLlocal1(r);
++  r = alloc_mpfr();
++  mpfr_init2(*mpfr_val(r), mpfr_get_prec(*mpfr_val(a)));
++  mpfr_set(*mpfr_val(r), *mpfr_val(a), Mode_val(mode));
++  mpfr_subnormalize(*mpfr_val(r), Int_val(ternary), Mode_val(mode));
++  CAMLreturn(r);
++#else
++  unimplemented(subnormalize);
++#endif
++}
++
++/*** Next toward */
++
++value _mlgmp_fr_nexttoward(value emin, value emax, value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLlocal1(r);
++  r = alloc_mpfr();
++  mpfr_init2(*mpfr_val(r), mpfr_get_prec(*mpfr_val(a)));
++  mpfr_exp_t last_emin = mpfr_get_emin();
++  mpfr_exp_t last_emax = mpfr_get_emax();
++  mpfr_set_emin(Long_val(emin));
++  mpfr_set_emax(Long_val(emax));
++  mpfr_set(*mpfr_val(r), *mpfr_val(a), GMP_RNDN);
++  mpfr_nexttoward(*mpfr_val(r), *mpfr_val(b));
++  mpfr_set_emin(last_emin);
++  mpfr_set_emax(last_emax);
++  CAMLreturn(r);
++#else
++  unimplemented(nexttoward);
++#endif
++}
++  
++
+ /*** Compare */
+ 
+ int _mlgmp_fr_custom_compare(value a, value b)
+@@ -354,6 +424,18 @@
+ #endif
+ }
+ 
++value _mlgmp_fr_is_inf(value a)
++{
++#ifdef USE_MPFR
++  CAMLparam1(a);
++  CAMLreturn(mpfr_inf_p(*mpfr_val(a)) ? Val_true : Val_false);
++#else
++  unimplemented(is_nan);
++#endif
++}
++
++
++
+ value _mlgmp_fr_eq(value a, value b, value nbits)
+ {
+ #ifdef USE_MPFR
+@@ -365,6 +447,67 @@
+ #endif
+ }
+ 
++
++value _mlgmp_fr_equal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_equal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(equal);
++#endif
++}
++
++
++value _mlgmp_fr_greater(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_greater_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(greater);
++#endif
++}
++
++
++value _mlgmp_fr_greaterequal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_greaterequal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(greaterequal);
++#endif
++}
++
++
++value _mlgmp_fr_less(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_less_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(less);
++#endif
++}
++
++
++value _mlgmp_fr_lessequal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_lessequal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(lessequal);
++#endif
++}
++
++
+ fr_binary_op_mpfr(reldiff)
+ 
+ 
+diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
+--- mlgmp_ref/mlgmp/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
++++ mlgmp/mlgmp_z.c	2015-08-24 10:27:12.671941721 -0500
+@@ -742,6 +742,13 @@
+ z_random_op(urandomm)
+ z_random_op_ui(rrandomb)
+ 
++value _mlgmp_z_randseed(value state, value seed)
++{
++  CAMLparam2(state, seed);
++  gmp_randseed(*randstate_val(state), *mpz_val(seed));
++  CAMLreturn(Val_unit);
++}
++
+ /*** Serialization */
+ value _mlgmp_z_initialize()
+ {

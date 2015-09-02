@@ -1,23 +1,22 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import dk.brics.automaton.BasicAutomata;
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
+import org.kframework.utils.algorithms.SCCTarjan;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.kframework.definition.Production;
-import org.kframework.parser.concrete2kore.kernel.Rule.DeleteRule;
-import org.kframework.utils.algorithms.SCCTarjan;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 
 /**
@@ -41,13 +40,13 @@ import com.google.common.collect.HashBiMap;
  *     | E "*" E   [label(mul)]
  *     | {E, ","}+ [label(lst)]
  *
- *     +--[E]---("+")--<Del>--[E]--<add>--+
- *     |                                  |
- * (|--+--[E]---("*")--<Del>--[E]--<mul>--+--|)
- *     |                                  |
- *     |   +-----------------------<lst>--+
- *     +--[E]---(",")--<Del>--+
- *         ^------------------+
+ *     +--[E]---("+")--[E]--<add>--+
+ *     |                           |
+ * (|--+--[E]---("*")--[E]--<mul>--+--|)
+ *     |                           |
+ *     |   +----------------<lst>--+
+ *     +--[E]---(",")----+
+ *         ^-------------+
  *
  * (| - EntryState
  * |) - ExitState
@@ -135,15 +134,13 @@ public class Grammar implements Serializable {
         }
     }
 
-    static final String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
-    static final String singleLine = "(//.*)";
-    static final String whites = "([ \n\r\t])";
-    static final Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
-
+    static final String multiLine = "(/\\*([^\\*]|(\\*+([^\\*/])))*\\*+/)";
+    static final String singleLine = "(//[^\n\r]*)";
+    static final String whites = "([\\ \n\r\t])";
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
      * All children of the given state are moved to the remove whitespace rule.
-     * (|-- gets transformed into (|-->(white)--><remove>---
+     * (|-- gets transformed into (|-->(white)--
      * @param start NextableState to which to attach the whitespaces
      * @return the remove whitespace state
      */
@@ -154,15 +151,14 @@ public class Grammar implements Serializable {
             start = (NextableState) start.next.iterator().next();
         }
         PrimitiveState whitespace = new RegExState(
-            "whitespace", start.nt, pattern, null);
-        RuleState deleteToken = new RuleState(
-            "whitespace-D", start.nt, new DeleteRule(1, true));
-        whitespace.next.add(deleteToken);
-        deleteToken.next.addAll(start.next);
+            "whitespace", start.nt, pattern);
+        whitespace.next.addAll(start.next);
         start.next.clear();
         start.next.add(whitespace);
-        return deleteToken;
+        return whitespace;
     }
+
+    static final RunAutomaton pattern = new RunAutomaton(new RegExp("("+ multiLine +"|"+ singleLine +"|"+ whites +")*").toAutomaton(), false);
 
     /**
      * Calculates Nullability and OrderingInfo for all the states in the grammar.
@@ -269,7 +265,7 @@ public class Grammar implements Serializable {
      * original BNF grammar. The non-terminal is represented as a NFA automaton which has only
      * one EntryState and one ExitState.
      */
-    public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
+    public static class NonTerminal implements Serializable {
         public final String name;
         private final int hashCode;
         /**
@@ -283,37 +279,6 @@ public class Grammar implements Serializable {
         // contains a list of all States found in this NonTerminal other than the EntryState
         // and ExitState
         private final Set<NextableState> intermediaryStates = new HashSet<>();
-        final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
-
-        /**
-         * Metadata used by the parser used to determine in what order to process StateReturns
-         * Note: currently unused until we do lookahead.
-         */
-        static class OrderingInfo implements Comparable<OrderingInfo> {
-            final int key;
-            public OrderingInfo(int key) { this.key = key; }
-            public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
-            @Override
-            public int hashCode() {
-                final int prime = 31;
-                int result = 1;
-                result = prime * result + key;
-                return result;
-            }
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj)
-                    return true;
-                if (obj == null)
-                    return false;
-                if (getClass() != obj.getClass())
-                    return false;
-                OrderingInfo other = (OrderingInfo) obj;
-                if (key != other.key)
-                    return false;
-                return true;
-            }
-        }
 
         public NonTerminal(String name) {
             assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
@@ -321,10 +286,6 @@ public class Grammar implements Serializable {
             hashCode = name.hashCode();
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
-        }
-
-        public int compareTo(NonTerminal that) {
-            return this.name.compareTo(that.name);
         }
 
         /**
@@ -370,7 +331,7 @@ public class Grammar implements Serializable {
         /** Counter for generating unique ids for the state. */
         private static int counter = 0;
         /** The unique id of this state. */
-        private final int unique = counter++;
+        public final int unique;
 
         /** A back reference to the NonTerminal that this state is part of. */
         public final NonTerminal nt;
@@ -408,6 +369,9 @@ public class Grammar implements Serializable {
         }
 
         public State(String name, NonTerminal nt) {
+            synchronized (State.class) {
+                unique = counter++;
+            }
             assert nt != null;
             this.name = name + "[" + this.unique + "]";
             this.nt = nt;
@@ -430,6 +394,11 @@ public class Grammar implements Serializable {
         @Override
         public int hashCode() {
             return unique;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 
@@ -476,17 +445,14 @@ public class Grammar implements Serializable {
     public static class NonTerminalState extends NextableState {
         /** The NonTerminal referenced by this NonTerminalState */
         public final NonTerminal child;
-        /** Specifies if this state should be treated as a lookahead parse */
-        public final boolean isLookahead;
 
         public NonTerminalState(
                 String name, NonTerminal nt,
-                NonTerminal child, boolean isLookahead) {
+                NonTerminal child) {
             super(name, nt, true);
             assert child != null;
             nt.intermediaryStates.add(this);
             this.child = child;
-            this.isLookahead = isLookahead;
         }
     }
 
@@ -509,8 +475,6 @@ public class Grammar implements Serializable {
      * TODO: revisit this description once we get the new KORE
      */
     public abstract static class PrimitiveState extends NextableState {
-        /** The production of the Constant. Used as a reference for trace back */
-        public final Production prd;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -522,11 +486,10 @@ public class Grammar implements Serializable {
          *  Returns a set of matches at the given position in the given string.
          *  If there are no matches, the returned set will be empty.
          */
-        abstract Set<MatchResult> matches(CharSequence text, int startPosition);
+        abstract Set<MatchResult> matches(String text, String reverseText, int startPosition);
 
-        public PrimitiveState(String name, NonTerminal nt, Production prd) {
+        public PrimitiveState(String name, NonTerminal nt) {
             super(name, nt, true);
-            this.prd = prd;
         }
 
         /**
@@ -534,7 +497,7 @@ public class Grammar implements Serializable {
          * @return true if it can parse without consuming any tokens.
          */
         public boolean isNullable() {
-            Set<MatchResult> matchResults = this.matches("", 0);
+            Set<MatchResult> matchResults = this.matches("", "", 0);
             return matchResults.size() != 0;
         }
     }
@@ -545,37 +508,33 @@ public class Grammar implements Serializable {
      */
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
-        public final Pattern pattern;
-        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
-        public final Set<String> rejects;
+        public final RunAutomaton pattern;
+        public final RunAutomaton precedePattern;
+        public final RunAutomaton followPattern;
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd) {
-            super(name, nt, prd);
-            assert pattern != null;
-            this.pattern = pattern;
-            this.rejects = new HashSet<>();
+        public RegExState(String name, NonTerminal nt, RunAutomaton pattern) {
+            this(name, nt, new RunAutomaton(BasicAutomata.makeEmpty(), false), pattern, new RunAutomaton(BasicAutomata.makeEmpty(), false));
         }
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd, Set<String> rejects) {
-            super(name, nt, prd);
+        public RegExState(String name, NonTerminal nt, RunAutomaton precedePattern, RunAutomaton pattern, RunAutomaton followPattern) {
+            super(name, nt);
             assert pattern != null;
+            this.precedePattern = precedePattern;
             this.pattern = pattern;
-            this.rejects = rejects;
+            this.followPattern = followPattern;
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
-        Set<MatchResult> matches(CharSequence text, int startPosition) {
-            Matcher matcher = pattern.matcher(text);
-            matcher.region(startPosition, text.length());
-            matcher.useAnchoringBounds(false);
-            matcher.useTransparentBounds(true);
-            Set<MatchResult> results = new HashSet<>();
-            if (matcher.lookingAt()) {
-                // reject keywords
-                if (!rejects.contains(matcher.group()))
-                    results.add(new MatchResult(matcher.end()));
-            }
-            return results;
+        Set<MatchResult> matches(String text, String reverseText, int startPosition) {
+            int matchedLength = pattern.run(text, startPosition);
+            if (matchedLength == -1)
+                return Collections.emptySet();
+            if (followPattern.run(text, startPosition + matchedLength) != -1)
+                return Collections.emptySet();
+            if (precedePattern.run(reverseText, text.length() - startPosition) != -1)
+                return Collections.emptySet();
+
+            return Collections.singleton(new MatchResult(startPosition + matchedLength));
         }
     }
 }

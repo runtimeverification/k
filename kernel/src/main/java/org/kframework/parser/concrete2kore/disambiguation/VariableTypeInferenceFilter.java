@@ -6,32 +6,42 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.attributes.Location;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kore.Sort;
 import org.kframework.definition.NonTerminal;
+import org.kframework.definition.Production;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.Sort;
+import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
+import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
-import org.kframework.parser.*;
+import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.VariableTypeClashException;
+import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Apply the priority and associativity filters.
@@ -40,27 +50,127 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     public enum VarType { CONTEXT, USER }
     private final POSet<Sort> subsorts;
     private final scala.collection.immutable.Set<Sort> sortSet;
+    private final scala.collection.immutable.Map<KLabel, scala.collection.immutable.Set<Production>> productions;
+    private final boolean inferSortChecks;
     private Set<ParseFailedException> warnings = this.warningUnit();
-    public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.immutable.Set<Sort> sortSet) {
+    public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.immutable.Set<Sort> sortSet, scala.collection.immutable.Map<
+            KLabel, scala.collection.immutable.Set<Production>> productions, boolean inferSortChecks) {
         this.subsorts = subsorts;
         this.sortSet = sortSet;
+        this.productions = productions;
+        this.inferSortChecks = inferSortChecks;
+    }
+
+    /** Return the set of all known sorts which are a lower bound on
+     * all sorts in {@code bounds}, leaving out internal sorts below "KBott".
+     */
+    private Set<Sort> lowerBounds(Collection<Sort> bounds) {
+        Set<Sort> mins = new HashSet<>();
+        nextsort:
+        for (Sort sort : iterable(sortSet)) { // for every declared sort
+            if (subsorts.lessThanEq(sort, Sort("KBott")))
+                continue;
+            for (Sort bound : bounds)
+                if (!subsorts.greaterThanEq(bound, sort))
+                    continue nextsort;
+            mins.add(sort);
+        }
+        return mins;
+    }
+
+    // When passed a mutable List {@code sets} of nonempty subsets of {@code universe},
+    // returns a set containing at least one item in common with each of the sets.
+    // Empties {@code sets}.
+    private <T> Set<T> hittingSet(Set<T> universe, List<Set<T>> sets) {
+        assert sets.stream().allMatch(s -> !s.isEmpty());
+        Set<T> hittingSet = new HashSet<>();
+        while (!sets.isEmpty()) {
+            T maxItem = null;
+            int maxCount = 0;
+            for (T item : universe) {
+                int count = 0;
+                for (Set<T> s : sets) {
+                    if (s.contains(item)) {
+                        ++count;
+                    }
+                }
+                if (count > maxCount) {
+                    maxItem = item;
+                    maxCount = count;
+                }
+            }
+            hittingSet.add(maxItem);
+            ListIterator<Set<T>> li = sets.listIterator();
+            while (li.hasNext()) {
+                if (li.next().contains(maxItem)) {
+                    li.remove();
+                }
+            }
+        }
+        return hittingSet;
+    }
+
+    static final class VarKey {
+        private final Constant var;
+        private VarKey(Constant c) {
+            var = c;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof VarKey)) return false;
+
+            VarKey vo = (VarKey)o;
+            return var.equals(vo.var) && var.source().equals(vo.var.source()) && var.location().equals(vo.var.location());
+        }
+
+        @Override
+        public int hashCode() {
+            return var.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            if (var.location().isPresent()) {
+                return '\''+var.value()+"' at "+var.location().get();
+            } else {
+                return '\''+var.value()+'\'';
+            }
+        }
+
+        public boolean isAnyVar() {
+            return var.value().equals(MetaK.Constants.anyVarSymbol);
+        }
+    }
+
+    private static VarKey getVarKey(Constant c) {
+        if (c.value().equals(MetaK.Constants.anyVarSymbol)) {
+            return new VarKey(c); // wildcard values are compared including location
+        } else {
+            return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));
+        }
     }
 
     @Override
     public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<ParseFailedException>> apply(Term t) {
+        Term loc = t;
+        if (loc instanceof Ambiguity) {
+            loc = ((Ambiguity)loc).items().iterator().next();
+        }
 
         Set<VarInfo> vis = new CollectVariables().apply(t)._2();
         //System.out.println("vis = " + vis);
-        Map<String, Sort> decl = new HashMap<>();
+        Map<VarKey, Sort> decl = new HashMap<>();
         for (VarInfo vi : vis) {
-            Sort s = decl.get(vi.varName);
+            Sort s = decl.get(vi.varKey);
             if (vi.varType == VarType.USER) {
                 if (s == null) {
-                    decl.put(vi.varName, vi.sort);
+                    decl.put(vi.varKey, vi.sort);
                 } else if (!s.equals(vi.sort)) {
-                    String msg = vi.varName + " declared with two different sorts: " + s + " and " + vi.sort;
+                    String msg = vi.varKey + " declared with two different sorts: " + s + " and " + vi.sort;
                     //System.out.println(msg);
-                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                    KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                     return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
@@ -79,55 +189,20 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             vars2.apply(t);
             //System.out.println("vars = " + vars2.vars);
 
-            Set<Multimap<String, Sort>> solutions = new HashSet<>();
-            String fails = null;
-            Set<Sort> failsAmb = null;
-            String failsAmbName = null;
-            for (Multimap<String, Sort> variant : vars2.vars) {
+            Set<Multimap<VarKey, Sort>> solutions = new HashSet<>();
+            VarKey fails = null;
+            for (Multimap<VarKey, Sort> variant : vars2.vars) {
                 // take each solution and do GLB on every variable
-                Multimap<String, Sort> solution = HashMultimap.create();
-                for (String key : variant.keySet()) {
+                Multimap<VarKey, Sort> solution = HashMultimap.create();
+                for (VarKey key : variant.keySet()) {
                     Collection<Sort> values = variant.get(key);
-                    Set<Sort> mins = new HashSet<>();
-                    for (Sort sort : iterable(sortSet)) { // for every declared sort
-                        if (subsorts.lessThenEq(sort, Sort("KBott")))
-                            continue;
-                        boolean min = true;
-                        for (Sort var : values) {
-                            if (!subsorts.greaterThenEq(var, sort)) {
-                                min = false;
-                                break;
-                            }
-                        }
-                        if (min)
-                            mins.add(sort);
-                    }
+                    Set<Sort> mins = lowerBounds(values);
                     if (mins.size() == 0) {
                         fails = key;
                         solution.clear();
                         break;
-                    } else if (mins.size() > 1) {
-                        java.util.Set<Sort> maxSorts = new HashSet<>();
-
-                        for (Sort vv1 : mins) {
-                            boolean maxSort = true;
-                            for (Sort vv2 : mins)
-                                if (subsorts.lessThen(vv1, vv2))
-                                    maxSort = false;
-                            if (maxSort)
-                                maxSorts.add(vv1);
-                        }
-
-                        if (maxSorts.size() == 1)
-                            solution.putAll(key, maxSorts);
-                        else {
-                            failsAmb = maxSorts;
-                            failsAmbName = key;
-                            solution.clear();
-                            break;
-                        }
                     } else {
-                        solution.putAll(key, mins);
+                        solution.putAll(key, subsorts.maximal(mins));
                     }
                 }
                 // I found a solution that fits everywhere, then store it for disambiguation
@@ -136,64 +211,98 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
             if (!vars2.vars.isEmpty()) {
                 if (solutions.size() == 0) {
-                    if (fails != null) {
-                        String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
-                        return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                    assert fails != null;
+                    String msg = "Could not infer a sort for variable " + fails + " to match every location.";
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                }
 
-                    } else {
-                        // Failure when in the same solution I can't find a unique sort for a specific variable.
-                        String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
+                // If multiple parses were typeable, check that all have the same set of variables
+                if (solutions.size() > 1) {
+                    Set<VarKey> allVars = new HashSet<>();
+                    Set<VarKey> commonVars = null;
+                    for (Multimap<VarKey, Sort> solution : solutions) {
+                        Set<VarKey> theseVars = solution.keySet();
+                        allVars.addAll(theseVars);
+                        if (commonVars == null) {
+                            commonVars = new HashSet<>(theseVars);
+                        } else {
+                            commonVars.retainAll(theseVars);
+                        }
+                    }
+                    if (!allVars.equals(commonVars)) {
+                        String msg = "Possible parses have different sets of variables. "
+                                + "Each of these may or may not be a variable, depending on the parse:";
+                        allVars.removeAll(commonVars);
+                        for (VarKey v : allVars) {
+                            msg += " " + v;
+                        }
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), this.warningUnit());
+                    }
+                }
+
+                // Now check that each variable has a unique maximal possible sort.
+                Multimap<VarKey,Sort> varBounds;
+                if (solutions.size() > 1) {
+                    varBounds = HashMultimap.create();
+                    for (Multimap<VarKey, Sort> solution : solutions) {
+                        varBounds.putAll(solution);
+                    }
+                } else {
+                    varBounds = solutions.iterator().next();
+                }
+                Multimap<VarKey,Sort> solution = HashMultimap.create();
+                for (VarKey k : varBounds.keySet()) {
+                    Set<Sort> sorts = subsorts.maximal(varBounds.get(k));
+                    if (sorts.size() > 1) {
+                        String msg = "Could not infer a unique sort for variable " + k + ".";
                         msg += " Possible sorts: ";
-                        for (Sort vv1 : failsAmb)
+                        for (Sort vv1 : sorts)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
+                        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
                         return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
-
                     }
-                } else if (solutions.size() == 1) {
+                    solution.putAll(k, sorts);
+                }
+
+                if (!solutions.contains(solution)) {
+                    List<Set<VarKey>> badVars = new ArrayList<>(solutions.size());
+                    for (Multimap<VarKey,Sort> badSolution : solutions) {
+                        HashSet<VarKey> myBadVars = new HashSet<>();
+                        for (VarKey k : badSolution.keySet()) {
+                            if (!badSolution.get(k).equals(solution.get(k))) {
+                                myBadVars.add(k);
+                            }
+                        }
+                        badVars.add(myBadVars);
+                    }
+                    Set<VarKey> reportVars = hittingSet(solution.keySet(), badVars);
+                    String msg = "Could not infer unique sorts. Each variable has a unique greatest possible sort,"
+                            +" but these cannot all be assigned simultaneously: ";
+                    for (VarKey v : solution.keySet()) {
+                        msg+= v+" : "+solution.get(v).iterator().next()+", ";
+                    }
+                    msg = msg.substring(0, msg.length() - 2);
+                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().get(), loc.location().get());
+                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
+                } else {
                     //System.out.println("solutions = " + solutions);
-                    Multimap<String, Sort> sol1 = solutions.iterator().next();
                     decl.clear();
-                    for (String key : sol1.keySet()) {
-                        Sort sort = sol1.get(key).iterator().next();
+                    for (VarKey key : solution.keySet()) {
+                        Sort sort = solution.get(key).iterator().next();
                         decl.put(key, sort);
-                        String msg = "Variable '" + key + "' was not declared. Assuming sort " + sort + ".";
-                        warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, null, t.location().get()))));
+                        if (!key.isAnyVar()) {
+                            String msg = "Variable " + key + " was not declared. Assuming sort " + sort + ".";
+                            warnings = mergeWarnings(warnings, makeWarningSet(new VariableTypeClashException(
+                                    new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, loc.source().get(), loc.location().get()))));
+                        }
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!decl.isEmpty()) {
                         t = new ApplyTypeCheck(decl).apply(t).right().get();
                     }
-                } else {
-                    Multimap<String, Sort> collect = HashMultimap.create();
-                    for (Multimap<String, Sort> sol : solutions) {
-                        collect.putAll(sol);
-                    }
-                    for (String key : collect.keySet()) {
-                        Collection<Sort> values = collect.get(key);
-                        if (values.size() > 1) {
-                            String msg = "Could not infer a unique sort for variable '" + key + "'.";
-                            msg += " Possible sorts: ";
-                            for (Sort vv1 : values)
-                                msg += vv1 + ", ";
-                            msg = msg.substring(0, msg.length() - 2);
-                            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
-                            return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
-                        }
-                    }
-                    // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
-                    // In rare cases (couldn't think of one right now) it may be that the
-                    // solution may be different because of different variable names
-
-                    // Ok, I found one example now. In C with unified-builtins, the follow restriction for ==Set doesn't work
-                    // and it creates multiple parses with different amounts of variables
-                    // This makes it that I can't disambiguate properly
-                    // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
-                    String msg = "Parser: failed to infer sorts for variables.\n    Please file a bug report at https://github.com/kframework/k/issues.";
-                    KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, null, t.location().get());
-                    return new Tuple2<>(Left.apply(Sets.newHashSet(new VariableTypeClashException(kex))), this.warningUnit());
                 }
             }
         }
@@ -208,15 +317,15 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     private class VarInfo {
-        public String varName;
+        public VarKey varKey;
         public Sort sort;
         public Location loc;
         public VarType varType;
 
-        public VarInfo(String varName, Sort sort, Location loc, VarType varType) {
-            this.varName = varName;
+        public VarInfo(Constant varOcc, Sort sort, VarType varType) {
+            this.varKey = getVarKey(varOcc);
             this.sort = sort;
-            this.loc = loc;
+            this.loc = varOcc.location().get();
             this.varType = varType;
         }
 
@@ -229,7 +338,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
             if (!loc.equals(varInfo.loc)) return false;
             if (!sort.equals(varInfo.sort)) return false;
-            if (!varName.equals(varInfo.varName)) return false;
+            if (!varKey.equals(varInfo.varKey)) return false;
             if (varType != varInfo.varType) return false;
 
             return true;
@@ -237,7 +346,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         @Override
         public int hashCode() {
-            int result = varName.hashCode();
+            int result = varKey.hashCode();
             result = 31 * result + sort.hashCode();
             result = 31 * result + loc.hashCode();
             result = 31 * result + varType.hashCode();
@@ -247,11 +356,26 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         @Override
         public String toString() {
             return "VarInfo{" +
-                    "'" + varName + '\'' +
+                    "" + varKey +
                     ", " + sort +
                     ", " + loc +
                     ", " + varType +
                     '}';
+        }
+    }
+
+    public static Sort getSortOfCast(TermCons tc) {
+        switch (tc.production().klabel().get().name()) {
+        case "#SyntacticCast":
+        case "#OuterCast":
+            return tc.production().sort();
+        case "#InnerCast":
+            return ((NonTerminal)tc.production().items().apply(0)).sort();
+        default:
+            if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
+                return tc.production().sort();
+            }
+            throw new AssertionError("Unexpected cast type");
         }
     }
 
@@ -261,14 +385,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             Set<VarInfo> collector = this.makeWarningSet();
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                collector = new CollectVariables2(Sort(tc.production().att().<String>get("sort").get()), VarType.USER).apply(t)._2();
+                Term t = tc.get(0);
+                collector = new CollectVariables2(getSortOfCast(tc), VarType.USER).apply(t)._2();
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
                         collector = mergeWarnings(collector, vars);
                         j++;
@@ -297,8 +421,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable")) {
-                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c.value(), this.sort, c.location().get(), varType)));
+                if (c.production().sort().equals(Sorts.KVariable())) {
+                    return new Tuple2<>(Right.apply(c), this.makeWarningSet(new VarInfo(c, this.sort, varType)));
                 }
                 return new Tuple2<>(Right.apply(c), this.warningUnit());
             }
@@ -306,31 +430,31 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     private class ApplyTypeCheck extends SetsTransformerWithErrors<ParseFailedException> {
-        private final Map<String, Sort> decl;
-        public ApplyTypeCheck(Map<String, Sort> decl) {
+        private final Map<VarKey, Sort> decl;
+        public ApplyTypeCheck(Map<VarKey, Sort> decl) {
             this.decl = decl;
         }
 
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-            // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(Sort(tc.production().att().<String>get("sort").get())).apply(t);
+                Term t = tc.get(0);
+                boolean strictSortEquality = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
+                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
                 if (rez.isLeft())
                     return rez;
-                tc.items().set(0, rez.right().get());
+                tc = tc.with(0, rez.right().get());
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
                         if (rez.isLeft())
                             return rez;
-                        tc.items().set(j, rez.right().get());
+                        tc = tc.with(j, rez.right().get());
                         j++;
                     }
                 }
@@ -343,11 +467,17 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         private class ApplyTypeCheck2 extends SetsTransformerWithErrors<ParseFailedException> {
             private final Sort sort;
-            public ApplyTypeCheck2(Sort sort) {
+            private final boolean hasCastAlready;
+            private final boolean strictSortEquality;
+            private final boolean addCast;
+
+            public ApplyTypeCheck2(Sort sort, boolean hasCastAlready, boolean strictSortEquality, boolean addCast) {
                 this.sort = sort;
+                this.hasCastAlready = hasCastAlready;
+                this.strictSortEquality = strictSortEquality;
+                this.addCast = addCast;
             }
 
-            // TODO (Radu): check types of terms under rewrites too?
             public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
                 if (tc.production().att().contains("bracket")
                         || (tc.production().klabel().isDefined()
@@ -358,21 +488,36 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Either<java.util.Set<ParseFailedException>, Term> apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable")) {
-                    Sort declared = decl.get(c.value());
-                    if (declared != null && !declared.equals(Sort("K"))) {
-                        //System.out.println("c = " + c.value() + ", " + declared + " < " + sort);
-                        if (!subsorts.lessThenEq(declared, sort)) {
-                            // TODO: location information
+                if (c.production().sort().equals(Sorts.KVariable())) {
+                    Sort declared = decl.get(getVarKey(c));
+                    if (declared != null && !declared.equals(Sorts.K())) {
+                        if ((!strictSortEquality && !subsorts.lessThanEq(declared, sort)) || (strictSortEquality && !declared.equals(sort))) {
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
-                            //System.out.println(msg);
-                            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, null, c.location().get());
+                            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().get(), c.location().get());
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
                         }
+                        return wrapTermWithCast(c, declared);
                     }
                 }
                 return Right.apply(c);
             }
+
+            private Either<Set<ParseFailedException>, Term> wrapTermWithCast(Constant c, Sort declared) {
+                Production cast;
+                if (addCast) {
+                    cast = productions.apply(KLabel("#SemanticCastTo" + declared.name())).head();
+                } else if (!hasCastAlready) {
+                    cast = stream(productions.apply(KLabel("#SyntacticCast"))).filter(p -> p.sort().equals(declared)).findAny().get();
+                } else {
+                    cast = null;
+                }
+                if (cast == null) {
+                    return Right.apply(c);
+                } else {
+                    return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
+                }
+            }
+
         }
     }
 
@@ -381,23 +526,23 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
          * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
          * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
          */
-        public Set<Multimap<String, Sort>> vars = new HashSet<>();
-        private final Set<String> declaredNames;
+        public Set<Multimap<VarKey, Sort>> vars = new HashSet<>();
+        private final Set<VarKey> declaredNames;
 
-        public CollectExpectedVariablesVisitor(Set<String> declaredNames) {
+        public CollectExpectedVariablesVisitor(Set<VarKey> declaredNames) {
             this.declaredNames = declaredNames;
         }
 
         @Override
         public Term apply(Ambiguity node) {
-            Set<Multimap<String, Sort>> newVars = new HashSet<>();
+            Set<Multimap<VarKey, Sort>> newVars = new HashSet<>();
             for (Term t : node.items()) {
                 CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(declaredNames);
                 viz.apply(t);
                 // create the split
-                for (Multimap<String, Sort> elem : vars) { // for every local type restrictions
-                    for (Multimap<String, Sort> elem2 : viz.vars) { // create a combination with every ambiguity detected
-                        Multimap<String, Sort> clone = HashMultimap.create();
+                for (Multimap<VarKey, Sort> elem : vars) { // for every local type restrictions
+                    for (Multimap<VarKey, Sort> elem2 : viz.vars) { // create a combination with every ambiguity detected
+                        Multimap<VarKey, Sort> clone = HashMultimap.create();
                         clone.putAll(elem);
                         clone.putAll(elem2);
                         newVars.add(clone);
@@ -412,17 +557,16 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public Term apply(TermCons tc) {
-            // TODO: (Radu) if this is cast, take the sort from annotations?
             if (tc.production().klabel().isDefined()
                     && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().equals("#SemanticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                     || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.items().get(0);
-                new CollectUndeclaredVariables2(Sort(tc.production().att().<String>get("sort").get())).apply(t);
+                Term t = tc.get(0);
+                new CollectUndeclaredVariables2(getSortOfCast(tc)).apply(t);
             } else {
                 for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
                     if (tc.production().items().apply(i) instanceof NonTerminal) {
-                        Term t = tc.items().get(j);
+                        Term t = tc.get(j);
                         new CollectUndeclaredVariables2(((NonTerminal) tc.production().items().apply(i)).sort()).apply(t);
                         j++;
                     }
@@ -447,11 +591,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Term apply(Constant c) {
-                if (c.production().sort().name().equals("KVariable") && !declaredNames.contains(c.value()) && !c.value().equals(MetaK.Constants.anyVarSymbol)) {
+                if (c.production().sort().equals(Sorts.KVariable()) && !declaredNames.contains(getVarKey(c))) {
                     if (vars.isEmpty())
-                        vars.add(HashMultimap.<String, Sort>create());
-                    for (Multimap<String, Sort> vars2 : vars)
-                        vars2.put(c.value(), sort);
+                        vars.add(HashMultimap.<VarKey, Sort>create());
+                    for (Multimap<VarKey, Sort> vars2 : vars)
+                        vars2.put(getVarKey(c), sort);
                 }
 
                 return c;

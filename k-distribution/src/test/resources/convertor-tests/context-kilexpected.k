@@ -5,7 +5,7 @@ module INCLUDE
 
   syntax #Bool ::= "true"
 
-  syntax #String ::= Lexical{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
+  syntax #String ::= Lexical{[\"](([^\"\n\r\\])|([\\][nrtf\"\\])|([\\][x][0-9a-fA-F]{2})|([\\][u][0-9a-fA-F]{4})|([\\][U][0-9a-fA-F]{8}))*[\"]}
 
   syntax Map ::= ".Map"
 
@@ -16,10 +16,18 @@ endmodule
 module TEST
   context []:KItem  + _:K
   context _:K + []:KItem
-  imports INCLUDE
+  syntax #Bool ::= "false"
+
+  syntax #Bool ::= "true"
+
+  syntax #String ::= Lexical{[\"](([^\"\n\r\\])|([\\][nrtf\"\\])|([\\][x][0-9a-fA-F]{2})|([\\][u][0-9a-fA-F]{4})|([\\][U][0-9a-fA-F]{8}))*[\"]}
+
   syntax Exp ::= Exp "+" Exp
+
+  syntax Map ::= ".Map"
+
+  syntax String ::= #String
 
 
 endmodule
-require "include.k"
 

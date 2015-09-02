@@ -1,8 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import static org.mockito.Mockito.*;
-
+import com.google.inject.util.Providers;
 import org.junit.Test;
 import org.kframework.main.GlobalOptions;
 import org.kframework.transformation.Transformation;
@@ -11,7 +10,7 @@ import org.kframework.utils.errorsystem.KEMExceptionProvider;
 import org.kframework.utils.file.JarInfo;
 import org.mockito.Mock;
 
-import com.google.inject.util.Providers;
+import static org.mockito.Mockito.*;
 
 public class KRunFrontEndTest extends BaseTestCase {
 
@@ -22,7 +21,7 @@ public class KRunFrontEndTest extends BaseTestCase {
     public void testVersion() {
         GlobalOptions options = new GlobalOptions();
         options.version = true;
-        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files, scope, Providers.of(kompiledDir));
+        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, jarInfo, files, scope, Providers.of(kompiledDir), new KRunOptions(), null);
         frontend.main();
         verify(jarInfo).printVersionMessage();
     }
@@ -30,7 +29,7 @@ public class KRunFrontEndTest extends BaseTestCase {
     @Test
     public void testNothingAvailable() {
         GlobalOptions options = new GlobalOptions();
-        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, loader, jarInfo, files, scope, Providers.of(kompiledDir));
+        KRunFrontEnd frontend = new KRunFrontEnd(options, null, null, new KEMExceptionProvider<Transformation<Void, Void>>(), kem, jarInfo, files, scope, Providers.of(kompiledDir), new KRunOptions(), null);
         frontend.main();
         verify(kem).print();
     }
