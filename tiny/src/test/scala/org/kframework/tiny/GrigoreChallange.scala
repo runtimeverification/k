@@ -1,9 +1,8 @@
 package org.kframework.tiny
 
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 import org.kframework.attributes.Att
-import org.kframework.builtin.Sorts
 import org.kframework.definition._
 
 
@@ -31,9 +30,9 @@ class GrigoreChallange {
 
   val boolPair = Seq(NonTerminal(Bool), NonTerminal(Bool))
 
-  val logicModule = Module("BOOLEAN-LOGIC", Set(), Set(
-    Production("_andBool_", Bool, boolPair, Att() + ("hook" -> "#BOOL:_andBool_")),
-    Production("_orBool_", Sorts.Bool, boolPair, Att() + ("hook" -> "#BOOL:_orBool_"))))
+  //  val logicModule = Module("BOOLEAN-LOGIC", Set(), Set(
+  //    Production("_andBool_", Bool, boolPair, Att() + ("hook" -> "#BOOL:_andBool_")),
+  //    Production("_orBool_", Sorts.Bool, boolPair, Att() + ("hook" -> "#BOOL:_orBool_"))))
 
   val intPair = Seq(NonTerminal(Int), NonTerminal(Int))
 
@@ -45,22 +44,22 @@ class GrigoreChallange {
     Production("~", K, intPair, Att() + "assoc" + "comm")
   ), Att())
 
-  val cons = new Constructors(syntaxModule)
+  val cons = new Constructors(syntaxModule, FreeTheory(syntaxModule))
 
   import cons._
 
   val R = KVar("R")
 
-  val argsAreInts = And('isInt(X), 'isInt(Y))
+  val argsAreInts = And(LiftBoolToMLLabel('isInt(X)), LiftBoolToMLLabel('isInt(Y)))
 
-  val completeModule = Module("T", Set(syntaxModule, logicModule), Set(
+  val completeModule = Module("T", Set(syntaxModule), Set(
     Rule(X ~ Y ~ R ==> (X + Y) ~ R, argsAreInts, False),
     Rule(X ~ Y ~ R ==> (X - Y) ~ R, argsAreInts, False),
     Rule(X ~ Y ~ R ==> (X / Y) ~ R, argsAreInts, False),
     Rule(X ~ Y ~ R ==> (X * Y) ~ R, argsAreInts, False)
   ))
 
-  val rewriter = new Rewriter(completeModule, SimpleIndex)
+  val rewriter = new Rewriter(completeModule, SimpleIndex, new TheoryWithFunctions(completeModule))
 
   @Test
   def shortTest {
@@ -74,14 +73,14 @@ class GrigoreChallange {
     assertEquals(Right(0: K), rewriter.search((5: K) ~ 5 ~ 7, 0))
   }
 
-  val completeModuleWithAnywhere = Module("T-ANYWHERE", Set(syntaxModule, logicModule), Set(
+  val completeModuleWithAnywhere = Module("T-ANYWHERE", Set(syntaxModule), Set(
     Rule(X ~ Y ==> (X + Y), argsAreInts, False, cons.Att() + "anywhere"),
     Rule(X ~ Y ==> (X - Y), argsAreInts, False, cons.Att() + "anywhere"),
     Rule(X ~ Y ==> (X / Y), argsAreInts, False, cons.Att() + "anywhere"),
     Rule(X ~ Y ==> (X * Y), argsAreInts, False, cons.Att() + "anywhere")
   ))
 
-  val rewriterWithAnywhere = new Rewriter(completeModuleWithAnywhere, SimpleIndex)
+  val rewriterWithAnywhere = new Rewriter(completeModuleWithAnywhere, SimpleIndex, new TheoryWithFunctions(completeModuleWithAnywhere))
 
   @Test
   def shortTestWithAnywhere {

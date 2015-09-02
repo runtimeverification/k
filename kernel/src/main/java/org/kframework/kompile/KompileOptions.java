@@ -13,15 +13,17 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
+import scala.NotImplementedError;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 @RequestScoped
-public class KompileOptions implements Serializable {
+public class KompileOptions implements Serializable, Function<String, String> {
 
     @Parameter(description="<file>")
     private List<String> parameters;
@@ -118,6 +120,11 @@ public class KompileOptions implements Serializable {
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
+
+    @Override
+    public String apply(String s) {
+        throw new NotImplementedError();
+    }
 
     public static final class Experimental implements Serializable {
 

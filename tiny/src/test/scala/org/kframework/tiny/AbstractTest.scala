@@ -12,7 +12,7 @@ trait AbstractTest {
   import org.kframework.kore._
   import org.kframework.{kore, tiny}
 
-  val cons = new tiny.Constructors(Module("TEST", Set(), Set(
+  val module = Module("TEST", Set(), Set(
     Production("_andBool_", Sorts.Bool,
       Seq(NonTerminal(Sorts.Bool), NonTerminal(Sorts.Bool)), Att() + ("hook" -> "#BOOL:_andBool_")),
     Production("_orBool_", Sorts.Bool,
@@ -22,7 +22,11 @@ trait AbstractTest {
     Production("bar", String, Seq(), Att()),
     Production("+", Int, Seq(), Att() + "assoc"),
     Production("MyBag", Sorts.K, Seq(), Att() + "assoc" + "comm")
-  ), Att()))
+  ), Att())
+
+  val theory = new TheoryWithFunctions(module)
+
+  val cons = new tiny.Constructors(module, theory)
 
   val X = KVar("X")
   val Y = KVar("Y")
@@ -39,6 +43,6 @@ trait AbstractTest {
   }
 
   @Before def clearCache: Unit = {
-    NormalizationCaching.cache.invalidateAll()
+    theory.cache.invalidateAll()
   }
 }
