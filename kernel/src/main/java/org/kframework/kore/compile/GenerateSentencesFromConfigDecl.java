@@ -348,7 +348,6 @@ public class GenerateSentencesFromConfigDecl {
                 bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
             case "Bag":
                 bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "");
-                bagAtt = bagAtt.add(Attribute.CELL_BAG, "");
             case "List":
                 break;
             default:
