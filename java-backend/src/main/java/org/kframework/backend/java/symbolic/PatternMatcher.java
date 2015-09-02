@@ -444,7 +444,7 @@ public class PatternMatcher extends AbstractUnifier {
 
             if (frame != null) {
                 if (otherFrame != null && numOfOtherDiffCellLabels == 0) {
-                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
+                    add(cellCollection.removeAll(unifiableCellLabels), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -463,7 +463,7 @@ public class PatternMatcher extends AbstractUnifier {
                         return;
                     }
                 } else {
-                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
+                    add(cellCollection.removeAll(unifiableCellLabels), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -546,7 +546,9 @@ public class PatternMatcher extends AbstractUnifier {
                 }
 
                 if (otherFrame != null) {
-                    CellCollection.Builder builder = CellCollection.builder(termContext.definition());
+                    CellCollection.Builder builder = CellCollection.builder(
+                            cellCollection.cellSort(),
+                            termContext.definition());
                     for (int i = 0; i < cells.length; ++i) {
                         if (!generator.isSelected(i)) {
                             builder.add(cells[i]);

@@ -29,7 +29,7 @@ public interface KItemRepresentation extends KoreRepresentation, KApply {
         if (kLabel() instanceof KLabelInjection) {
             return ((KApply) ((KLabelInjection) kLabel()).term()).klist();
         } else {
-            return (KList) kList();
+            return (KList) KCollection.upKind(kList(), Kind.KLIST);
         }
     }
 }

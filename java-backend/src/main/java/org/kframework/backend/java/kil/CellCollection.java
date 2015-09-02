@@ -81,12 +81,6 @@ public class CellCollection extends Collection implements CollectionInternalRepr
         }
     }
 
-    public static final CellCollection EMPTY = new CellCollection(
-            ImmutableListMultimap.of(),
-            ImmutableMultiset.of(),
-            false,
-            null);
-
     /**
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
      * be able to store identical cells.
@@ -102,18 +96,28 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasMultiplicityCell;
 
+    private final org.kframework.kore.Sort cellSort;
+
     private final Definition definition;
 
-    public static CellCollection singleton(CellLabel cellLabel, Term content, Definition definition) {
-        return (CellCollection) builder(definition).put(cellLabel, content).build();
+    public static CellCollection empty(org.kframework.kore.Sort collectionSort, Definition definition) {
+        return (CellCollection) builder(collectionSort, definition).build();
+    }
+
+    public static CellCollection singleton(
+            CellLabel cellLabel, Term content,
+            org.kframework.kore.Sort collectionSort, Definition definition) {
+        return (CellCollection) builder(collectionSort, definition).put(cellLabel, content).build();
     }
 
     /**
      * Static helper method which creates canonicalized cell collection
      * according to the given contents.
      */
-    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame, Definition definition) {
-        Builder builder = builder(definition);
+    public static Term of(
+            ListMultimap<CellLabel, Cell> cells, Variable frame,
+            org.kframework.kore.Sort collectionSort, Definition definition) {
+        Builder builder = builder(collectionSort, definition);
         builder.putAll(cells);
         if (frame != null) {
             builder.concatenate(frame);
@@ -124,19 +128,22 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
+            org.kframework.kore.Sort cellSort,
             Definition definition) {
-        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0, definition);
+        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, definition) > 0, cellSort, definition);
     }
 
     private CellCollection(
             ListMultimap<CellLabel, Cell> cells,
             Multiset<Variable> collectionVariables,
             boolean hasMultiplicityCell,
+            org.kframework.kore.Sort cellSort,
             Definition definition) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;
+        this.cellSort = cellSort;
         this.definition = definition;
     }
 
@@ -203,6 +210,10 @@ public class CellCollection extends Collection implements CollectionInternalRepr
         return hasMultiplicityCell;
     }
 
+    public org.kframework.kore.Sort cellSort() {
+        return cellSort;
+    }
+
     public Set<CellLabel> labelSet() {
         return cells.keySet();
     }
@@ -211,8 +222,8 @@ public class CellCollection extends Collection implements CollectionInternalRepr
      * Builds a new {@code CellCollection} by removing all the given cell
      * labels.
      */
-    public Term removeAll(Set<CellLabel> removeLabels, Definition definition) {
-        Builder builder = builder(definition);
+    public Term removeAll(Set<CellLabel> removeLabels) {
+        Builder builder = builder(cellSort, definition);
         cells.keySet().stream()
                 .filter(label -> !removeLabels.contains(label))
                 .forEach(label -> builder.addAll(cells.get(label)));
@@ -253,24 +264,18 @@ public class CellCollection extends Collection implements CollectionInternalRepr
 
     @Override
     public KLabel constructorLabel() {
-        org.kframework.kore.KLabel kLabel = definition.configurationInfo().getConcat(getCellSort());
+        org.kframework.kore.KLabel kLabel = definition.configurationInfo().getConcat(cellSort);
         return KLabelConstant.of(kLabel.name(), definition);
     }
 
     @Override
     public Term unit() {
-        org.kframework.kore.KApply kApply = definition.configurationInfo().getUnit(getCellSort());
+        org.kframework.kore.KApply kApply = definition.configurationInfo().getUnit(cellSort);
         return new KItem(
                 KLabelConstant.of(kApply.klabel().name(), definition),
                 KList.EMPTY,
                 sort(),
                 true);
-    }
-
-    private org.kframework.kore.Sort getCellSort() {
-        assert hasMultiplicityCell;
-        return definition.configurationInfo().getCellSort(
-                KLabelConstant.of(cells.keys().iterator().next().name(), definition));
     }
 
     @Override
@@ -339,16 +344,18 @@ public class CellCollection extends Collection implements CollectionInternalRepr
         return transformer.transform(this);
     }
 
-    public static Builder builder(Definition definition) {
-        return new Builder(definition);
+    public static Builder builder(org.kframework.kore.Sort collectionSort, Definition definition) {
+        return new Builder(collectionSort, definition);
     }
 
     public static class Builder {
         private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder;
         private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder;
+        private final org.kframework.kore.Sort cellSort;
         private final Definition definition;
 
-        private Builder(Definition definition) {
+        private Builder(org.kframework.kore.Sort cellSort, Definition definition) {
+            this.cellSort = cellSort;
             this.definition = definition;
             cellsBuilder = ImmutableListMultimap.builder();
             collectionVariablesBuilder = ImmutableMultiset.builder();
@@ -408,12 +415,11 @@ public class CellCollection extends Collection implements CollectionInternalRepr
             ImmutableMultiset<Variable> collectionVariables = collectionVariablesBuilder.build();
             if (cells.isEmpty()) {
                 switch (collectionVariables.size()) {
-                    case 0:  return EMPTY;
                     case 1:  return collectionVariables.iterator().next();
-                    default: return new CellCollection(cells, collectionVariables, definition);
+                    default: return new CellCollection(cells, collectionVariables, cellSort, definition);
                 }
             } else {
-                return new CellCollection(cells, collectionVariables, definition);
+                return new CellCollection(cells, collectionVariables, cellSort, definition);
             }
         }
     }

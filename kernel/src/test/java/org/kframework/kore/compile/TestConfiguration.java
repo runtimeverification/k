@@ -9,6 +9,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import scala.Option;
 
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,7 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     public void addDefault(String cell, K term) {
-        defaultCells.put(Sort(cell),term);
+        defaultCells.put(Sort(cell), term);
     }
 
     public void addUnit(String cell, KApply term) { units.put(Sort(cell), term); }
@@ -169,6 +170,16 @@ class TestConfiguration implements ConfigurationInfo {
 
     @Override
     public KLabel getConcat(Sort k) { return concats.get(k); }
+
+    @Override
+    public Option<Sort> getCellForConcat(KLabel concat) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Option<Sort> getCellForUnit(KApply unit) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public scala.collection.immutable.Set<Sort> getCellBagSortsOfCell(Sort k) {

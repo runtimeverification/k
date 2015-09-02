@@ -5,6 +5,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import scala.Option;
 
 import java.util.List;
 import java.util.Set;
@@ -82,6 +83,12 @@ public interface ConfigurationInfo {
 
     /** Returns the concatenation operation of a multiplicity * cell. */
     KLabel getConcat(Sort k);
+
+    /** Returns the cell associated with this concatenation label */
+    Option<Sort> getCellForConcat(KLabel concat);
+
+    /** Returns the cell associated with this unit */
+    Option<Sort> getCellForUnit(KApply unit);
 
     /** Declared mulitplicitly of a cell */
     enum Multiplicity {

@@ -122,7 +122,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     private Term CellCollection(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist) {
-        final CellCollection.Builder builder = CellCollection.builder(definition);
+        final CellCollection.Builder builder = CellCollection.builder(
+                definition.configurationInfo().getCellForConcat(klabel).get(),
+                definition);
         Assoc.flatten(klabel, klist.items(), module).stream().forEach(k -> {
             if (k instanceof KApply) {
                 builder.put(
@@ -147,12 +149,13 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         else if (k instanceof org.kframework.kore.KApply) {
             KLabel klabel = ((KApply) k).klabel();
             org.kframework.kore.KList klist = ((KApply) k).klist();
-            Option<Att> attOption = module.attributesFor().get(klabel);
-            if (attOption.isDefined() && attOption.get().contains(Attribute.CELL_BAG))
+            if (definition.configurationInfo().getCellForConcat(klabel).isDefined())
                 return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
+            if (definition.configurationInfo().getCellForUnit((KApply) k).isDefined())
+                return CellCollection.empty(definition.configurationInfo().getCellForUnit((KApply) k).get(), definition);
             else if (definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(
-                        CellCollection.builder(definition).put(CellLabel.of(klabel.name()), KList(klist.items())).build(),
+                        CellCollection.singleton(CellLabel.of(klabel.name()), KList(klist.items()), definition.configurationInfo().getCellSort(klabel), definition),
                         context);
             else
                 return KApply1(klabel, klist, k.att());

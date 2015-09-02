@@ -131,4 +131,18 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     assert(sorts.size == 1, "Too many cell bags found for cell sort: " + k + ", " + sorts)
     cellBagProductions(sorts.head).klabel.get
   }
+
+  override def getCellForConcat(concat: KLabel): Option[Sort] = cellSorts
+    .map(s => (s, getCellBagSortsOfCell(s)))
+    .filter(_._2.size == 1)
+    .filter(p => cellBagProductions(p._2.head).klabel.get.equals(concat))
+    .map(_._1)
+    .headOption
+
+  override def getCellForUnit(unit: KApply): Option[Sort] = cellSorts
+    .map(s => (s, getCellBagSortsOfCell(s)))
+    .filter(_._2.size == 1)
+    .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get[String]("unit").get)).equals(unit))
+    .map(_._1)
+    .headOption
 }
