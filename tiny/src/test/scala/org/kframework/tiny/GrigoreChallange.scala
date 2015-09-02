@@ -1,7 +1,7 @@
 package org.kframework.tiny
 
 import org.junit.Assert._
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import org.kframework.attributes.Att
 import org.kframework.definition._
 
@@ -61,14 +61,14 @@ class GrigoreChallange {
 
   val rewriter = new Rewriter(completeModule, SimpleIndex, new TheoryWithFunctions(completeModule))
 
-  @Test
+  @Test @Ignore
   def shortTest {
     val res = rewriter.rewrite((5: K) ~ 5 ~ 7)
     println(res.mkString("\n"))
     println(res.size + " states.")
   }
 
-  @Test
+  @Test @Ignore
   def shortTestWithSearch {
     assertEquals(Right(0: K), rewriter.search((5: K) ~ 5 ~ 7, 0))
   }
@@ -82,14 +82,14 @@ class GrigoreChallange {
 
   val rewriterWithAnywhere = new Rewriter(completeModuleWithAnywhere, SimpleIndex, new TheoryWithFunctions(completeModuleWithAnywhere))
 
-  @Test
+  @Test @Ignore
   def shortTestWithAnywhere {
     val res = rewriterWithAnywhere.rewrite((5: K) ~ 5 ~ 7)
     println(res.mkString("\n"))
     println(res.size + " states.")
   }
 
-  @Test
+  @Test @Ignore
   def shortTestWithSearchAnywhere {
     assertEquals(Right(0: K), rewriterWithAnywhere.search((5: K) ~ 5 ~ 7, 0))
   }
