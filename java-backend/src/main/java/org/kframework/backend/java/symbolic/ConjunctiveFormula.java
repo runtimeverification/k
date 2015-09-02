@@ -712,11 +712,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     @Override
-    public Term toKore() {
-        return toKore(context);
-    }
-
-    @Override
     public List<Term> getKComponents() {
         Stream<Term> stream = Stream.concat(
                 Stream.concat(

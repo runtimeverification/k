@@ -111,7 +111,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
             }
             Collections.reverse(cellLabels);
             rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(
-                    ConstructorType.CELL_COLLECTION, sizeBase, cellLabels)));
+                    ConstructorType.CELL_COLLECTION, sizeBase, cellLabels, node.cellSort())));
         }
     }
 

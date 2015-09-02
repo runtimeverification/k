@@ -479,14 +479,9 @@ public class GenerateSentencesFromConfigDecl {
     private static Multiplicity convertStringMultiplicity(Option<String> multiplicity, K body) {
         if (multiplicity.isEmpty())
             return Multiplicity.ONE;
-        switch(multiplicity.get()) {
-        case "1":
-            return Multiplicity.ONE;
-        case "*":
-            return Multiplicity.STAR;
-        case "?":
-            return Multiplicity.OPTIONAL;
-        default:
+        try {
+            return Multiplicity.of(multiplicity.get());
+        } catch (IllegalArgumentException _) {
             throw KEMException.compilerError("Invalid multiplicity found in cell: " + multiplicity.get(), body);
         }
     }

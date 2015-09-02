@@ -7,6 +7,7 @@ import java.util.Map;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.kil.Attribute;
@@ -55,4 +56,7 @@ public class IndexingCellsCollector extends BottomUpVisitor {
             }
         }
     }
+
+    @Override
+    public void visit(KItem kItem) {}
 }
