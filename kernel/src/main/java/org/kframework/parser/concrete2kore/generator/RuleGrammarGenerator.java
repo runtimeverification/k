@@ -186,13 +186,14 @@ public class RuleGrammarGenerator {
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
                     assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
-                    Seq<ProductionItem> pi;
+                    final ProductionItem body;
                     if (cfgInfo.isLeafCell(p.sort())) {
-                        ProductionItem body = p.items().tail().head();
-                        pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), body, NonTerminal(Sort("#OptionalDots")), p.items().last());
+                        body = p.items().tail().head();
                     } else {
-                        pi = Seq(p.items().head(), NonTerminal(Sort("#OptionalDots")), NonTerminal(Sort("K")), NonTerminal(Sort("#OptionalDots")), p.items().last());
+                        body = NonTerminal(Sort("K"));
                     }
+                    final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
+                    Seq<ProductionItem> pi = Seq(p.items().head(), optDots, body, optDots, p.items().last());
                     Production p1 = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
                     Production p2 = Production(Sort("Cell"), Seq(NonTerminal(p.sort())));
                     return Stream.of(p1, p2);
