@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @RequestScoped
-public class KompileOptions implements Serializable, Function<String, String> {
+public class KompileOptions implements Serializable {
 
     @Parameter(description="<file>")
     private List<String> parameters;
@@ -120,11 +120,6 @@ public class KompileOptions implements Serializable, Function<String, String> {
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
-
-    @Override
-    public String apply(String s) {
-        throw new NotImplementedError();
-    }
 
     public static final class Experimental implements Serializable {
 
