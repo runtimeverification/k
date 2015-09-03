@@ -63,7 +63,7 @@ public class RewriteEngineUtils {
         Substitution<Variable, Term> crntSubst = substitution;
         /* add bindings for fresh variables used in the rule */
         for (Variable variable : rule.freshConstants()) {
-            crntSubst = crntSubst.plus(variable, FreshOperations.fresh(variable.sort(), context));
+            crntSubst = crntSubst.plus(variable, FreshOperations.freshOfSort(variable.sort(), context));
         }
 
         /* evaluate data structure lookups/choices and add bindings for them */

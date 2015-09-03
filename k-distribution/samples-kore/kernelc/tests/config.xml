@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="./execution/programs"
+            results="./execution/tests"
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <all-programs>
+            <krun-option name="--output" value="none" />
+        </all-programs>
+        <program name="undefined.c">
+          <krun-option name="--output" value="pretty" />
+        </program>
+    </test>
+
+    <include file="simple/config.xml" />
+    <include file="list/config.xml" />
+    <include file="tree/config.xml" />
+    <include file="sorting/config.xml" />
+    <include file="binary_search_tree/config.xml" />
+    <include file="avl_tree/config.xml" />
+
+    <include file="cd2d/config.xml" />
+</tests>

@@ -18,12 +18,12 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public class FreshOperations {
 
-    public static Term fresh(Sort sort, TermContext context) {
+    public static Term freshOfSort(Sort sort, TermContext context) {
         return fresh(StringToken.of(sort.name()), context);
     }
 
     public static Term fresh(StringToken term, TermContext context) {
-        String name = context.definition().freshFunctionNames().get(org.kframework.kil.Sort.of(term.stringValue()));
+        String name = context.definition().freshFunctionNames().get(Sort.of(term.stringValue()));
         if (name == null) {
             throw KEMException.criticalError("Attempting to generate a fresh symbol of sort " + term.stringValue()
                     + " but no fresh function can be found.");

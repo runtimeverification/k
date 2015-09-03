@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="."
+            results="."
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <program name="cdd.c">
+          <krun-option name="--prove" value="tests/cd2d/cdd_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/floating_point.smt2" />
+          <krun-option name="--z3-executable" />
+          <krun-option name="--z3-cnstr-timeout" value="10000" />
+          <krun-option name="--z3-impl-timeout" value="20000" />
+        </program>
+    </test>
+
+</tests>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+  <test definition="kernelc.k"
+        programs="."
+        results="."
+        extension="c"
+        >
+    <kompile-option name="--backend" value="java" />
+    <program name="bubble_sort.c">
+      <krun-option name="--prove" value="tests/sorting/bubble_sort_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+    <program name="insertion_sort.c">
+      <krun-option name="--prove" value="tests/sorting/insertion_sort_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+    <program name="quicksort.c">
+      <krun-option name="--prove" value="tests/sorting/quicksort_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+    <program name="merge_sort.c">
+      <krun-option name="--prove" value="tests/sorting/merge_sort_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+  </test>
+</tests>
