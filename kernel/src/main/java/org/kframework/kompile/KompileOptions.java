@@ -13,14 +13,12 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
-import scala.NotImplementedError;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 @RequestScoped
 public class KompileOptions implements Serializable {
