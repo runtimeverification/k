@@ -249,7 +249,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[1.8.0-60,)</version>
+                  <version>[1.8.0-45,)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
