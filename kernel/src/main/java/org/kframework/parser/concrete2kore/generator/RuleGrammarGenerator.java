@@ -170,15 +170,15 @@ public class RuleGrammarGenerator {
         }
         extensionProds.addAll(prods);
 
-        boolean add_rule_cells;
+        boolean addRuleCells;
         if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
-            add_rule_cells = mod.sentences().exists(func(p -> p instanceof Production && ((Production) p).att().contains("cell")));
+            addRuleCells = mod.sentences().exists(func(p -> p instanceof Production && ((Production) p).att().contains("cell")));
         } else {
-            add_rule_cells = false;
+            addRuleCells = false;
         }
         Set<Sentence> parseProds;
-        if (add_rule_cells) {
+        if (addRuleCells) {
             ConfigurationInfo cfgInfo = new ConfigurationInfoFromModule(mod);
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).flatMap(s -> {
                 if (s instanceof Production && (s.att().contains("cell"))) {
