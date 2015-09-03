@@ -247,6 +247,14 @@
             </requireJavaVersion>
           </rules>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal> enforce</goal>
+            </goals>
+            <id>enforce-java</id>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
