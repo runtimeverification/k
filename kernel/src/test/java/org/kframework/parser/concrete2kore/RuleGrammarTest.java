@@ -92,11 +92,11 @@ public class RuleGrammarTest {
             }
             kem.print();
         }
-        Assert.assertEquals("Expected " + warnings + " warnings: ", warnings, rule._2().size());
         if (expectedError)
             Assert.assertTrue("Expected error here: ", rule._1().isLeft());
         else
             Assert.assertTrue("Expected no errors here: ", rule._1().isRight());
+        Assert.assertEquals("Expected " + warnings + " warnings: ", warnings, rule._2().size());
     }
 
     // test proper associativity for rewrite, ~> and cast

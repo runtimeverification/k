@@ -67,7 +67,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
       m + (to -> (m(from) + 1))
   }
 
-  private val mainCell = {
+  private lazy val mainCell = {
     val mainCells = cellProductions.filter(x => x._2.att.contains("maincell")).map(_._1)
     if (mainCells.size > 1)
       throw new AssertionError("Too many main cells:" + mainCells)
