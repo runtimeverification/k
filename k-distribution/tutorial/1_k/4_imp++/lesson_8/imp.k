@@ -507,7 +507,7 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  rule <k> Rho:Map => .K ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => .K ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
