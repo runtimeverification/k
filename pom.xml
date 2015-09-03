@@ -254,6 +254,19 @@
               </rules>
             </configuration>
           </execution>
+          <execution>
+            <id>default-cli</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[1.8.0-45,)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
