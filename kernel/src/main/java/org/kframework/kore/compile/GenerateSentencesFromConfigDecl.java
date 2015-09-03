@@ -223,6 +223,9 @@ public class GenerateSentencesFromConfigDecl {
 
     /**
      * Generates the sentences associated with a particular cell.
+     *
+     * As a special case, cells with the maincell attribute (usually just the {@code <k>} cell)
+     * are generated with contents of sort K, rather than a narrower sort calculated from the contents.
      * @param isLeaf true if this cell has no child cells.
      * @param multiplicity The multiplicity of the cell
      * @param configAtt The attributes on the configuration declaration.
@@ -252,6 +255,12 @@ public class GenerateSentencesFromConfigDecl {
             boolean hasConfigurationVariable) {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
+
+        if (cellProperties.contains("maincell")) {
+            assert isLeaf;
+            assert childSorts.size() == 1;
+            childSorts = Lists.newArrayList(Sort("K"));
+        }
 
         List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
                 Terminal("<" + cellName + ">")), childSorts.stream()
