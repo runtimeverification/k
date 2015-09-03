@@ -192,9 +192,9 @@ case class NativeBinaryOp[A, B, R](val klabel: NativeBinaryOpLabel[A, B, R], val
 
   override def normalizeInner(implicit theory: Theory): K =
     super[PlainNormalization].normalizeInner match {
-      case KApp(l, Seq(TypedKTok(s1, v1: A, _), TypedKTok(s2, v2: B, _)), _) =>
+      case KApp(l, Seq(TypedKTok(s1, v1, _), TypedKTok(s2, v2, _)), _) =>
         try {
-          val res = klabel.f(v1, v2)
+          val res = klabel.f(v1.asInstanceOf[A], v2.asInstanceOf[B])
           TypedKTok(klabel.resSort, res)
         } catch {
           case e: ArithmeticException => False
@@ -207,7 +207,7 @@ case class NativeUnaryOp[T, R](val klabel: NativeUnaryOpLabel[T, R], val childre
   extends KRegularApp with PlainNormalization {
   override def normalizeInner(implicit theory: Theory): K =
     super[PlainNormalization].normalizeInner match {
-      case KApp(l, Seq(TypedKTok(s, v: T, _)), _) => TypedKTok(klabel.resSort, klabel.f(v))
+      case KApp(l, Seq(TypedKTok(s, v, _)), _) => TypedKTok(klabel.resSort, klabel.f(v.asInstanceOf[T]))
       case x => x
     }
 }
