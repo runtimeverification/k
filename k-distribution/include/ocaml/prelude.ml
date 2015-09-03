@@ -72,7 +72,7 @@ let round_to_range (c: kitem) : kitem = match c with
   | _ -> raise (Invalid_argument "round_to_range")
 let curr_fd : Z.t ref = ref (Z.of_int 3)
 let file_descriptors = let m = Hashtbl.create 5 in Hashtbl.add m (Z.of_int 0) Unix.stdin; Hashtbl.add m (Z.of_int 1) Unix.stdout; Hashtbl.add m (Z.of_int 2) Unix.stderr; m
-let default_file_perm = let v = Unix.umask 0 in let _ = Unix.umask v in (lnot v) land 0o777
+let default_file_perm = 0o777
 let convert_open_flags (s: string) : Unix.open_flag list = 
   match s with 
       "r" -> [Unix.O_RDONLY] 
