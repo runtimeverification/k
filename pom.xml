@@ -240,21 +240,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>1.4.1</version>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>[1.8.0-45,)</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <rules>
+            <requireJavaVersion>
+              <version>[1.8.0-45,)</version>
+            </requireJavaVersion>
+          </rules>
+        </configuration>
       </plugin>
     </plugins>
   </build>
