@@ -242,19 +242,6 @@
         <version>1.4.1</version>
         <executions>
           <execution>
-            <id>enforce-java</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>[1.8.0-45,)</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
-          <execution>
             <id>default-cli</id>
             <goals>
               <goal>enforce</goal>
@@ -262,7 +249,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[1.8.0-45,)</version>
+                  <version>[1.8.0-60,)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
