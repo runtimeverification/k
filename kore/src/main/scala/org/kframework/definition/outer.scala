@@ -2,12 +2,11 @@
 
 package org.kframework.definition
 
-import dk.brics.automaton.{SpecialOperations, BasicAutomata, RegExp, RunAutomaton}
+import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
-import org.kframework.attributes.{Source, Location, Att}
-import org.kframework.kore.Unapply.{KLabel, KApply}
+import org.kframework.attributes.Att
+import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
-import org.kframework.kore.KORE.KLabel
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
@@ -100,6 +99,13 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .map { case (s, ps) => (s, ps)}
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
+
+  def optionSortFor(k: K): Option[Sort] = k match {
+    case Unapply.KApply(l, _) => sortFor.get(l)
+    case Unapply.KRewrite(_, r) => optionSortFor(r)
+    case Unapply.KToken(_, sort) => Some(sort)
+    case Unapply.KSequence(s) => optionSortFor(s.last)
+  }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 

@@ -228,7 +228,9 @@ public class Kompile {
         if (!hasConfigDecl) {
             definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
                 if (mod == definition.mainModule()) {
-                    return Module(mod.name(), (Set<Module>) mod.imports().$plus(definition.getModule("DEFAULT-CONFIGURATION").get()), mod.localSentences(), mod.att());
+                    java.util.Set<Module> imports = mutable(mod.imports());
+                    imports.add(definition.getModule("DEFAULT-CONFIGURATION").get());
+                    return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
                 return mod;
             }, "adding default configuration").apply(definition);

@@ -18,18 +18,28 @@ trait FromKDef {
 
   def substitute(and: K, t: K): K = {
     assert(and.isPureSubsitution,
-      "Invalid substitution when applying " + left + " to " + t + ":\n" + and)
+      "Invalid substitution when applying " + left + " to " + t + ":\n" + AsAnd(and).children.map(x => x + " of type " + x.getClass).mkString("\n"))
     Substitution(right).substitute(and.binding)
   }
 
-  def matchTerm(t: K) = And(left.matcher(t), sideConditions).normalize
+  def matchTerm(t: K) = {
+    val tWithFreshVars = if (!t.isGround)
+      RenameVariables(t)
+    else
+      t
+
+    And(left.matcher(tWithFreshVars), sideConditions).normalize
+  }
 }
 
 case class RegularRule(termWithRewrite: K, sideConditions: K)(implicit val theory: Theory)
   extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
-    AsOr(pmSolutions).children map {count += 1; substitute(_, t).normalize}
+    AsOr(pmSolutions).children map {
+      count += 1;
+      substitute(_, t).normalize
+    }
   }
 }
 
@@ -57,8 +67,14 @@ case class AnywhereRule(termWithRewrite: K, sideConditions: K)(implicit val theo
   def process(kapp: KApp): Set[K] = {
     kapp.children
       .map(recursiveResults)
-      .foldLeft(Set(Seq[K]())) { (soFar, nextArg) => soFar flatMap { args => nextArg map {args :+ _} } }
-      .map {kapp.klabel(_: _*)}
+      .foldLeft(Set(Seq[K]())) { (soFar, nextArg) => soFar flatMap { args => nextArg map {
+      args :+ _
+    }
+    }
+    }
+      .map {
+      kapp.klabel(_: _*)
+    }
   }
 
   def apply(t: K) = {
@@ -100,6 +116,12 @@ case class ExecuteRule(termWithRewrite: K, sideConditions: K = True)(implicit va
   extends Rule with FromKDef {
   def apply(t: K) = {
     val pmSolutions = matchTerm(t)
-    AsOr(pmSolutions).children.headOption map {count += 1; substitute(_, t).normalize} toSet
+    if (pmSolutions.isPureSubsitution) {
+      AsOr(pmSolutions).children.headOption map {
+        count += 1;
+        substitute(_, t).normalize
+      } toSet
+    } else
+      Set()
   }
 }

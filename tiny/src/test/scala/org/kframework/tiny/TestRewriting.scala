@@ -163,7 +163,7 @@ class TestRewriting extends AbstractTest {
       r((1: K) + 2 + 3 + 4))
   }
 
-  @Test def testEverywhereRuleAC {
+  @Test @Ignore def testEverywhereRuleAC {
     val r = EverywhereRule('MyBag(2, 4) ==> 7: K, True)
 
     assertEquals(Set('MyBag(1, 3, 7, 5)),
