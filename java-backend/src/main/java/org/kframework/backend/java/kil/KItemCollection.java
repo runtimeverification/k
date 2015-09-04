@@ -7,12 +7,6 @@ package org.kframework.backend.java.kil;
 public interface KItemCollection extends CollectionInternalRepresentation {
 
     TermContext context();
-    Sort sort();
-
-    @Override
-    default Term toKore() {
-        return toKore(context());
-    }
 
     @Override
     default KLabel constructorLabel() {

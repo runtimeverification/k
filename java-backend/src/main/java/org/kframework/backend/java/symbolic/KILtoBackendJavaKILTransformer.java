@@ -274,6 +274,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         return CellCollection.singleton(
                 CellLabel.of(node.getLabel()),
                 (Term) this.visitNode(node.getContents()),
+                null,
                 globalContext.getDefinition());
     }
 
@@ -282,7 +283,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents, node.getContents());
 
-        CellCollection.Builder builder = CellCollection.builder(globalContext.getDefinition());
+        CellCollection.Builder builder = CellCollection.builder(null, globalContext.getDefinition());
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
                 continue;

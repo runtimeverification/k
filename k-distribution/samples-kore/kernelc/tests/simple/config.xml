@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="."
+            results="."
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <program name="average.c">
+          <krun-option name="--prove" value="tests/simple/average_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="maximum.c">
+          <krun-option name="--prove" value="tests/simple/maximum_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="minimum.c">
+          <krun-option name="--prove" value="tests/simple/minimum_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="sum_iterative.c">
+          <krun-option name="--prove" value="tests/simple/sum_iterative_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="sum_recursive.c">
+          <krun-option name="--prove" value="tests/simple/sum_recursive_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="comm_assoc.c">
+          <krun-option name="--prove" value="tests/simple/comm_assoc_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-cnstr-timeout" value="5000" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="multiplication_by_addition.c">
+          <krun-option name="--prove" value="tests/simple/multiplication_by_addition_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+    </test>
+
+</tests>

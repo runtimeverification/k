@@ -253,7 +253,7 @@ public class SymbolicRewriter {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
-                    FreshOperations.fresh(variable.sort(), constraint.termContext()));
+                    FreshOperations.freshOfSort(variable.sort(), constraint.termContext()));
         }
         constraint = constraint.addAll(rule.ensures()).simplify();
 

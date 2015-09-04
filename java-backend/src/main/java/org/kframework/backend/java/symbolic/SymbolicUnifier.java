@@ -4,8 +4,6 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.kil.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
+import org.kframework.compile.ConfigurationInfo;
 
 
 /**
@@ -519,8 +518,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             if (frame != null && otherFrame != null && (numOfDiffCellLabels > 0) && (numOfOtherDiffCellLabels > 0)) {
                 Variable variable = Variable.getAnonVariable(Sort.BAG);
-                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, definition));
-                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, definition), otherFrame);
+                add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, otherCellCollection.cellSort(), definition));
+                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, cellCollection.cellSort(), definition), otherFrame);
             } else if (frame == null && (numOfOtherDiffCellLabels > 0)
                     || otherFrame == null && (numOfDiffCellLabels > 0)) {
                 fail(cellCollection, otherCellCollection);
@@ -531,8 +530,10 @@ public class SymbolicUnifier extends AbstractUnifier {
                     return;
                 }
             } else {
-                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, definition),
-                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, definition));
+                add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels),
+                            frame, cellCollection.cellSort(), definition),
+                    CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels),
+                            otherFrame, otherCellCollection.cellSort(), definition));
             }
         }
         /* Case 2: both cell collections have explicitly specified starred-cells */
@@ -559,7 +560,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!definition.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (definition.cellMultiplicity(cellLabel) != ConfigurationInfo.Multiplicity.STAR) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     addUnificationTask(cellCollection.get(cellLabel).iterator().next().content(),
@@ -614,7 +615,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 }
 
                 if (otherFrame != null) {
-                    CellCollection.Builder builder = CellCollection.builder(definition);
+                    CellCollection.Builder builder = cellCollection.builder();
                     for (int i = 0; i < cells.length; ++i) {
                         if (!generator.isSelected(i)) {
                             builder.add(cells[i]);

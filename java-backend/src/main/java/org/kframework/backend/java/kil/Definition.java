@@ -13,16 +13,15 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.definition.Module;
 import org.kframework.kil.ASTNode;
@@ -31,13 +30,11 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -68,8 +65,10 @@ public class Definition extends JavaSymbolicObject {
         public final Map<org.kframework.kore.Sort, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
         public final ImmutableMap<String, Attributes> kLabelAttributes;
-        public final Map<org.kframework.kil.Sort, String> freshFunctionNames;
+        public final Map<Sort, String> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
+        public final Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity;
+        public final ConfigurationInfo configurationInfo;
         public final ConfigurationStructureMap configurationStructureMap;
 
         private DefinitionData(
@@ -78,8 +77,10 @@ public class Definition extends JavaSymbolicObject {
                 Map<org.kframework.kore.Sort, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Attributes> kLabelAttributes,
-                Map<org.kframework.kil.Sort, String> freshFunctionNames,
+                Map<Sort, String> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening,
+                Map<CellLabel, ConfigurationInfo.Multiplicity> cellLabelMultiplicity,
+                ConfigurationInfo configurationInfo,
                 ConfigurationStructureMap configurationStructureMap) {
             this.subsorts = subsorts;
             this.builtinSorts = builtinSorts;
@@ -88,6 +89,8 @@ public class Definition extends JavaSymbolicObject {
             this.kLabelAttributes = kLabelAttributes;
             this.freshFunctionNames = freshFunctionNames;
             this.smtSortFlattening = smtSortFlattening;
+            this.cellLabelMultiplicity = cellLabelMultiplicity;
+            this.configurationInfo = configurationInfo;
             this.configurationStructureMap = configurationStructureMap;
         }
     }
@@ -185,8 +188,12 @@ public class Definition extends JavaSymbolicObject {
                 context.getDataStructureSorts().entrySet().stream().collect(Collectors.toMap(e -> Sort(e.getKey().getName()), Map.Entry::getValue)),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                context.freshFunctionNames,
+                context.freshFunctionNames.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), Map.Entry::getValue)),
                 context.smtSortFlattening.entrySet().stream().collect(Collectors.toMap(e -> Sort.of(e.getKey()), e -> Sort.of(e.getValue()))),
+                context.getConfigurationStructureMap().entrySet().stream().collect(Collectors.toMap(
+                        e -> CellLabel.of(e.getKey()),
+                        e -> KOREtoBackendKIL.kil2koreMultiplicity(e.getValue().multiplicity))),
+                null,
                 context.getConfigurationStructureMap());
         this.context = context;
     }
@@ -213,6 +220,8 @@ public class Definition extends JavaSymbolicObject {
             attributesBuilder.put(e.getKey().name(), new KOREtoKIL().convertAttributes(e.getValue()));
         });
 
+        ConfigurationInfo configurationInfo = new ConfigurationInfoFromModule(module);
+
         definitionData = new DefinitionData(
                 new Subsorts(module),
                 ImmutableSet.<Sort>builder()
@@ -224,8 +233,14 @@ public class Definition extends JavaSymbolicObject {
                 getDataStructureSorts(module),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
+                JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
+                        e -> Sort.of(e.getKey().name()),
+                        e -> e.getValue().name())),
                 null,
-                null,
+                configurationInfo.getCellSorts().stream().collect(Collectors.toMap(
+                        s -> CellLabel.of(configurationInfo.getCellLabel(s).name()),
+                        configurationInfo::getMultiplicity)),
+                configurationInfo,
                 null);
         context = null;
 
@@ -268,7 +283,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(termContext);
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext);
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
                 addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));
@@ -446,12 +461,20 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.dataStructureSorts.get(Sort(sort.name()));
     }
 
-    public Map<org.kframework.kil.Sort, String> freshFunctionNames() {
+    public Map<Sort, String> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 
     public Map<Sort, Sort> smtSortFlattening() {
         return definitionData.smtSortFlattening;
+    }
+
+    public ConfigurationInfo.Multiplicity cellMultiplicity(CellLabel label) {
+        return definitionData.cellLabelMultiplicity.get(label);
+    }
+
+    public ConfigurationInfo configurationInfo() {
+        return definitionData.configurationInfo;
     }
 
     public DefinitionData definitionData() {

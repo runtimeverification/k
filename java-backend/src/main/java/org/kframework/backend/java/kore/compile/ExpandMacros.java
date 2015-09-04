@@ -15,6 +15,8 @@ import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.compile.KtoKORE;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.krun.KRunOptions;
@@ -29,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static scala.compat.java8.JFunction.func;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
@@ -61,18 +64,45 @@ public class ExpandMacros {
                 new InitializeRewriter.InitializeDefinition()).apply(getMacroModule(mod));
     }
 
+    private static boolean isSortPredicates(K term, Module mod) {
+        if (term.equals(BooleanUtils.TRUE)) {
+            return true;
+        }
+        if (term instanceof KApply) {
+            KApply app = (KApply)term;
+            KLabel l = app.klabel();
+            if (l.equals(KLabel("_andBool_"))) {
+                return app.klist().stream().allMatch(t -> isSortPredicates(t,mod));
+            } else {
+                return isSortPredicate(l, mod);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isSortPredicate(KLabel label, Module mod) {
+        return mod.attributesFor().get(label).exists(func(atts ->
+                atts.get(Attribute.PREDICATE_KEY).exists(func(s -> !s.equals("")))));
+    }
+
     private static Module getMacroModule(Module mod) {
         Set<Sentence> sentences = new HashSet<>();
         sentences.addAll(mutable(mod.productions()));
         sentences.addAll(mutable(mod.sortDeclarations()));
         Set<Rule> macroRules = stream(mod.rules())
                 .filter(r -> r.att().contains(Attribute.MACRO_KEY))
+                .map(r -> {
+                    if (!r.ensures().equals(BooleanUtils.TRUE) || !isSortPredicates(r.requires(),mod)) {
+                        throw KEMException.compilerError("Side conditions are not allowed in macro rules. If you are typing a variable, use ::.", r);
+                    }
+                    if (!r.requires().equals(BooleanUtils.TRUE)) {
+                        return Rule(r.body(), BooleanUtils.TRUE, r.ensures(), r.att());
+                    } else {
+                        return r;
+                    }
+                })
                 .collect(Collectors.toSet());
-        for (Rule r : macroRules) {
-            if (!r.requires().equals(BooleanUtils.TRUE) || !r.ensures().equals(BooleanUtils.TRUE)) {
-                throw KEMException.compilerError("Side conditions are not allowed in macro rules. If you are typing a variable, use ::.", r);
-            }
-        }
         sentences.addAll(macroRules);
         return Module(mod.name(), Set(), immutable(sentences), mod.att());
     }
@@ -95,7 +125,7 @@ public class ExpandMacros {
     public K expand(K term) {
         TermContext tc = TermContext.of(rewriter.rewritingContext);
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
-        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(tc).convert(term));
+        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc).convert(term));
         return new KtoKORE().apply(t);
     }
 

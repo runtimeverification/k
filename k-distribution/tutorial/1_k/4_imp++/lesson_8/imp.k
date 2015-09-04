@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
+require "domains.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -77,6 +78,13 @@ of a program using the \texttt{search} option of \texttt{krun}.
 */
 
 module IMP-SYNTAX
+imports IMP-COMMON
+imports ID
+endmodule
+
+module IMP-COMMON
+imports DOMAINS-COMMON
+
 /*@ \section{Syntax}
 IMP++ adds several syntactic constructs to IMP\@.  Also, since the
 variable declaration construct is generalized to be used anywhere a
@@ -137,14 +145,17 @@ of statements surrounded by curly brackets.  */
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}               [strict]
+  syntax Ids   ::= List{Id,","}               [strict, klabel(ids)]
   syntax AExps ::= List{AExp,","}             [strict]
   syntax Stmts ::= List{Stmt,""}
 endmodule
 
 
 module IMP
-  imports IMP-SYNTAX
+  imports IMP-COMMON
+  imports STDIN-STREAM
+  imports STDOUT-STREAM
+  imports DOMAINS
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */
@@ -182,12 +193,15 @@ buffers as lists of items. */
                       <id color="black"> 0 </id>
                     </thread>
                   </threads>
-                  <br/>
+//                <br/>
                   <store color="red"> .Map </store>
-//                  <in color="magenta"> .List </in>
-//                  <out color="Orchid"> .List </out>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="Orchid" stream="stdout"> .List </out>
+// TODO: this is using temporary IO support
+// //                  <in color="magenta"> .List </in>
+// //                  <out color="Orchid"> .List </out>
+//                  <in color="magenta" stream="stdin"> .List </in>
+//                  <out color="Orchid" stream="stdout"> .List </out>
+                  <stdin/>
+                  <stdout/>
                 </T>
 // Replace the <in/> and <out/> cells with the next two in order to
 // initialize the input buffer through krun
@@ -314,10 +328,10 @@ semicolon ``;'' turning the expression into a statement.  The rationale behind
 this syntactic restructuring has been explained in Lesson 7.  Here is the
 semantics of the two constructs: */
 
-  rule _:Int; => .
+  rule _:Int; => .K
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
+       <store>... N |-> `_ => I` ...</store>  [assignment]
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition has been defined as a whitespace-separated syntactic
@@ -326,7 +340,7 @@ sugar for cons-lists.  Therefore, the following two rules eventually
 sequentialize a syntactic list of statements ``s1 s2 ... sn.. into the
 corresponding computation ``s1 ~> s2 ~> ... ~> sn''. */
 
-   rule .Stmts => .
+   rule .Stmts => .K
    rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
 
 //@ \subsubsection{Conditional statement}
@@ -376,7 +390,15 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => .List ...</in>  [read]
+  //     <in> ListItem(I:Int) => .List ...</in>  [read]
+  // TODO: temporary IO stuff
+       <stdin> ListItem(I:Int) => .List ...</stdin>  [read]
+  rule <k> read() ... </k>
+       <stdin>
+         `.List => ListItem(#parseInput("Int", " \n\t\r"))`
+         ListItem(#buffer(_:String))
+         ...
+       </stdin>
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -397,9 +419,14 @@ count as a computational step. */
 
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
+  syntax Printables ::= List{Printable,","}
+  syntax KResult ::= Printables
+  syntax AExps ::= Printables
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... .List => ListItem(P) </out>  [print]
-  rule print(.AExps); => .  [structural]
+// TODO: temporary IO system
+//       <out>... .List => ListItem(P) </out>  [print]
+       <stdout>... .List => ListItem(P) </stdout>  [print]
+  rule print(.AExps); => .K  [structural]
 
 /*@ \subsubsection{Halt}
 The \texttt{halt} statement empties the computation, so the rewriting process
@@ -411,7 +438,7 @@ contents of the \textsf{threads} cell, so the entire computation abruptly
 terminates the entire program, no matter how many concurrent threads it has,
 because there is nothing else to rewrite.  */
 
-  rule <k> halt; ~> _ => . </k>
+  rule <k> halt; ~> _ => .K </k>
 
 /*@ \subsubsection{Spawn thread}
 A spawned thread is passed its parent's environment at creation time.
@@ -444,7 +471,7 @@ with the declared configuration cell multiplicity.  The unique identifier
 of the new thread is generated using the ``fresh'' side condition. */
 
   rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+       `.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>`
 
 /*@ \subsubsection{Join thread}
 A thread who wants to join another thread \texttt{T} has to wait until
@@ -452,7 +479,7 @@ the computation of \texttt{T} becomes empty.  When that happens, the
 join statement is simply dissolved.  The terminated thread is not removed,
 because we want to allow possible other join statements to also dissolve. */
 
-  rule <k> join(T); => . ...</k> <thread>... <k>.</k> <id>T</id> ...</thread>
+  rule <k> join(T); => .K ...</k> <thread>... <k>.K</k> <id>T</id> ...</thread>
 
 /*@ \subsubsection{Blocks}
 The body statement of a block is executed normally, making sure
@@ -484,10 +511,10 @@ computational step. */
 We allocate a fresh location for each newly declared variable and
 initialize it with 0. */
 
-  rule <k> int (X,Xs => Xs); ...</k>
+  rule <k> int `X,Xs => Xs`; ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .K  [structural]
 
 /*@ \subsubsection{Auxiliary operations}
 We only have one auxiliary operation in IMP++, the environment
@@ -496,7 +523,7 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => .K ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
