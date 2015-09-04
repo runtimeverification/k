@@ -2,7 +2,7 @@ package org.kframework.unparser
 
 import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
-import org.kframework.definition.{Module, NonTerminal, Terminal}
+import org.kframework.definition.{RegexTerminal, Module, NonTerminal, Terminal}
 import org.kframework.kore.{KApply, KToken, KVariable, _}
 import org.kframework.parser.{Constant, Term, TermCons}
 import org.pcollections.ConsPStack
@@ -50,6 +50,7 @@ object KOREToTreeNodes {
           i = i + 1
           toString(t.get(i - 1))
         }
+        case RegexTerminal(_, _, _) => throw new AssertionError("Unimplemented yet")
       }
       if (p.att.contains("format")) {
         p.att.get[String]("format").get.format(unparsedItems:_*)

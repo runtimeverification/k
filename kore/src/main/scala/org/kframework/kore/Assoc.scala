@@ -1,10 +1,8 @@
 package org.kframework.kore
 
-import org.kframework.kore.ADT.KLabel
+import org.kframework.definition.Module
 
 import scala.collection.JavaConverters._
-
-import org.kframework.definition.Module
 
 /**
  * Created by dwightguth on 3/27/15.
@@ -12,7 +10,7 @@ import org.kframework.definition.Module
 object Assoc extends {
 
   def flatten(label: KLabel, list: java.util.List[K], m: Module): java.util.List[K] = {
-    flatten(label, list.asScala, KLabel(m.attributesFor(label).get[String]("unit").get)).asJava
+    flatten(label, list.asScala, ADT.KLabel(m.attributesFor(label).get[String]("unit").get)).asJava
   }
 
   def flatten(label:KLabel, list:Seq[K], unit: KLabel): Seq[K] = {
