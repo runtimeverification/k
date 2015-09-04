@@ -189,7 +189,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KLabelConstant matchLabel = KLabelConstant.of("#match", definition);
         KLabelConstant mapChoiceLabel = KLabelConstant.of("#mapChoice", definition);
         KLabelConstant setChoiceLabel = KLabelConstant.of("#setChoice", definition);
-        KLabelConstant andLabel = KLabelConstant.of("'_andBool_", definition);
+        KLabelConstant andLabel = KLabelConstant.of("_andBool_", definition);
 
         List<Term> requiresAndLookups = Lists.newArrayList();
         flatten(convert(rule.requires()), andLabel, requiresAndLookups);
