@@ -95,12 +95,24 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Definition definition) {
-        return cache.get(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), () -> new MapCache<>(new PatriciaTrie<>()))
-                .get(label, () -> new KLabelConstant(
-                        label,
-                        definition.signaturesOf(label),
+        /* rename KORE-style KLabel names to canonical KIL-style KLabel names */
+        final String canonicalLabel;
+        switch (label) {
+        case "_andBool_":
+            canonicalLabel = "'_andBool_"; break;
+        case "_orBool_":
+            canonicalLabel = "'_orBool_"; break;
+        case "notBool_":
+            canonicalLabel = "'notBool_"; break;
+        default:
+            canonicalLabel = label;
+        }
+        return cache.get(Pair.of(definition.signaturesOf(canonicalLabel), definition.kLabelAttributesOf(canonicalLabel)), () -> new MapCache<>(new PatriciaTrie<>()))
+                .get(canonicalLabel, () -> new KLabelConstant(
+                        canonicalLabel,
+                        definition.signaturesOf(canonicalLabel),
                         definition.allSorts(),
-                        definition.kLabelAttributesOf(label)));
+                        definition.kLabelAttributesOf(canonicalLabel)));
     }
 
     /**

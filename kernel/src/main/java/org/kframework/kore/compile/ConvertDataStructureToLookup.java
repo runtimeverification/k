@@ -159,13 +159,13 @@ public class ConvertDataStructureToLookup {
         List<Tuple2<KApply, KApply>> edges = new ArrayList<>();
         for (KApply k1 : state) {
             Multiset<KVariable> rhsVars = HashMultiset.create();
-            if (k1.klabel().name().equals("_in_")) {
+            if (k1.klabel().name().equals("Set:in")) {
                 continue;
             }
             gatherVars(k1.klist().items().get(1), rhsVars);
             for (KApply k2 : state) {
                 Multiset<KVariable> lhsVars = HashMultiset.create();
-                if (k2.klabel().name().equals("_in_")) {
+                if (k2.klabel().name().equals("Set:in")) {
                     continue;
                 }
                 gatherVars(k2.klist().items().get(0), lhsVars);
@@ -454,12 +454,12 @@ public class ConvertDataStructureToLookup {
                         Multiset<KVariable> vars = HashMultiset.create();
                         gatherVars(element, vars);
                         if (vars.isEmpty()) {
-                            state.add(KApply(KLabel("_in_"), element, accum));
+                            state.add(KApply(KLabel("Set:in"), element, accum));
                         } else {
                             //set choice
                             state.add(KApply(KLabel("#setChoice"), element, accum));
                         }
-                        accum = KApply(KLabel("_-Set_"), accum, KApply(elementLabel, element));
+                        accum = KApply(KLabel("Set:difference"), accum, KApply(elementLabel, element));
                     }
                     KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).<String>get("unit").get());
                     if (frame != null) {

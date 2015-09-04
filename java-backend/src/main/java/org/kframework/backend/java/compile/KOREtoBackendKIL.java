@@ -61,28 +61,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public KLabelConstant KLabel(String name) {
-        switch (name) {
-        case "List:get":
-            name = DataStructures.LIST_GET; break;
-        case "Map:lookup":
-            name = DataStructures.MAP_LOOKUP; break;
-        case "_in_":
-            name = DataStructures.SET_MEMBERSHIP; break;
-        case "List:range":
-            name = DataStructures.LIST_RANGE; break;
-        //case "":
-        //    name = DataStructures.MAP_UPDATE; break;
-        //case "":
-        //    name = DataStructures.MAP_REMOVE_ALL; break;
-        case "_-Set_":
-            name = DataStructures.SET_REMOVE_ALL; break;
-        case "_andBool_":
-            name = "'_andBool_"; break;
-        case "_orBool_":
-            name = "'_andBool_"; break;
-        case "_notBool_":
-            name = "'_andBool_"; break;
-        }
         return KLabelConstant.of(name, context.definition());
     }
 
