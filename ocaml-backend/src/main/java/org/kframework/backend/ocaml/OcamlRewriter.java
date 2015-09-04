@@ -107,7 +107,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     }
 
     private List<Map<KVariable, K>> parseOcamlSearchOutput(String output) {
-        String[] lines = output.split("\n");
+        String[] lines = output.split(System.getProperty("line.separator"));
         int count = Integer.parseInt(lines[0]);
         int line = 1;
         List<Map<KVariable, K>> list = new ArrayList<>();
