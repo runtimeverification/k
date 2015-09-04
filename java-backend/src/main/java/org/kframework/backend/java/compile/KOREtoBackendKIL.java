@@ -35,6 +35,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
+import static org.kframework.Collections.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -189,10 +190,11 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KLabelConstant matchLabel = KLabelConstant.of("#match", definition);
         KLabelConstant mapChoiceLabel = KLabelConstant.of("#mapChoice", definition);
         KLabelConstant setChoiceLabel = KLabelConstant.of("#setChoice", definition);
-        KLabelConstant andLabel = KLabelConstant.of("_andBool_", definition);
+        KLabelConstant andLabel = KLabel("_andBool_");
 
-        List<Term> requiresAndLookups = Lists.newArrayList();
-        flatten(convert(rule.requires()), andLabel, requiresAndLookups);
+        List<Term> requiresAndLookups = stream(Assoc.flatten(andLabel, Seq(rule.requires()), null))
+                .map(this::convert)
+                .collect(Collectors.toList());
 
         /* split requires clauses into matches and non-matches */
         List<Term> requires = Lists.newArrayList();
@@ -225,8 +227,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             }
         }
 
-        List<Term> ensures = Lists.newArrayList();
-        flatten(convert(rule.ensures()), andLabel, ensures);
+        List<Term> ensures = stream(Assoc.flatten(andLabel, Seq(rule.ensures()), null))
+                .map(this::convert)
+                .collect(Collectors.toList());
 
         return new Rule(
                 "",
@@ -245,17 +248,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 oldRule,
                 context);
 
-    }
-
-    public static void flatten(Term term, KLabelConstant label, List<Term> list) {
-        if (term instanceof KItem
-                && ((KItem) term).kLabel() instanceof KLabelConstant
-                && ((KItem) term).kList() instanceof KList
-                && ((KItem) term).kLabel().equals(label)) {
-            ((KList) ((KItem) term).kList()).getContents().forEach(t -> flatten(t, label, list));
-        } else {
-            list.add(term);
-        }
     }
 
     public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {
