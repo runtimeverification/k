@@ -34,7 +34,6 @@ module KAST
                  | ".KList"          [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
                  | ".::KList"        [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
-                 | KList ",," KList  [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
 endmodule
 
 

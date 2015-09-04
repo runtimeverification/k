@@ -234,7 +234,13 @@ public class ConvertDataStructureToLookup {
                             return convertSet(k, collectionLabel, components);
                         } else {
                             //TODO(dwightguth): differentiate Map and Bag
-                            return convertMap(k, collectionLabel, components, varConstraints);
+                            if (att.get(Attribute.HOOK_KEY).get().equals("MAP.concat"))
+                                // Map
+                                return convertMap(k, collectionLabel, components, varConstraints);
+                            else
+                                // Bag
+                                // TODO(dwightguth): handle bags
+                                return super.apply(k);
                         }
                     } else {
                         // List
@@ -495,7 +501,11 @@ public class ConvertDataStructureToLookup {
 
 
     public Sentence convert(Sentence s) {
-        if (s instanceof Rule) {
+        if (s.att().contains(Attribute.LEMMA_KEY)
+                || s.att().contains(Attribute.SMT_LEMMA_KEY)
+                || s.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
+          return s;
+        } else if (s instanceof Rule) {
             return convert((Rule) s);
         } else if (s instanceof Context) {
             return convert((Context) s);
