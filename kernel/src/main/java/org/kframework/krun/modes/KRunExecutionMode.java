@@ -10,6 +10,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
+import org.kframework.krun.SearchResult;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
@@ -37,6 +38,12 @@ public class KRunExecutionMode implements ExecutionMode {
 
     @Override
     public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+        if (kRunOptions.search()) {
+            if (kRunOptions.pattern != null) {
+                Rule pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
+                return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern));
+            }
+        }
         if (kRunOptions.exitCodePattern != null) {
             Rule pattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, kRunOptions, compiledDefinition, Source.apply("<command line: --exit-code>"));
             Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);

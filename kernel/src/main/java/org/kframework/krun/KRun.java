@@ -85,6 +85,9 @@ public class KRun implements Transformation<Void, Void> {
                 prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
                 return (Integer) tuple._2();
             }
+        } else if (result instanceof SearchResult) {
+            System.out.println("got search result");
+            
         }
 
         return 0;
