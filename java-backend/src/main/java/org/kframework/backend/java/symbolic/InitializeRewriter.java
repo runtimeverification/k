@@ -119,9 +119,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public List<Map<KVariable, K>> match(K k, org.kframework.definition.Rule rule) {
-            throw new UnsupportedOperationException();
+        public List<? extends Map<? extends KVariable,? extends K>> match(K k, org.kframework.definition.Rule rule) {
+            return search(k, Optional.of(0), Optional.empty(), rule);
         }
+
 
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
@@ -135,7 +136,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
 
-        public Tuple2<K, List<Map<KVariable, K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+        public Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
             K res = execute(k, depth).k();
             return Tuple2.apply(res, match(res, rule));
         }

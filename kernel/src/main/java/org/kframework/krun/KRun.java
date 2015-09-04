@@ -26,7 +26,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
@@ -76,8 +75,8 @@ public class KRun implements Transformation<Void, Void> {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
 
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = pattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
-                List<Map<KVariable, K>> res = rewriter.match((K) result, exitCodePattern);
+                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
             }
         } else if (result instanceof Tuple2) {
@@ -91,7 +90,7 @@ public class KRun implements Transformation<Void, Void> {
         return 0;
     }
 
-    public static int getExitCode(KExceptionManager kem, List<Map<KVariable, K>> res) {
+    public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
         if (res.size() != 1) {
             kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
             return 112;
@@ -124,13 +123,16 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static Rule pattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
+    public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
         }
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
+    public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
+        return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
+    }
 
     public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
         switch (output) {

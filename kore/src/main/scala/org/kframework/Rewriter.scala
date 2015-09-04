@@ -1,7 +1,7 @@
 package org.kframework
 
 
-import java.util.{List, Map, Optional}
+import java.util.Optional
 
 import org.kframework.definition.{Module, Rule}
 
@@ -23,7 +23,7 @@ trait Rewriter {
   def execute(k: kore.K, depth: Optional[Integer]): RewriterResult
 
 
-  def `match`(k: kore.K, rule: Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]]
+  def `match`(k: kore.K, rule: Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]
 
 
   /**
@@ -34,8 +34,8 @@ trait Rewriter {
    * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
    * @return A list of substitutions, denoting all the configurations matching the given rule.
    */
-  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule): List[_ <: Map[_ <: kore.KVariable, _ <: kore.K]]
+  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]
 
 
-  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]]
+  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[kore.K, java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]]
 }

@@ -1,9 +1,13 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.debugger;
 
+import com.google.common.collect.Maps;
 import org.kframework.kore.K;
 import org.kframework.krun.tools.Debugger;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -23,18 +27,22 @@ public class DebuggerState {
 
     private final NavigableMap<Integer, K> checkpointMap;
 
+    private final List<DebuggerMatchResult> watchList;
+
     private final K currentK;
 
     private final int stepNum;
 
-    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, K> checkpointMap) {
+    public DebuggerState(K currentK, int stepNum, NavigableMap<Integer, K> checkpointMap, List<DebuggerMatchResult> watchList) {
         this.checkpointMap = new TreeMap<>(checkpointMap);
+        this.watchList = new ArrayList<>(watchList);
         this.currentK = currentK;
         this.stepNum = stepNum;
     }
 
     public DebuggerState(DebuggerState copyState) {
         this.checkpointMap = new TreeMap<>(copyState.getCheckpointMap());
+        this.watchList = new ArrayList<>(copyState.getWatchList());
         this.currentK = copyState.getCurrentK();
         this.stepNum = copyState.getStepNum();
     }
@@ -57,7 +65,11 @@ public class DebuggerState {
         return checkpointMap.lastKey();
     }
 
+    public List<DebuggerMatchResult> getWatchList() {
+        return Collections.unmodifiableList(watchList);
+    }
+
     public NavigableMap<Integer, K> getCheckpointMap() {
-        return new TreeMap<>(checkpointMap);
+        return Maps.unmodifiableNavigableMap(checkpointMap);
     }
 }

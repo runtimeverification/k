@@ -46,10 +46,23 @@ TOKEN: /*RESERVED TOKENS */
     |  <CHECKPOINT: "checkpoint" | "ch">
     |  <RESUME: "resume" | "run" | "r">
     |  <PEEK: "p" | "peek">
+    |  <REMWATCH: "remwatch" | "xwatch">
+    |  <SHOW: "show"> : STRING_STATE
+    |  <GETSTATE: "get-states" | "gs">
+    |  <SELECT: "select">
+    |  <SOURCE:"source" | "src"> : STRING_STATE
+    |  <COPY: "copy" | "cp">
+    |  <WATCH: "watch" | "w"> : STRING_STATE
     |  <NUMBER: (["0" - "9"])+>
     |  <STRING : (["a" - "z", "A"-"Z", "0"-"9"])+ >
     |  <NEWLINE : "\n" | "\r\n">
+    |  <UNACCEPTED : (~[" "])+>
 
+}
+
+<STRING_STATE> TOKEN:
+{
+       <PATTERN : (~[])+> : DEFAULT
 }
 
 
@@ -58,6 +71,7 @@ Command command() throws NumberFormatException:
     int stepCount = 1;
     Integer stateNum = null;
     Integer configurationNum = null;
+    String pattern = null;
     int checkpointVal;
 }
 {
@@ -69,8 +83,26 @@ Command command() throws NumberFormatException:
     |   <JUMPTO> (configurationNum = parseNum())? {return new JumpToCommand(Optional.ofNullable(stateNum), Optional.ofNullable(configurationNum));}
     |   <QUIT> {return new QuitCommand();}
     |   <RESUME> {return new ResumeCommand();}
-    |   <CHECKPOINT> (checkpointVal = parseNum()){return new CheckpointCommand(checkpointVal);}
+    |   <CHECKPOINT> (checkpointVal = parseNum()) {return new CheckpointCommand(checkpointVal);}
+    |   <SHOW> (pattern = parsePattern()) {return new ShowCommand(pattern);}
+    |   LOOKAHEAD(2)
+        <WATCH> (pattern = parsePattern())? {return new WatchCommand(Optional.ofNullable(pattern));}
+    |   <SOURCE> (pattern = parsePattern()) {return new SourceCommand(pattern.trim());}
+    |   <REMWATCH> (stateNum = parseNum()) {return new RemoveWatchCommand(stateNum);}
+    |   <COPY> (stateNum = parseNum()) {return new CopyCommand(stateNum);}
+    |   <GETSTATE> {return new GetStatesCommand();}
+    |   <SELECT> (stateNum = parseNum()) {return new SelectCommand(stateNum);}
 }
+
+String parsePattern():
+{
+    String pattern;
+    Token t;
+}
+{
+    t = <PATTERN> {return t.image;}
+}
+
 
 Command parseCommand() throws NumberFormatException:
 {

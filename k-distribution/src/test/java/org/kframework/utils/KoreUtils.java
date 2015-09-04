@@ -110,4 +110,11 @@ public class KoreUtils {
 
     }
 
+    public static CompiledDefinition getCompiledDef() {
+        return compiledDef;
+    }
+
+    public static KExceptionManager getKem() {
+        return kem;
+    }
 }
