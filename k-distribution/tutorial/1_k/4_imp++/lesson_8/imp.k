@@ -188,7 +188,7 @@ buffers as lists of items. */
   configuration <T color="yellow">
                   <threads color="orange">
                     <thread multiplicity="*" color="blue">
-                      <k color="green"> $PGM:Stmts:K </k>
+                      <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <id color="black"> 0 </id>
                     </thread>
