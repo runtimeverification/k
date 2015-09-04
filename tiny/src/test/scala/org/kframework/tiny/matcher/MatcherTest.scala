@@ -1,6 +1,6 @@
 package org.kframework.tiny.matcher
 
-import org.junit.{Before, Assert, Ignore, Test}
+import org.junit.{Assert, Ignore, Test}
 import org.kframework.builtin.Sorts
 import org.kframework.tiny._
 
@@ -8,6 +8,7 @@ class MatcherTest extends AbstractTest {
 
   import cons._
 
+  val liftBool = LiftBoolToMLLabel
 
   implicit class KWithMatcherMethods(k: K) {
     def matchAll(other: K, sideConditions: K = True): K = And(k.matcher(other), sideConditions).normalize match {
@@ -193,7 +194,7 @@ class MatcherTest extends AbstractTest {
         And(Y -> 5, Z -> KSeq(), X -> 5),
         And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
       , pattern.matchAll(foo,
-        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
+        And(liftBool(SortPredicate(Sorts.KSeq, Z)), liftBool(SortPredicate(Sorts.Int, X)))))
   }
 
   @Test def testKSeqWithMatchAtEnd1() {
@@ -205,7 +206,7 @@ class MatcherTest extends AbstractTest {
         And(Y -> 5, Z -> KSeq(), X -> 5),
         And(X -> '+(), Z -> KSeq(), Y -> '+(5, 5)))
       , pattern.matchAll(foo,
-        And(SortPredicate(Sorts.KSeq, Z), SortPredicate(Sorts.Int, X))))
+        And(liftBool(SortPredicate(Sorts.KSeq, Z)), liftBool(SortPredicate(Sorts.Int, X)))))
   }
 
   //
@@ -238,31 +239,31 @@ class MatcherTest extends AbstractTest {
   }
 
   @Test def testOrInMatch {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = Or(1: K)
     assertEquals(True, o.matchAll(o))
   }
 
   @Test def testOrInMatchWithVariable {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = Or(1: K, 2: K)
     val p = Or(1: K, X)
     assertEquals(X -> Or(1, 2), p.matchAll(o))
   }
   @Test def testOrInMatchWithVariable1 {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = Or(1: K, 2: K)
     val p = X
     assertEquals(X -> Or(1, 2), p.matchAll(o))
   }
   @Test def testOrInMatchWithVariable2 {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = 'foo(Or(1: K, 2: K))
     val p = 'foo(X)
     assertEquals(X -> Or(1, 2), p.matchAll(o))
   }
   @Test def testOrInMatchWithVariable3 {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = 'foo(Or(1: K, 2: K))
     val p = 'foo(X)
     assertEquals(X -> 2, p.matchAll(o, X -> 2))
@@ -273,7 +274,7 @@ class MatcherTest extends AbstractTest {
   }
 
   @Test def testBag {
-    NormalizationCaching.cache.cleanUp()
+    theory.cache.cleanUp()
     val o = 'MyBag(1, 2, 3)
     val p = 'MyBag(X, 2)
     assertEquals(False, 'MyBag(X, 7).matchAll(o))
@@ -292,7 +293,7 @@ class MatcherTest extends AbstractTest {
       And(X -> 2, Y -> 3, Z -> 1),
       And(X -> 3, Y -> 1, Z -> 2),
       And(X -> 3, Y -> 2, Z -> 1)
-    ), 'MyBag(X, 'MyBag(Y, Z)).matchAll('MyBag(1, 2, 3), And('isInt(X), 'isInt(Y), 'isInt(Z))))
+    ), 'MyBag(X, 'MyBag(Y, Z)).matchAll('MyBag(1, 2, 3), And(liftBool('isInt(X)), liftBool('isInt(Y)), liftBool('isInt(Z)))))
 
     assertEquals(Or(), 'MyBag(X, Y).matchAll('MyBag(1)))
 

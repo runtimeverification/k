@@ -9,7 +9,6 @@ import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
-import org.kframework.tiny.Rewriter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -38,7 +37,7 @@ public class Konsole {
 
         Module module = compiledDef.executionModule();
         BiFunction<String, Source, K> programParser = compiledDef.getProgramParser(kem);
-        Rewriter rewriter = new org.kframework.tiny.Rewriter(module);
+        Rewriter rewriter = new org.kframework.tiny.FullTinyRewriter(module);
         String cmd;
 
         do {

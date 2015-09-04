@@ -85,7 +85,7 @@ and clarity, we place the two cells inside another cell, the ``top'' cell
 which is labeled \textsf{T}. */
 
   configuration <T color="yellow">
-                  <k color="green"> `$PGM:Pgm`:K </k>
+                  <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
                 </T>
 

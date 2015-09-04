@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -227,7 +228,9 @@ public class Kompile {
         if (!hasConfigDecl) {
             definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
                 if (mod == definition.mainModule()) {
-                    return Module(mod.name(), (Set<Module>) mod.imports().$plus(definition.getModule("DEFAULT-CONFIGURATION").get()), mod.localSentences(), mod.att());
+                    java.util.Set<Module> imports = mutable(mod.imports());
+                    imports.add(definition.getModule("DEFAULT-CONFIGURATION").get());
+                    return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
                 return mod;
             }, "adding default configuration").apply(definition);
@@ -342,7 +345,7 @@ public class Kompile {
                 stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
     }
 
-    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source) {
+    public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, kompileOptions.strict());
         java.util.Set<K> res = performParse(new HashMap<>(), gen.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule())),
@@ -351,7 +354,11 @@ public class Kompile {
         if (!errors.isEmpty()) {
             throw errors.iterator().next();
         }
-        Rule parsed = upRule(res.iterator().next());
+        return upRule(res.iterator().next());
+    }
+
+    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
+        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
         return (Rule) func(new ResolveAnonVar()::resolve)
                 .andThen(func(new ResolveSemanticCasts()::resolve))
                 .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))
