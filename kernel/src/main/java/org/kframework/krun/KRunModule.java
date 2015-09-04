@@ -212,7 +212,7 @@ public class KRunModule extends AbstractModule {
                     binder(), String.class, Prover.class);
 
             //TODO(cos): move to tiny module
-            rewriterBinder.addBinding("tiny").toInstance(m -> new org.kframework.tiny.Rewriter(m));
+            rewriterBinder.addBinding("tiny").toInstance(m -> new org.kframework.tiny.FullTinyRewriter(m));
 
             bind(Debugger.class).to(ExecutorDebugger.class);
 

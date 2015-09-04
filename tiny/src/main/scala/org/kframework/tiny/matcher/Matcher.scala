@@ -46,7 +46,7 @@ case class KRegularAppMatcher(left: KRegularApp, right: K) extends KAppMatcher {
 
   def matchContents(ksL: Seq[K], ksR: Seq[K])(implicit theory: Theory): K =
     And(ksL.zip(ksR) map {case (k1, k2) =>
-      assert(k2.isGround, "Trying to create KRegularAppMatcher(...(" + k1 + "    ,    " + k2 + ")...)")
+//      assert(k2.isGround, "Trying to create KRegularAppMatcher(...(" + k1 + "    ,    " + k2 + ")...)")
       k1.matcher(k2)
     }: _*)
 
@@ -105,7 +105,7 @@ object KAssocAppMatcher extends MatcherLabel {
 case class KVarMatcher(left: KVar, right: K) extends Matcher {
   val klabel = KVarMatcher
 
-  assert(!right.isInstanceOf[KVar], "Trying to create KVarMatcher(" + left + "," + right + ")")
+//  assert(!right.isInstanceOf[KVar], "Trying to create KVarMatcher(" + left + "," + right + ")")
 
   override def normalizeInner(implicit theory: Theory): K =
     Binding(left, right.normalize)
@@ -121,7 +121,7 @@ case class EqualsMatcher(left: K, right: K) extends Matcher {
   override val klabel = EqualsMatcher
   override def toString = left + ":=" + right
 
-  override protected[this] def normalizeInner(implicit theory: Theory): K = {
+  override def normalizeInner(implicit theory: Theory): K = {
     val res = if (left == right)
       True
     else if (isGround && left != right)

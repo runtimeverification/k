@@ -41,6 +41,8 @@ package object tiny {
     }
 
     def isPureSubsitution: Boolean = binding.size == children.size
+
+    def isSolved = isPureSubsitution && !children.exists(!_.isGround)
   }
 
   implicit class AsOr(val thisOr: K) extends AnyVal {
