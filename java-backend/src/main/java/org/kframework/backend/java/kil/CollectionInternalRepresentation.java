@@ -10,7 +10,8 @@ public interface CollectionInternalRepresentation extends KItemRepresentation {
      * The returned representation is not unique (due to associativity/commutativity).
      * {@link Term#evaluate} is the inverse operation.
      */
-    public default Term toKore(TermContext context) {
+    @Override
+    default Term toKore() {
         List<Term> components = getKComponents();
 
         if (components.isEmpty()) {
@@ -20,10 +21,11 @@ public interface CollectionInternalRepresentation extends KItemRepresentation {
         Term result = components.get(components.size() - 1);
         for (int i = components.size() - 2; i >= 0; --i) {
             Term component = components.get(i);
-            result = KItem.of(
+            result = new KItem(
                     constructorLabel(),
                     KList.concatenate(component, result),
-                    context,
+                    sort(),
+                    true,
                     component.getSource(),
                     component.getLocation());
         }
@@ -41,10 +43,12 @@ public interface CollectionInternalRepresentation extends KItemRepresentation {
     /**
      * Returns the KLabel that constructs an instance of this collection/formula.
      */
-    public KLabel constructorLabel();
+    KLabel constructorLabel();
 
     /**
      * Returns the KItem representation of the unit of this collection/formula.
      */
-    public Term unit();
+    Term unit();
+
+    Sort sort();
 }

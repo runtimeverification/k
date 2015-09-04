@@ -145,16 +145,16 @@ of statements surrounded by curly brackets.  */
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}               [strict]
+  syntax Ids   ::= List{Id,","}               [strict, klabel(ids)]
   syntax AExps ::= List{AExp,","}             [strict]
   syntax Stmts ::= List{Stmt,""}
-
-  syntax AExps ::= Ids
 endmodule
 
 
 module IMP
   imports IMP-COMMON
+  imports STDIN-STREAM
+  imports STDOUT-STREAM
   imports DOMAINS
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
@@ -188,17 +188,20 @@ buffers as lists of items. */
   configuration <T color="yellow">
                   <threads color="orange">
                     <thread multiplicity="*" color="blue">
-                      <k color="green"> $PGM:Stmts:K </k>
+                      <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <id color="black"> 0 </id>
                     </thread>
                   </threads>
 //                <br/>
                   <store color="red"> .Map </store>
-//                  <in color="magenta"> .List </in>
-//                  <out color="Orchid"> .List </out>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="Orchid" stream="stdout"> .List </out>
+// TODO: this is using temporary IO support
+// //                  <in color="magenta"> .List </in>
+// //                  <out color="Orchid"> .List </out>
+//                  <in color="magenta" stream="stdin"> .List </in>
+//                  <out color="Orchid" stream="stdout"> .List </out>
+                  <stdin/>
+                  <stdout/>
                 </T>
 // Replace the <in/> and <out/> cells with the next two in order to
 // initialize the input buffer through krun
@@ -387,7 +390,15 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => .List ...</in>  [read]
+  //     <in> ListItem(I:Int) => .List ...</in>  [read]
+  // TODO: temporary IO stuff
+       <stdin> ListItem(I:Int) => .List ...</stdin>  [read]
+  rule <k> read() ... </k>
+       <stdin>
+         `.List => ListItem(#parseInput("Int", " \n\t\r"))`
+         ListItem(#buffer(_:String))
+         ...
+       </stdin>
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -408,8 +419,13 @@ count as a computational step. */
 
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
+  syntax Printables ::= List{Printable,","}
+  syntax KResult ::= Printables
+  syntax AExps ::= Printables
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... .List => ListItem(P) </out>  [print]
+// TODO: temporary IO system
+//       <out>... .List => ListItem(P) </out>  [print]
+       <stdout>... .List => ListItem(P) </stdout>  [print]
   rule print(.AExps); => .K  [structural]
 
 /*@ \subsubsection{Halt}
@@ -507,7 +523,7 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  rule <k> Rho:Map => .K ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => .K ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule

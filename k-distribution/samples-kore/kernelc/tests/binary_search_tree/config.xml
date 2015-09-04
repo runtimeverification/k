@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+  <test definition="kernelc.k"
+        programs="."
+        results="."
+        extension="c"
+        >
+    <kompile-option name="--backend" value="java" />
+    <program name="find.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/find_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+    <program name="insert.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/insert_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+    <program name="delete.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/delete_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+      <krun-option name="--z3-executable" />
+    </program>
+  </test>
+</tests>
+
