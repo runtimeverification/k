@@ -7,6 +7,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.InjectedKLabel;
 import org.kframework.backend.java.kil.KCollection;
@@ -34,12 +35,15 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
-import scala.Option;
+import static org.kframework.Collections.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
+
 
 /**
  * KORE to backend KIL
@@ -115,7 +119,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private Term convert(KLabel klabel) {
         if (klabel instanceof KVariable) {
             return KVariable(klabel.name(), ((KVariable) klabel).att().add(Attribute.SORT_KEY, "KLabel"));
-
         } else {
             return KLabel(klabel.name());
         }
@@ -184,16 +187,59 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             }
         }
 
+        KLabelConstant matchLabel = KLabelConstant.of("#match", definition);
+        KLabelConstant mapChoiceLabel = KLabelConstant.of("#mapChoice", definition);
+        KLabelConstant setChoiceLabel = KLabelConstant.of("#setChoice", definition);
+        KLabelConstant andLabel = KLabel("_andBool_");
+
+        List<Term> requiresAndLookups = stream(Assoc.flatten(andLabel, Seq(rule.requires()), null))
+                .map(this::convert)
+                .collect(Collectors.toList());
+
+        /* split requires clauses into matches and non-matches */
+        List<Term> requires = Lists.newArrayList();
+        ConjunctiveFormula lookups = ConjunctiveFormula.of(context);
+        for (Term term : requiresAndLookups) {
+            if (term instanceof KItem) {
+                if (((KItem) term).kLabel().equals(matchLabel)) {
+                    lookups = lookups.add(
+                            ((KList) ((KItem) term).kList()).get(1),
+                            ((KList) ((KItem) term).kList()).get(0));
+                } else if (((KItem) term).kLabel().equals(setChoiceLabel)) {
+                    lookups = lookups.add(
+                            KItem.of(
+                                    KLabelConstant.of(DataStructures.SET_CHOICE, definition),
+                                    KList.singleton(((KList) ((KItem) term).kList()).get(1)),
+                                    context),
+                            ((KList) ((KItem) term).kList()).get(0));
+                } else if (((KItem) term).kLabel().equals(mapChoiceLabel)) {
+                    lookups = lookups.add(
+                            KItem.of(
+                                    KLabelConstant.of(DataStructures.MAP_CHOICE, definition),
+                                    KList.singleton(((KList) ((KItem) term).kList()).get(1)),
+                                    context),
+                            ((KList) ((KItem) term).kList()).get(0));
+                } else {
+                    requires.add(term);
+                }
+            } else {
+                requires.add(term);
+            }
+        }
+
+        List<Term> ensures = stream(Assoc.flatten(andLabel, Seq(rule.ensures()), null))
+                .map(this::convert)
+                .collect(Collectors.toList());
 
         return new Rule(
                 "",
                 convert(leftHandSide),
                 convert(RewriteToTop.toRight(rule.body())),
-                Collections.singletonList(convert(rule.requires())),
-                Collections.singletonList(convert(rule.ensures())),
+                requires,
+                ensures,
                 Collections.emptySet(),
                 Collections.emptySet(),
-                ConjunctiveFormula.of(context),
+                lookups,
                 false,
                 null,
                 null,
@@ -203,7 +249,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 context);
 
     }
-
 
     public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {
         switch (multiplicity) {

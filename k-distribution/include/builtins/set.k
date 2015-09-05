@@ -24,11 +24,12 @@ module SET
   syntax Set ::= intersectSet(Set, Set)   [function, hook(SET.intersection)]
 
   /*@ Get the difference of two sets ($A \setminus B$)*/
-  syntax Set ::= Set "-Set" Set           [function, hook(SET.difference), latex({#1}-_{\it Set}{#2})]
+  syntax Set ::= Set "-Set" Set           [function, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference)]
 
   /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= K "in" Set              [function, hook(SET.in)]
+  syntax Bool ::= K "in" Set              [function, hook(SET.in), klabel(Set:in)]
 
+  // Set:membership
   /*@ Check set inclusion ($A \subseteq B$) */
   syntax Bool ::= Set "<=Set" Set         [function, hook(SET.inclusion)]
 

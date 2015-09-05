@@ -449,19 +449,12 @@ public class KItem extends Term implements KItemRepresentation {
                                 solution = matches.get(0);
                             }
 
-                            Term rightHandSide = rule.rightHandSide();
-                            if (!rule.freshVariables().isEmpty()) {
-                                // this opt. only makes sense when using pattern matching
-                                // because after unification variables can end up in the
-                                // constraint rather than in the form of substitution
-
-                                /* rename unbound variables */
-                                Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
-                                /* rename rule variables in the rule RHS */
-                                rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                            }
-                            rightHandSide = KAbstractRewriteMachine.construct(rule.rhsInstructions(), solution, copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
-                                    context, false);
+                            Term rightHandSide = KAbstractRewriteMachine.construct(
+                                    rule.rhsInstructions(),
+                                    solution,
+                                    copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
+                                    context,
+                                    false);
 
                             if (rule.containsAttribute("owise")) {
                                 if (owiseResult != null) {

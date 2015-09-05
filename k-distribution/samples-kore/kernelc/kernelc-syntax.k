@@ -54,7 +54,9 @@ module KERNELC-COMMON-SYNTAX
     | "(" Expression ")"                                [bracket]
     //| Expression "." Id
     | Expression "->" Id
-    | Id "(" Expressions ")"                            [seqstrict(2)]
+    // TODO(RaduM): fix the bug with parsing th default label `_(_)`
+    // | Id "(" Expressions ")"                            [seqstrict(2)]
+    | Id "(" Expressions ")"                            [klabel(call), seqstrict(2)]
     //| Expression "[" Expression "]"
     > "-" Expression                                    [seqstrict]
     | "+" Expression                                    [seqstrict]
