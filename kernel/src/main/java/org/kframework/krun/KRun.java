@@ -87,17 +87,23 @@ public class KRun implements Transformation<Void, Void> {
             }
         } else if (result instanceof SearchResult) {
             List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
-            if (searchResult == null) {
-                outputFile("No Search Results", options);
+            if (searchResult == null || searchResult.isEmpty()) {
+                outputFile("No Search Results \n", options);
                 return 0;
             }
             int i = 0;
             StringBuilder searchString = new StringBuilder();
             for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-                searchString.append("Solution: " + (i++) + );
+                searchString.append("Solution: " + (i++) + "\n");
+                substitution.forEach((kVar, resultK) -> {
+                    prettyPrint(compiledDef, options.output, str -> searchString.append(str), kVar);
+                    searchString.append("---> \n");
+                    prettyPrint(compiledDef, options.output, str -> searchString.append(str + "\n"), resultK);
+                });
             }
+            outputFile(searchString.toString(), options);
+            return 0;
         }
-
         return 0;
     }
 
