@@ -1,6 +1,7 @@
 package org.kframework.tiny
 
 
+import java.util
 import java.util.Optional
 
 import org.kframework.builtin.Sorts
@@ -48,6 +49,8 @@ class FullTinyRewriter(module: definition.Module) extends org.kframework.Rewrite
   def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: org.kframework.definition.Rule): (kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]) = ???
   def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: org.kframework.definition.Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = ???
   override def `match`(k: kore.K, rule: org.kframework.definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = ???
+
+  override def proveRule(ruleToProve: definition.Rule, allRules: util.List[definition.Rule]): util.List[kore.K] = ???
 }
 
 class Rewriter(module: definition.Module, index: K => Option[Symbol] = KIndex, theory: Theory) {
@@ -158,16 +161,8 @@ class Rewriter(module: definition.Module, index: K => Option[Symbol] = KIndex, t
 
   def execute(k: kore.K): kore.K = execute(cons.convert(k))
 
-  def `match`(k: kore.K, rule: definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = throw new UnsupportedOperationException
-
-  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: definition.Rule): Tuple2[kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]] = {
-    val res = execute(k, depth).k
-    Tuple2(res, `match`(res, rule))
-  }
-
   def proveRule(ruleToProve: definition.Rule, allRules: java.util.List[definition.Rule]) = throw new UnsupportedOperationException
 
-  def execute(k: K): RewriterResult = {
   def execute(k: K): K = {
     var steps = 0
     var time = System.nanoTime()
