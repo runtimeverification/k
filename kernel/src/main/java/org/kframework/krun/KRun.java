@@ -86,8 +86,16 @@ public class KRun implements Transformation<Void, Void> {
                 return (Integer) tuple._2();
             }
         } else if (result instanceof SearchResult) {
-            System.out.println("got search result");
-            
+            List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
+            if (searchResult == null) {
+                outputFile("No Search Results", options);
+                return 0;
+            }
+            int i = 0;
+            StringBuilder searchString = new StringBuilder();
+            for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
+                searchString.append("Solution: " + (i++) + );
+            }
         }
 
         return 0;
