@@ -70,7 +70,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     }
 
-    private Data data;
+    private final Data data;
 
     private final TermContext context;
 

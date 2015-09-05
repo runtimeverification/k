@@ -135,6 +135,16 @@ public class SymbolicRewriter {
         appliedRules.clear();
         substitutions.clear();
 
+        if (this.strategyIsSave(subject)) {
+            results.add(subject/* procesat de cosmin*/);
+            return;
+        }
+
+        if (this.strategyIsRestore(subject)) {
+            results.add(subject/* restore by cosmin*/);
+            return;
+        }
+
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
 
         // Applying a strategy to a list of rules divides the rules up into
@@ -193,6 +203,17 @@ public class SymbolicRewriter {
         } finally {
             RuleAuditing.clearAuditingRule();
         }
+
+        // there are no successors
+        results.add(subject/* mark as blocked by cosmin */);
+    }
+
+    private boolean strategyIsRestore(ConstrainedTerm subject) {
+        throw new UnsupportedOperationException();
+    }
+
+    private boolean strategyIsSave(ConstrainedTerm subject) {
+        throw new UnsupportedOperationException();
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
