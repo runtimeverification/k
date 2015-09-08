@@ -28,7 +28,7 @@
     <dependency>
       <groupId>io.github.nicolasstucki</groupId>
       <artifactId>multisets_2.11</artifactId>
-      <version>0.2</version>
+      <version>0.3</version>
     </dependency>
   </dependencies>
 
@@ -37,7 +37,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.2</version>
         <executions>
           <execution>
             <id>scala-compile-first</id>
@@ -56,8 +56,13 @@
           </execution>
         </executions>
         <configuration>
+          <checkMultipleScalaVersions>false</checkMultipleScalaVersions>
           <args>
             <arg>-Xexperimental</arg>
+            <arg>-feature</arg>
+            <arg>-deprecation</arg>
+            <arg>-language:implicitConversions</arg>
+            <arg>-language:postfixOps</arg>
           </args>
         </configuration>
       </plugin>

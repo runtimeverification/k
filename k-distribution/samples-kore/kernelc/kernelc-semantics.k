@@ -213,7 +213,7 @@ module KERNELC-SEMANTICS
     <k>
       // TODO(RaduM): fix the bug with the extra .List{","} terminator
       // Callee:Id(EEs:EvaluatedExpressions) ~> K
-      `_(_)`(Callee:Id, EEs:EvaluatedExpressions) ~> K
+      `call`(Callee:Id, EEs:EvaluatedExpressions) ~> K
     =>
       { declareParameters(PDs) bindParameters(PDs, EEs, B) }
     </k>
@@ -415,6 +415,7 @@ module KERNELC-SEMANTICS
     ...</fun>
     <k> return tv(T1:Type * => T2 *, null); ...</k>
     <fun-id> Callee:Id </fun-id>
+    requires T1 =/=K T2
     [structural]
 
 

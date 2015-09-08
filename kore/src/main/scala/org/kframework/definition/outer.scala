@@ -285,7 +285,7 @@ sealed trait ProductionItem extends OuterKORE
 
 // marker
 
-trait TerminalLike extends ProductionItem {
+sealed trait TerminalLike extends ProductionItem {
   def pattern: RunAutomaton
   def followPattern: RunAutomaton
   def precedePattern: RunAutomaton

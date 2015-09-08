@@ -13,8 +13,6 @@ object RenameVariables {
   def apply(k: K): K = k match {
     case v: KVar => index += 1; KVar("FRESH_VAR_" + index, v.att)
     case s: KApp => s.klabel((s.children map apply).toSeq, s.att)
-    case r: KRewrite => KRewrite(apply(r.left), apply(r.right), r.att)
-    case s: KSeq => KSeq(s.children map apply, s.att)
     case x => x
   }
 }
