@@ -41,10 +41,10 @@ public class KRunExecutionMode implements ExecutionMode {
         if (kRunOptions.search()) {
             Rule pattern;
             if (kRunOptions.pattern != null) {
-                pattern = KRun.compilePattern(files, kem, kRunOptions.DEFAULT_KORE_PATTERN, kRunOptions, compiledDefinition, Source.apply("<command line>"));
+                pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
             }
             else {
-                pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
+                pattern = KRun.compilePattern(files, kem, kRunOptions.DEFAULT_KORE_PATTERN, kRunOptions, compiledDefinition, Source.apply("<command line>"));
             }
 
             return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern));
