@@ -52,6 +52,10 @@ public class ResolveIOStreams {
             return m;
         } else {
             java.util.Set<Sentence> sentences = mutable(m.localSentences());
+            // NOTE: it may seem inefficient to have duplicated for-loops here,
+            //      but such a duplication makes each step much simpler;
+            //      moreover the number of `streamProductions` is at most two (or possibly three later on),
+            //      so that the duplication effect is not that much.
             // Step 1.
             for (Production p : streamProductions) {
                 sentences = sentences.stream().map(s -> resolveInitRule(p,s)).collect(Collectors.toSet());
