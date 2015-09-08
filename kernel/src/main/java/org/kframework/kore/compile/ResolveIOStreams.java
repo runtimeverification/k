@@ -45,8 +45,6 @@ public class ResolveIOStreams {
      * 2. Update rules that refer to 'stdin' stream.
      * 3. Import rules from *-STREAM modules (with modification of cell names).
      */
-    // TODO(Daejun): current implementation is quite fragile in overall.
-    //               we will need to have a general way of instantiating a template module.
     public Module resolve(Module m) {
         java.util.Set<Production> streamProductions = getStreamProductions(m);
         if (streamProductions.isEmpty()) {
@@ -146,11 +144,11 @@ public class ResolveIOStreams {
     }
 
     // Step 3.
-    // TODO(Daejun): fix ad-hoc copying from stream modules by using additional annotations.
+    // get sentences from stream module:
+    // - productions whose sort is `Stream`
+    // - rules that have `stream` attribute, but changing cell names according to user-defined one.
     private java.util.Set<Sentence> getStreamModuleSentences(Production streamProduction) {
         String streamName = streamProduction.att().<String>get("stream").get(); // stdin, stdout
-        String builtinCellSort = GenerateSentencesFromConfigDecl.getSortOfCell(streamName); // StdinCell, StdoutCell
-        String builtinInitLabel = GenerateSentencesFromConfigDecl.getInitLabel(Sort(builtinCellSort)); // initStdinCell, initStdoutCell
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>, <stdout>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>, <out>
 
@@ -158,29 +156,29 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(getStreamModule(streamName).localSentences())) {
             if (s instanceof Rule) {
                 Rule rule = (Rule) s;
-                if (isInitRule(builtinInitLabel, builtinCellLabel, rule)) continue; // drop compiler-generated sentences
-
-                // Update cell names
-                K body = new TransformKORE() {
-                    @Override
-                    public K apply(KApply k) {
-                        k = (KApply) super.apply(k);
-                        return KApply(apply(k.klabel()), k.klist(), k.att());
-                    }
-                    private KLabel apply(KLabel klabel) {
-                        if (klabel.name().equals(builtinCellLabel)) {
-                            return userCellLabel;
-                        } else {
-                            return klabel;
+                if (rule.att().contains("stream")) {
+                    // Update cell names
+                    K body = new TransformKORE() {
+                        @Override
+                        public K apply(KApply k) {
+                            k = (KApply) super.apply(k);
+                            return KApply(apply(k.klabel()), k.klist(), k.att());
                         }
-                    }
-                }.apply(rule.body());
+                        private KLabel apply(KLabel klabel) {
+                            if (klabel.name().equals(builtinCellLabel)) {
+                                return userCellLabel;
+                            } else {
+                                return klabel;
+                            }
+                        }
+                    }.apply(rule.body());
 
-                rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
-                sentences.add(rule);
+                    rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
+                    sentences.add(rule);
+                }
             } else if (s instanceof Production) {
                 Production production = (Production) s;
-                if (!production.sort().name().equals(builtinCellSort)) { // drop compiler-generated sentences
+                if (production.sort().name().equals("Stream")) {
                     sentences.add(production);
                 }
             }
