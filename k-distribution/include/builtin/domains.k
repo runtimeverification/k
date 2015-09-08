@@ -635,6 +635,28 @@ module STDIN-STREAM
        andBool lengthString(S) <=Int 1 // [stdin]
        [stream]
 
+  // NOTE: This unblocking rule will be instantiated and inserted carefully
+  // when necessary according to user-defined rules, since otherwise it will
+  // lead to a diverging (i.e., non-terminating) transition system definition.
+  // Currently, it supports only a simple pattern matching on the top of the
+  // input stream cell, e.g.,
+  //   rule <k> read() => V ... </k> <in> ListItem(V:Int) => .List ...  </in>
+  // Non-supported rules that refer to the input stream cell in a sophisticated
+  // way will get stuck in concrete execution mode with real IO enabled (i.e.,
+  // under `--io on` option), while they will still work in symbolic execution
+  // mode or concrete execution mode with real IO disabled (i.e., under `--io
+  // off`, `--search`, or `--debug` options).
+  //
+  // TODO: More patterns need to be supported as well. In that case, we need to
+  // have a way to specify such patterns.
+  rule [stdinUnblock]:
+       <stdin>
+         `.List => ListItem(#parseInput(Sort:String, Delimiters:String))`
+         ListItem(#buffer(_:String))
+         ...
+       </stdin>
+       [unblock]
+
   /*
   syntax Stream ::= "#noIO"
 

@@ -13,6 +13,7 @@ import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.tiny.KVar;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
@@ -216,19 +217,75 @@ public class ResolveIOStreams {
      */
     private java.util.Set<Sentence> getStdinStreamUnblockingRules(Production streamProduction,
                                                                   java.util.Set<Sentence> sentences) {
-        KLabel streamCellLabel = streamProduction.klabel().get(); // <in>
+        KLabel userCellLabel = streamProduction.klabel().get(); // <in>
+
+        // find rules with currently supported matching patterns
+        java.util.Set<Tuple2<Rule,String>> rules = new HashSet<>();
+        for (Sentence s : sentences) {
+            if (s instanceof Rule) {
+                Rule rule = (Rule) s;
+                java.util.List<String> sorts = isSupportingRulePatternAndGetSortNameOfCast(streamProduction, rule);
+                assert sorts.size() <= 1;
+                if (sorts.size() == 1) {
+                    rules.add(Tuple2.apply(rule,sorts.get(0)));
+                }
+            }
+        }
+
+        // generate additional unblocking rules for each of the above rules
+        java.util.Set<Sentence> newSentences = new HashSet<>();
+        for (Tuple2<Rule,String> r : rules) {
+            Rule rule = r._1();
+            String sort = r._2();
+
+            K body = new TransformKORE() {
+                @Override
+                public K apply(KApply k) {
+                    if (k.klabel().name().equals(userCellLabel.name())) {
+                        return getUnblockRuleBody(streamProduction, sort);
+                    } else {
+                        return super.apply(k);
+                    }
+                }
+                @Override
+                public K apply(KRewrite k) {
+                    // drop rhs
+                    return apply(k.left());
+                }
+            }.apply(rule.body());
+
+            rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
+            newSentences.add(rule);
+        }
+
+        return newSentences;
+    }
+
+    // return (a list of) sort names of cast if the given rule has the supported pattern matching over input stream cell,
+    // otherwise return empty.
+    // currently, the list of sort names of cast should be a singleton.
+    /*
+     * Currently supported rule pattern is:
+     * rule <k> read() => V ... </k>
+     *      <in>
+     *        ListItem(V:Int) => .List
+     *        ...
+     *      </in>
+     */
+    private java.util.List<String> isSupportingRulePatternAndGetSortNameOfCast(Production streamProduction, Rule rule) {
+        KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<String> sorts = new ArrayList<>();
-        VisitKORE visitor = new VisitKORE() {
+        new VisitKORE() {
             @Override
             public Void apply(KApply k) {
-                if (k.klabel().name().equals(streamCellLabel.name())) {
+                if (k.klabel().name().equals(userCellLabel.name())) {
                     String sort = wellformedAndGetSortNameOfCast(k.klist());
                     if (!sort.isEmpty()) {
                         sorts.add(sort);
-                  //} else {
-                  //    throw KEMException.compilerError("Unsupported matching pattern in stdin stream cell." +
-                  //        " Currently the supported pattern is: e.g., <in> ListItem(V:Sort) => .List ... </in>", k);
+                        //} else {
+                        //    throw KEMException.compilerError("Unsupported matching pattern in stdin stream cell." +
+                        //        " Currently the supported pattern is: e.g., <in> ListItem(V:Sort) => .List ... </in>", k);
                     }
                     return null;
                 }
@@ -274,78 +331,63 @@ public class ResolveIOStreams {
                 }
                 return "";
             }
-        };
+        }.apply(rule.body());
 
-        java.util.Set<Tuple2<Rule,String>> rules = new HashSet<>();
-        for (Sentence s : sentences) {
-            if (s instanceof Rule) {
-                Rule rule = (Rule) s;
-                sorts.clear();
-                visitor.apply(rule.body());
-                assert sorts.size() <= 1;
-                if (sorts.size() == 1) {
-                    rules.add(Tuple2.apply(rule,sorts.get(0)));
-                }
-            }
-        }
+        return sorts;
+    }
 
-        java.util.Set<Sentence> newSentences = new HashSet<>();
-        for (Tuple2<Rule,String> r : rules) {
-            Rule rule = r._1();
-            String sort = r._2();
+    // get rule body of the `[unblock]` rule (it should exist an unique one),
+    // instantiating with proper `Sort` and `Delimiters` values.
+    // this method should be called with stdin stream production, not with stdout stream.
+    /*
+     * Currently supporting generated rule would be:
+     * rule <k> read() ... </k>
+     *      <in>
+     *        `.List => ListItem(#parseInput("Int", " \n\t\r"))`
+     *        ListItem(#buffer(_:String))
+     *        ...
+     *      </in>
+     */
+    private K getUnblockRuleBody(Production streamProduction, String sort) {
+        String streamName = streamProduction.att().<String>get("stream").get(); assert streamName.equals("stdin"); // stdin
+        String builtinCellLabel = "<" + streamName + ">"; // <stdin>
+        KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
-            // TODO(Daejun): generalize it by using additional annotations in STDIN-STREAM module
-            // Generate:
-            // rule <k> read() ... </k>
-            //      <in>
-            //        `.List => ListItem(#parseInput("Int", " \n\t\r"))`
-            //        ListItem(#buffer(_:String))
-            //        ...
-            //      </in>
-            K body = new TransformKORE() {
-                @Override
-                public K apply(KApply k) {
-                    if (k.klabel().name().equals(streamCellLabel.name())) {
-                        KApply content = KApply(KLabel("_List_"), KList(
-                            // .List => ListItem(#parseInput(sort, " \n\t\r"))
-                            KRewrite(
-                                KApply(KLabel(".List"), KList()),
-                                KApply(KLabel("ListItem"), KList(
-                                    KApply(KLabel("#parseInput"), KList(
-                                        KToken("\"" + sort + "\"", Sort("String")),
-                                        KToken("\" \\n\\t\\r\"", Sort("String"))
-                                    ))
-                                ))
-                            ),
-                            // ListItem(#buffer(_:String))
-                            KApply(KLabel("ListItem"), KList(
-                                KApply(KLabel("#buffer"), KList(
-                                    KApply(KLabel("#SemanticCastTo" + "String"), KList(KVariable("_")))
-                                ))
-                            ))
-                        ));
-                        KList klist = KList(
-                            KApply(KLabel("#noDots"), KList()),
-                            content,
-                            KApply(KLabel("#dots"), KList())
-                        );
-                        return KApply(k.klabel(), klist, k.att());
-                    } else {
-                        return super.apply(k);
+        java.util.List<Sentence> unblockRules = stream(getStreamModule(streamName).localSentences())
+                .filter(s -> s instanceof Rule && s.att().contains("unblock"))
+                .collect(Collectors.toList());
+        assert unblockRules.size() == 1;
+        Rule unblockRule = (Rule) unblockRules.get(0);
+
+        return new TransformKORE() {
+            @Override
+            public K apply(KApply k) {
+                if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {
+                    K i = k.klist().items().get(0);
+                    if (i instanceof KVariable) {
+                        KVariable x = (KVariable) i;
+                        switch(x.name()) {
+                        case "Sort":
+                            return KToken("\"" + sort + "\"", Sort("String"));
+                        case "Delimiters":
+                            // TODO(Daejun): support `delimiter` attribute in stream cell
+                            return KToken("\" \\n\\t\\r\"", Sort("String"));
+                        default:
+                            // fall through
+                        }
                     }
                 }
-                @Override
-                public K apply(KRewrite k) {
-                    // drop rhs
-                    return apply(k.left());
+                k = (KApply) super.apply(k);
+                return KApply(apply(k.klabel()), k.klist(), k.att());
+            }
+            private KLabel apply(KLabel klabel) {
+                if (klabel.name().equals(builtinCellLabel)) {
+                    return userCellLabel;
+                } else {
+                    return klabel;
                 }
-            }.apply(rule.body());
-
-            rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
-            newSentences.add(rule);
-        }
-
-        return newSentences;
+            }
+        }.apply(unblockRule.body());
     }
 
 }
