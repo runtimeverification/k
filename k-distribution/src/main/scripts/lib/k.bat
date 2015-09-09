@@ -9,4 +9,4 @@ IF NOT ERRORLEVEL 1 (
 ) ELSE (
   java  -Djava.awt.headless=true -ea %K_OPTS% -cp "%~dp0..\lib\java\*" org.kframework.main.Main %*
 )
-ENDLOCAL
+::don't call endlocal because that would reset ERRORLEVEL
