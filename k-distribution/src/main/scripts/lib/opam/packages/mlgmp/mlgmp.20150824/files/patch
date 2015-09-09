@@ -1,6 +1,6 @@
 diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
 --- mlgmp_ref/mlgmp/config.h	2002-07-29 20:31:12.000000000 -0500
-+++ mlgmp/config.h	2015-09-01 16:43:33.033447709 -0500
++++ mlgmp/config.h	2015-09-09 09:49:52.315262573 -0500
 @@ -3,6 +3,7 @@
  #define NDEBUG
  #undef TRACE
@@ -26,7 +26,7 @@ diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
  #endif /* SERIALIZE */
 diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
 --- mlgmp_ref/mlgmp/gmp.ml	2012-02-24 01:48:47.000000000 -0600
-+++ mlgmp/gmp.ml	2015-09-01 16:43:33.033447709 -0500
++++ mlgmp/gmp.ml	2015-09-09 09:49:52.315262573 -0500
 @@ -1,7 +1,8 @@
  (*
   * ML GMP - Interface between Objective Caml and GNU MP
@@ -110,7 +110,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
     let mantissa, exponent =
 diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
 --- mlgmp_ref/mlgmp/gmp.mli	2012-02-24 01:48:02.000000000 -0600
-+++ mlgmp/gmp.mli	2015-09-01 16:43:33.033447709 -0500
++++ mlgmp/gmp.mli	2015-09-09 09:49:52.319262573 -0500
 @@ -128,6 +128,8 @@
      external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
      external scan0 : t -> int -> int = "_mlgmp_z_scan0"
@@ -178,7 +178,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
      val to_string : t -> string
 diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
 --- mlgmp_ref/mlgmp/Makefile	2012-02-24 02:17:29.000000000 -0600
-+++ mlgmp/Makefile	2015-09-01 16:43:33.033447709 -0500
++++ mlgmp/Makefile	2015-09-09 09:49:52.319262573 -0500
 @@ -36,7 +36,7 @@
  all:	$(LIBS) tests
  
@@ -208,7 +208,7 @@ diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
  	$(OCAMLOPT) $+ -o $@
 diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
 --- mlgmp_ref/mlgmp/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
-+++ mlgmp/mlgmp_fr.c	2015-09-03 15:37:23.391911682 -0500
++++ mlgmp/mlgmp_fr.c	2015-09-09 16:19:23.833783350 -0500
 @@ -296,12 +296,82 @@
  fr_unary_op(sqrt)
  fr_unary_op(exp)
@@ -388,9 +388,43 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
    CAMLreturn(Val_unit);
  #endif
  }
+@@ -443,7 +586,7 @@
+   char *s;
+   int len;
+   mp_exp_t exponent;
+-  char exponent_buf[10];
++  char exponent_buf[22];
+ 
+   *wsize_32 = MPFR_SIZE_ARCH32;
+   *wsize_64 = MPFR_SIZE_ARCH64;
+@@ -452,14 +595,18 @@
+ 
+   s = mpfr_get_str (NULL, &exponent, 16, 0, *mpfr_val(v), GMP_RNDN);
+   len = strlen(s);
+-  serialize_int_4(len + 11);
+ 
+-  serialize_block_1("0.", 2);
++  if (mpfr_number_p(*mpfr_val(v))) {
++    serialize_int_4(len + 23);
++    serialize_block_1("0.", 2);
++  } else {
++    serialize_int_4(len + 21);
++  }
+   serialize_block_1(s, len);
+-  free(s);
++  mpfr_free_str(s);
+ 
+-  sprintf(exponent_buf, "@%08lx", (exponent & 0xFFFFFFFFUL));
+-  serialize_block_1(exponent_buf, 9);
++  sprintf(exponent_buf, "@%020ld", (exponent & 0xFFFFFFFFUL));
++  serialize_block_1(exponent_buf, 21);
+ 
+   CAMLreturn0;
+ }
+Binary files mlgmp_ref/mlgmp/.mlgmp_fr.c.swp and mlgmp/.mlgmp_fr.c.swp differ
 diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
 --- mlgmp_ref/mlgmp/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
-+++ mlgmp/mlgmp_z.c	2015-09-01 16:43:33.033447709 -0500
++++ mlgmp/mlgmp_z.c	2015-09-09 09:49:52.323262573 -0500
 @@ -742,6 +742,13 @@
  z_random_op(urandomm)
  z_random_op_ui(rrandomb)
