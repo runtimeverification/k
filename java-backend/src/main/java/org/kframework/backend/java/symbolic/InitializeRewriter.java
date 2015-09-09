@@ -59,6 +59,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
     private static int NEGATIVE_VALUE = -1;
+    private boolean useCellCollections = true;
 
     @Inject
     public InitializeRewriter(
@@ -84,6 +85,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         this.initializeDefinition = initializeDefinition;
     }
 
+    public void dontUseCellCollections() {
+        useCellCollections = false;
+    }
+
     @Override
     public synchronized Rewriter apply(Module module) {
         GlobalContext initializingContext = new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING);
@@ -91,7 +96,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext);
         rewritingContext.setDefinition(evaluatedDef);
 
-        return new SymbolicRewriterGlue(module, evaluatedDef, kompileOptions, javaOptions, rewritingContext, kem);
+        return new SymbolicRewriterGlue(module, evaluatedDef, kompileOptions, javaOptions, rewritingContext, kem, useCellCollections);
     }
 
     public static class SymbolicRewriterGlue implements Rewriter {
@@ -101,8 +106,17 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public final Module module;
         public final GlobalContext rewritingContext;
         private final KExceptionManager kem;
+        private final boolean useCellCollections;
 
-        public SymbolicRewriterGlue(Module module, Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
+        public SymbolicRewriterGlue(
+                Module module,
+                Definition definition,
+                KompileOptions kompileOptions,
+                JavaExecutionOptions javaOptions,
+                GlobalContext rewritingContext,
+                KExceptionManager kem,
+                boolean useCellCollections) {
+            this.useCellCollections = useCellCollections;
             this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
             this.definition = definition;
             this.module = module;
@@ -112,7 +126,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext));
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), useCellCollections);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
@@ -126,7 +140,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext));
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), useCellCollections);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;

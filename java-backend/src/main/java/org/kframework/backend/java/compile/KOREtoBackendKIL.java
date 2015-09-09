@@ -53,11 +53,13 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Module module;
     private final Definition definition;
     private final TermContext context;
+    private final boolean useCellCollections;
 
-    public KOREtoBackendKIL(Module module, Definition definition, TermContext context) {
+    public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean useCellCollections) {
         this.module = module;
         this.definition = definition;
         this.context = context;
+        this.useCellCollections = useCellCollections;
     }
 
     @Override
@@ -152,11 +154,11 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         else if (k instanceof org.kframework.kore.KApply) {
             KLabel klabel = ((KApply) k).klabel();
             org.kframework.kore.KList klist = ((KApply) k).klist();
-            if (definition.configurationInfo().getCellForConcat(klabel).isDefined())
+            if (useCellCollections && definition.configurationInfo().getCellForConcat(klabel).isDefined())
                 return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
-            if (definition.configurationInfo().getCellForUnit((KApply) k).isDefined())
+            if (useCellCollections && definition.configurationInfo().getCellForUnit((KApply) k).isDefined())
                 return CellCollection.empty(definition.configurationInfo().getCellForUnit((KApply) k).get(), definition);
-            else if (definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
+            else if (useCellCollections && definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(
                         CellCollection.singleton(CellLabel.of(klabel.name()), KList(klist.items()), definition.configurationInfo().getCellSort(klabel), definition),
                         context);
