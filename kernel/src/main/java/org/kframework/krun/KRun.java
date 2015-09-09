@@ -163,7 +163,7 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    private void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst, Rule parsedPattern, CompiledDefinition compiledDefinition, OutputModes outputModes, Consumer<String> print) {
+    public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst, Rule parsedPattern, CompiledDefinition compiledDefinition, OutputModes outputModes, Consumer<String> print) {
         if (subst.isEmpty()) {
             return;
         }
