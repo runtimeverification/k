@@ -41,17 +41,16 @@ public class KRunExecutionMode implements ExecutionMode {
 
     @Override
     public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
-        Rule parsedPattern;
-        Rule pattern;
+        Rule pattern = null, parsedPattern = null;
         if (kRunOptions.pattern != null) {
             parsedPattern = KRun.parsePattern(files, kem, kRunOptions.pattern, compiledDefinition, Source.apply("<command line>"));
             pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
-        } else {
-            pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, compiledDefinition.executionModule().att());
-            parsedPattern = pattern;
-
         }
         if (kRunOptions.search()) {
+            if (pattern == null) {
+                pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, compiledDefinition.executionModule().att());
+                parsedPattern = pattern;
+            }
             return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern), parsedPattern);
         }
         if (kRunOptions.exitCodePattern != null) {
@@ -59,6 +58,9 @@ public class KRunExecutionMode implements ExecutionMode {
             Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
             return Tuple2.apply(res._1(), KRun.getExitCode(kem, res._2()));
         }
-        return rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern)._1();
+        if (pattern != null) {
+            return rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern)._1();
+        }
+        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
     }
 }

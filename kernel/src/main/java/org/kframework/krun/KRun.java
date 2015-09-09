@@ -181,9 +181,13 @@ public class KRun implements Transformation<Void, Void> {
                 .stream()
                 .filter(x -> varList.contains(x.getKey().name()))
                 .forEach(x -> {
-                    prettyPrint(compiledDefinition, outputModes, print, x.getKey());
-                    print.accept("--->\n");
-                    prettyPrint(compiledDefinition, outputModes, print, x.getValue());
+                    if (parsedPattern.body() instanceof KVariable) {
+                        prettyPrint(compiledDefinition, outputModes, print, x.getValue());
+                    } else {
+                        prettyPrint(compiledDefinition, outputModes, print, x.getKey());
+                        print.accept("--->\n");
+                        prettyPrint(compiledDefinition, outputModes, print, x.getValue());
+                    }
                 });
 
     }
