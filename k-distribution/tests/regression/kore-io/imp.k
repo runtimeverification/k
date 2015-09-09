@@ -45,8 +45,7 @@ module IMP
   imports LIST
   imports MAP
   imports SET
-  imports STDIN-STREAM
-  imports STDOUT-STREAM
+  imports K-IO
   imports IMP-COMMON
 
   syntax KResult ::= Int | Bool
@@ -54,8 +53,8 @@ module IMP
   configuration <T color="yellow">
                   <k color="green"> `$PGM:Pgm`:K </k>
                   <state color="red"> .Map </state>
-                  <stdin/>
-                  <stdout/>
+                  <in stream="stdin"> .List </in>
+                  <out stream="stdout"> .List </out>
                 </T>
 
 // AExp
@@ -104,21 +103,12 @@ module IMP
 // IO
 
   rule <k> read() => I ...</k>
-       <stdin> ListItem(I:Int) => .List ...</stdin>
-       when isStream(I) =/=K true
+       <in> ListItem(I:Int) => .List ...</in>
        [read]
-
-  // TODO(daejunpark): need to be implicitly done by kompile?
-  rule <k> read() ... </k>
-       <stdin>
-         `.List => ListItem(#parseInput("Int", " \n\t\r"))`
-         ListItem(#buffer(_:String))
-         ...
-       </stdin>
 
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
   rule <k> print(P:Printable); => .K ...</k>
-       <stdout>... .List => ListItem(P) </stdout>  [print]
+       <out>... .List => ListItem(P) </out>  [print]
 
 endmodule
