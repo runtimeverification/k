@@ -12,7 +12,6 @@ import collection.JavaConverters._
 
 
 object ADT {
-
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
     def apply(ks: K*) = KApply(this, KList(ks.toList))

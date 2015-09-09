@@ -16,6 +16,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
+import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.parser.ProductionReference;
 import org.kframework.transformation.Transformation;
@@ -92,16 +93,10 @@ public class KRun implements Transformation<Void, Void> {
                 return 0;
             }
             int i = 0;
-            StringBuilder searchString = new StringBuilder();
             for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-                searchString.append("Solution: " + (i++) + "\n");
-                substitution.forEach((kVar, resultK) -> {
-                    prettyPrint(compiledDef, options.output, str -> searchString.append(str), kVar);
-                    searchString.append("---> \n");
-                    prettyPrint(compiledDef, options.output, str -> searchString.append(str + "\n"), resultK);
-                });
+                outputFile("Solution: " + (i++) + "\n", options);
+                prettyPrintSubstitution(substitution, ((SearchResult) result).getParsedRule(), compiledDef, options.output, s -> outputFile(s, options));
             }
-            outputFile(searchString.toString(), options);
             return 0;
         }
         return 0;
@@ -168,6 +163,30 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    private void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst, Rule parsedPattern, CompiledDefinition compiledDefinition, OutputModes outputModes, Consumer<String> print) {
+        if (subst.isEmpty()) {
+            return;
+        }
+        List<String> varList = new ArrayList<>();
+        new VisitKORE() {
+            @Override
+            public Void apply(KVariable k) {
+                    /* Not Observing reflexivity Rule requires comparison by name */
+                varList.add(k.name());
+                return super.apply(k);
+            }
+        }.apply(parsedPattern.body());
+
+        subst.entrySet()
+                .stream()
+                .filter(x -> varList.contains(x.getKey().name()))
+                .forEach(x -> {
+                    prettyPrint(compiledDefinition, outputModes, print, x.getKey());
+                    print.accept("--->\n");
+                    prettyPrint(compiledDefinition, outputModes, print, x.getValue());
+                });
+
+    }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();

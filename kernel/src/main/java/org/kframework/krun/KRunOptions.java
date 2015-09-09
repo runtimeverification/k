@@ -249,8 +249,6 @@ public final class KRunOptions {
 
     public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
 
-    public static final String DEFAULT_KORE_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
-
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;
 

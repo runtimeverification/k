@@ -4,9 +4,11 @@ package org.kframework.krun.modes;
 import com.google.inject.Inject;
 import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
@@ -18,6 +20,7 @@ import scala.Tuple2;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 /**
  * Execution Mode for Conventional KRun
@@ -38,26 +41,24 @@ public class KRunExecutionMode implements ExecutionMode {
 
     @Override
     public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
-        if (kRunOptions.search()) {
-            Rule pattern;
-            if (kRunOptions.pattern != null) {
-                pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
-            }
-            else {
-                pattern = KRun.compilePattern(files, kem, kRunOptions.DEFAULT_KORE_PATTERN, kRunOptions, compiledDefinition, Source.apply("<command line>"));
-            }
+        Rule parsedPattern;
+        Rule pattern;
+        if (kRunOptions.pattern != null) {
+            parsedPattern = KRun.parsePattern(files, kem, kRunOptions.pattern, compiledDefinition, Source.apply("<command line>"));
+            pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
+        } else {
+            pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, compiledDefinition.executionModule().att());
+            parsedPattern = pattern;
 
-            return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern));
+        }
+        if (kRunOptions.search()) {
+            return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern), parsedPattern);
         }
         if (kRunOptions.exitCodePattern != null) {
-            Rule pattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, kRunOptions, compiledDefinition, Source.apply("<command line: --exit-code>"));
+            pattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, kRunOptions, compiledDefinition, Source.apply("<command line: --exit-code>"));
             Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
             return Tuple2.apply(res._1(), KRun.getExitCode(kem, res._2()));
         }
-        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k();
+        return rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern)._1();
     }
 }
-
-
-
-
