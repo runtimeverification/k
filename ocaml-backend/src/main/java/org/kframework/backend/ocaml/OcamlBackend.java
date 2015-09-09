@@ -66,26 +66,18 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
                 "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml", "parser.mli", "parser.ml", "lexer.ml"));
             args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
             if (!options.genMLOnly) {
-                String ocamlfind = "ocamlfind";
-                String ocamlc = "ocamlc.opt";
-                String ocamlopt = "ocamlopt.opt";
-                String env = files.getEnv().get("K_OCAML_HOME");
-                if (env != null) {
-                    ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
-                    ocamlc = new File(files.resolveWorkingDirectory(env), "ocamlc.opt").getAbsolutePath();
-                    ocamlopt = new File(files.resolveWorkingDirectory(env), "ocamlopt.opt").getAbsolutePath();
-                }
+                String ocamlfind = getOcamlFind(files);
                 if (options.ocamlopt) {
                     args.add(0, ocamlfind);
                     args.add(1, "ocamlopt");
                     args.add("-inline");
                     args.add("20");
                     args.add("-nodynlink");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlopt=" + ocamlopt);
+                    pb.command(args);
                 } else {
                     args.add(0, ocamlfind);
                     args.add(1, "ocamlc");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlc=" + ocamlc);
+                    pb.command(args);
                 }
                 Process p = pb
                         .directory(files.resolveKompiled("."))
@@ -102,5 +94,14 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
         } catch (IOException e) {
             throw KEMException.criticalError("Error starting ocamlopt process: " + e.getMessage(), e);
         }
+    }
+
+    public static String getOcamlFind(FileUtil files) {
+        String ocamlfind = "ocamlfind";
+        String env = files.getEnv().get("K_OCAML_HOME");
+        if (env != null) {
+            ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
+        }
+        return ocamlfind;
     }
 }
