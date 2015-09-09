@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="."
+            results="."
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <program name="height.c">
+          <krun-option name="--prove" value="tests/tree/height_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="size.c">
+          <krun-option name="--prove" value="tests/tree/size_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="find.c">
+          <krun-option name="--prove" value="tests/tree/find_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="mirror.c">
+          <krun-option name="--prove" value="tests/tree/mirror_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="inorder.c">
+          <krun-option name="--prove" value="tests/tree/inorder_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="preorder.c">
+          <krun-option name="--prove" value="tests/tree/preorder_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="postorder.c">
+          <krun-option name="--prove" value="tests/tree/postorder_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="tree_to_list_iterative.c">
+          <krun-option name="--prove" value="tests/tree/tree_to_list_iterative_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+        <program name="tree_to_list_recursive.c">
+          <krun-option name="--prove" value="tests/tree/tree_to_list_recursive_spec.k" />
+          <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
+        </program>
+    </test>
+
+</tests>

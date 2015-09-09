@@ -253,7 +253,7 @@ public class SymbolicRewriter {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
-                    FreshOperations.fresh(variable.sort(), constraint.termContext()));
+                    FreshOperations.freshOfSort(variable.sort(), constraint.termContext()));
         }
         constraint = constraint.addAll(rule.ensures()).simplify();
 
@@ -400,7 +400,8 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+            if(context.global().krunOptions.experimental.statistics)
+                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
             return searchResults;
         }
 
@@ -417,7 +418,8 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                if(context.global().krunOptions.experimental.statistics)
+                    System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }

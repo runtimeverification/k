@@ -8,8 +8,6 @@ import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.util.Profiler;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -114,6 +112,7 @@ public class AbstractKMachine {
                                 CellCollection.singleton(
                                         subCell.cellLabel(),
                                         subCell.content(),
+                                        ((CellCollection) cell.content()).cellSort(),
                                         context.definition()));
                         substitutions = substitutions.plus(substitution);
                         assert successPC == -1 || successPC == pc;
@@ -188,7 +187,7 @@ public class AbstractKMachine {
         @Override
         public CellCollection transform(CellCollection cellCollection) {
             boolean changed = false;
-            CellCollection.Builder builder = CellCollection.builder(context.definition());
+            CellCollection.Builder builder = cellCollection.builder();
             for (CellCollection.Cell cell : cellCollection.cells().values()) {
                 CellCollection selectedCell = (CellCollection) substitution.get(Rule.getChoiceVariableForCell(cell.cellLabel()));
                 if (selectedCell != null && !cell.equals(selectedCell.cells().values().iterator().next())) {

@@ -18,11 +18,11 @@ public interface DataStructures {
     public final String SET_CHOICE = "Set:choice";
     public final String LIST_GET = "List:get";
     public final String MAP_LOOKUP = "Map:lookup";
-    public final String SET_MEMBERSHIP = "'_in_";
+    public final String SET_MEMBERSHIP = "Set:in";
     public final String LIST_RANGE = "List:range";
     public final String MAP_UPDATE = "'updateMap";
     public final String MAP_REMOVE_ALL = "'removeAll";
-    public final String SET_REMOVE_ALL = "'_-Set_";
+    public final String SET_REMOVE_ALL = "Set:difference";
 
     static KItem lookup(Term base, Term key, TermContext context) {
         KLabelConstant klabel;

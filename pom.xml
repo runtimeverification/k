@@ -57,7 +57,7 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.11.6</scala.version>
+    <scala.version>2.11.7</scala.version>
   </properties>
 
   <dependencies>
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>org.scala-lang.modules</groupId>
       <artifactId>scala-java8-compat_2.11</artifactId>
-      <version>0.3.0</version>
+      <version>0.7.0</version>
     </dependency>
     <dependency>
         <groupId>org.scala-lang</groupId>
@@ -235,6 +235,26 @@
           <tagNameFormat>v@{project.version}</tagNameFormat>
           <pushChanges>false</pushChanges>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <configuration>
+          <rules>
+            <requireJavaVersion>
+              <version>[1.8.0-45,)</version>
+            </requireJavaVersion>
+          </rules>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal> enforce</goal>
+            </goals>
+            <id>enforce-java</id>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

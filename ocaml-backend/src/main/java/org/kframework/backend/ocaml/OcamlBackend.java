@@ -3,8 +3,11 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.compile.Backend;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
@@ -16,14 +19,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Created by dwightguth on 5/27/15.
  */
-public class OcamlBackend implements Consumer<CompiledDefinition> {
+public class OcamlBackend implements Backend {
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -103,5 +106,10 @@ public class OcamlBackend implements Consumer<CompiledDefinition> {
             ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
         }
         return ocamlfind;
+    }
+
+    @Override
+    public Function<Definition, Definition> steps(Kompile kompile) {
+        return kompile.defaultSteps();
     }
 }

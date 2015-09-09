@@ -28,10 +28,10 @@ import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.kore.compile.ResolveContexts;
 import org.kframework.kore.compile.ResolveFreshConstants;
 import org.kframework.kore.compile.ResolveHeatCoolAttribute;
+import org.kframework.kore.compile.ResolveIOStreams;
 import org.kframework.kore.compile.ResolveSemanticCasts;
 import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
-import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParseCache.ParsedSentence;
@@ -46,7 +46,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
-import scala.Function1;
 import scala.Tuple2;
 import scala.collection.immutable.Set;
 import scala.util.Either;
@@ -58,7 +57,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,6 +114,10 @@ public class Kompile {
         this(kompileOptions, files, kem, sw, true);
     }
 
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
+        return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
+    }
+
     /**
      * Executes the Kompile tool. This tool accesses a
      *
@@ -122,10 +127,19 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
 
+        Definition kompiledDefinition = pipeline.apply(parsedDef);
+        sw.printIntermediate("Apply compile pipeline");
+
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
+
+        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+    }
+
+    public Function<Definition, Definition> defaultSteps() {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict()::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts()::resolve, "resolving context sentences");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute()::resolve, "resolving heat and cool attributes");
@@ -134,7 +148,8 @@ public class Kompile {
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
-        Function1<Definition, Definition> pipeline = resolveStrict
+        return def -> func(this::resolveIOStreams)
+                .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
                 .andThen(resolveContexts)
                 .andThen(resolveHeatCoolAttribute)
@@ -143,14 +158,12 @@ public class Kompile {
                 .andThen(func(this::resolveFreshConstants))
                 .andThen(func(this::concretizeTransformer))
                 .andThen(func(this::addSemanticsModule))
-                .andThen(func(this::addProgramModule));
+                .andThen(func(this::addProgramModule))
+                .apply(def);
+    }
 
-        Definition kompiledDefinition = pipeline.apply(parsedDef);
-        sw.printIntermediate("Apply compile pipeline");
-
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
-
-        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+    public Definition resolveIOStreams(Definition d) {
+        return DefinitionTransformer.from(new ResolveIOStreams(d)::resolve, "resolving io streams").apply(d);
     }
 
     public Definition addSemanticsModule(Definition d) {
@@ -221,7 +234,9 @@ public class Kompile {
         if (!hasConfigDecl) {
             definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
                 if (mod == definition.mainModule()) {
-                    return Module(mod.name(), (Set<Module>) mod.imports().$plus(definition.getModule("DEFAULT-CONFIGURATION").get()), mod.localSentences(), mod.att());
+                    java.util.Set<Module> imports = mutable(mod.imports());
+                    imports.add(definition.getModule("DEFAULT-CONFIGURATION").get());
+                    return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
                 return mod;
             }, "adding default configuration").apply(definition);
@@ -336,7 +351,7 @@ public class Kompile {
                 stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
     }
 
-    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source) {
+    public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, kompileOptions.strict());
         java.util.Set<K> res = performParse(new HashMap<>(), gen.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule())),
@@ -345,7 +360,11 @@ public class Kompile {
         if (!errors.isEmpty()) {
             throw errors.iterator().next();
         }
-        Rule parsed = upRule(res.iterator().next());
+        return upRule(res.iterator().next());
+    }
+
+    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
+        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
         return (Rule) func(new ResolveAnonVar()::resolve)
                 .andThen(func(new ResolveSemanticCasts()::resolve))
                 .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))

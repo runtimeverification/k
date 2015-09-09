@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kore.Sort;
 
 import java.io.Serializable;
 import java.util.List;
@@ -30,6 +31,7 @@ public final class RHSInstruction implements Serializable {
         private final int size2;
         private final int size3;
         private final Kind kind;
+        private final Sort cellCollectionSort;
         private final List<CellLabel> cellLabels;
         private final Source source;
         private final Location location;
@@ -82,37 +84,40 @@ public final class RHSInstruction implements Serializable {
 
         public Constructor(ConstructorType type, int size1,
                 int size2, int size3) {
-            this(type, size1, size2, size3, null, null);
+            this(type, size1, size2, size3, null, null, null);
         }
 
         public Constructor(ConstructorType type, int size1,
-                int size2, int size3, Kind kind, List<CellLabel> cellLabels) {
-            this(type, size1, size2, size3, kind, cellLabels, null, null);
+                int size2, int size3, Kind kind,
+                Sort cellCollectionSort, List<CellLabel> cellLabels) {
+            this(type, size1, size2, size3, kind, cellCollectionSort, cellLabels, null, null);
         }
 
         public Constructor(ConstructorType type, Source source, Location location) {
-            this(type, 0, 0, 0, null, null, source, location);
+            this(type, 0, 0, 0, null, null, null, source, location);
         }
 
         public Constructor(ConstructorType type, int size1,
-                int size2, int size3, Kind kind, List<CellLabel> cellLabels,
+                int size2, int size3, Kind kind, Sort cellCollectionSort, List<CellLabel> cellLabels,
                 Source source, Location location) {
             this.type = type;
             this.size1 = size1;
             this.size2 = size2;
             this.size3 = size3;
             this.kind = kind;
+            this.cellCollectionSort = cellCollectionSort;
             this.cellLabels = cellLabels;
             this.source = source;
             this.location = location;
         }
 
         public Constructor(ConstructorType type, Kind kind) {
-            this(type, 0, 0, 0, kind, null);
+            this(type, 0, 0, 0, kind, null, null);
         }
 
-        public Constructor(ConstructorType type, int size1, List<CellLabel> cellLabels) {
-            this(type, size1, 0, 0, null, cellLabels);
+        public Constructor(ConstructorType type, int size1,
+                List<CellLabel> cellLabels, Sort cellCollectionSort) {
+            this(type, size1, 0, 0, null, cellCollectionSort, cellLabels);
         }
 
         public Kind kind() {
@@ -133,6 +138,10 @@ public final class RHSInstruction implements Serializable {
 
         public ConstructorType type() {
             return type;
+        }
+
+        public Sort cellCollectionSort() {
+            return cellCollectionSort;
         }
 
         public List<CellLabel> cellLabels() {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+  <tests>
+    <test
+        definition="imp.k"
+        programs="."
+        extension="imp"
+        results="." >
+      <kompile-option name="--kore" />
+      <kompile-option name="--backend" value="ocaml" />
+      <kompile-option name="--non-strict" />
+      <all-programs>
+        <krun-option name="--kore" />
+      </all-programs>
+    </test>
+  </tests>

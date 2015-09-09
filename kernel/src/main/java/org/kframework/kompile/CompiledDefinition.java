@@ -20,6 +20,7 @@ import scala.util.Either;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -36,7 +37,9 @@ public class CompiledDefinition implements Serializable {
     public final Sort programStartSymbol;
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
-    private transient Map<String, Rule> cachedPatterns;
+    private transient Map<String, Rule> cachedcompiledPatterns;
+    private transient Map<String, Rule> cachedParsedPatterns;
+
 
     public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
@@ -97,12 +100,18 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).compileRule(this, p, source));
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).compileRule(this, p, source,
+                Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
+    }
+
+    public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
+        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseRule(this, p, source));
     }
 
     private void readObject(java.io.ObjectInputStream stream)
          throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        cachedPatterns = new ConcurrentHashMap<>();
+        cachedcompiledPatterns = new ConcurrentHashMap<>();
+        cachedParsedPatterns = new ConcurrentHashMap<>();
     }
 }

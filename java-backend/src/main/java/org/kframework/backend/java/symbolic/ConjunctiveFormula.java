@@ -172,14 +172,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     public ConjunctiveFormula add(Equality equality) {
         /* simplify andBool */
         if (equality.leftHandSide() instanceof KItem
-                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'_andBool_")
+                && ((KItem) equality.leftHandSide()).kLabel().toString().endsWith("_andBool_")
                 && equality.rightHandSide().equals(BoolToken.TRUE)) {
             return this
                     .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(0), BoolToken.TRUE)
                     .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(1), BoolToken.TRUE);
         }
         if (equality.rightHandSide() instanceof KItem
-                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'_andBool_")
+                && ((KItem) equality.rightHandSide()).kLabel().toString().endsWith("_andBool_")
                 && equality.leftHandSide().equals(BoolToken.TRUE)) {
             return this
                     .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(0), BoolToken.TRUE)
@@ -188,14 +188,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
         /* simplify orBool */
         if (equality.leftHandSide() instanceof KItem
-                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'_orBool_")
+                && ((KItem) equality.leftHandSide()).kLabel().toString().endsWith("_orBool_")
                 && equality.rightHandSide().equals(BoolToken.FALSE)) {
             return this
                     .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(0), BoolToken.FALSE)
                     .add(((KList) ((KItem) equality.leftHandSide()).kList()).get(1), BoolToken.FALSE);
         }
         if (equality.rightHandSide() instanceof KItem
-                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'_orBool_")
+                && ((KItem) equality.rightHandSide()).kLabel().toString().endsWith("_orBool_")
                 && equality.leftHandSide().equals(BoolToken.FALSE)) {
             return this
                     .add(((KList) ((KItem) equality.rightHandSide()).kList()).get(0), BoolToken.FALSE)
@@ -204,14 +204,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
         /* simplify notBool */
         if (equality.leftHandSide() instanceof KItem
-                && ((KItem) equality.leftHandSide()).kLabel().toString().equals("'notBool_")
+                && ((KItem) equality.leftHandSide()).kLabel().toString().endsWith("notBool_")
                 && equality.rightHandSide() instanceof BoolToken) {
             return this.add(
                     ((KList) ((KItem) equality.leftHandSide()).kList()).get(0),
                     BoolToken.of(!((BoolToken) equality.rightHandSide()).booleanValue()));
         }
         if (equality.rightHandSide() instanceof KItem
-                && ((KItem) equality.rightHandSide()).kLabel().toString().equals("'notBool_")
+                && ((KItem) equality.rightHandSide()).kLabel().toString().endsWith("notBool_")
                 && equality.leftHandSide() instanceof BoolToken) {
             return this.add(
                     ((KList) ((KItem) equality.rightHandSide()).kList()).get(0),
@@ -709,11 +709,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     protected boolean computeMutability() {
         return false;
-    }
-
-    @Override
-    public Term toKore() {
-        return toKore(context);
     }
 
     @Override

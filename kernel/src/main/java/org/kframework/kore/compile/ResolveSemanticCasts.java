@@ -74,7 +74,7 @@ public class ResolveSemanticCasts {
         }
     }
 
-    private String getSortNameOfCast(KApply kapp) {
+    public static String getSortNameOfCast(KApply kapp) {
         return kapp.klabel().name().substring("#SemanticCastTo".length());
     }
 

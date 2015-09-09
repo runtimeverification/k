@@ -4,6 +4,7 @@ package org.kframework.debugger;
 
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
+import org.kframework.kore.KVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -105,5 +106,30 @@ public interface KDebug {
      * @return Debugger State that's active
      */
     public DebuggerState getActiveState();
+
+    /**
+     * Match the pattern with the specified configuration, and return the substitution attained.
+     *
+     * @param pattern String specifying that pattern to be matched
+     * @param source
+     * @return The substitution
+     */
+    public DebuggerMatchResult match(String pattern, String source);
+
+    /**
+     * Given a pattern, as it as a watch so that it can be retrieved later.
+     * <p>
+     * The Debugger maintains watches as part of the DebuggerState. Every State has a watch
+     * associated with it. On copying the state, watches are also copied.
+     */
+    public void addWatch(String pattern, String watchSource);
+
+    /**
+     * Given a watch number that identifies a watch, removes the watch from the list of watches.
+     *
+     * @param watchNum Then number of watch to be removed.
+     * @return The watch number of the watch removed, or -1 if watch not found in the list.
+     */
+    public int removeWatch(int watchNum);
 }
 

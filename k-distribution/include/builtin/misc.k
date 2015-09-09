@@ -9,20 +9,63 @@ module EMPTY-ID
   imports LOGIC
 
   syntax Id
-  syntax KBool ::= "isId" "(" K ")"         [klabel(isId), function]
+  syntax Bool ::= "isId" "(" K ")"         [klabel(isId), function]
 endmodule
 
 module BOOL
-  syntax Bool ::= "true"           [token]
-  syntax Bool ::= "false"          [token]
+  imports BASIC-K
+  syntax Bool ::= "true"  [token]
+  syntax Bool ::= "false" [token]
+
+  syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
+                > Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_andBool_)]
+                | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(#BOOL:_andThenBool_)]
+                > Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(#BOOL:_xorBool_)]
+                > Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_orBool_)]
+                | K "orElseBool" K        [function, left, smtlib(or), boolOperation, hook(#BOOL:_orElseBool_)]
+                > Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(#BOOL:_impliesBool_)]
+                > left:
+                  Bool "==Bool" Bool      [function, left, smtlib(=), hook(#BOOL:_==Bool_)]
+                | Bool "=/=Bool" Bool     [function, left, smtlib(distinct), hook(#BOOL:_=/=Bool_)]
+
+/*
+  rule notBool true => false
+  rule notBool false => true
+
+  rule true andBool B:Bool => B:Bool
+  rule B:Bool andBool true => B:Bool
+  rule false andBool _:Bool => false
+  rule _:Bool andBool false => false
+
+  rule false xorBool B:Bool => B:Bool
+  rule B:Bool xorBool false => B:Bool
+  rule B:Bool xorBool B:Bool => false
+  rule B1:Bool xorBool B2:Bool => notBool `B1 ==Bool B2`
+
+  rule true orBool _:Bool => true
+  rule _:Bool orBool true => true
+  rule false orBool B:Bool => B
+  rule B:Bool orBool false => B
+
+  rule true impliesBool B:Bool => B
+  rule false impliesBool _:Bool => true
+  rule _:Bool impliesBool true => true
+  rule B:Bool impliesBool false => notBool B
+
+  rule B1:Bool =/=Bool B2:Bool => notBool `B1 ==Bool B2`*/
 endmodule
 
 module LOGIC
-  syntax KBool ::= "KTrue"                  [klabel(_andBool_), function, hook(#BOOL:_andBool_)]
-  syntax KBool ::= "KFalse"                 [klabel(_orBool_), function, hook(#BOOL:_orBool_)]
+  import BOOL
 
-  syntax KBool ::= "notBool" "(" KBool ")"  [klabel(notBool_),  function, hook(#BOOL:notBool_)]
-  syntax KBool ::= KBool "andBool" KBool    [klabel('_andBool_), function, hook(#BOOL:_andBool_), left]
+  syntax KBool ::= "KTrue"                  [klabel(AND), function, hook(LOGIC:AND)]
+  syntax KBool ::= "KFalse"                 [klabel(OR), function, hook(LOGIC:OR)]
+
+  syntax KBool ::= "NOT" "(" KBool ")"  [klabel(NOT),  function, hook(LOGIC:NOT)]
+  syntax KBool ::= KBool "AND" KBool    [klabel(AND), function, hook(LOGIC:AND), left]
+  syntax KBool ::= KBool "OR" KBool    [klabel(OR), function, hook(LOGIC:OR), left]
+
+  syntax LiftBoolToML ::= "^ML" "(" Bool ")" [function, hook(LOGIC:BOOL-TO-ML)]
 
   syntax priority 'notBool_ > '_andBool_
 endmodule
@@ -30,6 +73,7 @@ endmodule
 module INT
   imports K
   imports LOGIC
+  imports BOOL
 
   syntax Int ::= r"[\\+-]?[0-9]+"     [prefer, token]
 
@@ -39,14 +83,14 @@ module INT
   syntax Int ::= Int "/Int" Int     [klabel('_/Int_), function, hook(#INT:_/Int_), left]
   syntax Int ::= Int "%Int" Int     [klabel('_%Int_), function, hook(#INT:_%Int_), left]
 
-  syntax KBool ::= Int "<=Int" Int       [klabel('_<=Int_), function, hook(#INT:_<=Int_), left]
-  syntax KBool ::= Int "<Int" Int        [klabel('_<Int_),  function, hook(#INT:_<Int_),  left]
-  syntax KBool ::= Int ">=Int" Int       [klabel('_>=Int_), function, hook(#INT:_>=Int_), left]
-  syntax KBool ::= Int ">Int" Int        [klabel('_>Int_),  function, hook(#INT:_>Int_),  left]
+  syntax Bool ::= Int "<=Int" Int       [klabel('_<=Int_), function, hook(#INT:_<=Int_), left]
+  syntax Bool ::= Int "<Int" Int        [klabel('_<Int_),  function, hook(#INT:_<Int_),  left]
+  syntax Bool ::= Int ">=Int" Int       [klabel('_>=Int_), function, hook(#INT:_>=Int_), left]
+  syntax Bool ::= Int ">Int" Int        [klabel('_>Int_),  function, hook(#INT:_>Int_),  left]
 
   syntax priority '_*Int_ '_/Int_ '_%Int_ > '_+Int_ '_-Int_
 
-  syntax KBool ::= "isInt" "(" K ")"     [klabel(isKResult), function]
+  syntax Bool ::= "isInt" "(" K ")"     [klabel(isKResult), function]
 endmodule
 
 module K-RESULT
@@ -54,7 +98,7 @@ module K-RESULT
   import LOGIC
 
   syntax KResult
-  syntax KBool ::= isKResult(K) [function,klabel(isKResult)]
+  syntax Bool ::= isKResult(K) [function,klabel(isKResult)]
 endmodule
 
 module STRICTNESS
@@ -72,7 +116,7 @@ module MAP
 
   syntax Set ::= "keys" "(" Map ")"     [klabel('keys), function, hook(Map:keys)]
 
-  syntax K ::= Map "[" K "]"                    [function, klabel(Map:lookup)]
+  syntax K ::= Map "[" K "]"                    [function, klabel(Map:lookup), hook(Map:lookup)]
 endmodule
 
 module SET
@@ -81,5 +125,5 @@ module SET
 
   syntax Set
 
-  syntax KBool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
+  syntax Bool ::= K "in" Set            [klabel('_in_), function, hook(Set:in)]
 endmodule

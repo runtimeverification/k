@@ -33,6 +33,7 @@ public class KException implements Serializable {
         labels.put(KExceptionGroup.LISTS, "Lists");
         labels.put(KExceptionGroup.INTERNAL, "Internal");
         labels.put(KExceptionGroup.CRITICAL, "Critical");
+        labels.put(KExceptionGroup.DEBUGGER, "Debugger");
     }
 
     public static KException criticalError(String message) {
@@ -84,7 +85,7 @@ public class KException implements Serializable {
     }
 
     public enum KExceptionGroup {
-        OUTER_PARSER, INNER_PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
+        OUTER_PARSER, INNER_PARSER, COMPILER, LISTS, INTERNAL, CRITICAL, DEBUGGER
     }
 
     public enum ExceptionType {

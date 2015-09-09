@@ -11,6 +11,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.compile.ConfigurationInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -443,7 +444,7 @@ public class PatternMatcher extends AbstractUnifier {
 
             if (frame != null) {
                 if (otherFrame != null && numOfOtherDiffCellLabels == 0) {
-                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
+                    add(cellCollection.removeAll(unifiableCellLabels), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -462,7 +463,7 @@ public class PatternMatcher extends AbstractUnifier {
                         return;
                     }
                 } else {
-                    add(cellCollection.removeAll(unifiableCellLabels, termContext.definition()), otherFrame);
+                    add(cellCollection.removeAll(unifiableCellLabels), otherFrame);
                     if (failed) {
                         return;
                     }
@@ -480,7 +481,7 @@ public class PatternMatcher extends AbstractUnifier {
 
             CellLabel starredCellLabel = null;
             for (CellLabel cellLabel : unifiableCellLabels) {
-                if (!termContext.definition().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                if (termContext.definition().cellMultiplicity(cellLabel) != ConfigurationInfo.Multiplicity.STAR) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     addUnificationTask(cellCollection.get(cellLabel).iterator().next().content(),
@@ -545,7 +546,7 @@ public class PatternMatcher extends AbstractUnifier {
                 }
 
                 if (otherFrame != null) {
-                    CellCollection.Builder builder = CellCollection.builder(termContext.definition());
+                    CellCollection.Builder builder = cellCollection.builder();
                     for (int i = 0; i < cells.length; ++i) {
                         if (!generator.isSelected(i)) {
                             builder.add(cells[i]);
