@@ -1,6 +1,6 @@
 diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
 --- mlgmp_ref/mlgmp/config.h	2002-07-29 20:31:12.000000000 -0500
-+++ mlgmp/config.h	2015-08-24 14:57:01.047794438 -0500
++++ mlgmp/config.h	2015-09-01 16:43:33.033447709 -0500
 @@ -3,6 +3,7 @@
  #define NDEBUG
  #undef TRACE
@@ -26,7 +26,7 @@ diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
  #endif /* SERIALIZE */
 diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
 --- mlgmp_ref/mlgmp/gmp.ml	2012-02-24 01:48:47.000000000 -0600
-+++ mlgmp/gmp.ml	2015-08-24 14:59:12.227793244 -0500
++++ mlgmp/gmp.ml	2015-09-01 16:43:33.033447709 -0500
 @@ -1,7 +1,8 @@
  (*
   * ML GMP - Interface between Objective Caml and GNU MP
@@ -110,7 +110,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
     let mantissa, exponent =
 diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
 --- mlgmp_ref/mlgmp/gmp.mli	2012-02-24 01:48:02.000000000 -0600
-+++ mlgmp/gmp.mli	2015-08-24 10:27:37.239941497 -0500
++++ mlgmp/gmp.mli	2015-09-01 16:43:33.033447709 -0500
 @@ -128,6 +128,8 @@
      external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
      external scan0 : t -> int -> int = "_mlgmp_z_scan0"
@@ -178,7 +178,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
      val to_string : t -> string
 diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
 --- mlgmp_ref/mlgmp/Makefile	2012-02-24 02:17:29.000000000 -0600
-+++ mlgmp/Makefile	2015-07-03 14:16:37.332146281 -0500
++++ mlgmp/Makefile	2015-09-01 16:43:33.033447709 -0500
 @@ -36,7 +36,7 @@
  all:	$(LIBS) tests
  
@@ -208,7 +208,7 @@ diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
  	$(OCAMLOPT) $+ -o $@
 diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
 --- mlgmp_ref/mlgmp/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
-+++ mlgmp/mlgmp_fr.c	2015-07-10 12:28:04.656728771 -0500
++++ mlgmp/mlgmp_fr.c	2015-09-03 15:37:23.391911682 -0500
 @@ -296,12 +296,82 @@
  fr_unary_op(sqrt)
  fr_unary_op(exp)
@@ -379,9 +379,18 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
  fr_binary_op_mpfr(reldiff)
  
  
+@@ -429,7 +572,7 @@
+ {
+ #ifdef USE_MPFR
+   CAMLparam0();
+-  register_custom_operations(& _mlgmp_custom_f);
++  register_custom_operations(& _mlgmp_custom_fr);
+   CAMLreturn(Val_unit);
+ #endif
+ }
 diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
 --- mlgmp_ref/mlgmp/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
-+++ mlgmp/mlgmp_z.c	2015-08-24 10:27:12.671941721 -0500
++++ mlgmp/mlgmp_z.c	2015-09-01 16:43:33.033447709 -0500
 @@ -742,6 +742,13 @@
  z_random_op(urandomm)
  z_random_op_ui(rrandomb)

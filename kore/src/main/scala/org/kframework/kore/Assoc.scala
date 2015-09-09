@@ -13,6 +13,11 @@ object Assoc extends {
     flatten(label, list.asScala, ADT.KLabel(m.attributesFor(label).get[String]("unit").get)).asJava
   }
 
+
+  def flatten(label: KLabel, list: java.util.List[K], unit: KLabel): java.util.List[K] = {
+    flatten(label, list.asScala, unit).asJava
+  }
+
   def flatten(label:KLabel, list:Seq[K], unit: KLabel): Seq[K] = {
     list flatMap { case k: KApply =>
         if (k.klabel == label)

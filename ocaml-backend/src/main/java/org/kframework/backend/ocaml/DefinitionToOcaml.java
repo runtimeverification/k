@@ -254,6 +254,38 @@ public class DefinitionToOcaml implements Serializable {
         return result.toString();
     }
 
+    public static String enquoteString(byte[] value) {
+        char delimiter = '"';
+        final int length = value.length;
+        StringBuilder result = new StringBuilder();
+        result.append(delimiter);
+        for (int offset = 0, codepoint; offset < length; offset ++) {
+            codepoint = Byte.toUnsignedInt(value[offset]);
+            if (codepoint > 0xFF) {
+                throw KEMException.compilerError("Unsupported: unicode characters in strings in Ocaml backend.");
+            } else if (codepoint == delimiter) {
+                result.append("\\").append(delimiter);
+            } else if (codepoint == '\\') {
+                result.append("\\\\");
+            } else if (codepoint == '\n') {
+                result.append("\\n");
+            } else if (codepoint == '\t') {
+                result.append("\\t");
+            } else if (codepoint == '\r') {
+                result.append("\\r");
+            } else if (codepoint == '\b') {
+                result.append("\\b");
+            } else if (codepoint >= 32 && codepoint < 127) {
+                result.append((char)codepoint);
+            } else if (codepoint <= 0xff) {
+                result.append("\\");
+                result.append(String.format("%03d", codepoint));
+            }
+        }
+        result.append(delimiter);
+        return result.toString();
+    }
+
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
@@ -287,15 +319,33 @@ public class DefinitionToOcaml implements Serializable {
         return sb.toString();
     }
 
-    public String ocamlCompile(K k, Rule exitCode, Integer dumpExitCode) {
+    public String ocamlCompile(K k, Map<String, byte[]> serializedVars, KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
+        if (serializedVars == null) {
+            sb.append("let input = Lexer.parse_k\n");
+            sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+            sb.append("\n");
+        } else {
+            sb.append("let unserialized = Lexer.parse_k\n");
+            sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+            sb.append("\n");
+            sb.append("let input = match unserialized with [Map(SortMap, Lbl_Map_, m)] ->\n");
+            sb.append("let completeMap = ");
+            for (Map.Entry<String, byte[]> entry : serializedVars.entrySet()) {
+                sb.append("let m = KMap.add [KToken (SortKConfigVar, ").append(enquoteString(entry.getKey())).append(")]\n");
+                sb.append("(Marshal.from_string ").append(enquoteString(entry.getValue())).append(" 0 : k)\n");
+                sb.append("m in\n");
+            }
+            sb.append("m in (");
+            encodeStringToFunction(sb, topCellInitializer);
+            sb.append(" [Map(SortMap, Lbl_Map_, completeMap)] [Bottom] (-1))\n");
+
+        }
         sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
         convertFunction(Collections.singletonList(convert(exitCode)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let res = run(Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
-        sb.append("\n) (-1) in let subst = try_match(res) in\n");
+        sb.append("let _ = let res = run(input) (-1) in let subst = try_match(res) in\n");
         sb.append("let code = get_exit_code subst in\n");
         if (dumpExitCode != null) {
             sb.append("(if code = ").append(dumpExitCode).append(" then\n");
@@ -304,6 +354,16 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
+        return sb.toString();
+    }
+
+    public String marshal(K k, String file) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
+        sb.append("let input = Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append("\n");
+        sb.append("let _ = Marshal.to_channel (open_out_bin ").append(enquoteString(file)).append(") input [Marshal.No_sharing]");
         return sb.toString();
     }
 
@@ -816,7 +876,7 @@ public class DefinitionToOcaml implements Serializable {
                 .collect(Collectors.toList());
         Map<Boolean, List<Rule>> groupedByLookup = sortedRules.stream()
                 .collect(Collectors.groupingBy(this::hasLookups));
-        int ruleNum = convert(groupedByLookup.get(true), sb, "lookups_step", RuleType.REGULAR, 0);
+        int ruleNum = convert(groupedByLookup.getOrDefault(true, Collections.emptyList()), sb, "lookups_step", RuleType.REGULAR, 0);
         sb.append("| _ -> raise (Stuck c)\n");
         sb.append("let step (c: k) : k = let config = c in match c with \n");
         if (groupedByLookup.containsKey(false)) {
