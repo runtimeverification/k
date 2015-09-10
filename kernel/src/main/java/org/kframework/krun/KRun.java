@@ -3,7 +3,6 @@ package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Rewriter;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
@@ -40,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
 
@@ -178,7 +176,7 @@ public class KRun implements Transformation<Void, Void> {
         for (KVariable variable : subst.keySet()) {
             if (varList.contains(variable.name())) {
                 K value = subst.get(variable);
-                if (parsedPattern instanceof KVariable) {
+                if (parsedPattern.body() instanceof KVariable) {
                     prettyPrint(compiledDefinition, outputModes, print, value);
                     return;
                 }
