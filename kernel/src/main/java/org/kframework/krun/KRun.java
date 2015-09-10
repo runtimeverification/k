@@ -74,14 +74,8 @@ public class KRun implements Transformation<Void, Void> {
 
         Object result = executionMode.execute(program, rewriter, compiledDef);
 
-        if (result instanceof RewriterResult) {
-            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) ((RewriterResult) result).k());
-
-            if (options.exitCodePattern != null) {
-                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
-                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
-                return getExitCode(kem, res);
-            }
+        if (result instanceof K) {
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
         } else if (result instanceof Tuple2) {
             Tuple2<?, ?> tuple = (Tuple2<?, ?>) result;
             if (tuple._1() instanceof K && tuple._2() instanceof Integer) {

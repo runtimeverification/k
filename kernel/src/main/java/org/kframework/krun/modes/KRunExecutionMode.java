@@ -47,7 +47,7 @@ public class KRunExecutionMode implements ExecutionMode {
         }
         if (kRunOptions.search()) {
             if (pattern == null) {
-                pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, compiledDefinition.executionModule().att());
+                pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, KORE.Att());
                 parsedPattern = pattern;
             }
             return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern), parsedPattern);
@@ -58,8 +58,9 @@ public class KRunExecutionMode implements ExecutionMode {
             return Tuple2.apply(res._1(), KRun.getExitCode(kem, res._2()));
         }
         if (pattern != null) {
-            return rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern)._1();
+            Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
+            return new SearchResult(res._2(), parsedPattern);
         }
-        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
+        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k();
     }
 }
