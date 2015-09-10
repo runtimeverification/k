@@ -167,6 +167,9 @@ public class KRun implements Transformation<Void, Void> {
         if (subst.isEmpty()) {
             return;
         }
+        if (parsedPattern instanceof KVariable) {
+
+        }
         List<String> varList = new ArrayList<>();
         new VisitKORE() {
             @Override
@@ -176,18 +179,13 @@ public class KRun implements Transformation<Void, Void> {
                 return super.apply(k);
             }
         }.apply(parsedPattern.body());
-
         subst.entrySet()
                 .stream()
                 .filter(x -> varList.contains(x.getKey().name()))
                 .forEach(x -> {
-                    if (parsedPattern.body() instanceof KVariable) {
-                        prettyPrint(compiledDefinition, outputModes, print, x.getValue());
-                    } else {
-                        prettyPrint(compiledDefinition, outputModes, print, x.getKey());
-                        print.accept("--->\n");
-                        prettyPrint(compiledDefinition, outputModes, print, x.getValue());
-                    }
+                    prettyPrint(compiledDefinition, outputModes, print, x.getKey());
+                    print.accept("--->\n");
+                    prettyPrint(compiledDefinition, outputModes, print, x.getValue());
                 });
 
     }
