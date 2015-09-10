@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -114,7 +115,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 Rule(KRewrite(KApply(KLabel("initThreadCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<thread>"), false,
                                         Arrays.asList(KApply(KLabel("initKCell"), KVariable("Init")),
-                                                KApply(KLabel("#cells"))), false)),
+                                                KApply(KLabel(Labels.Cells()))), false)),
                         BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
                 Rule(KRewrite(KApply(KLabel("initKCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<k>"), false, KApply(KLabel("#SemanticCastToKItem"), KApply(KLabel("Map:lookup"),
@@ -152,7 +153,7 @@ public class GenerateSentencesFromConfigDeclTest {
     }
 
     private KApply cells(K cell1, K cell2) {
-        return KApply(KLabel("#cells"), cell1, cell2);
+        return KApply(KLabel(Labels.Cells()), cell1, cell2);
     }
 
     private KApply cell(String s, Map<String, String> att, K body) {

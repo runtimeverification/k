@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
@@ -239,6 +240,6 @@ public class SortCellsTest {
     }
 
     KApply cells(K... ks) {
-        return KApply(KLabel("#cells"), ks);
+        return KApply(KLabel(Labels.Cells()), ks);
     }
 }
