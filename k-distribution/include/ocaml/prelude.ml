@@ -99,7 +99,7 @@ let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t opti
  let scaled_significand = if exp < min_exp then 
    (Z.shift_right significand (min_exp - (exp - 1))) else 
    significand in
- let true_exp = if exp < min_exp then min_exp else exp in
+ let true_exp = if exp < min_exp then min_exp else if exp > (emax exp) then emax exp else (exp - 1) in
  (String.get digits 0 = '-'), true_exp, Some scaled_significand
 
 let float_regexp = Str.regexp "(.*)[pP]([0-9]+)[xX]([0-9]+)"

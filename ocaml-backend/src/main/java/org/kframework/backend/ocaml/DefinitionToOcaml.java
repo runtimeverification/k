@@ -254,6 +254,11 @@ public class DefinitionToOcaml implements Serializable {
         return result.toString();
     }
 
+    /**
+     * Returns a string representing an OCAML-encoded string from the specified byte sequence
+     * @param value
+     * @return
+     */
     public static String enquoteString(byte[] value) {
         char delimiter = '"';
         final int length = value.length;
@@ -319,6 +324,19 @@ public class DefinitionToOcaml implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Generates a program that when compiled, can be run to execute a particular program in the semantics
+     * @param k The initial configuration to execute. If serializedVars is not null, this may be missing the configuration
+     *          variables present in the keys of that map
+     * @param serializedVars null if {@code k} should be used unchanged. Otherwise, a map from the names of configuration
+     *                       variables to the result of encoding the value of the configuration variable using OCAML's
+     *                       Marshal module.
+     * @param topCellInitializer The klabel used to call the initializer of the top cell. Not used if serializedVars is null.
+     * @param exitCode The pattern used to determine the integer exit code to return on the command line.
+     * @param dumpExitCode A value that, if the exit code is equal to this integer, indicates that the resulting configuration
+     *                     from execution should be printed to the current working directory in a file named "config"
+     * @return A program that can be compiled to rewrite the specified {@code k}.
+     */
     public String ocamlCompile(K k, Map<String, byte[]> serializedVars, KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
@@ -357,6 +375,13 @@ public class DefinitionToOcaml implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Generates a string that, when compiled, writes a particular K term as binary to the specified file using the
+     * Marshal module.
+     * @param k
+     * @param file
+     * @return
+     */
     public String marshal(K k, String file) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");

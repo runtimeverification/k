@@ -120,6 +120,11 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
         }
     }
 
+    /**
+     * Marshals the specified K term using the OCAML Marshal module and returns the resulting bytes.
+     * @param value
+     * @return
+     */
     private byte[] marshalValue(K value) {
         String ocaml = converter.marshal(value, files.resolveTemp("run.out").getAbsolutePath());
         files.saveToTemp("marshalvalue.ml", ocaml);
