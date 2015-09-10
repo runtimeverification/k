@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import org.kframework.builtin.Labels;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -43,7 +44,7 @@ public class IncompleteCellUtils {
     }
 
     private static void flattenCells(List<K> children, K item) {
-        if (item instanceof KApply && ((KApply)item).klabel().name().equals("#cells")) {
+        if (item instanceof KApply && ((KApply)item).klabel().name().equals(Labels.Cells())) {
             for (K deeper : ((KApply) item).klist().items()) {
                 flattenCells(children, deeper);
             }
@@ -68,7 +69,7 @@ public class IncompleteCellUtils {
         if (children.size() == 1) {
             return children.get(0);
         } else {
-            return KApply(KLabel("#cells"), KList(children));
+            return KApply(KLabel(Labels.Cells()), KList(children));
         }
     }
 
