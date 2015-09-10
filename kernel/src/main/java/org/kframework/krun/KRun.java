@@ -3,6 +3,7 @@ package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Rewriter;
+import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
 
@@ -72,8 +74,8 @@ public class KRun implements Transformation<Void, Void> {
 
         Object result = executionMode.execute(program, rewriter, compiledDef);
 
-        if (result instanceof K) {
-            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+        if (result instanceof RewriterResult) {
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) ((RewriterResult) result).k());
 
             if (options.exitCodePattern != null) {
                 Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
@@ -163,12 +165,12 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
-    public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst, Rule parsedPattern, CompiledDefinition compiledDefinition, OutputModes outputModes, Consumer<String> print) {
+    public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst,
+                                               Rule parsedPattern, CompiledDefinition compiledDefinition,
+                                               OutputModes outputModes,
+                                               Consumer<String> print) {
         if (subst.isEmpty()) {
             return;
-        }
-        if (parsedPattern instanceof KVariable) {
-
         }
         List<String> varList = new ArrayList<>();
         new VisitKORE() {
@@ -179,15 +181,18 @@ public class KRun implements Transformation<Void, Void> {
                 return super.apply(k);
             }
         }.apply(parsedPattern.body());
-        subst.entrySet()
-                .stream()
-                .filter(x -> varList.contains(x.getKey().name()))
-                .forEach(x -> {
-                    prettyPrint(compiledDefinition, outputModes, print, x.getKey());
-                    print.accept("--->\n");
-                    prettyPrint(compiledDefinition, outputModes, print, x.getValue());
-                });
-
+        for (KVariable variable : subst.keySet()) {
+            if (varList.contains(variable.name())) {
+                K value = subst.get(variable);
+                if (parsedPattern instanceof KVariable) {
+                    prettyPrint(compiledDefinition, outputModes, print, value);
+                    return;
+                }
+                prettyPrint(compiledDefinition, outputModes, print, variable);
+                print.accept("---> \n");
+                prettyPrint(compiledDefinition, outputModes, print, value);
+            }
+        }
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {

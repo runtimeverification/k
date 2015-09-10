@@ -38,7 +38,6 @@ public class KRunExecutionMode implements ExecutionMode {
         this.files = files;
     }
 
-
     @Override
     public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         Rule pattern = null, parsedPattern = null;
