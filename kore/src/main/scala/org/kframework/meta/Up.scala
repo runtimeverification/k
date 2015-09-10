@@ -37,7 +37,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugar[K], imports: Set[Str
         val elements = o.productIterator.toList
         val klist = cons.KList(elements map apply asJava)
         cons.KApply(cons.KLabel(processName(o.getClass().getName)), klist,
-          Att() +(ClassFromUp.toString(), o.getClass().getName()))
+          Att() +(Att.ClassFromUp.toString(), o.getClass().getName()))
     }
   }
 

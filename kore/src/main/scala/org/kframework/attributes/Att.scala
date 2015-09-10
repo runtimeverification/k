@@ -8,6 +8,7 @@ import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
 
+
 case class Att(att: Set[K]) extends AttributesToString {
 
   val attMap: Map[String, KApply] = att map {
@@ -90,6 +91,10 @@ object Att {
 
   implicit def asK(key: String, value: String) =
     KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
+
+  val ClassFromUp = "classType"
+  val Location = "location"
+  val Function = "function"
 }
 
 trait AttributesToString {
