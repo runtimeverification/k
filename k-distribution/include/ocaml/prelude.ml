@@ -95,7 +95,7 @@ let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t opti
  | "@NaN@" -> false, (emax exp), None
  | "-@NaN@" -> true, (emax exp), None
  | _ -> let min_exp = emin_normal e in
- let significand = Z.of_string digits in
+ let significand = Z.abs (Z.of_string_base 2 digits) in
  let scaled_significand = if exp < min_exp then 
    (Z.shift_right significand (min_exp - (exp - 1))) else 
    significand in
