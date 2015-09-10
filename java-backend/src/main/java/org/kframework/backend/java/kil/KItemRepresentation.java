@@ -6,6 +6,9 @@ import org.kframework.kore.*;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KList;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 public interface KItemRepresentation extends KoreRepresentation, KApply {
     default Term kLabel() {
         return ((KItem) toKore()).kLabel();
@@ -14,6 +17,12 @@ public interface KItemRepresentation extends KoreRepresentation, KApply {
     default Term kList() {
         return ((KItem) toKore()).kList();
     }
+
+    default Stream<K> stream() {
+        throw new AssertionError("Unimplemented");
+    }
+
+    default List<K> items() { throw new AssertionError("Unimplemented"); }
 
     @Override
     default org.kframework.kore.KLabel klabel() {
