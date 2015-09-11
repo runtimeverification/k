@@ -267,12 +267,15 @@ public class Kompile {
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
         Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
-        if(cacheParses) {
+        if (cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
-            throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
+            errors.stream().forEach(e -> {
+                throw e;
+            });
+//            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
+//            throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedDef;
     }
@@ -318,7 +321,7 @@ public class Kompile {
         if (def.getModule("MAP").isDefined()) {
             mapModule = def.getModule("MAP").get();
         } else {
-            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module "+module.name());
+            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
         }
         return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
     }
@@ -438,7 +441,7 @@ public class Kompile {
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
-                KApply k = (KApply)TreeNodesToKORE.down(result._1().right().get());
+                KApply k = (KApply) TreeNodesToKORE.down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove("Source").remove("Location")));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);
