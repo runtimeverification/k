@@ -2,7 +2,7 @@
 package org.kframework.krun.modes;
 
 import com.google.inject.Inject;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Rule;
@@ -50,7 +50,7 @@ public class KRunExecutionMode implements ExecutionMode {
                 pattern = new Rule(KORE.KVariable("X"), BooleanUtils.TRUE, BooleanUtils.TRUE, KORE.Att());
                 parsedPattern = pattern;
             }
-            return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern), parsedPattern);
+            return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern, kRunOptions.searchType()), parsedPattern);
         }
         if (kRunOptions.exitCodePattern != null) {
             pattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, kRunOptions, compiledDefinition, Source.apply("<command line: --exit-code>"));

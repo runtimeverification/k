@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -16,12 +15,12 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
+import org.kframework.rewriter.SearchType;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
-import org.kframework.krun.api.SearchType;
 import org.kframework.krun.tools.Executor;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;

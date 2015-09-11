@@ -3,7 +3,7 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;

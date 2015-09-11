@@ -2,7 +2,7 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;

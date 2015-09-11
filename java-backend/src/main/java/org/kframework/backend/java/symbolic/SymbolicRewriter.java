@@ -23,8 +23,8 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.rewriter.SearchType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -357,9 +357,6 @@ public class SymbolicRewriter {
     }
 
     /**
-     *
-     * @param targetTerm not implemented yet
-     * @param rules not implemented yet
      * @param initialTerm
      * @param pattern the pattern we are searching for
      * @param bound a negative value specifies no bound

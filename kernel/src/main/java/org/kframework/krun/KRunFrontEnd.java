@@ -11,6 +11,7 @@ import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.transformation.AmbiguousTransformationException;
 import org.kframework.transformation.Transformation;
 import org.kframework.transformation.TransformationNotSatisfiedException;
@@ -85,7 +86,7 @@ public class KRunFrontEnd extends FrontEnd {
         private final KRunOptions krunOptions;
         private final FileUtil files;
         private final CompiledDefinition compiledDef;
-        private final Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter;
+        private final Function<org.kframework.definition.Module, Rewriter> initializeRewriter;
         private final ExecutionMode executionMode;
         private final TTYInfo tty;
 
@@ -95,7 +96,7 @@ public class KRunFrontEnd extends FrontEnd {
                 KRunOptions krunOptions,
                 @Main FileUtil files,
                 @Main CompiledDefinition compiledDef,
-                @Main Function<org.kframework.definition.Module, org.kframework.Rewriter> initializeRewriter,
+                @Main Function<org.kframework.definition.Module, Rewriter> initializeRewriter,
                 @Main ExecutionMode executionMode,
                 TTYInfo tty) {
             this.kem = kem;
