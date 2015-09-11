@@ -32,15 +32,22 @@ module IMP-SYNTAX
   imports IMP-CORE-SYNTAX
 endmodule
 
+module STRATEGY
+  syntax Empty ::= "foo"
+endmodule
+
 module IMP
   imports IMP-CORE-SYNTAX
   imports MAP
   imports INT
+  imports STRATEGY
+
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm:K </k>
                   <state color="red"> .Map </state>
+                  <s color="red"> foo </s>
                 </T>
 
 // AExp

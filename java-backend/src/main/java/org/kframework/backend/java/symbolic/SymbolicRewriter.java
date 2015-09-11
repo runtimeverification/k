@@ -205,15 +205,17 @@ public class SymbolicRewriter {
         }
 
         // there are no successors
-        results.add(subject/* mark as blocked by cosmin */);
+//        results.add(subject/* mark as blocked by cosmin */);
     }
 
     private boolean strategyIsRestore(ConstrainedTerm subject) {
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
+        return false;
     }
 
     private boolean strategyIsSave(ConstrainedTerm subject) {
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
+        return false;
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {

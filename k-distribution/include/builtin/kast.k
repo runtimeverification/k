@@ -176,7 +176,7 @@ endmodule
 module DEFAULT-CONFIGURATION
   imports BASIC-K
 
-  configuration <k> $PGM:K </k>
+  configuration <k> $PGM:K </k> <s> $STRATEGY:K </s>
 endmodule
 
 // To be used to parse semantic rules

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.kframework.Collections;
+import org.kframework.Strategy;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
@@ -156,6 +157,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
                 .andThen(func(this::addImplicitComputationCellTransformer))
+                .andThen(Strategy.addStrategyCellToRulesTransformer())
                 .andThen(func(this::concretizeTransformer))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
