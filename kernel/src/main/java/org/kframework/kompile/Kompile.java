@@ -21,6 +21,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.kore.compile.AddImplicitComputationCell;
 import org.kframework.kore.compile.ConcretizeCells;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.kore.compile.GenerateSortPredicateSyntax;
@@ -156,6 +157,7 @@ public class Kompile {
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
+                .andThen(func(this::addImplicitComputationCellTransformer))
                 .andThen(func(this::concretizeTransformer))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
@@ -196,6 +198,15 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(programsModule);
         return Definition(d.mainModule(), programsModule, immutable(allModules));
+    }
+
+    private Definition addImplicitComputationCellTransformer(Definition input) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
+        return DefinitionTransformer.fromRuleBodyTranformer(
+                new AddImplicitComputationCell(configInfo, labelInfo),
+                "concretizing configuration").apply(input);
     }
 
     private Definition concretizeTransformer(Definition input) {
