@@ -111,7 +111,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     }
 
     private List<Map<KVariable, K>> parseOcamlSearchOutput(String output) {
-        String[] lines = output.split("\n");
+        String[] lines = output.split(System.getProperty("line.separator"));
         int count = Integer.parseInt(lines[0]);
         int line = 1;
         List<Map<KVariable, K>> list = new ArrayList<>();
@@ -216,8 +216,9 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
         args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
         args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
+        String ocamlfind = OcamlBackend.getOcamlFind(files);
         if (converter.options.ocamlopt) {
-            args.add(0, "ocamlfind");
+            args.add(0, ocamlfind);
             args.add(1, "ocamlopt");
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
@@ -230,9 +231,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             args.add("20");
             args.add("-nodynlink");
             pb = pb.command(args);
-            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
         } else {
-            args.add(0, "ocamlfind");
+            args.add(0, ocamlfind);
             args.add(1, "ocamlc");
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
@@ -242,7 +242,6 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
                     name));
             pb = pb.command(args);
-            pb.environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
         }
         Process p = pb.directory(files.resolveTemp("."))
                 .redirectError(files.resolveTemp("compile.err"))

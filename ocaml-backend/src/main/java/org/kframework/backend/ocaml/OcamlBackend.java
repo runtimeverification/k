@@ -14,6 +14,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,23 +69,24 @@ public class OcamlBackend implements Backend {
                 "-safe-string", "-w", "-26-11", "constants.ml", "prelude.ml", "def.ml", "parser.mli", "parser.ml", "lexer.ml"));
             args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
             if (!options.genMLOnly) {
+                String ocamlfind = getOcamlFind(files);
                 if (options.ocamlopt) {
-                    args.add(0, "ocamlfind");
+                    args.add(0, ocamlfind);
                     args.add(1, "ocamlopt");
                     args.add("-inline");
                     args.add("20");
                     args.add("-nodynlink");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlopt=ocamlopt.opt");
+                    pb.command(args);
                 } else {
-                    args.add(0, "ocamlfind");
+                    args.add(0, ocamlfind);
                     args.add(1, "ocamlc");
-                    pb.command(args).environment().put("OCAMLFIND_COMMANDS", "ocamlc=ocamlc.opt");
+                    pb.command(args);
                 }
-                Process ocamlopt = pb
+                Process p = pb
                         .directory(files.resolveKompiled("."))
                         .inheritIO()
                         .start();
-                exit = ocamlopt.waitFor();
+                exit = p.waitFor();
                 if (exit != 0) {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }
@@ -95,6 +97,15 @@ public class OcamlBackend implements Backend {
         } catch (IOException e) {
             throw KEMException.criticalError("Error starting ocamlopt process: " + e.getMessage(), e);
         }
+    }
+
+    public static String getOcamlFind(FileUtil files) {
+        String ocamlfind = "ocamlfind";
+        String env = files.getEnv().get("K_OCAML_HOME");
+        if (env != null) {
+            ocamlfind = new File(files.resolveWorkingDirectory(env), "ocamlfind").getAbsolutePath();
+        }
+        return ocamlfind;
     }
 
     @Override

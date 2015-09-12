@@ -101,13 +101,14 @@ public class GenerateSentencesFromConfigDecl {
                                 Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
                                 Multiplicity multiplicity = convertStringMultiplicity(
                                         cellProperties.<String>get("multiplicity"), term);
+                                boolean isStream = cellProperties.<String>get("stream").isDefined();
 
                                 K cellContents = kapp.klist().items().get(2);
                                 Tuple3<Set<Sentence>, List<Sort>, K> childResult = genInternal(
                                         cellContents, null, cfgAtt, m);
 
                                 boolean isLeafCell = childResult._1().isEmpty();
-                                Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(isLeafCell, multiplicity, cfgAtt, m, cellName, cellProperties,
+                                Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, cfgAtt, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigVariable(cellContents));
                                 return Tuple3.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3());
                             }
@@ -178,7 +179,7 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
-    private static String getInitLabel(Sort sort) {
+    public static String getInitLabel(Sort sort) {
         return "init" + sort.name();
     }
 
@@ -227,6 +228,7 @@ public class GenerateSentencesFromConfigDecl {
      * As a special case, cells with the maincell attribute (usually just the {@code <k>} cell)
      * are generated with contents of sort K, rather than a narrower sort calculated from the contents.
      * @param isLeaf true if this cell has no child cells.
+     * @param isStream true if this cell has a stream attribute.
      * @param multiplicity The multiplicity of the cell
      * @param configAtt The attributes on the configuration declaration.
      * @param m The module containing the configuration.
@@ -244,6 +246,7 @@ public class GenerateSentencesFromConfigDecl {
      */
     private static Tuple3<Set<Sentence>, Sort, K> computeSentencesOfWellFormedCell(
             boolean isLeaf,
+            boolean isStream,
             Multiplicity multiplicity,
             Att configAtt,
             Module m,
@@ -280,7 +283,7 @@ public class GenerateSentencesFromConfigDecl {
         String initLabel = getInitLabel(sort);
         Sentence initializer;
         Rule initializerRule;
-        if (hasConfigurationVariable) {
+        if (hasConfigurationVariable || isStream) {
             initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att());
         } else {
@@ -396,7 +399,7 @@ public class GenerateSentencesFromConfigDecl {
             // -or-
             // rule initCell(Init) => <cell> initChildren(Init)... </cell>
             cellsSort = sort;
-            if (hasConfigurationVariable) {
+            if (hasConfigurationVariable || isStream) {
                 rhs = KApply(KLabel(initLabel), KVariable("Init"));
             } else {
                 rhs = KApply(KLabel(initLabel));
@@ -470,7 +473,7 @@ public class GenerateSentencesFromConfigDecl {
         throw KEMException.compilerError("Malformed cell property", k);
     }
 
-    private static String getSortOfCell(String cellName) {
+    public static String getSortOfCell(String cellName) {
         char[] chars = cellName.toCharArray();
         StringBuilder sb = new StringBuilder();
         sb.append(Character.toUpperCase(chars[0]));
