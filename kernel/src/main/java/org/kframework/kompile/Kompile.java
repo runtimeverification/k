@@ -16,7 +16,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -250,10 +249,10 @@ public class Kompile {
         }
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
-        Module modWithConfig = ModuleTransformer.from(m -> resolveConfig(m, definition.getParsedDefinition()), "parsing configurations").apply(module);
+        Module modWithConfig = resolveConfig(module, definition.getParsedDefinition());
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
-        Module parsedMod = ModuleTransformer.from(this::resolveBubbles, "parsing rules").apply(modWithConfig);
+        Module parsedMod = resolveBubbles(modWithConfig);
 
         if(cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
