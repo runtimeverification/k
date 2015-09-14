@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-require "kernelc.k"
+require "../../kernelc.k"
 
 module BST-SPEC
   imports KERNELC
