@@ -1,5 +1,6 @@
-package org.kframework.builtin;
+// Copyright (c) 2015 K Team. All Rights Reserved.
 
+package org.kframework.builtin;
 
 public class KLabels {
     public static String HOLE = "HOLE";
