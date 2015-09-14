@@ -1,7 +1,7 @@
 package org.kframework.kore
 
 import org.kframework.attributes.Att
-import org.kframework.builtin.{Labels, Sorts}
+import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore
 
 import scala.collection.JavaConverters._
@@ -31,8 +31,8 @@ trait ScalaSugar[K <: kore.K] {
     def /(other: K) = KLabel("/")(k, other)
     def &(other: K) = KLabel("&")(k, other)
     def ~(other: K) = KLabel("~")(k, other)
-    def &&(other: K) = KLabel(Labels.And)(k, other)
-    def ||(other: K) = KLabel(Labels.Or)(k, other)
+    def &&(other: K) = KLabel(KLabels.AND)(k, other)
+    def ||(other: K) = KLabel(KLabels.OR)(k, other)
   }
 
   def KList[KK <: K](ks: Seq[KK]): KList = KList(ks.asJava)
