@@ -33,7 +33,9 @@ module IMP-SYNTAX
 endmodule
 
 module STRATEGY
-  syntax Empty ::= "foo"
+  syntax SExp ::= "heat" | "regular" | "cool"
+  syntax SExp ::= "#STUCK"
+  syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
 endmodule
 
 module IMP
@@ -42,12 +44,15 @@ module IMP
   imports INT
   imports STRATEGY
 
+  rule <s> `#STUCK ~~> heat` => regular </s>
+  rule <s> `#STUCK ~~> cool` => heat </s>
+
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm:K </k>
                   <state color="red"> .Map </state>
-                  <s color="red"> foo </s>
+                  <s color="red"> heat </s>
                 </T>
 
 // AExp

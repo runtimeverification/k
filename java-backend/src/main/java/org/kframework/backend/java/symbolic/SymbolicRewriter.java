@@ -10,9 +10,11 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
+import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
@@ -21,6 +23,8 @@ import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
@@ -31,10 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
- *
  * @author AndreiS
- *
  */
 public class SymbolicRewriter {
 
@@ -61,6 +62,7 @@ public class SymbolicRewriter {
         ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
+
     }
 
     public KRunGraph getExecutionGraph() {
@@ -109,8 +111,7 @@ public class SymbolicRewriter {
      * Gets the rules that could be applied to a given term according to the
      * rule indexing mechanism.
      *
-     * @param term
-     *            the given term
+     * @param term the given term
      * @return a list of rules that could be applied
      */
     private List<Rule> getRules(Term term) {
@@ -204,8 +205,31 @@ public class SymbolicRewriter {
             RuleAuditing.clearAuditingRule();
         }
 
-        // there are no successors
-//        results.add(subject/* mark as blocked by cosmin */);
+        Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
+                .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
+                .findFirst();
+
+        KApply topOfStrategyCell = (KApply) ((KApply) theStrategy.get()).klist().items().get(0);
+        if (topOfStrategyCell.klabel().name().equals("#sseq")) {
+            topOfStrategyCell = (KApply) topOfStrategyCell.klist().items().get(0);
+        }
+
+        boolean isStuck = topOfStrategyCell.klabel().name().equals(Att.stuck());
+
+        if (theStrategy.isPresent() && !isStuck) {
+            Att emptyAtt = Att.apply();
+
+            KOREtoBackendKIL constructor = new KOREtoBackendKIL(definition.module, definition, subject.termContext());
+            K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(), emptyAtt);
+            List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
+            items.add(0, stuck);
+            K sContent = constructor.KApply1(constructor.KLabel("#sseq"), constructor.KList(items), emptyAtt);
+            K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(sContent), emptyAtt);
+            K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
+                    constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
+                            k instanceof KApply && ((KApply) k).klabel().name().contains("<s>") ? s : k).collect(Collectors.toList())), emptyAtt);
+            results.add(new ConstrainedTerm((Term) entireConf, subject.constraint()));
+        }
     }
 
     private boolean strategyIsRestore(ConstrainedTerm subject) {
@@ -380,19 +404,17 @@ public class SymbolicRewriter {
     }
 
     /**
-     *
-     * @param targetTerm not implemented yet
-     * @param rules not implemented yet
+     * @param targetTerm   not implemented yet
+     * @param rules        not implemented yet
      * @param initialTerm
-     * @param pattern the pattern we are searching for
-     * @param bound a negative value specifies no bound
-     * @param depth a negative value specifies no bound
-     * @param searchType defines when we will attempt to match the pattern
-
+     * @param pattern      the pattern we are searching for
+     * @param bound        a negative value specifies no bound
+     * @param depth        a negative value specifies no bound
+     * @param searchType   defines when we will attempt to match the pattern
      * @param computeGraph determines whether the transition graph should be computed.
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable,Term>> search(
+    public List<Substitution<Variable, Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -412,7 +434,7 @@ public class SymbolicRewriter {
             executionGraph = null;
         }
 
-        List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
+        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -423,7 +445,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            if(context.global().krunOptions.experimental.statistics)
+            if (context.global().krunOptions.experimental.statistics)
                 System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
             return searchResults;
         }
@@ -441,13 +463,13 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                if(context.global().krunOptions.experimental.statistics)
+                if (context.global().krunOptions.experimental.statistics)
                     System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }
 
-        label:
+    label:
         for (step = 0; !queue.isEmpty(); ++step) {
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
@@ -474,7 +496,7 @@ public class SymbolicRewriter {
                     ConstrainedTerm result = results.get(resultIndex);
                     if (computeGraph) {
                         JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
-                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
+                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex), substitutions.get(resultIndex), kilContext);
                         executionGraph.addVertex(resultState);
                         executionGraph.addEdge(javaTransition, startState, resultState);
                     }

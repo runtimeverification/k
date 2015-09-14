@@ -8,6 +8,8 @@ object Labels {
   val And = "_andBool_"
   val Or = "_orBool_"
   val Cells = "#cells"
+  val Dots = "#dots"
+  val NoDots = "#noDots"
 }
 
 class Labels[KK <: K](cons: Constructors[KK]) {

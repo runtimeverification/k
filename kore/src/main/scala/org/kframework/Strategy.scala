@@ -19,14 +19,25 @@ object Strategy {
 
           r match {
             case r: Rule if !r.body.contains({ case KApply(KLabel("<s>"), _) => true }) =>
-              println("old: "+r.body)
               val newBody = r.body match {
                 case KApply(klabel, _) if !module.attributesFor.contains(klabel) || klabel.att.contains(Att.Function) =>
                   // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
-                  KORE.KApply(KORE.KLabel(Labels.Cells), r.body)
+                  val strategy =
+                    if (r.att.contains(Att.heat))
+                      KORE.KApply(KORE.KLabel("heat"))
+                    else if (r.att.contains(Att.cool))
+                      KORE.KApply(KORE.KLabel("cool"))
+                    else
+                      KORE.KRewrite(KORE.KApply(KORE.KLabel("regular")), KORE.KApply(KORE.KLabel("cool")))
+
+                  KORE.KApply(KORE.KLabel(Labels.Cells), r.body,
+                    KORE.KApply(KORE.KLabel("<s>"),
+                      KORE.KApply(KORE.KLabel(Labels.NoDots)),
+                      strategy,
+                      KORE.KApply(KORE.KLabel(Labels.NoDots))
+                    ))
                 case _ => r.body
               }
-              println("new: "+newBody)
               Rule(newBody, r.requires, r.ensures, r.att)
             case r => r
           }

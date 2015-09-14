@@ -59,6 +59,8 @@ import static org.kframework.kore.KORE.Sort;
  */
 public class Definition extends JavaSymbolicObject {
 
+    public final Module module;
+
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
         public final Set<Sort> builtinSorts;
@@ -129,6 +131,7 @@ public class Definition extends JavaSymbolicObject {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.module = null;
 
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
@@ -159,7 +162,8 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("binder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    new TypeToken<Multimap<Integer, Integer>>() {
+                                    },
                                     Names.named("binder")),
                             p.getBinderMap()));
                 }
@@ -199,6 +203,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
+        this.module = module;
         kLabels = new HashSet<>();
         this.kem = kem;
 
@@ -206,9 +211,7 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
-                JavaConversions.seqAsJavaList(p._1()).stream()
-                        .map(s -> Sort.of(s.name()))
-                        .forEach(sortsBuilder::add);
+                stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
                         e.getKey().name(),
                         new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
@@ -296,6 +299,7 @@ public class Definition extends JavaSymbolicObject {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.module = null;
 
         this.definitionData = definitionData;
         this.context = null;
@@ -429,13 +433,13 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public KItem.CacheTableValue getSortCacheValue(KItem.CacheTableColKey key) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             return sortCacheTable.get(key);
         }
     }
 
     public void putSortCacheValue(KItem.CacheTableColKey key, KItem.CacheTableValue value) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             sortCacheTable.put(key, value);
         }
     }

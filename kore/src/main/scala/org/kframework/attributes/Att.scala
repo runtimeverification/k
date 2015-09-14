@@ -95,6 +95,9 @@ object Att {
   val ClassFromUp = "classType"
   val Location = "location"
   val Function = "function"
+  val heat = "heat"
+  val cool = "cool"
+  val stuck = "#STUCK"
 }
 
 trait AttributesToString {
