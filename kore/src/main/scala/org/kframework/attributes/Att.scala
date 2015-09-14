@@ -97,6 +97,8 @@ object Att {
   val Function = "function"
   val heat = "heat"
   val cool = "cool"
+  val superheat = "superheat"
+  val supercool = "supercool"
   val stuck = "#STUCK"
 }
 

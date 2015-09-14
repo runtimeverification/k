@@ -33,9 +33,12 @@ module IMP-SYNTAX
 endmodule
 
 module STRATEGY
-  syntax SExp ::= "heat" | "regular" | "cool"
+  syntax SExp ::= "heat" | "regular" | "supercool"
   syntax SExp ::= "#STUCK"
   syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
+
+  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> heat` => regular, `#noDots`(.KList))
+  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> supercool` => heat, `#noDots`(.KList))
 endmodule
 
 module IMP
@@ -43,9 +46,6 @@ module IMP
   imports MAP
   imports INT
   imports STRATEGY
-
-  rule <s> `#STUCK ~~> heat` => regular </s>
-  rule <s> `#STUCK ~~> cool` => heat </s>
 
   syntax KResult ::= Int | Bool
 

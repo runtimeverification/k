@@ -205,6 +205,14 @@ public class SymbolicRewriter {
             RuleAuditing.clearAuditingRule();
         }
 
+        getUnstuck(subject);
+    }
+
+    /**
+     * This method adds a #STUCK item on the top of the strategy cell of the stuck configuration and adds
+     * the resulting configuration to this.results, allowing the rewriting to continue.
+     */
+    private void getUnstuck(ConstrainedTerm subject) {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
                 .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
                 .findFirst();
