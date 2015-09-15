@@ -1,17 +1,18 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.kserver;
-import java.io.File;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.martiansoftware.nailgun.NGContext;
+import com.martiansoftware.nailgun.NGListeningAddress;
+import com.martiansoftware.nailgun.NGServer;
+import com.martiansoftware.nailgun.ThreadLocalPrintStream;
 import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -22,13 +23,13 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.SimpleScope;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.martiansoftware.nailgun.NGContext;
-import com.martiansoftware.nailgun.NGServer;
-import com.martiansoftware.nailgun.ThreadLocalPrintStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class KServerFrontEnd extends FrontEnd {
@@ -65,20 +66,41 @@ public class KServerFrontEnd extends FrontEnd {
         for (String tool : tools) {
             injectors.put(tool, Main.getInjector(tool));
         }
-        NGServer server = new NGServer(InetAddress.getLoopbackAddress(), options.port);
+        NGServer server;
+        File dir = null;
+        if (OS.current() == OS.WINDOWS) {
+            server = new NGServer(InetAddress.getLoopbackAddress(), options.port);
+        } else {
+            // can use more secure unix domain sockets
+            dir = new File(System.getProperty("user.home"), ".kserver");
+            dir.mkdirs();
+            dir.setReadable(false, false);
+            dir.setReadable(true, true);
+            dir.setWritable(false, false);
+            dir.setWritable(true, true);
+            dir.setExecutable(false, false);
+            dir.setExecutable(true, true);
+            new File(dir, "socket").deleteOnExit();
+            server = new NGServer(new NGListeningAddress(new File(dir, "socket").getAbsolutePath()), 10, 10000);
+        }
         Thread t = new Thread(server);
         instance = this;
         threadInstance = t;
         t.start();
 
-        int runningPort = server.getPort();
-        while (runningPort == 0) {
-            try {
-                Thread.sleep(50L);
-            } catch (InterruptedException e) {}
-            runningPort = server.getPort();
+        if (OS.current() == OS.WINDOWS) {
+            int runningPort = server.getPort();
+            while (runningPort == 0) {
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                }
+                runningPort = server.getPort();
+            }
+            System.out.println("K server started on 127.0.0.1:" + options.port);
+        } else {
+            System.out.println("K server started using IPC at " + dir.getAbsolutePath());
         }
-        System.out.println("K server started on 127.0.0.1:" + options.port);
 
         try {
             t.join();

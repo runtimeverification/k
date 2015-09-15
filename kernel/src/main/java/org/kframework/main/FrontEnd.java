@@ -37,6 +37,7 @@ public abstract class FrontEnd {
 
     public int main() {
         int retval;
+        files.deleteTempDir();
         try {
             if (globalOptions.help) {
                 System.out.print(usage);
@@ -52,7 +53,6 @@ public abstract class FrontEnd {
                     retval = run();
                 } catch (ParameterException e) {
                     throw KEMException.criticalError(e.getMessage(), e);
-                } finally {
                     files.deleteTempDir(kem);
                 }
                 kem.print();
