@@ -25,51 +25,19 @@ import java.util.stream.Stream;
  * Rules with the anywhere attribute are not modified.
  */
 // TODO: rules defining functions shouldn't be wrapped
-public class AddImplicitCells {
+public class AddTopCellToRules {
 
     private final ConfigurationInfo cfg;
     private final LabelInfo labelInfo;
 
-    public AddImplicitCells(ConfigurationInfo cfg, LabelInfo labelInfo) {
+    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo) {
         this.cfg = cfg;
         this.labelInfo = labelInfo;
     }
 
     public K addImplicitCells(K term) {
-        if (term instanceof KApply && labelInfo.isFunction(((KApply) term).klabel())) {
-            return term;
-        }
-        if (term instanceof KRewrite && ((KRewrite) term).left() instanceof KApply
-                && labelInfo.isFunction(((KApply) ((KRewrite) term).left()).klabel())) {
-            return term;
-        }
-        return addRootCell(addComputationCells(term));
-    }
-
-    protected boolean isCell(K k) {
-        return k instanceof KApply
-          && cfg.isCell(labelInfo.getCodomain(((KApply) k).klabel()));
-    }
-
-    protected K addComputationCells(K term) {
-        List<K> items = IncompleteCellUtils.flattenCells(term);
-        if (items.size() != 1) {
-            return term;
-        }
-        K item = items.get(0);
-        if (isCell(item)) {
-            return term;
-        } else if (item instanceof KRewrite) {
-            final KRewrite rew = (KRewrite) item;
-            if (Stream.concat(
-                    IncompleteCellUtils.flattenCells(rew.left()).stream(),
-                    IncompleteCellUtils.flattenCells(rew.right()).stream())
-                    .anyMatch(this::isCell)) {
-                return term;
-            }
-        }
-        KLabel computation = cfg.getCellLabel(cfg.getComputationCell());
-        return IncompleteCellUtils.make(computation, false, item, true);
+        if (labelInfo.isFunction(term)) return term;
+        return addRootCell(term);
     }
 
     protected K addRootCell(K term) {

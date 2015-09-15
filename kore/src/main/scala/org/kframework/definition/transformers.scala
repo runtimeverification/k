@@ -4,15 +4,20 @@ package org.kframework.definition
 
 import org.kframework.attributes.{Source, Location}
 import org.kframework.definition
+import org.kframework.kore.K
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {
   def from(f: java.util.function.UnaryOperator[Module], name: String): ModuleTransformer = ModuleTransformer(f(_), name)
+
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence], name: String): ModuleTransformer =
+    fromSentenceTransformer((m: Module, s: Sentence) => f(s), name)
+
+  def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
-      val newSentences = m.localSentences map {s =>
+      val newSentences = m.localSentences map { s =>
         try {
-          f(s)
+          f(m, s)
         } catch {
           case e: KEMException =>
             e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at " + s.att.get(classOf[Source]).map(_.toString).getOrElse("<none>") + ":" + s.att.get(classOf[Location]).map(_.toString).getOrElse("<none>"))
@@ -24,6 +29,9 @@ object ModuleTransformer {
       else
         m
     }, name)
+
+  def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): ModuleTransformer =
+    fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
 
   def apply(f: Module => Module, name: String): ModuleTransformer = f match {
     case f: ModuleTransformer => f
@@ -52,12 +60,18 @@ class ModuleTransformer(f: Module => Module, name: String) extends (Module => Mo
 object DefinitionTransformer {
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence], name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
+
+  def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromRuleBodyTranformer(f, name))
+
   def from(f: java.util.function.UnaryOperator[Module], name: String): DefinitionTransformer = DefinitionTransformer(f(_), name)
-  def apply(f: ModuleTransformer): DefinitionTransformer = new DefinitionTransformer(f)
+
+  def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(f)
+
   def apply(f: Module => Module, name: String): DefinitionTransformer = new DefinitionTransformer(ModuleTransformer(f, name))
 }
 
-class DefinitionTransformer(moduleTransformer: ModuleTransformer) extends (Definition => Definition) {
+class DefinitionTransformer(moduleTransformer: Module => Module) extends (Definition => Definition) {
   override def apply(d: Definition): Definition = {
     definition.Definition(
       moduleTransformer(d.mainModule),
