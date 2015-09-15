@@ -233,7 +233,7 @@ public class SymbolicRewriter {
      * Builds the pattern term used in unification by composing the left-hand
      * side of a specified rule and its preconditions.
      */
-    private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
+    public static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
                 rule.leftHandSide(),
                 ConjunctiveFormula.of(context).add(rule.lookups()).addAll(rule.requires()));
@@ -514,31 +514,31 @@ public class SymbolicRewriter {
                     continue;
                 }
 
-                // TODO(YilongL): the `get(0)` seems hacky
-                Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
-                Variable leftFrame = KSequence.getFrame(leftKContent);
-                if (leftFrame != null) {
-                    KSequence.Builder builder = KSequence.builder();
-                    KSequence.getElements(leftKContent).stream().forEach(builder::concatenate);
-                    leftKContent = builder.build();
-                }
-                Term rightKContent = targetTerm.term().getCellContentsByName(CellLabel.K).get(0);
-                Variable rightFrame = KSequence.getFrame(rightKContent);
-                if (rightFrame != null) {
-                    KSequence.Builder builder = KSequence.builder();
-                    KSequence.getElements(rightKContent).stream().forEach(builder::concatenate);
-                    rightKContent = builder.build();
-                }
-                if (leftFrame != null && rightFrame != null && leftFrame.equals(rightFrame)) {
-                    BoolToken matchable = MetaK.matchable(
-                            leftKContent,
-                            rightKContent,
-                            term.termContext());
-                    if (matchable != null && matchable.booleanValue()) {
-                        proofResults.add(term);
-                        continue;
-                    }
-                }
+//                // TODO(YilongL): the `get(0)` seems hacky
+//                Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
+//                Variable leftFrame = KSequence.getFrame(leftKContent);
+//                if (leftFrame != null) {
+//                    KSequence.Builder builder = KSequence.builder();
+//                    KSequence.getElements(leftKContent).stream().forEach(builder::concatenate);
+//                    leftKContent = builder.build();
+//                }
+//                Term rightKContent = targetTerm.term().getCellContentsByName(CellLabel.K).get(0);
+//                Variable rightFrame = KSequence.getFrame(rightKContent);
+//                if (rightFrame != null) {
+//                    KSequence.Builder builder = KSequence.builder();
+//                    KSequence.getElements(rightKContent).stream().forEach(builder::concatenate);
+//                    rightKContent = builder.build();
+//                }
+//                if (leftFrame != null && rightFrame != null && leftFrame.equals(rightFrame)) {
+//                    BoolToken matchable = MetaK.matchable(
+//                            leftKContent,
+//                            rightKContent,
+//                            term.termContext());
+//                    if (matchable != null && matchable.booleanValue()) {
+//                        proofResults.add(term);
+//                        continue;
+//                    }
+//                }
 
                 if (guarded) {
                     ConstrainedTerm result = applyRule(term, rules);

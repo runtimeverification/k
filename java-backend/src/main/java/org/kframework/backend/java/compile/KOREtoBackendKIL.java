@@ -53,11 +53,13 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Module module;
     private final Definition definition;
     private final TermContext context;
+    private final boolean freshRules;
 
-    public KOREtoBackendKIL(Module module, Definition definition, TermContext context) {
+    public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean freshRules) {
         this.module = module;
         this.definition = definition;
         this.context = context;
+        this.freshRules = freshRules;
     }
 
     @Override
@@ -231,7 +233,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 .map(this::convert)
                 .collect(Collectors.toList());
 
-        return new Rule(
+        Rule backendKILRule = new Rule(
                 "",
                 convert(leftHandSide),
                 convert(RewriteToTop.toRight(rule.body())),
@@ -247,7 +249,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 null,
                 oldRule,
                 context);
-
+        if (freshRules) {
+            backendKILRule = backendKILRule.getFreshRule(context);
+        }
+        return backendKILRule;
     }
 
     public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {

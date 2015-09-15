@@ -106,6 +106,11 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
+    public boolean isCellLabel(KLabel kLabel) {
+        return getCellSort(kLabel) != null;
+    }
+
+    @Override
     public boolean isLeafCell(Sort k) {
         return !children.containsKey(k) && isCell(k);
     }

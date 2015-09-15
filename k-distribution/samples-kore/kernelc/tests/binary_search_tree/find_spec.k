@@ -11,6 +11,8 @@ rule
     tv(int, ?B:Int)
   ...</k>
   <heap>... tree(TP)(T:Tree) ...</heap>
+  <in> IN:List </in>
+  <out> OUT:List </out>
 requires bst(T)
 ensures (?B =/=K 0) ==K (V inIntSet tree_keys(T))
 endmodule

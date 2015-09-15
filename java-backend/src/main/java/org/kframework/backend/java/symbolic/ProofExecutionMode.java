@@ -10,6 +10,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.kore.ADT;
 import org.kframework.kore.AbstractKORETransformer;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -69,10 +70,10 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
             @Override
             public Map<String, K> apply(KApply k) {
                 Map<String, K> substitution = processChildren(k.klist());
-                if (configurationInfo.getCellSort(k.klabel()) != null && k.klist().size() == 1) {
+                if (configurationInfo.isCellLabel(new ADT.KLabel(k.klabel().name())) && k.klist().size() == 1) {
                     substitution = mergeSubstitutions(Stream.of(
                             substitution,
-                            Collections.singletonMap(k.klabel().name().toUpperCase().replace("-", ""), k.klist().items().get(0))));
+                            Collections.singletonMap(k.klabel().name().substring(1, k.klabel().name().length() - 1).toUpperCase().replace("-", ""), k.klist().items().get(0))));
                 }
                 return substitution;
             }
@@ -124,13 +125,14 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
             }
         };
 
-        List<Rule> rules = stream(mod.rules())
-                .map(r -> new Rule(cellPlaceholderSubstitutionApplication.apply(r.body()), r.requires(), r.ensures(), r.att()))
+        List<Rule> rules = stream(mod.localRules())
+                .map(r -> new Rule(
+                        cellPlaceholderSubstitutionApplication.apply(r.body()),
+                        cellPlaceholderSubstitutionApplication.apply(r.requires()),
+                        cellPlaceholderSubstitutionApplication.apply(r.ensures()),
+                        r.att()))
                 .map(r -> kompile.compileRule(compiledDefinition, r))
                 .collect(Collectors.toList());
-        return rules.stream()
-                .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
-                .flatMap(r -> rewriter.proveRule(r, rules).stream())
-                .collect(Collectors.toList());
+        return rewriter.prove(rules);
     }
 }

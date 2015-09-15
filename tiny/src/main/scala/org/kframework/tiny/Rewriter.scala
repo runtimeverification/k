@@ -50,7 +50,7 @@ class FullTinyRewriter(module: definition.Module) extends org.kframework.Rewrite
   def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: org.kframework.definition.Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = ???
   override def `match`(k: kore.K, rule: org.kframework.definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = ???
 
-  override def proveRule(ruleToProve: definition.Rule, allRules: util.List[definition.Rule]): util.List[kore.K] = ???
+  override def prove(rules: util.List[definition.Rule]): util.List[kore.K] = ???
 }
 
 class Rewriter(module: definition.Module, index: K => Option[Symbol] = KIndex, theory: Theory) {
