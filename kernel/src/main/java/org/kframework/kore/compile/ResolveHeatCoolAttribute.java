@@ -32,9 +32,16 @@ public class ResolveHeatCoolAttribute {
         String sort = att.<String>getOptional("result").orElse("KResult");
         K predicate = KApply(KLabel("is" + sort), KVariable("HOLE"));
         if (att.contains("heat")) {
+            System.out.println(att);
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            return BooleanUtils.and(requires, predicate);
+            if (att.contains("transition")) {
+                // if the cooling rule is a transition, do not add the isKResult predicate
+                // because that will inhibit search
+                return requires;
+            } else {
+                return BooleanUtils.and(requires, predicate);
+            }
         }
         throw new AssertionError("unreachable");
     }
