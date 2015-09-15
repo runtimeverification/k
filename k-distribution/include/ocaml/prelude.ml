@@ -90,7 +90,7 @@ let convert_open_flags (s: string) : Unix.open_flag list =
       "r" -> [Unix.O_RDONLY] 
     | "w" -> [Unix.O_WRONLY] 
     | "rw" -> [Unix.O_RDWR]
-    | "wa" -> [Unix.O_WRONLY; Unix.O_APPEND]
+    | "wac" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
     | _ -> raise (Invalid_argument "convert_open_flags")
 let to_string_base (base: int) (i: Z.t) : string = match base with
   10 -> Z.format "%d" i
