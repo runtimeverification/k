@@ -26,10 +26,10 @@ object Strategy {
                   val strategy =
                     if (r.att.contains(Att.heat))
                       KORE.KApply(KORE.KLabel("heat"))
-                    else if (r.att.contains(Att.supercool))
-                      KORE.KApply(KORE.KLabel("supercool"))
+                    else if (r.att.contains(Att.cool))
+                      KORE.KApply(KORE.KLabel("cool"))
                     else
-                      KORE.KRewrite(KORE.KApply(KORE.KLabel("regular")), KORE.KApply(KORE.KLabel("supercool")))
+                      KORE.KRewrite(KORE.KApply(KORE.KLabel("regular")), KORE.KApply(KORE.KLabel("cool")))
 
                   KORE.KApply(KORE.KLabel(Labels.Cells), r.body,
                     KORE.KApply(KORE.KLabel("<s>"),

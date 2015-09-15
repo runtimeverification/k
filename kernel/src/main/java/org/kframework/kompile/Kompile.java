@@ -149,28 +149,7 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-
-        DefinitionTransformer addSuperheatSupercool = DefinitionTransformer.fromSentenceTransformer(
-                s -> {
-                    if (s instanceof Rule) {
-                        Rule r = (Rule) s;
-                        boolean isSuperheat = kompileOptions.superheat.stream().anyMatch(tag -> s.att().contains(tag));
-                        boolean isSupercool = kompileOptions.supercool.stream().anyMatch(tag -> s.att().contains(tag));
-                        if(isSupercool && isSuperheat) {
-                            throw KEMException.compilerError("Cannot be both superheat and supercool!");
-                        }
-                        if(isSuperheat) {
-                            return new Rule(r.body(), r.requires(), r.ensures(), r.att().add("superheat"));
-                        } else if(isSupercool) {
-                            return new Rule(r.body(), r.requires(), r.ensures(), r.att().add("supercool"));
-                        } else
-                            return r;
-
-                    } else
-                        return s;
-                }
-                , "add superheat/supercool tags");
-
+        
         return def -> resolveStrict
                 .andThen(resolveAnonVars)
                 .andThen(resolveContexts)

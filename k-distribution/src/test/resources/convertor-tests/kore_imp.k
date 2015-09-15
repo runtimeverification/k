@@ -8,7 +8,7 @@ module IMP-CORE-SYNTAX
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict]
+                 > AExp "+" AExp              [left, strict, transition]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -33,12 +33,12 @@ module IMP-SYNTAX
 endmodule
 
 module STRATEGY
-  syntax SExp ::= "heat" | "regular" | "supercool"
+  syntax SExp ::= "heat" | "regular" | "cool"
   syntax SExp ::= "#STUCK"
   syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
 
   rule `<s>`(`#noDots`(.KList), `#STUCK ~~> heat` => regular, `#noDots`(.KList))
-  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> supercool` => heat, `#noDots`(.KList))
+  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> cool` => heat, `#noDots`(.KList))
 endmodule
 
 module IMP
