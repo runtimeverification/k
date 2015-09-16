@@ -70,6 +70,8 @@ trait KApp extends {} with kore.KApply with K {
   // KApp seen as a collection Set(2, Set(3, 4)) is normalized and has size 3 and 2,3,4 as children
   def size: Int = children.size
 
+  def items = children.toList.asJava.asInstanceOf[java.util.List[kore.K]]
+
   def children: Iterable[K]
 
   lazy val isGround = !(children exists {
@@ -237,8 +239,6 @@ final class RegularKAssocApp(val klabel: KAssocAppLabel, val children: Seq[K], v
 final class KSeq private(val children: Seq[K], val att: Att)
   extends kore.KSequence with KAssocApp with PlainNormalization {
   val klabel = KSeq
-
-  def items: java.util.List[kore.K] = children.toList.asInstanceOf[List[kore.K]].asJava
 
   override def computeHashCode = super[KAssocApp].computeHashCode
 }
