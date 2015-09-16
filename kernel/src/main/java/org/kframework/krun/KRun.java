@@ -2,6 +2,7 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
@@ -18,7 +19,6 @@ import org.kframework.kore.ToKast;
 import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.parser.ProductionReference;
-import org.kframework.rewriter.Rewriter;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
@@ -108,6 +108,13 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    /**
+     * Function to return the exit code specified by the user given a substitution
+     *
+     * @param kem ExcpetionManager object
+     * @param res The substitution from the match of the user specified pattern on the Final Configuration.
+     * @return An int representing the error code.
+     */
     public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
         if (res.size() != 1) {
             kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
@@ -141,6 +148,15 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    /**
+     * Function to compile the String Pattern, if the pattern is not present in the cache. Note the difference between
+     * compilation and parsing. Compilation is the result of resolving anonymous variables, semantic casts, and concretizing
+     * sentences after parsing the pattern string.
+     *
+     * @param pattern The String specifying the pattern to be compiled
+     * @param source  Source of the pattern, usually either command line or file path.
+     * @return The pattern (represented by a Rule object) obtained from the compilation process.
+     */
     public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
@@ -148,6 +164,14 @@ public class KRun implements Transformation<Void, Void> {
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
+    /**
+     * Function to parse the String Pattern. It's the step in the compilation process that occurs before resoving anonymous variables,
+     * semantic casts, and sentence concretizaiton
+     *
+     * @param pattern The String representing the pattern to be parsed.
+     * @param source The Source of the pattern, usually either the command line or the file path.
+     * @return The pattern (represented by a Rule object) obtained from the parsing process.
+     */
     public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
