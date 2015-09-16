@@ -8,7 +8,8 @@ import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
 
-class Constructors(val module: definition.Module, implicit val theory: Theory) extends kore.Constructors[K] with ScalaSugar[K] {
+class Constructors(val module: definition.Module, implicit val theory: Theory) extends kore.Constructors[K] with ScalaSugared[K] {
+  val c = this
 
   implicit val theTheory = theory
 
