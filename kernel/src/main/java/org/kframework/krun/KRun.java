@@ -169,7 +169,7 @@ public class KRun implements Transformation<Void, Void> {
      * semantic casts, and sentence concretizaiton
      *
      * @param pattern The String representing the pattern to be parsed.
-     * @param source The Source of the pattern, usually either the command line or the file path.
+     * @param source  The Source of the pattern, usually either the command line or the file path.
      * @return The pattern (represented by a Rule object) obtained from the parsing process.
      */
     public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
@@ -193,6 +193,17 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    /**
+     * Given a substitution, represented by a map of KVariables to K, print the substitution. The printing follows the following format:
+     * If Pattern is represented by a single variable, then entire substitution is printed without the pattern, else
+     * variable is printed, followed by --->, and then the substitution corresponding K.
+     *
+     * @param subst         A Map from KVariables to K representing the result of a match of a pattern on a configuration.
+     * @param parsedPattern The parsed (not compiled) pattern object. The parsed pattern is used to
+     *                      weed out variables not defined in the original string pattern by the user.
+     * @param outputModes   The output mode represented by the user.
+     * @param print         A consumer function that is called with the result of the unparsing process. The consumer must accept a String.
+     */
     public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst,
                                                Rule parsedPattern, CompiledDefinition compiledDefinition,
                                                OutputModes outputModes,
