@@ -8,6 +8,7 @@ import org.kframework.kore.KVariable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by manasvi on 9/4/15.
@@ -30,4 +31,5 @@ public class SearchResult {
     public Rule getParsedRule() {
         return parsedRule;
     }
+
 }

@@ -2,7 +2,6 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
@@ -19,6 +18,7 @@ import org.kframework.kore.ToKast;
 import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.parser.ProductionReference;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.transformation.Transformation;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
@@ -74,26 +74,38 @@ public class KRun implements Transformation<Void, Void> {
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+            if (options.exitCodePattern != null) {
+                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
+                return getExitCode(kem, res);
+            }
         } else if (result instanceof Tuple2) {
             Tuple2<?, ?> tuple = (Tuple2<?, ?>) result;
             if (tuple._1() instanceof K && tuple._2() instanceof Integer) {
                 prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
                 return (Integer) tuple._2();
             }
+            if (tuple._1() instanceof SearchResult && tuple._2() instanceof Integer) {
+                printSearchResult((SearchResult) tuple._1(), options, compiledDef);
+                return (Integer) tuple._2();
+            }
         } else if (result instanceof SearchResult) {
-            List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
-            if (searchResult == null || searchResult.isEmpty()) {
-                outputFile("No Search Results \n", options);
-                return 0;
-            }
-            int i = 0;
-            for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-                outputFile("Solution: " + (i++) + "\n", options);
-                prettyPrintSubstitution(substitution, ((SearchResult) result).getParsedRule(), compiledDef, options.output, s -> outputFile(s, options));
-            }
+            printSearchResult((SearchResult) result, options, compiledDef);
             return 0;
         }
         return 0;
+    }
+
+    private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
+        List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
+        if (searchResult == null || searchResult.isEmpty()) {
+            outputFile("No Search Results \n", options);
+        }
+        int i = 0;
+        for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
+            outputFile("Solution: " + (i++) + "\n", options);
+            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, s -> outputFile(s, options));
+        }
     }
 
     public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
