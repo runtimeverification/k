@@ -56,7 +56,8 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
+                <exec executable="${project.build.directory}/release/k/bin/spawn-kserver">
+                  <arg value="${project.build.directory}/kserver.log"/>
                 </exec>
                 <sleep seconds="5" />
               </target>
