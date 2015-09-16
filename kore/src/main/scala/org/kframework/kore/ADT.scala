@@ -1,5 +1,6 @@
 package org.kframework.kore
 
+import org.kframework.builtin.KLabels
 import org.kframework.kore
 import org.kframework.attributes._
 import collection.JavaConverters._
@@ -20,13 +21,17 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
 
-  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
-    def items: java.util.List[K] = elements.asJava
+  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence with kore.KApply {
+    val klabel = KLabel(KLabels.KSEQ)
+    val items: java.util.List[K] = elements.asJava
+    val klist = KList(List(items.asScala.head, KSequence(items.asScala.toList.tail)))
     def iterator: Iterator[K] = elements.iterator
     override def equals(that: Any) = that match {
       case s: KSequence => s.elements == elements
       case _ => false
     }
+
+    override def computeHashCode = super[KApply].computeHashCode
   }
 
   object KSequence {

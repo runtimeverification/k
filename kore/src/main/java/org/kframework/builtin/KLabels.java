@@ -7,5 +7,6 @@ public class KLabels {
     public static String KBAG = "KBag";
     public static String AND = "_andBool_";
     public static String OR = "_orBool_";
+    public static String KSEQ = "~>";
     public static String CELLS = "#cells";
 }
