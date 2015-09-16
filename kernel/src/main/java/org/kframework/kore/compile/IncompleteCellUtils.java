@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Labels;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -23,8 +24,8 @@ import static org.kframework.kore.KORE.*;
  * (which this class will allow with arbitrary arity).
  */
 public class IncompleteCellUtils {
-    private final static KApply dots = KApply(KLabel(Labels.Dots()));
-    private final static KApply noDots = KApply(KLabel(Labels.NoDots()));
+    private final static KApply dots = KApply(KLabel(KLabels.DOTS));
+    private final static KApply noDots = KApply(KLabel(KLabels.NO_DOTS));
 
     private static boolean isOpen(K flag) {
         if (dots.equals(flag)) {
@@ -44,7 +45,7 @@ public class IncompleteCellUtils {
     }
 
     private static void flattenCells(List<K> children, K item) {
-        if (item instanceof KApply && ((KApply)item).klabel().name().equals(Labels.Cells())) {
+        if (item instanceof KApply && ((KApply)item).klabel().name().equals(KLabels.CELLS)) {
             for (K deeper : ((KApply) item).klist().items()) {
                 flattenCells(children, deeper);
             }
@@ -69,7 +70,7 @@ public class IncompleteCellUtils {
         if (children.size() == 1) {
             return children.get(0);
         } else {
-            return KApply(KLabel(Labels.Cells()), KList(children));
+            return KApply(KLabel(KLabels.CELLS), KList(children));
         }
     }
 

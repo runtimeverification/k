@@ -30,6 +30,7 @@ import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.kore.compile.ResolveContexts;
 import org.kframework.kore.compile.ResolveFreshConstants;
 import org.kframework.kore.compile.ResolveHeatCoolAttribute;
+import org.kframework.kore.compile.ResolveIOStreams;
 import org.kframework.kore.compile.ResolveSemanticCasts;
 import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
@@ -150,7 +151,8 @@ public class Kompile {
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         
-        return def -> resolveStrict
+        return def -> func(this::resolveIOStreams)
+                .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
                 .andThen(resolveContexts)
                 .andThen(resolveHeatCoolAttribute)
@@ -163,6 +165,10 @@ public class Kompile {
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
                 .apply(def);
+    }
+
+    public Definition resolveIOStreams(Definition d) {
+        return DefinitionTransformer.from(new ResolveIOStreams(d)::resolve, "resolving io streams").apply(d);
     }
 
     public Definition addSemanticsModule(Definition d) {

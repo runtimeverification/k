@@ -1,7 +1,7 @@
 package org.kframework
 
 import org.kframework.attributes.Att
-import org.kframework.builtin.Labels
+import org.kframework.builtin.KLabels
 import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Rule}
 import org.kframework.kore.KORE
 import org.kframework.kore.Unapply.{KApply, KLabel}
@@ -31,11 +31,11 @@ object Strategy {
                     else
                       KORE.KRewrite(KORE.KApply(KORE.KLabel("regular")), KORE.KApply(KORE.KLabel("cool")))
 
-                  KORE.KApply(KORE.KLabel(Labels.Cells), r.body,
+                  KORE.KApply(KORE.KLabel(KLabels.CELLS), r.body,
                     KORE.KApply(KORE.KLabel("<s>"),
-                      KORE.KApply(KORE.KLabel(Labels.NoDots)),
+                      KORE.KApply(KORE.KLabel(KLabels.NO_DOTS)),
                       strategy,
-                      KORE.KApply(KORE.KLabel(Labels.NoDots))
+                      KORE.KApply(KORE.KLabel(KLabels.NO_DOTS))
                     ))
                 case _ => r.body
               }

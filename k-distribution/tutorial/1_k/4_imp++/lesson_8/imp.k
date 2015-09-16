@@ -153,8 +153,6 @@ endmodule
 
 module IMP
   imports IMP-COMMON
-  imports STDIN-STREAM
-  imports STDOUT-STREAM
   imports DOMAINS
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
@@ -195,13 +193,10 @@ buffers as lists of items. */
                   </threads>
 //                <br/>
                   <store color="red"> .Map </store>
-// TODO: this is using temporary IO support
-// //                  <in color="magenta"> .List </in>
-// //                  <out color="Orchid"> .List </out>
-//                  <in color="magenta" stream="stdin"> .List </in>
-//                  <out color="Orchid" stream="stdout"> .List </out>
-                  <stdin/>
-                  <stdout/>
+//                  <in color="magenta"> .List </in>
+//                  <out color="Orchid"> .List </out>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 // Replace the <in/> and <out/> cells with the next two in order to
 // initialize the input buffer through krun
@@ -390,15 +385,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-  //     <in> ListItem(I:Int) => .List ...</in>  [read]
-  // TODO: temporary IO stuff
-       <stdin> ListItem(I:Int) => .List ...</stdin>  [read]
-  rule <k> read() ... </k>
-       <stdin>
-         `.List => ListItem(#parseInput("Int", " \n\t\r"))`
-         ListItem(#buffer(_:String))
-         ...
-       </stdin>
+       <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -423,9 +410,7 @@ count as a computational step. */
   syntax KResult ::= Printables
   syntax AExps ::= Printables
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-// TODO: temporary IO system
-//       <out>... .List => ListItem(P) </out>  [print]
-       <stdout>... .List => ListItem(P) </stdout>  [print]
+       <out>... .List => ListItem(P) </out>  [print]
   rule print(.AExps); => .K  [structural]
 
 /*@ \subsubsection{Halt}
