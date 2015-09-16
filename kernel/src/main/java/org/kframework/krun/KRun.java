@@ -85,6 +85,10 @@ public class KRun implements Transformation<Void, Void> {
                 prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
                 return (Integer) tuple._2();
             }
+        } else if (options.experimental.prove != null) {
+            if (((List) result).isEmpty()) {
+                System.out.println("true");
+            }
         }
 
         return 0;
