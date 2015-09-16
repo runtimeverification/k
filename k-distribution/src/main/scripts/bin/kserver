@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  "$(dirname "$0")/k.bat" "$@"
+  "$(dirname "$0")/kserver.bat" "$@"
 else
   source "$(dirname "$0")/../lib/setenv"
   ulimit -s `ulimit -H -s`
