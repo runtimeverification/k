@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-source "$(dirname "$0")/../lib/setenv"
-ulimit -s `ulimit -H -s`
-if [ -z "$K_OPTS" ];
-  then export K_OPTS="-Xms64m -Xmx4G -Xss32m -XX:+TieredCompilation"
-fi
-if "$(dirname "$0")/../lib/checkJava"; then
-  java -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"
+if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
+  "$(dirname "$0")/k.bat" "$@"
 else
-  exit 1
+  source "$(dirname "$0")/../lib/setenv"
+  ulimit -s `ulimit -H -s`
+  export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation $K_OPTS"
+  if "$(dirname "$0")/../lib/checkJava"; then
+    java -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"
+  else
+    exit 1
+  fi
 fi
