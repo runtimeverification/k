@@ -56,7 +56,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   }
 
   def pushDisjunction(terms: Set[(K, K)]): K = {
-    val disjunctionOfKApplies: Iterable[K] = terms
+    val disjunctionOfKApplies: Iterable[(K, K)] = terms
       .collect({ case (x: KApply, ruleP) => (x, ruleP) })
       .groupBy(_._1.klabel)
       .map { case (klabel: KLabel, ks: Set[(KApply, K)]) => {
@@ -66,18 +66,23 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
             setOfLists.head.indices
               .map(i => setOfLists.map(_ (i)))
               .map(pushDisjunction)
+          val rulePs = ks map { _._2 } toSeq
 
-          klabel(childrenDisjunctionsOfklabel: _*)
+          (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
         } else
-          and(ks.head._1, ks.head._2)
+          (ks.head._1, ks.head._2)
       }
       }
 
-    val disjunctionOfOthers: Iterable[K] = terms.filterNot(_._1.isInstanceOf[KApply])
+    val disjunctionOfOthers: Iterable[(K, K)] = terms.filterNot(_._1.isInstanceOf[KApply])
       .groupBy(_._1)
       .map({ case (k, set) => (k, set.map(_._2)) })
-      .map({ case (k, rulePs) => and(k, or(rulePs.toSeq: _*)) })
+      .map({ case (k, rulePs) => (k, or(rulePs.toSeq: _*)) })
 
-    or((disjunctionOfKApplies ++ disjunctionOfOthers).toSeq: _*)
+    val entireDisjunction = disjunctionOfKApplies ++ disjunctionOfOthers
+    if (entireDisjunction.size == 1)
+      entireDisjunction.head._1
+    else
+      or(entireDisjunction.map({ case (a, b) => and(a, b) }).toSeq: _*)
   }
 }
