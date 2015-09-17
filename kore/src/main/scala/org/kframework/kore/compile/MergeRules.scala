@@ -37,7 +37,8 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
       val newBody = pushDisjunction(topRules map whatever(r => RewriteToTop.toLeft(r.body)))
       val newRequires = or((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
-      Module(m.name, m.imports, m.localSentences + Rule(newBody, newRequires, True, Att()), m.att)
+      val automatonRule = Rule(newBody, newRequires, True, Att().add("automaton"))
+      Module(m.name, m.imports, m.localSentences + automatonRule, m.att)
     } else {
       m
     }
