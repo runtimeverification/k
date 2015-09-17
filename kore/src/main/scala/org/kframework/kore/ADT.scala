@@ -16,16 +16,22 @@ object ADT {
 
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
+
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
 
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence with kore.KApply {
-    val klabel = KLabel(KLabels.KSEQ)
     val items: java.util.List[K] = elements.asJava
-    val klist = KList(List(items.asScala.head, KSequence(items.asScala.toList.tail)))
+    val klabel = KLabel(if (items.isEmpty) KLabels.DOTK else KLabels.KSEQ)
+    val klist = items.asScala.toList match {
+      case List() => KList(List())
+      case head +: tail => KList(List(head, KSequence(tail)))
+    }
+
     def iterator: Iterator[K] = elements.iterator
+
     override def equals(that: Any) = that match {
       case s: KSequence => s.elements == elements
       case _ => false
@@ -54,7 +60,9 @@ object ADT {
 
   case class KList(elements: List[K]) extends kore.KList {
     elements foreach { e => assert(e.isInstanceOf[K]) }
+
     def items: java.util.List[K] = elements.asJava
+
     def iterator: Iterator[K] = elements.iterator
   }
 

@@ -44,22 +44,21 @@ import static org.kframework.kore.KORE.KToken;
 
 public class KoreUtils {
 
-    private static CompiledDefinition compiledDef;
-    private static Injector injector;
-    private static KExceptionManager kem;
-    private static SimpleScope requestScope;
-    private static BiFunction<String, Source, K> programParser;
-    private static Rewriter rewriter = null;
-
+    public final CompiledDefinition compiledDef;
+    public final Injector injector;
+    public final KExceptionManager kem;
+    public final SimpleScope requestScope;
+    public final BiFunction<String, Source, K> programParser;
+    public Rewriter rewriter;
 
     protected File testResource(String baseName) throws URISyntaxException {
         return new File(KoreUtils.class.getResource(baseName).toURI());
     }
 
-    public KoreUtils(String fileName) throws URISyntaxException {
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
-        compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
+        compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K());
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
@@ -107,14 +106,6 @@ public class KoreUtils {
 
     public Module getUnparsingModule() {
         return compiledDef.getExtensionModule(compiledDef.languageParsingModule());
-
     }
 
-    public static CompiledDefinition getCompiledDef() {
-        return compiledDef;
-    }
-
-    public static KExceptionManager getKem() {
-        return kem;
-    }
 }

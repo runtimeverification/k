@@ -28,13 +28,31 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   val isRule = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    val newBody = pushDisjunction(m.rules map whatever(r => RewriteToTop.toLeft(r.body)))
-    val newRequires = m.rules map whatever(_.requires) map { case (a, b) => and(a, b) } reduce { (a, b) => or(a, b) }
-    Module(m.name, m.imports, m.localSentences + Rule(newBody, newRequires, True, Att()), m.att)
+    if (!m.rules.isEmpty) {
+      val topRules = m.rules filter { r => r.body match {
+        case app: KApply => app.klabel.name == "<T>"
+        case _ => false
+      }
+      }
+
+      val newBody = pushDisjunction(topRules map whatever(r => RewriteToTop.toLeft(r.body)))
+      val newRequires = or((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
+      Module(m.name, m.imports, m.localSentences + Rule(newBody, newRequires, True, Att()), m.att)
+    } else {
+      m
+    }
   }
 
   def whatever(relevant: Rule => K)(r: Rule): (K, K) = {
-    (relevant(r), isRule(r.att.getK("Source").get, r.att.getK("Location").get))
+    (relevant(r), isRule(r.hashCode))
+  }
+
+  def or(ks: K*): K = {
+    if (ks.size == 1) {
+      ks.head
+    } else {
+      ML.or(ks: _*)
+    }
   }
 
   def pushDisjunction(terms: Set[(K, K)]): K = {
@@ -55,7 +73,11 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       }
       }
 
-    val disjunctionOfOthers: Set[K] = terms.filterNot(_._1.isInstanceOf[KApply]).map({ case (k, ruleP) => and(k, ruleP) })
+    val disjunctionOfOthers: Iterable[K] = terms.filterNot(_._1.isInstanceOf[KApply])
+      .groupBy(_._1)
+      .map({ case (k, set) => (k, set.map(_._2)) })
+      .map({ case (k, rulePs) => and(k, or(rulePs.toSeq: _*)) })
+
     or((disjunctionOfKApplies ++ disjunctionOfOthers).toSeq: _*)
   }
 }
