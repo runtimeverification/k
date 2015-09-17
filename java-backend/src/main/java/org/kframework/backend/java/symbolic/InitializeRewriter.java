@@ -173,7 +173,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .map(ConstrainedTerm::term)
                     .map(t -> (KItem) t)
                     .collect(Collectors.toList());
-            //Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
         }
 
     }

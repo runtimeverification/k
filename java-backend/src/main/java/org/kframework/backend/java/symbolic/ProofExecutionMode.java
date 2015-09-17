@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
@@ -7,7 +8,6 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.ADT;
