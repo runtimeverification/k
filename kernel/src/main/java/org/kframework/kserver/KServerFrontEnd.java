@@ -80,8 +80,13 @@ public class KServerFrontEnd extends FrontEnd {
             dir.setWritable(true, true);
             dir.setExecutable(false, false);
             dir.setExecutable(true, true);
-            new File(dir, "socket").deleteOnExit();
-            server = new NGServer(new NGListeningAddress(new File(dir, "socket").getAbsolutePath()), 10, 10000);
+            File socket = new File(dir, "socket");
+            socket.deleteOnExit();
+            if (socket.exists()) {
+                System.out.println("Warning: K server already started.");
+                socket.delete();
+            }
+            server = new NGServer(new NGListeningAddress(socket.getAbsolutePath()), 10, 10000);
         }
         Thread t = new Thread(server);
         instance = this;
