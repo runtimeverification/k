@@ -2,28 +2,13 @@
 
 package org.kframework.backend.java.compile;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.DataStructures;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.InjectedKLabel;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.Attribute;
@@ -32,6 +17,7 @@ import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
@@ -40,6 +26,7 @@ import static org.kframework.Collections.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -88,7 +75,15 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
+        if (klabel.name().equals(KLabels.OR)) {
+            return new RuleAutomatonDisjunction(klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()));
+        }
         return KItem.of(convert(klabel), KList(klist.items()), context);
+    }
+
+    private static Set<Integer> getRuleSet(KApply k) {
+        Set<KApply> rulePs = k.klabel().name().equals(KLabels.OR) ? k.klist().items().stream().map(kk -> (KApply) kk).collect(Collectors.toSet()) : Collections.singleton(k);
+        return rulePs.stream().map(kk -> Integer.valueOf(((KToken) kk.klist().items().get(0)).s())).collect(Collectors.toSet());
     }
 
     @Override

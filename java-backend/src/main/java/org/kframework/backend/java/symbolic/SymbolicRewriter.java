@@ -195,6 +195,11 @@ public class SymbolicRewriter {
         }
     }
 
+    private void fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
+        results.clear();
+
+    }
+
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
         try {
             if (rule == RuleAuditing.getAuditingRule()) {
