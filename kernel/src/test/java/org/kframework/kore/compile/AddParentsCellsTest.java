@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Labels;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kil.Attribute;
@@ -230,6 +232,6 @@ public class AddParentsCellsTest {
     }
 
     KApply cells(K... ks) {
-        return KApply(KLabel("#cells"), ks);
+        return KApply(KLabel(KLabels.CELLS), ks);
     }
 }
