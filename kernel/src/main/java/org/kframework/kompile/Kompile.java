@@ -16,6 +16,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -24,6 +25,7 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.AddImplicitComputationCell;
 import org.kframework.kore.compile.ConcretizeCells;
+import org.kframework.kore.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.kore.compile.GenerateSortPredicateSyntax;
 import org.kframework.kore.compile.MergeRules;
@@ -150,6 +152,7 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, true).convert(s)), "convert data structures to lookups");
 
         return def -> func(this::resolveIOStreams)
                 .andThen(resolveStrict)
@@ -163,6 +166,7 @@ public class Kompile {
                 .andThen(func(this::concretizeTransformer))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
+                .andThen(convertDataStructureToLookup)
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
     }

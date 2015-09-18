@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term {
 
     private final Map<KLabelConstant, Pair<Term, Set<Integer>>> kItemDisjunctions;
-    private final Map<Sort, Pair<Variable, Set<Integer>>> variableDisjunctions;
+    private final Map<Sort, List<Pair<Variable, Set<Integer>>>> variableDisjunctions;
     private final Map<Token, Pair<Token, Set<Integer>>> tokenDisjunctions;
 
     public RuleAutomatonDisjunction(List<Pair<Term, Set<Integer>>> children) {
@@ -22,9 +22,9 @@ public class RuleAutomatonDisjunction extends Term {
         this.kItemDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> p));
-        this.variableDisjunctions = children.stream()
+        this.variableDisjunctions = (Map<Sort, List<Pair<Variable, Set<Integer>>>>) (Object) children.stream()
                 .filter(p -> p.getLeft() instanceof Variable)
-                .collect(Collectors.toMap(p -> ((Variable) p.getLeft()).sort(), p -> (Pair<Variable, Set<Integer>>) (Object) p));
+                .collect(Collectors.groupingBy(p -> p.getLeft().sort()));
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, Set<Integer>>) (Object) p));
@@ -78,8 +78,6 @@ public class RuleAutomatonDisjunction extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        throw new UnsupportedOperationException();
-    }
+    public void accept(Visitor visitor) { }
 
 }

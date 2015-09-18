@@ -8,6 +8,11 @@ public class KLabels {
     public static String AND = "_andBool_";
     public static String OR = "_orBool_";
 
+    public static String ML_AND = "AND";
+    public static String ML_OR = "OR";
+    public static String ML_TRUE = "TRUE";
+    public static String ML_FALSE = "FALSE";
+
     public static String KSEQ = "~>";
     public static String DOTK = ".K";
 

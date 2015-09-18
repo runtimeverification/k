@@ -1,6 +1,7 @@
 package org.kframework.kore.compile
 
 import org.kframework.attributes.Att
+import org.kframework.builtin.KLabels
 import org.kframework.definition.{Module, Rule}
 import org.kframework.kore._
 
@@ -17,10 +18,11 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   import s._
 
   object ML {
-    val and = KLabel("AND")
-    val or = KLabel("OR")
-    val True = KLabel("TRUE")()
-    val False = KLabel("FALSE")()
+    val and = KLabel(KLabels.ML_AND)
+    val or = KLabel(KLabels.ML_OR)
+    val True = KLabel(KLabels.ML_TRUE)()
+    val False = KLabel(KLabels.ML_FALSE)()
+    val TrueToken: K = KToken("true", Sort("Bool"), Att())
   }
 
   import ML._
@@ -36,8 +38,9 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       }
 
       val newBody = pushDisjunction(topRules map whatever(r => RewriteToTop.toLeft(r.body)))
-      val newRequires = or((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
-      val automatonRule = Rule(newBody, newRequires, True, Att().add("automaton"))
+      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
+      //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
+      val automatonRule = Rule(newBody, TrueToken, TrueToken, Att().add("automaton"))
       Module(m.name, m.imports, m.localSentences + automatonRule, m.att)
     } else {
       m
@@ -48,11 +51,11 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     (relevant(r), isRule(r.hashCode))
   }
 
-  def or(ks: K*): K = {
+  def makeOr(ks: K*): K = {
     if (ks.size == 1) {
       ks.head
     } else {
-      ML.or(ks: _*)
+      or(ks: _*)
     }
   }
 
@@ -78,12 +81,12 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     val disjunctionOfOthers: Iterable[(K, K)] = terms.filterNot(_._1.isInstanceOf[KApply])
       .groupBy(_._1)
       .map({ case (k, set) => (k, set.map(_._2)) })
-      .map({ case (k, rulePs) => (k, or(rulePs.toSeq: _*)) })
+      .map({ case (k, rulePs) => (k, makeOr(rulePs.toSeq: _*)) })
 
     val entireDisjunction = disjunctionOfKApplies ++ disjunctionOfOthers
     if (entireDisjunction.size == 1)
       entireDisjunction.head._1
     else
-      or(entireDisjunction.map({ case (a, b) => and(a, b) }).toSeq: _*)
+      makeOr(entireDisjunction.map({ case (a, b) => and(a, b) }).toSeq: _*)
   }
 }

@@ -61,6 +61,9 @@ object DefinitionTransformer {
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence], name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
 
+  def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
+
   def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromRuleBodyTranformer(f, name))
 

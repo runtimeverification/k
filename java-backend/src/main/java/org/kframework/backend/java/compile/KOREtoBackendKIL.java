@@ -19,6 +19,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
 import static org.kframework.Collections.*;
@@ -75,14 +76,14 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
-        if (klabel.name().equals(KLabels.OR)) {
+        if (klabel.name().equals(KLabels.ML_OR)) {
             return new RuleAutomatonDisjunction(klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()));
         }
         return KItem.of(convert(klabel), KList(klist.items()), context);
     }
 
     private static Set<Integer> getRuleSet(KApply k) {
-        Set<KApply> rulePs = k.klabel().name().equals(KLabels.OR) ? k.klist().items().stream().map(kk -> (KApply) kk).collect(Collectors.toSet()) : Collections.singleton(k);
+        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(kk -> (KApply) kk).collect(Collectors.toSet()) : Collections.singleton(k);
         return rulePs.stream().map(kk -> Integer.valueOf(((KToken) kk.klist().items().get(0)).s())).collect(Collectors.toSet());
     }
 
