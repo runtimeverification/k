@@ -90,10 +90,7 @@ public class AddBrackets {
         boolean inversePriority;
         EnumSet<Fixity> fixity = getFixity(inner, outer);
         EnumSet<Fixity> innerFixity = getFixity(inner);
-        Tag parentLabel = new Tag(outer.production().klabel().get().name());
-        Tag localLabel = new Tag(inner.production().klabel().get().name());
-
-        if (parentLabel.equals(localLabel) && m.attributesFor().apply(inner.production().klabel().get()).contains(Attribute.ASSOCIATIVE_KEY))
+        if (inner.production().klabel().equals(outer.production().klabel()) && inner.production().klabel().isDefined() && m.attributesFor().apply(inner.production().klabel().get()).contains(Attribute.ASSOCIATIVE_KEY))
             return false;
         if (inner instanceof Constant)
             return false;
