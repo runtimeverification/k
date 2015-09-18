@@ -1,8 +1,14 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 require "domains.k"
 
+module TEST-SYNTAX
+  imports INT-SYNTAX
+endmodule
+
 module TEST
+  imports TEST-SYNTAX
   imports INT
+
   configuration
     <T>
       <threads multiplicity="?">
