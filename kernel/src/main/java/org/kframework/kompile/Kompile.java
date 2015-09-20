@@ -210,7 +210,7 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return DefinitionTransformer.fromRuleBodyTranformer(
+        return DefinitionTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
                 "concretizing configuration").apply(input);
     }
