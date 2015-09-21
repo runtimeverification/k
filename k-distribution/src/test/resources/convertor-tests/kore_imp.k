@@ -66,6 +66,6 @@ module IMP
     when notBool `X in keys(Rho)`
   rule int .Ids; S => S  [structural]
 
-  rule K ~> .K => K     [anywhere]
-  rule .K ~> K => K     [anywhere]
+  //rule K ~> .K => K     [anywhere]
+  //rule .K ~> K => K     [anywhere]
 endmodule

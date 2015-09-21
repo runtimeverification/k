@@ -6,8 +6,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.DoubleLinkedList;
 import org.kframework.builtin.KLabels;
+import org.kframework.kore.Assoc;
+import org.kframework.kore.K;
+import org.kframework.tiny.KSeq;
+
+import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -125,11 +131,23 @@ public abstract class AbstractUnifier implements Unifier {
                     }
                 }
 
-                if (isKSeq(term) && !isKSeq(otherTerm)) {
-                    otherTerm = KItem.of(((KItem) term).kLabel(), KList.concatenate(otherTerm, KItem.of(KLabelConstant.of(KLabels.DOTK, termContext.definition()), KList.concatenate(), termContext)), termContext);
-                }
-                if (isKSeq(otherTerm) && !isKSeq(term)) {
-                    term = KItem.of(((KItem) otherTerm).kLabel(), KList.concatenate(term, KItem.of(KLabelConstant.of(KLabels.DOTK, termContext.definition()), KList.concatenate(), termContext)), termContext);
+                if (isKSeq(term) || isKSeq(otherTerm)) {
+                    KLabelConstant kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
+                    KLabelConstant kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
+                    KItem kDot = KItem.of(kDotLabel, KList.concatenate(), termContext);
+
+                    term = stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                            .map(Term.class::cast)
+                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(a, b), termContext));
+                    otherTerm = stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                            .map(Term.class::cast)
+                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(a, b), termContext));
+                    if (isKSeq(term) && !isKSeq(otherTerm)) {
+                        otherTerm = KItem.of(((KItem) term).kLabel(), KList.concatenate(otherTerm, KItem.of(kDotLabel, KList.concatenate(), termContext)), termContext);
+                    }
+                    if (isKSeq(otherTerm) && !isKSeq(term)) {
+                        term = KItem.of(((KItem) otherTerm).kLabel(), KList.concatenate(term, KItem.of(kDotLabel, KList.concatenate(), termContext)), termContext);
+                    }
                 }
 
                 if (term.kind() != otherTerm.kind()) {
@@ -244,13 +262,13 @@ public abstract class AbstractUnifier implements Unifier {
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
-                    Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
+                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
                     Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
-                        Term bindingExp = terms.get(bindingExpPosition-1);
+                        Term bindingExp = terms.get(bindingExpPosition - 1);
                         Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
-                        terms.set(bindingExpPosition-1, freshbindingExp);
+                        terms.set(bindingExpPosition - 1, freshbindingExp);
                     }
                 }
                 kList = KList.concatenate(terms);
