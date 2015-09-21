@@ -13,8 +13,8 @@ public class KLabels {
     public static String ML_TRUE = "TRUE";
     public static String ML_FALSE = "FALSE";
 
-    public static String KSEQ = "~>";
-    public static String DOTK = ".K";
+    public static String KSEQ = "#KSequence";
+    public static String DOTK = "#EmptyK";
 
     public static String CELLS = "#cells";
 }

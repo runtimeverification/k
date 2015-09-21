@@ -1,12 +1,15 @@
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +33,26 @@ public class RuleAutomatonDisjunction extends Term {
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, Set<Integer>>) (Object) p));
     }
 
+    public Map<KLabelConstant, Pair<Term, Set<Integer>>> kItemDisjunctions() {
+        return kItemDisjunctions;
+    }
+
+    public Map<Sort, List<Pair<Variable, Set<Integer>>>> variableDisjunctions() {
+        return variableDisjunctions;
+    }
+
+    public Map<Token, Pair<Token, Set<Integer>>> tokenDisjunctions() {
+        return tokenDisjunctions;
+    }
+
+    public List<Pair<Term, Set<Integer>>> disjunctions() {
+        List<Pair<Term, Set<Integer>>> disjunctions = new ArrayList<>();
+        disjunctions.addAll(kItemDisjunctions.values());
+        ((Map<Sort, List<Pair<Term, Set<Integer>>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
+        disjunctions.addAll((java.util.Collection<? extends Pair<Term, Set<Integer>>>) (Object) tokenDisjunctions.values());
+        return disjunctions;
+    }
+
     @Override
     public boolean isExactSort() {
         throw new UnsupportedOperationException();
@@ -47,7 +70,7 @@ public class RuleAutomatonDisjunction extends Term {
 
     @Override
     protected boolean computeMutability() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
@@ -74,10 +97,12 @@ public class RuleAutomatonDisjunction extends Term {
 
     @Override
     public ASTNode accept(Transformer transformer) {
-        throw new UnsupportedOperationException();
+        return transformer.transform(this);
     }
 
     @Override
-    public void accept(Visitor visitor) { }
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
 }

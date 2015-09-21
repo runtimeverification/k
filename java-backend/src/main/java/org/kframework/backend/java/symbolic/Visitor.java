@@ -42,5 +42,6 @@ public interface Visitor {
     public void visit(UninterpretedToken uninterpretedToken);
     public void visit(Variable variable);
     public void visit(InjectedKLabel injectedKLabel);
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction);
 
 }

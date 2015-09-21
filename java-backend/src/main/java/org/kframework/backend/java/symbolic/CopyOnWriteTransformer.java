@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -116,6 +118,15 @@ public class CopyOnWriteTransformer implements Transformer {
             injectedKLabel = new InjectedKLabel(term);
         }
         return injectedKLabel;
+    }
+
+    @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        Stream<Pair<Term, Set<Integer>>> pairStream = ruleAutomatonDisjunction.disjunctions().stream()
+                .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()));
+        List<Pair<Term, Set<Integer>>> collect = pairStream
+                .collect(Collectors.toList());
+        return new RuleAutomatonDisjunction(collect);
     }
 
     @Override

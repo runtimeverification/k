@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.DoubleLinkedList;
+import org.kframework.builtin.KLabels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +125,13 @@ public abstract class AbstractUnifier implements Unifier {
                     }
                 }
 
+                if (isKSeq(term) && !isKSeq(otherTerm)) {
+                    otherTerm = KItem.of(((KItem) term).kLabel(), KList.concatenate(otherTerm, KItem.of(KLabelConstant.of(KLabels.DOTK, termContext.definition()), KList.concatenate(), termContext)), termContext);
+                }
+                if (isKSeq(otherTerm) && !isKSeq(term)) {
+                    term = KItem.of(((KItem) otherTerm).kLabel(), KList.concatenate(term, KItem.of(KLabelConstant.of(KLabels.DOTK, termContext.definition()), KList.concatenate(), termContext)), termContext);
+                }
+
                 if (term.kind() != otherTerm.kind()) {
                     term = KCollection.upKind(term, otherTerm.kind());
                     otherTerm = KCollection.upKind(otherTerm, term.kind());
@@ -189,6 +197,10 @@ public abstract class AbstractUnifier implements Unifier {
             flushTaskBuffer();
         }
         return !failed;
+    }
+
+    private static boolean isKSeq(Term term) {
+        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
     }
 
     private void flushTaskBuffer() {

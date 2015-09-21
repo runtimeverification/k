@@ -183,4 +183,9 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(InjectedKLabel injectedKLabel) {
         return transform((Term) injectedKLabel);
     }
+
+    @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        return transform((JavaSymbolicObject) ruleAutomatonDisjunction);
+    }
 }

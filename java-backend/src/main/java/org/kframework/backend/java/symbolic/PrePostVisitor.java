@@ -148,6 +148,9 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+
+    @Override
     public void visit(KItem kItem) {
         preVisitor.resetProceed();
         kItem.accept(preVisitor);

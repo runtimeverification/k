@@ -222,6 +222,7 @@ public class SymbolicRewriter {
             e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
             throw e;
         } finally {
+            /*
             if (RuleAuditing.isAuditBegun()) {
                 if (RuleAuditing.getAuditingRule() == rule) {
                     RuleAuditing.endAudit();
@@ -230,7 +231,7 @@ public class SymbolicRewriter {
                         && RuleAuditing.getAuditingRule() == rule) {
                     throw RuleAuditing.fail();
                 }
-            }
+            }*/
         }
     }
 

@@ -127,6 +127,9 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);
