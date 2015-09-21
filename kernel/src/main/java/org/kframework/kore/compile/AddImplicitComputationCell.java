@@ -27,7 +27,7 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
     }
 
     public Sentence apply(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY)) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ANYWHERE_KEY)) {
             return s;
         }
 

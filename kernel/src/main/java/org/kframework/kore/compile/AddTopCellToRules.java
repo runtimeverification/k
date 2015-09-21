@@ -51,9 +51,6 @@ public class AddTopCellToRules {
     }
 
     public Rule addImplicitCells(Rule rule) {
-        if (rule.att().contains("anywhere")) {
-            return rule;
-        }
         return new Rule(
                 addImplicitCells(rule.body()),
                 rule.requires(),
@@ -69,7 +66,7 @@ public class AddTopCellToRules {
     }
 
     public Sentence addImplicitCells(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY)) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ANYWHERE_KEY)) {
             return s;
         }
         if (s instanceof Rule) {
