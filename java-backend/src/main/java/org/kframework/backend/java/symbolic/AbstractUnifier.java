@@ -138,10 +138,12 @@ public abstract class AbstractUnifier implements Unifier {
 
                     term = stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
                             .map(Term.class::cast)
-                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(a, b), termContext));
-                    otherTerm = stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext));
+                    otherTerm = stream(Assoc.flatten(kSeqLabel, Seq(otherTerm), kDotLabel).reverse())
                             .map(Term.class::cast)
-                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(a, b), termContext));
+                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext));
+                    System.out.println(term);
+                    System.out.println(otherTerm);
                     if (isKSeq(term) && !isKSeq(otherTerm)) {
                         otherTerm = KItem.of(((KItem) term).kLabel(), KList.concatenate(otherTerm, KItem.of(kDotLabel, KList.concatenate(), termContext)), termContext);
                     }
