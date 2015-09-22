@@ -15,4 +15,7 @@ public class KServerOptions {
 
     @Parameter(names={"--port", "-p"}, description="The port to start the server on.")
     public int port = 2113;
+
+    @Parameter(names={"--local", "-l"}, description="Use local sockets (Unix Domain Sockets/Named Pipes) to host the server.")
+    public boolean local = false;
 }

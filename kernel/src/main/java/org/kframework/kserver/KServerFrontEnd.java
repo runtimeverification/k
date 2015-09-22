@@ -12,7 +12,6 @@ import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
-import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -68,9 +67,7 @@ public class KServerFrontEnd extends FrontEnd {
         }
         NGServer server;
         File dir = null;
-        if (OS.current() == OS.WINDOWS) {
-            server = new NGServer(InetAddress.getLoopbackAddress(), options.port);
-        } else {
+        if (isLocal()) {
             // can use more secure unix domain sockets
             dir = new File(System.getProperty("user.home"), ".kserver");
             dir.mkdirs();
@@ -87,13 +84,17 @@ public class KServerFrontEnd extends FrontEnd {
                 socket.delete();
             }
             server = new NGServer(new NGListeningAddress(socket.getAbsolutePath()), 10, 10000);
+        } else {
+            server = new NGServer(InetAddress.getLoopbackAddress(), options.port);
         }
         Thread t = new Thread(server);
         instance = this;
         threadInstance = t;
         t.start();
 
-        if (OS.current() == OS.WINDOWS) {
+        if (isLocal()) {
+            System.out.println("K server started using IPC at " + dir.getAbsolutePath());
+        } else {
             int runningPort = server.getPort();
             while (runningPort == 0) {
                 try {
@@ -103,8 +104,6 @@ public class KServerFrontEnd extends FrontEnd {
                 runningPort = server.getPort();
             }
             System.out.println("K server started on 127.0.0.1:" + options.port);
-        } else {
-            System.out.println("K server started using IPC at " + dir.getAbsolutePath());
         }
 
         try {
@@ -153,7 +152,15 @@ public class KServerFrontEnd extends FrontEnd {
     }
 
     public static void nailMain(NGContext context) {
+        KServerFrontEnd kserver = KServerFrontEnd.instance();
+        if (!kserver.isLocal()) {
+            context.assertLoopbackClient();
+        }
         System.setSecurityManager(null);
         context.getNGServer().shutdown(true);
+    }
+
+    public boolean isLocal() {
+        return options.local;
     }
 }
