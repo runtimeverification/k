@@ -38,8 +38,9 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 
+
 /**
- * Created by dwightguth on 8/26/15.
+ * Class that implements the "--prove" option.
  */
 public class ProofExecutionMode implements ExecutionMode<List<K>> {
 

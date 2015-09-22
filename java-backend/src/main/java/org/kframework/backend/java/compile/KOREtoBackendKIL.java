@@ -53,6 +53,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Module module;
     private final Definition definition;
     private final TermContext context;
+
+    /**
+     * Flag that controls whether the translator substitutes the variables in a {@code Rule} with fresh variables
+     */
     private final boolean freshRules;
 
     public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean freshRules) {
