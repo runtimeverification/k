@@ -109,17 +109,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                     Optional<Module> theModule = allKilModules.stream()
                             .filter(m -> m.getName().equals(imp.getName()))
                             .findFirst();
-                    if (theModule.isPresent())
-                        return theModule.get();
-                    else
+                    if (theModule.isPresent()) {
+                        Module mod = theModule.get();
+                        org.kframework.definition.Module result = koreModules.get(mod.getName());
+                        if (result == null) {
+                            result = apply(mod, allKilModules, koreModules);
+                        }
+                        return result;
+                    } else if (koreModules.containsKey(imp.getName())) {
+                        return koreModules.get(imp.getName());
+                    } else
                         throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
-                })
-                .map(mod -> {
-                    org.kframework.definition.Module result = koreModules.get(mod.getName());
-                    if (result == null) {
-                        result = apply(mod, allKilModules, koreModules);
-                    }
-                    return result;
                 }).collect(Collectors.toSet());
 
 
