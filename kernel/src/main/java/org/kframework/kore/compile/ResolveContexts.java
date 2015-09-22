@@ -66,9 +66,10 @@ public class ResolveContexts {
         K requires = context.requires();
         K heated = new VisitKORE() {
             K heated;
+            K holeWithSemanticCast;
             public K process(K k) {
                 apply(k);
-                return heated;
+                return heated != null ? heated : holeWithSemanticCast;
             }
             @Override
             public Void apply(KRewrite k) {
@@ -91,11 +92,17 @@ public class ResolveContexts {
             public Void apply(KApply k) {
                 if (k.klabel() instanceof KVariable)
                     vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
+                if (k.klabel().name().startsWith("#SemanticCastTo")) {
+                    K child = k.klist().items().get(0);
+                    if (child instanceof KVariable && ((KVariable) child).name().equals("HOLE")) {
+                        holeWithSemanticCast = k;
+                    }
+                }
                 return super.apply(k);
             }
         }.process(body);
         if (heated == null) {
-            heated = ResolveStrict.HOLE;
+            heated = KApply(KLabel("#SemanticCastToKItem"), KVariable("HOLE"));
         }
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
