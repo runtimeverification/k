@@ -21,7 +21,7 @@ module LAMBDA
   imports DOMAINS
 
   configuration <T>
-                  <k> $PGM:Exp:K </k>
+                  <k> $PGM:Exp </k>
                   <env> .Map </env>
                   <store> .Map </store>
                 </T>
