@@ -6,13 +6,13 @@ else
   ulimit -s `ulimit -H -s`
   export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation $K_OPTS"
   if "$(dirname "$0")/checkJava"; then
-    ng ng-version > /dev/null 2>&1
+    ng --nailgun-server local:$HOME/.kserver/socket ng-version > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-      ng org.kframework.main.Main "$@"
+      ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.Main "$@"
     else
-      ng --nailgun-server local:$HOME/.kserver/socket ng-version > /dev/null 2>&1
+      ng ng-version > /dev/null 2>&1
       if [ $? -eq 0 ]; then
-        ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.Main "$@"
+	ng org.kframework.main.Main "$@"
       else 
         java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/java/*" org.kframework.main.Main "$@"
       fi
