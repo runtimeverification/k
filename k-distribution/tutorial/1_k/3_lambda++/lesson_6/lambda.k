@@ -89,7 +89,7 @@ an environment cell, and a store cell.  An environment binds variable names
 to locations, and a store binds locations to values. */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Exp:K </k>
+                  <k color="green"> $PGM:Exp </k>
                   <env color="blue"> .Map </env>
                   <store color="red"> .Map </store>
                 </T>
@@ -150,12 +150,12 @@ division rule. */
 
 //@ \subsection{Let Binder}
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  rule let X = E in E':Exp => (lambda X . E') E                         //[macro]
 
 /*@ \subsection{Letrec Binder}
 We define \texttt{letrec} in term of \texttt{mu}, whose semantics is below. */
 
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     //[macro]
 
 /*@ \subsection{Mu}
 To save the number of locations needed to evaluate $\mu X . E$, we replace it
