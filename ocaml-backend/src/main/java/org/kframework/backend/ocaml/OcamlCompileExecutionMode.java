@@ -63,7 +63,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
         if (options.exitCodePattern != null) {
             Rule pattern = KRun.compilePattern(files, kem, options.exitCodePattern, options, compiledDefinition, Source.apply("<command line: --exit-code>"));
 
-            Map<String, byte[]> serializedVars = new HashMap<>();
+            Map<String, String> serializedVars = new HashMap<>();
             List<K> unserializedVars = new ArrayList<>();
             if (!ocamlOptions.serializeConfig.isEmpty()) {
                 if (k instanceof KApply) {
@@ -121,11 +121,11 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
     }
 
     /**
-     * Marshals the specified K term using the OCAML Marshal module and returns the resulting bytes.
+     * Marshals the specified K term using the OCAML Marshal module and returns a string containing the ocaml representation of a string of the resulting bytes.
      * @param value
      * @return
      */
-    private byte[] marshalValue(K value) {
+    private String marshalValue(K value) {
         String ocaml = converter.marshal(value, files.resolveTemp("run.out").getAbsolutePath());
         files.saveToTemp("marshalvalue.ml", ocaml);
         try {
@@ -134,7 +134,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
             if (exit != 0) {
                 throw KEMException.criticalError("Failed to precompile program variables.");
             }
-            return FileUtils.readFileToByteArray(files.resolveTemp("run.out"));
+            return FileUtils.readFileToString(files.resolveTemp("run.out"));
         }catch (IOException e) {
             throw KEMException.criticalError("Failed to start ocamlopt: " + e.getMessage(), e);
         } catch (InterruptedException e) {

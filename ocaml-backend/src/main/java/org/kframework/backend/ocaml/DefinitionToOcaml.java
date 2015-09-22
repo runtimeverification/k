@@ -254,43 +254,6 @@ public class DefinitionToOcaml implements Serializable {
         return result.toString();
     }
 
-    /**
-     * Returns a string representing an OCAML-encoded string from the specified byte sequence
-     * @param value
-     * @return
-     */
-    public static String enquoteString(byte[] value) {
-        char delimiter = '"';
-        final int length = value.length;
-        StringBuilder result = new StringBuilder();
-        result.append(delimiter);
-        for (int offset = 0, codepoint; offset < length; offset ++) {
-            codepoint = Byte.toUnsignedInt(value[offset]);
-            if (codepoint > 0xFF) {
-                throw KEMException.compilerError("Unsupported: unicode characters in strings in Ocaml backend.");
-            } else if (codepoint == delimiter) {
-                result.append("\\").append(delimiter);
-            } else if (codepoint == '\\') {
-                result.append("\\\\");
-            } else if (codepoint == '\n') {
-                result.append("\\n");
-            } else if (codepoint == '\t') {
-                result.append("\\t");
-            } else if (codepoint == '\r') {
-                result.append("\\r");
-            } else if (codepoint == '\b') {
-                result.append("\\b");
-            } else if (codepoint >= 32 && codepoint < 127) {
-                result.append((char)codepoint);
-            } else if (codepoint <= 0xff) {
-                result.append("\\");
-                result.append(String.format("%03d", codepoint));
-            }
-        }
-        result.append(delimiter);
-        return result.toString();
-    }
-
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
@@ -337,7 +300,7 @@ public class DefinitionToOcaml implements Serializable {
      *                     from execution should be printed to the current working directory in a file named "config"
      * @return A program that can be compiled to rewrite the specified {@code k}.
      */
-    public String ocamlCompile(K k, Map<String, byte[]> serializedVars, KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
+    public String ocamlCompile(K k, Map<String, String> serializedVars, KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
         if (serializedVars == null) {
@@ -350,9 +313,9 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n");
             sb.append("let input = match unserialized with [Map(SortMap, Lbl_Map_, m)] ->\n");
             sb.append("let completeMap = ");
-            for (Map.Entry<String, byte[]> entry : serializedVars.entrySet()) {
+            for (Map.Entry<String, String> entry : serializedVars.entrySet()) {
                 sb.append("let m = KMap.add [KToken (SortKConfigVar, ").append(enquoteString(entry.getKey())).append(")]\n");
-                sb.append("(Marshal.from_string ").append(enquoteString(entry.getValue())).append(" 0 : k)\n");
+                sb.append("(Marshal.from_string \"").append(entry.getValue()).append("\" 0 : Prelude.k)\n");
                 sb.append("m in\n");
             }
             sb.append("m in (");
@@ -388,7 +351,9 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let input = Lexer.parse_k\n");
         sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
         sb.append("\n");
-        sb.append("let _ = Marshal.to_channel (open_out_bin ").append(enquoteString(file)).append(") input [Marshal.No_sharing]");
+        sb.append("let file = open_out ").append(enquoteString(file)).append("\n");
+        sb.append("let str = Marshal.to_string (input : Prelude.k) [Marshal.No_sharing]\n");
+        sb.append("let () = output_string file (String.escaped str)\n");
         return sb.toString();
     }
 
