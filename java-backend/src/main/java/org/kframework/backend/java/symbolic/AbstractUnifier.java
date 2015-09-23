@@ -7,13 +7,9 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.DoubleLinkedList;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.Assoc;
-import org.kframework.kore.K;
-import org.kframework.tiny.KSeq;
-
 import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +57,18 @@ public abstract class AbstractUnifier implements Unifier {
 
     //private boolean matchOnFunctionSymbol;
     //
-    protected TermContext termContext;
+    protected final TermContext termContext;
+
+    private final KLabelConstant kSeqLabel;
+    private final KLabelConstant kDotLabel;
+    private final KItem kDot;
+
+    protected AbstractUnifier(TermContext termContext) {
+        this.termContext = termContext;
+        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
+        kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
+        kDot = KItem.of(kDotLabel, KList.concatenate(), termContext);
+    }
 
     void addUnificationTask(Term term, Term otherTerm) {
         taskBuffer.add(Pair.of(term, otherTerm));
@@ -132,23 +139,14 @@ public abstract class AbstractUnifier implements Unifier {
                 }
 
                 if (isKSeq(term) || isKSeq(otherTerm)) {
-                    KLabelConstant kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
-                    KLabelConstant kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
-                    KItem kDot = KItem.of(kDotLabel, KList.concatenate(), termContext);
+                    term = getCanonicalKSeq(term);
+                    otherTerm = getCanonicalKSeq(otherTerm);
 
-                    term = stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
-                            .map(Term.class::cast)
-                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext));
-                    otherTerm = stream(Assoc.flatten(kSeqLabel, Seq(otherTerm), kDotLabel).reverse())
-                            .map(Term.class::cast)
-                            .reduce(kDot, (a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext));
-                    System.out.println(term);
-                    System.out.println(otherTerm);
-                    if (isKSeq(term) && !isKSeq(otherTerm)) {
-                        otherTerm = KItem.of(((KItem) term).kLabel(), KList.concatenate(otherTerm, KItem.of(kDotLabel, KList.concatenate(), termContext)), termContext);
+                    if (isKSeq(term)) {
+                        otherTerm = upKSeq(otherTerm);
                     }
-                    if (isKSeq(otherTerm) && !isKSeq(term)) {
-                        term = KItem.of(((KItem) otherTerm).kLabel(), KList.concatenate(term, KItem.of(kDotLabel, KList.concatenate(), termContext)), termContext);
+                    if (isKSeq(otherTerm)) {
+                        term = upKSeq(term);
                     }
                 }
 
@@ -219,8 +217,25 @@ public abstract class AbstractUnifier implements Unifier {
         return !failed;
     }
 
-    private static boolean isKSeq(Term term) {
+    public static boolean isKSeq(Term term) {
         return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+    }
+
+    private static boolean isKSeqVar(Term term) {
+        return term instanceof Variable && term.sort().equals(Sort.KSEQUENCE);
+    }
+
+    private Term upKSeq(Term otherTerm) {
+        if (!isKSeq(otherTerm) && !isKSeqVar(otherTerm))
+            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), termContext);
+        return otherTerm;
+    }
+
+    private Term getCanonicalKSeq(Term term) {
+        return stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                .map(Term.class::cast)
+                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext))
+                .orElse(kDot);
     }
 
     private void flushTaskBuffer() {

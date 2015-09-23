@@ -30,7 +30,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   val isRule = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    if (!m.rules.isEmpty) {
+    if (m.rules.nonEmpty) {
       val topRules = m.rules filter { r => r.body match {
         case app: KApply => app.klabel.name == "<T>"
         case _ => false
@@ -60,25 +60,26 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   }
 
   def pushDisjunction(terms: Set[(K, K)]): K = {
-    val disjunctionOfKApplies: Iterable[(K, K)] = terms
+    val normalizedTerms: Set[(K, K)] = terms map { p => (normalizeKSeq(p._1), p._2)}
+    val disjunctionOfKApplies: Iterable[(K, K)] = normalizedTerms
       .collect({ case (x: KApply, ruleP) => (x, ruleP) })
       .groupBy(_._1.klabel)
       .map { case (klabel: KLabel, ks: Set[(KApply, K)]) => {
-        if (ks.size > 1) {
-          val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
-          val childrenDisjunctionsOfklabel: IndexedSeq[K] =
-            setOfLists.head.indices
-              .map(i => setOfLists.map(_ (i)))
-              .map(pushDisjunction)
-          val rulePs = ks map { _._2 } toSeq
+      if (ks.size > 1) {
+        val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+        val childrenDisjunctionsOfklabel: IndexedSeq[K] =
+          setOfLists.head.indices
+            .map(i => setOfLists.map(_(i)))
+            .map(pushDisjunction)
+        val rulePs = ks map { _._2 } toSeq
 
-          (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
-        } else
-          (ks.head._1, ks.head._2)
-      }
-      }
+        (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
+      } else
+        (ks.head._1, ks.head._2)
+    }
+    }
 
-    val disjunctionOfOthers: Iterable[(K, K)] = terms.filterNot(_._1.isInstanceOf[KApply])
+    val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
       .groupBy(_._1)
       .map({ case (k, set) => (k, set.map(_._2)) })
       .map({ case (k, rulePs) => (k, makeOr(rulePs.toSeq: _*)) })
@@ -89,4 +90,6 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     else
       makeOr(entireDisjunction.map({ case (a, b) => and(a, b) }).toSeq: _*)
   }
+
+  def normalizeKSeq(k: K): K = Assoc.flatten(KLabel(KLabels.KSEQ), Seq(k), KLabel(KLabels.DOTK)) reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() }
 }

@@ -19,6 +19,7 @@ import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.backend.java.util.JavaTransition;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunGraph;
@@ -77,7 +78,7 @@ public class SymbolicRewriter {
         }
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
-            computeRewriteStep(constrainedTerm, true);
+            fastComputeRewriteStep(constrainedTerm, true);
             ConstrainedTerm result = getTransition(0);
             KRunState finalState = null;
             if (result != null) {
@@ -197,7 +198,14 @@ public class SymbolicRewriter {
 
     private void fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         results.clear();
-
+        List<Pair<Substitution<Variable, Term>, Integer>> matches = new FastRuleMatcher(subject.termContext()).mainMatch(subject.term(), definition.automaton.leftHandSide(), definition.ruleTable.keySet());
+        matches.stream()
+                .map(p -> Pair.of(p.getLeft(), definition.ruleTable.get(p.getRight())))
+                .map(p -> Pair.of(RewriteEngineUtils.evaluateConditions(p.getRight(), p.getLeft(), subject.termContext()), p.getRight()))
+                .filter(p -> p.getLeft() != null)
+                .map(p -> p.getRight().rightHandSide().substituteAndEvaluate(p.getLeft(), subject.termContext()))
+                .map(t -> new ConstrainedTerm(t, subject.termContext()))
+                .forEach(results::add);
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {

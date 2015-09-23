@@ -7,6 +7,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.symbolic.AbstractUnifier;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
@@ -22,6 +23,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
+
 import static org.kframework.Collections.*;
 
 import java.util.Collections;
@@ -42,10 +44,18 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Definition definition;
     private final TermContext context;
 
+    private final KLabelConstant kSeqLabel;
+    private final KLabelConstant kDotLabel;
+    private final KItem kDot;
+
     public KOREtoBackendKIL(Module module, Definition definition, TermContext context) {
         this.module = module;
         this.definition = definition;
         this.context = context;
+
+        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, context.definition());
+        kDotLabel = KLabelConstant.of(KLabels.DOTK, context.definition());
+        kDot = KItem.of(kDotLabel, KList.concatenate(), context);
     }
 
     @Override
@@ -77,14 +87,25 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
         if (klabel.name().equals(KLabels.ML_OR)) {
-            return new RuleAutomatonDisjunction(klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()));
+            return new RuleAutomatonDisjunction(
+                    klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()),
+                    context);
         }
-        return KItem.of(convert(klabel), KList(klist.items()), context);
+
+        KItem kItem = KItem.of(convert(klabel), KList(klist.items()), context);
+        if (AbstractUnifier.isKSeq(kItem)) {
+            return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
+                    .map(Term.class::cast)
+                    .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), context))
+                    .get();
+        } else {
+            return kItem;
+        }
     }
 
-    private static Set<Integer> getRuleSet(KApply k) {
-        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(kk -> (KApply) kk).collect(Collectors.toSet()) : Collections.singleton(k);
-        return rulePs.stream().map(kk -> Integer.valueOf(((KToken) kk.klist().items().get(0)).s())).collect(Collectors.toSet());
+    private Set<Integer> getRuleSet(KApply k) {
+        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
+        return rulePs.stream().map(kk -> definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()))).collect(Collectors.toSet());
     }
 
     @Override

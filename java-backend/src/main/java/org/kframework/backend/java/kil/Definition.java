@@ -30,6 +30,7 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.kore.KApply;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.Sort;
@@ -122,6 +124,11 @@ public class Definition extends JavaSymbolicObject {
 
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
+
+    // new indexing data
+    public Rule automaton = null;
+    public Map<Integer, Rule> ruleTable = new HashMap<>();
+    public Map<Integer, Integer> reverseRuleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
@@ -284,18 +291,37 @@ public class Definition extends JavaSymbolicObject {
 
     public void addKoreRules(Module module, TermContext termContext) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext);
-        JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
-            if (s instanceof org.kframework.definition.Rule) {
-                addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));
+        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
+                .filter(org.kframework.definition.Rule.class::isInstance)
+                .map(org.kframework.definition.Rule.class::cast)
+                .collect(Collectors.toList());
+        koreRules.forEach(r -> {
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+                if (!r.att().contains("automaton")) {
+                    reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
+                }
+            }
+        });
+        koreRules.forEach(r -> {
+            Rule convertedRule = transformer.convert(Optional.of(module), r);
+            addRule(convertedRule);
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+                if (!r.att().contains("automaton")) {
+                    ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
+                } else {
+                    automaton = convertedRule;
+                }
             }
         });
     }
 
     @Inject
-    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
+    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData, Map<Integer, Rule> ruleTable, Rule automaton) {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.ruleTable = ruleTable;
+        this.automaton = automaton;
 
         this.definitionData = definitionData;
         this.context = null;

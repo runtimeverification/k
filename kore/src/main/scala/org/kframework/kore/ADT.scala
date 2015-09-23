@@ -24,11 +24,12 @@ object ADT {
 
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence with kore.KApply {
     val items: java.util.List[K] = elements.asJava
-    val klabel = KLabel(if (items.isEmpty) KLabels.DOTK else KLabels.KSEQ)
-    val klist = items.asScala.toList match {
-      case List() => KList(List())
-      case head +: tail => KList(List(head, KSequence(tail)))
+    val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
+      case k: kore.KApply => k
+      case _ => ???
     }
+    val klabel: kore.KLabel = kApply.klabel
+    val klist: kore.KList = kApply.klist
 
     def iterator: Iterator[K] = elements.iterator
 

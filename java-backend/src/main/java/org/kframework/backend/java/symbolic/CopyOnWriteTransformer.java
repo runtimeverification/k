@@ -122,11 +122,11 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
-        Stream<Pair<Term, Set<Integer>>> pairStream = ruleAutomatonDisjunction.disjunctions().stream()
-                .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()));
-        List<Pair<Term, Set<Integer>>> collect = pairStream
-                .collect(Collectors.toList());
-        return new RuleAutomatonDisjunction(collect);
+        return new RuleAutomatonDisjunction(
+                ruleAutomatonDisjunction.disjunctions().stream()
+                        .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
+                        .collect(Collectors.toList()),
+                context);
     }
 
     @Override
