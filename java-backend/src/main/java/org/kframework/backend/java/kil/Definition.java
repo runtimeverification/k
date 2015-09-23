@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.Sort;
@@ -127,6 +128,7 @@ public class Definition extends JavaSymbolicObject {
     // new indexing data
     public Rule automaton = null;
     public Map<Integer, Rule> ruleTable = new HashMap<>();
+    public Map<Integer, Integer> reverseRuleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
@@ -289,16 +291,25 @@ public class Definition extends JavaSymbolicObject {
 
     public void addKoreRules(Module module, TermContext termContext) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext);
-        JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
-            if (s instanceof org.kframework.definition.Rule) {
-                Rule convertedRule = transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s);
-                addRule(convertedRule);
-                if (((org.kframework.definition.Rule) s).body() instanceof KApply && ((KApply) ((org.kframework.definition.Rule) s).body()).klabel().name().equals("<T>")) {
-                    if (s.att().contains("automaton")) {
-                        automaton = convertedRule;
-                    } else {
-                        ruleTable.put(s.hashCode(), convertedRule);
-                    }
+        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
+                .filter(org.kframework.definition.Rule.class::isInstance)
+                .map(org.kframework.definition.Rule.class::cast)
+                .collect(Collectors.toList());
+        koreRules.forEach(r -> {
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+                if (!r.att().contains("automaton")) {
+                    reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
+                }
+            }
+        });
+        koreRules.forEach(r -> {
+            Rule convertedRule = transformer.convert(Optional.of(module), r);
+            addRule(convertedRule);
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+                if (!r.att().contains("automaton")) {
+                    ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
+                } else {
+                    automaton = convertedRule;
                 }
             }
         });

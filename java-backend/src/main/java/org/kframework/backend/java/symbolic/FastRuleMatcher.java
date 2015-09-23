@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.Assoc;
+
 import static org.kframework.Collections.*;
 
 import java.util.Collections;
@@ -66,13 +67,15 @@ public class FastRuleMatcher {
                 }
             }
 
-            Pair<KItem, Set<Integer>> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
-            if (pSeq != null) {
-                Set<Integer> localRuleMaskSeq = Sets.intersection(ruleMask, pSeq.getRight());
-                if (!localRuleMaskSeq.isEmpty()) {
-                    localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq);
+            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
+                Pair<KItem, Set<Integer>> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
+                if (pSeq != null) {
+                    Set<Integer> localRuleMaskSeq = Sets.intersection(ruleMask, pSeq.getRight());
+                    if (!localRuleMaskSeq.isEmpty()) {
+                        localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq);
+                    }
+                    returnSet = Sets.union(returnSet, localRuleMaskSeq);
                 }
-                returnSet = Sets.union(returnSet, localRuleMaskSeq);
             }
 
             if (subject instanceof KItem) {

@@ -103,9 +103,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         }
     }
 
-    private static Set<Integer> getRuleSet(KApply k) {
-        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(kk -> (KApply) kk).collect(Collectors.toSet()) : Collections.singleton(k);
-        return rulePs.stream().map(kk -> Integer.valueOf(((KToken) kk.klist().items().get(0)).s())).collect(Collectors.toSet());
+    private Set<Integer> getRuleSet(KApply k) {
+        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
+        return rulePs.stream().map(kk -> definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()))).collect(Collectors.toSet());
     }
 
     @Override

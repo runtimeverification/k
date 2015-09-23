@@ -30,7 +30,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   val isRule = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    if (!m.rules.isEmpty) {
+    if (m.rules.nonEmpty) {
       val topRules = m.rules filter { r => r.body match {
         case app: KApply => app.klabel.name == "<T>"
         case _ => false
