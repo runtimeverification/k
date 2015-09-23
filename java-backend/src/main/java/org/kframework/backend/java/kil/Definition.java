@@ -30,6 +30,7 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.kore.KApply;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -122,6 +123,10 @@ public class Definition extends JavaSymbolicObject {
 
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
+
+    // new indexing data
+    public Rule automaton = null;
+    public Map<Integer, Rule> ruleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
@@ -286,16 +291,26 @@ public class Definition extends JavaSymbolicObject {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext);
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
-                addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));
+                Rule convertedRule = transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s);
+                addRule(convertedRule);
+                if (((org.kframework.definition.Rule) s).body() instanceof KApply && ((KApply) ((org.kframework.definition.Rule) s).body()).klabel().name().equals("<T>")) {
+                    if (s.att().contains("automaton")) {
+                        automaton = convertedRule;
+                    } else {
+                        ruleTable.put(s.hashCode(), convertedRule);
+                    }
+                }
             }
         });
     }
 
     @Inject
-    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
+    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData, Map<Integer, Rule> ruleTable, Rule automaton) {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.ruleTable = ruleTable;
+        this.automaton = automaton;
 
         this.definitionData = definitionData;
         this.context = null;

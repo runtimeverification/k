@@ -16,28 +16,30 @@ import java.util.stream.Collectors;
 
 public class RuleAutomatonDisjunction extends Term {
 
-    private final Map<KLabelConstant, Pair<Term, Set<Integer>>> kItemDisjunctions;
-    private final Map<Sort, List<Pair<Variable, Set<Integer>>>> variableDisjunctions;
+    private final Map<KLabelConstant, Pair<KItem, Set<Integer>>> kItemDisjunctions;
+    private final Map<Sort, Set<Pair<Variable, Set<Integer>>>> variableDisjunctions;
     private final Map<Token, Pair<Token, Set<Integer>>> tokenDisjunctions;
 
-    public RuleAutomatonDisjunction(List<Pair<Term, Set<Integer>>> children) {
+    public RuleAutomatonDisjunction(List<Pair<Term, Set<Integer>>> children, TermContext context) {
         super(Kind.KITEM);
         this.kItemDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
-                .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> p));
-        this.variableDisjunctions = (Map<Sort, List<Pair<Variable, Set<Integer>>>>) (Object) children.stream()
-                .filter(p -> p.getLeft() instanceof Variable)
-                .collect(Collectors.groupingBy(p -> p.getLeft().sort()));
+                .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> (Pair<KItem, Set<Integer>>) (Object) p));
+        this.variableDisjunctions = context.definition().allSorts().stream().collect(Collectors.toMap(
+                s -> s,
+                s -> (Set<Pair<Variable, Set<Integer>>>) (Object) children.stream()
+                        .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
+                        .collect(Collectors.toSet())));
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, Set<Integer>>) (Object) p));
     }
 
-    public Map<KLabelConstant, Pair<Term, Set<Integer>>> kItemDisjunctions() {
+    public Map<KLabelConstant, Pair<KItem, Set<Integer>>> kItemDisjunctions() {
         return kItemDisjunctions;
     }
 
-    public Map<Sort, List<Pair<Variable, Set<Integer>>>> variableDisjunctions() {
+    public Map<Sort, Set<Pair<Variable, Set<Integer>>>> variableDisjunctions() {
         return variableDisjunctions;
     }
 
@@ -47,9 +49,9 @@ public class RuleAutomatonDisjunction extends Term {
 
     public List<Pair<Term, Set<Integer>>> disjunctions() {
         List<Pair<Term, Set<Integer>>> disjunctions = new ArrayList<>();
-        disjunctions.addAll(kItemDisjunctions.values());
-        ((Map<Sort, List<Pair<Term, Set<Integer>>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
-        disjunctions.addAll((java.util.Collection<? extends Pair<Term, Set<Integer>>>) (Object) tokenDisjunctions.values());
+        disjunctions.addAll((java.util.Collection<Pair<Term, Set<Integer>>>) (Object) kItemDisjunctions.values());
+        ((Map<Sort, Set<Pair<Term, Set<Integer>>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
+        disjunctions.addAll((java.util.Collection<Pair<Term, Set<Integer>>>) (Object) tokenDisjunctions.values());
         return disjunctions;
     }
 

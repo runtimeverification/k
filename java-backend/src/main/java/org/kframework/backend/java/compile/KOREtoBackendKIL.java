@@ -87,7 +87,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
         if (klabel.name().equals(KLabels.ML_OR)) {
-            return new RuleAutomatonDisjunction(klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()));
+            return new RuleAutomatonDisjunction(
+                    klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()),
+                    context);
         }
 
         KItem kItem = KItem.of(convert(klabel), KList(klist.items()), context);

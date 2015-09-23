@@ -58,23 +58,37 @@ public class FastRuleMatcher {
             Set<Integer> returnSet = Collections.emptySet();
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
 
-            for (Pair<Variable, Set<Integer>> p : automatonDisjunction.variableDisjunctions().get(subject.sort())) {
+            Set<Pair<Variable, Set<Integer>>> pairs = automatonDisjunction.variableDisjunctions().get(subject.sort());
+            for (Pair<Variable, Set<Integer>> p : pairs) {
                 Set<Integer> localRuleMask = Sets.intersection(ruleMask, p.getRight());
-                if (localRuleMask.isEmpty()) {
+                if (!localRuleMask.isEmpty()) {
                     returnSet = Sets.union(returnSet, add(p.getLeft(), subject, localRuleMask));
                 }
             }
 
-            if (subject instanceof KItem) {
-                Pair<Term, Set<Integer>> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
-                Set<Integer> localRuleMask = Sets.intersection(ruleMask, p.getRight());
-                if (!localRuleMask.isEmpty()) {
-                    localRuleMask = match(subject, p.getLeft(), localRuleMask);
+            Pair<KItem, Set<Integer>> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
+            if (pSeq != null) {
+                Set<Integer> localRuleMaskSeq = Sets.intersection(ruleMask, pSeq.getRight());
+                if (!localRuleMaskSeq.isEmpty()) {
+                    localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq);
                 }
-                returnSet = Sets.union(returnSet, localRuleMask);
+                returnSet = Sets.union(returnSet, localRuleMaskSeq);
+            }
+
+            if (subject instanceof KItem) {
+                Pair<KItem, Set<Integer>> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
+                if (p != null) {
+                    Set<Integer> localRuleMask = Sets.intersection(ruleMask, p.getRight());
+                    if (!localRuleMask.isEmpty()) {
+                        localRuleMask = match(subject, p.getLeft(), localRuleMask);
+                    }
+                    returnSet = Sets.union(returnSet, localRuleMask);
+                }
             } else if (subject instanceof Token) {
                 Pair<Token, Set<Integer>> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
-                returnSet = Sets.union(returnSet, Sets.intersection(ruleMask, p.getRight()));
+                if (p != null) {
+                    returnSet = Sets.union(returnSet, Sets.intersection(ruleMask, p.getRight()));
+                }
             }
 
             return returnSet;
@@ -110,7 +124,7 @@ public class FastRuleMatcher {
             assert subjectKList.size() == patternKList.size();
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
-                ruleMask = match(subjectKList.get(0), patternKList.get(0), ruleMask);
+                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask);
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
                 }
