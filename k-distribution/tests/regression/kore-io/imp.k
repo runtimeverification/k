@@ -106,6 +106,8 @@ module IMP
        <in> ListItem(I:Int) => .List ...</in>
        [read]
 
+  // TODO(DaejunP): fix sort lattice issue
+  syntax KResult ::= Printable
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
   rule <k> print(P:Printable); => .K ...</k>
