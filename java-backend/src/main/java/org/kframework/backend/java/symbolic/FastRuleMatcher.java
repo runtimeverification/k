@@ -194,9 +194,8 @@ public class FastRuleMatcher {
     }
 
     private Term getCanonicalKSeq(Term term) {
-        return stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
-                .map(Term.class::cast)
-                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), context))
+        return (Term) stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate((Term) b, (Term) a), context))
                 .orElse(kDot);
     }
 
