@@ -10,6 +10,7 @@ import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.definition.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -17,6 +18,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by dwightguth on 5/6/15.
@@ -112,7 +115,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext));
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
@@ -126,7 +129,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext));
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
@@ -139,6 +142,37 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
             K res = execute(k, depth).k();
             return Tuple2.apply(res, match(res, rule));
+        }
+
+        @Override
+        public List<K> prove(List<Rule> rules) {
+            TermContext context = TermContext.of(rewritingContext);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, context, false);
+            List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
+                    .map(r -> converter.convert(Optional.<Module>empty(), r))
+                    .collect(Collectors.toList());
+            List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
+                    .map(r -> r.getFreshRule(context))
+                    .collect(Collectors.toList());
+
+            List<ConstrainedTerm> proofResults = javaRules.stream()
+                    .filter(r -> !r.containsAttribute(Attribute.TRUSTED_KEY))
+                    .flatMap(r -> {
+                        //context.setCounter(counter);
+                        ConstrainedTerm initialTerm = new ConstrainedTerm(
+                                r.leftHandSide(),
+                                ConjunctiveFormula.of(context).addAll(r.requires()));
+                        ConstrainedTerm targetTerm = new ConstrainedTerm(
+                                r.rightHandSide(),
+                                ConjunctiveFormula.of(context).addAll(r.ensures()));
+                        return rewriter.proveRule(initialTerm, targetTerm, allRules).stream();
+                    })
+                    .collect(Collectors.toList());
+
+            return proofResults.stream()
+                    .map(ConstrainedTerm::term)
+                    .map(t -> (KItem) t)
+                    .collect(Collectors.toList());
         }
 
     }

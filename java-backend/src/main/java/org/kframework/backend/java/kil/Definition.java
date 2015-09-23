@@ -236,7 +236,7 @@ public class Definition extends JavaSymbolicObject {
                 JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
                         e -> Sort.of(e.getKey().name()),
                         e -> e.getValue().name())),
-                null,
+                Collections.emptyMap(),
                 configurationInfo.getCellSorts().stream().collect(Collectors.toMap(
                         s -> CellLabel.of(configurationInfo.getCellLabel(s).name()),
                         configurationInfo::getMultiplicity)),
@@ -283,7 +283,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext);
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, true);
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
                 addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));

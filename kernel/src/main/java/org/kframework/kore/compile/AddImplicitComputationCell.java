@@ -3,8 +3,10 @@ package org.kframework.kore.compile;
 
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public class AddImplicitComputationCell implements UnaryOperator<K> {
+public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
 
     private final ConfigurationInfo cfg;
     private final LabelInfo labelInfo;
@@ -24,7 +26,23 @@ public class AddImplicitComputationCell implements UnaryOperator<K> {
         this.labelInfo = labelInfo;
     }
 
-    public K apply(K term) {
+    public Sentence apply(Sentence s) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ANYWHERE_KEY)) {
+            return s;
+        }
+
+        if (s instanceof Rule) {
+            Rule rule = (Rule) s;
+            return new Rule(apply(rule.body()), rule.requires(), rule.ensures(), rule.att());
+        } else if (s instanceof Context) {
+            Context context = (Context) s;
+            return new Context(apply(context.body()), context.requires(), context.att());
+        } else {
+            return s;
+        }
+    }
+
+    private K apply(K term) {
         if (labelInfo.isFunction(term)) return term;
 
         List<K> items = IncompleteCellUtils.flattenCells(term);
@@ -47,7 +65,7 @@ public class AddImplicitComputationCell implements UnaryOperator<K> {
         return IncompleteCellUtils.make(computation, false, item, true);
     }
 
-    protected boolean isCell(K k) {
+    private boolean isCell(K k) {
         return k instanceof KApply
                 && cfg.isCell(labelInfo.getCodomain(((KApply) k).klabel()));
     }
