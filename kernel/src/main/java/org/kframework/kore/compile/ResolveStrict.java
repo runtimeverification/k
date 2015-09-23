@@ -8,6 +8,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
@@ -29,6 +30,12 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveStrict {
 
+    private final KompileOptions kompileOptions;
+
+    public ResolveStrict(KompileOptions kompileOptions) {
+        this.kompileOptions = kompileOptions;
+    }
+
     public Set<Sentence> resolve(Set<Production> strictProductions) {
         Set<Sentence> sentences = new HashSet<>();
         for (Production prod : strictProductions) {
@@ -44,9 +51,6 @@ public class ResolveStrict {
         }
         return sentences;
     }
-
-    // NOTE: HOLE should have a proper sort instead of a general one
-    //public static final KApply HOLE = KApply(KLabel("#SemanticCastToKItem"), KVariable("HOLE"));
 
     private static KApply cast(Sort sort, K k) {
         return KApply(KLabel("#SemanticCastTo" + sort.name()), k);
@@ -86,10 +90,20 @@ public class ResolveStrict {
         for (int i = 0; i < strictnessPositions.size(); i++) {
             List<K> items = new ArrayList<>();
             for (int j = 0; j < arity; j++) {
-                items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                if (kompileOptions.strict()) {
+                    // Preserve sort information of the production
+                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                } else {
+                    items.add(KVariable("K" + j));
+                }
             }
             int strictnessPosition = strictnessPositions.get(i) - 1;
-            items.set(strictnessPosition, cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE")));
+            if (kompileOptions.strict()) {
+                // Preserve sort information of the production
+                items.set(strictnessPosition, cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE")));
+            } else {
+                items.set(strictnessPosition, cast(Sort("KItem"), KVariable("HOLE")));
+            }
 
             // is seqstrict the elements before the argument should be KResult
             Optional<KApply> sideCondition = strictnessPositions.subList(0, i).stream().map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
