@@ -7,6 +7,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,42 +17,42 @@ import java.util.stream.Collectors;
 
 public class RuleAutomatonDisjunction extends Term {
 
-    private final Map<KLabelConstant, Pair<KItem, Set<Integer>>> kItemDisjunctions;
-    private final Map<Sort, Set<Pair<Variable, Set<Integer>>>> variableDisjunctions;
-    private final Map<Token, Pair<Token, Set<Integer>>> tokenDisjunctions;
+    private final Map<KLabelConstant, Pair<KItem, BitSet>> kItemDisjunctions;
+    private final Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions;
+    private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
 
-    public RuleAutomatonDisjunction(List<Pair<Term, Set<Integer>>> children, TermContext context) {
+    public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
         this.kItemDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
-                .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> (Pair<KItem, Set<Integer>>) (Object) p));
+                .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> (Pair<KItem, BitSet>) (Object) p));
         this.variableDisjunctions = context.definition().allSorts().stream().collect(Collectors.toMap(
                 s -> s,
-                s -> (Set<Pair<Variable, Set<Integer>>>) (Object) children.stream()
+                s -> (Set<Pair<Variable, BitSet>>) (Object) children.stream()
                         .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
                         .collect(Collectors.toSet())));
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
-                .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, Set<Integer>>) (Object) p));
+                .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
     }
 
-    public Map<KLabelConstant, Pair<KItem, Set<Integer>>> kItemDisjunctions() {
+    public Map<KLabelConstant, Pair<KItem, BitSet>> kItemDisjunctions() {
         return kItemDisjunctions;
     }
 
-    public Map<Sort, Set<Pair<Variable, Set<Integer>>>> variableDisjunctions() {
+    public Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions() {
         return variableDisjunctions;
     }
 
-    public Map<Token, Pair<Token, Set<Integer>>> tokenDisjunctions() {
+    public Map<Token, Pair<Token, BitSet>> tokenDisjunctions() {
         return tokenDisjunctions;
     }
 
-    public List<Pair<Term, Set<Integer>>> disjunctions() {
-        List<Pair<Term, Set<Integer>>> disjunctions = new ArrayList<>();
-        disjunctions.addAll((java.util.Collection<Pair<Term, Set<Integer>>>) (Object) kItemDisjunctions.values());
-        ((Map<Sort, Set<Pair<Term, Set<Integer>>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
-        disjunctions.addAll((java.util.Collection<Pair<Term, Set<Integer>>>) (Object) tokenDisjunctions.values());
+    public List<Pair<Term, BitSet>> disjunctions() {
+        List<Pair<Term, BitSet>> disjunctions = new ArrayList<>();
+        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) kItemDisjunctions.values());
+        ((Map<Sort, Set<Pair<Term, BitSet>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
+        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) tokenDisjunctions.values());
         return disjunctions;
     }
 

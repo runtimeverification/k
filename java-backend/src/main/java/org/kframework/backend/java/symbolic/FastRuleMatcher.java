@@ -15,6 +15,7 @@ import org.kframework.kore.Assoc;
 
 import static org.kframework.Collections.*;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class FastRuleMatcher {
         kDot = KItem.of(kDotLabel, KList.concatenate(), context);
     }
 
-    public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, Set<Integer> ruleMask) {
+    public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask) {
         SymbolicRewriter.matchStopwatch.start();
         assert subject.isGround();
 
@@ -52,11 +53,16 @@ public class FastRuleMatcher {
         ruleMask.stream().forEach(i -> substitutions.put(i, ConjunctiveFormula.of(context)));
         empty = new BitSet(ruleMask.size());
 
-        List<Pair<Substitution<Variable, Term>, Integer>> collect = match(subject, pattern, ruleMask).stream()
-                .map(i -> Pair.of(substitutions.get(i).substitution(), i))
-                .collect(Collectors.toList());
+        BitSet theMatchingRules = match(subject, pattern, ruleMask);
+
+        List<Pair<Substitution<Variable, Term>, Integer>> theResult = new ArrayList<>();
+
+        for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i+1)) {
+            theResult.add(Pair.of(substitutions.get(i).substitution(), i));
+        }
+
         SymbolicRewriter.matchStopwatch.stop();
-        return collect;
+        return theResult;
     }
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask) {
@@ -65,8 +71,8 @@ public class FastRuleMatcher {
             BitSet returnSet = new BitSet(ruleMask.size());
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
 
-            Set<Pair<Variable, Set<Integer>>> pairs = automatonDisjunction.variableDisjunctions().get(subject.sort());
-            for (Pair<Variable, Set<Integer>> p : pairs) {
+            Set<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctions().get(subject.sort());
+            for (Pair<Variable, BitSet> p : pairs) {
                 BitSet localRuleMask = ((BitSet) ruleMask.clone());
                 localRuleMask.and(p.getRight());
                 if (!localRuleMask.isEmpty()) {
@@ -75,7 +81,7 @@ public class FastRuleMatcher {
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                Pair<KItem, Set<Integer>> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
+                Pair<KItem, BitSet> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
                 if (pSeq != null) {
                     BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
                     localRuleMaskSeq.and(pSeq.getRight());
@@ -87,7 +93,7 @@ public class FastRuleMatcher {
             }
 
             if (subject instanceof KItem) {
-                Pair<KItem, Set<Integer>> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
+                Pair<KItem, BitSet> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
                 if (p != null) {
                     BitSet localRuleMask = ((BitSet) ruleMask.clone());
                     localRuleMask.and(p.getRight());
@@ -97,7 +103,7 @@ public class FastRuleMatcher {
                     returnSet.or(localRuleMask);
                 }
             } else if (subject instanceof Token) {
-                Pair<Token, Set<Integer>> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
+                Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
                     BitSet localRuleMask = ((BitSet) ruleMask.clone());
                     localRuleMask.and(p.getRight());
@@ -161,10 +167,15 @@ public class FastRuleMatcher {
             return empty;
         }
 
-        return ruleMask.nextSetBit()  .stream()
-                .peek(i -> substitutions.put(i, substitutions.get(i).unsafeAddVariableBinding(variable, term)))
-                .filter(i -> !substitutions.get(i).isFalse())
-                .collect(Collectors.toSet());
+        BitSet nonConflictualBitset = new BitSet();
+        for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i+1)) {
+            substitutions.put(i, substitutions.get(i).unsafeAddVariableBinding(variable, term));
+            if(!substitutions.get(i).isFalse()) {
+                nonConflictualBitset.set(i);
+            }
+        }
+
+        return nonConflictualBitset;
     }
 
 

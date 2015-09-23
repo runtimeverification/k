@@ -43,6 +43,7 @@ public class SymbolicRewriter {
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+    private final BitSet allRuleBits;
     private int step;
     private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
@@ -60,6 +61,8 @@ public class SymbolicRewriter {
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
         this.definition = definition;
+        this.allRuleBits = new BitSet(definition.ruleTable.size());
+        this.allRuleBits.flip(0, definition.ruleTable.size());
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
         this.counter = counter;
@@ -191,7 +194,7 @@ public class SymbolicRewriter {
 
     private void fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         results.clear();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = new FastRuleMatcher(subject.termContext()).mainMatch(subject.term(), definition.automaton.leftHandSide(), definition.ruleTable.keySet());
+        List<Pair<Substitution<Variable, Term>, Integer>> matches = new FastRuleMatcher(subject.termContext()).mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
         matches.stream()
                 .map(p -> Pair.of(p.getLeft(), definition.ruleTable.get(p.getRight())))
                 .map(p -> Pair.of(RewriteEngineUtils.evaluateConditions(p.getRight(), p.getLeft(), subject.termContext()), p.getRight()))

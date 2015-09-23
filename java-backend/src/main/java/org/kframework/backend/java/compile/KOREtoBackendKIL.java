@@ -26,6 +26,7 @@ import org.kframework.kore.convertors.KOREtoKIL;
 
 import static org.kframework.Collections.*;
 
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -103,9 +104,11 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         }
     }
 
-    private Set<Integer> getRuleSet(KApply k) {
+    private BitSet getRuleSet(KApply k) {
+        BitSet theRuleSetIndices = new BitSet();
         Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
-        return rulePs.stream().map(kk -> definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()))).collect(Collectors.toSet());
+        rulePs.stream().map(kk -> definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()))).forEach(theRuleSetIndices::set);
+        return theRuleSetIndices;
     }
 
     @Override
