@@ -29,7 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class FastRuleMatcher {
 
-    private Map<Integer, ConjunctiveFormula> substitutions = new HashMap<>();
+    private ConjunctiveFormula[] substitutions;
     private BitSet empty;
 
     private final TermContext context;
@@ -49,16 +49,16 @@ public class FastRuleMatcher {
         SymbolicRewriter.matchStopwatch.start();
         assert subject.isGround();
 
-        substitutions.clear();
-        ruleMask.stream().forEach(i -> substitutions.put(i, ConjunctiveFormula.of(context)));
+        substitutions = new ConjunctiveFormula[ruleMask.length()];
+        ruleMask.stream().forEach(i -> substitutions[i] = ConjunctiveFormula.of(context));
         empty = new BitSet(ruleMask.size());
 
         BitSet theMatchingRules = match(subject, pattern, ruleMask);
 
         List<Pair<Substitution<Variable, Term>, Integer>> theResult = new ArrayList<>();
 
-        for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i+1)) {
-            theResult.add(Pair.of(substitutions.get(i).substitution(), i));
+        for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
+            theResult.add(Pair.of(substitutions[i].substitution(), i));
         }
 
         SymbolicRewriter.matchStopwatch.stop();
@@ -168,9 +168,9 @@ public class FastRuleMatcher {
         }
 
         BitSet nonConflictualBitset = new BitSet();
-        for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i+1)) {
-            substitutions.put(i, substitutions.get(i).unsafeAddVariableBinding(variable, term));
-            if(!substitutions.get(i).isFalse()) {
+        for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
+            substitutions[i] = substitutions[i].unsafeAddVariableBinding(variable, term);
+            if (!substitutions[i].isFalse()) {
                 nonConflictualBitset.set(i);
             }
         }
