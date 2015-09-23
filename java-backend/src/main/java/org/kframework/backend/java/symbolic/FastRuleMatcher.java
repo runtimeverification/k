@@ -15,6 +15,7 @@ import org.kframework.kore.Assoc;
 
 import static org.kframework.Collections.*;
 
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class FastRuleMatcher {
 
     private Map<Integer, ConjunctiveFormula> substitutions = new HashMap<>();
+    private BitSet empty;
 
     private final TermContext context;
 
@@ -43,54 +45,63 @@ public class FastRuleMatcher {
     }
 
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, Set<Integer> ruleMask) {
+        SymbolicRewriter.matchStopwatch.start();
         assert subject.isGround();
 
         substitutions.clear();
         ruleMask.stream().forEach(i -> substitutions.put(i, ConjunctiveFormula.of(context)));
+        empty = new BitSet(ruleMask.size());
 
-        return match(subject, pattern, ruleMask).stream()
+        List<Pair<Substitution<Variable, Term>, Integer>> collect = match(subject, pattern, ruleMask).stream()
                 .map(i -> Pair.of(substitutions.get(i).substitution(), i))
                 .collect(Collectors.toList());
+        SymbolicRewriter.matchStopwatch.stop();
+        return collect;
     }
 
-    private Set<Integer> match(Term subject, Term pattern, Set<Integer> ruleMask) {
+    private BitSet match(Term subject, Term pattern, BitSet ruleMask) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
-            Set<Integer> returnSet = Collections.emptySet();
+            BitSet returnSet = new BitSet(ruleMask.size());
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
 
             Set<Pair<Variable, Set<Integer>>> pairs = automatonDisjunction.variableDisjunctions().get(subject.sort());
             for (Pair<Variable, Set<Integer>> p : pairs) {
-                Set<Integer> localRuleMask = Sets.intersection(ruleMask, p.getRight());
+                BitSet localRuleMask = ((BitSet) ruleMask.clone());
+                localRuleMask.and(p.getRight());
                 if (!localRuleMask.isEmpty()) {
-                    returnSet = Sets.union(returnSet, add(p.getLeft(), subject, localRuleMask));
+                    returnSet.or(add(p.getLeft(), subject, localRuleMask));
                 }
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
                 Pair<KItem, Set<Integer>> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
                 if (pSeq != null) {
-                    Set<Integer> localRuleMaskSeq = Sets.intersection(ruleMask, pSeq.getRight());
+                    BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
+                    localRuleMaskSeq.and(pSeq.getRight());
                     if (!localRuleMaskSeq.isEmpty()) {
                         localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq);
                     }
-                    returnSet = Sets.union(returnSet, localRuleMaskSeq);
+                    returnSet.or(localRuleMaskSeq);
                 }
             }
 
             if (subject instanceof KItem) {
                 Pair<KItem, Set<Integer>> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
                 if (p != null) {
-                    Set<Integer> localRuleMask = Sets.intersection(ruleMask, p.getRight());
+                    BitSet localRuleMask = ((BitSet) ruleMask.clone());
+                    localRuleMask.and(p.getRight());
                     if (!localRuleMask.isEmpty()) {
                         localRuleMask = match(subject, p.getLeft(), localRuleMask);
                     }
-                    returnSet = Sets.union(returnSet, localRuleMask);
+                    returnSet.or(localRuleMask);
                 }
             } else if (subject instanceof Token) {
                 Pair<Token, Set<Integer>> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
-                    returnSet = Sets.union(returnSet, Sets.intersection(ruleMask, p.getRight()));
+                    BitSet localRuleMask = ((BitSet) ruleMask.clone());
+                    localRuleMask.and(p.getRight());
+                    returnSet.or(localRuleMask);
                 }
             }
 
@@ -121,7 +132,7 @@ public class FastRuleMatcher {
             KList patternKList = (KList) ((KItem) pattern).kList();
 
             if (subjectKLabel != patternKLabel) {
-                return Collections.emptySet();
+                return empty;
             }
 
             assert subjectKList.size() == patternKList.size();
@@ -135,22 +146,22 @@ public class FastRuleMatcher {
             return ruleMask;
         } else if (subject instanceof Token && pattern instanceof Token) {
             // TODO: make tokens unique?
-            return subject.equals(pattern) ? ruleMask : Collections.emptySet();
+            return subject.equals(pattern) ? ruleMask : empty;
         } else {
             throw new AssertionError("unexpected class at matching");
         }
     }
 
-    private Set<Integer> add(Variable variable, Term term, Set<Integer> ruleMask) {
+    private BitSet add(Variable variable, Term term, BitSet ruleMask) {
         if (variable.equals(term)) {
             return ruleMask;
         }
 
         if (!context.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
-            return Collections.emptySet();
+            return empty;
         }
 
-        return ruleMask.stream()
+        return ruleMask.nextSetBit()  .stream()
                 .peek(i -> substitutions.put(i, substitutions.get(i).unsafeAddVariableBinding(variable, term)))
                 .filter(i -> !substitutions.get(i).isFalse())
                 .collect(Collectors.toSet());

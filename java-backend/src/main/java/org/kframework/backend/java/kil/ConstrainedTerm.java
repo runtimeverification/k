@@ -12,6 +12,7 @@ import org.kframework.backend.java.symbolic.AbstractKMachine;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.PatternExpander;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -179,6 +180,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             Set<Variable> variables) {
         assert (instructions == null) == (cells == null);
         /* unify the subject term and the pattern term without considering those associated constraints */
+        SymbolicRewriter.matchStopwatch.start();
         ConjunctiveFormula constraint;
         if (instructions != null) {
             constraint = AbstractKMachine.unify(this, instructions, cells, termContext());
@@ -188,14 +190,17 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         } else {
             SymbolicUnifier unifier = new SymbolicUnifier(termContext());
             if (!unifier.symbolicUnify(term(), constrainedTerm.term())) {
+                SymbolicRewriter.matchStopwatch.stop();
                 return Collections.emptyList();
             }
             constraint = unifier.constraint();
         }
         constraint = constraint.simplify();
         if (constraint.isFalse()) {
+            SymbolicRewriter.matchStopwatch.stop();
             return Collections.emptyList();
         }
+        SymbolicRewriter.matchStopwatch.stop();
 
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
                 .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
