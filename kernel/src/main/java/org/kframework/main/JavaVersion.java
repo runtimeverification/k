@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K team. All Rights Reserved.
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.main;
 
 /**
