@@ -14,8 +14,29 @@ else
     exit 1
 fi
 
+version=$(ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.JavaVersion 2>&1)
+if [ $? -eq 0 ]; then
+  JAVA="ng --nailgun-server local:$HOME/.kserver/socket"
+else
+  version=$(ng org.kframework.main.JavaVersion 2>&1)
+  if [ $? -eq 0 ]; then
+    JAVA=ng
+  else
+    JAVA="java -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$0")/java/*\""
+    version=$("$_java" -version 2>&1)
+  fi
+fi
+echo $version | grep '64-Bit' >& /dev/null
+if [ $? -eq 0 ]; then
+  ARCH=64
+else
+  ARCH=32
+fi
+
+
+
 if [[ "$_java" ]]; then
-    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    version=$(echo $version | awk -F '"' '/version/ {print $2}')
 #    echo version "$version"
     if ! [[ "$version" > "$MIN_VERSION" ]]; then
         echoerr -e "\033[1;31mError:\033[0m K requires Java $MIN_VERSION to run but the detected version is $version."
