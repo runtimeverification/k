@@ -78,6 +78,8 @@
                   <arg value="--report" />
                   <arg value="--debug" />
                   <arg value="--warnings-to-errors" />
+                  <arg value="--timeout" />
+                  <arg value="400000" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
