@@ -117,7 +117,7 @@ public class FastRuleMatcher {
         // normalize KSeq representations
         if (isKSeq(subject) || isKSeq(pattern)) {
             subject = getCanonicalKSeq(subject);
-            pattern = getCanonicalKSeq(pattern);
+//            pattern = getCanonicalKSeq(pattern);
 
             if (isKSeq(subject)) {
                 pattern = upKSeq(pattern);
