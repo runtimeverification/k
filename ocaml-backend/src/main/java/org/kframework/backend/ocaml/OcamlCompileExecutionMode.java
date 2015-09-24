@@ -93,7 +93,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
                 }
             }
 
-            String ocaml
+            String ocaml;
             if (!unserializedVars.isEmpty() && !serializedVars.isEmpty()) {
                 k = unserializedVars.stream().reduce(KApply(KLabel(".Map")), (k1, k2) -> (KApply(KLabel("_Map_"), k1, k2)));
                 ocaml = converter.ocamlCompile(k, serializedVars, compiledDefinition.topCellInitializer, pattern, ocamlOptions.dumpExitCode);
