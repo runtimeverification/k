@@ -111,6 +111,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
 
+  lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
+
   // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {
   //    case (l, ps) =>

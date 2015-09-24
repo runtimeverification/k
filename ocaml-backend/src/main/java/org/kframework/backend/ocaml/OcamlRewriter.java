@@ -103,6 +103,11 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            public List<K> prove(List<Rule> rules) {
+                throw new UnsupportedOperationException();
+            }
         };
     }
 

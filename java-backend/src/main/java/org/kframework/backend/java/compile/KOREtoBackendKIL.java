@@ -54,10 +54,16 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Definition definition;
     private final TermContext context;
 
-    public KOREtoBackendKIL(Module module, Definition definition, TermContext context) {
+    /**
+     * Flag that controls whether the translator substitutes the variables in a {@code Rule} with fresh variables
+     */
+    private final boolean freshRules;
+
+    public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean freshRules) {
         this.module = module;
         this.definition = definition;
         this.context = context;
+        this.freshRules = freshRules;
     }
 
     @Override
@@ -155,7 +161,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             if (definition.configurationInfo().getCellForConcat(klabel).isDefined())
                 return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
             if (definition.configurationInfo().getCellForUnit((KApply) k).isDefined())
-                return CellCollection.empty(definition.configurationInfo().getCellForUnit((KApply) k).get(), definition);
+                return KLabelInjection.injectionOf(
+                        CellCollection.empty(definition.configurationInfo().getCellForUnit((KApply) k).get(), definition),
+                        context);
             else if (definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(
                         CellCollection.singleton(CellLabel.of(klabel.name()), KList(klist.items()), definition.configurationInfo().getCellSort(klabel), definition),
@@ -231,7 +239,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 .map(this::convert)
                 .collect(Collectors.toList());
 
-        return new Rule(
+        Rule backendKILRule = new Rule(
                 "",
                 convert(leftHandSide),
                 convert(RewriteToTop.toRight(rule.body())),
@@ -247,7 +255,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 null,
                 oldRule,
                 context);
-
+        if (freshRules) {
+            backendKILRule = backendKILRule.getFreshRule(context);
+        }
+        return backendKILRule;
     }
 
     public static ConfigurationInfo.Multiplicity kil2koreMultiplicity(Cell.Multiplicity multiplicity) {

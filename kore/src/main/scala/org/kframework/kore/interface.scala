@@ -67,7 +67,7 @@ trait KList extends KCollection {
   def size: Int = items.size
 }
 
-trait KApply extends KItem {
+trait KApply extends KItem with KCollection {
   def klabel: KLabel
   def klist: KList
 

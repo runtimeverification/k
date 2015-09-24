@@ -92,6 +92,10 @@ public class KRun implements Transformation<Void, Void> {
         } else if (result instanceof SearchResult) {
             printSearchResult((SearchResult) result, options, compiledDef);
             return 0;
+        } else if (options.experimental.prove != null) {
+            if (((List) result).isEmpty()) {
+                System.out.println("true");
+            }
         }
         return 0;
     }

@@ -26,4 +26,3 @@ trait Constructors[KK <: K] {
 
 abstract class AbstractConstructors[KK <: K] extends Constructors[KK]
 
-

@@ -17,6 +17,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.Prover;
 import org.kframework.main.AnnotatedByDefinitionModule;
@@ -83,6 +84,12 @@ public class JavaSymbolicKRunModule extends AbstractModule {
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                     });
             rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+
+
+            MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
+                    ToolActivation.class, ExecutionMode.class);
+
+            executionBinder.addBinding(new ToolActivation.OptionActivation("--prove")).to(ProofExecutionMode.class);
 
         }
 

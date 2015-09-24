@@ -6,6 +6,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Tag;
 import org.kframework.definition.TerminalLike;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
@@ -89,6 +90,10 @@ public class AddBrackets {
         boolean inversePriority;
         EnumSet<Fixity> fixity = getFixity(inner, outer);
         EnumSet<Fixity> innerFixity = getFixity(inner);
+        if (inner.production().klabel().equals(outer.production().klabel()) &&
+            inner.production().klabel().isDefined() &&
+            m.attributesFor().apply(inner.production().klabel().get()).contains(Attribute.ASSOCIATIVE_KEY))
+            return false;
         if (inner instanceof Constant)
             return false;
         if (fixity.size() == 0)

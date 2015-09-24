@@ -5,7 +5,10 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.Sort;
 
 import java.util.Collection;
@@ -60,6 +63,17 @@ public class LabelInfo {
 
     public boolean isFunction(KLabel l) {
         return functionLabels.contains(l);
+    }
+
+    public boolean isFunction(K term) {
+        if (term instanceof KApply && isFunction(((KApply) term).klabel())) {
+            return true;
+        }
+        if (term instanceof KRewrite && ((KRewrite) term).left() instanceof KApply
+                && isFunction(((KApply) ((KRewrite) term).left()).klabel())) {
+            return true;
+        }
+        return false;
     }
 
     /**

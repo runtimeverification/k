@@ -33,6 +33,9 @@ public interface ConfigurationInfo {
     /** True if sort k is actually a cell sort */
     boolean isCell(Sort k);
 
+    /** True if kLabel is the KLabel of a cell */
+    boolean isCellLabel(KLabel kLabel);
+
     /** True for cells which contain a term rather than other cells */
     boolean isLeafCell(Sort k);
 

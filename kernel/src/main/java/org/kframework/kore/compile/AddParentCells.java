@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Labels;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
@@ -206,7 +208,7 @@ public class AddParentCells {
     Optional<KLabel> getParent(K k) {
         if (k instanceof KApply) {
             final KApply app = (KApply) k;
-            if (app.klabel().equals(KLabel("#cells"))) {
+            if (app.klabel().equals(KLabel(KLabels.CELLS))) {
                 List<K> items = app.klist().items();
                 if (items.isEmpty()) {
                     return Optional.empty();
