@@ -47,7 +47,7 @@ public class SortCellsTest {
     @Test
     public void testSimpleSplitting() {
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"));
-        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"));
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());

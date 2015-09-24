@@ -146,30 +146,26 @@ public class SortCells {
         }
 
         K replacementTerm() {
-            if (remainingCells.size() == 1) {
-                return KVariable(var.name(), var.att().remove(Attribute.SORT_KEY));
-            } else {
-                getSplit(var);
-                KLabel fragmentLabel = cfg.getCellFragmentLabel(parentCell);
-                if (fragmentLabel == null) {
-                    throw KEMException.compilerError("Unsupported cell fragment with types: " + remainingCells, var);
-                }
-                List<Sort> children = cfg.getChildren(parentCell);
-                List<K> arguments = new ArrayList<>(children.size());
-                for (Sort child : children) {
-                    K arg = split.get(child);
-                    if (arg == null) {
-                        if (cfg.getMultiplicity(child) == Multiplicity.STAR) {
-                            arg = cfg.cfg.getUnit(child);
-                        } else {
-                            arg = cfg.getCellAbsentTerm(child);
-                        }
-                    }
-                    assert arg != null;
-                    arguments.add(arg);
-                }
-                return KApply(fragmentLabel, immutable(arguments));
+            getSplit(var);
+            KLabel fragmentLabel = cfg.getCellFragmentLabel(parentCell);
+            if (fragmentLabel == null) {
+                throw KEMException.compilerError("Unsupported cell fragment with types: " + remainingCells, var);
             }
+            List<Sort> children = cfg.getChildren(parentCell);
+            List<K> arguments = new ArrayList<>(children.size());
+            for (Sort child : children) {
+                K arg = split.get(child);
+                if (arg == null) {
+                    if (cfg.getMultiplicity(child) == Multiplicity.STAR) {
+                        arg = cfg.cfg.getUnit(child);
+                    } else {
+                        arg = cfg.getCellAbsentTerm(child);
+                    }
+                }
+                assert arg != null;
+                arguments.add(arg);
+            }
+            return KApply(fragmentLabel, immutable(arguments));
         }
 
        Map<Sort, K> getSplit(KVariable var) {
