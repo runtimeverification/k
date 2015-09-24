@@ -26,8 +26,16 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
     /* KLabelConstant cache */
     private static final MapCache<Pair<Set<SortSignature>, Attributes>, MapCache<String, KLabelConstant>> cache = new MapCache<>();
 
+    public static int cacheSize = 0;
+
+    synchronized private static int incrementCacheSize() {
+        return cacheSize++;
+    }
+
     /* un-escaped label */
     private final String label;
+
+    private final int ordinal;
 
     /* the sort signatures of the productions generating this {@code KLabelConstant} */
     private final Set<SortSignature> signatures;
@@ -50,16 +58,18 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
 
     private final boolean isSortPredicate;
 
-    private final String smtlib;
-
     private final Sort predicateSort;
+
+    private final String smtlib;
 
     private KLabelConstant(
             String label,
+            int ordinal,
             Set<SortSignature> signatures,
             Set<Sort> allSorts,
             Attributes productionAttributes) {
         this.label = label;
+        this.ordinal = ordinal;
         this.signatures = signatures;
         this.productionAttributes = productionAttributes;
 
@@ -98,6 +108,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         return cache.get(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), () -> new MapCache<>(new PatriciaTrie<>()))
                 .get(label, () -> new KLabelConstant(
                         label,
+                        incrementCacheSize(),
                         definition.signaturesOf(label),
                         definition.allSorts(),
                         definition.kLabelAttributesOf(label)));
@@ -130,10 +141,6 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         return isPattern;
     }
 
-    public String smtlib() {
-        return smtlib;
-    }
-
     /**
      * Returns true if this {@code KLabelConstant} is a sort membership
      * predicate; otherwise, false.
@@ -155,11 +162,19 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         return label;
     }
 
+    public int ordinal() {
+        return ordinal;
+    }
+
     /**
      * Returns a list of productions generating this {@code KLabelConstant}.
      */
     public Set<SortSignature> signatures() {
         return signatures;
+    }
+
+    public String smtlib() {
+        return smtlib;
     }
 
     @Override

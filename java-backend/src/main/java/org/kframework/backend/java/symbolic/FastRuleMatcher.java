@@ -1,6 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Sets;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -17,12 +16,8 @@ import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -71,7 +66,7 @@ public class FastRuleMatcher {
             BitSet returnSet = new BitSet(ruleMask.size());
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
 
-            Set<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctions().get(subject.sort());
+            List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
             for (Pair<Variable, BitSet> p : pairs) {
                 BitSet localRuleMask = ((BitSet) ruleMask.clone());
                 localRuleMask.and(p.getRight());
@@ -81,7 +76,7 @@ public class FastRuleMatcher {
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                Pair<KItem, BitSet> pSeq = automatonDisjunction.kItemDisjunctions().get(kSeqLabel);
+                Pair<KItem, BitSet> pSeq = automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()];
                 if (pSeq != null) {
                     BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
                     localRuleMaskSeq.and(pSeq.getRight());
@@ -93,7 +88,7 @@ public class FastRuleMatcher {
             }
 
             if (subject instanceof KItem) {
-                Pair<KItem, BitSet> p = automatonDisjunction.kItemDisjunctions().get((KLabelConstant) ((KItem) subject).kLabel());
+                Pair<KItem, BitSet> p = automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()];
                 if (p != null) {
                     BitSet localRuleMask = ((BitSet) ruleMask.clone());
                     localRuleMask.and(p.getRight());

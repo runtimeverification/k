@@ -25,4 +25,9 @@ public class MapCache<K, V> {
         }
         return cachedVal;
     }
+
+    public synchronized int size() {
+        return cache.size();
+    }
+
 }

@@ -8,6 +8,7 @@ import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,12 +18,26 @@ import java.util.stream.Collectors;
 
 public class RuleAutomatonDisjunction extends Term {
 
+    public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+    public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
     private final Map<KLabelConstant, Pair<KItem, BitSet>> kItemDisjunctions;
     private final Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions;
     private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
 
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
+        this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize];
+        children.stream()
+                .filter(p -> p.getLeft() instanceof KItem)
+                .forEach(p -> {
+                    this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
+                });
+        this.variableDisjunctionsArray = new List[Sort.cache.size()];
+        context.definition().allSorts().forEach(s -> {
+            this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
+                    .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
+                    .collect(Collectors.toSet()));
+        });
         this.kItemDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> (Pair<KItem, BitSet>) (Object) p));
@@ -51,6 +66,11 @@ public class RuleAutomatonDisjunction extends Term {
     public List<Pair<Term, BitSet>> disjunctions() {
         List<Pair<Term, BitSet>> disjunctions = new ArrayList<>();
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) kItemDisjunctions.values());
+//        for (List<Pair<Variable, BitSet>> pairs : variableDisjunctions) {
+//            if (pairs != null) {
+//                disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) pairs);
+//            }
+//        }
         ((Map<Sort, Set<Pair<Term, BitSet>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) tokenDisjunctions.values());
         return disjunctions;
