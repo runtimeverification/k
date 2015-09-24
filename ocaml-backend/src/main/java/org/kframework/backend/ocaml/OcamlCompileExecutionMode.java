@@ -93,13 +93,14 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
                 }
             }
 
+            String ocaml
             if (!unserializedVars.isEmpty() && !serializedVars.isEmpty()) {
                 k = unserializedVars.stream().reduce(KApply(KLabel(".Map")), (k1, k2) -> (KApply(KLabel("_Map_"), k1, k2)));
+                ocaml = converter.ocamlCompile(k, serializedVars, compiledDefinition.topCellInitializer, pattern, ocamlOptions.dumpExitCode);
             } else {
-                serializedVars = null;
+                ocaml = converter.ocamlCompile(k, pattern, ocamlOptions.dumpExitCode);
             }
 
-            String ocaml = converter.ocamlCompile(k, serializedVars, compiledDefinition.topCellInitializer, pattern, ocamlOptions.dumpExitCode);
             files.saveToTemp("pgm.ml", ocaml);
             try {
                 new OcamlRewriter(files, converter, options).compileOcaml("pgm.ml");
