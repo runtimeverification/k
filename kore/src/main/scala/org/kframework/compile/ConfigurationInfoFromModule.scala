@@ -89,6 +89,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def getParent(k: Sort): Sort = edges collectFirst { case (p, `k`) => p } get
   override def isCell(k: Sort): Boolean = cellSorts.contains(k)
+  override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
   override def isLeafCell(k: Sort): Boolean = !isParentCell(k)
 
   override def getChildren(k: Sort): util.List[Sort] = cellProductions(k).items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal].sort).flatMap {s => {

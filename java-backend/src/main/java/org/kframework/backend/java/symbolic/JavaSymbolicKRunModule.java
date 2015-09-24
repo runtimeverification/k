@@ -8,17 +8,16 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import org.kframework.Rewriter;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.ksimulation.Simulator;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.Prover;
 import org.kframework.main.AnnotatedByDefinitionModule;
@@ -36,8 +35,6 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
@@ -87,6 +84,12 @@ public class JavaSymbolicKRunModule extends AbstractModule {
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                     });
             rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+
+
+            MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
+                    ToolActivation.class, ExecutionMode.class);
+
+            executionBinder.addBinding(new ToolActivation.OptionActivation("--prove")).to(ProofExecutionMode.class);
 
         }
 

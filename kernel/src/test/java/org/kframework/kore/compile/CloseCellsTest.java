@@ -3,6 +3,8 @@ package org.kframework.kore.compile;
 
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.*;
@@ -55,11 +57,11 @@ public class CloseCellsTest {
 
     @Test
     public void testCloseList() {
-        K term = KApply(KLabel("#cells"),
+        K term = KApply(KLabel(KLabels.CELLS),
                 cell("<list>", true, false, intToToken(1)),
                 cell("<list>", false, true, intToToken(2)),
                 cell("<list>", true, true, intToToken(3)));
-        K expected = KApply(KLabel("#cells"),
+        K expected = KApply(KLabel(KLabels.CELLS),
                 ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar0"), intToToken(1))),
                 ccell("<list>", KApply(KLabel("'_List_"), intToToken(2), KVariable("DotVar1"))),
                 ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar2"), KApply(KLabel("'_List_"), intToToken(3), KVariable("DotVar3")))));
@@ -68,11 +70,11 @@ public class CloseCellsTest {
 
     @Test
     public void testCloseCellVar() {
-        K term = KApply(KLabel("#cells"),
+        K term = KApply(KLabel(KLabels.CELLS),
                 cell("<thread>", true, false, cell("<k>", intToToken(1))),
                 cell("<thread>", false, true, cell("<k>", intToToken(2))),
                 cell("<thread>", true, true, cell("<k>", intToToken(2))));
-        K expected = KApply(KLabel("#cells"),
+        K expected = KApply(KLabel(KLabels.CELLS),
                 ccell("<thread>", ccell("<k>", intToToken(1)), KVariable("DotVar0")),
                 ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar1")),
                 ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar2")));
@@ -116,6 +118,6 @@ public class CloseCellsTest {
 
 
     KApply cells(K... ks) {
-        return KApply(KLabel("#cells"), ks);
+        return KApply(KLabel(KLabels.CELLS), ks);
     }
 }

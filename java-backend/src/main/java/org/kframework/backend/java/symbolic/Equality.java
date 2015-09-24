@@ -81,7 +81,7 @@ public class Equality implements Serializable {
     private boolean isTermEquality(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && ((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_");
+                && (((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_") || ((KLabelConstant) ((KItem) term).kLabel()).label().equals("_==K_"));
     }
 
     private Term canonicalize(Term term) {

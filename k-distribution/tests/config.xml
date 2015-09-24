@@ -12,5 +12,9 @@
   <include file="../samples/tests/config.xml" directory="samples" />
 
   <include file="regression/config.xml" directory="tests/regression" skip="pdf" />
+
+  <include file="../samples-kore/kernelc/tests/config.xml"
+           directory="samples-kore/kernelc"
+           skip="pdf" />
 </tests>
 

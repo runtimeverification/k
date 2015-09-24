@@ -6,6 +6,6 @@ class LabelInfoFromModule(module: Module) extends LabelInfo {
   module.productionsFor.foreach({
     case (label, prods) =>
       def att(key : String) = prods.exists(_.att.contains(key))
-      addLabel(prods.head.sort.toString, label.toString, att("assoc"), att("comm"), att("function"))
+      addLabel(prods.head.sort.toString, label.toString, att("assoc"), att("comm"), att("function") || att("pattern"))
   })
 }
