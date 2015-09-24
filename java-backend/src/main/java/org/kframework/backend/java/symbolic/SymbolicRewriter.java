@@ -195,13 +195,16 @@ public class SymbolicRewriter {
     private void fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         results.clear();
         List<Pair<Substitution<Variable, Term>, Integer>> matches = new FastRuleMatcher(subject.termContext()).mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
-        matches.stream()
+        Optional<ConstrainedTerm> successor = matches.stream()
                 .map(p -> Pair.of(p.getLeft(), definition.ruleTable.get(p.getRight())))
                 .map(p -> Pair.of(RewriteEngineUtils.evaluateConditions(p.getRight(), p.getLeft(), subject.termContext()), p.getRight()))
                 .filter(p -> p.getLeft() != null)
                 .map(p -> p.getRight().rightHandSide().substituteAndEvaluate(p.getLeft(), subject.termContext()))
                 .map(t -> new ConstrainedTerm(t, subject.termContext()))
-                .forEach(results::add);
+                .findAny();
+        if (successor.isPresent()) {
+            results.add(successor.get());
+        }
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
