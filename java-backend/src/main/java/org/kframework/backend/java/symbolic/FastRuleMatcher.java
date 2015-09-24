@@ -115,13 +115,8 @@ public class FastRuleMatcher {
         }
 
         // normalize KSeq representations
-        if (isKSeq(subject) || isKSeq(pattern)) {
-            if (isKSeq(subject)) {
-                pattern = upKSeq(pattern);
-            }
-            if (isKSeq(pattern)) {
-                subject = upKSeq(subject);
-            }
+        if (isKSeq(pattern)) {
+            subject = upKSeq(subject);
         }
 
         if (pattern instanceof Variable) {
