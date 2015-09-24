@@ -89,7 +89,7 @@ an environment cell, and a store cell.  An environment binds variable names
 to locations, and a store binds locations to values. */
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Exp:K </k>
+                  <k color="green"> $PGM:Exp </k>
                   <env color="blue"> .Map </env>
                   <store color="red"> .Map </store>
                 </T>

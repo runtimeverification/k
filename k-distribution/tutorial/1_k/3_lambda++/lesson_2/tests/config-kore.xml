@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<tests>
+
+  <include file="../../../1_lambda/lesson_1/tests/config.xml"
+           exclude="omega"
+           results=".">
+    <kompile-option name="--kore" />
+    <all-programs>
+      <krun-option name="--kore" />
+      <krun-option name="--parser" value="kast --kore --sort Exp" />
+    </all-programs>
+  </include>
+
+</tests>
