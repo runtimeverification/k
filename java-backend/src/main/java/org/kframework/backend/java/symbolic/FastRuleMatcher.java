@@ -116,9 +116,6 @@ public class FastRuleMatcher {
 
         // normalize KSeq representations
         if (isKSeq(subject) || isKSeq(pattern)) {
-            subject = getCanonicalKSeq(subject);
-//            pattern = getCanonicalKSeq(pattern);
-
             if (isKSeq(subject)) {
                 pattern = upKSeq(pattern);
             }
@@ -163,11 +160,7 @@ public class FastRuleMatcher {
             return ruleMask;
         }
 
-        if (!context.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
-            return empty;
-        }
-
-        BitSet nonConflictualBitset = new BitSet();
+        BitSet nonConflictualBitset = new BitSet(ruleMask.size());
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
             substitutions[i] = substitutions[i].unsafeAddVariableBinding(variable, term);
             if (!substitutions[i].isFalse()) {
