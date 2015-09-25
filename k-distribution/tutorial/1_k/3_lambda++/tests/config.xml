@@ -9,11 +9,11 @@
 <tests>
 
   <include file="../lesson_1/tests/config.xml" directory="lesson_1" />
+  <!-- TODO: skipping lessons 2 to 6 while the KORE translation proceeds
   <include file="../lesson_2/tests/config.xml" directory="lesson_2" />
   <include file="../lesson_3/tests/config.xml" directory="lesson_3" />
   <include file="../lesson_4/tests/config.xml" directory="lesson_4" />
   <include file="../lesson_5/tests/config.xml" directory="lesson_5" />
-  <!-- TODO: skipping lesson 6 while the KORE translation proceeds
   <include file="../lesson_6/tests/config.xml" directory="lesson_6" /> -->
 
 </tests>

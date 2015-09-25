@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<tests>
+
+  <include file="../../lesson_4/tests/config-kore.xml"
+           exclude="omega closed-variable-capture free-variable-capture"
+           more-results="../../lesson_1/tests ." />
+
+</tests>
