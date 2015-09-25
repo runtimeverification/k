@@ -12,6 +12,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -161,6 +162,6 @@ public class KServerFrontEnd extends FrontEnd {
     }
 
     public boolean isLocal() {
-        return options.local;
+        return OS.current() != OS.WINDOWS;
     }
 }
