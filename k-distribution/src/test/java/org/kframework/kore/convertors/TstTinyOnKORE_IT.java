@@ -6,7 +6,7 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;

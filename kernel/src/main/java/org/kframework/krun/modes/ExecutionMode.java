@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun.modes;
 
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 

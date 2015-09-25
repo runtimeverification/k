@@ -2,7 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;

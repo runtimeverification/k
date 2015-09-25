@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.kframework.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
@@ -12,21 +11,22 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.definition.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.Rewriter;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Builtins;
@@ -123,18 +123,18 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable,? extends K>> match(K k, org.kframework.definition.Rule rule) {
-            return search(k, Optional.of(0), Optional.empty(), rule);
+            return search(k, Optional.of(0), Optional.empty(), rule, SearchType.STAR);
         }
 
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
-                    SearchType.STAR, TermContext.of(rewritingContext), false);
+                    searchType, TermContext.of(rewritingContext), false);
             return searchResults;
         }
 
