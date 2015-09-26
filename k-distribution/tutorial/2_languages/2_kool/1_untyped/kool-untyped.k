@@ -283,7 +283,7 @@ definition. */
 
   rule <k> acquire V:Val; => .K ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
-       <busy> Busy (.Set => SetItem(V)) </busy>
+       <busy> Busy `.Set => SetItem(V)` </busy>
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => .K ...</k>
