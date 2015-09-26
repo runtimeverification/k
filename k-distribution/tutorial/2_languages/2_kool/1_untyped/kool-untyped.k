@@ -380,7 +380,7 @@ definition. */
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
-  syntax KItem ::= (Id,BagItem) // TODO: used to be ListItem; explain this
+  syntax KItem ::= (Id,Cell) // TODO: used to be ListItem; explain this
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> `Class(Vs); return this;` </k>
@@ -441,7 +441,7 @@ current object. */
   context HOLE._::Id when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
+                     <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>)
        . X:Id
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
@@ -522,7 +522,7 @@ current object. */
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]*/
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
+                            <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>)
               . X
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
                               X))  [structural]
@@ -537,7 +537,7 @@ current object. */
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  syntax KItem ::= lookupMember(BagItem,Id)  [function]
+  syntax Exp ::= lookupMember(Cell,Id)  [function]
 
 //  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
 //    => lookup(L)
