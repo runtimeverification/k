@@ -198,7 +198,7 @@ definition. */
 
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T => notBool(T)
+  rule ! T:Bool => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
