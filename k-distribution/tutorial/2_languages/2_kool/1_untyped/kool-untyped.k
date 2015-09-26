@@ -305,7 +305,7 @@ definition. */
   rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
-  syntax KItem ::= lookup(Int)
+  syntax Exp ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
   syntax KItem ::= env(Map)
@@ -327,7 +327,7 @@ definition. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> K:K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 
   syntax KItem ::= "execute"
@@ -383,7 +383,7 @@ definition. */
   syntax KItem ::= (Id,BagItem) // TODO: used to be ListItem; explain this
 
   rule <k> new Class:Id(Vs:Vals) ~> K
-           => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
+           => create(Class) ~> storeObj ~> `Class(Vs); return this;` </k>
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
      //<br/>
