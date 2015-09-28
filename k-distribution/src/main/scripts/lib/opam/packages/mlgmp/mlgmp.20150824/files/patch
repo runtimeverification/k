@@ -1,6 +1,6 @@
 diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
 --- mlgmp_ref/mlgmp/config.h	2002-07-29 20:31:12.000000000 -0500
-+++ mlgmp/config.h	2015-08-24 14:57:01.047794438 -0500
++++ mlgmp/config.h	2015-09-22 18:11:08.259083750 -0500
 @@ -3,6 +3,7 @@
  #define NDEBUG
  #undef TRACE
@@ -9,9 +9,15 @@ diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
  #include <gmp.h>
  #ifdef USE_MPFR
  #include <mpfr.h>
-@@ -58,11 +59,11 @@
+@@ -54,15 +55,15 @@
+ #define MPF_SIZE_ARCH32 16
+ #define MPF_SIZE_ARCH64 24
+ 
+-/* __mpfr_struct = 3 * int + ptr */
++/* __mpfr_struct = 2 * long + int + ptr */
  #define MPFR_SIZE_ARCH32 16
- #define MPFR_SIZE_ARCH64 24
+-#define MPFR_SIZE_ARCH64 24
++#define MPFR_SIZE_ARCH64 28
  
 -extern void serialize_int_4(int32 i);
 +extern void serialize_int_4(int32_t i);
@@ -26,7 +32,7 @@ diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
  #endif /* SERIALIZE */
 diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
 --- mlgmp_ref/mlgmp/gmp.ml	2012-02-24 01:48:47.000000000 -0600
-+++ mlgmp/gmp.ml	2015-08-24 14:59:12.227793244 -0500
++++ mlgmp/gmp.ml	2015-09-09 09:49:52.315262573 -0500
 @@ -1,7 +1,8 @@
  (*
   * ML GMP - Interface between Objective Caml and GNU MP
@@ -110,7 +116,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
     let mantissa, exponent =
 diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
 --- mlgmp_ref/mlgmp/gmp.mli	2012-02-24 01:48:02.000000000 -0600
-+++ mlgmp/gmp.mli	2015-08-24 10:27:37.239941497 -0500
++++ mlgmp/gmp.mli	2015-09-09 09:49:52.319262573 -0500
 @@ -128,6 +128,8 @@
      external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
      external scan0 : t -> int -> int = "_mlgmp_z_scan0"
@@ -178,7 +184,7 @@ diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
      val to_string : t -> string
 diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
 --- mlgmp_ref/mlgmp/Makefile	2012-02-24 02:17:29.000000000 -0600
-+++ mlgmp/Makefile	2015-07-03 14:16:37.332146281 -0500
++++ mlgmp/Makefile	2015-09-09 09:49:52.319262573 -0500
 @@ -36,7 +36,7 @@
  all:	$(LIBS) tests
  
@@ -206,10 +212,49 @@ diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
  
  test_suite.opt:	gmp.cmxa test_suite.cmx
  	$(OCAMLOPT) $+ -o $@
+diff -ruN mlgmp_ref/mlgmp/mlgmp_f.c mlgmp/mlgmp_f.c
+--- mlgmp_ref/mlgmp/mlgmp_f.c	2012-02-24 02:10:11.000000000 -0600
++++ mlgmp/mlgmp_f.c	2015-09-22 15:29:16.967172104 -0500
+@@ -228,8 +228,7 @@
+ 
+ int _mlgmp_f_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpf_cmp(*mpf_val(a), *mpf_val(b)));
++  return mpf_cmp(*mpf_val(a), *mpf_val(b));
+ }
+ 
+ value _mlgmp_f_cmp(value a, value b)
+@@ -293,7 +292,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+   mp_exp_t exponent;
+@@ -314,8 +312,6 @@
+ 
+   sprintf(exponent_buf, "@%08lx", (exponent & 0xFFFFFFFFUL));
+   serialize_block_1(exponent_buf, 9);
+-
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_f_deserialize(void * dst)
 diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
 --- mlgmp_ref/mlgmp/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
-+++ mlgmp/mlgmp_fr.c	2015-07-10 12:28:04.656728771 -0500
-@@ -296,12 +296,82 @@
++++ mlgmp/mlgmp_fr.c	2015-09-22 17:33:31.655104281 -0500
+@@ -35,7 +35,7 @@
+ 
+ struct custom_operations _mlgmp_custom_fr =
+   {
+-    field(identifier)  "Gmp.F.t",
++    field(identifier)  "Gmp.FR.t",
+     field(finalize)    &_mlgmp_fr_finalize,
+     field(compare)     &_mlgmp_fr_custom_compare,
+     field(hash)        custom_hash_default,
+@@ -296,19 +296,88 @@
  fr_unary_op(sqrt)
  fr_unary_op(exp)
  fr_unary_op(exp2)
@@ -292,7 +337,15 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
  /*** Compare */
  
  int _mlgmp_fr_custom_compare(value a, value b)
-@@ -354,6 +424,18 @@
+ {
+ #ifdef USE_MPFR
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpfr_cmp(*mpfr_val(a), *mpfr_val(b)));
++  return mpfr_cmp(*mpfr_val(a), *mpfr_val(b));
+ #else
+   unimplemented(create);
+ #endif
+@@ -354,6 +423,18 @@
  #endif
  }
  
@@ -311,7 +364,7 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
  value _mlgmp_fr_eq(value a, value b, value nbits)
  {
  #ifdef USE_MPFR
-@@ -365,6 +447,67 @@
+@@ -365,6 +446,67 @@
  #endif
  }
  
@@ -379,10 +432,122 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
  fr_binary_op_mpfr(reldiff)
  
  
+@@ -429,7 +571,7 @@
+ {
+ #ifdef USE_MPFR
+   CAMLparam0();
+-  register_custom_operations(& _mlgmp_custom_f);
++  register_custom_operations(& _mlgmp_custom_fr);
+   CAMLreturn(Val_unit);
+ #endif
+ }
+@@ -439,11 +581,10 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+-  int len;
++  int len, minus_sign_length = 0, negative_mantissa = 0;
+   mp_exp_t exponent;
+-  char exponent_buf[10];
++  char exponent_buf[23];
+ 
+   *wsize_32 = MPFR_SIZE_ARCH32;
+   *wsize_64 = MPFR_SIZE_ARCH64;
+@@ -452,16 +593,25 @@
+ 
+   s = mpfr_get_str (NULL, &exponent, 16, 0, *mpfr_val(v), GMP_RNDN);
+   len = strlen(s);
+-  serialize_int_4(len + 11);
+-
+-  serialize_block_1("0.", 2);
+-  serialize_block_1(s, len);
+-  free(s);
+ 
+-  sprintf(exponent_buf, "@%08lx", (exponent & 0xFFFFFFFFUL));
+-  serialize_block_1(exponent_buf, 9);
++  if (exponent < 0)
++    minus_sign_length = 1;
++  if (s[0] == '-' && mpfr_number_p(*mpfr_val(v)))
++    negative_mantissa = 1;
++
++  if (mpfr_number_p(*mpfr_val(v))) {
++    serialize_int_4(len + minus_sign_length + 23);
++    if (negative_mantissa)
++      serialize_block_1("-", 1);
++    serialize_block_1("0.", 2);
++  } else {
++    serialize_int_4(len + minus_sign_length + 21);
++  }
++  serialize_block_1(s + negative_mantissa, len - negative_mantissa);
++  mpfr_free_str(s);
+ 
+-  CAMLreturn0;
++  sprintf(exponent_buf, "@%0*ld", 20 + minus_sign_length, (exponent));
++  serialize_block_1(exponent_buf, 21 + minus_sign_length);
+ }
+ 
+ unsigned long _mlgmp_fr_deserialize(void * dst)
+diff -ruN mlgmp_ref/mlgmp/mlgmp_q.c mlgmp/mlgmp_q.c
+--- mlgmp_ref/mlgmp/mlgmp_q.c	2012-02-24 02:16:14.000000000 -0600
++++ mlgmp/mlgmp_q.c	2015-09-22 15:30:35.015171394 -0500
+@@ -156,8 +156,7 @@
+ 
+ int _mlgmp_q_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpq_cmp(*mpq_val(a), *mpq_val(b)));
++  return mpq_cmp(*mpq_val(a), *mpq_val(b));
+ }
+ 
+ value _mlgmp_q_cmp(value a, value b)
+@@ -194,7 +193,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+ 
+@@ -212,8 +210,6 @@
+   serialize_int_4(len);
+   serialize_block_1(s, len);
+   free(s);
+-
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_q_deserialize(void * dst)
+@@ -241,7 +237,6 @@
+ 
+ long _mlgmp_q_hash(value v)
+ {
+-  CAMLparam1(v);
+   mpz_t dummy;
+   long r;
+   mpz_init(dummy);
+@@ -250,5 +245,5 @@
+     ^ mpz_mod_ui(dummy, mpq_numref(*mpq_val(v)), HASH_MODULUS);
+ 
+   mpz_clear(dummy);
+-  CAMLreturn(r);
++  return r;
+ }
 diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
 --- mlgmp_ref/mlgmp/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
-+++ mlgmp/mlgmp_z.c	2015-08-24 10:27:12.671941721 -0500
-@@ -742,6 +742,13 @@
++++ mlgmp/mlgmp_z.c	2015-09-22 15:31:39.435170808 -0500
+@@ -571,8 +571,7 @@
+ 
+ int _mlgmp_z_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpz_cmp(*mpz_val(a), *mpz_val(b)));
++  return mpz_cmp(*mpz_val(a), *mpz_val(b));
+ }
+ 
+ value _mlgmp_z_compare(value a, value b)
+@@ -742,6 +741,13 @@
  z_random_op(urandomm)
  z_random_op_ui(rrandomb)
  
@@ -396,3 +561,34 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
  /*** Serialization */
  value _mlgmp_z_initialize()
  {
+@@ -755,7 +761,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+ 
+@@ -768,7 +773,6 @@
+   serialize_block_1(s, len);
+ 
+   free(s);
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_z_deserialize(void * dst)
+@@ -791,7 +795,6 @@
+ 
+ long _mlgmp_z_hash(value v)
+ {
+-  CAMLparam1(v);
+   mpz_t dummy;
+   long r;
+   mpz_init(dummy);
+@@ -799,5 +802,5 @@
+   r = mpz_mod_ui(dummy, *mpz_val(v), HASH_MODULUS);
+ 
+   mpz_clear(dummy);
+-  CAMLreturn(r);
++  return r;
+ }

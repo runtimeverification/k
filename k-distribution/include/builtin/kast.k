@@ -34,6 +34,9 @@ module KAST
                  | ".KList"          [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
                  | ".::KList"        [klabel(#EmptyKList), hook(org.kframework.kore.EmptyKList)]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
+//TODO(dwightguth): there is some kind of weird issue with this production which is causing AddEmptyLists to behave incorrectly.
+// we need to fix this issue so we can add this production back.
+//                 | KList ",," KList  [klabel(#KList), left, assoc, unit(#EmptyKList), hook(org.kframework.kore.KList), prefer]
 endmodule
 
 

@@ -86,7 +86,7 @@ public class ConvertDataStructureToLookup {
                 set.add(Tuple2.apply(KLabel(p.att().<String>get("wrapElement").get()), p.klabel().get()));
             }
             return set.stream();
-        }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+        }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
     }
 
     private Rule convert(Rule rule) {
