@@ -114,10 +114,13 @@ public class ResolveContexts {
                 if (k.klabel().name().startsWith("#SemanticCastTo")) {
                     K child = k.klist().items().get(0);
                     if (child instanceof KVariable && ((KVariable) child).name().equals("HOLE")) {
-                        if (holeWithSemanticCast != null) {
-                            throw KEMException.compilerError("Cannot compile a context with multiple holes.", context);
+                        if (!ResolveSemanticCasts.getSortNameOfCast(k).equals("KItem")) {
+                            if (holeWithSemanticCast != null && !holeWithSemanticCast.equals(k)) {
+                                throw KEMException.compilerError("Cannot compile a context with multiple holes" +
+                                        " having different sort casting.", context);
+                            }
+                            holeWithSemanticCast = k;
                         }
-                        holeWithSemanticCast = k;
                     }
                 }
                 return super.apply(k);
