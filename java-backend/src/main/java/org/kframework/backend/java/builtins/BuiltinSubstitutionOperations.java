@@ -6,6 +6,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.UserSubstitutionTransformer;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,9 +18,11 @@ import java.util.Map;
 public class BuiltinSubstitutionOperations {
 
     public static Term userSubstitution(Term term, Term substitute, Term variable, TermContext context) {
-        Map<Term, Term> substitution = new HashMap<>();
-        substitution.put(variable, substitute);
-        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(substitution, term, context), context);
+        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(Collections.singletonMap(variable, substitute), term, context), context);
+    }
+
+    public static Term userSubstitutionKore(Term term, Term substitute, Term variable, TermContext context) {
+        return UserSubstitutionTransformer.userSubstitution(Collections.singletonMap(variable, substitute), term, context);
     }
 
 }
