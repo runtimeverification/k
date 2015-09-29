@@ -404,6 +404,7 @@ different threads may compete on the output buffer and we want to capture
 all behaviors.  The second rule is structural because we do not want it to
 count as a computational step. */
 
+  syntax KResult ::= Printable
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
   syntax Printables ::= List{Printable,","}
