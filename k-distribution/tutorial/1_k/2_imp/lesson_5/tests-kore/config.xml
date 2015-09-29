@@ -3,6 +3,7 @@
 <tests>
 
   <include file="../../lesson_4/tests/config.xml"
+           skip="pdf"
            more-results="." >
     <kompile-option name="--kore" />
     <all-programs>

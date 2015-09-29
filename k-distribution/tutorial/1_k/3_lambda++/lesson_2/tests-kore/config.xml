@@ -4,6 +4,7 @@
 
 <!-- TODO: include free-variable-capture once superheat supported -->
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
+           skip="pdf"
            exclude="omega free-variable-capture"
            results=".">
     <kompile-option name="--superheat"

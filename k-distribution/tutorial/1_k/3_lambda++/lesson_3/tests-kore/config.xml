@@ -3,6 +3,7 @@
 <tests>
 
   <include file="../../../1_lambda/lesson_8/tests/config.xml"
+           skip="pdf"
            more-results="../../lesson_2/tests ."
            exclude="omega fibbo closed-variable-capture free-variable-capture" >
     <kompile-option name="--kore" />

@@ -3,6 +3,7 @@
 <tests>
 
   <include file="../../lesson_1/tests/config.xml"
+           skip="pdf"
            more-results="../../lesson_2/tests ../../lesson_3/tests-kore ."
            exclude="omega fibbo closed-variable-capture free-variable-capture callcc-with-let" >
     <kompile-option name="--kore" />
