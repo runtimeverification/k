@@ -1,0 +1,4 @@
+Solution: 0
+V
+---> 
+z ~> #freezer1 ( ( lambda x . lambda y . x ) y ) ~> #freezer1 ( a )
