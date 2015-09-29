@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<tests>
+
+  <include file="../../lesson_4/tests-kore/config.xml"
+           exclude="omega closed-variable-capture free-variable-capture"
+           more-results="../../lesson_1/tests ../tests ." />
+<!-- The above is not perfect, because closed-variable-capture and
+     free-variable-capture ended up being excluded from both sets of
+     included tests; we need to extend ktest to allow for finer
+     grain configuration of inclusions -->
+</tests>
