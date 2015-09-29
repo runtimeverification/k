@@ -17,6 +17,6 @@
 <!-- NOTE: use temporary config.xml during KORE translation
   <include file="../lesson_8/tests/config.xml" directory="lesson_8" />
 -->
-  <include file="../lesson_8/tests-kore/config.xml" directory="lesson_8" /> -->
+  <include file="../lesson_8/tests-kore/config.xml" directory="lesson_8" />
 </tests>
 
