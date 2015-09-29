@@ -2,8 +2,9 @@
 <!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <tests>
 
+<!-- TODO: include free-variable-capture once superheat supported -->
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
-           exclude="omega"
+           exclude="omega free-variable-capture"
            results=".">
     <kompile-option name="--superheat"
                     value="strict" />
