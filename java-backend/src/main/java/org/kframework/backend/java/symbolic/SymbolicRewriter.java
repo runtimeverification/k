@@ -54,6 +54,7 @@ public class SymbolicRewriter {
     private RuleIndex ruleIndex;
     private KRunState.Counter counter;
     private SetMultimap<ConstrainedTerm, Rule> disabledRules = HashMultimap.create();
+    private FastRuleMatcher theFastMatcher;
 
     public static final Stopwatch matchStopwatch = Stopwatch.createUnstarted();
 
@@ -67,6 +68,7 @@ public class SymbolicRewriter {
         ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
+
     }
 
     public KRunGraph getExecutionGraph() {
@@ -74,6 +76,8 @@ public class SymbolicRewriter {
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
+        this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext());
+
         KRunState initialState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
@@ -192,9 +196,10 @@ public class SymbolicRewriter {
         }
     }
 
+
     private void fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         results.clear();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = new FastRuleMatcher(subject.termContext()).mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
+        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
         for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
             Rule rule = definition.ruleTable.get(pair.getRight());
             Substitution<Variable, Term> substitution = RewriteEngineUtils.evaluateConditions(rule, pair.getLeft(), subject.termContext());
