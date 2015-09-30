@@ -304,27 +304,34 @@ public class SortCells {
         return s;
     }
 
+    private boolean isCellFragmentTest(KApply app) {
+        if (app.klist().size() != 1) return false;
+        K argument = app.klist().items().get(0);
+        if (!(argument instanceof KVariable)) return false;
+        VarInfo info = variables.get((KVariable)argument);
+        if (info == null) return false;
+        KLabel expectedPredicate = KLabel("is"+cfg.getCellSort(info.parentCell).toString()+"Fragment");
+        return app.klabel().equals(expectedPredicate);
+    }
+
+    /**
+     * Expand away cell fragment variables, and correctly order the children of cells.
+     * There are three significnat contexts for expanding cell fragments -
+     * as an argument to a parent cell it splits into separate arguments for each of the variables
+     * in most other uses, it expands into a term applying the appropriate {@code <cell>-fragment} label
+     * to the split variables, except that applications of an {@code isCellFragment} sort predicate
+     * to a cell fragment variable decomposes into a conjunction of sort predicate tests on the split
+     * variables.
+     */
     private K processVars(K term) {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
                 if (!cfg.isParentCell(k.klabel())) {
-                    if (k.klabel().name().equals("isBag")) {
-                        if (k.klist().size() != 1) {
-                            throw KEMException.compilerError("Unexpected isBag predicate not of arity 1 found; cannot compile to sorted cells.", k);
-                        }
-                        K item = k.klist().items().get(0);
-                        Map<Sort, K> split;
-                        try {
-                            split = getSplit(item);
-                        } catch (IllegalArgumentException e) {
-                            kem.registerCompilerWarning("Unchecked isBag predicate found. Treating as isK.", k);
-                            if (item instanceof KVariable) {
-                                return KVariable(((KVariable) item).name(), item.att().remove(Attribute.SORT_KEY));
-                            }
-                            return BooleanUtils.TRUE;
-                        }
-                        return split.entrySet().stream().map(e -> (K) KApply(KLabel("is" + getPredicateSort(e.getKey())), e.getValue())).reduce(BooleanUtils.TRUE, BooleanUtils::and);
+                    if (isCellFragmentTest(k)) {
+                        return getSplit(k.klist().items().get(0)).entrySet().stream()
+                                .map(e -> (K) KApply(KLabel("is" + getPredicateSort(e.getKey())), e.getValue()))
+                                .reduce(BooleanUtils.TRUE, BooleanUtils::and);
                     }
                     return super.apply(k);
                 } else {
