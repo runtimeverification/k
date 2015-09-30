@@ -253,7 +253,7 @@ definition. */
   rule print(.Vals); => .K  [structural]
 
 
-  syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
+  syntax KItem ::= (Id,Stmt,K,Map,K/*ControlCellFragment*/)
 
   syntax KItem ::= "popx"
 
@@ -333,10 +333,10 @@ definition. */
   syntax KItem ::= "execute"
   rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
 
-  syntax Val ::= objectClosure(CrntObjCellFragment)
+  syntax Val ::= objectClosure(K/*CrntObjCellFragment*/)
                | methodClosure(Id,Int,Ids,Stmt)
 
-  syntax KItem ::= (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,K/*ControlCellFragment*/)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
@@ -473,7 +473,7 @@ current object. */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
+  rule (objectClosure(Obj <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
 
 /*  rule <k> (super . X
@@ -491,8 +491,8 @@ current object. */
        <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-  context HOLE(_:Exps)
-    when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
+  context HOLE:Exp(_:Exps)
+    when getKLabel(HOLE) ==K #klabel(`'_(_)`) orBool getKLabel(HOLE) ==K #klabel(`'_[_]`)
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
