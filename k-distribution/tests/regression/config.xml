@@ -73,8 +73,8 @@
            programs="ocamlbackend/tests"
            results="ocamlbackend/tests" />
 
-  <include file="kore-cell-fragments/imp_fragments/config.xml"
-           directory="kore-cell-fragments/imp_fragments/" />
+  <include file="kore-cell-fragments/config.xml"
+           directory="kore-cell-fragments/" />
 
   <include file="issue1724/config.xml"
            directory="issue1724"
