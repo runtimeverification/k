@@ -6,14 +6,10 @@ import org.kframework.debugger.DebuggerMatchResult;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.K;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.compile.VisitKORE;
+import org.kframework.krun.KRun;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -64,7 +60,7 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             CommandUtils utils = new CommandUtils(isSource);
             pattern.ifPresent(pattern -> {
-                if(isSource) {
+                if (isSource) {
                     session.addWatch(pattern, "<Source File>");
                 } else {
                     session.addWatch(pattern, "<Command Line>");
@@ -301,39 +297,20 @@ public class Commands {
         private boolean disableOutput;
 
         private CommandUtils(boolean isSource) {
-            this.disableOutput= isSource;
+            this.disableOutput = isSource;
         }
 
         private void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
-            List<? extends Map<? extends KVariable, ? extends K>> substList = result.getSubstitutions();
-
-            if (substList.isEmpty() && !disableOutput) {
-                System.out.println("No Substitution Found");
+            if (disableOutput) {
                 return;
             }
-
-            List<String> varList = new ArrayList<>();
-            new VisitKORE() {
-                @Override
-                public Void apply(KVariable k) {
-                    /* Not Observing reflexivity Rule requires comparison by name */
-                    varList.add(k.name());
-                    return super.apply(k);
-                }
-            }.apply(result.getParsedRule().body());
-
-            substList.stream()
-                    .forEach(map ->
-                            map.entrySet()
-                                    .stream()
-                                    .filter(x -> varList.contains(x.getKey().name()))
-                                    .forEach(x -> {
-                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> print(s, cons -> System.out.print(cons)), x.getKey());
-                                        print(" ----> ", cons -> System.out.print(cons));
-                                        prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> print(s, cons -> System.out.println(cons)), x.getValue());
-                                    }));
-
-
+            if (result.getSubstitutions().isEmpty()) {
+                System.out.println("No Substitutions");
+                return;
+            }
+            result.getSubstitutions().stream().forEach(subst -> {
+                KRun.prettyPrintSubstitution(subst, result.getParsedRule(), compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s));
+            });
         }
 
         private void print(String printString, Consumer<String> printer) {

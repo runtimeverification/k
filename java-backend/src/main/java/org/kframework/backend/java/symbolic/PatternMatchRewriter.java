@@ -19,7 +19,7 @@ import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
-import org.kframework.krun.api.SearchType;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.File;

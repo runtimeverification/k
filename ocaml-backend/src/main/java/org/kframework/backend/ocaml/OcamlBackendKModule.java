@@ -6,7 +6,7 @@ import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.AbstractKModule;
 import org.kframework.transformation.ToolActivation;

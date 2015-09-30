@@ -2,7 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
@@ -13,6 +13,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -99,12 +100,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
-            public List<K> prove(List<Rule> rules) {
+            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
+            public List<K> prove(List<Rule> rules) {
                 throw new UnsupportedOperationException();
             }
         };

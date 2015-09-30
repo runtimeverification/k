@@ -3,7 +3,7 @@ package org.kframework.utils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
 import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
