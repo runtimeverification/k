@@ -72,11 +72,16 @@ public class DeconstructIntegerAndFloatLiterals {
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
         K body = convert(rule.body());
+        K requires = convertLookups(rule.requires());
         return Rule(
                 body,
-                addSideCondition(rule.requires()),
+                addSideCondition(requires),
                 rule.ensures(),
                 rule.att());
+    }
+
+    private K convertLookups(K requires) {
+        return new Transformer(false).apply(requires);
     }
 
     private Context convert(Context context) {
@@ -112,36 +117,57 @@ public class DeconstructIntegerAndFloatLiterals {
     }
 
     private K convert(K term) {
-        return new TransformKORE() {
+        return new Transformer(true).apply(term);
+    }
 
-            @Override
-            public K apply(KToken k) {
-                if (rhsOf == null) {
-                    //lhs
-                    if (k.sort().equals(Sorts.Int()) || k.sort().equals(Sorts.Float())) {
-                        KVariable var = newDotVariable(k.sort());
-                        state.add(KApply(KLabel("_==" + k.sort().name() + "_"), var, k));
-                        return var;
-                    }
+    private class Transformer extends TransformKORE {
+
+        @Override
+        public K apply(KToken k) {
+            if (lhs) {
+                if (k.sort().equals(Sorts.Int()) || k.sort().equals(Sorts.Float())) {
+                    KVariable var = newDotVariable(k.sort());
+                    state.add(KApply(KLabel("_==" + k.sort().name() + "_"), var, k));
+                    return var;
                 }
-                return super.apply(k);
             }
+            return super.apply(k);
+        }
 
-            private K rhsOf;
+        private boolean lhs;
 
-            @Override
-            public K apply(KRewrite k) {
-                K l = apply(k.left());
-                rhsOf = k;
-                K r = apply(k.right());
-                rhsOf = null;
-                if (l != k.left() || r != k.right()) {
-                    return KRewrite(l, r, k.att());
+        public Transformer(boolean lhs) {
+            this.lhs = lhs;
+        }
+
+        @Override
+        public K apply(KApply k) {
+            if (ConvertDataStructureToLookup.isLookupKLabel(k)) {
+                assert k.klist().size() == 2;
+                K r = apply(k.klist().items().get(1));
+                lhs = true;
+                K l = apply(k.klist().items().get(0));
+                lhs = false;
+                if (l != k.klist().items().get(0) || r != k.klist().items().get(1)) {
+                    return KApply(k.klabel(), l, r);
                 } else {
                     return k;
                 }
             }
-        }.apply(term);
-    }
+            return super.apply(k);
+        }
 
+        @Override
+        public K apply(KRewrite k) {
+            K l = apply(k.left());
+            lhs = false;
+            K r = apply(k.right());
+            lhs = true;
+            if (l != k.left() || r != k.right()) {
+                return KRewrite(l, r, k.att());
+            } else {
+                return k;
+            }
+        }
+    }
 }

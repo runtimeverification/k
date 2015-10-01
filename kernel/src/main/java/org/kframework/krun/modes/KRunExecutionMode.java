@@ -2,6 +2,7 @@
 package org.kframework.krun.modes;
 
 import com.google.inject.Inject;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -54,16 +55,16 @@ public class KRunExecutionMode implements ExecutionMode {
         }
         if (kRunOptions.exitCodePattern != null) {
             Rule exitCodePattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, kRunOptions, compiledDefinition, Source.apply("<command line: --exit-code>"));
-            Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res;
+            Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> res;
             if (pattern != null) {
                 res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
-                return new Tuple2<>(new SearchResult(res._2(), parsedPattern), KRun.getExitCode(kem, rewriter.match(res._1(), exitCodePattern)));
+                return new Tuple2<>(new SearchResult(res._2(), parsedPattern), KRun.getExitCode(kem, rewriter.match(res._1().k(), exitCodePattern)));
             }
             res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), exitCodePattern);
-            return Tuple2.apply(res._1(), KRun.getExitCode(kem, res._2()));
+            return Tuple2.apply(res._1().k(), KRun.getExitCode(kem, res._2()));
         }
         if (pattern != null) {
-            Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
+            Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
             return new SearchResult(res._2(), parsedPattern);
         }
         return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k();
