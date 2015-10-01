@@ -253,7 +253,7 @@ definition. */
   rule print(.Vals); => .K  [structural]
 
 
-  syntax KItem ::= (Id,Stmt,K,Map,K/*ControlCellFragment*/)
+  syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
 
   syntax KItem ::= "popx"
 
@@ -333,21 +333,21 @@ definition. */
   syntax KItem ::= "execute"
   rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
 
-  syntax Val ::= objectClosure(K/*CrntObjCellFragment*/)
+  syntax Val ::= objectClosure(CrntObjCellFragment)
                | methodClosure(Id,Int,Ids,Stmt)
 
-  syntax KItem ::= (Map,K,K/*ControlCellFragment*/)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
+       <store>... OL |-> objectClosure(<crntObj>-fragment <crntClass>_</crntClass> Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
      //<br/>
        <control>
           C
-          <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
+          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj' </crntObj> </control>-fragment))
           ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
+          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 Obj2 </crntObj>
        </control>
 
 
@@ -393,7 +393,7 @@ definition. */
                       <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
-         <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
+         <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj </crntObj> </control>-fragment)) ...</fstack>
        </control>
 
   syntax KItem ::= create(Id)
@@ -440,13 +440,17 @@ current object. */
 
   context HOLE._::Id when (HOLE =/=K super)
 
-  rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>)
+  rule objectClosure(<crntObj>-fragment
+                     <crntClass> Class:Id </crntClass>
+                     <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>
+                     _ </crntObj>-fragment)
        . X:Id
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
-  rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+  rule objectClosure(<crntObj>-fragment
+                     <crntClass> Class:Id </crntClass>
+                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+                     _ </crntObj>-fragment)
        . X:Id
     when Class =/=K Class'  [structural]
 
@@ -473,7 +477,7 @@ current object. */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  rule (objectClosure(Obj <envStack> EStack </envStack>) . X
+  rule (objectClosure(<crntObj>-fragment _ <envStack> EStack </envStack> _ </crntObj>-fragment) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
 
 /*  rule <k> (super . X
@@ -497,18 +501,18 @@ current object. */
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
 
-  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
+  rule objectClosure(<crntObj>-fragment _ <envStack> ListItem((C,_)) ...</envStack> _ </crntObj>-fragment)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
+  rule objectClosure(<crntObj>-fragment _ <envStack> ListItem((C::Id,_)) => .List ...</envStack> _ </crntObj>-fragment)
        instanceOf C'  when C =/=K C'  [structural]
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
-  rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
+  rule objectClosure(<crntObj>-fragment _ <envStack> .List </envStack> _ </crntObj>-fragment) instanceOf _ => false
 
 
-  rule (C) objectClosure(<crntClass> _ </crntClass> Obj)
-    => objectClosure(<crntClass> C </crntClass> Obj)
+  rule (C) objectClosure(<crntObj>-fragment <crntClass> _ </crntClass> Obj1 Obj2 </crntObj>-fragment)
+    => objectClosure(<crntObj>-fragment <crntClass> C </crntClass> Obj1 Obj2 </crntObj>-fragment)
 
 
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
@@ -521,13 +525,17 @@ current object. */
               . X
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]*/
-  rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>)
+  rule lvalue(objectClosure(<crntObj>-fragment
+                            <crntClass> Class </crntClass>
+                            <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>
+                            _ </crntObj>-fragment)
               . X
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
                               X))  [structural]
-  rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+  rule lvalue(objectClosure(<crntObj>-fragment
+                            <crntClass> Class </crntClass>
+                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+                            _ </crntObj>-fragment)
               . X)
     when Class =/=K Class'  [structural]
 
