@@ -8,8 +8,8 @@ import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.unparser.OutputModes;
-import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
@@ -248,7 +248,6 @@ public final class KRunOptions {
     public String exitCodePattern;
 
     public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
-
 
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;

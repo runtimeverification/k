@@ -38,6 +38,18 @@ let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else 
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
+let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
+| '"' -> Buffer.add_string buf "\\\""
+| '\\' -> Buffer.add_string buf "\\\\"
+| '\n' -> Buffer.add_string buf "\\n"
+| '\t' -> Buffer.add_string buf "\\t"
+| '\r' -> Buffer.add_string buf "\\r"
+| '\x0c' -> Buffer.add_string buf "\\f"
+| _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
+| _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
+let k_string_escape str = 
+  let buf = Buffer.create (String.length str) in
+  String.iter (k_char_escape buf) str; Buffer.contents buf
 let print_k (c: k) : string = let buf = Buffer.create 16 in
   let rec print_klist(c: k list) : unit = match c with
   | [] -> Buffer.add_string buf ".KList"
@@ -49,11 +61,11 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | e1::e2::l -> print_kitem(normalize e1); Buffer.add_string buf " ~> "; print_k(e2::l)
   and print_kitem(c: normal_kitem) : unit = match c with
   | KApply(klabel, klist) -> Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf '('; print_klist(klist); Buffer.add_char buf ')'
-  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (String.escaped s); 
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (k_string_escape s); 
         Buffer.add_string buf "\", \""; Buffer.add_string buf (print_sort sort); Buffer.add_string buf "\")"
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
-  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (String.escaped s) ^ "\"")))
+  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
   | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
   | KItem (Bottom) -> Buffer.add_string buf "`#Bottom`(.KList)"
@@ -78,6 +90,7 @@ let convert_open_flags (s: string) : Unix.open_flag list =
       "r" -> [Unix.O_RDONLY] 
     | "w" -> [Unix.O_WRONLY] 
     | "rw" -> [Unix.O_RDWR]
+    | "wac" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
     | _ -> raise (Invalid_argument "convert_open_flags")
 let to_string_base (base: int) (i: Z.t) : string = match base with
   10 -> Z.format "%d" i
@@ -90,16 +103,16 @@ let from_zarith (i: Z.t) : Gmp.Z.t = Gmp.Z.from_string (Z.to_string i)
 
 let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t option =
  let (digits, exp) = Gmp.FR.to_string_exp_base_digits Gmp.GMP_RNDN 2 prec f in match digits with 
- | "@Inf@" -> false, (emax exp), Some Z.zero
- | "-@Inf@" -> true, (emax exp), Some Z.zero
- | "@NaN@" -> false, (emax exp), None
- | "-@NaN@" -> true, (emax exp), None
+ | "@Inf@" -> false, (emax e), Some Z.zero
+ | "-@Inf@" -> true, (emax e), Some Z.zero
+ | "@NaN@" -> false, (emax e), None
+ | "-@NaN@" -> true, (emax e), None
  | _ -> let min_exp = emin_normal e in
- let significand = Z.of_string digits in
+ let significand = Z.abs (Z.of_string_base 2 digits) in
  let scaled_significand = if exp < min_exp then 
    (Z.shift_right significand (min_exp - (exp - 1))) else 
    significand in
- let true_exp = if exp < min_exp then min_exp else exp in
+ let true_exp = if exp < min_exp then min_exp else if exp > (emax e) then emax e else (exp - 1) in
  (String.get digits 0 = '-'), true_exp, Some scaled_significand
 
 let float_regexp = Str.regexp "(.*)[pP]([0-9]+)[xX]([0-9]+)"

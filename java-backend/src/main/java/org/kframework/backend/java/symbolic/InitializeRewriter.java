@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.kframework.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
@@ -12,21 +11,22 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.definition.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.Rewriter;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Builtins;
@@ -105,7 +105,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public final GlobalContext rewritingContext;
         private final KExceptionManager kem;
 
-        public SymbolicRewriterGlue(Module module, Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions, GlobalContext rewritingContext, KExceptionManager kem) {
+        public SymbolicRewriterGlue(
+                Module module,
+                Definition definition,
+                KompileOptions kompileOptions,
+                JavaExecutionOptions javaOptions,
+                GlobalContext rewritingContext,
+                KExceptionManager kem) {
             this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
             this.definition = definition;
             this.module = module;
@@ -115,7 +121,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), true, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), rewritingContext.getDefinition().context(), depth.orElse(-1), false);
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
@@ -123,18 +129,18 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable,? extends K>> match(K k, org.kframework.definition.Rule rule) {
-            return search(k, Optional.of(0), Optional.empty(), rule);
+            return search(k, Optional.of(0), Optional.empty(), rule, SearchType.STAR);
         }
 
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false);
+        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), true, false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
-                    SearchType.STAR, TermContext.of(rewritingContext), false);
+                    searchType, TermContext.of(rewritingContext), false);
             return searchResults;
         }
 
@@ -147,7 +153,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<K> prove(List<Rule> rules) {
             TermContext context = TermContext.of(rewritingContext);
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, context, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, context, true, false);
             List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());

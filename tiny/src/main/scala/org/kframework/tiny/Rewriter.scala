@@ -8,7 +8,8 @@ import org.kframework.builtin.Sorts
 import org.kframework.definition.{Module, ModuleTransformer}
 import org.kframework.kore.Unapply.KLabel
 import org.kframework.kore.{KApply, Unapply}
-import org.kframework.{RewriterResult, definition, kore}
+import org.kframework.rewriter.SearchType
+import org.kframework.{rewriter, RewriterResult, definition, kore}
 
 import scala.collection.parallel.ParIterable
 
@@ -32,7 +33,7 @@ object SimpleIndex extends (K => Option[Symbol]) {
   }
 }
 
-class FullTinyRewriter(module: definition.Module) extends org.kframework.Rewriter {
+class FullTinyRewriter(module: definition.Module) extends rewriter.Rewriter {
   val moduleWithoutFunctions = ModuleTransformer(m => Module(
     m.name, m.imports, m.localSentences.filter({
       case r: org.kframework.definition.Rule =>
@@ -47,7 +48,7 @@ class FullTinyRewriter(module: definition.Module) extends org.kframework.Rewrite
 
   def execute(k: kore.K, depth:java.util.Optional[Integer]): RewriterResult = new RewriterResult(java.util.Optional.of(-1), innerRewriter.execute(k))
   def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: org.kframework.definition.Rule): (kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]) = ???
-  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: org.kframework.definition.Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = ???
+  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: org.kframework.definition.Rule, searchType: SearchType): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = ???
   override def `match`(k: kore.K, rule: org.kframework.definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = ???
 
   override def prove(rules: util.List[definition.Rule]): util.List[kore.K] = ???

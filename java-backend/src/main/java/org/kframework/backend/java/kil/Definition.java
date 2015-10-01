@@ -283,7 +283,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, true);
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, true, true);
         JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
             if (s instanceof org.kframework.definition.Rule) {
                 addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));

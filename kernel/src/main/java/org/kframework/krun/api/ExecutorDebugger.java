@@ -22,6 +22,7 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.parser.TermLoader;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.Map.Entry;

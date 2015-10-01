@@ -11,7 +11,7 @@ import jline.console.completer.Completer;
 import jline.console.completer.FileNameCompleter;
 import jline.console.completer.NullCompleter;
 import jline.console.completer.StringsCompleter;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
 import org.kframework.kompile.CompiledDefinition;
