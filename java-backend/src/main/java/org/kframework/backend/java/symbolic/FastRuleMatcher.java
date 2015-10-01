@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -16,15 +17,20 @@ import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.kore.KApply;
 
 
 public class FastRuleMatcher {
 
     private ConjunctiveFormula[] substitutions;
+    private Map<Pair<KItem, Integer>, Term>[] rewrites;
+
     private BitSet empty;
 
     private final TermContext context;
@@ -32,6 +38,8 @@ public class FastRuleMatcher {
     private final KLabelConstant kSeqLabel;
     private final KLabelConstant kDotLabel;
     private final KItem kDot;
+    private KItem parent;
+    private int childLocation;
 
     public FastRuleMatcher(TermContext context) {
         this.context = context;
@@ -46,6 +54,8 @@ public class FastRuleMatcher {
 
         substitutions = new ConjunctiveFormula[ruleMask.length()];
         ruleMask.stream().forEach(i -> substitutions[i] = ConjunctiveFormula.of(context));
+        rewrites = new Map[ruleMask.length()];
+        ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = new BitSet(ruleMask.size());
 
         BitSet theMatchingRules = match(subject, pattern, ruleMask);
@@ -109,6 +119,17 @@ public class FastRuleMatcher {
             return returnSet;
         }
 
+        if (isKRewrite(pattern)) {
+            KApply rw = (KApply) pattern;
+            InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
+            for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
+                if (innerRHSRewrite.theRHS[i] != null) {
+                    rewrites[i].put(Pair.of(parent, childLocation), innerRHSRewrite.theRHS[i]);
+                }
+            }
+            return match(subject, (Term) rw.klist().items().get(0), ruleMask);
+        }
+
         // normalize KSeq representations
         if (isKSeq(pattern)) {
             subject = upKSeq(subject);
@@ -131,6 +152,8 @@ public class FastRuleMatcher {
             assert subjectKList.size() == patternKList.size();
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
+                this.parent = (KItem) subject;
+                this.childLocation = i;
                 ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask);
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
@@ -164,6 +187,10 @@ public class FastRuleMatcher {
 
     private static boolean isKSeq(Term term) {
         return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+    }
+
+    private static boolean isKRewrite(Term term) {
+        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KREWRITE);
     }
 
     private static boolean isKSeqVar(Term term) {

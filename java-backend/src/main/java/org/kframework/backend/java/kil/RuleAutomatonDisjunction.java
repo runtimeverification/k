@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term {
 
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+    public final Pair<KItem, BitSet>[] kItemDisjunctionsForRewriteArray;
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
-    private final Map<KLabelConstant, Pair<KItem, BitSet>> kItemDisjunctions;
     private final Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions;
     private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
 
@@ -32,15 +33,21 @@ public class RuleAutomatonDisjunction extends Term {
                 .forEach(p -> {
                     this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
                 });
+
+        this.kItemDisjunctionsForRewriteArray = new Pair[KLabelConstant.cacheSize];
+        children.stream()
+                .filter(p -> p.getLeft() instanceof KItem && ((KItem) p.getLeft()).klabel().name().equals(KLabels.KREWRITE))
+                .forEach(p -> {
+                    this.kItemDisjunctionsForRewriteArray[((KLabelConstant) ((KItem) ((KList) ((KItem) p.getLeft()).kList()).get(0)).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
+                });
+
         this.variableDisjunctionsArray = new List[Sort.cache.size()];
         context.definition().allSorts().forEach(s -> {
             this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
                     .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
                     .collect(Collectors.toSet()));
         });
-        this.kItemDisjunctions = children.stream()
-                .filter(p -> p.getLeft() instanceof KItem)
-                .collect(Collectors.toMap(p -> ((KLabelConstant) ((KItem) p.getLeft()).kLabel()), p -> (Pair<KItem, BitSet>) (Object) p));
+
         this.variableDisjunctions = context.definition().allSorts().stream().collect(Collectors.toMap(
                 s -> s,
                 s -> (Set<Pair<Variable, BitSet>>) (Object) children.stream()
@@ -51,9 +58,6 @@ public class RuleAutomatonDisjunction extends Term {
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
     }
 
-    public Map<KLabelConstant, Pair<KItem, BitSet>> kItemDisjunctions() {
-        return kItemDisjunctions;
-    }
 
     public Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions() {
         return variableDisjunctions;
@@ -128,4 +132,8 @@ public class RuleAutomatonDisjunction extends Term {
         visitor.visit(this);
     }
 
+    @Override
+    public String toString() {
+        return disjunctions().stream().map(Object::toString).reduce("", (a, b) -> a + " OR " + b);
+    }
 }

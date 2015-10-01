@@ -43,5 +43,5 @@ public interface Visitor {
     public void visit(Variable variable);
     public void visit(InjectedKLabel injectedKLabel);
     public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction);
-
+    public void visit(InnerRHSRewrite innerRHSRewrite);
 }

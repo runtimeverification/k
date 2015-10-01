@@ -27,7 +27,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
   import ML._
 
-  val isRule = KLabel("isRule")
+  val isRulePredicate = KLabel("isRule")
 
   def apply(m: Module): Module = {
     if (m.rules.nonEmpty) {
@@ -37,8 +37,8 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       }
       }
 
-      val newBody = pushDisjunction(topRules map whatever(r => RewriteToTop.toLeft(r.body)))
-      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
+      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(RewriteToTop.bubbleRewriteOutOfKSeq(r.body)), isRulePredicate(r.hashCode)) })
+      //      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
       //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
       val automatonRule = Rule(newBody, TrueToken, TrueToken, Att().add("automaton"))
       Module(m.name, m.imports, m.localSentences + automatonRule, m.att)
@@ -47,8 +47,10 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     }
   }
 
-  def whatever(relevant: Rule => K)(r: Rule): (K, K) = {
-    (relevant(r), isRule(r.hashCode))
+  def convertKRewriteToKApply(k: K): K = k match {
+    case Unapply.KApply(label, children) => label(children map convertKRewriteToKApply: _*)
+    case Unapply.KRewrite(l, r) => KLabel(KLabels.KREWRITE)(l, r)
+    case other => other
   }
 
   def makeOr(ks: K*): K = {
@@ -59,25 +61,39 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     }
   }
 
+
   def pushDisjunction(terms: Set[(K, K)]): K = {
-    val normalizedTerms: Set[(K, K)] = terms map { p => (normalizeKSeq(p._1), p._2)}
+
+
+    val rwLabel = KLabel(KLabels.KREWRITE)
+
+    val normalizedTerms: Set[(K, K)] = terms map { p => (normalizeKSeq(p._1), p._2) }
     val disjunctionOfKApplies: Iterable[(K, K)] = normalizedTerms
       .collect({ case (x: KApply, ruleP) => (x, ruleP) })
       .groupBy(_._1.klabel)
-      .map { case (klabel: KLabel, ks: Set[(KApply, K)]) => {
-      if (ks.size > 1) {
-        val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
-        val childrenDisjunctionsOfklabel: IndexedSeq[K] =
-          setOfLists.head.indices
-            .map(i => setOfLists.map(_(i)))
-            .map(pushDisjunction)
-        val rulePs = ks map { _._2 } toSeq
+      .map {
+        case (`rwLabel`, ks: Set[(KApply, K)]) =>
+          val thePairs = ks map { case (Unapply.KApply(`rwLabel`, List(left, right)), isRuleP) => ((left, isRuleP), (right, isRuleP)) } unzip
 
-        (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
-      } else
-        (ks.head._1, ks.head._2)
-    }
-    }
+          val theProcessedLHS = pushDisjunction(thePairs._1)
+          val theProcessedRHS = thePairs._2 map { case (k, isRuleP) => and(k, isRuleP) }
+          val rulePs = ks map { _._2 } toSeq
+
+          (rwLabel(theProcessedLHS, makeOr(theProcessedRHS.toSeq: _*)), or(rulePs: _*))
+
+        case (klabel: KLabel, ks: Set[(KApply, K)]) =>
+//          if (ks.size > 1 || klabel.name == KLabels.KREWRITE) {
+            val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+            val childrenDisjunctionsOfklabel: IndexedSeq[K] =
+              setOfLists.head.indices
+                .map(i => setOfLists.map(l => l(i)))
+                .map(pushDisjunction)
+            val rulePs = ks map { _._2 } toSeq
+
+            (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
+//          } else
+//            (ks.head._1, ks.head._2)
+      }
 
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
       .groupBy(_._1)

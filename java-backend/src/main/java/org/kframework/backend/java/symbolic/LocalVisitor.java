@@ -179,4 +179,7 @@ public class LocalVisitor implements Visitor {
 
     @Override
     public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) { }
 }

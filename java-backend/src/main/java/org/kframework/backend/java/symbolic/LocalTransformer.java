@@ -188,4 +188,9 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
         return transform((JavaSymbolicObject) ruleAutomatonDisjunction);
     }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        return transform((JavaSymbolicObject) innerRHSRewrite);
+    }
 }

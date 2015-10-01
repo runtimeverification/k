@@ -46,4 +46,5 @@ public interface Transformer {
     public ASTNode transform(Variable variable);
     public ASTNode transform(InjectedKLabel injectedKLabel);
     public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction);
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite);
 }

@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.kframework.kore.KORE.*;
+
 import com.google.common.collect.Lists;
 
 
@@ -53,6 +55,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         this.module = module;
         this.definition = definition;
         this.context = context;
+
+        System.out.println("module.rules().mkString(\"\\n\") = " + module.rules().mkString("\n"));
 
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, context.definition());
         kDotLabel = KLabelConstant.of(KLabels.DOTK, context.definition());
@@ -87,6 +91,30 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
+        if (klabel.name().equals(KLabels.KREWRITE)) {
+
+            K kk = klist.items().get(1);
+
+            if (!(kk instanceof KApply))
+                throw new AssertionError("k should be a KApply");
+
+            KApply k = (KApply) kk;
+
+            Set<KApply> orContents = getOrContents(k);
+
+            Term[] theRHSs = new Term[this.definition.reverseRuleTable.size()];
+
+            orContents.forEach(c -> {
+                if (!c.klabel().name().equals(KLabels.ML_AND))
+                    throw new AssertionError("c should be an KApply AND but is " + c.klabel().name());
+                K term = c.klist().items().get(0);
+                Integer ruleIndex = getRuleIndex((KApply) c.klist().items().get(1));
+                theRHSs[ruleIndex] = convert(term);
+            });
+
+            return KItem.of(convert(klabel), KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), context);
+        }
+
         if (klabel.name().equals(KLabels.ML_OR)) {
             return new RuleAutomatonDisjunction(
                     klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()),
@@ -106,9 +134,17 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     private BitSet getRuleSet(KApply k) {
         BitSet theRuleSetIndices = new BitSet();
-        Set<KApply> rulePs = k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
-        rulePs.stream().map(kk -> definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()))).forEach(theRuleSetIndices::set);
+        Set<KApply> rulePs = getOrContents(k);
+        rulePs.stream().map(this::getRuleIndex).forEach(theRuleSetIndices::set);
         return theRuleSetIndices;
+    }
+
+    private Integer getRuleIndex(KApply kk) {
+        return definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()));
+    }
+
+    private Set<KApply> getOrContents(KApply k) {
+        return k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
     }
 
     @Override

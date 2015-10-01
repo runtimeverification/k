@@ -11,7 +11,9 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -127,6 +129,16 @@ public class CopyOnWriteTransformer implements Transformer {
                         .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
                         .collect(Collectors.toList()),
                 context);
+    }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        Term[] theNewRHS = new Term[innerRHSRewrite.theRHS.length];
+        for (int i = 0; i < theNewRHS.length; i++) {
+            if (innerRHSRewrite.theRHS[i] != null)
+                theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
+        }
+        return new InnerRHSRewrite(theNewRHS);
     }
 
     @Override
@@ -321,7 +333,7 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
         BuiltinSet.Builder builder = BuiltinSet.builder(context);
-        for(Term element : builtinSet.elements()) {
+        for (Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
             changed = changed || (transformedElement != element);

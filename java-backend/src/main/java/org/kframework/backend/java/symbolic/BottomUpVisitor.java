@@ -130,6 +130,9 @@ public class BottomUpVisitor implements Visitor {
     public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
 
     @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) { }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);

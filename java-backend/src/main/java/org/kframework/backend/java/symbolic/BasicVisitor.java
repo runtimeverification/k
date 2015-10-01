@@ -65,6 +65,8 @@ public class BasicVisitor implements Visitor {
             visit((Bottom) node);
         } else if (node instanceof RuleAutomatonDisjunction) {
             visit((RuleAutomatonDisjunction) node);
+        } else if (node instanceof InnerRHSRewrite) {
+            visit((InnerRHSRewrite) node);
         } else {
             assert false : "unexpected class " + node.getClass();
         }
@@ -178,7 +180,12 @@ public class BasicVisitor implements Visitor {
     }
 
     @Override
-    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) {
+    }
 
     @Override
     public void visit(KCollection kCollection) {
@@ -237,7 +244,9 @@ public class BasicVisitor implements Visitor {
         disjunctiveFormula.conjunctions().stream().forEach(this::visitNode);
     }
 
-    @Override public void visit(Term term) { }
+    @Override
+    public void visit(Term term) {
+    }
 
     @Override
     public void visit(Token token) {

@@ -1,7 +1,8 @@
 package org.kframework.kore.compile
 
 import org.kframework.kore.KORE.{KApply, KList, KSequence}
-import org.kframework.kore.{KSequence, K, KApply, KRewrite}
+import org.kframework.kore.KRewrite
+import org.kframework.kore._
 import org.kframework.Collections._
 
 
@@ -17,6 +18,13 @@ object RewriteToTop {
     case t: KRewrite => t.right
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toRight, t.att)
     case t: KSequence => KSequence(mutable(immutable(t.items) map toRight toList), t.att)
+    case other => other
+  }
+
+  def bubbleRewriteOutOfKSeq(k: K): K = k match {
+    case kseq: KSequence => ADT.KRewrite(toLeft(kseq), toRight(kseq))
+    case t: KRewrite => ADT.KRewrite(t.left, t.right)
+    case t: KApply => KApply(t.klabel, immutable(t.klist.items) map bubbleRewriteOutOfKSeq, t.att)
     case other => other
   }
 }

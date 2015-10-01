@@ -17,4 +17,6 @@ public class KLabels {
     public static String DOTK = "#EmptyK";
 
     public static String CELLS = "#cells";
+
+    public static String KREWRITE = "=>";
 }
