@@ -114,6 +114,9 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     private RewriterResult parseOcamlRewriterOutput(String output) {
         String[] lines = output.split(System.getProperty("line.separator"));
         int steps = Integer.parseInt(lines[0]);
+        if (options.experimental.statistics) {
+            System.err.println("[" + steps + " steps]");
+        }
         return new RewriterResult(Optional.of(steps), parseOcamlOutput(lines[1]));
     }
 
