@@ -196,7 +196,11 @@ public class PatternMatcher extends AbstractUnifier {
      */
     @Override
     void add(Term term, Term variableTerm) {
-        assert variableTerm instanceof Variable;
+        if (!(variableTerm instanceof Variable)) {
+            fail(variableTerm, term);
+            return;
+        }
+
         Variable variable = (Variable) variableTerm;
         if (variable.equals(term)) {
             return;
