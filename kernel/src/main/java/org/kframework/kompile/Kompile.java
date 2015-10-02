@@ -22,21 +22,9 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.compile.AddImplicitComputationCell;
-import org.kframework.kore.compile.ConcretizeCells;
-import org.kframework.kore.compile.ConvertDataStructureToLookup;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
-import org.kframework.kore.compile.GenerateSortPredicateSyntax;
-import org.kframework.kore.compile.MergeRules;
-import org.kframework.kore.compile.ResolveAnonVar;
-import org.kframework.kore.compile.ResolveContexts;
-import org.kframework.kore.compile.ResolveFreshConstants;
-import org.kframework.kore.compile.ResolveHeatCoolAttribute;
-import org.kframework.kore.compile.ResolveIOStreams;
-import org.kframework.kore.compile.ResolveSemanticCasts;
-import org.kframework.kore.compile.ResolveStrict;
-import org.kframework.kore.compile.SortInfo;
+import org.kframework.kore.compile.*;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParseCache.ParsedSentence;
@@ -167,8 +155,38 @@ public class Kompile {
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
                 .andThen(convertDataStructureToLookup)
+                .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
+    }
+
+    private Sentence markSingleVariables(Sentence s) {
+        if (s instanceof Rule) {
+            Rule r = (Rule) s;
+            Map<KVariable, Integer> varCount = new HashMap<>();
+            VisitKORE markerVisitor = new VisitKORE() {
+                public Void apply(KVariable kvar) {
+                    varCount.put(kvar, varCount.getOrDefault(kvar, 0) + 1);
+                    return null;
+                }
+            };
+            markerVisitor.apply(r.body());
+            markerVisitor.apply(r.requires());
+            markerVisitor.apply(r.ensures());
+
+            TransformKORE markerAdder = new TransformKORE() {
+                public K apply(KVariable kvar) {
+                    if (varCount.get(kvar) == 1)
+                        return KORE.KVariable(kvar.name(), kvar.att().add("singleVariable"));
+                    else
+                        return kvar;
+                }
+            };
+
+            return Rule(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
+        } else {
+            return s;
+        }
     }
 
     public Definition resolveIOStreams(Definition d) {

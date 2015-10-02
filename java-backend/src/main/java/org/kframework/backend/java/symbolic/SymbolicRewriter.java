@@ -22,20 +22,20 @@ import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KApply;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
- *
  * @author AndreiS
- *
  */
 public class SymbolicRewriter {
 
@@ -110,8 +110,7 @@ public class SymbolicRewriter {
      * Gets the rules that could be applied to a given term according to the
      * rule indexing mechanism.
      *
-     * @param term
-     *            the given term
+     * @param term the given term
      * @return a list of rules that could be applied
      */
     private List<Rule> getRules(Term term) {
@@ -204,12 +203,58 @@ public class SymbolicRewriter {
             Rule rule = definition.ruleTable.get(pair.getRight());
             Substitution<Variable, Term> substitution = RewriteEngineUtils.evaluateConditions(rule, pair.getLeft(), subject.termContext());
             if (substitution != null) {
-                results.add(new ConstrainedTerm(rule.rightHandSide().substituteAndEvaluate(substitution, subject.termContext()), subject.termContext()));
+                Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrites()[pair.getRight()];
+                List<Pair<scala.collection.immutable.List<Integer>, Term>> cleanedUpRewrites =
+                        rewrites.entrySet().stream().map(e -> Pair.of(e.getKey().reverse(), e.getValue())).collect(Collectors.toList());
+
+                Term theNew;
+                if (cleanedUpRewrites.size() == 1)
+                    theNew = buildRHS(subject.term(), substitution, cleanedUpRewrites.get(0).getLeft(), cleanedUpRewrites.get(0).getRight(), subject.termContext());
+                else
+                    theNew = buildRHS((KItem) subject.term(), substitution, cleanedUpRewrites, subject.termContext());
+
+                results.add(new ConstrainedTerm(theNew, subject.termContext()));
                 if (computeOne) {
                     break;
                 }
             }
         }
+    }
+
+    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, scala.collection.immutable.List<Integer> path, Term term, TermContext context) {
+        if (path.isEmpty()) {
+            return term.substituteAndEvaluate(substitution, context);
+        } else {
+            KItem kItemSubject = (KItem) subject;
+            List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
+            newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, (scala.collection.immutable.List<Integer>) path.tail(), term, context));
+            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context);
+        }
+    }
+
+    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, List<Pair<scala.collection.immutable.List<Integer>, Term>> rewrites, TermContext context) {
+        if (rewrites.size() == 1 && rewrites.get(0).getLeft().isEmpty()) {
+            return rewrites.get(0).getRight().substituteAndEvaluate(substitution, context);
+        }
+
+        KItem kItemSubject = (KItem) subject;
+
+        Map<Integer, List<Pair<scala.collection.immutable.List<Integer>, Term>>> commonPath = rewrites.stream().collect(Collectors.groupingBy(rw -> rw.getLeft().head()));
+
+        List<Term> contents = ((KList) kItemSubject.kList()).getContents();
+        List<Term> newContents = new ArrayList<>();
+
+        for (int i = 0; i < contents.size(); i++) {
+            if (commonPath.containsKey(i)) {
+                List<Pair<scala.collection.immutable.List<Integer>, Term>> theInnerRewrites = commonPath.get(i).stream().map(p -> Pair.of(
+                        (scala.collection.immutable.List<Integer>) p.getLeft().tail(), p.getRight())).collect(Collectors.toList());
+                newContents.add(buildRHS(contents.get(i), substitution, theInnerRewrites, context));
+            } else {
+                newContents.add(contents.get(i));
+            }
+        }
+
+        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context);
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
@@ -375,19 +420,17 @@ public class SymbolicRewriter {
     }
 
     /**
-     *
-     * @param targetTerm not implemented yet
-     * @param rules not implemented yet
+     * @param targetTerm   not implemented yet
+     * @param rules        not implemented yet
      * @param initialTerm
-     * @param pattern the pattern we are searching for
-     * @param bound a negative value specifies no bound
-     * @param depth a negative value specifies no bound
-     * @param searchType defines when we will attempt to match the pattern
-
+     * @param pattern      the pattern we are searching for
+     * @param bound        a negative value specifies no bound
+     * @param depth        a negative value specifies no bound
+     * @param searchType   defines when we will attempt to match the pattern
      * @param computeGraph determines whether the transition graph should be computed.
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable,Term>> search(
+    public List<Substitution<Variable, Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -407,7 +450,7 @@ public class SymbolicRewriter {
             executionGraph = null;
         }
 
-        List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
+        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -418,7 +461,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            if(context.global().krunOptions.experimental.statistics)
+            if (context.global().krunOptions.experimental.statistics)
                 System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
             return searchResults;
         }
@@ -436,13 +479,13 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                if(context.global().krunOptions.experimental.statistics)
+                if (context.global().krunOptions.experimental.statistics)
                     System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }
 
-        label:
+    label:
         for (step = 0; !queue.isEmpty(); ++step) {
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
@@ -469,7 +512,7 @@ public class SymbolicRewriter {
                     ConstrainedTerm result = results.get(resultIndex);
                     if (computeGraph) {
                         JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
-                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
+                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex), substitutions.get(resultIndex), kilContext);
                         executionGraph.addVertex(resultState);
                         executionGraph.addEdge(javaTransition, startState, resultState);
                     }

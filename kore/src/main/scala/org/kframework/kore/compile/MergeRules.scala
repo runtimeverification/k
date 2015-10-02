@@ -30,13 +30,12 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   val isRulePredicate = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    if (m.rules.nonEmpty) {
-      val topRules = m.rules filter { r => r.body match {
-        case app: KApply => app.klabel.name == "<T>"
-        case _ => false
-      }
-      }
-
+    val topRules = m.rules filter { r => r.body match {
+      case app: KApply => app.klabel.name == "<T>"
+      case _ => false
+    }
+    }
+    if (topRules.nonEmpty) {
       val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(RewriteToTop.bubbleRewriteOutOfKSeq(r.body)), isRulePredicate(r.hashCode)) })
       //      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
       //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
@@ -82,17 +81,17 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
           (rwLabel(theProcessedLHS, makeOr(theProcessedRHS.toSeq: _*)), or(rulePs: _*))
 
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
-//          if (ks.size > 1 || klabel.name == KLabels.KREWRITE) {
-            val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
-            val childrenDisjunctionsOfklabel: IndexedSeq[K] =
-              setOfLists.head.indices
-                .map(i => setOfLists.map(l => l(i)))
-                .map(pushDisjunction)
-            val rulePs = ks map { _._2 } toSeq
+          //          if (ks.size > 1 || klabel.name == KLabels.KREWRITE) {
+          val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+          val childrenDisjunctionsOfklabel: IndexedSeq[K] =
+            setOfLists.head.indices
+              .map(i => setOfLists.map(l => l(i)))
+              .map(pushDisjunction)
+          val rulePs = ks map { _._2 } toSeq
 
-            (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
-//          } else
-//            (ks.head._1, ks.head._2)
+          (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
+        //          } else
+        //            (ks.head._1, ks.head._2)
       }
 
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])

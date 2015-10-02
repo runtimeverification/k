@@ -68,7 +68,7 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
-        assert !(kLabel.toString().equals(KLabels.KSEQ) && kList instanceof KList && ((KList) kList).getContents().get(0) instanceof KItem && ((KItem) ((KList) kList).getContents().get(0)).kLabel().toString().equals(KLabels.KSEQ));
+//        assert !(kLabel.toString().equals(KLabels.KSEQ) && kList instanceof KList && ((KList) kList).getContents().get(0) instanceof KItem && ((KItem) ((KList) kList).getContents().get(0)).kLabel().toString().equals(KLabels.KSEQ));
         /* YilongL: since KList.Builder always canonicalizes its result, the
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);

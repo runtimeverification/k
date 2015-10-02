@@ -29,7 +29,11 @@ import org.kframework.kore.KApply;
 public class FastRuleMatcher {
 
     private ConjunctiveFormula[] substitutions;
-    private Map<scala.collection.immutable.List<Pair<KItem, Integer>>, Term>[] rewrites;
+    private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
+
+    public Map<scala.collection.immutable.List<Integer>, Term>[] getRewrites() {
+        return rewrites;
+    }
 
     private BitSet empty;
 
@@ -71,7 +75,7 @@ public class FastRuleMatcher {
     }
 
 
-    private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<KItem, Integer>> path) {
+    private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
             BitSet returnSet = new BitSet(ruleMask.size());
@@ -123,7 +127,11 @@ public class FastRuleMatcher {
         }
 
         if (pattern instanceof Variable) {
-            return add((Variable) pattern, subject, ruleMask);
+            if (pattern.containsAttribute("singleVariable")) {
+                return ruleMask;
+            } else {
+                return add((Variable) pattern, subject, ruleMask);
+            }
         }
 
         if (subject instanceof KItem && pattern instanceof KItem) {
@@ -139,7 +147,7 @@ public class FastRuleMatcher {
             assert subjectKList.size() == patternKList.size();
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
-                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(Pair.of((KItem) subject, i)));
+                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(i));
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
                 }
@@ -153,7 +161,7 @@ public class FastRuleMatcher {
         }
     }
 
-    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<KItem, Integer>> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
+    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
         if (pSeq != null) {
             BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
             localRuleMaskSeq.and(pSeq.getRight());
