@@ -29,7 +29,7 @@ import org.kframework.kore.KApply;
 public class FastRuleMatcher {
 
     private ConjunctiveFormula[] substitutions;
-    private Map<Pair<KItem, Integer>, Term>[] rewrites;
+    private Map<scala.collection.immutable.List<Pair<KItem, Integer>>, Term>[] rewrites;
 
     private BitSet empty;
 
@@ -58,7 +58,7 @@ public class FastRuleMatcher {
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = new BitSet(ruleMask.size());
 
-        BitSet theMatchingRules = match(subject, pattern, ruleMask);
+        BitSet theMatchingRules = match(subject, pattern, ruleMask, List());
 
         List<Pair<Substitution<Variable, Term>, Integer>> theResult = new ArrayList<>();
 
@@ -70,7 +70,8 @@ public class FastRuleMatcher {
         return theResult;
     }
 
-    private BitSet match(Term subject, Term pattern, BitSet ruleMask) {
+
+    private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<KItem, Integer>> path) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
             BitSet returnSet = new BitSet(ruleMask.size());
@@ -86,27 +87,13 @@ public class FastRuleMatcher {
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                Pair<KItem, BitSet> pSeq = automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()];
-                if (pSeq != null) {
-                    BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
-                    localRuleMaskSeq.and(pSeq.getRight());
-                    if (!localRuleMaskSeq.isEmpty()) {
-                        localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq);
-                    }
-                    returnSet.or(localRuleMaskSeq);
-                }
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsForRewriteArray[kSeqLabel.ordinal()]);
             }
 
             if (subject instanceof KItem) {
-                Pair<KItem, BitSet> p = automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()];
-                if (p != null) {
-                    BitSet localRuleMask = ((BitSet) ruleMask.clone());
-                    localRuleMask.and(p.getRight());
-                    if (!localRuleMask.isEmpty()) {
-                        localRuleMask = match(subject, p.getLeft(), localRuleMask);
-                    }
-                    returnSet.or(localRuleMask);
-                }
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsForRewriteArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
                 Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
@@ -124,10 +111,10 @@ public class FastRuleMatcher {
             InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
             for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
                 if (innerRHSRewrite.theRHS[i] != null) {
-                    rewrites[i].put(Pair.of(parent, childLocation), innerRHSRewrite.theRHS[i]);
+                    rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
                 }
             }
-            return match(subject, (Term) rw.klist().items().get(0), ruleMask);
+            return match(subject, (Term) rw.klist().items().get(0), ruleMask, path);
         }
 
         // normalize KSeq representations
@@ -152,9 +139,7 @@ public class FastRuleMatcher {
             assert subjectKList.size() == patternKList.size();
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
-                this.parent = (KItem) subject;
-                this.childLocation = i;
-                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask);
+                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(Pair.of((KItem) subject, i)));
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
                 }
@@ -165,6 +150,17 @@ public class FastRuleMatcher {
             return subject.equals(pattern) ? ruleMask : empty;
         } else {
             throw new AssertionError("unexpected class at matching");
+        }
+    }
+
+    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<KItem, Integer>> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
+        if (pSeq != null) {
+            BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
+            localRuleMaskSeq.and(pSeq.getRight());
+            if (!localRuleMaskSeq.isEmpty()) {
+                localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq, path);
+            }
+            returnSet.or(localRuleMaskSeq);
         }
     }
 

@@ -8,6 +8,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +70,7 @@ public class RuleAutomatonDisjunction extends Term {
 
     public List<Pair<Term, BitSet>> disjunctions() {
         List<Pair<Term, BitSet>> disjunctions = new ArrayList<>();
-        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) kItemDisjunctions.values());
+        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) Arrays.asList(kItemDisjunctionsArray));
 //        for (List<Pair<Variable, BitSet>> pairs : variableDisjunctions) {
 //            if (pairs != null) {
 //                disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) pairs);
@@ -77,6 +78,7 @@ public class RuleAutomatonDisjunction extends Term {
 //        }
         ((Map<Sort, Set<Pair<Term, BitSet>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) tokenDisjunctions.values());
+        disjunctions.removeIf(e -> e == null);
         return disjunctions;
     }
 
@@ -107,7 +109,7 @@ public class RuleAutomatonDisjunction extends Term {
 
         RuleAutomatonDisjunction that = (RuleAutomatonDisjunction) o;
 
-        return kItemDisjunctions.equals(that.kItemDisjunctions)
+        return Arrays.equals(kItemDisjunctionsArray, that.kItemDisjunctionsArray)
                 && variableDisjunctions.equals(that.variableDisjunctions)
                 && tokenDisjunctions.equals(that.tokenDisjunctions);
 
@@ -116,7 +118,7 @@ public class RuleAutomatonDisjunction extends Term {
     @Override
     protected int computeHash() {
         int result = 1;
-        result = 31 * result + kItemDisjunctions.hashCode();
+        result = 31 * result + Arrays.hashCode(kItemDisjunctionsArray);
         result = 31 * result + variableDisjunctions.hashCode();
         result = 31 * result + tokenDisjunctions.hashCode();
         return result;
