@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term {
 
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
-    public final Pair<KItem, BitSet>[] kItemDisjunctionsForRewriteArray;
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
     private final Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions;
     private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
@@ -33,13 +32,6 @@ public class RuleAutomatonDisjunction extends Term {
                 .filter(p -> p.getLeft() instanceof KItem)
                 .forEach(p -> {
                     this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
-                });
-
-        this.kItemDisjunctionsForRewriteArray = new Pair[KLabelConstant.cacheSize];
-        children.stream()
-                .filter(p -> p.getLeft() instanceof KItem && ((KItem) p.getLeft()).klabel().name().equals(KLabels.KREWRITE))
-                .forEach(p -> {
-                    this.kItemDisjunctionsForRewriteArray[((KLabelConstant) ((KItem) ((KList) ((KItem) p.getLeft()).kList()).get(0)).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
                 });
 
         this.variableDisjunctionsArray = new List[Sort.cache.size()];

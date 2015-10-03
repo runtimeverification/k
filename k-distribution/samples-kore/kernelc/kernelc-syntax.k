@@ -104,12 +104,12 @@ module KERNELC-COMMON-SYNTAX
 
 
   /*
-   * Macros
+   * anywheres
    */
-  rule if (E:Expression) S:Statement => if (E) S else ;     [macro]
-  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)      [macro]
-  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)      [macro]
-  rule ! E:Expression => E ? 0 : 1                          [macro]
+  rule if (E:Expression) S:Statement => if (E) S else ;     [anywhere]
+  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)      [anywhere]
+  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)      [anywhere]
+  rule ! E:Expression => E ? 0 : 1                          [anywhere]
 
 
   /*

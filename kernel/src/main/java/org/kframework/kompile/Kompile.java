@@ -142,6 +142,7 @@ public class Kompile {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, true).convert(s)), "convert data structures to lookups");
 
+
         return def -> func(this::resolveIOStreams)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
@@ -156,9 +157,14 @@ public class Kompile {
                 .andThen(func(this::addProgramModule))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
+//                .andThen(func(this::expandMacros))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
     }
+
+//    private Definition expandMacros(Definition d) {
+//        new ExpandMacros(d.executionModule(), kem, files, kompileOptions.global, kompileOptions);
+//    }
 
     private Sentence markSingleVariables(Sentence s) {
         if (s instanceof Rule) {

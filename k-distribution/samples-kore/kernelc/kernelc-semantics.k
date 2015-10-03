@@ -16,7 +16,7 @@ module KERNELC-CONFIGURATION
    * KernelC configuration
    */
   configuration
-    <config>
+    <T>
       <struct> .Map </struct>
       <fun> .Map </fun>
 
@@ -29,9 +29,9 @@ module KERNELC-CONFIGURATION
 
       <heap> .Map </heap>
 
-      <in stream="stdin"> .List </in>
-      <out stream="stdout"> .List </out>
-    </config>
+      <in> .List </in>
+      <out> .List </out>
+    </T>
 endmodule
 
 
@@ -47,14 +47,14 @@ module KERNELC-SEMANTICS
 
 
   /*
-   * Macros
+   * anywheres
    */
-  rule return; => return tv(void, undef);                   [macro]
-  rule NULL => tv(void *, null)                             [macro]
+  rule return; => return tv(void, undef);                   [anywhere]
+  rule NULL => tv(void *, null)                             [anywhere]
 
-  /* block without declarations macro (for use in the semantics only) */
+  /* block without declarations anywhere (for use in the semantics only) */
   syntax Block ::= "{" Statements "}"
-  rule { Ss:Statements } => { .VariableDeclarations Ss }    [macro]
+  rule { Ss:Statements } => { .VariableDeclarations Ss }    [anywhere]
 
 
   /*

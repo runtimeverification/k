@@ -92,12 +92,10 @@ public class FastRuleMatcher {
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsForRewriteArray[kSeqLabel.ordinal()]);
             }
 
             if (subject instanceof KItem) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsForRewriteArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
                 Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
@@ -144,7 +142,10 @@ public class FastRuleMatcher {
                 return empty;
             }
 
-            assert subjectKList.size() == patternKList.size();
+//            assert subjectKList.size() == patternKList.size();
+            if(subjectKList.size() != patternKList.size())
+                return empty;
+
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
                 ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(i));
@@ -157,7 +158,7 @@ public class FastRuleMatcher {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
         } else {
-            throw new AssertionError("unexpected class at matching");
+            throw new AssertionError("unexpected class at matching ");
         }
     }
 

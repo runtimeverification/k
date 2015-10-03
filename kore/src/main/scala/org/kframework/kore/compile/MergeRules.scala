@@ -62,26 +62,24 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
 
   def pushDisjunction(terms: Set[(K, K)]): K = {
-
-
     val rwLabel = KLabel(KLabels.KREWRITE)
 
-    val normalizedTerms: Set[(K, K)] = terms map { p => (normalizeKSeq(p._1), p._2) }
+    val removedRewrites = terms.map({
+      case (Unapply.KApply(`rwLabel`, children), ruleP) => (children.head, ruleP)
+      case other => other
+    })
+
+    val normalizedTerms: Set[(K, K)] = removedRewrites map { p => (normalizeKSeq(p._1), p._2) }
+
+    val theRewrites = terms
+      .collect { case (Unapply.KApply(`rwLabel`, children), ruleP) => (children.last, ruleP) }
+      .map { p => (normalizeKSeq(p._1), p._2) }
+
     val disjunctionOfKApplies: Iterable[(K, K)] = normalizedTerms
       .collect({ case (x: KApply, ruleP) => (x, ruleP) })
       .groupBy(_._1.klabel)
       .map {
-        case (`rwLabel`, ks: Set[(KApply, K)]) =>
-          val thePairs = ks map { case (Unapply.KApply(`rwLabel`, List(left, right)), isRuleP) => ((left, isRuleP), (right, isRuleP)) } unzip
-
-          val theProcessedLHS = pushDisjunction(thePairs._1)
-          val theProcessedRHS = thePairs._2 map { case (k, isRuleP) => and(k, isRuleP) }
-          val rulePs = ks map { _._2 } toSeq
-
-          (rwLabel(theProcessedLHS, makeOr(theProcessedRHS.toSeq: _*)), or(rulePs: _*))
-
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
-          //          if (ks.size > 1 || klabel.name == KLabels.KREWRITE) {
           val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
           val childrenDisjunctionsOfklabel: IndexedSeq[K] =
             setOfLists.head.indices
@@ -90,8 +88,6 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
           val rulePs = ks map { _._2 } toSeq
 
           (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
-        //          } else
-        //            (ks.head._1, ks.head._2)
       }
 
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
@@ -99,11 +95,17 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       .map({ case (k, set) => (k, set.map(_._2)) })
       .map({ case (k, rulePs) => (k, makeOr(rulePs.toSeq: _*)) })
 
-    val entireDisjunction = disjunctionOfKApplies ++ disjunctionOfOthers
-    if (entireDisjunction.size == 1)
+    val entireDisjunction: Iterable[(K, K)] = disjunctionOfKApplies ++ disjunctionOfOthers
+    val theLHS = if (entireDisjunction.size == 1)
       entireDisjunction.head._1
     else
       makeOr(entireDisjunction.map({ case (a, b) => and(a, b) }).toSeq: _*)
+
+    if (theRewrites.nonEmpty) {
+      rwLabel(theLHS, makeOr(theRewrites.map({ case (a, b) => and(a, b) }).toSeq: _*))
+    } else {
+      theLHS
+    }
   }
 
   def normalizeKSeq(k: K): K = Assoc.flatten(KLabel(KLabels.KSEQ), Seq(k), KLabel(KLabels.DOTK)) reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() }

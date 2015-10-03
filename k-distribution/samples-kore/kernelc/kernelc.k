@@ -11,8 +11,8 @@ require "patterns/tree_pattern.k"
 
 module KERNELC
   imports KERNELC-SEMANTICS
-  imports LIST-PATTERN
-  imports TREE-PATTERN
+//  imports LIST-PATTERN
+//  imports TREE-PATTERN
   //imports VERIFICATION_LEMMAS
   //imports CDD-SPEC-AUX
 endmodule
