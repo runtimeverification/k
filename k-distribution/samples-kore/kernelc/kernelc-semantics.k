@@ -17,10 +17,10 @@ module KERNELC-CONFIGURATION
    */
   configuration
     <T>
+      <k> $PGM:File:K ~> main(.Expressions) </k>
       <struct> .Map </struct>
       <fun> .Map </fun>
 
-      <k> $PGM:File:K ~> main(.Expressions) </k>
       <env> .Map </env>
       <locals> .List </locals>
       //<fun-id> String2Id("") </fun-id>

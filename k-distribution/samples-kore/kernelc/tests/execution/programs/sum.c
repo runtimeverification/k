@@ -20,7 +20,7 @@ int main()
 {
   int s;
 
-  s = sum(10);
+  s = sum(100);
   printf("The sum for the first 10 natural numbers: %d\n", s);
 
   return 0;

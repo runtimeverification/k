@@ -144,6 +144,14 @@ public class FastRuleMatcher {
 
             int size = subjectKList.size();
             for (int i = 0; i < size; ++i) {
+                if (((KItem) pattern).childrenDontCareRuleMask != null && ((KItem) pattern).childrenDontCareRuleMask[i] != null) {
+                    BitSet clonedRuleMask = (BitSet) ruleMask.clone();
+                    clonedRuleMask.and(((KItem) pattern).childrenDontCareRuleMask[i]);
+                    if (clonedRuleMask.equals(ruleMask)) {
+                        continue;
+                    }
+                }
+
                 ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(i));
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
@@ -170,7 +178,7 @@ public class FastRuleMatcher {
     }
 
     private BitSet add(Variable variable, Term term, BitSet ruleMask) {
-        if (variable.name() == "THE_VARIABLE".intern()) {
+        if (variable.name().equals("THE_VARIABLE".intern())) {
             return ruleMask;
         }
 

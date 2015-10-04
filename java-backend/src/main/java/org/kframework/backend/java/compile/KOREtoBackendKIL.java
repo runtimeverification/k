@@ -119,7 +119,23 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                     context);
         }
 
-        KItem kItem = KItem.of(convert(klabel), KList(klist.items()), context);
+        KList convertedKList = KList(klist.items());
+        BitSet childrenDontCareRuleMask[] = null;
+        if (convertedKList.stream().anyMatch(RuleAutomatonDisjunction.class::isInstance)) {
+            childrenDontCareRuleMask = new BitSet[convertedKList.size()];
+            for (int i = 0; i < convertedKList.size(); ++i) {
+                if (convertedKList.get(i) instanceof  RuleAutomatonDisjunction) {
+                    BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).variableDisjunctionsArray[Sort.KSEQUENCE.ordinal()].stream()
+                            .filter(p -> p.getLeft().name().equals("THE_VARIABLE")).findAny().map(Pair::getRight).orElseGet(() -> null);
+                    childrenDontCareRuleMask[i] = the_variable;
+                } else {
+                    childrenDontCareRuleMask[i] = null;
+                }
+            }
+        }
+
+        KItem kItem = KItem.of(convert(klabel), convertedKList, context);
+        kItem.childrenDontCareRuleMask = childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask;
         if (AbstractUnifier.isKSeq(kItem)) {
             return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
                     .map(Term.class::cast)

@@ -26,6 +26,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class KItem extends Term implements KItemRepresentation {
 
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
+
+    public BitSet[] childrenDontCareRuleMask = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
         return of(kLabel, kList, termContext, null, null);

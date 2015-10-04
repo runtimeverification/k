@@ -185,6 +185,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         if (instructions != null) {
             constraint = AbstractKMachine.unify(this, instructions, cells, termContext());
             if (constraint == null) {
+                SymbolicRewriter.matchStopwatch.stop();
                 return Collections.emptyList();
             }
         } else {
