@@ -156,19 +156,19 @@ public class Kompile {
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
                 .andThen(convertDataStructureToLookup)
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
-//                .andThen(func(this::expandMacros))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
     }
 
-//    private Definition expandMacros(Definition d) {
-//        new ExpandMacros(d.executionModule(), kem, files, kompileOptions.global, kompileOptions);
-//    }
-
     private Sentence markSingleVariables(Sentence s) {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
+
+            if (!(r.body() instanceof KApply) || !((KApply) r.body()).klabel().name().equals("<T>"))
+                return r;
+
             Map<KVariable, Integer> varCount = new HashMap<>();
             VisitKORE markerVisitor = new VisitKORE() {
                 public Void apply(KVariable kvar) {
@@ -182,10 +182,11 @@ public class Kompile {
 
             TransformKORE markerAdder = new TransformKORE() {
                 public K apply(KVariable kvar) {
-                    if (varCount.get(kvar) == 1)
-                        return KORE.KVariable(kvar.name(), kvar.att().add("singleVariable"));
-                    else
+                    if (varCount.get(kvar) == 1) {
+                        return KORE.KVariable("THE_VARIABLE".intern());
+                    } else {
                         return kvar;
+                    }
                 }
             };
 

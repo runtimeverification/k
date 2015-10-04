@@ -56,8 +56,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         this.definition = definition;
         this.context = context;
 
-        System.out.println("module.rules().mkString(\"\\n\") = " + module.rules().mkString("\n"));
-
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, context.definition());
         kDotLabel = KLabelConstant.of(KLabels.DOTK, context.definition());
         kDot = KItem.of(kDotLabel, KList.concatenate(), context);

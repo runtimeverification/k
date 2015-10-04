@@ -35,8 +35,10 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       case _ => false
     }
     }
+
     if (topRules.nonEmpty) {
-      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(RewriteToTop.bubbleRewriteOutOfKSeq(r.body)), isRulePredicate(r.hashCode)) })
+
+      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(r.body), isRulePredicate(r.hashCode)) })
       //      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
       //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
       val automatonRule = Rule(newBody, TrueToken, TrueToken, Att().add("automaton"))

@@ -54,24 +54,25 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        Optional<KApply> sideCondition = casts.stream().map(k -> {
-            return new TransformKORE() {
-                @Override
-                public K apply(KVariable k) {
-                    if (varToTypedVar.containsKey(k)) {
-                        return varToTypedVar.get(k);
-                    }
-                    return k;
-                }
-            }.apply(k);
-        }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply)k)), transform(k))).reduce(BooleanUtils::and);
-        if (!sideCondition.isPresent()) {
-            return requires;
-        } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
-            return sideCondition.get();
-        } else {
-            return BooleanUtils.and(sideCondition.get(), requires);
-        }
+        return requires;
+//        Optional<KApply> sideCondition = casts.stream().map(k -> {
+//            return new TransformKORE() {
+//                @Override
+//                public K apply(KVariable k) {
+//                    if (varToTypedVar.containsKey(k)) {
+//                        return varToTypedVar.get(k);
+//                    }
+//                    return k;
+//                }
+//            }.apply(k);
+//        }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply)k)), transform(k))).reduce(BooleanUtils::and);
+//        if (!sideCondition.isPresent()) {
+//            return requires;
+//        } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
+//            return sideCondition.get();
+//        } else {
+//            return BooleanUtils.and(sideCondition.get(), requires);
+//        }
     }
 
     public static String getSortNameOfCast(KApply kapp) {

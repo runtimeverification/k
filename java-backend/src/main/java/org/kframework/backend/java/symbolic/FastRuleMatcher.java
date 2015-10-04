@@ -125,11 +125,7 @@ public class FastRuleMatcher {
         }
 
         if (pattern instanceof Variable) {
-            if (pattern.containsAttribute("singleVariable")) {
-                return ruleMask;
-            } else {
-                return add((Variable) pattern, subject, ruleMask);
-            }
+            return add((Variable) pattern, subject, ruleMask);
         }
 
         if (subject instanceof KItem && pattern instanceof KItem) {
@@ -143,7 +139,7 @@ public class FastRuleMatcher {
             }
 
 //            assert subjectKList.size() == patternKList.size();
-            if(subjectKList.size() != patternKList.size())
+            if (subjectKList.size() != patternKList.size())
                 return empty;
 
             int size = subjectKList.size();
@@ -174,6 +170,10 @@ public class FastRuleMatcher {
     }
 
     private BitSet add(Variable variable, Term term, BitSet ruleMask) {
+        if (variable.name() == "THE_VARIABLE".intern()) {
+            return ruleMask;
+        }
+
         if (variable.equals(term)) {
             return ruleMask;
         }
