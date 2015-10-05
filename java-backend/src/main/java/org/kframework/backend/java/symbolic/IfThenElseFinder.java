@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class IfThenElseFinder extends PrePostVisitor {
     final List<KItem> result;
-    private String IF_THEN_ELSE_LABEL="'#if_#then_#else_#fi";
+    private final String IF_THEN_ELSE_LABEL="'#if_#then_#else_#fi";
 
     public IfThenElseFinder(TermContext context) {
         result = new ArrayList<>();

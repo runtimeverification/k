@@ -65,6 +65,6 @@ public class PriorityStrategy implements Strategy {
     }
 
     private Iterator<Integer> priorityIterator;
-    private HashMap<Integer, HashSet<Rule>> priorityMap;
-    private TreeSet<Integer> priorities;
+    private final HashMap<Integer, HashSet<Rule>> priorityMap;
+    private final TreeSet<Integer> priorities;
 }

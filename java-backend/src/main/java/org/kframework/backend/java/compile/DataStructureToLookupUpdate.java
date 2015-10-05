@@ -43,7 +43,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     private class ExtendedListLookup extends ListLookup implements VariableCache {
-        private Set<Variable> variables;
+        private final Set<Variable> variables;
 
         ExtendedListLookup(Variable list, int key, Term value, Sort kind) {
             super(list, key, value, kind);
@@ -58,7 +58,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     private class ExtendedMapLookup extends MapLookup implements VariableCache {
-        private Set<Variable> variables;
+        private final Set<Variable> variables;
 
         ExtendedMapLookup(Variable map, Term key, Term value, Sort kind) {
             super(map, key, value, kind, false);
@@ -74,7 +74,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     private class ExtendedSetLookup extends SetLookup implements VariableCache {
-        private Set<Variable> variables;
+        private final Set<Variable> variables;
 
         ExtendedSetLookup(Variable set, Term key) {
             super(set, key, false);
@@ -91,9 +91,9 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
     private enum Status {LHS, RHS, CONDITION }
 
-    private Map<Variable, Term> reverseMap = new HashMap<>();
-    private Map<Variable, Integer> concreteSize = new HashMap<>();
-    private ArrayList<VariableCache> queue = new ArrayList<>();
+    private final Map<Variable, Term> reverseMap = new HashMap<>();
+    private final Map<Variable, Integer> concreteSize = new HashMap<>();
+    private final ArrayList<VariableCache> queue = new ArrayList<>();
     private Status status;
     private ASTNode location;
 

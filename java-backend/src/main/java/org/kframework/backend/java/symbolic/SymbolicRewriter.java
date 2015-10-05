@@ -48,8 +48,8 @@ public class SymbolicRewriter {
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
     private KRunGraph executionGraph = null;
     private boolean transition;
-    private RuleIndex ruleIndex;
-    private KRunState.Counter counter;
+    private final RuleIndex ruleIndex;
+    private final KRunState.Counter counter;
     private SetMultimap<ConstrainedTerm, Rule> disabledRules = HashMultimap.create();
 
     @Inject

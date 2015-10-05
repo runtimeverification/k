@@ -46,7 +46,7 @@ public class PatternMatchRewriter {
     private final TransitionCompositeStrategy strategy;
     private int step;
     private final List<Term> results = new ArrayList<>();
-    private RuleIndex ruleIndex;
+    private final RuleIndex ruleIndex;
 
     @Inject
     public PatternMatchRewriter(

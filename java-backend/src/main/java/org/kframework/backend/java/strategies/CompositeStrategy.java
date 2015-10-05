@@ -104,5 +104,5 @@ public class CompositeStrategy implements Strategy {
         return false;
     }
 
-    private LinkedList<Strategy> stack;
+    private final LinkedList<Strategy> stack;
 }

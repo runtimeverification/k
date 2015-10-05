@@ -73,7 +73,7 @@ import com.google.inject.Inject;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
-    private boolean freshRules;
+    private final boolean freshRules;
 
     /**
      * Maps variables representing concrete collections to their sizes. This

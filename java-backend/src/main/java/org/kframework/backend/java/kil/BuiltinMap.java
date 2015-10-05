@@ -188,10 +188,10 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
     public static class Builder {
 
-        private Map<Term, Term> entries = new HashMap<>();
-        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final Map<Term, Term> entries = new HashMap<>();
+        private final ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
         private final TermContext context;
 
         public Builder(TermContext context) {

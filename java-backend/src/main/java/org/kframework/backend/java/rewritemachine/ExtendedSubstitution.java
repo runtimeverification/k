@@ -30,7 +30,7 @@ class ExtendedSubstitution {
      * by the rewrite rule; the references are collected as the rewrite machine
      * builds the substitution map.
      */
-    private List<CellCollection.Cell> writeCells;
+    private final List<CellCollection.Cell> writeCells;
 
     ExtendedSubstitution() {
         subst = Substitution.empty();

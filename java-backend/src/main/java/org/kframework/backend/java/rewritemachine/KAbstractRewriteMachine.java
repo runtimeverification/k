@@ -39,7 +39,7 @@ public class KAbstractRewriteMachine {
     private final List<MatchingInstruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
-    private List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
+    private final List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
 
     // program counter
     private int pc = 1;

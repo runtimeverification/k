@@ -57,7 +57,7 @@ public class Rule extends JavaSymbolicObject {
      * Specifies whether this rule has been compiled to generate instructions
      * for the {@link KAbstractRewriteMachine}.
      */
-    private boolean compiledForFastRewriting;
+    private final boolean compiledForFastRewriting;
     /**
      * Left-hand sides of the local rewrite operations under read cells; such
      * left-hand sides are used as patterns to match against the subject term.

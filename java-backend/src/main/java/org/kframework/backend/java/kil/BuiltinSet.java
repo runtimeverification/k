@@ -172,10 +172,10 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
     public static class Builder {
 
-        private Set<Term> elements = new HashSet<>();
-        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final Set<Term> elements = new HashSet<>();
+        private final ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
         private final TermContext context;
 
         public Builder(TermContext context) {
