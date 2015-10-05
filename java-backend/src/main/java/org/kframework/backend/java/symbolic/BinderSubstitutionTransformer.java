@@ -12,8 +12,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
-import org.kframework.attributes.Source;
-import org.kframework.attributes.Location;
 
 
 /**

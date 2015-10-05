@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.kil.CellCollection.Cell;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.PatternMatcher;
