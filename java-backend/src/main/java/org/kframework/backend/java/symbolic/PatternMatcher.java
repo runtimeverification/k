@@ -588,14 +588,7 @@ public class PatternMatcher extends AbstractUnifier {
 
     private ListMultimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
-        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
-            @Override
-            public boolean apply(CellLabel cellLabel) {
-                return !labelsToRemove.contains(cellLabel);
-            }
-        };
-
-        return Multimaps.filterKeys(cellCollection.cells(), notRemoved);
+        return Multimaps.filterKeys(cellCollection.cells(), l -> !labelsToRemove.contains(l));
     }
 
     @Override
