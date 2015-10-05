@@ -50,7 +50,7 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
      * @return the fresh variable
      */
     public static Variable getAnonVariable(Sort sort) {
-        return new Variable(VARIABLE_PREFIX + counter.getAndIncrement(), sort, true);
+        return new Variable(VARIABLE_PREFIX + counter.getAndIncrement(), sort, true, -1);
     }
 
     /* TODO(AndreiS): cache the variables */
@@ -58,7 +58,9 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
     private final Sort sort;
     private final boolean anonymous;
 
-    public Variable(String name, Sort sort, boolean anonymous) {
+    private final int ordinal;
+
+    public Variable(String name, Sort sort, boolean anonymous, int ordinal) {
         super(Kind.of(sort));
 
         assert name != null && sort != null;
@@ -66,10 +68,15 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
         this.name = name;
         this.sort = sort;
         this.anonymous = anonymous;
+        this.ordinal = ordinal;
     }
 
     public Variable(String name, Sort sort) {
-        this(name, sort, false);
+        this(name, sort, false, -1);
+    }
+
+    public Variable(String name, Sort sort, int ordinal) {
+        this(name, sort, false, ordinal);
     }
 
     public Variable(MetaVariable metaVariable) {
@@ -92,6 +99,10 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
 
     public boolean isAnonymous() {
         return anonymous;
+    }
+
+    public int ordinal() {
+        return ordinal;
     }
 
     @Override

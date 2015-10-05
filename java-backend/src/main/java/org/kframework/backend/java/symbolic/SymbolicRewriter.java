@@ -77,7 +77,7 @@ public class SymbolicRewriter {
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
-        this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext());
+        this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext(), allRuleBits.length(), 90);
 
         KRunState initialState = null;
         if (computeGraph) {

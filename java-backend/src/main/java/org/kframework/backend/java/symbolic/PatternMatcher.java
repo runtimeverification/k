@@ -260,7 +260,7 @@ public class PatternMatcher extends AbstractUnifier {
         Set<PartialSubstitution> partialSubstitutions = new HashSet<>();
         partialSubstitutions.add(new PartialSubstitution(
                 ImmutableSet.<Term>of(),
-                Substitution.empty()));
+                ImmutableMapSubstitution.empty()));
 
         /* match each entry from the pattern */
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
