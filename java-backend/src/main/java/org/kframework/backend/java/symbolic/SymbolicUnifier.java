@@ -525,7 +525,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
                 return;
             } else if (frame == null && otherFrame == null) {
-                assert numOfDiffCellLabels == 0 && numOfDiffCellLabels == 0;
+                assert numOfDiffCellLabels == 0 && numOfOtherDiffCellLabels == 0;
             } else {
                 add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels),
                             frame, cellCollection.cellSort(), definition),
