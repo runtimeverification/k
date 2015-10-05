@@ -558,12 +558,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
         assert !context.global().krunOptions.experimental.smt.floatsAsPO;
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format(
+        return new SMTLibTerm(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",
                 floatToken.exponent(), floatToken.bigFloatValue().precision(),
                 floatToken.bigFloatValue().toString("%f")));
-        return new SMTLibTerm(sb.toString());
     }
 
     @Override
