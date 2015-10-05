@@ -91,7 +91,9 @@ public class Profiler {
             System.err.println(DEEP_CLONE_TIMER);
             System.err.println("Top 10 most expensive functions:");
             SortedSet<ReentrantStopwatch> sorted = new TreeSet<>(new ReverseComparator<>());
-            sorted.addAll(FUNCTION_PROFILING_TIMERS.values());
+            synchronized (FUNCTION_PROFILING_TIMERS) {
+                sorted.addAll(FUNCTION_PROFILING_TIMERS.values());
+            }
             Iterator<ReentrantStopwatch> iter = sorted.iterator();
             for (int i = 0; i < 10 && iter.hasNext(); i++) {
                 ReentrantStopwatch stopwatch = iter.next();

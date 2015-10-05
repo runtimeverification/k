@@ -42,7 +42,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         public Set<Variable> unmatchedVariables();
     }
 
-    private class ExtendedListLookup extends ListLookup implements VariableCache {
+    private static class ExtendedListLookup extends ListLookup implements VariableCache {
         private Set<Variable> variables;
 
         ExtendedListLookup(Variable list, int key, Term value, Sort kind) {
@@ -57,7 +57,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         }
     }
 
-    private class ExtendedMapLookup extends MapLookup implements VariableCache {
+    private static class ExtendedMapLookup extends MapLookup implements VariableCache {
         private Set<Variable> variables;
 
         ExtendedMapLookup(Variable map, Term key, Term value, Sort kind) {
@@ -73,7 +73,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         }
     }
 
-    private class ExtendedSetLookup extends SetLookup implements VariableCache {
+    private static class ExtendedSetLookup extends SetLookup implements VariableCache {
         private Set<Variable> variables;
 
         ExtendedSetLookup(Variable set, Term key) {

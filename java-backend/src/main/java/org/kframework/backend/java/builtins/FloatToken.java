@@ -37,8 +37,7 @@ public class FloatToken extends Token implements MaximalSharing {
      */
     public static FloatToken of(BigFloat value, int exponent) {
         MapCache<BigFloat, FloatToken> exponentCache = cache.get(exponent, MapCache::new);
-        FloatToken cachedFloatToken = exponentCache.get(value, () -> new FloatToken(value, exponent));
-        return cachedFloatToken;
+        return exponentCache.get(value, () -> new FloatToken(value, exponent));
     }
 
     public static FloatToken of(String value) {
@@ -132,8 +131,7 @@ public class FloatToken extends Token implements MaximalSharing {
      */
     private Object readResolve() {
         MapCache<BigFloat, FloatToken> exponentCache = cache.get(exponent, MapCache::new);
-        FloatToken cachedFloatToken = exponentCache.get(value, () -> this);
-        return cachedFloatToken;
+        return exponentCache.get(value, () -> this);
     }
 
 }

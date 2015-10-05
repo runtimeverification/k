@@ -323,7 +323,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         return variable.accept(postTransformer);
     }
 
-    protected class DoneTransforming extends ASTNode {
+    protected static class DoneTransforming extends ASTNode {
         public DoneTransforming(ASTNode node) {
             contents = node;
         }
