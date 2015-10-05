@@ -7,7 +7,9 @@ import com.google.inject.Inject;
 import org.kframework.Collections;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.CleanKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -19,9 +21,11 @@ import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.*;
@@ -40,6 +44,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
+import scala.collection.immutable.Seq;
 import scala.collection.immutable.Set;
 import scala.util.Either;
 
@@ -157,6 +162,7 @@ public class Kompile {
                 .andThen(func(this::addProgramModule))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
