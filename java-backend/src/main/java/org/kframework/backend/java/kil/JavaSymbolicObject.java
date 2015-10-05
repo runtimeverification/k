@@ -8,7 +8,7 @@ import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Visitable;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -35,7 +35,7 @@ public abstract class JavaSymbolicObject extends ASTNode
     /**
      * Field used for caching the hash code
      */
-    protected transient int hashCode = Utils.NO_HASHCODE;
+    protected transient int hashCode = Constants.NO_HASHCODE;
 
     /**
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized

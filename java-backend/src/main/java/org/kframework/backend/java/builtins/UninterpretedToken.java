@@ -6,7 +6,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import java.util.Map;
@@ -58,8 +58,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 

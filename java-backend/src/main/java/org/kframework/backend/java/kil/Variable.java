@@ -4,7 +4,7 @@ package org.kframework.backend.java.kil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.BiMap;
@@ -131,8 +131,8 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
     @Override
     protected final int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 

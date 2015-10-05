@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 
 /**
  * Represents instructions of the {@link KAbstractRewriteMachine}.
@@ -38,7 +38,7 @@ public final class MatchingInstruction implements Serializable {
         this.type = type;
         this.cellLabel = cellLabel;
         this.hashCode = type == Type.GOTO ?
-                type.hashCode() * Utils.HASH_PRIME + cellLabel.hashCode() :
+                type.hashCode() * Constants.HASH_PRIME + cellLabel.hashCode() :
                 type.hashCode();
     }
 

@@ -10,7 +10,7 @@ import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kore.convertors.KILtoInnerKORE;
 
 import java.util.ArrayList;
@@ -228,7 +228,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public final int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE && !isMutable()) {
+        if (h == Constants.NO_HASHCODE && !isMutable()) {
             h = computeHash();
             h = h == 0 ? 1 : h;
             hashCode = h;

@@ -20,10 +20,9 @@ import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.loader.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,9 +136,9 @@ public class Rule extends JavaSymbolicObject {
         setLocation(oldRule.getLocation());
         setSource(oldRule.getSource());
 
-        if (oldRule.containsAttribute(Constants.STDIN)
-                || oldRule.containsAttribute(Constants.STDOUT)
-                || oldRule.containsAttribute(Constants.STDERR)) {
+        if (oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN)
+                || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDOUT)
+                || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
             BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
             for (Equality eq : lookups.equalities()) {
@@ -150,7 +149,7 @@ public class Rule extends JavaSymbolicObject {
             }
 
             Term streamList = streamListBuilder.build();
-            this.indexingPair = oldRule.containsAttribute(Constants.STDIN) ?
+            this.indexingPair = oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN) ?
                     IndexingPair.getInstreamIndexingPair(streamList, termContext.definition()) :
                     IndexingPair.getOutstreamIndexingPair(streamList, termContext.definition());
         } else {
@@ -548,15 +547,15 @@ public class Rule extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Constants.NO_HASHCODE) {
             h = 1;
-            h = h * Utils.HASH_PRIME + label.hashCode();
-            h = h * Utils.HASH_PRIME + leftHandSide.hashCode();
-            h = h * Utils.HASH_PRIME + rightHandSide.hashCode();
-            h = h * Utils.HASH_PRIME + requires.hashCode();
-            h = h * Utils.HASH_PRIME + ensures.hashCode();
-            h = h * Utils.HASH_PRIME + lookups.hashCode();
-            h = h * Utils.HASH_PRIME + freshConstants.hashCode();
+            h = h * Constants.HASH_PRIME + label.hashCode();
+            h = h * Constants.HASH_PRIME + leftHandSide.hashCode();
+            h = h * Constants.HASH_PRIME + rightHandSide.hashCode();
+            h = h * Constants.HASH_PRIME + requires.hashCode();
+            h = h * Constants.HASH_PRIME + ensures.hashCode();
+            h = h * Constants.HASH_PRIME + lookups.hashCode();
+            h = h * Constants.HASH_PRIME + freshConstants.hashCode();
             h = h == 0 ? 1 : h;
             hashCode = h;
         }

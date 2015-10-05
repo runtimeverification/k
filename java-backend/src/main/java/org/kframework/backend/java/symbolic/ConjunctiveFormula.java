@@ -24,7 +24,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import java.util.Collection;
@@ -734,9 +734,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + disjunctions.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + substitution.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + equalities.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + disjunctions.hashCode();
         return hashCode;
     }
 

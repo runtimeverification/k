@@ -14,7 +14,7 @@ import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
@@ -667,8 +667,8 @@ public class KItem extends Term implements KItemRepresentation {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + kLabel.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + kList.hashCode();
         return hashCode;
     }
 
@@ -737,9 +737,9 @@ public class KItem extends Term implements KItemRepresentation {
 
         private int computeHash() {
             int hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + kLabelConstant.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + Arrays.deepHashCode(sorts);
-            hashCode = hashCode * Utils.HASH_PRIME + Arrays.hashCode(bools);
+            hashCode = hashCode * Constants.HASH_PRIME + kLabelConstant.hashCode();
+            hashCode = hashCode * Constants.HASH_PRIME + Arrays.deepHashCode(sorts);
+            hashCode = hashCode * Constants.HASH_PRIME + Arrays.hashCode(bools);
             return hashCode;
         }
 

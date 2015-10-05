@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.utils.errorsystem.KEMException;
@@ -165,9 +165,9 @@ public class BuiltinList extends Collection implements KItemCollection {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + baseTerms.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + elementsLeft.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + elementsRight.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + baseTerms.hashCode();
         return hashCode;
     }
 
@@ -300,8 +300,8 @@ public class BuiltinList extends Collection implements KItemCollection {
 
         public int hashCode() {
             int hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + type.hashCode();
+            hashCode = hashCode * Constants.HASH_PRIME + term.hashCode();
+            hashCode = hashCode * Constants.HASH_PRIME + type.hashCode();
             return hashCode;
         }
     }
