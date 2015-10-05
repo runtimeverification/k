@@ -12,35 +12,35 @@ import org.kframework.backend.java.kil.*;
  */
 public interface Visitor {
 
-    public String getName();
+    String getName();
 
-    public void visit(BitVector bitVector);
-    public void visit(BoolToken boolToken);
-    public void visit(BuiltinList builtinList);
-    public void visit(BuiltinMap builtinMap);
-    public void visit(BuiltinSet builtinSet);
-    public void visit(CellCollection cellCollection);
-    public void visit(Collection collection);
-    public void visit(ConjunctiveFormula node);
-    public void visit(ConstrainedTerm constrainedTerm);
-    public void visit(DisjunctiveFormula node);
-    public void visit(Hole hole);
-    public void visit(IntToken intToken);
-    public void visit(KLabelConstant kLabelConstant);
-    public void visit(KLabelFreezer kLabelFreezer);
-    public void visit(KLabelInjection kLabelInjection);
-    public void visit(KItem kItem);
-    public void visit(KItemProjection kItemProjection);
-    public void visit(KCollection kCollection);
-    public void visit(KLabel kLabel);
-    public void visit(KList kList);
-    public void visit(KSequence kSequence);
-    public void visit(MetaVariable metaVariable);
-    public void visit(Rule rule);
-    public void visit(Term node);
-    public void visit(Token token);
-    public void visit(UninterpretedToken uninterpretedToken);
-    public void visit(Variable variable);
-    public void visit(InjectedKLabel injectedKLabel);
+    void visit(BitVector bitVector);
+    void visit(BoolToken boolToken);
+    void visit(BuiltinList builtinList);
+    void visit(BuiltinMap builtinMap);
+    void visit(BuiltinSet builtinSet);
+    void visit(CellCollection cellCollection);
+    void visit(Collection collection);
+    void visit(ConjunctiveFormula node);
+    void visit(ConstrainedTerm constrainedTerm);
+    void visit(DisjunctiveFormula node);
+    void visit(Hole hole);
+    void visit(IntToken intToken);
+    void visit(KLabelConstant kLabelConstant);
+    void visit(KLabelFreezer kLabelFreezer);
+    void visit(KLabelInjection kLabelInjection);
+    void visit(KItem kItem);
+    void visit(KItemProjection kItemProjection);
+    void visit(KCollection kCollection);
+    void visit(KLabel kLabel);
+    void visit(KList kList);
+    void visit(KSequence kSequence);
+    void visit(MetaVariable metaVariable);
+    void visit(Rule rule);
+    void visit(Term node);
+    void visit(Token token);
+    void visit(UninterpretedToken uninterpretedToken);
+    void visit(Variable variable);
+    void visit(InjectedKLabel injectedKLabel);
 
 }

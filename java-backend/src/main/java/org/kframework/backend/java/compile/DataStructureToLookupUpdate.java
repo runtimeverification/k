@@ -39,7 +39,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         /**
          * Returns a {@code Set} of {@link Variable} instances that are not matched yet.
          */
-        public Set<Variable> unmatchedVariables();
+        Set<Variable> unmatchedVariables();
     }
 
     private class ExtendedListLookup extends ListLookup implements VariableCache {

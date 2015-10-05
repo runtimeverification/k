@@ -276,7 +276,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
     }
 
-    public ConjunctiveFormula addAll(Iterable<? extends Object> terms) {
+    public ConjunctiveFormula addAll(Iterable<?> terms) {
         ConjunctiveFormula result = this;
         for (Object term : terms) {
             result = result.add(term);

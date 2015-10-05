@@ -130,7 +130,7 @@ public class PatternMatchRewriter {
         return ruleIndex.getRules(term);
     }
 
-    private final Term getTransition(int n) {
+    private Term getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
 
@@ -141,7 +141,7 @@ public class PatternMatchRewriter {
      * This method is extracted to simplify the profiling script.
      * </p>
      */
-    private final List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
+    private List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
         return PatternMatcher.match(subject, rule, termContext);
     }
 
@@ -149,7 +149,7 @@ public class PatternMatchRewriter {
         indexingCells = IndexingCellsCollector.getIndexingCells(subject, termContext.definition());
     }
 
-    private final void computeSearchRewriteStep(Term subject, int successorBound, TermContext termContext) {
+    private void computeSearchRewriteStep(Term subject, int successorBound, TermContext termContext) {
         results.clear();
 
         if (successorBound == 0) {
@@ -187,7 +187,7 @@ public class PatternMatchRewriter {
         return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
     }
 
-    private final void computeRewriteStep(Term subject, int successorBound, TermContext termContext) {
+    private void computeRewriteStep(Term subject, int successorBound, TermContext termContext) {
         results.clear();
         assert successorBound == 1;
 
@@ -293,7 +293,7 @@ public class PatternMatchRewriter {
         }
     }
 
-    private final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution, TermContext termContext) {
+    private Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution, TermContext termContext) {
         Term rhs = DeepCloner.clone(rule.rightHandSide());
         Term result = rhs.copyOnShareSubstAndEval(substitution,
                 rule.reusableVariables().elementSet(), termContext);

@@ -78,7 +78,7 @@ public class IndexingPair implements Serializable {
 
         if (!(pattern instanceof BuiltinList)) {
             return definition.indexingData.TOP_INDEXING_PAIR;
-        };
+        }
         BuiltinList instream = (BuiltinList) pattern;
 
         if (!instream.isConcreteCollection()) {

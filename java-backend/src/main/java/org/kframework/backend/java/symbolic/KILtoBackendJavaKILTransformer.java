@@ -135,7 +135,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     public static Term expandAndEvaluate(GlobalContext globalContext, KExceptionManager kem, Term term) {
-        term = new MacroExpander(TermContext.of(globalContext), kem).processTerm((Term) term);
+        term = new MacroExpander(TermContext.of(globalContext), kem).processTerm(term);
         term = term.evaluate(TermContext.of(globalContext));
         return term;
     }
