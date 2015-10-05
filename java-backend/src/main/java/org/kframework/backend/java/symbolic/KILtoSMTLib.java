@@ -503,7 +503,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             // smtlib expression instead of operator
             String expression = label;
             for (int i = 0; i < kList.getContents().size(); i++) {
-                expression = expression.replaceAll("\\#" + (i + 1) + "(?![0-9])", ((SMTLibTerm) kList.get(i).accept(this)).expression());
+                expression = expression.replaceAll("#" + (i + 1) + "(?![0-9])", ((SMTLibTerm) kList.get(i).accept(this)).expression());
             }
             return new SMTLibTerm(expression);
         }
