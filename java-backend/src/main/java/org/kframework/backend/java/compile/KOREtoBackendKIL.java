@@ -29,6 +29,7 @@ import static org.kframework.Collections.*;
 import org.kframework.utils.BitSet;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,6 +52,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final KLabelConstant kSeqLabel;
     private final KLabelConstant kDotLabel;
     private final KItem kDot;
+
+    private final HashMap<String, Variable> variableTable = new HashMap<>();
 
     public KOREtoBackendKIL(Module module, Definition definition, TermContext context) {
         this.module = module;
@@ -172,9 +175,17 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public Variable KVariable(String name, Att att) {
-        Variable var = new Variable(name, Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K")));
+        Sort sort = Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K"));
+        String key = name.equals("HOLE") ? name : name + sort;
+        if (variableTable.containsKey(key)) {
+            return variableTable.get(key);
+        }
+
+        Variable var = new Variable(name, sort, variableTable.size());
         var.setAttributes(new KOREtoKIL().convertAttributes(att));
+        variableTable.put(key, var);
         return var;
+
     }
 
     @Override

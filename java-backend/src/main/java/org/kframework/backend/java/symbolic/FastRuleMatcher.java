@@ -29,7 +29,7 @@ import org.kframework.kore.KApply;
 
 public class FastRuleMatcher {
 
-    private ConjunctiveFormula[] substitutions;
+    private Substitution<Variable, Term>[] substitutions;
     private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
 
     public Map<scala.collection.immutable.List<Integer>, Term>[] getRewrites() {
@@ -43,22 +43,26 @@ public class FastRuleMatcher {
     private final KLabelConstant kSeqLabel;
     private final KLabelConstant kDotLabel;
     private final KItem kDot;
-    private KItem parent;
-    private int childLocation;
 
-    public FastRuleMatcher(TermContext context) {
+    public FastRuleMatcher(TermContext context, int ruleCount, int variableCount) {
         this.context = context;
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, context.definition());
         kDotLabel = KLabelConstant.of(KLabels.DOTK, context.definition());
         kDot = KItem.of(kDotLabel, KList.concatenate(), context);
+
+        substitutions = new Substitution[ruleCount];
+        for (int i = 0; i < ruleCount; ++i ) {
+            //substitutions[i] = new ArraySubstitution(variableCount);
+            substitutions[i] = new HashMapSubstitution();
+        }
+
     }
 
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask) {
         SymbolicRewriter.matchStopwatch.start();
         assert subject.isGround();
 
-        substitutions = new ConjunctiveFormula[ruleMask.length()];
-        ruleMask.stream().forEach(i -> substitutions[i] = ConjunctiveFormula.of(context));
+        ruleMask.stream().forEach(i -> substitutions[i].clear());
         rewrites = new Map[ruleMask.length()];
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = new BitSet();
@@ -68,7 +72,7 @@ public class FastRuleMatcher {
         List<Pair<Substitution<Variable, Term>, Integer>> theResult = new ArrayList<>();
 
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
-            theResult.add(Pair.of(substitutions[i].substitution(), i));
+            theResult.add(Pair.of(substitutions[i], i));
         }
 
         SymbolicRewriter.matchStopwatch.stop();
@@ -204,8 +208,7 @@ public class FastRuleMatcher {
 
         BitSet nonConflictualBitset = new BitSet();
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
-            substitutions[i] = substitutions[i].unsafeAddVariableBinding(variable, term);
-            if (!substitutions[i].isFalse()) {
+            if (substitutions[i].plus(variable, term) != null) {
                 nonConflictualBitset.set(i);
             }
         }
