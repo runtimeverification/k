@@ -48,7 +48,6 @@ public class UnsafeSharingDetector extends PrePostVisitor {
             }
 
             visitedTerms.add(term);
-            return;
         }
     }
 }

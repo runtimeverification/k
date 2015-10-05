@@ -326,7 +326,6 @@ public class PatternMatcher extends AbstractUnifier {
             fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
             if (fSubstitution.isFalse()) {
                 fail(builtinMap, patternBuiltinMap);
-                return;
             }
         }
     }
@@ -613,7 +612,6 @@ public class PatternMatcher extends AbstractUnifier {
             }
         } else {
             fail(kCollection, pattern);
-            return;
         }
     }
 
