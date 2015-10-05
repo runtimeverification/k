@@ -77,7 +77,7 @@ public class SymbolicRewriter {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, true);
             ConstrainedTerm result = getTransition(0);
-            KRunState finalState = null;
+            KRunState finalState;
             if (result != null) {
                 if (computeGraph) {
                     finalState = new JavaKRunState(result, context, counter, Optional.of(step));

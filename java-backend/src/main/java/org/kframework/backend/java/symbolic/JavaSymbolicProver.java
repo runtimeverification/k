@@ -92,7 +92,7 @@ public class JavaSymbolicProver implements Prover {
 
     @Override
     public Module preprocess(Module module, Term cfg) throws KRunExecutionException {
-        Map<Term, Term> substitution = null;
+        Map<Term, Term> substitution;
         if (cfg != null) {
             cfg = executor.run(cfg, false).getFinalState().getRawResult();
             cfg = (Term) (new DataStructure2Cell(context)).visitNode(cfg);
@@ -101,8 +101,7 @@ public class JavaSymbolicProver implements Prover {
             configurationSubstitutionVisitor.visitNode(cfg);
             substitution = configurationSubstitutionVisitor.getSubstitution();
 //            System.out.println(substitution);
-            Module mod = module;
-            mod = (Module) new Substitution(substitution,context).visitNode(module);
+            Module mod = (Module) new Substitution(substitution,context).visitNode(module);
 //                System.out.println(mod.toString());
             module = mod;
         }

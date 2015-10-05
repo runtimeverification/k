@@ -120,7 +120,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     public Rule transformAndEval(org.kframework.kil.Rule node) {
-        Rule rule = null;
+        Rule rule;
         rule = new MacroExpander(TermContext.of(globalContext), kem).processRule((Rule) this.visitNode(node));
         rule = evaluateRule(rule, globalContext);
 
