@@ -54,7 +54,7 @@ public class JavaSymbolicProver implements Prover {
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module) throws KRunExecutionException {
         TermContext termContext = TermContext.of(globalContext);
-        List<Rule> rules = new ArrayList<Rule>();
+        List<Rule> rules = new ArrayList<>();
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
             if (!(moduleItem instanceof org.kframework.kil.Rule)) {
                 continue;

@@ -175,7 +175,7 @@ public class JavaSymbolicExecutor implements Executor {
         pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
         Rule patternRule = transformer.transformAndEval(pattern);
 
-        List<SearchResult> searchResults = new ArrayList<SearchResult>();
+        List<SearchResult> searchResults = new ArrayList<>();
         List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
         Term targetTerm = null;
@@ -197,7 +197,7 @@ public class JavaSymbolicExecutor implements Executor {
         for (Map<Variable, Term> map : hits) {
             // Construct substitution map from the search results
             Map<String, org.kframework.kil.Term> substitutionMap =
-                    new HashMap<String, org.kframework.kil.Term>();
+                    new HashMap<>();
             for (Variable var : map.keySet()) {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(

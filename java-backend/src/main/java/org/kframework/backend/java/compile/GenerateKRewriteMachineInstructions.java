@@ -139,7 +139,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             }
 
             assert !containingCells.containsKey(cellLabelName);
-            containingCells.put(cellLabelName, new HashSet<String>());
+            containingCells.put(cellLabelName, new HashSet<>());
             containingCells.get(cellLabelName).add(cellLabelName);
 
             cellStack.push(cellLabelName);

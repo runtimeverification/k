@@ -547,7 +547,7 @@ public class SymbolicRewriter {
 //                    }
 
                     /* add helper rule */
-                    HashSet<Variable> ruleVariables = new HashSet<Variable>(initialTerm.variableSet());
+                    HashSet<Variable> ruleVariables = new HashSet<>(initialTerm.variableSet());
                     ruleVariables.addAll(targetTerm.variableSet());
 
                     /*

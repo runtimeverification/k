@@ -202,7 +202,7 @@ public class RewriteEngineUtils {
         if (!multiSubstitutions.isEmpty()) {
             assert multiSubstitutions.size() <= 2;
 
-            List<Map<Variable, Term>> result = new ArrayList<Map<Variable, Term>>();
+            List<Map<Variable, Term>> result = new ArrayList<>();
             Iterator<Collection<Map<Variable, Term>>> iterator = multiSubstitutions.iterator();
             if (multiSubstitutions.size() == 1) {
                 for (Map<Variable, Term> subst : iterator.next()) {

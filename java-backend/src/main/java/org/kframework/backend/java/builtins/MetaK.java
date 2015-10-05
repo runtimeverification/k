@@ -98,7 +98,7 @@ public class MetaK {
             return term;
         }
 
-        Set<Variable> variables = new HashSet<Variable>();
+        Set<Variable> variables = new HashSet<>();
         for (Term element : builtinSet.elements()) {
             if (!(element instanceof MetaVariable)) {
                 return term;

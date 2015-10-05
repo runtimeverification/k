@@ -321,9 +321,9 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             return variable;
         } else {
             /* status == Status.RHS || status == Status.CONDITION */
-            List<Term> baseTerms = new ArrayList<Term>();
-            java.util.List<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft());
-            java.util.List<Term> elementsRight = new ArrayList<Term>(node.elementsRight());
+            List<Term> baseTerms = new ArrayList<>();
+            java.util.List<Term> elementsLeft = new ArrayList<>(node.elementsLeft());
+            java.util.List<Term> elementsRight = new ArrayList<>(node.elementsRight());
             for (Term term : node.baseTerms()) {
                 if (!(term instanceof ListUpdate)) {
                     baseTerms.add(term);
@@ -331,8 +331,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 }
                 ListUpdate listUpdate = (ListUpdate) term;
 
-                List<Term> removeLeft = new ArrayList<Term>(listUpdate.removeLeft());
-                List<Term> removeRight = new ArrayList<Term>(listUpdate.removeRight());
+                List<Term> removeLeft = new ArrayList<>(listUpdate.removeLeft());
+                List<Term> removeRight = new ArrayList<>(listUpdate.removeRight());
 
                 ListIterator<Term> iteratorElem = elementsLeft.listIterator(elementsLeft.size());
                 ListIterator<Term> iteratorRemove = removeLeft.listIterator(removeLeft.size());
@@ -405,8 +405,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             return variable;
         } else {
             /* status == Status.RHS || status == Status.CONDITION */
-            List<Term> baseTerms = new ArrayList<Term>();
-            Map<Term, Term> elements = new HashMap<Term, Term>(node.elements());
+            List<Term> baseTerms = new ArrayList<>();
+            Map<Term, Term> elements = new HashMap<>(node.elements());
             for (Term term : node.baseTerms()) {
                 if (!(term instanceof MapUpdate)) {
                     baseTerms.add(term);
@@ -414,8 +414,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 }
                 MapUpdate mapUpdate = (MapUpdate) term;
 
-                Map<Term, Term> removeEntries = new HashMap<Term, Term>();
-                Map<Term, Term> updateEntries = new HashMap<Term, Term>();
+                Map<Term, Term> removeEntries = new HashMap<>();
+                Map<Term, Term> updateEntries = new HashMap<>();
                 for (Map.Entry<Term, Term> entry : mapUpdate.removeEntries().entrySet()) {
                     if (elements.containsKey(entry.getKey())) {
                         if (elements.get(entry.getKey()).equals(entry.getValue())) {
@@ -480,8 +480,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             return variable;
         } else {
             /* status == Status.RHS || status == Status.CONDITION */
-            List<Term> baseTerms = new ArrayList<Term>();
-            Collection<Term> elements = new ArrayList<Term>(node.elements());
+            List<Term> baseTerms = new ArrayList<>();
+            Collection<Term> elements = new ArrayList<>(node.elements());
             for (Term term : node.baseTerms()) {
                 if (!(term instanceof SetUpdate)) {
                     baseTerms.add(term);
@@ -489,7 +489,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 }
                 SetUpdate setUpdate = (SetUpdate) term;
 
-                Collection<Term> removeEntries = new ArrayList<Term>();
+                Collection<Term> removeEntries = new ArrayList<>();
                 for (Term key : setUpdate.removeEntries()) {
                     if (elements.contains(key)) {
                         elements.remove(key);
