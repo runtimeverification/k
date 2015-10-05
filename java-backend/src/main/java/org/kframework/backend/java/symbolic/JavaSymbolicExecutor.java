@@ -121,7 +121,7 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     /**
-     * Rewrite Enginre run that creates a new KRun State.
+     * Rewrite Engine run that creates a new KRun State.
      * @param cfg The term configuration to begin with.
      * @param bound The number of steps
      * @param computeGraph Option to compute Execution Graph,
@@ -159,7 +159,6 @@ public class JavaSymbolicExecutor implements Executor {
             RuleCompilerSteps compilationInfo,
             boolean computeGraph) throws KRunExecutionException {
 
-        List<Rule> claims = Collections.emptyList();
         if (bound == null) {
             bound = -1;
         }
