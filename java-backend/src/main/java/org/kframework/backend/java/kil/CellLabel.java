@@ -3,9 +3,10 @@ package org.kframework.backend.java.kil;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.backend.java.util.MapCache;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.MetaK;
 
@@ -17,7 +18,7 @@ import org.kframework.compile.utils.MetaK;
  */
 public final class CellLabel implements MaximalSharing, Serializable {
 
-    private static final MapCache<String, CellLabel> cache = new MapCache<>(new PatriciaTrie<>());
+    private static final Map<String, CellLabel> cache = Collections.synchronizedMap(new PatriciaTrie<>());
 
     public static final CellLabel GENERATED_TOP =   CellLabel.of(MetaK.Constants.generatedTopCellLabel);
     public static final CellLabel K             =   CellLabel.of("k");
@@ -36,7 +37,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * @return the cell label
      */
     public static CellLabel of(String name) {
-        return cache.get(name, () -> new CellLabel(name));
+        return cache.computeIfAbsent(name, CellLabel::new);
     }
 
     private CellLabel(String name) {
@@ -76,7 +77,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        return cache.get(name, () -> this);
+        return cache.computeIfAbsent(name, x -> this);
     }
 
 }

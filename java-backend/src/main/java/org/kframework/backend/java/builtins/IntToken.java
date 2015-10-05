@@ -6,10 +6,11 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -22,7 +23,7 @@ public final class IntToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.INT;
 
     /* IntToken cache */
-    private static final MapCache<BigInteger, IntToken> cache = new MapCache<>();
+    private static final Map<BigInteger, IntToken> cache = new ConcurrentHashMap<>();
 
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
@@ -38,7 +39,7 @@ public final class IntToken extends Token implements MaximalSharing {
      */
     public static IntToken of(BigInteger value) {
         assert value != null;
-        return cache.get(value, () -> new IntToken(value));
+        return cache.computeIfAbsent(value, IntToken::new);
     }
 
     public static IntToken of(long value) {
@@ -150,7 +151,7 @@ public final class IntToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        return cache.get(value, () -> this);
+        return cache.computeIfAbsent(value, v -> this);
     }
 
 }
