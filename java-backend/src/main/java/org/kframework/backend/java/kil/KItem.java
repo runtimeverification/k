@@ -26,7 +26,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.BitSet;
+import org.kframework.utils.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

@@ -26,7 +26,8 @@ import org.kframework.kore.convertors.KOREtoKIL;
 
 import static org.kframework.Collections.*;
 
-import java.util.BitSet;
+import org.kframework.utils.BitSet;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -124,7 +125,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         if (convertedKList.stream().anyMatch(RuleAutomatonDisjunction.class::isInstance)) {
             childrenDontCareRuleMask = new BitSet[convertedKList.size()];
             for (int i = 0; i < convertedKList.size(); ++i) {
-                if (convertedKList.get(i) instanceof  RuleAutomatonDisjunction) {
+                if (convertedKList.get(i) instanceof RuleAutomatonDisjunction) {
                     BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).variableDisjunctionsArray[Sort.KSEQUENCE.ordinal()].stream()
                             .filter(p -> p.getLeft().name().equals("THE_VARIABLE")).findAny().map(Pair::getRight).orElseGet(() -> null);
                     childrenDontCareRuleMask[i] = the_variable;

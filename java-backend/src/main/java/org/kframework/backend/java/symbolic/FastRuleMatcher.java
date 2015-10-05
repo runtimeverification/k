@@ -16,11 +16,12 @@ import org.kframework.kore.Assoc;
 import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
-import java.util.BitSet;
+
+import org.kframework.utils.BitSet;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kore.KApply;
@@ -60,7 +61,7 @@ public class FastRuleMatcher {
         ruleMask.stream().forEach(i -> substitutions[i] = ConjunctiveFormula.of(context));
         rewrites = new Map[ruleMask.length()];
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
-        empty = new BitSet(ruleMask.size());
+        empty = new BitSet();
 
         BitSet theMatchingRules = match(subject, pattern, ruleMask, List());
 
@@ -74,29 +75,40 @@ public class FastRuleMatcher {
         return theResult;
     }
 
+    static long counter1 = 0;
+    static long counter2 = 0;
+    static long counter3 = 0;
+    static long counter4 = 0;
+    static long counter5 = 0;
+    static long counter6 = 0;
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
-            BitSet returnSet = new BitSet(ruleMask.size());
+            counter1++;
+            BitSet returnSet = new BitSet();
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
 
             List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
             for (Pair<Variable, BitSet> p : pairs) {
-                BitSet localRuleMask = ((BitSet) ruleMask.clone());
-                localRuleMask.and(p.getRight());
-                if (!localRuleMask.isEmpty()) {
+                counter2++;
+                if (ruleMask.intersects(p.getRight())) {
+                    BitSet localRuleMask = ruleMask.clone();
+                    localRuleMask.and(p.getRight());
                     returnSet.or(add(p.getLeft(), subject, localRuleMask));
                 }
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
+                counter3++;
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
             }
 
             if (subject instanceof KItem) {
+                counter4++;
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
+                counter5++;
                 Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
                     BitSet localRuleMask = ((BitSet) ruleMask.clone());
@@ -107,16 +119,22 @@ public class FastRuleMatcher {
 
             return returnSet;
         }
+        if (pattern instanceof Variable) {
+            return add((Variable) pattern, subject, ruleMask);
+        }
 
-        if (isKRewrite(pattern)) {
+        if (pattern instanceof KItem && ((KItem) pattern).kLabel().toString().equals(KLabels.KREWRITE)) {
             KApply rw = (KApply) pattern;
             InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
+            BitSet theNewMask = match(subject, (Term) rw.klist().items().get(0), ruleMask, path);
+
             for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
-                if (innerRHSRewrite.theRHS[i] != null) {
+                if (innerRHSRewrite.theRHS[i] != null && theNewMask.contains(i)) {
+                    counter6++;
                     rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
                 }
             }
-            return match(subject, (Term) rw.klist().items().get(0), ruleMask, path);
+            return theNewMask;
         }
 
         // normalize KSeq representations
@@ -124,29 +142,27 @@ public class FastRuleMatcher {
             subject = upKSeq(subject);
         }
 
-        if (pattern instanceof Variable) {
-            return add((Variable) pattern, subject, ruleMask);
-        }
-
         if (subject instanceof KItem && pattern instanceof KItem) {
-            KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
-            KList subjectKList = (KList) ((KItem) subject).kList();
-            KLabelConstant patternKLabel = (KLabelConstant) ((KItem) pattern).kLabel();
-            KList patternKList = (KList) ((KItem) pattern).kList();
+            KItem kitemPattern = (KItem) pattern;
 
+            KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
+            KLabelConstant patternKLabel = (KLabelConstant) kitemPattern.kLabel();
             if (subjectKLabel != patternKLabel) {
                 return empty;
             }
 
-//            assert subjectKList.size() == patternKList.size();
-            if (subjectKList.size() != patternKList.size())
-                return empty;
-
+            KList subjectKList = (KList) ((KItem) subject).kList();
+            KList patternKList = (KList) kitemPattern.kList();
             int size = subjectKList.size();
+
+            if (size != patternKList.size()) {
+                return empty;
+            }
+
             for (int i = 0; i < size; ++i) {
-                if (((KItem) pattern).childrenDontCareRuleMask != null && ((KItem) pattern).childrenDontCareRuleMask[i] != null) {
-                    BitSet clonedRuleMask = (BitSet) ruleMask.clone();
-                    clonedRuleMask.and(((KItem) pattern).childrenDontCareRuleMask[i]);
+                if (kitemPattern.childrenDontCareRuleMask != null && kitemPattern.childrenDontCareRuleMask[i] != null) {
+                    BitSet clonedRuleMask = ruleMask.clone();
+                    clonedRuleMask.and(kitemPattern.childrenDontCareRuleMask[i]);
                     if (clonedRuleMask.equals(ruleMask)) {
                         continue;
                     }
@@ -162,23 +178,23 @@ public class FastRuleMatcher {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
         } else {
-            throw new AssertionError("unexpected class at matching ");
+            throw new AssertionError("unexpected class at matching: " + subject.getClass());
         }
     }
 
     private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
         if (pSeq != null) {
-            BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
-            localRuleMaskSeq.and(pSeq.getRight());
-            if (!localRuleMaskSeq.isEmpty()) {
+            if (ruleMask.intersects(pSeq.getRight())) {
+                BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
+                localRuleMaskSeq.and(pSeq.getRight());
                 localRuleMaskSeq = match(subject, pSeq.getLeft(), localRuleMaskSeq, path);
+                returnSet.or(localRuleMaskSeq);
             }
-            returnSet.or(localRuleMaskSeq);
         }
     }
 
     private BitSet add(Variable variable, Term term, BitSet ruleMask) {
-        if (variable.name().equals("THE_VARIABLE".intern())) {
+        if (variable.name().equals("THE_VARIABLE")) {
             return ruleMask;
         }
 
@@ -186,7 +202,7 @@ public class FastRuleMatcher {
             return ruleMask;
         }
 
-        BitSet nonConflictualBitset = new BitSet(ruleMask.size());
+        BitSet nonConflictualBitset = new BitSet();
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
             substitutions[i] = substitutions[i].unsafeAddVariableBinding(variable, term);
             if (!substitutions[i].isFalse()) {
@@ -200,10 +216,6 @@ public class FastRuleMatcher {
 
     private static boolean isKSeq(Term term) {
         return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
-    }
-
-    private static boolean isKRewrite(Term term) {
-        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KREWRITE);
     }
 
     private static boolean isKSeqVar(Term term) {

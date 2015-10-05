@@ -9,7 +9,7 @@ import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
+import org.kframework.utils.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

@@ -27,6 +27,7 @@ import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.BitSet;
 
 import java.util.*;
 import java.util.List;
@@ -62,8 +63,8 @@ public class SymbolicRewriter {
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
         this.definition = definition;
-        this.allRuleBits = new BitSet(definition.ruleTable.size());
-        this.allRuleBits.flip(0, definition.ruleTable.size());
+        this.allRuleBits = new BitSet();
+        this.allRuleBits.makeones(definition.ruleTable.size());
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
         this.counter = counter;
@@ -98,7 +99,14 @@ public class SymbolicRewriter {
             }
         }
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + ", " + matchStopwatch + "]");
+        System.err.println("[" + step + ", " + stopwatch + ", " + matchStopwatch +
+                " c1 " + FastRuleMatcher.counter1 +
+                " c2 " + FastRuleMatcher.counter2 +
+                " c3 " + FastRuleMatcher.counter3 +
+                " c4 " + FastRuleMatcher.counter4 +
+                " c5 " + FastRuleMatcher.counter5 +
+                " c6 " + FastRuleMatcher.counter6 +
+                "]");
 
         if (initialState == null) {
             initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
