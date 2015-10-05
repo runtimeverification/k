@@ -216,11 +216,9 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        SearchResults retval = new SearchResults(
+        return new SearchResults(
                 searchResults,
                 executionGraph);
-
-        return retval;
     }
 
     @Override

@@ -185,8 +185,7 @@ public class RewriteEngineUtils {
     }
 
     public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
-        Term evalLookupOrChoice = lookupOrChoice.copyOnShareSubstAndEval(subst, context);
-        return evalLookupOrChoice;
+        return lookupOrChoice.copyOnShareSubstAndEval(subst, context);
     }
 
     /**
