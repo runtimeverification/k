@@ -38,7 +38,6 @@ import java.util.stream.Stream;
  */
 public class SymbolicRewriter {
 
-    private final Definition definition;
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
@@ -56,7 +55,6 @@ public class SymbolicRewriter {
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
-        this.definition = definition;
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
         this.counter = counter;

@@ -17,11 +17,6 @@ import java.util.Map;
 public class GenerateRHSInstructions extends BottomUpVisitor {
 
     private final List<RHSInstruction> rhsSchedule = new ArrayList<>();
-    private final TermContext context;
-
-    public GenerateRHSInstructions(TermContext context) {
-        this.context = context;
-    }
 
     @Override
     public void visit(BuiltinList node) {

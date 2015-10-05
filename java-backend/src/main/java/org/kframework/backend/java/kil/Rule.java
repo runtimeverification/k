@@ -206,7 +206,7 @@ public class Rule extends JavaSymbolicObject {
         this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
         this.matchingInstructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
 
-        GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions(termContext);
+        GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions();
         rightHandSide.accept(rhsVisitor);
         this.rhsInstructions = rhsVisitor.getInstructions();
 
@@ -214,7 +214,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             for (Map.Entry<CellLabel, Term> entry :
                 rhsOfWriteCells.entrySet()) {
-                GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+                GenerateRHSInstructions visitor = new GenerateRHSInstructions();
                 entry.getValue().accept(visitor);
                 ImmutableList<RHSInstruction> rhsInstructions = visitor.getInstructions();
                 if (rhsInstructions != null) {
@@ -224,13 +224,13 @@ public class Rule extends JavaSymbolicObject {
         }
         instructionsOfRequires = new ArrayList<>();
         for (Term require : requires) {
-            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions();
             require.accept(visitor);
             instructionsOfRequires.add(visitor.getInstructions());
         }
         instructionsOfLookups = new ArrayList<>();
         for (Equality equality : lookups.equalities()) {
-            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions();
             equality.leftHandSide().accept(visitor);
             instructionsOfLookups.add(visitor.getInstructions());
         }

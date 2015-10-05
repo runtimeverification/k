@@ -43,7 +43,6 @@ public class KAbstractRewriteMachine {
 
     // program counter
     private int pc = 1;
-    private MatchingInstruction nextInstr;
     private boolean success = true;
     private boolean isStarNested = false;
 
@@ -279,7 +278,7 @@ public class KAbstractRewriteMachine {
         }
 
         while (true) {
-            nextInstr = nextInstruction();
+            MatchingInstruction nextInstr = nextInstruction();
 
             if (nextInstr == MatchingInstruction.UP) {
                 return;
