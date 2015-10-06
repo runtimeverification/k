@@ -67,13 +67,14 @@ public class SymbolicRewriter {
     public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
         stopwatch.start();
         KRunState startState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
-        KRunState crntState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            executionGraph.addVertex(crntState = startState);
+            executionGraph.addVertex(startState);
         }
-        int step;
-        for (step = 0; step != bound; ++step) {
+        KRunState crntState = startState;
+        KRunState finalState = null;
+        int step = 1;
+        while (step <= bound || bound < 0) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, step, true);
             ConstrainedTerm result = getTransition(0);
@@ -86,9 +87,14 @@ public class SymbolicRewriter {
                     crntState = nextState;
                 }
                 constrainedTerm = result;
+                if (step == bound) {
+                    finalState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
+                }
             } else {
+                finalState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step - 1));
                 break;
             }
+            step++;
         }
 
         stopwatch.stop();
@@ -96,10 +102,7 @@ public class SymbolicRewriter {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
-        if (crntState == null) {
-            crntState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
-        }
-        return crntState;
+        return finalState;
     }
 
     /**
