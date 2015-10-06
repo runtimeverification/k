@@ -131,7 +131,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
         files.saveToTemp("marshalvalue.ml", ocaml);
         try {
             new OcamlRewriter(files, converter, options).compileOcaml("marshalvalue.ml");
-            int exit = files.getProcessBuilder().command("./a.out").directory(files.resolveTemp(".")).start().waitFor();
+            int exit = files.getProcessBuilder().command(files.resolveTemp("a.out").getAbsolutePath()).directory(files.resolveTemp(".")).start().waitFor();
             if (exit != 0) {
                 throw KEMException.criticalError("Failed to precompile program variables.");
             }
