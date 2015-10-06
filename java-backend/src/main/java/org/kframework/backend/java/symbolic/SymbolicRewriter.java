@@ -66,25 +66,24 @@ public class SymbolicRewriter {
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
         stopwatch.start();
-        KRunState initialState = null;
+        KRunState startState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
+        KRunState crntState = null;
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
-            executionGraph.addVertex(initialState);
+            executionGraph.addVertex(crntState = startState);
         }
         int step;
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, step, true);
             ConstrainedTerm result = getTransition(0);
-            KRunState finalState;
             if (result != null) {
                 if (computeGraph) {
-                    finalState = new JavaKRunState(result, context, counter, Optional.of(step));
+                    KRunState nextState = new JavaKRunState(result, context, counter, Optional.of(step));
                     JavaTransition javaTransition = new JavaTransition(
                             getRule(0), getSubstitution(0), context);
-                    executionGraph.addEdge(javaTransition, initialState, finalState);
-                    initialState = finalState;
+                    executionGraph.addEdge(javaTransition, crntState, nextState);
+                    crntState = nextState;
                 }
                 constrainedTerm = result;
             } else {
@@ -97,10 +96,10 @@ public class SymbolicRewriter {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
 
-        if (initialState == null) {
-            initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
+        if (crntState == null) {
+            crntState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
         }
-        return initialState;
+        return crntState;
     }
 
     /**
@@ -375,13 +374,10 @@ public class SymbolicRewriter {
         stopwatch.start();
 
         Context kilContext = context.definition().context();
-        JavaKRunState startState = null;
+        JavaKRunState crntState = new JavaKRunState(initialTerm, kilContext, counter);
         if (computeGraph) {
             executionGraph = new KRunGraph();
-            startState = new JavaKRunState(initialTerm, kilContext, counter);
-            executionGraph.addVertex(startState);
-        } else {
-            executionGraph = null;
+            executionGraph.addVertex(crntState);
         }
 
         List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
@@ -427,7 +423,7 @@ public class SymbolicRewriter {
                 Integer currentDepth = entry.getValue();
 
                 if (computeGraph) {
-                    startState = new JavaKRunState(term.term(), kilContext, counter);
+                    crntState = new JavaKRunState(term.term(), kilContext, counter);
                 }
 
                 computeRewriteStep(term, step, false);
@@ -449,7 +445,7 @@ public class SymbolicRewriter {
                         JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
                         JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
                         executionGraph.addVertex(resultState);
-                        executionGraph.addEdge(javaTransition, startState, resultState);
+                        executionGraph.addEdge(javaTransition, crntState, resultState);
                     }
                     if (!transition) {
                         nextQueue.put(result, currentDepth);
