@@ -1,15 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Bottom;
@@ -23,11 +15,12 @@ import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.RuleAuditing;
+import org.kframework.backend.java.symbolic.Substitution;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utilities for the Java rewrite engine.
@@ -35,10 +28,6 @@ import com.google.common.collect.Sets;
  * @author YilongL
  */
 public class RewriteEngineUtils {
-
-    public static boolean isSubsorted(Term big, Term small, TermContext context) {
-        return context.definition().subsorts().isSubsorted(big.sort(), small.sort());
-    }
 
     public static boolean isSubsortedEq(Term big, Term small, TermContext context) {
         return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
@@ -48,9 +37,6 @@ public class RewriteEngineUtils {
      * Evaluates the side-conditions of a rule according to a given
      * substitution and updates the substitution accordingly.
      *
-     * @param rule
-     * @param substitution
-     * @param context
      * @return the updated substitution if it satisfies the side-condition;
      *         otherwise, {@code null}
      */
@@ -85,7 +71,7 @@ public class RewriteEngineUtils {
                 // against ``<env> Rho </env>'' will result in a pending
                 // choice operation due to the unknown ``Rho''.
 
-                if (!resolved && RuleAuditing.isAuditBegun()) {
+                if (RuleAuditing.isAuditBegun()) {
                     System.err.println("Matching failure: unable to resolve collection operation "
                     + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
                     + evalLookupOrChoice);
@@ -114,7 +100,7 @@ public class RewriteEngineUtils {
                         if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
                             resolved = true;
                             crntSubst = crntSubst.plusAll(lookupMatcher.substitution());
-                        } else if (!resolved && RuleAuditing.isAuditBegun()) {
+                        } else if (RuleAuditing.isAuditBegun()) {
                             System.err.println("Matching failure: substitution "
                             + lookupMatcher.substitution() + " missing variables "
                             + Sets.difference(lookupMatcher.substitution().keySet(), nonLookupOrChoice.variableSet()));
@@ -166,9 +152,6 @@ public class RewriteEngineUtils {
      * Evaluates the side-conditions of a rule against a list of possible
      * instantiations.
      *
-     * @param rule
-     * @param substitutions
-     * @param context
      * @return a list of instantiations that satisfy the side-conditions; each
      *         of which is updated with extra bindings introduced during the
      *         evaluation
@@ -182,116 +165,6 @@ public class RewriteEngineUtils {
                 .map(s -> evaluateConditions(rule, Substitution.from(s), context))
                 .filter(s -> s != null)
                 .collect(Collectors.toList());
-    }
-
-    public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
-        return lookupOrChoice.copyOnShareSubstAndEval(subst, context);
-    }
-
-    /**
-     * Helper method which constructs all possible variable bindings of
-     * the pattern term to match the subject term.
-     *
-     * @return all possible substitutions of the pattern term to match the
-     *         subject term
-     */
-    public static List<Map<Variable, Term>> getMultiSubstitutions(
-            Map<Variable, Term> fSubstitution,
-            Collection<Collection<Map<Variable, Term>>> multiSubstitutions) {
-        if (!multiSubstitutions.isEmpty()) {
-            assert multiSubstitutions.size() <= 2;
-
-            List<Map<Variable, Term>> result = new ArrayList<>();
-            Iterator<Collection<Map<Variable, Term>>> iterator = multiSubstitutions.iterator();
-            if (multiSubstitutions.size() == 1) {
-                for (Map<Variable, Term> subst : iterator.next()) {
-                    Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst);
-                    if (composedSubst != null) {
-                        result.add(composedSubst);
-                    }
-                }
-            } else {
-                Collection<Map<Variable, Term>> substitutions = iterator.next();
-                Collection<Map<Variable, Term>> otherSubstitutions = iterator.next();
-                for (Map<Variable, Term> subst1 : substitutions) {
-                    for (Map<Variable, Term> subst2 : otherSubstitutions) {
-                        Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst1);
-                        if (composedSubst != null) {
-                            // TODO(YilongL): might be able to exploit the fact that composedSubst can be safely mutated
-                            composedSubst = composeSubstitution(composedSubst, subst2);
-                            if (composedSubst != null) {
-                                result.add(composedSubst);
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-        } else {
-            Map<Variable, Term> substitution = Maps.newHashMap(fSubstitution);
-            return Collections.singletonList(substitution);
-        }
-    }
-
-    /**
-     * Composes two specified substitutions.
-     *
-     * @param subst1
-     *            the first substitution
-     * @param subst2
-     *            the second substitution
-     * @return the composed substitution on success; otherwise, {@code null}
-     */
-    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
-        if (subst1.size() < subst2.size()) {
-            Map<Variable, Term> tmp = subst1;
-            subst1 = subst2;
-            subst2 = tmp;
-        }
-
-        Map<Variable, Term> result = new HashMap<>(subst1);
-        for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
-            Variable variable = entry.getKey();
-            Term term = entry.getValue();
-            Term otherTerm = result.get(variable);
-            if (otherTerm == null) {
-                result.put(variable, term);
-            } else if (!otherTerm.equals(term)) {
-                if (RuleAuditing.isAuditBegun()) {
-                    System.err.println("Incompatible substitutions: " + subst1 + " and " + subst2);
-                }
-                return null;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Composes a list of substitutions.
-     *
-     * @param substs
-     *            a list of substitutions
-     * @return the composed substitution on success; otherwise, {@code null}
-     */
-    @SafeVarargs
-    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term>... substs) {
-        switch (substs.length) {
-        case 0:
-            return null;
-
-        case 1:
-            return substs[0];
-
-        case 2:
-            return composeSubstitution(substs[0], substs[1]);
-
-        default:
-            Map<Variable, Term> subst = substs[0];
-            for (int idx = 1; idx < substs.length; idx++) {
-                subst = composeSubstitution(subst, substs[idx]);
-            }
-            return subst;
-        }
     }
 
 }

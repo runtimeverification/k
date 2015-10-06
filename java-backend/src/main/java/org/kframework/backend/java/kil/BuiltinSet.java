@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.utils.errorsystem.KEMException;
@@ -98,10 +98,10 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + elements.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionPatterns.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionFunctions.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
     }
 

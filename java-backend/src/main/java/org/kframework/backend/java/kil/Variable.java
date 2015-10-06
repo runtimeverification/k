@@ -4,14 +4,15 @@ package org.kframework.backend.java.kil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.MapCache;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -24,7 +25,7 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static final AtomicInteger counter = new AtomicInteger(0);
-    private static final MapCache<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new MapCache<>();
+    private static final Map<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new ConcurrentHashMap<>();
 
     /**
      * Given a set of {@link Variable}s, returns a substitution that maps each
@@ -130,8 +131,8 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
     @Override
     protected final int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 
@@ -166,7 +167,7 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
             * `id` has been used and this anonymous variable must be renamed */
             for (int c = counter.get(); ; ) {
                 if (id < c) {
-                    return deserializationAnonymousVariableMap.get(Pair.of(id, sort), this::getFreshCopy);
+                    return deserializationAnonymousVariableMap.computeIfAbsent(Pair.of(id, sort), p -> getFreshCopy());
                 } else if (counter.compareAndSet(c, id + 1)) {
                     return this;
                 }

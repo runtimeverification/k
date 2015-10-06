@@ -20,7 +20,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -157,8 +157,8 @@ public class Equality implements Serializable {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + leftHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + rightHandSide.hashCode();
         return hashCode;
     }
 
