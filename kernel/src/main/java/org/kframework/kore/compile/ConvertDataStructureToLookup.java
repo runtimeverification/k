@@ -513,4 +513,13 @@ public class ConvertDataStructureToLookup {
             return s;
         }
     }
+
+    public static boolean isLookupKLabel(KLabel k) {
+        return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#setChoice");
+    }
+
+    public static boolean isLookupKLabel(KApply k) {
+        return isLookupKLabel(k.klabel());
+    }
+
 }

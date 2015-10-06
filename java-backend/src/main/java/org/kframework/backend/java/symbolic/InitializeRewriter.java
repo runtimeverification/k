@@ -145,9 +145,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
 
-        public Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
-            K res = execute(k, depth).k();
-            return Tuple2.apply(res, match(res, rule));
+        public Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+            RewriterResult res = execute(k, depth);
+            return Tuple2.apply(res, match(res.k(), rule));
         }
 
         @Override

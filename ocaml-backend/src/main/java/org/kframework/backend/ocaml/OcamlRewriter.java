@@ -79,7 +79,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");
-                return new RewriterResult(Optional.<Integer>empty(), parseOcamlOutput(output));
+                return parseOcamlRewriterOutput(output);
             }
 
             @Override
@@ -91,12 +91,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
-            public Tuple2<K, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+            public Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
                 String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
                 files.saveToTemp("pgm.ml", ocaml);
                 String output = compileAndExecOcaml("pgm.ml");
                 String subst = files.loadFromTemp("run.subst");
-                return Tuple2.apply(parseOcamlOutput(output), parseOcamlSearchOutput(subst));
+                return Tuple2.apply(parseOcamlRewriterOutput(output), parseOcamlSearchOutput(subst));
             }
 
             @Override
@@ -109,6 +109,15 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    private RewriterResult parseOcamlRewriterOutput(String output) {
+        String[] lines = output.split(System.getProperty("line.separator"));
+        int steps = Integer.parseInt(lines[0]);
+        if (options.experimental.statistics) {
+            System.err.println("[" + steps + " steps]");
+        }
+        return new RewriterResult(Optional.of(steps), parseOcamlOutput(lines[1]));
     }
 
     private List<Map<KVariable, K>> parseOcamlSearchOutput(String output) {
