@@ -113,7 +113,7 @@ public class Profiler {
             }
         };
 
-        private ThreadLocal<Integer> count = new ThreadLocal<Integer>() {
+        private final ThreadLocal<Integer> count = new ThreadLocal<Integer>() {
             @Override
             protected Integer initialValue() {
                 return 0;

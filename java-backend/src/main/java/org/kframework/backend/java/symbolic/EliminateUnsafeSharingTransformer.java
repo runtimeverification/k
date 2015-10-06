@@ -19,7 +19,7 @@ import org.kframework.kil.ASTNode;
  */
 public class EliminateUnsafeSharingTransformer extends PrePostTransformer {
 
-    private final Set<Term> visitedTerms = Collections.newSetFromMap(new IdentityHashMap<Term, Boolean>());
+    private final Set<Term> visitedTerms = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public static Term transformTerm(Term term, TermContext context) {
         Transformer transformer = new EliminateUnsafeSharingTransformer(context);

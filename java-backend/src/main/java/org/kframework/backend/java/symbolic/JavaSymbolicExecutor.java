@@ -102,7 +102,7 @@ public class JavaSymbolicExecutor implements Executor {
     private RewriteRelation patternMatcherRewriteRun(Term term, TermContext termContext, int bound, boolean computeGraph) {
 
         if (computeGraph) {
-            KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
         }
         ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
         JavaKRunState finalState = new JavaKRunState(rewriteResult, context, counter, Optional.empty());
@@ -174,7 +174,7 @@ public class JavaSymbolicExecutor implements Executor {
         pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
         Rule patternRule = transformer.transformAndEval(pattern);
 
-        List<SearchResult> searchResults = new ArrayList<SearchResult>();
+        List<SearchResult> searchResults = new ArrayList<>();
         List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
         Term targetTerm = null;
@@ -182,7 +182,7 @@ public class JavaSymbolicExecutor implements Executor {
         KRunGraph executionGraph = null;
         if (!javaOptions.symbolicExecution) {
             if (computeGraph) {
-                KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+                throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
             }
             hits = getPatternMatchRewriter().search(initialTerm,
                     patternRule, bound, depth, searchType, termContext);
@@ -196,7 +196,7 @@ public class JavaSymbolicExecutor implements Executor {
         for (Map<Variable, Term> map : hits) {
             // Construct substitution map from the search results
             Map<String, org.kframework.kil.Term> substitutionMap =
-                    new HashMap<String, org.kframework.kil.Term>();
+                    new HashMap<>();
             for (Variable var : map.keySet()) {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
@@ -215,11 +215,9 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        SearchResults retval = new SearchResults(
+        return new SearchResults(
                 searchResults,
                 executionGraph);
-
-        return retval;
     }
 
     @Override

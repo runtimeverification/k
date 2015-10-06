@@ -87,7 +87,7 @@ public class Coverage {
     }
 
     private static String getSourceLocation(Rule rule) {
-        String s = null; // Return null, if location information is not available.
+        String s; // Return null, if location information is not available.
         Source source = rule.getSource();
         s = source.toString() + ":" + rule.getLocation().toString();
         return s;

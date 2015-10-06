@@ -22,8 +22,8 @@ import java.util.TreeSet;
 
 public class PriorityStrategy implements Strategy {
     public PriorityStrategy() {
-        priorityMap = new java.util.HashMap<Integer, HashSet<Rule>>();
-        priorities = new java.util.TreeSet<Integer>();
+        priorityMap = new java.util.HashMap<>();
+        priorities = new java.util.TreeSet<>();
         priorityIterator = priorities.descendingIterator();
     }
 
@@ -40,7 +40,7 @@ public class PriorityStrategy implements Strategy {
                 p = Integer.parseInt(r.getAttribute("priority"));
             }
             if (!priorityMap.containsKey(p)) {
-                priorityMap.put(p, new HashSet<Rule>());
+                priorityMap.put(p, new HashSet<>());
             }
             priorityMap.get(p).add(r);
             priorities.add(p);
@@ -65,6 +65,6 @@ public class PriorityStrategy implements Strategy {
     }
 
     private Iterator<Integer> priorityIterator;
-    private HashMap<Integer, HashSet<Rule>> priorityMap;
-    private TreeSet<Integer> priorities;
+    private final HashMap<Integer, HashSet<Rule>> priorityMap;
+    private final TreeSet<Integer> priorities;
 }

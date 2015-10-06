@@ -38,7 +38,6 @@ import java.util.stream.Stream;
  */
 public class SymbolicRewriter {
 
-    private final Definition definition;
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
@@ -49,14 +48,13 @@ public class SymbolicRewriter {
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
     private KRunGraph executionGraph = null;
     private boolean transition;
-    private RuleIndex ruleIndex;
-    private KRunState.Counter counter;
+    private final RuleIndex ruleIndex;
+    private final KRunState.Counter counter;
     private SetMultimap<ConstrainedTerm, Rule> disabledRules = HashMultimap.create();
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
-        this.definition = definition;
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
         this.counter = counter;
@@ -79,7 +77,7 @@ public class SymbolicRewriter {
             /* get the first solution */
             computeRewriteStep(constrainedTerm, true);
             ConstrainedTerm result = getTransition(0);
-            KRunState finalState = null;
+            KRunState finalState;
             if (result != null) {
                 if (computeGraph) {
                     finalState = new JavaKRunState(result, context, counter, Optional.of(step));
@@ -549,7 +547,7 @@ public class SymbolicRewriter {
 //                    }
 
                     /* add helper rule */
-                    HashSet<Variable> ruleVariables = new HashSet<Variable>(initialTerm.variableSet());
+                    HashSet<Variable> ruleVariables = new HashSet<>(initialTerm.variableSet());
                     ruleVariables.addAll(targetTerm.variableSet());
 
                     /*

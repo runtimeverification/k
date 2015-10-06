@@ -205,14 +205,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
             if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
                 add(remainingList, otherRemainingList);
-                if (failed) {
-                    return;
-                }
             } else {
                 add(list, otherList);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -295,16 +289,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (remainingSet instanceof Variable || otherRemainingSet instanceof Variable || partialSimpl) {
                 // set equality resolved or partial simplification enabled
                 add(remainingSet, otherRemainingSet);
-                if (failed) {
-                    return;
-                }
             } else {
                 /* unable to dissolve the entire map equality; thus, we need to
                  * preserve the original set terms for pattern folding */
                 add(set, otherSet);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -352,9 +340,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         /* made no progress */
         add(map, otherMap);
-        if (failed) {
-            return;
-        }
     }
 
     private void unifyMap(BuiltinMap map, BuiltinMap otherMap) {
@@ -448,16 +433,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable || partialSimpl) {
                 // map equality resolved or partial simplification enabled
                 add(remainingMap, otherRemainingMap);
-                if (failed) {
-                    return;
-                }
             } else {
                 /* unable to dissolve the entire map equality; thus, we need to
                  * preserve the original map terms for pattern folding */
                 add(map, otherMap);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -665,34 +644,19 @@ public class SymbolicUnifier extends AbstractUnifier {
                 return;
             }
             add(kCollection.frame(), otherKCollection.fragment(length));
-            if (failed) {
-                return;
-            }
         } else if (otherKCollection.concreteSize() < kCollection.concreteSize()) {
             if (!otherKCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
                 return;
             }
             add(kCollection.fragment(length), otherKCollection.frame());
-            if (failed) {
-                return;
-            }
         } else {
             if (kCollection.hasFrame() && otherKCollection.hasFrame()) {
                 add(kCollection.frame(), otherKCollection.frame());
-                if (failed) {
-                    return;
-                }
             } else if (kCollection.hasFrame()) {
                 add(kCollection.frame(), otherKCollection.fragment(length));
-                if (failed) {
-                    return;
-                }
             } else if (otherKCollection.hasFrame()) {
                 add(kCollection.fragment(length), otherKCollection.frame());
-                if (failed) {
-                    return;
-                }
             }
         }
     }

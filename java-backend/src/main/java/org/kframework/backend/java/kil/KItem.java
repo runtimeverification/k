@@ -281,7 +281,7 @@ public class KItem extends Term implements KItemRepresentation {
             this.options = options;
         }
 
-        private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
+        private static final String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
 
         /**
          * Evaluates this {@code KItem} if it is a predicate or function; otherwise,

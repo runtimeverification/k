@@ -67,10 +67,9 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setLookups(List<BuiltinLookup> lookups2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 ImmutableList.copyOf(lookups2), concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, instructions);
-        return ruleData;
     }
 
     public Map<Variable, Integer> getConcreteDataStructureSize() {
@@ -78,10 +77,9 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setConcreteDataStructureSize(Map<Variable, Integer> concreteDataStructureSize2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, ImmutableMap.copyOf(concreteDataStructureSize2), compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, instructions);
-        return ruleData;
     }
 
     public boolean isCompiledForFastRewriting() {
@@ -89,10 +87,9 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setCompiledForFastRewriting(boolean compiledForFastRewriting2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting2, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, instructions);
-        return ruleData;
     }
 
     public Set<String> getCellsOfInterest() {
@@ -100,10 +97,9 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setCellsOfInterest(Set<String> cellsOfInterest2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, ImmutableSet.copyOf(cellsOfInterest2),
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, instructions);
-        return ruleData;
     }
 
     public Set<String> getReadCells() {
@@ -119,11 +115,10 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setLhsOfReadCell(Map<String, Term> lhsOfReadCell2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(lhsOfReadCell2)),
                 rhsOfWriteCell, cellsToCopy, instructions);
-        return ruleData;
     }
 
     public Map<String, Term> getRhsOfWriteCell() {
@@ -131,11 +126,10 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setRhsOfWriteCell(Map<String, Term> rhsOfWriteCell2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, (UnmodifiableMap<String, Term>) UnmodifiableMap.unmodifiableMap(Maps.newHashMap(rhsOfWriteCell2)),
                 cellsToCopy, instructions);
-        return ruleData;
     }
 
     public List<MatchingInstruction> getMatchingInstructions() {
@@ -143,10 +137,9 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setInstructions(List<MatchingInstruction> instructions2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, cellsToCopy, ImmutableList.copyOf(instructions2));
-        return ruleData;
     }
 
     public Set<String> getCellsToCopy() {
@@ -154,9 +147,8 @@ public class JavaBackendRuleData implements Serializable {
     }
 
     public JavaBackendRuleData setCellsToCopy(Set<String> cellsToCopy2) {
-        JavaBackendRuleData ruleData = new JavaBackendRuleData(
+        return new JavaBackendRuleData(
                 lookups, concreteDataStructureSize, compiledForFastRewriting, cellsOfInterest,
                 lhsOfReadCell, rhsOfWriteCell, ImmutableSet.copyOf(cellsToCopy2), instructions);
-        return ruleData;
     }
 }

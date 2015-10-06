@@ -61,7 +61,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final KRunOptions krunOptions;
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
-    private static int NEGATIVE_VALUE = -1;
+    private static final int NEGATIVE_VALUE = -1;
 
     @Inject
     public InitializeRewriter(

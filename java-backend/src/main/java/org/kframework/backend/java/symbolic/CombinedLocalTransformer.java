@@ -16,10 +16,10 @@ import java.util.List;
  */
 public class CombinedLocalTransformer extends LocalTransformer {
 
-    private List<LocalTransformer> transformers;
+    private final List<LocalTransformer> transformers;
 
     public CombinedLocalTransformer() {
-        transformers = new ArrayList<LocalTransformer>();
+        transformers = new ArrayList<>();
     }
 
     public CombinedLocalTransformer(LocalTransformer ... localTransformers) {

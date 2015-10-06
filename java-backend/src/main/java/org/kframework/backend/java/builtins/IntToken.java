@@ -22,7 +22,7 @@ public final class IntToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.INT;
 
     /* IntToken cache */
-    private static final MapCache<BigInteger, IntToken> cache = new MapCache<BigInteger, IntToken>();
+    private static final MapCache<BigInteger, IntToken> cache = new MapCache<>();
 
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;

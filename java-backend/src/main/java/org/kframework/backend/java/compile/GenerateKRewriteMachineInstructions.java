@@ -39,10 +39,10 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     private enum Status { CONFIGURATION, RULE }
 
     private Status status;
-    private List<MatchingInstruction> schedule = new ArrayList<>();
-    private Set<String> cellsToVisit = new HashSet<>();
-    private Deque<String> cellStack = new ArrayDeque<>();
-    private Map<String, Set<String>> containingCells = new HashMap<>();
+    private final List<MatchingInstruction> schedule = new ArrayList<>();
+    private final Set<String> cellsToVisit = new HashSet<>();
+    private final Deque<String> cellStack = new ArrayDeque<>();
+    private final Map<String, Set<String>> containingCells = new HashMap<>();
 
     public GenerateKRewriteMachineInstructions(Context context) {
         super("Generate K rewrite machine instructions", context);
@@ -139,7 +139,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             }
 
             assert !containingCells.containsKey(cellLabelName);
-            containingCells.put(cellLabelName, new HashSet<String>());
+            containingCells.put(cellLabelName, new HashSet<>());
             containingCells.get(cellLabelName).add(cellLabelName);
 
             cellStack.push(cellLabelName);

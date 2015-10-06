@@ -36,7 +36,7 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new RemoveBrackets(context));
         add(new AddEmptyLists(context, kem));
         add(new RemoveSyntacticCasts(context));
-        add(new CheckVisitorStep<Module>(new CheckVariables(context, kem), context));
+        add(new CheckVisitorStep<>(new CheckVariables(context, kem), context));
         //add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
 
         add(new AddKCell(context));

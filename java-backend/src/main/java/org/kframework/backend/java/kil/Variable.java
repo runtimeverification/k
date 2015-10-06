@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Variable extends Term implements Immutable, org.kframework.kore.KVariable {
 
     protected static final String VARIABLE_PREFIX = "_";
-    protected static AtomicInteger counter = new AtomicInteger(0);
-    private static MapCache<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new MapCache<>();
+    protected static final AtomicInteger counter = new AtomicInteger(0);
+    private static final MapCache<Pair<Integer, Sort>, Variable> deserializationAnonymousVariableMap = new MapCache<>();
 
     /**
      * Given a set of {@link Variable}s, returns a substitution that maps each

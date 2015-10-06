@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
@@ -11,7 +10,6 @@ import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
 
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * Created by dwightguth on 9/1/15.
