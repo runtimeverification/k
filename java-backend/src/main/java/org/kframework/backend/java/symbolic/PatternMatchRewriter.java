@@ -44,7 +44,6 @@ public class PatternMatchRewriter {
     private boolean transition;
 
     private final TransitionCompositeStrategy strategy;
-    private int step;
     private final List<Term> results = new ArrayList<>();
     private final RuleIndex ruleIndex;
 
@@ -88,8 +87,9 @@ public class PatternMatchRewriter {
          * transformer with the copy-on-share version and supply it with
          * the correct reusable variables obtained from the pattern match
          * phase */
+        int step;
         for (step = 0; step != bound; ++step) {
-            computeRewriteStep(subject, 1, termContext);
+            computeRewriteStep(subject, step, 1, termContext);
             Term result = getTransition(0);
             if (result != null) {
                 if (ENABLE_DEBUG_MODE) {
@@ -187,7 +187,7 @@ public class PatternMatchRewriter {
         return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
     }
 
-    private void computeRewriteStep(Term subject, int successorBound, TermContext termContext) {
+    private void computeRewriteStep(Term subject, int step, int successorBound, TermContext termContext) {
         results.clear();
         assert successorBound == 1;
 
@@ -336,7 +336,7 @@ public class PatternMatchRewriter {
             addSearchResult(searchResults, initialTerm, pattern, termContext, bound);
             stopwatch.stop();
             if (options.experimental.statistics) {
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             }
             return searchResults;
         }
@@ -354,12 +354,13 @@ public class PatternMatchRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initialTerm, pattern, termContext, bound)) {
                 stopwatch.stop();
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }
 
-        label:
+        int step;
+    label:
         for (step = 0; !queue.isEmpty(); ++step) {
             for (Map.Entry<Term, Integer> entry : queue.entrySet()) {
                 Term term = entry.getKey();

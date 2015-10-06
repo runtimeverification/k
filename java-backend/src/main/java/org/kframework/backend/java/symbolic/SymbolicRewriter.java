@@ -41,7 +41,6 @@ public class SymbolicRewriter {
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private int step;
     private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
@@ -73,9 +72,10 @@ public class SymbolicRewriter {
             initialState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
             executionGraph.addVertex(initialState);
         }
+        int step;
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
-            computeRewriteStep(constrainedTerm, true);
+            computeRewriteStep(constrainedTerm, step, true);
             ConstrainedTerm result = getTransition(0);
             KRunState finalState;
             if (result != null) {
@@ -127,7 +127,7 @@ public class SymbolicRewriter {
         return n < substitutions.size() ? substitutions.get(n) : null;
     }
 
-    private void computeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
+    private void computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
         subject.termContext().setTopTerm(subject.term());
         results.clear();
         appliedRules.clear();
@@ -396,7 +396,7 @@ public class SymbolicRewriter {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
             if(context.global().krunOptions.experimental.statistics)
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             return searchResults;
         }
 
@@ -414,12 +414,13 @@ public class SymbolicRewriter {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
                 if(context.global().krunOptions.experimental.statistics)
-                    System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                    System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }
 
-        label:
+        int step;
+    label:
         for (step = 0; !queue.isEmpty(); ++step) {
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
@@ -429,7 +430,7 @@ public class SymbolicRewriter {
                     startState = new JavaKRunState(term.term(), kilContext, counter);
                 }
 
-                computeRewriteStep(term, false);
+                computeRewriteStep(term, step, false);
 //                    System.out.println(step);
 //                    System.err.println(term);
 //                    for (ConstrainedTerm r : results) {
@@ -501,6 +502,7 @@ public class SymbolicRewriter {
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
+        int step = 0;
         while (!queue.isEmpty()) {
             step++;
 //            System.err.println("step #" + step);
@@ -537,7 +539,7 @@ public class SymbolicRewriter {
                     }
                 }
 
-                computeRewriteStep(term, false);
+                computeRewriteStep(term, step, false);
                 if (results.isEmpty()) {
                     /* final term */
                     proofResults.add(term);
