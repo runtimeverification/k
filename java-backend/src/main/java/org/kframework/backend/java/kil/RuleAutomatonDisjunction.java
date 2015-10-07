@@ -22,7 +22,6 @@ public class RuleAutomatonDisjunction extends Term {
 
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
-    private final Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions;
     private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
 
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
@@ -41,19 +40,9 @@ public class RuleAutomatonDisjunction extends Term {
                     .collect(Collectors.toSet()));
         });
 
-        this.variableDisjunctions = context.definition().allSorts().stream().collect(Collectors.toMap(
-                s -> s,
-                s -> (Set<Pair<Variable, BitSet>>) (Object) children.stream()
-                        .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
-                        .collect(Collectors.toSet())));
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
-    }
-
-
-    public Map<Sort, Set<Pair<Variable, BitSet>>> variableDisjunctions() {
-        return variableDisjunctions;
     }
 
     public Map<Token, Pair<Token, BitSet>> tokenDisjunctions() {
@@ -61,17 +50,12 @@ public class RuleAutomatonDisjunction extends Term {
     }
 
     public List<Pair<Term, BitSet>> disjunctions() {
-        List<Pair<Term, BitSet>> disjunctions = new ArrayList<>();
+        Set<Pair<Term, BitSet>> disjunctions = new HashSet<>();
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) Arrays.asList(kItemDisjunctionsArray));
-//        for (List<Pair<Variable, BitSet>> pairs : variableDisjunctions) {
-//            if (pairs != null) {
-//                disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) pairs);
-//            }
-//        }
-        ((Map<Sort, Set<Pair<Term, BitSet>>>) (Object) variableDisjunctions).values().forEach(disjunctions::addAll);
+        ((List<List<Pair<Term, BitSet>>>) (Object) Arrays.asList(variableDisjunctionsArray)).stream().filter(l -> l != null).forEach(disjunctions::addAll);
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) tokenDisjunctions.values());
         disjunctions.removeIf(e -> e == null);
-        return disjunctions;
+        return new ArrayList<>(disjunctions);
     }
 
     @Override
@@ -102,7 +86,7 @@ public class RuleAutomatonDisjunction extends Term {
         RuleAutomatonDisjunction that = (RuleAutomatonDisjunction) o;
 
         return Arrays.equals(kItemDisjunctionsArray, that.kItemDisjunctionsArray)
-                && variableDisjunctions.equals(that.variableDisjunctions)
+                && Arrays.equals(variableDisjunctionsArray, that.variableDisjunctionsArray)
                 && tokenDisjunctions.equals(that.tokenDisjunctions);
 
     }
@@ -111,7 +95,7 @@ public class RuleAutomatonDisjunction extends Term {
     protected int computeHash() {
         int result = 1;
         result = 31 * result + Arrays.hashCode(kItemDisjunctionsArray);
-        result = 31 * result + variableDisjunctions.hashCode();
+        result = 31 * result + Arrays.hashCode(variableDisjunctionsArray);
         result = 31 * result + tokenDisjunctions.hashCode();
         return result;
     }
