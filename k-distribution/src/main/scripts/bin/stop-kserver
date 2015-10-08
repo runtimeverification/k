@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
-source "$(dirname "$0")/../lib/setenv"
-ng --nailgun-server local:$HOME/.kserver/socket org.kframework.kserver.KServerFrontEnd
+if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
+  "$(dirname "$0")/stop-kserver.bat" "$@"
+else
+  source "$(dirname "$0")/../lib/setenv"
+  ng --nailgun-server local:$HOME/.kserver/socket org.kframework.kserver.KServerFrontEnd
+fi
