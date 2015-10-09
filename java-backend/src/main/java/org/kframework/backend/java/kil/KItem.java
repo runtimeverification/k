@@ -452,7 +452,7 @@ public class KItem extends Term implements KItemRepresentation {
                             /* rename fresh variables of the rule */
                             for (Variable freshVar : rule.variableSet()) {
                                 if (!solution.containsKey(freshVar)) {
-                                    solution.plus(freshVar, freshVar.getFreshCopy());
+                                    solution = solution.plus(freshVar, freshVar.getFreshCopy());
                                 }
                             }
                             Term rightHandSide = KAbstractRewriteMachine.construct(
