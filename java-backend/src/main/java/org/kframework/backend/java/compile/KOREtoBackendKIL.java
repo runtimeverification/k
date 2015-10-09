@@ -20,13 +20,11 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
-import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
+import org.kframework.utils.BitSet;
 
 import static org.kframework.Collections.*;
-
-import org.kframework.utils.BitSet;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,8 +32,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.kframework.kore.KORE.*;
 
 import com.google.common.collect.Lists;
 
@@ -151,7 +147,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     private BitSet getRuleSet(KApply k) {
-        BitSet theRuleSetIndices = new BitSet();
+        BitSet theRuleSetIndices = BitSet.apply(definition.reverseRuleTable.size());
         Set<KApply> rulePs = getOrContents(k);
         rulePs.stream().map(this::getRuleIndex).forEach(theRuleSetIndices::set);
         return theRuleSetIndices;
