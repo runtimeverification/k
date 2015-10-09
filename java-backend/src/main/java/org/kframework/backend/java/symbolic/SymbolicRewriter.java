@@ -261,15 +261,16 @@ public class SymbolicRewriter {
 
         /* apply the constraints substitution on the rule RHS */
         constraint.termContext().setTopConstraint(constraint);
-        constraint = constraint.orientSubstitution(rule.matchingVariables());
+        Set<Variable> substitutedVars = Sets.union(rule.freshConstants(), rule.matchingVariables());
+        constraint = constraint.orientSubstitution(substitutedVars);
         if (rule.isCompiledForFastRewriting()) {
             term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, constraint.termContext());
         } else {
             term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), constraint.termContext());
         }
 
-        /* eliminate bindings of rule variables */
-        constraint = constraint.removeBindings(Sets.union(rule.freshConstants(), rule.matchingVariables()));
+        /* eliminate bindings of the substituted variables */
+        constraint = constraint.removeBindings(substitutedVars);
 
         /* get fresh substitutions of rule variables */
         BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
