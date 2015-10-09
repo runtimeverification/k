@@ -232,7 +232,7 @@ public abstract class AbstractUnifier implements Unifier {
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
-                    Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
+                    Map<Variable,Variable> freshSubstitution = Variable.rename(variables);
                     Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
