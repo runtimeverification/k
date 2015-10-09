@@ -454,7 +454,8 @@ public class KItem extends Term implements KItemRepresentation {
                                     solution,
                                     copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
                                     context,
-                                    false);
+                                    false)
+                                    .substituteWithBinders(Variable.rename(rule.variableSet()), context);
 
                             if (rule.containsAttribute("owise")) {
                                 if (owiseResult != null) {
