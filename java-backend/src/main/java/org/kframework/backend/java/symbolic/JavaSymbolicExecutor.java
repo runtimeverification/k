@@ -15,18 +15,17 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.rewriter.SearchType;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.tools.Executor;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,18 +135,6 @@ public class JavaSymbolicExecutor implements Executor {
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
         return conventionalRewriteRun(constrainedTerm, bound, computeGraph);
     }
-
-    /**
-     * Rewrite Engine Run with existing krun State.
-     * @param initialState The existing State
-     * @param bound The number of steps
-     * @param computeGraph Option to compute Execution Graph.
-     * @return The execution relation.
-     */
-    private RewriteRelation javaRewriteEngineRun(JavaKRunState initialState, int bound, boolean computeGraph) {
-        return conventionalRewriteRun(initialState.getConstrainedTerm(), bound, computeGraph);
-    }
-
 
     @Override
     public SearchResults search(
