@@ -258,43 +258,26 @@ public class SymbolicRewriter {
         constraint = constraint.addAll(rule.ensures()).simplify();
 
         Term term;
+
+        /* apply the constraints substitution on the rule RHS */
+        constraint.termContext().setTopConstraint(constraint);
+        constraint = constraint.orientSubstitution(rule.matchingVariables());
         if (rule.isCompiledForFastRewriting()) {
-            constraint = constraint.orientSubstitution(rule.matchingVariables());
-
-            /* apply the constraints substitution on the rule RHS */
-            constraint.termContext().setTopConstraint(constraint);
             term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, constraint.termContext());
-
-            /* eliminate bindings of rule variables */
-            constraint = constraint.removeBindings(Sets.union(rule.freshConstants(), rule.matchingVariables()));
-
-            /* get fresh substitutions of rule variables */
-            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
-
-            /* rename rule variables in the rule RHS */
-            term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
-            /* rename rule variables in the constraints */
-            constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
         } else {
-            /* get fresh substitutions of rule variables */
-            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
-
-            /* rename rule variables in the rule RHS */
-            term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
-
-            /* rename rule variables in the constraints */
-            constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
-            constraint = constraint.orientSubstitution(rule.boundVariables().stream()
-                    .map(freshSubstitution::get)
-                    .collect(Collectors.toSet()));
-
-            /* apply the constraints substitution on the rule RHS */
-            constraint.termContext().setTopConstraint(constraint);
-            term = term.substituteAndEvaluate(constraint.substitution(), constraint.termContext());
-
-            /* eliminate bindings of rule variables */
-            constraint = constraint.removeBindings(freshSubstitution.values());
+            term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), constraint.termContext());
         }
+
+        /* eliminate bindings of rule variables */
+        constraint = constraint.removeBindings(Sets.union(rule.freshConstants(), rule.matchingVariables()));
+
+        /* get fresh substitutions of rule variables */
+        BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+
+        /* rename rule variables in the rule RHS */
+        term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
+        /* rename rule variables in the constraints */
+        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(freshSubstitution, constraint.termContext())).simplify();
 
         ConstrainedTerm result = new ConstrainedTerm(term, constraint);
         if (expandPattern) {
