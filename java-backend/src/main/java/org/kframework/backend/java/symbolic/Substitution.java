@@ -151,22 +151,22 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V>, 
         return entries.get(key);
     }
 
-    @Override
+    @Deprecated
     public V put(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    @Deprecated
     public V remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    @Deprecated
     public void putAll(Map<? extends K, ? extends V> map) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    @Deprecated
     public void clear() {
         throw new UnsupportedOperationException();
     }

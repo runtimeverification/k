@@ -433,7 +433,7 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
 
-                            Map<Variable, Term> solution;
+                            Substitution<Variable, Term> solution;
                             List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
                             if (matches.isEmpty()) {
                                 continue;
@@ -452,7 +452,7 @@ public class KItem extends Term implements KItemRepresentation {
                             /* rename fresh variables of the rule */
                             for (Variable freshVar : rule.variableSet()) {
                                 if (!solution.containsKey(freshVar)) {
-                                    solution.put(freshVar, freshVar.getFreshCopy());
+                                    solution.plus(freshVar, freshVar.getFreshCopy());
                                 }
                             }
                             Term rightHandSide = KAbstractRewriteMachine.construct(
