@@ -269,7 +269,7 @@ public class SymbolicRewriter {
             constraint = constraint.removeBindings(Sets.union(rule.freshConstants(), rule.matchingVariables()));
 
             /* get fresh substitutions of rule variables */
-            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(Sets.union(rule.variableSet(), rule.matchingVariables()));
+            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
             /* rename rule variables in the rule RHS */
             term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
