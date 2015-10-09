@@ -205,6 +205,10 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V>, 
         return entries.hashCode();
     }
 
+    public String toString() {
+        return entries.toString();
+    }
+
     private void writeObject(final ObjectOutputStream out) throws IOException {
         out.writeObject(new HashMap<>(entries));
     }
