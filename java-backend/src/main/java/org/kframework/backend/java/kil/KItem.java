@@ -449,13 +449,18 @@ public class KItem extends Term implements KItemRepresentation {
                                 solution = matches.get(0);
                             }
 
+                            /* rename fresh variables of the rule */
+                            for (Variable freshVar : rule.variableSet()) {
+                                if (!solution.containsKey(freshVar)) {
+                                    solution.put(freshVar, freshVar.getFreshCopy());
+                                }
+                            }
                             Term rightHandSide = KAbstractRewriteMachine.construct(
                                     rule.rhsInstructions(),
                                     solution,
                                     copyOnShareSubstAndEval ? rule.reusableVariables().elementSet() : null,
                                     context,
-                                    false)
-                                    .substituteWithBinders(Variable.rename(rule.variableSet()), context);
+                                    false);
 
                             if (rule.containsAttribute("owise")) {
                                 if (owiseResult != null) {
