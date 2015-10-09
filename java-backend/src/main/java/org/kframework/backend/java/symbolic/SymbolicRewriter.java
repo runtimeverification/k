@@ -413,12 +413,6 @@ public class SymbolicRewriter {
                 }
 
                 computeRewriteStep(term, step, false);
-//                    System.out.println(step);
-//                    System.err.println(term);
-//                    for (ConstrainedTerm r : results) {
-//                        System.out.println(r);
-//                    }
-
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
                         break label;
