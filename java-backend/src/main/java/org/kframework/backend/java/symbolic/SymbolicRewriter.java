@@ -38,7 +38,6 @@ public class SymbolicRewriter {
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
-    private final List<Rule> appliedRules = Lists.newArrayList();
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
@@ -88,7 +87,6 @@ public class SymbolicRewriter {
     private void computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
         subject.termContext().setTopTerm(subject.term());
         results.clear();
-        appliedRules.clear();
 
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
 
@@ -161,7 +159,6 @@ public class SymbolicRewriter {
             return subject.unify(buildPattern(rule, subject.termContext()), rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables()).stream()
                     .peek(s -> {
                         RuleAuditing.succeed(rule);
-                        appliedRules.add(rule);
                         Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
                         Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
                     })
