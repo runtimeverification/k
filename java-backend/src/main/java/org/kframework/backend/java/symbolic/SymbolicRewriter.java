@@ -118,10 +118,10 @@ public class SymbolicRewriter {
                 // If we've found matching results from one equivalence class then
                 // we are done, as we can't match rules from two equivalence classes
                 // in the same step.
-                if (internalResults.size() > 0) {
+                if (!internalResults.isEmpty()) {
                     internalResults.stream().map(Pair::getLeft).forEach(results::add);
                     SetMultimap<ConstrainedTerm, Rule> resultDisabledRules = HashMultimap.create();
-                    internalResults.stream().forEach(p -> {
+                    internalResults.forEach(p -> {
                         if (p.getRight().isCompiledForFastRewriting()) {
                             failedRules.stream()
                                     .filter(r -> r.readCells() != null && p.getRight().writeCells() != null)
@@ -177,7 +177,7 @@ public class SymbolicRewriter {
 
     /**
      * Builds the pattern term used in unification by composing the left-hand
-     * side of a specified rule and its preconditions.
+     * side of the rule and its preconditions.
      */
     private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
