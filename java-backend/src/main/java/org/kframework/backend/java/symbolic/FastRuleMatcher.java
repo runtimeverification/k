@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -51,7 +52,7 @@ public class FastRuleMatcher {
 
         this.ruleCount = ruleCount;
         substitutions = new Substitution[this.ruleCount];
-        for (int i = 0; i < this.ruleCount; ++i ) {
+        for (int i = 0; i < this.ruleCount; ++i) {
             //substitutions[i] = new ArraySubstitution(variableCount);
             substitutions[i] = new HashMapSubstitution();
         }
@@ -90,8 +91,10 @@ public class FastRuleMatcher {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
             counter1++;
-            BitSet returnSet = BitSet.apply(ruleCount);
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
+            //BitSet returnSet = BitSet.apply(ruleCount);
+            BitSet returnSet = automatonDisjunction.ruleMask;
+            returnSet.clear();
 
             List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
             for (Pair<Variable, BitSet> p : pairs) {
@@ -132,12 +135,18 @@ public class FastRuleMatcher {
             InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
             BitSet theNewMask = match(subject, (Term) rw.klist().items().get(0), ruleMask, path);
 
-            for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
-                if (innerRHSRewrite.theRHS[i] != null && theNewMask.get(i)) {
+            for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
+                if (innerRHSRewrite.theRHS[i] != null) {
                     counter6++;
                     rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
                 }
             }
+//            for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
+//                if (innerRHSRewrite.theRHS[i] != null && theNewMask.get(i)) {
+//                    counter6++;
+//                    rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
+//                }
+//            }
             return theNewMask;
         }
 
@@ -165,9 +174,7 @@ public class FastRuleMatcher {
 
             for (int i = 0; i < size; ++i) {
                 if (kitemPattern.childrenDontCareRuleMask != null && kitemPattern.childrenDontCareRuleMask[i] != null) {
-                    BitSet clonedRuleMask = ruleMask.clone();
-                    clonedRuleMask.and(kitemPattern.childrenDontCareRuleMask[i]);
-                    if (clonedRuleMask.equals(ruleMask)) {
+                    if (ruleMask.subset(kitemPattern.childrenDontCareRuleMask[i])) {
                         continue;
                     }
                 }
@@ -198,7 +205,7 @@ public class FastRuleMatcher {
     }
 
     private BitSet add(Variable variable, Term term, BitSet ruleMask) {
-        if (variable.name().equals("THE_VARIABLE")) {
+        if (variable.name().equals(KOREtoBackendKIL.THE_VARIABLE)) {
             return ruleMask;
         }
 
@@ -206,14 +213,13 @@ public class FastRuleMatcher {
             return ruleMask;
         }
 
-        BitSet nonConflictualBitset = BitSet.apply(this.ruleCount);
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
-            if (substitutions[i].plus(variable, term) != null) {
-                nonConflictualBitset.set(i);
+            if (substitutions[i].plus(variable, term) == null) {
+                ruleMask.clear(i);
             }
         }
 
-        return nonConflictualBitset;
+        return ruleMask;
     }
 
 

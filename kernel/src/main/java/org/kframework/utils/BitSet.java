@@ -13,6 +13,8 @@ public interface BitSet<T extends BitSet<?>> extends Cloneable {
     static BitSet apply(int length) {
         if (length <= Long.SIZE) {
             return new OneWordBitSet();
+        } else if (length <= 4 * Long.SIZE) {
+            return new FourWordBitSet();
         } else {
             return new OneIntegerGenericBitSet();
         }
@@ -31,7 +33,7 @@ public interface BitSet<T extends BitSet<?>> extends Cloneable {
             public int nextInt() {
                 if (next != -1) {
                     int ret = next;
-                    next = nextSetBit(next+1);
+                    next = nextSetBit(next + 1);
                     return ret;
                 } else {
                     throw new NoSuchElementException();
@@ -48,19 +50,28 @@ public interface BitSet<T extends BitSet<?>> extends Cloneable {
                 false);
     }
 
-    void or(T that);
-    void and(T that);
-    boolean intersects(T other);
+    default void makeOnes(int size) {
+        for (int i = 0; i < size; i++) {
+            set(i);
+        }
+    }
+
+    void or(T bitSet);
+    void and(T bitSet);
+    boolean intersects(T bitSet);
+    boolean subset(T bitSet);
 
     boolean get(int i);
     void set(int i);
+    void clear(int i);
     int nextSetBit(int i);
 
     boolean isEmpty();
-    int length();
     int cardinality();
+    int length();
+    int size();
 
-    void makeOnes(int length);
+    void clear();
 
     T clone();
 

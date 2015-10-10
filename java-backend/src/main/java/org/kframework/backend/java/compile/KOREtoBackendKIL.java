@@ -41,6 +41,8 @@ import com.google.common.collect.Lists;
  */
 public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<org.kframework.kore.K> {
 
+    public static final String THE_VARIABLE = "THE_VARIABLE";
+
     private final Module module;
     private final Definition definition;
     private final TermContext context;
@@ -126,7 +128,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             for (int i = 0; i < convertedKList.size(); ++i) {
                 if (convertedKList.get(i) instanceof RuleAutomatonDisjunction) {
                     BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).variableDisjunctionsArray[Sort.KSEQUENCE.ordinal()].stream()
-                            .filter(p -> p.getLeft().name().equals("THE_VARIABLE")).findAny().map(Pair::getRight).orElseGet(() -> null);
+                            .filter(p -> p.getLeft().name().equals(THE_VARIABLE)).findAny().map(Pair::getRight).orElseGet(() -> null);
                     childrenDontCareRuleMask[i] = the_variable;
                 } else {
                     childrenDontCareRuleMask[i] = null;
