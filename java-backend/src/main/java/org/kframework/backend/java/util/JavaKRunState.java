@@ -20,23 +20,16 @@ public class JavaKRunState extends KRunState {
 
     private Context context;
 
-    public JavaKRunState(ConstrainedTerm constrainedTerm, Context context, Counter counter, Optional<Integer> stepsTaken) {
+    public JavaKRunState(ConstrainedTerm constrainedTerm, Counter counter, Optional<Integer> stepsTaken) {
         super(null, counter, stepsTaken);
-        this.context = context;
         this.constrainedTerm = constrainedTerm;
+        this.context = constrainedTerm.termContext().definition().context();
         this.javaTerm = constrainedTerm.term();
-    }
-
-    public JavaKRunState(org.kframework.backend.java.kil.Term javaTerm, Context context, Counter counter) {
-        super(null, counter, Optional.empty());
-        this.context = context;
-        this.javaTerm = javaTerm;
     }
 
     public JavaKRunState(Term term, Counter counter) {
         super(term, counter, Optional.empty());
     }
-
 
     public org.kframework.backend.java.kil.Term getJavaKilTerm() {
         return javaTerm;

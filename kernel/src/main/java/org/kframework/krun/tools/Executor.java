@@ -48,7 +48,7 @@ public interface Executor {
     @exception KRunExecutionException Thrown if the backend fails to successfully execute the
     term
     */
-    public abstract RewriteRelation run(Term cfg, boolean computeGraph) throws KRunExecutionException;
+    RewriteRelation run(Term cfg, boolean computeGraph) throws KRunExecutionException;
 
     /**
     Perform a breadth-first search of the transition system starting at a particular term.
@@ -67,7 +67,7 @@ public interface Executor {
     @return An object containing both metadata about krun's execution, and information about
     the results of the search
     */
-    public abstract SearchResults search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo, boolean computeGraph) throws KRunExecutionException;
+    SearchResults search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo, boolean computeGraph) throws KRunExecutionException;
 
     /**
     Execute a term in normal-execution mode for a specified number of steps
@@ -84,9 +84,9 @@ public interface Executor {
     the resulting term after executing the specified number of steps (or fewer if no further
     rewrites are possible), and the execution graph if computeGraph was true.
     */
-    public abstract RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
+    RewriteRelation step(Term cfg, int steps, boolean computeGraph) throws KRunExecutionException;
 
-    public static class Tool implements Transformation<Void, KRunResult> {
+    class Tool implements Transformation<Void, KRunResult> {
 
         public static final String EXIT_CODE = "exitCode";
         private final KRunOptions options;
@@ -155,7 +155,6 @@ public interface Executor {
                         options.searchType(),
                         searchPattern.patternRule,
                         initialConfiguration, searchPattern.steps, false);
-
             sw.printIntermediate("Search total");
             return result;
         }
@@ -175,7 +174,6 @@ public interface Executor {
             }
             if (pattern != null && !options.search()) {
                 SearchPattern searchPattern = new SearchPattern(pattern);
-                Term res = result.getRawResult();
                 return executor.search(0, 0, SearchType.FINAL, searchPattern.patternRule, result.toBackendTerm(), searchPattern.steps, false);
             }
             return result;
