@@ -100,7 +100,7 @@ public class JavaSymbolicExecutor implements Executor {
             throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
         }
         ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
-        JavaKRunState finalState = new JavaKRunState(rewriteResult, context, counter, Optional.empty());
+        JavaKRunState finalState = new JavaKRunState(rewriteResult, counter, Optional.empty());
         return new RewriteRelation(finalState, null);
     }
 
@@ -108,7 +108,6 @@ public class JavaSymbolicExecutor implements Executor {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
                 constrainedTerm,
-                context,
                 bound
         );
 

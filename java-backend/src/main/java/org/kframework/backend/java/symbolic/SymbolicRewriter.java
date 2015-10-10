@@ -17,7 +17,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.errorsystem.KEMException;
@@ -55,7 +54,7 @@ public class SymbolicRewriter {
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
-    public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound) {
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
         KRunState finalState = null;
         int step = 1;
@@ -66,10 +65,10 @@ public class SymbolicRewriter {
             if (result != null) {
                 constrainedTerm = result;
                 if (step == bound) {
-                    finalState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
+                    finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
                 }
             } else {
-                finalState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step - 1));
+                finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step - 1));
                 break;
             }
             step++;
