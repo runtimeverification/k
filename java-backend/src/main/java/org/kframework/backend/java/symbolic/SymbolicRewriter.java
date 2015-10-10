@@ -37,7 +37,6 @@ public class SymbolicRewriter {
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final List<ConstrainedTerm> results = Lists.newArrayList();
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
@@ -58,10 +57,9 @@ public class SymbolicRewriter {
         int step = 1;
         while (step <= bound || bound < 0) {
             /* get the first solution */
-            computeRewriteStep(constrainedTerm, step, true);
-            ConstrainedTerm result = getTransition(0);
-            if (result != null) {
-                constrainedTerm = result;
+            List<ConstrainedTerm> results = computeRewriteStep(constrainedTerm, step, true);
+            if (!results.isEmpty()) {
+                constrainedTerm = results.get(0);
                 if (step == bound) {
                     finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
                 }
@@ -80,13 +78,9 @@ public class SymbolicRewriter {
         return finalState;
     }
 
-    private ConstrainedTerm getTransition(int n) {
-        return n < results.size() ? results.get(n) : null;
-    }
-
-    private void computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
+    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
+        List<ConstrainedTerm> results = new ArrayList<>();
         subject.termContext().setTopTerm(subject.term());
-        results.clear();
 
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
 
@@ -140,12 +134,13 @@ public class SymbolicRewriter {
                         }
                     });
                     disabledRules = resultDisabledRules;
-                    return;
+                    return results;
                 }
             }
         } finally {
             RuleAuditing.clearAuditingRule();
         }
+        return results;
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
@@ -345,15 +340,14 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
                         break label;
                     }
                 }
 
-                for (int resultIndex = 0; resultIndex < results.size(); resultIndex++) {
-                    ConstrainedTerm result = results.get(resultIndex);
+                for (ConstrainedTerm result : results) {
                     if (!transition) {
                         nextQueue.put(result, currentDepth);
                         break;
@@ -440,7 +434,7 @@ public class SymbolicRewriter {
                     }
                 }
 
-                computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
                 if (results.isEmpty()) {
                     /* final term */
                     proofResults.add(term);
@@ -465,12 +459,12 @@ public class SymbolicRewriter {
                      */
                 }
 
-                for (int i = 0; getTransition(i) != null; ++i) {
+                for (ConstrainedTerm cterm : results) {
                     ConstrainedTerm result = new ConstrainedTerm(
-                            getTransition(i).term(),
-                            getTransition(i).constraint().removeBindings(
+                            cterm.term(),
+                            cterm.constraint().removeBindings(
                                     Sets.difference(
-                                            getTransition(i).constraint().substitution().keySet(),
+                                            cterm.constraint().substitution().keySet(),
                                             initialTerm.variableSet())));
                     if (visited.add(result)) {
                         nextQueue.add(result);
