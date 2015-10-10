@@ -410,8 +410,8 @@ public class SymbolicRewriter {
                 List<Term> rightKContents = targetTerm.term().getCellContentsByName(CellLabel.K);
                 // TODO(YilongL): the `get(0)` seems hacky
                 if (leftKContents.size() == 1 && rightKContents.size() == 1) {
-                    Pair<Term, Variable> leftKPattern = splitKContent(leftKContents.get(0));
-                    Pair<Term, Variable> rightKPattern = splitKContent(rightKContents.get(0));
+                    Pair<Term, Variable> leftKPattern = KSequence.splitContentAndFrame(leftKContents.get(0));
+                    Pair<Term, Variable> rightKPattern = KSequence.splitContentAndFrame(rightKContents.get(0));
                     if (leftKPattern.getRight() != null && rightKPattern.getRight() != null
                             && leftKPattern.getRight().equals(rightKPattern.getRight())) {
                         BoolToken matchable = MetaK.matchable(
@@ -482,16 +482,6 @@ public class SymbolicRewriter {
         }
 
         return proofResults;
-    }
-
-    private static Pair<Term, Variable> splitKContent(Term kContent) {
-        Variable frame = KSequence.getFrame(kContent);
-        if (frame != null) {
-            KSequence.Builder builder = KSequence.builder();
-            KSequence.getElements(kContent).stream().forEach(builder::concatenate);
-            kContent = builder.build();
-        }
-        return Pair.of(kContent, frame);
     }
 
 }
