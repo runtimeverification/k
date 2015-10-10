@@ -38,7 +38,6 @@ public class SymbolicRewriter {
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
@@ -51,7 +50,7 @@ public class SymbolicRewriter {
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
         this.javaOptions = javaOptions;
-        ruleIndex = definition.getIndex();
+        this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
@@ -84,18 +83,6 @@ public class SymbolicRewriter {
         return finalState;
     }
 
-    /**
-     * Gets the rules that could be applied to a given term according to the
-     * rule indexing mechanism.
-     *
-     * @param term
-     *            the given term
-     * @return a list of rules that could be applied
-     */
-    private List<Rule> getRules(Term term) {
-        return ruleIndex.getRules(term);
-    }
-
     private ConstrainedTerm getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
@@ -111,7 +98,7 @@ public class SymbolicRewriter {
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
-        strategy.reset(getRules(subject.term()));
+        strategy.reset(ruleIndex.getRules(subject.term()));
 
         try {
             while (strategy.hasNext()) {
@@ -204,7 +191,7 @@ public class SymbolicRewriter {
      * Builds the pattern term used in unification by composing the left-hand
      * side of a specified rule and its preconditions.
      */
-    public static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
+    private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
                 rule.leftHandSide(),
                 ConjunctiveFormula.of(context).add(rule.lookups()).addAll(rule.requires()));
@@ -246,9 +233,8 @@ public class SymbolicRewriter {
         /* get fresh substitutions of rule variables */
         Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
-        /* rename rule variables in the rule RHS */
+        /* rename rule variables in both the term and the constraint */
         term = term.substituteWithBinders(renameSubst, constraint.termContext());
-        /* rename rule variables in the constraints */
         constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, constraint.termContext())).simplify();
 
         ConstrainedTerm result = new ConstrainedTerm(term, constraint);
@@ -271,16 +257,11 @@ public class SymbolicRewriter {
      */
     private ConstrainedTerm applyRule(ConstrainedTerm constrainedTerm, List<Rule> rules) {
         for (Rule rule : rules) {
-            ruleStopwatch.reset();
-            ruleStopwatch.start();
-
             ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(leftHandSideTerm, true);
-            if (constraint == null) {
-                continue;
+            if (constraint != null) {
+                return buildResult(rule, constraint, null, true);
             }
-
-            return buildResult(rule, constraint, null, true);
         }
 
         return null;
@@ -291,7 +272,7 @@ public class SymbolicRewriter {
      * the pattern to the terms they unify with. Adds as many search results
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
-    private boolean addSearchResult(
+    private static boolean addSearchResult(
             List<Substitution<Variable, Term>> searchResults,
             ConstrainedTerm initialTerm,
             Rule pattern,
@@ -399,7 +380,6 @@ public class SymbolicRewriter {
                     }
                 }
             }
-//                System.out.println("+++++++++++++++++++++++");
 
             /* swap the queues */
             Map<ConstrainedTerm, Integer> temp;
@@ -434,7 +414,6 @@ public class SymbolicRewriter {
         int step = 0;
         while (!queue.isEmpty()) {
             step++;
-//            System.err.println("step #" + step);
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
                     continue;
@@ -513,13 +492,6 @@ public class SymbolicRewriter {
             nextQueue = temp;
             nextQueue.clear();
             guarded = true;
-
-            /*
-            for (ConstrainedTerm result : queue) {
-                System.err.println(result);
-            }
-            System.err.println("============================================================");
-             */
         }
 
         return proofResults;
