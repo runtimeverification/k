@@ -21,8 +21,8 @@ public final class IntToken extends Token implements MaximalSharing {
 
     public static final Sort SORT = Sort.INT;
 
-    /* IntToken cache */
-    private static final MapCache<BigInteger, IntToken> cache = new MapCache<BigInteger, IntToken>();
+//    /* IntToken cache */
+//    private static final MapCache<BigInteger, IntToken> cache = new MapCache<BigInteger, IntToken>();
 
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
@@ -38,7 +38,8 @@ public final class IntToken extends Token implements MaximalSharing {
      */
     public static IntToken of(BigInteger value) {
         assert value != null;
-        return cache.get(value, () -> new IntToken(value));
+//        return cache.get(value, () -> new IntToken(value));
+        return new IntToken(value);
     }
 
     public static IntToken of(long value) {
@@ -130,9 +131,14 @@ public final class IntToken extends Token implements MaximalSharing {
     }
 
     @Override
-    public boolean equals(Object object) {
-        /* IntToken instances are cached */
-        return this == object;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IntToken intToken = (IntToken) o;
+
+        return value.equals(intToken.value);
+
     }
 
     @Override
@@ -145,12 +151,12 @@ public final class IntToken extends Token implements MaximalSharing {
         visitor.visit(this);
     }
 
-    /**
-     * Returns the cached instance rather than the de-serialized instance if there is a cached
-     * instance.
-     */
-    private Object readResolve() {
-        return cache.get(value, () -> this);
-    }
+//    /**
+//     * Returns the cached instance rather than the de-serialized instance if there is a cached
+//     * instance.
+//     */
+//    private Object readResolve() {
+//        return cache.get(value, () -> this);
+//    }
 
 }

@@ -22,16 +22,19 @@ import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kore.KApply;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchType;
-import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.BitSet;
+import org.kframework.utils.errorsystem.KEMException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,8 +66,8 @@ public class SymbolicRewriter {
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
         this.definition = definition;
-        this.allRuleBits = new BitSet();
-        this.allRuleBits.makeones(definition.ruleTable.size());
+        this.allRuleBits = BitSet.apply(definition.ruleTable.size());
+        this.allRuleBits.makeOnes(definition.ruleTable.size());
         this.javaOptions = javaOptions;
         ruleIndex = definition.getIndex();
         this.counter = counter;
