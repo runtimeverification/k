@@ -17,10 +17,8 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.rewriter.SearchType;
@@ -44,7 +42,6 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
     private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
-    private KRunGraph executionGraph = null;
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
@@ -59,18 +56,8 @@ public class SymbolicRewriter {
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
-    public KRunGraph getExecutionGraph() {
-        return executionGraph;
-    }
-
-    public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound, boolean computeGraph) {
+    public KRunState rewrite(ConstrainedTerm constrainedTerm, Context context, int bound) {
         stopwatch.start();
-        KRunState startState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(0));
-        if (computeGraph) {
-            executionGraph = new KRunGraph();
-            executionGraph.addVertex(startState);
-        }
-        KRunState crntState = startState;
         KRunState finalState = null;
         int step = 1;
         while (step <= bound || bound < 0) {
@@ -78,13 +65,6 @@ public class SymbolicRewriter {
             computeRewriteStep(constrainedTerm, step, true);
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
-                if (computeGraph) {
-                    KRunState nextState = new JavaKRunState(result, context, counter, Optional.of(step));
-                    JavaTransition javaTransition = new JavaTransition(
-                            getRule(0), getSubstitution(0), context);
-                    executionGraph.addEdge(javaTransition, crntState, nextState);
-                    crntState = nextState;
-                }
                 constrainedTerm = result;
                 if (step == bound) {
                     finalState = new JavaKRunState(constrainedTerm, context, counter, Optional.of(step));
@@ -118,14 +98,6 @@ public class SymbolicRewriter {
 
     private ConstrainedTerm getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
-    }
-
-    private Rule getRule(int n) {
-        return n < appliedRules.size() ? appliedRules.get(n) : null;
-    }
-
-    private Map<Variable, Term> getSubstitution(int n) {
-        return n < substitutions.size() ? substitutions.get(n) : null;
     }
 
     private void computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
@@ -346,7 +318,6 @@ public class SymbolicRewriter {
      * @param depth a negative value specifies no bound
      * @param searchType defines when we will attempt to match the pattern
 
-     * @param computeGraph determines whether the transition graph should be computed.
      * @return a list of substitution mappings for results that matched the pattern
      */
     public List<Substitution<Variable,Term>> search(
@@ -355,16 +326,8 @@ public class SymbolicRewriter {
             int bound,
             int depth,
             SearchType searchType,
-            TermContext context,
-            boolean computeGraph) {
+            TermContext context) {
         stopwatch.start();
-
-        Context kilContext = context.definition().context();
-        JavaKRunState crntState = new JavaKRunState(initialTerm, kilContext, counter);
-        if (computeGraph) {
-            executionGraph = new KRunGraph();
-            executionGraph.addVertex(crntState);
-        }
 
         List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
@@ -408,10 +371,6 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                if (computeGraph) {
-                    crntState = new JavaKRunState(term.term(), kilContext, counter);
-                }
-
                 computeRewriteStep(term, step, false);
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
@@ -421,12 +380,6 @@ public class SymbolicRewriter {
 
                 for (int resultIndex = 0; resultIndex < results.size(); resultIndex++) {
                     ConstrainedTerm result = results.get(resultIndex);
-                    if (computeGraph) {
-                        JavaKRunState resultState = new JavaKRunState(result.term(), kilContext, counter);
-                        JavaTransition javaTransition = new JavaTransition(appliedRules.get(resultIndex),substitutions.get(resultIndex), kilContext);
-                        executionGraph.addVertex(resultState);
-                        executionGraph.addEdge(javaTransition, crntState, resultState);
-                    }
                     if (!transition) {
                         nextQueue.put(result, currentDepth);
                         break;

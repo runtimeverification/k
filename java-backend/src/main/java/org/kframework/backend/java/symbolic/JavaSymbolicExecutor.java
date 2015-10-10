@@ -15,7 +15,6 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
@@ -87,9 +86,6 @@ public class JavaSymbolicExecutor implements Executor {
 
     /**
      * Given a term, return the TermContext constructed from the globalContext
-     *
-     * @param term
-     * @return
      */
     private TermContext getTermContext(Term term) {
         TermContext termContext = TermContext.of(globalContext);
@@ -108,15 +104,15 @@ public class JavaSymbolicExecutor implements Executor {
         return new RewriteRelation(finalState, null);
     }
 
-    private RewriteRelation conventionalRewriteRun(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+    private RewriteRelation conventionalRewriteRun(ConstrainedTerm constrainedTerm, int bound) {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
                 constrainedTerm,
                 context,
-                bound,
-                computeGraph);
+                bound
+        );
 
-        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
+        return new RewriteRelation(finalState, null);
     }
 
     /**
@@ -133,7 +129,7 @@ public class JavaSymbolicExecutor implements Executor {
             return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
         }
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
-        return conventionalRewriteRun(constrainedTerm, bound, computeGraph);
+        return conventionalRewriteRun(constrainedTerm, bound);
     }
 
     @Override
@@ -164,9 +160,7 @@ public class JavaSymbolicExecutor implements Executor {
         List<SearchResult> searchResults = new ArrayList<>();
         List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
-        Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
-        KRunGraph executionGraph = null;
         if (!javaOptions.symbolicExecution) {
             if (computeGraph) {
                 throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
@@ -176,8 +170,7 @@ public class JavaSymbolicExecutor implements Executor {
         } else {
             SymbolicRewriter rewriter = getSymbolicRewriter();
             hits = rewriter.search(initialTerm,
-                    patternRule, bound, depth, searchType, termContext, computeGraph);
-            executionGraph = rewriter.getExecutionGraph();
+                    patternRule, bound, depth, searchType, termContext);
         }
 
         for (Map<Variable, Term> map : hits) {
@@ -202,9 +195,7 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        return new SearchResults(
-                searchResults,
-                executionGraph);
+        return new SearchResults(searchResults, null);
     }
 
     @Override
