@@ -360,12 +360,6 @@ public class Rule extends JavaSymbolicObject {
         return freshVariables;
     }
 
-    public Set<Variable> boundVariables() {
-        return variableSet().stream()
-                .filter(v -> !freshConstants.contains(v) && !freshVariables.contains(v))
-                .collect(Collectors.toSet());
-    }
-
     /**
      * @return {@code true} if this rule is a sort predicate rule; otherwise,
      *         {@code false}
