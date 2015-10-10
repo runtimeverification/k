@@ -428,7 +428,7 @@ public class Rule extends JavaSymbolicObject {
      * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
      */
     public Rule getFreshRule(TermContext context) {
-        return this.substitute(Variable.getFreshSubstitution(variableSet()), context);
+        return this.substitute(Variable.rename(variableSet()), context);
     }
 
     public IndexingPair indexingPair() {

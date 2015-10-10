@@ -35,7 +35,7 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
      *            the set of {@code Variable}s
      * @return the substitution
      */
-    public static BiMap<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
+    public static BiMap<Variable, Variable> rename(Set<Variable> variableSet) {
         BiMap<Variable, Variable> substitution = HashBiMap.create(variableSet.size());
         for (Variable variable : variableSet) {
             substitution.put(variable, variable.getFreshCopy());
