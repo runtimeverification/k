@@ -171,6 +171,11 @@ public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> 
     }
 
     @Override
+    public void clear(int i) {
+        throw new AssertionError("unimplemented");
+    }
+
+    @Override
     public OneIntegerGenericBitSet clone() {
         OneIntegerGenericBitSet bitSet = new OneIntegerGenericBitSet();
         if (this.count == 1) {
@@ -185,17 +190,20 @@ public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> 
     }
 
     @Override
-    public void makeOnes(int size) {
-        for (int i = 0; i < size; i++) set(i);
-    }
-
-    @Override
     public int length() {
         if (count == 0)
             return 0;
         else if (count == 1)
             return oneValue + 1;
         else return severalValues.length();
+    }
+
+    @Override
+    public int size() {
+        if (count <= 1)
+            return count;
+        else
+            return severalValues.size();
     }
 
     @Override
@@ -222,6 +230,11 @@ public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> 
     }
 
     @Override
+    public boolean subset(OneIntegerGenericBitSet bitSet) {
+        throw new AssertionError("unimplemented");
+    }
+
+    @Override
     public boolean get(int b) {
         if (count == 0)
             return false;
@@ -230,4 +243,10 @@ public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> 
         else
             return severalValues.get(b);
     }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
 }

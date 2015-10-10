@@ -31,20 +31,31 @@ public class OneWordBitSet implements BitSet<OneWordBitSet> {
     }
 
     @Override
+    public boolean subset(OneWordBitSet bitSet) {
+        return word == (word & bitSet.word);
+    }
+
+    @Override
     public boolean get(int i) {
-        assert i < Long.SIZE;
-        return (word & ((long) 1) << i) != 0;
+        assert i < size();
+        return (word & 1L << i) != 0;
     }
 
     @Override
     public void set(int i) {
-        assert i < Long.SIZE;
-        word |= ((long) 1) << i;
+        assert i < size();
+        word |= 1L << i;
+    }
+
+    @Override
+    public void clear(int i) {
+        assert i < size();
+        word &= ~(1L << i);
     }
 
     @Override
     public int nextSetBit(int i) {
-        assert i <= Long.SIZE;
+        assert i <= size();
         long maskedWord = word & (WORD_MASK << i);
         return maskedWord == 0 ? -1 : Long.numberOfTrailingZeros(maskedWord);
     }
@@ -55,19 +66,23 @@ public class OneWordBitSet implements BitSet<OneWordBitSet> {
     }
 
     @Override
-    public int length() {
-        return Long.SIZE - Long.numberOfLeadingZeros(word);
-    }
-
-    @Override
     public int cardinality() {
         return Long.bitCount(word);
     }
 
     @Override
-    public void makeOnes(int length) {
-        assert length < Long.SIZE;
-        word = (((long) 1) << length) - 1;
+    public int length() {
+        return Long.SIZE - Long.numberOfLeadingZeros(word);
+    }
+
+    @Override
+    public int size() {
+        return Long.SIZE;
+    }
+
+    @Override
+    public void clear() {
+        word = 0;
     }
 
     @Override

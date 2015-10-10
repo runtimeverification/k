@@ -22,7 +22,9 @@ public class RuleAutomatonDisjunction extends Term {
 
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
-    private final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
+    public final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
+
+    public final BitSet ruleMask;
 
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
@@ -43,6 +45,8 @@ public class RuleAutomatonDisjunction extends Term {
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
+
+        ruleMask = BitSet.apply(context.definition().reverseRuleTable.size());
     }
 
     public Map<Token, Pair<Token, BitSet>> tokenDisjunctions() {
