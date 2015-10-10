@@ -39,7 +39,6 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = Lists.newArrayList();
     private final List<Rule> appliedRules = Lists.newArrayList();
-    private final List<Map<Variable, Term>> substitutions = Lists.newArrayList();
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
@@ -90,7 +89,6 @@ public class SymbolicRewriter {
         subject.termContext().setTopTerm(subject.term());
         results.clear();
         appliedRules.clear();
-        substitutions.clear();
 
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
 
@@ -164,7 +162,6 @@ public class SymbolicRewriter {
                     .peek(s -> {
                         RuleAuditing.succeed(rule);
                         appliedRules.add(rule);
-                        substitutions.add(s.getLeft().substitution());
                         Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
                         Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
                     })
