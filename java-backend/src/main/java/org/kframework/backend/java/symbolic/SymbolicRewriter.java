@@ -241,21 +241,6 @@ public class SymbolicRewriter {
     }
 
     /**
-     * Apply a specification rule
-     */
-    private ConstrainedTerm applyRule(ConstrainedTerm constrainedTerm, List<Rule> rules) {
-        for (Rule rule : rules) {
-            ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(leftHandSideTerm, true);
-            if (constraint != null) {
-                return buildResult(rule, constraint, null, true);
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Unifies the term with the pattern, and computes a map from variables in
      * the pattern to the terms they unify with. Adds as many search results
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
@@ -387,7 +372,7 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> rules) {
+            List<Rule> specRules) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -426,7 +411,7 @@ public class SymbolicRewriter {
                 }
 
                 if (guarded) {
-                    ConstrainedTerm result = applyRule(term, rules);
+                    ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
                         if (visited.add(result))
                             nextQueue.add(result);
@@ -482,6 +467,20 @@ public class SymbolicRewriter {
         }
 
         return proofResults;
+    }
+
+    /**
+     * Applies the first applicable specification rule and returns the result.
+     */
+    private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
+        for (Rule specRule : specRules) {
+            ConstrainedTerm pattern = buildPattern(specRule, constrainedTerm.termContext());
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
+            if (constraint != null) {
+                return buildResult(specRule, constraint, null, true);
+            }
+        }
+        return null;
     }
 
 }
