@@ -144,6 +144,7 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
+        List<ConstrainedTerm> results = null;
         try {
             if (rule == RuleAuditing.getAuditingRule()) {
                 RuleAuditing.beginAudit();
@@ -151,18 +152,20 @@ public class SymbolicRewriter {
                 System.err.println("\nAuditing " + rule + "...\n");
             }
 
-            return subject.unify(buildPattern(rule, subject.termContext()), rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables()).stream()
-                    .peek(s -> {
-                        RuleAuditing.succeed(rule);
-                        Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
-                        Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
-                    })
+            return results = subject.unify(buildPattern(rule, subject.termContext()),
+                    rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables()).stream()
                     .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight()))
                     .collect(Collectors.toList());
         } catch (KEMException e) {
             e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
             throw e;
         } finally {
+            if (!results.isEmpty()) {
+                RuleAuditing.succeed(rule);
+                Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
+                Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
+            }
+
             if (RuleAuditing.isAuditBegun()) {
                 if (RuleAuditing.getAuditingRule() == rule) {
                     RuleAuditing.endAudit();
