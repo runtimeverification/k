@@ -96,8 +96,8 @@ public class SymbolicRewriter {
                 if (computeOne || !transition) {
                     rule2Results = Collections.emptyMap();
                     for (Rule rule : rules) {
-                        List<ConstrainedTerm> terms;
-                        if (!(terms = computeRewriteStepByRule(subject, rule)).isEmpty()) {
+                        List<ConstrainedTerm> terms = computeRewriteStepByRule(subject, rule);
+                        if (!terms.isEmpty()) {
                             rule2Results = Collections.singletonMap(rule, terms);
                             results.add(terms.get(0));
                             break;
@@ -153,7 +153,8 @@ public class SymbolicRewriter {
             }
 
             return results = subject.unify(buildPattern(rule, subject.termContext()),
-                    rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables()).stream()
+                    rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())
+                    .stream()
                     .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight()))
                     .collect(Collectors.toList());
         } catch (KEMException e) {
