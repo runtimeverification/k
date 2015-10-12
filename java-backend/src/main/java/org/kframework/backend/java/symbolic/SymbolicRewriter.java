@@ -106,8 +106,8 @@ public class SymbolicRewriter {
                         }
                     }
                 } else {
-                    rule2Results = rules.stream().collect(
-                            Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
+                    rule2Results = (RuleAuditing.isAudit() ? rules.stream() : rules.parallelStream())
+                            .collect(Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
                                     (u, v) -> u, LinkedHashMap::new));
                     rule2Results.forEach((rule, terms) -> {
                         if (terms.isEmpty()) {
@@ -144,7 +144,7 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
-        List<ConstrainedTerm> results = null;
+        List<ConstrainedTerm> results = Collections.emptyList();
         try {
             if (rule == RuleAuditing.getAuditingRule()) {
                 RuleAuditing.beginAudit();
