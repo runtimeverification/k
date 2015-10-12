@@ -59,7 +59,7 @@ public class Coverage {
         }
     }
 
-    private static void print(File file, String string) {
+    private synchronized static void print(File file, String string) {
         if (file != null && string != null) {
             try {
                 writeStringToFile(file, string + "\n", true);

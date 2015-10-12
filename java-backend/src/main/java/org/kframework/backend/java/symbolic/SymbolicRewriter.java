@@ -2,10 +2,8 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +22,6 @@ import org.kframework.rewriter.SearchType;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *
@@ -40,7 +37,7 @@ public class SymbolicRewriter {
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
-    private SetMultimap<ConstrainedTerm, Rule> disabledRules = HashMultimap.create();
+    private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -79,71 +76,75 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
-        List<ConstrainedTerm> results = new ArrayList<>();
-        subject.termContext().setTopTerm(subject.term());
-
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
-
-        // Applying a strategy to a list of rules divides the rules up into
-        // equivalence classes of rules. We iterate through these equivalence
-        // classes one at a time, seeing which one contains rules we can apply.
-        strategy.reset(ruleIndex.getRules(subject.term()));
-
         try {
-            while (strategy.hasNext()) {
-                transition = strategy.nextIsTransition();
-                LinkedHashSet<Rule> rules = Sets.newLinkedHashSet(strategy.next());
-                rules.removeAll(disabledRules.get(subject));
+            subject.termContext().setTopTerm(subject.term());
+            /* rules that are failed to apply on subject */
+            Set<Rule> failedRules = new HashSet<>(subject2DisabledRules.getOrDefault(subject, Collections.emptySet()));
+            /* resulting terms after rewriting */
+            List<ConstrainedTerm> results = new ArrayList<>();
 
-                ArrayList<Pair<ConstrainedTerm, Rule>> internalResults = Lists.newArrayList();
-                ArrayList<Rule> failedRules = Lists.newArrayList();
-                Stream<List<Pair<ConstrainedTerm, Rule>>> resultsStream = rules.stream()
-                        .map(r -> Pair.of(computeRewriteStepByRule(subject, r), r))
-                        .peek(p -> {
-                            if (p.getLeft().isEmpty()) {
-                                failedRules.add(p.getRight());
-                            }
-                        })
-                        .map(Pair::getLeft)
-                        .filter(l -> !l.isEmpty());
-                if (computeOne) {
-                    Optional<List<Pair<ConstrainedTerm, Rule>>> any = resultsStream.findAny();
-                    if (any.isPresent()) {
-                        internalResults.add(any.get().get(0));
+            // Applying a strategy to a list of rules divides the rules up into
+            // equivalence classes of rules. We iterate through these equivalence
+            // classes one at a time, seeing which one contains rules we can apply.
+            for (strategy.reset(ruleIndex.getRules(subject.term())); strategy.hasNext(); ) {
+                transition = strategy.nextIsTransition();
+                Set<Rule> rules = new LinkedHashSet<>(strategy.next());
+                rules.removeAll(failedRules);
+
+                Map<Rule, List<ConstrainedTerm>> rule2Results;
+                if (computeOne || !transition) {
+                    rule2Results = Collections.emptyMap();
+                    for (Rule rule : rules) {
+                        List<ConstrainedTerm> terms = computeRewriteStepByRule(subject, rule);
+                        if (!terms.isEmpty()) {
+                            rule2Results = Collections.singletonMap(rule, terms);
+                            results.add(terms.get(0));
+                            break;
+                        } else {
+                            failedRules.add(rule);
+                        }
                     }
                 } else {
-                    resultsStream.forEach(internalResults::addAll);
+                    rule2Results = (RuleAuditing.isAudit() ? rules.stream() : rules.parallelStream())
+                            .collect(Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
+                                    (u, v) -> u, LinkedHashMap::new));
+                    rule2Results.forEach((rule, terms) -> {
+                        if (terms.isEmpty()) {
+                            failedRules.add(rule);
+                        } else {
+                            results.addAll(terms);
+                        }
+                    });
                 }
 
                 // If we've found matching results from one equivalence class then
                 // we are done, as we can't match rules from two equivalence classes
                 // in the same step.
-                if (internalResults.size() > 0) {
-                    internalResults.stream().map(Pair::getLeft).forEach(results::add);
-                    SetMultimap<ConstrainedTerm, Rule> resultDisabledRules = HashMultimap.create();
-                    internalResults.stream().forEach(p -> {
-                        if (p.getRight().isCompiledForFastRewriting()) {
-                            failedRules.stream()
-                                    .filter(r -> r.readCells() != null && p.getRight().writeCells() != null)
-                                    .filter(r -> Sets.intersection(r.readCells(), p.getRight().writeCells()).isEmpty())
-                                    .forEach(r -> resultDisabledRules.put(p.getLeft(), r));
-                            disabledRules.get(subject).stream()
-                                    .filter(r -> r.readCells() != null && p.getRight().writeCells() != null)
-                                    .filter(r -> Sets.intersection(r.readCells(), p.getRight().writeCells()).isEmpty())
-                                    .forEach(r -> resultDisabledRules.put(p.getLeft(), r));
-                        }
+                if (!results.isEmpty()) {
+                    /* compute disabled rules for the resulting terms */
+                    subject2DisabledRules.remove(subject);
+                    rule2Results.forEach((appliedRule, terms) -> {
+                        // if the latest applied rule doesn't modify the read cells of a failing rule,
+                        // that failing rule is deemed to fail again when applied on the new term
+                        Set<Rule> rulesWillFail = failedRules.stream()
+                                .filter(failedRule -> failedRule.isCompiledForFastRewriting() &&
+                                        appliedRule.isCompiledForFastRewriting() &&
+                                        Collections.disjoint(failedRule.readCells(), appliedRule.writeCells()))
+                                .collect(Collectors.toSet());
+                        terms.forEach(t -> subject2DisabledRules.put(t, rulesWillFail));
                     });
-                    disabledRules = resultDisabledRules;
-                    return results;
+                    break;
                 }
             }
+            return results;
         } finally {
             RuleAuditing.clearAuditingRule();
         }
-        return results;
     }
 
-    private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
+    private List<ConstrainedTerm> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
+        List<ConstrainedTerm> results = Collections.emptyList();
         try {
             if (rule == RuleAuditing.getAuditingRule()) {
                 RuleAuditing.beginAudit();
@@ -151,18 +152,21 @@ public class SymbolicRewriter {
                 System.err.println("\nAuditing " + rule + "...\n");
             }
 
-            return subject.unify(buildPattern(rule, subject.termContext()), rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables()).stream()
-                    .peek(s -> {
-                        RuleAuditing.succeed(rule);
-                        Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
-                        Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
-                    })
-                    .map(s -> Pair.of(buildResult(rule, s.getLeft(), subject.term(), !s.getRight()), rule))
+            return results = subject.unify(buildPattern(rule, subject.termContext()),
+                    rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())
+                    .stream()
+                    .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight()))
                     .collect(Collectors.toList());
         } catch (KEMException e) {
             e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
             throw e;
         } finally {
+            if (!results.isEmpty()) {
+                RuleAuditing.succeed(rule);
+                Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
+                Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
+            }
+
             if (RuleAuditing.isAuditBegun()) {
                 if (RuleAuditing.getAuditingRule() == rule) {
                     RuleAuditing.endAudit();
@@ -177,7 +181,7 @@ public class SymbolicRewriter {
 
     /**
      * Builds the pattern term used in unification by composing the left-hand
-     * side of a specified rule and its preconditions.
+     * side of the rule and its preconditions.
      */
     private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
@@ -238,21 +242,6 @@ public class SymbolicRewriter {
         }
 
         return result;
-    }
-
-    /**
-     * Apply a specification rule
-     */
-    private ConstrainedTerm applyRule(ConstrainedTerm constrainedTerm, List<Rule> rules) {
-        for (Rule rule : rules) {
-            ConstrainedTerm leftHandSideTerm = buildPattern(rule, constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(leftHandSideTerm, true);
-            if (constraint != null) {
-                return buildResult(rule, constraint, null, true);
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -387,7 +376,7 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> rules) {
+            List<Rule> specRules) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -410,8 +399,8 @@ public class SymbolicRewriter {
                 List<Term> rightKContents = targetTerm.term().getCellContentsByName(CellLabel.K);
                 // TODO(YilongL): the `get(0)` seems hacky
                 if (leftKContents.size() == 1 && rightKContents.size() == 1) {
-                    Pair<Term, Variable> leftKPattern = splitKContent(leftKContents.get(0));
-                    Pair<Term, Variable> rightKPattern = splitKContent(rightKContents.get(0));
+                    Pair<Term, Variable> leftKPattern = KSequence.splitContentAndFrame(leftKContents.get(0));
+                    Pair<Term, Variable> rightKPattern = KSequence.splitContentAndFrame(rightKContents.get(0));
                     if (leftKPattern.getRight() != null && rightKPattern.getRight() != null
                             && leftKPattern.getRight().equals(rightKPattern.getRight())) {
                         BoolToken matchable = MetaK.matchable(
@@ -426,7 +415,7 @@ public class SymbolicRewriter {
                 }
 
                 if (guarded) {
-                    ConstrainedTerm result = applyRule(term, rules);
+                    ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
                         if (visited.add(result))
                             nextQueue.add(result);
@@ -484,14 +473,18 @@ public class SymbolicRewriter {
         return proofResults;
     }
 
-    private static Pair<Term, Variable> splitKContent(Term kContent) {
-        Variable frame = KSequence.getFrame(kContent);
-        if (frame != null) {
-            KSequence.Builder builder = KSequence.builder();
-            KSequence.getElements(kContent).stream().forEach(builder::concatenate);
-            kContent = builder.build();
+    /**
+     * Applies the first applicable specification rule and returns the result.
+     */
+    private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
+        for (Rule specRule : specRules) {
+            ConstrainedTerm pattern = buildPattern(specRule, constrainedTerm.termContext());
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
+            if (constraint != null) {
+                return buildResult(specRule, constraint, null, true);
+            }
         }
-        return Pair.of(kContent, frame);
+        return null;
     }
 
 }
