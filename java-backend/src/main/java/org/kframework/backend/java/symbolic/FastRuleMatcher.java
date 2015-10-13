@@ -188,6 +188,8 @@ public class FastRuleMatcher {
         } else if (subject instanceof Token && pattern instanceof Token) {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
+        } else if (subject instanceof KItem && pattern instanceof Token || subject instanceof Token && pattern instanceof KItem) {
+            return empty;
         } else {
             throw new AssertionError("unexpected class at matching: " + subject.getClass());
         }

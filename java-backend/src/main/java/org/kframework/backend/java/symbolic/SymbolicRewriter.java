@@ -239,7 +239,7 @@ public class SymbolicRewriter {
             KItem kItemSubject = (KItem) subject;
             List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
             newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, (scala.collection.immutable.List<Integer>) path.tail(), term, context));
-            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context);
+            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context).applyAnywhereRules(false, context);
         }
     }
 
@@ -265,7 +265,7 @@ public class SymbolicRewriter {
             }
         }
 
-        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context);
+        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context).applyAnywhereRules(false, context);
     }
 
     private List<Pair<ConstrainedTerm, Rule>> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
