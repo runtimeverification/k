@@ -25,7 +25,7 @@ module KOOL-UNTYPED-COMMON
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
                > Exp "[" Exps "]"        [strict]
-               > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
+               > Exp "(" Exps ")"        [strict(2),klabel("fcall")]    // was strict in SIMPLE
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
                | "read" "(" ")"
@@ -50,7 +50,7 @@ module KOOL-UNTYPED-COMMON
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  syntax Ids  ::= List{Id,","}
+  syntax Ids  ::= List{Id,","}           [klabel("'_,_::Ids")]
   syntax Exps ::= List{Exp,","}          [strict]
 
 
@@ -139,6 +139,7 @@ module KOOL-UNTYPED
   syntax Exps ::= Vals
   syntax Exp ::= Val
   syntax KResult ::= Val
+  syntax KResult ::= Vals
 
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
@@ -250,7 +251,7 @@ definition. */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
-  rule print(.Vals); => .K  [structural]
+  rule `print(_);`(.Vals) => .K  [structural]
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
@@ -338,7 +339,7 @@ definition. */
 
   syntax KItem ::= (Map,K,ControlCellFragment)
 
-  rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
+  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntObj>-fragment <crntClass>_</crntClass> Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
@@ -348,6 +349,18 @@ definition. */
           <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj' </crntObj> </control>-fragment))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 Obj2 </crntObj>
+       </control>
+
+  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
+           => mkDecls(Xs,Vs) S return; </k>
+       <env> Env => .Map </env>
+       <store>... OL |-> objectClosure(<crntObj>-fragment <crntClass>_</crntClass> Obj1:EnvStackCell noLocationCell </crntObj>-fragment)...</store>
+     //<br/>
+       <control>
+          C
+          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj' </crntObj> </control>-fragment))
+          ...</fstack>
+          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 </crntObj>
        </control>
 
 
@@ -380,10 +393,14 @@ definition. */
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
-  syntax KItem ::= (Id,Cell) // TODO: used to be ListItem; explain this
+  syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
-  rule <k> new Class:Id(Vs:Vals) ~> K
-           => create(Class) ~> storeObj ~> `Class(Vs); return this;` </k>
+//rule <k> new Class:Id(Vs:Vals) ~> K
+//         => create(Class) ~> storeObj ~> `Class(Vs); return this;` </k>
+  rule <k> `new_(_)`(Class:Id, Vs:Vals) ~> K
+           => create(Class) ~> storeObj ~> ` fcall(Class,Vs) ; return this;` </k>
+//         => create(Class) ~> storeObj ~>
+//              `__`(`_;`(`_(_)`(Class,Vs)), `_;`(`return_`(this))) </k>
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
      //<br/>
@@ -442,7 +459,7 @@ current object. */
 
   rule objectClosure(<crntObj>-fragment
                      <crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>
+                     <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>
                      _ </crntObj>-fragment)
        . X:Id
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
@@ -495,8 +512,8 @@ current object. */
        <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-  context HOLE:Exp(_:Exps)
-    when getKLabel(HOLE) ==K #klabel(`'_(_)`) orBool getKLabel(HOLE) ==K #klabel(`'_[_]`)
+//context HOLE:Exp(_:Exps)
+//  when getKLabel(HOLE) ==K #klabel(`'_(_)`) orBool getKLabel(HOLE) ==K #klabel(`'_[_]`)
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
@@ -527,7 +544,7 @@ current object. */
                               X))  [structural]*/
   rule lvalue(objectClosure(<crntObj>-fragment
                             <crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:Cell)) EStack </envStack>
+                            <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>
                             _ </crntObj>-fragment)
               . X
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
@@ -545,7 +562,7 @@ current object. */
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  syntax Exp ::= lookupMember(Cell,Id)  [function]
+  syntax Exp ::= lookupMember(EnvStackCell,Id)  [function]
 
 //  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
 //    => lookup(L)
