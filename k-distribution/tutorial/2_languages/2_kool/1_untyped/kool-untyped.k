@@ -144,7 +144,7 @@ module KOOL-UNTYPED
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
 
-  syntax KItem ::= "undefined"  [latex(\bot)]
+  syntax Exp ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => .K ...</k>
        <env> Env => Env[X <- L] </env>
@@ -232,7 +232,7 @@ definition. */
 
   context (HOLE => lvalue(HOLE)) = _
 
-  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_:Val => V) ...</store>
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_:Exp => V) ...</store>
     [assignment]
 
 
