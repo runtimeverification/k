@@ -67,12 +67,8 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
-        /* YilongL: since KList.Builder always canonicalizes its result, the
-         * following conversion is necessary */
-        kList = KCollection.upKind(kList, Kind.KLIST);
-
-        // TODO(yilongli): break the dependency on the Tool object
-        return new KItem(kLabel, kList, termContext, termContext.global().stage, source, location);
+        return new KItem(kLabel, KCollection.upKind(kList, Kind.KLIST), termContext,
+                termContext.global().stage, source, location);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -130,7 +126,6 @@ public class KItem extends Term implements KItemRepresentation {
 
     private void computeSort() {
         if (sort != null) {
-            //computed already
             return;
         }
         if (enableCache) {
