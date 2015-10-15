@@ -45,14 +45,6 @@ public class TermContext extends JavaSymbolicObject {
     }
 
     /**
-     * Returns a new {@link TermContext} with a fresh counter starting from {@code 0}.
-     */
-    @Deprecated
-    public static TermContext of(GlobalContext global) {
-        return new TermContext(global, new FreshCounter(0));
-    }
-
-    /**
      * Forks an identical {@link TermContext}.
      */
     public TermContext fork() {
@@ -64,6 +56,10 @@ public class TermContext extends JavaSymbolicObject {
             throw KEMException.criticalError("No fresh counter available in this TermContext.");
         }
         return counter.incrementAndGet();
+    }
+
+    public long getCounterValue() {
+        return counter.value;
     }
 
     public Definition definition() {

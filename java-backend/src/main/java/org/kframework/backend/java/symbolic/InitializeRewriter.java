@@ -88,10 +88,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
     @Override
     public synchronized Rewriter apply(Module module) {
-        GlobalContext initializingContext = new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING);
-        GlobalContext rewritingContext = new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING);
+        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING))
+                .freshCounter(0).build();
         Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext);
-        rewritingContext.setDefinition(evaluatedDef);
+
+        TermContext rewritingContext = TermContext.builder(new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING))
+                .freshCounter(initializingContext.getCounterValue()).build();
+        rewritingContext.global().setDefinition(evaluatedDef);
 
         return new SymbolicRewriterGlue(module, evaluatedDef, kompileOptions, javaOptions, rewritingContext, kem);
     }
@@ -101,7 +104,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         private final SymbolicRewriter rewriter;
         public final Definition definition;
         public final Module module;
-        public final GlobalContext rewritingContext;
+        public final TermContext termContext;
         private final KExceptionManager kem;
 
         public SymbolicRewriterGlue(
@@ -109,21 +112,20 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 Definition definition,
                 KompileOptions kompileOptions,
                 JavaExecutionOptions javaOptions,
-                GlobalContext rewritingContext,
+                TermContext rewritingContext,
                 KExceptionManager kem) {
             this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
             this.definition = definition;
             this.module = module;
-            this.rewritingContext = rewritingContext;
+            this.termContext = rewritingContext;
             this.kem = kem;
         }
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            TermContext termContext = TermContext.builder(rewritingContext).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(k));
-            JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext)), depth.orElse(-1));
+            JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
         }
 
@@ -135,13 +137,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
-            TermContext termContext = TermContext.builder(rewritingContext).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
             searchResults = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE),
-                    searchType, TermContext.of(rewritingContext));
+                    searchType, termContext);
             return searchResults;
         }
 
@@ -153,13 +154,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<K> prove(List<Rule> rules) {
-            TermContext context = TermContext.of(rewritingContext);
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, context, true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());
             List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
-                    .map(r -> r.getFreshRule(context))
+                    .map(r -> r.getFreshRule(termContext))
                     .collect(Collectors.toList());
 
             List<ConstrainedTerm> proofResults = javaRules.stream()
@@ -168,10 +168,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         //context.setCounter(counter);
                         ConstrainedTerm initialTerm = new ConstrainedTerm(
                                 r.leftHandSide(),
-                                ConjunctiveFormula.of(context).addAll(r.requires()));
+                                ConjunctiveFormula.of(termContext).addAll(r.requires()));
                         ConstrainedTerm targetTerm = new ConstrainedTerm(
                                 r.rightHandSide(),
-                                ConjunctiveFormula.of(context).addAll(r.ensures()));
+                                ConjunctiveFormula.of(termContext).addAll(r.ensures()));
                         return rewriter.proveRule(initialTerm, targetTerm, allRules).stream();
                     })
                     .collect(Collectors.toList());
@@ -195,13 +195,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
         };
 
-        public Definition invoke(Module module, KExceptionManager kem, GlobalContext initializingContext) {
+        public Definition invoke(Module module, KExceptionManager kem, TermContext termContext) {
             if (cache.containsKey(module)) {
                 return cache.get(module);
             }
             Definition definition = new Definition(module, kem);
 
-            TermContext termContext = TermContext.of(initializingContext);
             termContext.global().setDefinition(definition);
 
             JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
