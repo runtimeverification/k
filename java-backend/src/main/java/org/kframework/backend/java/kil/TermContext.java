@@ -1,52 +1,64 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.math.BigInteger;
-
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.krun.api.io.FileSystem;
 
+import java.io.Serializable;
+
 /**
  * An object containing context specific to a particular configuration.
  */
 public class TermContext extends JavaSymbolicObject {
 
-    private BigInteger counter = BigInteger.ZERO;
+    private final FreshCounter counter;
 
     private final GlobalContext global;
 
+    // TODO(YilongL): do we want to make it thread-safe?
+    private static class FreshCounter implements Serializable {
+        private long value;
+
+        private FreshCounter(long value) {
+            this.value = value;
+        }
+
+        private long incrementAndGet() {
+            return ++value;
+        }
+    }
+
+    /**
+     * {@code topTerm} and {@code topConstraint} are not set in the constructor
+     * because they must be set before use anyway.
+     */
     private Term topTerm;
     private ConjunctiveFormula topConstraint;
 
-    private TermContext(GlobalContext global) {
+    private TermContext(GlobalContext global, FreshCounter counter) {
         this.global = global;
-    }
-
-    public static TermContext of(GlobalContext global) {
-        return new TermContext(global);
-    }
-
-    public static TermContext of(GlobalContext global, Term topTerm, BigInteger counter) {
-        TermContext termContext = new TermContext(global);
-        termContext.topTerm = topTerm;
-        termContext.counter = counter;
-        return termContext;
-    }
-
-    public BigInteger getCounter() {
-        return counter;
-    }
-
-    public void setCounter(BigInteger counter) {
         this.counter = counter;
     }
 
-    public BigInteger incrementCounter() {
-        counter = this.counter.add(BigInteger.ONE);
-        return counter;
+    /**
+     * Returns a new {@link TermContext} with a fresh counter starting from {@code 0}.
+     */
+    public static TermContext of(GlobalContext global) {
+        return new TermContext(global, new FreshCounter(0));
+    }
+
+    /**
+     * Forks an identical {@link TermContext}.
+     */
+    public TermContext fork() {
+        return new TermContext(global, new FreshCounter(counter.value));
+    }
+
+    public long freshConstant() {
+        return counter.incrementAndGet();
     }
 
     public Definition definition() {

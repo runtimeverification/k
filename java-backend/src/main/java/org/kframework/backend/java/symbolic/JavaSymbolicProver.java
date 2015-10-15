@@ -76,7 +76,6 @@ public class JavaSymbolicProver implements Prover {
                 continue;
             }
 
-            termContext.setCounter(counter);
             Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
