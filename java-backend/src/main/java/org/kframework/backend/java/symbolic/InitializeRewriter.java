@@ -37,6 +37,7 @@ import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 import java.lang.invoke.MethodHandle;
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,11 +93,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 .freshCounter(0).build();
         Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext);
 
-        TermContext rewritingContext = TermContext.builder(new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING))
-                .freshCounter(initializingContext.getCounterValue()).build();
-        rewritingContext.global().setDefinition(evaluatedDef);
+        GlobalContext rewritingContext = new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING);
+        rewritingContext.setDefinition(evaluatedDef);
 
-        return new SymbolicRewriterGlue(module, evaluatedDef, kompileOptions, javaOptions, rewritingContext, kem);
+        return new SymbolicRewriterGlue(module, evaluatedDef, kompileOptions, javaOptions, initializingContext.getCounterValue(), rewritingContext, kem);
     }
 
     public static class SymbolicRewriterGlue implements Rewriter {
@@ -104,7 +104,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         private final SymbolicRewriter rewriter;
         public final Definition definition;
         public final Module module;
-        public final TermContext termContext;
+        private final BigInteger initCounterValue;
+        public final GlobalContext rewritingContext;
         private final KExceptionManager kem;
 
         public SymbolicRewriterGlue(
@@ -112,17 +113,20 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 Definition definition,
                 KompileOptions kompileOptions,
                 JavaExecutionOptions javaOptions,
-                TermContext rewritingContext,
+                BigInteger initCounterValue,
+                GlobalContext rewritingContext,
                 KExceptionManager kem) {
             this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
             this.definition = definition;
             this.module = module;
-            this.termContext = rewritingContext;
+            this.initCounterValue = initCounterValue;
+            this.rewritingContext = rewritingContext;
             this.kem = kem;
         }
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
+            TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
@@ -137,6 +141,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
+            TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
@@ -154,6 +159,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public List<K> prove(List<Rule> rules) {
+            TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
             List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
@@ -165,7 +171,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.containsAttribute(Attribute.TRUSTED_KEY))
                     .flatMap(r -> {
-                        //context.setCounter(counter);
                         ConstrainedTerm initialTerm = new ConstrainedTerm(
                                 r.leftHandSide(),
                                 ConjunctiveFormula.of(termContext).addAll(r.requires()));

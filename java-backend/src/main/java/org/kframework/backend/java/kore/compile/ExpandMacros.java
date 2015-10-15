@@ -123,7 +123,8 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        TermContext tc = rewriter.termContext;
+        // YilongL: is it correct to create a fresh TermContext every time?
+        TermContext tc = TermContext.builder(rewriter.rewritingContext).freshCounter(0).build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
         Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc, false, false).convert(term));
         return new KtoKORE().apply(t);
