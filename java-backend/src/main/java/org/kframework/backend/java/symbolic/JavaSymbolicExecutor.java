@@ -79,23 +79,10 @@ public class JavaSymbolicExecutor implements Executor {
     private Term getJavaKilTerm(org.kframework.kil.Term cfg) {
         Term term = kilTransformer.transformAndEval(cfg);
         sw.printIntermediate("Convert initial configuration to internal representation");
-        TermContext termContext = TermContext.of(globalContext);
-        termContext.setTopTerm(term);
         return term;
     }
 
-    /**
-     * Given a term, return the TermContext constructed from the globalContext
-     */
-    private TermContext getTermContext(Term term) {
-        TermContext termContext = TermContext.of(globalContext);
-        termContext.setTopTerm(term);
-        return termContext;
-    }
-
-
     private RewriteRelation patternMatcherRewriteRun(Term term, TermContext termContext, int bound, boolean computeGraph) {
-
         if (computeGraph) {
             throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
         }
@@ -123,7 +110,7 @@ public class JavaSymbolicExecutor implements Executor {
      */
     private RewriteRelation javaRewriteEngineRun(org.kframework.kil.Term cfg, int bound, boolean computeGraph) {
         Term term = getJavaKilTerm(cfg);
-        TermContext termContext = getTermContext(term);
+        TermContext termContext = TermContext.builder(globalContext).freshCounter(0).topTerm(term).build();
         if (!javaOptions.symbolicExecution) {
             return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
         }
@@ -159,7 +146,7 @@ public class JavaSymbolicExecutor implements Executor {
         List<SearchResult> searchResults = new ArrayList<>();
         List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
-        TermContext termContext = TermContext.of(globalContext);
+        TermContext termContext = TermContext.builder(globalContext).freshCounter(0).build();
         if (!javaOptions.symbolicExecution) {
             if (computeGraph) {
                 throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");

@@ -32,16 +32,14 @@ public class TermContext extends JavaSymbolicObject {
         }
     }
 
-    /**
-     * {@code topTerm} and {@code topConstraint} are not set in the constructor
-     * because they must be set before use anyway.
-     */
     private Term topTerm;
+
     private ConjunctiveFormula topConstraint;
 
-    private TermContext(GlobalContext global, FreshCounter counter) {
+    private TermContext(GlobalContext global, FreshCounter counter, Term topTerm) {
         this.global = global;
         this.counter = counter;
+        this.topTerm = topTerm;
     }
 
     /**
@@ -49,14 +47,14 @@ public class TermContext extends JavaSymbolicObject {
      */
     @Deprecated
     public static TermContext of(GlobalContext global) {
-        return new TermContext(global, new FreshCounter(0));
+        return new TermContext(global, new FreshCounter(0), null);
     }
 
     /**
      * Forks an identical {@link TermContext}.
      */
     public TermContext fork() {
-        return new TermContext(global, new FreshCounter(counter.value));
+        return new TermContext(global, new FreshCounter(counter.value), null);
     }
 
     public long freshConstant() {
@@ -112,15 +110,12 @@ public class TermContext extends JavaSymbolicObject {
 
         private final GlobalContext globalContext;
 
-        private FreshCounter counter = new FreshCounter(0);
+        private FreshCounter counter;
+
+        private Term topTerm;
 
         public Builder(GlobalContext globalContext) {
             this.globalContext = globalContext;
-        }
-
-        public Builder noFreshCounter() {
-            counter = null;
-            return this;
         }
 
         public Builder freshCounter(long initialValue) {
@@ -128,8 +123,13 @@ public class TermContext extends JavaSymbolicObject {
             return this;
         }
 
+        public Builder topTerm(Term topTerm) {
+            this.topTerm = topTerm;
+            return this;
+        }
+
         public TermContext build() {
-            return new TermContext(globalContext, counter);
+            return new TermContext(globalContext, counter, topTerm);
         }
 
     }
