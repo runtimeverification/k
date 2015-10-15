@@ -9,6 +9,7 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * An object containing context specific to a particular configuration.
@@ -24,14 +25,15 @@ public class TermContext extends JavaSymbolicObject {
      * so it is made non-thread-safe intentionally.
      */
     private static class FreshCounter implements Serializable {
-        private long value;
+        private BigInteger value;
 
-        private FreshCounter(long value) {
+        private FreshCounter(BigInteger value) {
             this.value = value;
         }
 
-        private long incrementAndGet() {
-            return ++value;
+        private BigInteger incrementAndGet() {
+            value = value.add(BigInteger.ONE);
+            return value;
         }
     }
 
@@ -51,14 +53,14 @@ public class TermContext extends JavaSymbolicObject {
         return new TermContext(global, new FreshCounter(counter.value));
     }
 
-    public long freshConstant() {
+    public BigInteger freshConstant() {
         if (counter == null) {
             throw KEMException.criticalError("No fresh counter available in this TermContext.");
         }
         return counter.incrementAndGet();
     }
 
-    public long getCounterValue() {
+    public BigInteger getCounterValue() {
         return counter.value;
     }
 
@@ -115,6 +117,10 @@ public class TermContext extends JavaSymbolicObject {
         }
 
         public Builder freshCounter(long initialValue) {
+            return freshCounter(BigInteger.valueOf(initialValue));
+        }
+
+        public Builder freshCounter(BigInteger initialValue) {
             this.counter = new FreshCounter(initialValue);
             return this;
         }
