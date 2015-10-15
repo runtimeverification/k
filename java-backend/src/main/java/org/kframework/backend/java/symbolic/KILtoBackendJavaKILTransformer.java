@@ -100,9 +100,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         super("Transform KIL into java backend KIL", context);
         this.freshRules = freshRules;
         this.globalContext = globalContext;
-        this.termContext = TermContext.builder(globalContext).build();
+        this.termContext = TermContext.builder(globalContext).freshCounter(0).build();
         this.indexingData = data;
         this.kem = kem;
+    }
+
+    public TermContext termContext() {
+        return termContext;
     }
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {

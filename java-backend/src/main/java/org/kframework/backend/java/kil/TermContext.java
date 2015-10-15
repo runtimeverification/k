@@ -36,10 +36,9 @@ public class TermContext extends JavaSymbolicObject {
 
     private ConjunctiveFormula topConstraint;
 
-    private TermContext(GlobalContext global, FreshCounter counter, Term topTerm) {
+    private TermContext(GlobalContext global, FreshCounter counter) {
         this.global = global;
         this.counter = counter;
-        this.topTerm = topTerm;
     }
 
     /**
@@ -47,14 +46,14 @@ public class TermContext extends JavaSymbolicObject {
      */
     @Deprecated
     public static TermContext of(GlobalContext global) {
-        return new TermContext(global, new FreshCounter(0), null);
+        return new TermContext(global, new FreshCounter(0));
     }
 
     /**
      * Forks an identical {@link TermContext}.
      */
     public TermContext fork() {
-        return new TermContext(global, new FreshCounter(counter.value), null);
+        return new TermContext(global, new FreshCounter(counter.value));
     }
 
     public long freshConstant() {
@@ -112,8 +111,6 @@ public class TermContext extends JavaSymbolicObject {
 
         private FreshCounter counter;
 
-        private Term topTerm;
-
         public Builder(GlobalContext globalContext) {
             this.globalContext = globalContext;
         }
@@ -123,13 +120,8 @@ public class TermContext extends JavaSymbolicObject {
             return this;
         }
 
-        public Builder topTerm(Term topTerm) {
-            this.topTerm = topTerm;
-            return this;
-        }
-
         public TermContext build() {
-            return new TermContext(globalContext, counter, topTerm);
+            return new TermContext(globalContext, counter);
         }
 
     }

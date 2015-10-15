@@ -37,7 +37,6 @@ import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 import java.lang.invoke.MethodHandle;
-import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
