@@ -123,7 +123,7 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        TermContext tc = TermContext.of(rewriter.rewritingContext);
+        TermContext tc = TermContext.builder(rewriter.rewritingContext).noFreshCounter().build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
         Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc, false, false).convert(term));
         return new KtoKORE().apply(t);

@@ -6,6 +6,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 
@@ -46,6 +47,7 @@ public class TermContext extends JavaSymbolicObject {
     /**
      * Returns a new {@link TermContext} with a fresh counter starting from {@code 0}.
      */
+    @Deprecated
     public static TermContext of(GlobalContext global) {
         return new TermContext(global, new FreshCounter(0));
     }
@@ -58,6 +60,9 @@ public class TermContext extends JavaSymbolicObject {
     }
 
     public long freshConstant() {
+        if (counter == null) {
+            throw KEMException.criticalError("No fresh counter available in this TermContext.");
+        }
         return counter.incrementAndGet();
     }
 
@@ -98,4 +103,35 @@ public class TermContext extends JavaSymbolicObject {
     public void accept(Visitor visitor) {
         throw new UnsupportedOperationException();
     }
+
+    public static Builder builder(GlobalContext globalContext) {
+        return new Builder(globalContext);
+    }
+
+    public static class Builder {
+
+        private final GlobalContext globalContext;
+
+        private FreshCounter counter = new FreshCounter(0);
+
+        public Builder(GlobalContext globalContext) {
+            this.globalContext = globalContext;
+        }
+
+        public Builder noFreshCounter() {
+            counter = null;
+            return this;
+        }
+
+        public Builder freshCounter(long initialValue) {
+            this.counter = new FreshCounter(initialValue);
+            return this;
+        }
+
+        public TermContext build() {
+            return new TermContext(globalContext, counter);
+        }
+
+    }
+
 }
