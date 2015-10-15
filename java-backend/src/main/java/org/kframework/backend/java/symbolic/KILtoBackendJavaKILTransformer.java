@@ -100,6 +100,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         super("Transform KIL into java backend KIL", context);
         this.freshRules = freshRules;
         this.globalContext = globalContext;
+        // TODO(YilongL): remove the call to "freshCounter(0)" once
+        // macro expansion doesn't trigger the fresh constants generation
         this.termContext = TermContext.builder(globalContext).freshCounter(0).build();
         this.indexingData = data;
         this.kem = kem;
