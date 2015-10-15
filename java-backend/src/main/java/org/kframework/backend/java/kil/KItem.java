@@ -233,8 +233,8 @@ public class KItem extends Term implements KItemRepresentation {
         }
     }
 
-    public boolean isEvaluable(TermContext context) {
-        return context.global().kItemOps.isEvaluable(this, context);
+    public boolean isEvaluable(GlobalContext context) {
+        return context.kItemOps.isEvaluable(this, context.getDefinition());
     }
 
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
@@ -289,10 +289,10 @@ public class KItem extends Term implements KItemRepresentation {
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
             try {
-                Term result = kItem.isEvaluable(context) ?
+                Term result = kItem.isEvaluable(context.global()) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                             kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
-                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context.global()) && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
                     if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
                         StringBuilder sb = new StringBuilder();
@@ -322,7 +322,7 @@ public class KItem extends Term implements KItemRepresentation {
             }
         }
 
-        public boolean isEvaluable(KItem kItem, TermContext context) {
+        public boolean isEvaluable(KItem kItem, Definition definition) {
             if (kItem.evaluable != null) {
                 return kItem.evaluable;
             }
@@ -338,7 +338,7 @@ public class KItem extends Term implements KItemRepresentation {
             }
 
             if (kLabelConstant.isSortPredicate()
-                    || !context.definition().functionRules().get(kLabelConstant).isEmpty()
+                    || !definition.functionRules().get(kLabelConstant).isEmpty()
                     || builtins.get().isBuiltinKLabel(kLabelConstant)) {
                 kItem.evaluable = true;
             }
@@ -359,7 +359,7 @@ public class KItem extends Term implements KItemRepresentation {
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
         public Term evaluateFunction(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
-            if (!kItem.isEvaluable(context)) {
+            if (!kItem.isEvaluable(context.global())) {
                 return kItem;
             }
 
