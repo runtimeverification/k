@@ -19,7 +19,10 @@ public class TermContext extends JavaSymbolicObject {
 
     private final GlobalContext global;
 
-    // TODO(YilongL): do we want to make it thread-safe?
+    /**
+     * This class shall not be accessed by more than one thread,
+     * so it is made non-thread-safe intentionally.
+     */
     private static class FreshCounter implements Serializable {
         private long value;
 
