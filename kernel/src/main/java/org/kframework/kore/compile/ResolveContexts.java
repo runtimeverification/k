@@ -73,9 +73,13 @@ public class ResolveContexts {
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitKORE() {
             K heated;
+            KVariable holeVar;
             public K process(K k) {
                 apply(k);
-                return heated;
+                if(heated != null)
+                    return heated;
+                else
+                    return holeVar;
             }
             @Override
             public Void apply(KRewrite k) {
@@ -90,6 +94,8 @@ public class ResolveContexts {
             public Void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
                     vars.put(k, k);
+                } else {
+                    holeVar = k;
                 }
                 return super.apply(k);
             }

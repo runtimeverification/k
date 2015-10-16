@@ -171,20 +171,20 @@ module KERNELC-SEMANTICS
    * If/choice
    */
   syntax KItem ::= "#wrap2" "(" K "," K ")"
-  rule if (HOLE) S1:Statement else S2:Statement
-    => expression2bool(HOLE) ~> #wrap2(S1, S2) requires isExpression(HOLE)
+  rule if (HOLE:Expression) S1:Statement else S2:Statement
+    => expression2bool(HOLE) ~> #wrap2(S1, S2)
     [heat]
-  rule HOLE ~> #wrap2(S1:Statement, S2:Statement)
-    => if (HOLE) S1 else S2 requires isBool(HOLE)
+  rule HOLE:Bool ~> #wrap2(S1:Statement, S2:Statement)
+    => if (HOLE) S1 else S2
     [cool]
   rule if( true) S:Statement else _:Statement => S    [structural]
   rule if(false) _:Statement else S:Statement => S    [structural]
 
-  rule HOLE ? E1:Expression : E2:Expression
-    => expression2bool(HOLE) ~> #wrap2(E1, E2) requires isExpression(HOLE)
+  rule HOLE:Expression ? E1:Expression : E2:Expression
+    => expression2bool(HOLE) ~> #wrap2(E1, E2)
     [heat]
-  rule HOLE ~> #wrap2(E1:Expression, E2:Expression)
-    => HOLE ? E1 : E2 requires isBool(HOLE)
+  rule HOLE:Bool ~> #wrap2(E1:Expression, E2:Expression)
+    => HOLE ? E1 : E2
     [cool]
   rule  true ? E:Expression : _:Expression => E   [structural]
   rule false ? _:Expression : E:Expression => E   [structural]
