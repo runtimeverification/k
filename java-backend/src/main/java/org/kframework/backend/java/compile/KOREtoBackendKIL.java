@@ -174,7 +174,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     @Override
     public Variable KVariable(String name, Att att) {
         Sort sort = Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K"));
-        String key = name.equals("HOLE") ? name : name + sort;
+        String key = name + sort;
         if (variableTable.containsKey(key)) {
             return variableTable.get(key);
         }

@@ -66,9 +66,13 @@ public class ResolveContexts {
         K requires = context.requires();
         K heated = new VisitKORE() {
             K heated;
+            KVariable holeVar;
             public K process(K k) {
                 apply(k);
-                return heated;
+                if(heated != null)
+                    return heated;
+                else
+                    return holeVar;
             }
             @Override
             public Void apply(KRewrite k) {
@@ -83,6 +87,8 @@ public class ResolveContexts {
             public Void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
                     vars.put(k, k);
+                } else {
+                    holeVar = k;
                 }
                 return super.apply(k);
             }
@@ -94,9 +100,6 @@ public class ResolveContexts {
                 return super.apply(k);
             }
         }.process(body);
-        if (heated == null) {
-            heated = ResolveStrict.HOLE;
-        }
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
