@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public class BuiltinList extends Collection implements KItemCollection {
 
-    private static enum BaseTermType {
+    private enum BaseTermType {
         VARIABLE, FUNCTION, PATTERN, LIST;
     }
 
@@ -46,8 +46,8 @@ public class BuiltinList extends Collection implements KItemCollection {
             ImmutableList<Term> elementsRight,
             ImmutableList<BaseTermType> baseTermTypes,
             ImmutableList<Variable> listVariables,
-            TermContext context) {
-        super(computeFrame(baseTerms), Kind.KITEM, context);
+            GlobalContext global) {
+        super(computeFrame(baseTerms), Kind.KITEM, global);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
@@ -63,17 +63,17 @@ public class BuiltinList extends Collection implements KItemCollection {
         }
     }
 
-    private BuiltinList(ImmutableList<Term> elementsLeft, TermContext context) {
+    private BuiltinList(ImmutableList<Term> elementsLeft, GlobalContext global) {
         this(elementsLeft,
              ImmutableList.<Term>of(),
              ImmutableList.<Term>of(),
              ImmutableList.<BaseTermType>of(),
              ImmutableList.<Variable>of(),
-             context);
+             global);
     }
 
-    public static Term concatenate(TermContext context, Term... lists) {
-        Builder builder = new Builder(context);
+    public static Term concatenate(GlobalContext global, Term... lists) {
+        Builder builder = new Builder(global);
         builder.concatenate(lists);
         return builder.build();
     }
@@ -226,14 +226,14 @@ public class BuiltinList extends Collection implements KItemCollection {
 
     @Override
     public List<Term> getKComponents() {
-        DataStructureSort sort = context.definition().dataStructureSortOf(sort());
+        DataStructureSort sort = global.getDefinition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
         Consumer<Term> addElementToComponents = element ->
                 components.add(KItem.of(
-                        KLabelConstant.of(sort.elementLabel(), context.definition()),
+                        KLabelConstant.of(sort.elementLabel(), global.getDefinition()),
                         KList.singleton(element),
-                        context, element.getSource(), element.getLocation()));
+                        global, element.getSource(), element.getLocation()));
 
         elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
@@ -248,8 +248,8 @@ public class BuiltinList extends Collection implements KItemCollection {
         return components;
     }
 
-    public static Builder builder(TermContext context) {
-        return new Builder(context);
+    public static Builder builder(GlobalContext global) {
+        return new Builder(global);
     }
 
     public static class BaseTerm {
@@ -342,10 +342,10 @@ public class BuiltinList extends Collection implements KItemCollection {
         private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<Variable> listVariablesBuilder = new ImmutableList.Builder<>();
-        private final TermContext context;
+        private final GlobalContext global;
 
-        public Builder(TermContext context) {
-            this.context = context;
+        public Builder(GlobalContext global) {
+            this.global = global;
         }
 
         /**
@@ -426,7 +426,7 @@ public class BuiltinList extends Collection implements KItemCollection {
                     if (!pendingElements.isEmpty()) {
                         addConcatTerm(new BuiltinList(
                                 ImmutableList.copyOf(pendingElements),
-                                context));
+                                global));
                         pendingElements.clear();
                     }
                     addConcatTerm(term);
@@ -439,7 +439,7 @@ public class BuiltinList extends Collection implements KItemCollection {
                         if (!pendingElements.isEmpty()) {
                             addConcatTerm(new BuiltinList(
                                     ImmutableList.copyOf(pendingElements),
-                                    context));
+                                    global));
                             pendingElements.clear();
                         }
                         addConcatTerms(list.baseTerms);
@@ -483,7 +483,7 @@ public class BuiltinList extends Collection implements KItemCollection {
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build(),
                     listVariablesBuilder.build(),
-                    context);
+                    global);
             return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
                    builtinList.baseTerms().get(0) :
                    builtinList;

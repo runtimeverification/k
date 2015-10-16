@@ -123,7 +123,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         termList.set(idx, resultBindingExp);
                     }
 
-                    kItem = KItem.of(kLabel, KList.concatenate(termList), context,
+                    kItem = KItem.of(kLabel, KList.concatenate(termList), context.global(),
                                 kItem.getSource(), kItem.getLocation());
                     return new DoneTransforming(kItem);
                 }

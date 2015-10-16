@@ -19,7 +19,7 @@ public class BuiltinSubstitutionOperations {
     public static Term userSubstitution(Term term, Term substitute, Term variable, TermContext context) {
         Map<Term, Term> substitution = new HashMap<>();
         substitution.put(variable, substitute);
-        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(substitution, term, context), context);
+        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(substitution, term, context), context.global());
     }
 
 }

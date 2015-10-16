@@ -173,10 +173,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .flatMap(r -> {
                         ConstrainedTerm initialTerm = new ConstrainedTerm(
                                 r.leftHandSide(),
-                                ConjunctiveFormula.of(termContext).addAll(r.requires()));
+                                ConjunctiveFormula.of(rewritingContext).addAll(r.requires()),
+                                termContext);
                         ConstrainedTerm targetTerm = new ConstrainedTerm(
                                 r.rightHandSide(),
-                                ConjunctiveFormula.of(termContext).addAll(r.ensures()));
+                                ConjunctiveFormula.of(rewritingContext).addAll(r.ensures()),
+                                termContext);
                         return rewriter.proveRule(initialTerm, targetTerm, allRules).stream();
                     })
                     .collect(Collectors.toList());

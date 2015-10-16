@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import java.util.Map;
 
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Immutable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -25,6 +26,7 @@ public class DeepCloner {
         cloner.dontCloneInstanceOf(Immutable.class);
         cloner.dontCloneInstanceOf(TermContext.class);
         cloner.dontCloneInstanceOf(Definition.class);
+        cloner.dontCloneInstanceOf(GlobalContext.class);
     }
 
     public static Term clone(Term term) {

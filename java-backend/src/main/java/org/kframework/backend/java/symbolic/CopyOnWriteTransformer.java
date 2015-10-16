@@ -33,14 +33,17 @@ public class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
     protected final Definition definition;
+    protected final GlobalContext global;
 
     public CopyOnWriteTransformer(TermContext context) {
         this.context = context;
+        this.global = context.global();
         this.definition = context.definition();
     }
 
     public CopyOnWriteTransformer() {
         this.context = null;
+        this.global = null;
         this.definition = null;
     }
 
@@ -76,7 +79,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term term = (Term) constrainedTerm.term().accept(this);
         ConjunctiveFormula constraint = (ConjunctiveFormula) constrainedTerm.constraint().accept(this);
         if (term != constrainedTerm.term() || constraint != constrainedTerm.constraint()) {
-            constrainedTerm = new ConstrainedTerm(term, constraint);
+            constrainedTerm = new ConstrainedTerm(term, constraint, context);
         }
         return constrainedTerm;
     }
@@ -132,7 +135,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = KItem.of(kLabel, kList, context, kItem.getSource(), kItem.getLocation());
+            kItem = KItem.of(kLabel, kList, global, kItem.getSource(), kItem.getLocation());
         }
         return kItem;
     }
@@ -243,7 +246,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder(global);
         for (Term term : builtinList.elementsLeft()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
@@ -265,7 +268,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         boolean changed = false;
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder(global);
 
         for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
@@ -309,7 +312,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(global);
         for(Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
@@ -385,7 +388,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     rule.cellsToCopy(),
                     rule.matchingInstructions(),
                     rule,
-                    context);
+                    global);
         } else {
             return rule;
         }
@@ -393,7 +396,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(context);
+        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(global);
 
         for (Map.Entry<Variable, Term> entry : conjunctiveFormula.substitution().entrySet()) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.add(
@@ -412,8 +415,8 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        if (context.global().stage == Stage.REWRITING) {
-            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
+        if (global.stage == Stage.REWRITING) {
+            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify(context);
         }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
                 transformedConjunctiveFormula :
@@ -425,7 +428,7 @@ public class CopyOnWriteTransformer implements Transformer {
         DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
                 disjunctiveFormula.conjunctions().stream()
                         .map(c -> (ConjunctiveFormula) c.accept(this))
-                        .collect(Collectors.toList()), context);
+                        .collect(Collectors.toList()), global);
         return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
                 transformedDisjunctiveFormula :
                 disjunctiveFormula;

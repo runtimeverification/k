@@ -169,8 +169,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             /* bool2int */
             "smt_bool2int");
 
-    public static String translateConstraint(ConjunctiveFormula constraint) {
-        KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.termContext());
+    public static String translateConstraint(ConjunctiveFormula constraint, TermContext termContext) {
+        KILtoSMTLib transformer = new KILtoSMTLib(true, termContext);
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
         return transformer.getSortAndFunctionDeclarations(transformer.variables())
                 + transformer.getAxioms()
@@ -181,9 +181,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     public static String translateImplication(
             ConjunctiveFormula leftHandSide,
             ConjunctiveFormula rightHandSide,
-            Set<Variable> rightHandSideOnlyVariables) {
-        KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.termContext());
-        KILtoSMTLib rightTransformer = new KILtoSMTLib(false, rightHandSide.termContext());
+            Set<Variable> rightHandSideOnlyVariables,
+            TermContext termContext) {
+        KILtoSMTLib leftTransformer = new KILtoSMTLib(true, termContext);
+        KILtoSMTLib rightTransformer = new KILtoSMTLib(false, termContext);
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
@@ -276,7 +277,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     private String getAxioms() {
         StringBuilder sb = new StringBuilder();
-        for (Rule rule : context.definition().functionRules().values()) {
+        for (Rule rule : global.getDefinition().functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
                 try {
                     KILtoSMTLib transformer = new KILtoSMTLib(false, context);
@@ -355,7 +356,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
             return "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")";
-        } else if (s == Sort.FLOAT && !context.global().krunOptions.experimental.smt.floatsAsPO) {
+        } else if (s == Sort.FLOAT && !global.krunOptions.experimental.smt.floatsAsPO) {
             Pair<Integer, Integer> pair = FloatToken.getExponentAndSignificandOrDie(node);
             return "(_ FP " + pair.getLeft() + " " + pair.getRight() + ")";
         } else {
@@ -389,7 +390,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
         if (!skipEqualities) {
             constraint.substitution().entrySet().stream()
-                    .map(entry -> new Equality(entry.getKey(), entry.getValue(), context))
+                    .map(entry -> new Equality(entry.getKey(), entry.getValue(), global))
                     .forEach(equalities::add);
 
         }
@@ -466,7 +467,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             throw new UnsupportedOperationException("missing SMTLib translation for " + kLabel);
         }
 
-        if (context.global().krunOptions.experimental.smt.floatsAsPO) {
+        if (global.krunOptions.experimental.smt.floatsAsPO) {
             switch (kLabel.label()) {
                 case "'_<Float_":
                     label = "float_lt";
@@ -551,11 +552,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(FloatToken floatToken) {
-        if (context.global().krunOptions.experimental.smt.floatsAsPO
+        if (global.krunOptions.experimental.smt.floatsAsPO
                 && (floatToken.bigFloatValue().isPositiveZero() || floatToken.bigFloatValue().isNegativeZero())) {
             return new SMTLibTerm("float_zero");
         }
-        assert !context.global().krunOptions.experimental.smt.floatsAsPO;
+        assert !global.krunOptions.experimental.smt.floatsAsPO;
 
         return new SMTLibTerm(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",
@@ -577,7 +578,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         //return builtinList.toKore().accept(this);
-        return ((BuiltinList) BuiltinList.concatenate(context, builtinList)).toKore().accept(this);
+        return ((BuiltinList) BuiltinList.concatenate(global, builtinList)).toKore().accept(this);
     }
 
     @Override

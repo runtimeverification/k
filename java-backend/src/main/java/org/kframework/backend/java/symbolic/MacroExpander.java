@@ -101,7 +101,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 rule.cellsToCopy(),
                 rule.matchingInstructions(),
                 rule,
-                context);
+                global);
     }
 
     public Term processTerm(Term term) {

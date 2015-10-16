@@ -285,7 +285,7 @@ public final class BuiltinBitVectorOperations {
             IntToken count,
             TermContext context) {
         if (bitwidth.intValue() > 0 && bitwidth.intValue() * count.intValue() <= term.bitwidth) {
-            BuiltinList.Builder builder = BuiltinList.builder(context);
+            BuiltinList.Builder builder = BuiltinList.builder(context.global());
             builder.addItems(term.toDigits(bitwidth.intValue(), count.intValue()));
             return (BuiltinList) builder.build();
         } else {

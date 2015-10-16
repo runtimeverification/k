@@ -105,7 +105,7 @@ public class JavaSymbolicExecutor implements Executor {
         if (!javaOptions.symbolicExecution) {
             return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
         }
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
         return conventionalRewriteRun(constrainedTerm, bound);
     }
 

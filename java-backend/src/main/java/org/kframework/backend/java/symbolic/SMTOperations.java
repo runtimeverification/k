@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.utils.options.SMTOptions;
@@ -26,7 +27,7 @@ public class SMTOperations {
         this.z3 = z3;
     }
 
-    public boolean checkUnsat(ConjunctiveFormula constraint) {
+    public boolean checkUnsat(ConjunctiveFormula constraint, TermContext context) {
         if (smtOptions.smt != SMTSolver.Z3) {
             return false;
         }
@@ -37,7 +38,7 @@ public class SMTOperations {
 
         boolean result = false;
         try {
-            String query = KILtoSMTLib.translateConstraint(constraint);
+            String query = KILtoSMTLib.translateConstraint(constraint, context);
             result = z3.checkQuery(query, smtOptions.z3CnstrTimeout);
             if (result && RuleAuditing.isAuditBegun()) {
                 System.err.println("SMT query returned unsat: " + query);
@@ -51,11 +52,12 @@ public class SMTOperations {
     public boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> rightOnlyVariables) {
+            Set<Variable> rightOnlyVariables,
+            TermContext context) {
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
                 return z3.checkQuery(
-                        KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
+                        KILtoSMTLib.translateImplication(left, right, rightOnlyVariables, context),
                         smtOptions.z3ImplTimeout);
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();

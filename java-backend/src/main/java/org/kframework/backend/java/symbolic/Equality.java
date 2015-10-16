@@ -24,7 +24,7 @@ public class Equality implements Serializable {
 
     private TruthValue truthValue = null;
 
-    public Equality(Term leftHandSide, Term rightHandSide, TermContext context) {
+    public Equality(Term leftHandSide, Term rightHandSide, GlobalContext global) {
         // TODO(YilongL): this seems a little bit ad-hoc...
         if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
             KList kList = (KList) (((KItem) leftHandSide).kList());
@@ -50,7 +50,7 @@ public class Equality implements Serializable {
 
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
-        this.global = context.global();
+        this.global = global;
     }
 
     public Term leftHandSide() {
@@ -118,11 +118,11 @@ public class Equality implements Serializable {
                 || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
     }
 
-    public KItem toK(TermContext context) {
+    public KItem toK() {
         return KItem.of(
-                KLabelConstant.of("'_==K_", context.definition()),
+                KLabelConstant.of("'_==K_", global.getDefinition()),
                 KList.concatenate(leftHandSide, rightHandSide),
-                context);
+                global);
     }
 
     @Override

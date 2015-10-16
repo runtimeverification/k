@@ -155,7 +155,7 @@ public class SymbolicRewriter {
             return results = subject.unify(buildPattern(rule, subject.termContext()),
                     rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())
                     .stream()
-                    .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight()))
+                    .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight(), subject.termContext()))
                     .collect(Collectors.toList());
         } catch (KEMException e) {
             e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
@@ -186,7 +186,8 @@ public class SymbolicRewriter {
     private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
         return new ConstrainedTerm(
                 rule.leftHandSide(),
-                ConjunctiveFormula.of(context).add(rule.lookups()).addAll(rule.requires()));
+                ConjunctiveFormula.of(context.global()).add(rule.lookups()).addAll(rule.requires()),
+                context);
     }
 
     /**
@@ -199,24 +200,25 @@ public class SymbolicRewriter {
             Rule rule,
             ConjunctiveFormula constraint,
             Term subject,
-            boolean expandPattern) {
+            boolean expandPattern,
+            TermContext context) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
-                    FreshOperations.freshOfSort(variable.sort(), constraint.termContext()));
+                    FreshOperations.freshOfSort(variable.sort(), context));
         }
-        constraint = constraint.addAll(rule.ensures()).simplify();
+        constraint = constraint.addAll(rule.ensures()).simplify(context);
 
         Term term;
 
         /* apply the constraints substitution on the rule RHS */
-        constraint.termContext().setTopConstraint(constraint);
+        context.setTopConstraint(constraint);
         Set<Variable> substitutedVars = Sets.union(rule.freshConstants(), rule.matchingVariables());
-        constraint = constraint.orientSubstitution(substitutedVars);
+        constraint = constraint.orientSubstitution(substitutedVars, context);
         if (rule.isCompiledForFastRewriting()) {
-            term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, constraint.termContext());
+            term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, context);
         } else {
-            term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), constraint.termContext());
+            term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), context);
         }
 
         /* eliminate bindings of the substituted variables */
@@ -226,17 +228,17 @@ public class SymbolicRewriter {
         Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
         /* rename rule variables in both the term and the constraint */
-        term = term.substituteWithBinders(renameSubst, constraint.termContext());
-        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, constraint.termContext())).simplify();
+        term = term.substituteWithBinders(renameSubst, context);
+        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, context)).simplify(context);
 
-        ConstrainedTerm result = new ConstrainedTerm(term, constraint);
+        ConstrainedTerm result = new ConstrainedTerm(term, constraint, context);
         if (expandPattern) {
             if (rule.isCompiledForFastRewriting()) {
-                result = new ConstrainedTerm(term.substituteAndEvaluate(constraint.substitution(), constraint.termContext()), constraint);
+                result = new ConstrainedTerm(term.substituteAndEvaluate(constraint.substitution(), context), constraint, context);
             }
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalse() || result.constraint().checkUnsat()) {
+            if (result.constraint().isFalse() || result.constraint().checkUnsat(context)) {
                 result = null;
             }
         }
@@ -454,7 +456,8 @@ public class SymbolicRewriter {
                             cterm.constraint().removeBindings(
                                     Sets.difference(
                                             cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())));
+                                            initialTerm.variableSet())),
+                            cterm.termContext());
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
@@ -481,7 +484,7 @@ public class SymbolicRewriter {
             ConstrainedTerm pattern = buildPattern(specRule, constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true);
+                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
             }
         }
         return null;

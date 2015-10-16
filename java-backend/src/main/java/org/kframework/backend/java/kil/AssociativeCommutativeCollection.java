@@ -20,13 +20,13 @@ public abstract class AssociativeCommutativeCollection extends Collection implem
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables,
-            TermContext context) {
+            GlobalContext global) {
         super(computeFrame(
                 collectionPatterns,
                 collectionFunctions,
                 collectionVariables),
                 Kind.KITEM,
-                context);
+                global);
         this.collectionPatterns = collectionPatterns;
         this.collectionVariables = collectionVariables;
         this.collectionFunctions = collectionFunctions;

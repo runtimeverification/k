@@ -54,7 +54,11 @@ public abstract class AbstractUnifier implements Unifier {
 
     //private boolean matchOnFunctionSymbol;
     //
-    protected TermContext termContext;
+    protected final TermContext termContext;
+
+    protected AbstractUnifier(TermContext termContext) {
+        this.termContext = termContext;
+    }
 
     void addUnificationTask(Term term, Term otherTerm) {
         taskBuffer.add(Pair.of(term, otherTerm));

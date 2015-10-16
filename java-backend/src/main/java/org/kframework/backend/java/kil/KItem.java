@@ -57,18 +57,18 @@ public class KItem extends Term implements KItemRepresentation {
     private Sort sort;
     private Set<Sort> possibleSorts;
     private transient boolean enableCache; // for lazy computation
-    private transient TermContext termContext; // for lazy computation
+    private final GlobalContext global; // for lazy computation
 
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
-    public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        return of(kLabel, kList, termContext, null, null);
+    public static KItem of(Term kLabel, Term kList, GlobalContext global) {
+        return of(kLabel, kList, global, null, null);
     }
 
-    public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
-        return new KItem(kLabel, KCollection.upKind(kList, Kind.KLIST), termContext,
-                termContext.global().stage, source, location);
+    public static KItem of(Term kLabel, Term kList, GlobalContext global, Source source, Location location) {
+        return new KItem(kLabel, KCollection.upKind(kList, Kind.KLIST), global,
+                global.stage, source, location);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -86,17 +86,17 @@ public class KItem extends Term implements KItemRepresentation {
         this.sort = sort;
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
-        this.termContext = null;
+        this.global = null;
         this.enableCache = false;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location) {
+    private KItem(Term kLabel, Term kList, GlobalContext global, Stage stage, Source source, Location location) {
         super(Kind.KITEM, source, location);
         this.kLabel = kLabel;
         this.kList = kList;
-        this.termContext = termContext;
+        this.global = global;
 
-        Definition definition = termContext.definition();
+        Definition definition = global.getDefinition();
 
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
@@ -128,9 +128,11 @@ public class KItem extends Term implements KItemRepresentation {
         if (sort != null) {
             return;
         }
+
+        Definition definition = global.getDefinition();
         if (enableCache) {
             CacheTableColKey cacheTabColKey = new CacheTableColKey((KLabelConstant) kLabel, (KList) kList);
-            CacheTableValue cacheTabVal = termContext.definition().getSortCacheValue(cacheTabColKey);
+            CacheTableValue cacheTabVal = definition.getSortCacheValue(cacheTabColKey);
             if (cacheTabVal != null) {
                 sort = cacheTabVal.sort;
                 isExactSort = cacheTabVal.isExactSort;
@@ -140,7 +142,6 @@ public class KItem extends Term implements KItemRepresentation {
         }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
         KList kList = (KList) this.kList;
-        Definition definition = termContext.definition();
         Subsorts subsorts = definition.subsorts();
 
         Set<Sort> sorts = Sets.newHashSet();
@@ -157,11 +158,12 @@ public class KItem extends Term implements KItemRepresentation {
          */
         /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
         for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
-            if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
+            TermContext context = TermContext.builder(global).build();
+            if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), context)
                     .equals(BoolToken.TRUE)) {
                 sorts.add(rule.predicateSort());
             } else if (BoolToken.TRUE.equals(MetaK.unifiable(
-                    kList, rule.sortPredicateArgument().kList(), termContext))) {
+                    kList, rule.sortPredicateArgument().kList(), context))) {
                 possibleSorts.add(rule.predicateSort());
             }
         }
@@ -229,7 +231,7 @@ public class KItem extends Term implements KItemRepresentation {
         CacheTableValue cacheTabVal = new CacheTableValue(sort, isExactSort, possibleSorts);
 
         if (enableCache) {
-            definition.putSortCacheValue(new CacheTableColKey(kLabelConstant, (KList) kList), cacheTabVal);
+            definition.putSortCacheValue(new CacheTableColKey(kLabelConstant, kList), cacheTabVal);
         }
     }
 
@@ -511,9 +513,10 @@ public class KItem extends Term implements KItemRepresentation {
                                         context);
                                 ConstrainedTerm pattern = new ConstrainedTerm(
                                         ((KItem) rule.leftHandSide()).kList(),
-                                        ConjunctiveFormula.of(context)
+                                        ConjunctiveFormula.of(context.global())
                                                 .add(rule.lookups())
-                                                .addAll(rule.requires()));
+                                                .addAll(rule.requires()),
+                                        context);
                                 if (!subject.unify(pattern, null, null, null).isEmpty()) {
                                     return kItem;
                                 }

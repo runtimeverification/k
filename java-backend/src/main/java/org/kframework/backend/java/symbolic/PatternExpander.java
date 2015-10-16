@@ -29,7 +29,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
         super(context);
         this.constraint = constraint;
         this.narrowing = narrowing;
-        extraConstraint = ConjunctiveFormula.of(context);
+        extraConstraint = ConjunctiveFormula.of(global);
     }
 
     public ConjunctiveFormula extraConstraint() {
@@ -53,12 +53,12 @@ public class PatternExpander extends CopyOnWriteTransformer {
         List<ConstrainedTerm> results = new ArrayList<>();
         Term inputKList = KList.concatenate(kItem.getPatternInput());
         Term outputKList = KList.concatenate(kItem.getPatternOutput());
-        for (Rule rule : context.definition().patternRules().get(kLabel)) {
+        for (Rule rule : global.getDefinition().patternRules().get(kLabel)) {
             Term ruleInputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternInput());
             Term ruleOutputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternOutput());
-            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.of(context)
+            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.of(global)
                     .add(inputKList, ruleInputKList)
-                    .simplify();
+                    .simplify(context);
             // TODO(AndreiS): there is only one solution here, so no list of constraints
             if (unificationConstraint.isFalse()) {
                 continue;
@@ -68,30 +68,30 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 ConjunctiveFormula globalConstraint = unificationConstraint
                         .addAll(constraint.equalities())
                         .addAll(rule.requires())
-                        .simplify();
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                        .simplify(context);
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat(context)) {
                     continue;
                 }
                 globalConstraint = globalConstraint
                         .add(outputKList, ruleOutputKList)
                         .addAll(rule.ensures())
-                        .simplify();
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                        .simplify(context);
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat(context)) {
                     continue;
                 }
             } else {
                 Set<Variable> existVariables = ruleInputKList.variableSet();
-                unificationConstraint = unificationConstraint.orientSubstitution(existVariables);
+                unificationConstraint = unificationConstraint.orientSubstitution(existVariables, context);
                 if (!unificationConstraint.isMatching(existVariables)) {
                     continue;
                 }
 
                 ConjunctiveFormula requires = unificationConstraint
                         .addAll(rule.requires())
-                        .simplify();
+                        .simplify(context);
                 // this should be guaranteed by the above unificationConstraint.isMatching
                 assert requires.substitution().keySet().containsAll(existVariables);
-                if (requires.isFalse() || !constraint.implies(requires, existVariables)) {
+                if (requires.isFalse() || !constraint.implies(requires, existVariables, context)) {
                     continue;
                 }
             }
@@ -99,14 +99,14 @@ public class PatternExpander extends CopyOnWriteTransformer {
             unificationConstraint = unificationConstraint
                     .add(outputKList, ruleOutputKList)
                     .addAll(rule.ensures())
-                    .simplify();
-            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
-                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false));
+                    .simplify(context);
+            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat(context)) {
+                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false, context));
             }
         }
 
         if (results.size() == 1) {
-            extraConstraint = extraConstraint.add(results.get(0).constraint()).simplify();
+            extraConstraint = extraConstraint.add(results.get(0).constraint()).simplify(context);
             return results.get(0).term().accept(this);
         } else {
             return kItem;

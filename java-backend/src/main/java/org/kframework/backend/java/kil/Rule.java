@@ -122,7 +122,7 @@ public class Rule extends JavaSymbolicObject {
             Set<CellLabel> cellsToCopy,
             List<MatchingInstruction> instructions,
             ASTNode oldRule,
-            TermContext termContext) {
+            GlobalContext global) {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
@@ -140,7 +140,7 @@ public class Rule extends JavaSymbolicObject {
                 || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDOUT)
                 || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
-            BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
+            BuiltinList.Builder streamListBuilder = BuiltinList.builder(global);
             for (Equality eq : lookups.equalities()) {
                 streamListBuilder.addItem(eq.rightHandSide());
             }
@@ -150,10 +150,10 @@ public class Rule extends JavaSymbolicObject {
 
             Term streamList = streamListBuilder.build();
             this.indexingPair = oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN) ?
-                    IndexingPair.getInstreamIndexingPair(streamList, termContext.definition()) :
-                    IndexingPair.getOutstreamIndexingPair(streamList, termContext.definition());
+                    IndexingPair.getInstreamIndexingPair(streamList, global.getDefinition()) :
+                    IndexingPair.getOutstreamIndexingPair(streamList, global.getDefinition());
         } else {
-            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(termContext.definition());
+            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(global.getDefinition());
 
             /*
              * Compute indexing information only if the left-hand side of this rule has precisely one
@@ -162,7 +162,7 @@ public class Rule extends JavaSymbolicObject {
             if (indexingPairs.size() == 1) {
                 this.indexingPair = indexingPairs.iterator().next();
             } else {
-                this.indexingPair = termContext.definition().indexingData.TOP_INDEXING_PAIR;
+                this.indexingPair = global.getDefinition().indexingData.TOP_INDEXING_PAIR;
             }
         }
 
@@ -238,7 +238,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
             for (CellLabel wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (termContext.definition().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
+                if (global.getDefinition().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }
@@ -250,13 +250,13 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             final ImmutableSet.Builder<CellLabel> readBuilder = ImmutableSet.builder();
             lhsOfReadCells.keySet().stream().forEach(c -> {
-                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                global.getDefinition().getConfigurationStructureMap().descendants(c.name()).stream()
                         .forEach(s -> readBuilder.add(CellLabel.of(s)));
             });
             readCells = readBuilder.build();
             final ImmutableSet.Builder<CellLabel> writeBuilder = ImmutableSet.builder();
             rhsOfWriteCells.keySet().stream().forEach(c -> {
-                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                global.getDefinition().getConfigurationStructureMap().descendants(c.name()).stream()
                         .forEach(s -> writeBuilder.add(CellLabel.of(s)));
             });
             writeCells = writeBuilder.build();

@@ -52,7 +52,7 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Map<Variable,Variable> renameSubst = Variable.rename(variables);
                         Term freshBoundVars = boundVars.substitute(renameSubst, context);
                         Term freshBindingExp = bindingExp.substitute(renameSubst, context);
-                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshBindingExp), context,
+                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshBindingExp), context.global(),
                                     kItem.getSource(), kItem.getLocation());
 //                    }
                 }

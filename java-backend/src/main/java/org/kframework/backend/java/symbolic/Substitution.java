@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -116,14 +117,14 @@ public class Substitution<K extends Term, V extends Term> implements Map<K, V>, 
         return new Substitution<>(evaluatedEntries);
     }
 
-    public List<Equality> equalities(TermContext context) {
+    public List<Equality> equalities(GlobalContext global) {
         return entries.entrySet().stream()
-                .map(entry -> new Equality(entry.getKey(), entry.getValue(), context))
+                .map(entry -> new Equality(entry.getKey(), entry.getValue(), global))
                 .collect(Collectors.toList());
     }
 
-    public boolean isFalse(TermContext context) {
-        return equalities(context).stream().anyMatch(e -> e.truthValue() == TruthValue.FALSE);
+    public boolean isFalse(GlobalContext global) {
+        return equalities(global).stream().anyMatch(e -> e.truthValue() == TruthValue.FALSE);
     }
 
     @Override

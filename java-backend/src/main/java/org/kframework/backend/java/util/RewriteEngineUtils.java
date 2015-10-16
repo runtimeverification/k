@@ -6,6 +6,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -29,8 +30,8 @@ import java.util.stream.Collectors;
  */
 public class RewriteEngineUtils {
 
-    public static boolean isSubsortedEq(Term big, Term small, TermContext context) {
-        return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
+    public static boolean isSubsortedEq(Term big, Term small, Definition definition) {
+        return definition.subsorts().isSubsortedEq(big.sort(), small.sort());
     }
 
     /**
@@ -130,7 +131,7 @@ public class RewriteEngineUtils {
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
                     if (!evaluatedReq.isGround()
                             && context.getTopConstraint() != null
-                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet())) {
+                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context.global()).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet(), context)) {
                         i++;
                         continue;
                     }
