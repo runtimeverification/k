@@ -22,14 +22,12 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
 
-  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence with kore.KApply {
+  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
     val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
       case k: kore.KApply => k
-      case _ => ???
+      case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
     }
-    val klabel: kore.KLabel = kApply.klabel
-    val klist: kore.KList = kApply.klist
 
     def iterator: Iterator[K] = elements.iterator
 
@@ -37,8 +35,6 @@ object ADT {
       case s: KSequence => s.elements == elements
       case _ => false
     }
-
-    override def computeHashCode = super[KApply].computeHashCode
   }
 
   object KSequence {

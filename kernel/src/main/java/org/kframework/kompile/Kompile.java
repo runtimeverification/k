@@ -21,6 +21,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.ADT;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -162,10 +163,19 @@ public class Kompile {
                 .andThen(func(this::addProgramModule))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(Kompile::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
+    }
+
+    private static K convertKSeqToKApply(K ruleBody) {
+        return new TransformKORE() {
+            public K apply(KSequence kseq) {
+                return ((ADT.KSequence) kseq).kApply();
+            }
+        }.apply(ruleBody);
     }
 
     private Sentence markSingleVariables(Sentence s) {
