@@ -148,12 +148,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
-        constraint = constraint.orientSubstitution(rightOnlyVariables, context);
+        constraint = constraint.orientSubstitution(rightOnlyVariables);
 
         ConjunctiveFormula leftHandSide = data.constraint;
         ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
         rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution(), context);
-        if (!leftHandSide.implies(rightHandSide, rightOnlyVariables, context)) {
+        if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
         }
 
@@ -210,7 +210,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         List<Pair<ConjunctiveFormula, Boolean>> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
             variables = variables == null ? constrainedTerm.variableSet() : variables;
-            candidate = candidate.orientSubstitution(variables, context);
+            candidate = candidate.orientSubstitution(variables);
 
             ConjunctiveFormula solution = candidate.addAndSimplify(constraint(), context);
             if (solution.isFalse()) {
@@ -220,7 +220,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             boolean isMatching = candidate.isMatching(variables);
-            if (!isMatching && solution.checkUnsat(context)) {
+            if (!isMatching && solution.checkUnsat()) {
                 continue;
             }
 

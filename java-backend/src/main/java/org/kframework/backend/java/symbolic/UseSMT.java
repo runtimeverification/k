@@ -45,7 +45,7 @@ public class UseSMT implements Serializable {
             Solver solver = context.mkSolver();
             BoolExpr query = context.parseSMTLIB2String(
                     // TODO(AndreiS): this should be included from the default smt prelude
-                    "(declare-sort IntSeq)" + KILtoSMTLib.translateConstraint(constraint, termContext),
+                    "(declare-sort IntSeq)" + KILtoSMTLib.translateConstraint(constraint),
                     null,
                     null,
                     null,

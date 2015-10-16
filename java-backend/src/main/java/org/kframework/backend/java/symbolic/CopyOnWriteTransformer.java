@@ -41,6 +41,12 @@ public class CopyOnWriteTransformer implements Transformer {
         this.definition = context.definition();
     }
 
+    public CopyOnWriteTransformer(GlobalContext global) {
+        this.context = TermContext.builder(global).build();
+        this.global = global;
+        this.definition = global.getDefinition();
+    }
+
     public CopyOnWriteTransformer() {
         this.context = null;
         this.global = null;

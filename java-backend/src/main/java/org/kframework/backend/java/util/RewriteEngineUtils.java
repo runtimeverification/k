@@ -131,7 +131,7 @@ public class RewriteEngineUtils {
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
                     if (!evaluatedReq.isGround()
                             && context.getTopConstraint() != null
-                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context.global()).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet(), context)) {
+                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context.global()).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet())) {
                         i++;
                         continue;
                     }

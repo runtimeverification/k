@@ -214,7 +214,7 @@ public class SymbolicRewriter {
         /* apply the constraints substitution on the rule RHS */
         context.setTopConstraint(constraint);
         Set<Variable> substitutedVars = Sets.union(rule.freshConstants(), rule.matchingVariables());
-        constraint = constraint.orientSubstitution(substitutedVars, context);
+        constraint = constraint.orientSubstitution(substitutedVars);
         if (rule.isCompiledForFastRewriting()) {
             term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, context);
         } else {
@@ -238,7 +238,7 @@ public class SymbolicRewriter {
             }
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalse() || result.constraint().checkUnsat(context)) {
+            if (result.constraint().isFalse() || result.constraint().checkUnsat()) {
                 result = null;
             }
         }

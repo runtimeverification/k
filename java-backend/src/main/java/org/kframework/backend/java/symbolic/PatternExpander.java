@@ -69,19 +69,19 @@ public class PatternExpander extends CopyOnWriteTransformer {
                         .addAll(constraint.equalities())
                         .addAll(rule.requires())
                         .simplify(context);
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat(context)) {
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
                 }
                 globalConstraint = globalConstraint
                         .add(outputKList, ruleOutputKList)
                         .addAll(rule.ensures())
                         .simplify(context);
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat(context)) {
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
                 }
             } else {
                 Set<Variable> existVariables = ruleInputKList.variableSet();
-                unificationConstraint = unificationConstraint.orientSubstitution(existVariables, context);
+                unificationConstraint = unificationConstraint.orientSubstitution(existVariables);
                 if (!unificationConstraint.isMatching(existVariables)) {
                     continue;
                 }
@@ -91,7 +91,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                         .simplify(context);
                 // this should be guaranteed by the above unificationConstraint.isMatching
                 assert requires.substitution().keySet().containsAll(existVariables);
-                if (requires.isFalse() || !constraint.implies(requires, existVariables, context)) {
+                if (requires.isFalse() || !constraint.implies(requires, existVariables)) {
                     continue;
                 }
             }
@@ -100,7 +100,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .add(outputKList, ruleOutputKList)
                     .addAll(rule.ensures())
                     .simplify(context);
-            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat(context)) {
+            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
                 results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false, context));
             }
         }

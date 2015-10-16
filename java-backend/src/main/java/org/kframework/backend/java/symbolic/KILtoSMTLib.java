@@ -7,6 +7,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -15,7 +16,6 @@ import org.kframework.backend.java.kil.SMTLibTerm;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.SortSignature;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -169,8 +169,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             /* bool2int */
             "smt_bool2int");
 
-    public static String translateConstraint(ConjunctiveFormula constraint, TermContext termContext) {
-        KILtoSMTLib transformer = new KILtoSMTLib(true, termContext);
+    public static String translateConstraint(ConjunctiveFormula constraint) {
+        KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.globalContext());
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
         return transformer.getSortAndFunctionDeclarations(transformer.variables())
                 + transformer.getAxioms()
@@ -181,10 +181,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     public static String translateImplication(
             ConjunctiveFormula leftHandSide,
             ConjunctiveFormula rightHandSide,
-            Set<Variable> rightHandSideOnlyVariables,
-            TermContext termContext) {
-        KILtoSMTLib leftTransformer = new KILtoSMTLib(true, termContext);
-        KILtoSMTLib rightTransformer = new KILtoSMTLib(false, termContext);
+            Set<Variable> rightHandSideOnlyVariables) {
+        KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.globalContext());
+        KILtoSMTLib rightTransformer = new KILtoSMTLib(false, rightHandSide.globalContext());
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
@@ -220,8 +219,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final HashSet<Variable> variables;
     private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
 
-    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
-        super(context);
+    public KILtoSMTLib(boolean skipEqualities, GlobalContext global) {
+        super(global);
         this.skipEqualities = skipEqualities;
         variables = new HashSet<>();
     }
@@ -280,7 +279,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         for (Rule rule : global.getDefinition().functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
                 try {
-                    KILtoSMTLib transformer = new KILtoSMTLib(false, context);
+                    KILtoSMTLib transformer = new KILtoSMTLib(false, global);
                     String leftExpression = ((SMTLibTerm) rule.leftHandSide().accept(transformer)).expression();
                     String rightExpression = ((SMTLibTerm) rule.rightHandSide().accept(transformer)).expression();
                     sb.append("(assert ");

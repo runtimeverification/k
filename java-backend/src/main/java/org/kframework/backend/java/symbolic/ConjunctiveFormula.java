@@ -110,6 +110,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this(substitution, equalities, disjunctions, truthValue, null, global);
     }
 
+    public GlobalContext globalContext() {
+        return global;
+    }
+
     public Substitution<Variable, Term> substitution() {
         return substitution;
     }
@@ -506,7 +510,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return equalities.isEmpty() && disjunctions.isEmpty();
     }
 
-    public ConjunctiveFormula orientSubstitution(Set<Variable> variables, TermContext context) {
+    public ConjunctiveFormula orientSubstitution(Set<Variable> variables) {
         if (substitution.keySet().containsAll(variables)) {
             return this;
         }
@@ -532,6 +536,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
         }
 
+        TermContext context = TermContext.builder(global).build();
         return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, context)).simplify(context);
     }
 
@@ -558,11 +563,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .collect(Collectors.toList()), global);
     }
 
-    public boolean checkUnsat(TermContext context) {
-        return global.constraintOps.checkUnsat(this, context);
+    public boolean checkUnsat() {
+        return global.constraintOps.checkUnsat(this);
     }
 
-    public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables, TermContext context) {
+    public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
         assert !constraint.isFalse();
 
@@ -580,9 +585,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
-            right = right.orientSubstitution(rightOnlyVariables, context);
+            right = right.orientSubstitution(rightOnlyVariables);
             right = left.simplifyConstraint(right);
-            right = right.orientSubstitution(rightOnlyVariables, context);
+            right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
                 if (global.globalOptions.debug) {
                     System.err.println("Implication proved by simplification");
@@ -599,12 +604,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 if (global.globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
+                TermContext context = TermContext.builder(global).build();
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));
                 implications.add(Pair.of(left.add(condition, BoolToken.FALSE).simplify(context), right));
                 continue;
             }
 
-            if (!impliesSMT(left,right, rightOnlyVariables, context)) {
+            if (!impliesSMT(left,right, rightOnlyVariables)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
@@ -659,9 +665,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     private static boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> rightOnlyVariables,
-            TermContext context) {
-        return left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables, context);
+            Set<Variable> rightOnlyVariables) {
+        return left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables);
     }
 
     public boolean hasMapEqualities() {
