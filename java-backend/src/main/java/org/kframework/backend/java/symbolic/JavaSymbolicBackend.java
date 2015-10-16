@@ -93,25 +93,25 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public CompilerSteps<Definition> getCompilationSteps() {
-        CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
+        CompilerSteps<Definition> steps = new CompilerSteps<>(context);
         steps.add(new FirstStep(this, context));
-        steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
+        steps.add(new CheckVisitorStep<>(new CheckConfigurationCells(context), context));
         steps.add(new RemoveBrackets(context));
         // SetVariablesInferredSort must be performed before AddEmptyLists
         steps.add(new SetVariablesInferredSort(context));
         steps.add(new AddEmptyLists(context, kem));
         steps.add(new RemoveSyntacticCasts(context));
-        steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context, kem), context));
-        steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
+        steps.add(new CheckVisitorStep<>(new CheckVariables(context, kem), context));
+        steps.add(new CheckVisitorStep<>(new CheckRewrite(context), context));
 
         steps.add(new KORECompilationSteps(context));
 
         steps.add(new FlattenModules(context, kem));
 
         steps.add(new CompleteSortLatice(context));
-        steps.add(new CheckVisitorStep<Definition>(new CollectProductionsVisitor(context), context));
-        steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
-        steps.add(new CheckVisitorStep<Definition>(new CollectBracketsVisitor(context), context));
+        steps.add(new CheckVisitorStep<>(new CollectProductionsVisitor(context), context));
+        steps.add(new CheckVisitorStep<>(new CollectSubsortsVisitor(context), context));
+        steps.add(new CheckVisitorStep<>(new CollectBracketsVisitor(context), context));
 
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));

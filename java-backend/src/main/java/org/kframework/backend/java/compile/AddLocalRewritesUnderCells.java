@@ -56,7 +56,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
     private Map<String, Term> lhsOfReadCell;
     private Map<String, Term> rhsOfWriteCell;
-    private Set<String> cellsToCopy = Sets.newHashSet();
+    private final Set<String> cellsToCopy = Sets.newHashSet();
 
     public AddLocalRewritesUnderCells(Context context) {
         super("Add local rewrites under cells of interest", context);
@@ -213,7 +213,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         final MutableBoolean hasGroundCell = new MutableBoolean(false);
         new BasicVisitor(context) {
 
-            Set<Cell> visitedCells = Collections.newSetFromMap(new IdentityHashMap<Cell, Boolean>());
+            final Set<Cell> visitedCells = Collections.newSetFromMap(new IdentityHashMap<>());
 
             @Override
             public Void visit(Cell cell, Void _void) {

@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
 
-    private Set<String> cellMapLabels = Sets.newHashSet();
+    private final Set<String> cellMapLabels = Sets.newHashSet();
 
     private String patternLabel;
 

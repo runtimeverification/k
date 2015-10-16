@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -62,33 +63,19 @@ public class KSequence extends KCollection implements org.kframework.kore.KSeque
     }
 
     /**
-     * Retrieves the frame variable of a given term representing a potentially
-     * canonicalized {@code KSequence}.
+     * Splits the content and the frame variable of a potentially canonicalized
+     * {@code KSequence}.
      */
-    public static Variable getFrame(Term term) {
+    public static Pair<Term, Variable> splitContentAndFrame(Term term) {
         if (term instanceof Variable && term.sort().equals(Sort.KSEQUENCE)) {
-            return (Variable) term;
+            return Pair.of(EMPTY, (Variable) term);
         } else if (term.kind() == Kind.KITEM) {
-            return null;
+            return Pair.of(term, null);
         } else if (term instanceof KSequence) {
-            return ((KSequence) term).frame;
-        } else {
-            assert false : "unexpected argument: " + term;
-            return null;
-        }
-    }
-
-    /**
-     * Retrieves the list of elements of a given term representing a potentially
-     * canonicalized {@code KSequence}.
-     */
-    public static List<Term> getElements(Term term) {
-        if (term instanceof Variable && term.sort().equals(Sort.KSEQUENCE)) {
-            return Collections.emptyList();
-        } else if (term.kind() == Kind.KITEM) {
-            return Collections.singletonList(term);
-        } else if (term instanceof KSequence) {
-            return ((KSequence) term).contents;
+            KSequence kSequence = (KSequence) term;
+            Builder builder = builder();
+            kSequence.contents.forEach(builder::concatenate);
+            return Pair.of(builder.build(), kSequence.frame);
         } else {
             assert false : "unexpected argument: " + term;
             return null;

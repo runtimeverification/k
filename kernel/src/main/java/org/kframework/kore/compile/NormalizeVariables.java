@@ -7,8 +7,10 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
@@ -81,8 +83,8 @@ public class NormalizeVariables {
                 denormal.att());
     }
 
-    public K normalize(K term) {
-        resetVars(term);
+    public K normalize(K term, K... normals) {
+        resetVars(Stream.concat(Stream.of(term), Arrays.stream(normals)).toArray(K[]::new));
         return transform(term);
     }
 

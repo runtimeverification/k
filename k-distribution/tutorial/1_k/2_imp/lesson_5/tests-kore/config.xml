@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<tests>
+
+  <include file="../../lesson_4/tests/config.xml"
+           skip="pdf"
+           more-results="." >
+    <kompile-option name="--kore" />
+    <all-programs>
+      <krun-option name="--kore" />
+      <krun-option name="--parser" value="kast --kore --sort Pgm" />
+    </all-programs>
+  </include>
+
+</tests>

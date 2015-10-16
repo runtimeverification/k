@@ -17,7 +17,7 @@ import com.google.inject.name.Named;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.backend.unparser.BinaryOutputMode;
 import org.kframework.backend.unparser.ConcretizeTerm;
 import org.kframework.backend.unparser.KASTOutputMode;

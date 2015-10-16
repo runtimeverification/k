@@ -199,6 +199,11 @@ public class ImmutableMapSubstitution<K extends Term, V extends Term> implements
         return entries.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return entries.toString();
+    }
+
     private void writeObject(final ObjectOutputStream out) throws IOException {
         out.writeObject(new HashMap<>(entries));
     }

@@ -109,10 +109,11 @@ public class DefinitionToOcaml implements Serializable {
     }
     public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
-    public static final String postlude = "let run c n=\n" +
-            "  try let rec go c n = if n = 0 then c else go (step c) (n - 1)\n" +
-            "      in go c n\n" +
-            "  with Stuck c' -> c'\n";
+    public static final String postlude = "let run c depth=\n" +
+            "  let n = ref 0 in\n" +
+            "  try let rec go c = if !n = depth then (c,!n) else (n := !n + 1; go (step c))\n" +
+            "      in go c\n" +
+            "  with Stuck c' -> (c', !n)\n";
 
     public static final ImmutableSet<String> hookNamespaces;
     private transient ImmutableMap<String, Function<String, String>> sortHooks;
@@ -198,8 +199,8 @@ public class DefinitionToOcaml implements Serializable {
         this.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(this.expandMacros::expand, "expand macro rules");
         ModuleTransformer deconstructInts = ModuleTransformer.fromSentenceTransformer(new DeconstructIntegerAndFloatLiterals()::convert, "remove matches on integer literals in left hand side");
-        Function1<Module, Module> pipeline = deconstructInts
-                .andThen(convertLookups)
+        Function1<Module, Module> pipeline = convertLookups
+                .andThen(deconstructInts)
                 .andThen(expandMacros)
                 .andThen(generatePredicates)
                 .andThen(liftToKSequence);
@@ -212,8 +213,8 @@ public class DefinitionToOcaml implements Serializable {
         Function1<Sentence, Sentence> liftToKSequence = func(new LiftToKSequence()::lift);
         Function1<Sentence, Sentence> deconstructInts = func(new DeconstructIntegerAndFloatLiterals()::convert);
         Function1<Sentence, Sentence> expandMacros = func(this.expandMacros::expand);
-        return (Rule) deconstructInts
-                .andThen(convertLookups)
+        return (Rule) convertLookups
+                .andThen(deconstructInts)
                 .andThen(expandMacros)
                 .andThen(liftToKSequence)
                 .apply(r);
@@ -256,46 +257,94 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" in output_string out (print_k(try(run(Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
-        sb.append("\n) (").append(depth).append(")) with Stuck c' -> c'))");
+        ocamlProgramHeader(sb);
+        ocamlTermInput(k, sb); //declares input
+        ocamlOpenFile("out", file, sb); //declares out
+        runAndPrint(depth, sb); //calls run and prints to out
         return sb.toString();
     }
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
-        sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
+        ocamlProgramHeader(sb);
+        ocamlMatchPattern(r, sb); //declares try_match
+        ocamlTermInput(k, sb); //declares input
+        ocamlOpenFile("subst", file, sb); //declares subst
+        sb.append("let res = input\n");
+        matchPatternAndPrint(sb); //calls try_match and prints to subst
+        return sb.toString();
+    }
+
+    private void ocamlMatchPattern(Rule r, StringBuilder sb) {
+        sb.append("let rec try_match (c: k) (config: k) (guard: int) : k Subst.t = match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
         sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append("in (try print_subst out (try_match(Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
-        sb.append("\n)) with Stuck c -> output_string out \"0\\n\")");
-        return sb.toString();
     }
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
-        sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
-        convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
-        sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let config = [Bottom] in let out = open_out ").append(enquoteString(file)).append(" and subst = open_out ").append(enquoteString(substFile)).append(" in (try print_subst subst (try_match(let res = run(Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
-        sb.append("\n) (").append(depth).append(") in output_string out (print_k(res)); res)) with Stuck c -> output_string out (print_k(c)); output_string subst \"0\\n\")");
+        ocamlProgramHeader(sb);
+        ocamlMatchPattern(r, sb);  //declares try_match
+        ocamlTermInput(k, sb);  //declares input
+        ocamlOpenFile("out", file, sb); //declares out
+        ocamlOpenFile("subst", substFile, sb); //declares subst
+        runAndPrint(depth, sb); //calls run and prints to out
+        matchPatternAndPrint(sb); //calls try_match and prints to subst
         return sb.toString();
     }
 
+    private void matchPatternAndPrint(StringBuilder sb) {
+        sb.append("let _ = (try print_subst subst (try_match res res (-1)) with Stuck c -> output_string subst \"0\\n\")\n");
+    }
+
+    private void runAndPrint(int depth, StringBuilder sb) {
+        sb.append("let res, steps = run input (").append(depth).append(")\n");
+        sb.append("let () = output_string out ((string_of_int steps) ^ \"\\n\" ^ print_k(res))\n");
+    }
+
+    public void ocamlOpenFile(String name, String file, StringBuilder sb) {
+        sb.append("let ").append(name).append(" = open_out ").append(enquoteString(file)).append("\n");
+    }
+
+    /**
+     * Generates a string containing ocaml code that, when executed, runs a particular program in the semantics.
+     * Use this overload in order to precompute any configuration variables that are pure, leading to faster execution.
+     * @param k The initial configuration to execute, minus the configuration
+     *          variables present in the keys of that map
+     * @param serializedVars A map from the names of configuration
+     *                       variables to the result of encoding the value of the configuration variable using OCAML's
+     *                       Marshal module.
+     * @param topCellInitializer The klabel used to call the initializer of the top cell.
+     * @param exitCode The pattern used to determine the integer exit code to return on the command line.
+     * @param dumpExitCode A value that, if the integer matched by --exit-code is equal to this integer, indicates that the resulting configuration
+     *                     from execution should be printed to the current working directory in a file named "config"
+     * @return A program that can be compiled to rewrite the specified {@code k}.
+     */
+    public String ocamlCompile(K k, Map<String, String> serializedVars, KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
+        StringBuilder sb = new StringBuilder();
+        ocamlProgramHeader(sb);
+        ocamlCompileSerializedInput(k, serializedVars, topCellInitializer, sb);
+        return ocamlFinishCompile(exitCode, dumpExitCode, sb);
+    }
+
+    /**
+     * Generates a string containing ocaml code that, when executed, runs a particular program in the semantics
+     * @param k The initial configuration to execute.
+     * @param exitCode The pattern used to determine the integer exit code to return on the command line.
+     * @param dumpExitCode A value that, if the integer matched by --exit-code is equal to this integer, indicates that the resulting configuration
+     *                     from execution should be printed to the current working directory in a file named "config"
+     * @return A program that can be compiled to rewrite the specified {@code k}.
+     */
     public String ocamlCompile(K k, Rule exitCode, Integer dumpExitCode) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
-        sb.append("let try_match (c: k) : k Subst.t = let config = c in match c with \n");
-        convertFunction(Collections.singletonList(convert(exitCode)), sb, "try_match", RuleType.PATTERN);
-        sb.append("| _ -> raise(Stuck c)\n");
-        sb.append("let _ = let res = run(Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
-        sb.append("\n) (-1) in let subst = try_match(res) in\n");
+        ocamlProgramHeader(sb);
+        ocamlTermInput(k, sb);
+        return ocamlFinishCompile(exitCode, dumpExitCode, sb);
+    }
+
+    private String ocamlFinishCompile(Rule exitCode, Integer dumpExitCode, StringBuilder sb) {
+        ocamlMatchPattern(exitCode, sb);
+        sb.append("let _ = let res, _ = run(input) (-1) in let subst = try_match res res (-1) in\n");
         sb.append("let code = get_exit_code subst in\n");
         if (dumpExitCode != null) {
             sb.append("(if code = ").append(dumpExitCode).append(" then\n");
@@ -304,6 +353,49 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
+        return sb.toString();
+    }
+
+    private void ocamlProgramHeader(StringBuilder sb) {
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Def\n");
+    }
+
+    private void ocamlCompileSerializedInput(K k, Map<String, String> serializedVars, KLabel topCellInitializer, StringBuilder sb) {
+        sb.append("let unserialized = Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append("\n");
+        sb.append("let input = match unserialized with [Map(SortMap, Lbl_Map_, m)] ->\n");
+        sb.append("let completeMap = ");
+        for (Map.Entry<String, String> entry : serializedVars.entrySet()) {
+            sb.append("let m = KMap.add [KToken (SortKConfigVar, ").append(enquoteString(entry.getKey())).append(")]\n");
+            sb.append("(Marshal.from_string \"").append(entry.getValue()).append("\" 0 : Prelude.k)\n");
+            sb.append("m in\n");
+        }
+        sb.append("m in (");
+        encodeStringToFunction(sb, topCellInitializer);
+        sb.append(" [Map(SortMap, Lbl_Map_, completeMap)] [Bottom] (-1))\n");
+    }
+
+    private void ocamlTermInput(K k, StringBuilder sb) {
+        sb.append("let input = Lexer.parse_k\n");
+        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append("\n");
+    }
+
+    /**
+     * Generates a string that, when compiled, writes a particular K term as binary to the specified file using the
+     * Marshal module.
+     * @param k
+     * @param file
+     * @return
+     */
+    public String marshal(K k, String file) {
+        StringBuilder sb = new StringBuilder();
+        ocamlProgramHeader(sb);
+        ocamlTermInput(k, sb);
+        sb.append("let file = open_out ").append(enquoteString(file)).append("\n");
+        sb.append("let str = Marshal.to_string (input : Prelude.k) [Marshal.No_sharing]\n");
+        sb.append("let () = output_string file (String.escaped str)\n");
         return sb.toString();
     }
 
@@ -604,7 +696,7 @@ public class DefinitionToOcaml implements Serializable {
 
     private void forEachKLabel(Consumer<Tuple2<KLabel, Long>> action) {
         for (KLabel label : iterable(mainModule.definedKLabels())) {
-            if (isLookupKLabel(label) || label.name().equals("#KToken"))
+            if (ConvertDataStructureToLookup.isLookupKLabel(label) || label.name().equals("#KToken"))
                 continue;
             stream(mainModule.productionsFor().apply(label)).map(p -> Tuple2.apply(p.klabel().get(), stream(p.items()).filter(pi -> pi instanceof NonTerminal).count())).distinct().forEach(action);
         }
@@ -816,7 +908,7 @@ public class DefinitionToOcaml implements Serializable {
                 .collect(Collectors.toList());
         Map<Boolean, List<Rule>> groupedByLookup = sortedRules.stream()
                 .collect(Collectors.groupingBy(this::hasLookups));
-        int ruleNum = convert(groupedByLookup.get(true), sb, "lookups_step", RuleType.REGULAR, 0);
+        int ruleNum = convert(groupedByLookup.getOrDefault(true, Collections.emptyList()), sb, "lookups_step", RuleType.REGULAR, 0);
         sb.append("| _ -> raise (Stuck c)\n");
         sb.append("let step (c: k) : k = let config = c in match c with \n");
         if (groupedByLookup.containsKey(false)) {
@@ -943,7 +1035,7 @@ public class DefinitionToOcaml implements Serializable {
         new VisitKORE() {
             @Override
             public Void apply(KApply k) {
-                h.b |= isLookupKLabel(k);
+                h.b |= ConvertDataStructureToLookup.isLookupKLabel(k);
                 return super.apply(k);
             }
         }.apply(r.requires());
@@ -1062,7 +1154,7 @@ public class DefinitionToOcaml implements Serializable {
                         if (lookup == null) return null;
                         //reconstruct the denormalization for this particular rule
                         K left2 = t.normalize(RewriteToTop.toLeft(r.body()));
-                        K normal = t.normalize(t.applyNormalization(lookup.klist().items().get(1), left2));
+                        K normal = t.normalize(t.applyNormalization(lookup.klist().items().get(1), left2), left2);
                         return Tuple3.apply(left, lookup.klabel(), new AttCompare(normal, "sort"));
                     })));
         }
@@ -1080,7 +1172,7 @@ public class DefinitionToOcaml implements Serializable {
 
                 //reconstruct the denormalization for this particular rule
                 left = t.normalize(RewriteToTop.toLeft(r.body()));
-                lookup = t.normalize(t.applyNormalization(getLookup(r, 0).klist().items().get(1), left));
+                lookup = t.normalize(t.applyNormalization(getLookup(r, 0).klist().items().get(1), left), left);
                 r = t.normalize(t.applyNormalization(r, left, lookup));
 
                 List<Lookup> lookups = convertLookups(r.requires(), globalVars, functionName, ruleNum, false);
@@ -1103,7 +1195,7 @@ public class DefinitionToOcaml implements Serializable {
 
                         //reconstruct the denormalization for this particular rule
                         left = t.normalize(RewriteToTop.toLeft(r.body()));
-                        lookup = t.normalize(t.applyNormalization(getLookup(r, 0).klist().items().get(1), left));
+                        lookup = t.normalize(t.applyNormalization(getLookup(r, 0).klist().items().get(1), left), left);
                         r = t.normalize(t.applyNormalization(r, left, lookup));
 
                         VarInfo vars = new VarInfo(globalVars);
@@ -1261,7 +1353,7 @@ public class DefinitionToOcaml implements Serializable {
         }*/
         if (type == RuleType.PATTERN) {
             for (KVariable var : vars.vars.keySet()) {
-                sb.append("(Subst.add \"").append(var.name()).append("\" ");
+                sb.append("(Subst.add \"").append(getVarName(var)).append("\" ");
                 boolean isList = isList(var, false, true, vars, false);
                 if (!isList) {
                     sb.append("[");
@@ -1284,6 +1376,13 @@ public class DefinitionToOcaml implements Serializable {
         }*/
         sb.append(suffix);
         sb.append("\n");
+    }
+
+    private String getVarName(KVariable var) {
+        if (var.att().contains("denormal")) {
+            return var.att().<String>get("denormal").get();
+        }
+        return var.name();
     }
 
     private String convertSideCondition(StringBuilder sb, K requires, VarInfo vars, List<Lookup> lookups, boolean when, RuleType type, int ruleNum) {
@@ -1494,7 +1593,7 @@ public class DefinitionToOcaml implements Serializable {
                 inBooleanExp = stack;
                 return null;
             }
-            if (isLookupKLabel(k)) {
+            if (ConvertDataStructureToLookup.isLookupKLabel(k)) {
                 apply(BooleanUtils.TRUE);
             } else if (k.klabel().name().equals("#KToken")) {
                 //magic down-ness
@@ -1837,14 +1936,6 @@ public class DefinitionToOcaml implements Serializable {
             }
         }
         return k.att().<String>getOptional(Attribute.SORT_KEY).orElse("K");
-    }
-
-    private boolean isLookupKLabel(KLabel k) {
-        return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#setChoice");
-    }
-
-    private boolean isLookupKLabel(KApply k) {
-        return isLookupKLabel(k.klabel());
     }
 
     private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {

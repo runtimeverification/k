@@ -13,8 +13,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.Term;
-import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -28,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -161,6 +160,7 @@ public class ParserUtils {
     }
 
     public Set<Module> loadModules(
+            Set<Module> previousModules,
             String definitionText,
             Source source,
             File currentDirectory,
@@ -179,11 +179,12 @@ public class ParserUtils {
         KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote);
 
         HashMap<String, Module> koreModules = new HashMap<>();
+        koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
         kilModules.stream().forEach(m -> kilToKore.apply(m, kilModulesSet, koreModules));
 
-        return new HashSet<>(koreModules.values());
+        return koreModules.values().stream().filter(m -> !previousModules.contains(m)).collect(Collectors.toSet());
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -194,7 +195,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {
-        Set<Module> modules = loadModules(definitionText, source, currentDirectory, lookupDirectories, dropQuote);
+        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
             throw KEMException.compilerError("Could not find main module with name " + mainModuleName

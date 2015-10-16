@@ -20,10 +20,9 @@ import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.loader.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +56,7 @@ public class Rule extends JavaSymbolicObject {
      * Specifies whether this rule has been compiled to generate instructions
      * for the {@link KAbstractRewriteMachine}.
      */
-    private boolean compiledForFastRewriting;
+    private final boolean compiledForFastRewriting;
     /**
      * Left-hand sides of the local rewrite operations under read cells; such
      * left-hand sides are used as patterns to match against the subject term.
@@ -137,9 +136,9 @@ public class Rule extends JavaSymbolicObject {
         setLocation(oldRule.getLocation());
         setSource(oldRule.getSource());
 
-        if (oldRule.containsAttribute(Constants.STDIN)
-                || oldRule.containsAttribute(Constants.STDOUT)
-                || oldRule.containsAttribute(Constants.STDERR)) {
+        if (oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN)
+                || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDOUT)
+                || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
             BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
             for (Equality eq : lookups.equalities()) {
@@ -150,7 +149,7 @@ public class Rule extends JavaSymbolicObject {
             }
 
             Term streamList = streamListBuilder.build();
-            this.indexingPair = oldRule.containsAttribute(Constants.STDIN) ?
+            this.indexingPair = oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN) ?
                     IndexingPair.getInstreamIndexingPair(streamList, termContext.definition()) :
                     IndexingPair.getOutstreamIndexingPair(streamList, termContext.definition());
         } else {
@@ -206,7 +205,7 @@ public class Rule extends JavaSymbolicObject {
         this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
         this.matchingInstructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
 
-        GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions(termContext);
+        GenerateRHSInstructions rhsVisitor = new GenerateRHSInstructions();
         rightHandSide.accept(rhsVisitor);
         this.rhsInstructions = rhsVisitor.getInstructions();
 
@@ -214,7 +213,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             for (Map.Entry<CellLabel, Term> entry :
                 rhsOfWriteCells.entrySet()) {
-                GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+                GenerateRHSInstructions visitor = new GenerateRHSInstructions();
                 entry.getValue().accept(visitor);
                 ImmutableList<RHSInstruction> rhsInstructions = visitor.getInstructions();
                 if (rhsInstructions != null) {
@@ -224,13 +223,13 @@ public class Rule extends JavaSymbolicObject {
         }
         instructionsOfRequires = new ArrayList<>();
         for (Term require : requires) {
-            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions();
             require.accept(visitor);
             instructionsOfRequires.add(visitor.getInstructions());
         }
         instructionsOfLookups = new ArrayList<>();
         for (Equality equality : lookups.equalities()) {
-            GenerateRHSInstructions visitor = new GenerateRHSInstructions(termContext);
+            GenerateRHSInstructions visitor = new GenerateRHSInstructions();
             equality.leftHandSide().accept(visitor);
             instructionsOfLookups.add(visitor.getInstructions());
         }
@@ -361,12 +360,6 @@ public class Rule extends JavaSymbolicObject {
         return freshVariables;
     }
 
-    public Set<Variable> boundVariables() {
-        return variableSet().stream()
-                .filter(v -> !freshConstants.contains(v) && !freshVariables.contains(v))
-                .collect(Collectors.toSet());
-    }
-
     /**
      * @return {@code true} if this rule is a sort predicate rule; otherwise,
      *         {@code false}
@@ -429,7 +422,7 @@ public class Rule extends JavaSymbolicObject {
      * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
      */
     public Rule getFreshRule(TermContext context) {
-        return this.substitute(Variable.getFreshSubstitution(variableSet()), context);
+        return this.substitute(Variable.rename(variableSet()), context);
     }
 
     public IndexingPair indexingPair() {
@@ -548,15 +541,15 @@ public class Rule extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Constants.NO_HASHCODE) {
             h = 1;
-            h = h * Utils.HASH_PRIME + label.hashCode();
-            h = h * Utils.HASH_PRIME + leftHandSide.hashCode();
-            h = h * Utils.HASH_PRIME + rightHandSide.hashCode();
-            h = h * Utils.HASH_PRIME + requires.hashCode();
-            h = h * Utils.HASH_PRIME + ensures.hashCode();
-            h = h * Utils.HASH_PRIME + lookups.hashCode();
-            h = h * Utils.HASH_PRIME + freshConstants.hashCode();
+            h = h * Constants.HASH_PRIME + label.hashCode();
+            h = h * Constants.HASH_PRIME + leftHandSide.hashCode();
+            h = h * Constants.HASH_PRIME + rightHandSide.hashCode();
+            h = h * Constants.HASH_PRIME + requires.hashCode();
+            h = h * Constants.HASH_PRIME + ensures.hashCode();
+            h = h * Constants.HASH_PRIME + lookups.hashCode();
+            h = h * Constants.HASH_PRIME + freshConstants.hashCode();
             h = h == 0 ? 1 : h;
             hashCode = h;
         }

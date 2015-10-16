@@ -12,5 +12,5 @@ import org.kframework.kil.ASTNode;
  * To change this template use File | Settings | File Templates.
  */
 public interface Transformable {
-    public ASTNode accept(Transformer transformer);
+    ASTNode accept(Transformer transformer);
 }

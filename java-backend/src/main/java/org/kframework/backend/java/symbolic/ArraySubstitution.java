@@ -124,4 +124,28 @@ public class ArraySubstitution implements Substitution<Variable, Term> {
     public Set<Entry<Variable, Term>> entrySet() {
         throw new UnsupportedOperationException("entrySet");
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof ArraySubstitution)) {
+            return false;
+        }
+
+        ArraySubstitution substitution = (ArraySubstitution) object;
+        return Arrays.equals(entries, substitution.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(entries);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(entries);
+    }
 }

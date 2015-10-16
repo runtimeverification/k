@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<tests>
+
+  <include file="../../../1_lambda/lesson_8/tests/config.xml"
+           skip="pdf"
+           more-results="../../lesson_2/tests ."
+           exclude="omega fibbo closed-variable-capture free-variable-capture" >
+    <kompile-option name="--kore" />
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      <krun-option name="--kore" />
+      <krun-option name="--parser" value="kast --kore --sort Exp" />
+    </all-programs>
+  </include>
+
+  <include file="../../lesson_2/tests-kore/config.xml" >
+    <kompile-option name="--kore" />
+    <kompile-option name="--superheat"
+                    value="strict" />
+    <kompile-option name="--directory"
+                    value="nondet" />
+    <all-programs>
+      <krun-option name="--kore" />
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      <krun-option name="--directory"
+                   value="nondet"/>
+    </all-programs>
+  </include>
+
+</tests>

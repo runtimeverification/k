@@ -119,7 +119,7 @@ public class BuiltinIntOperations {
         return BoolToken.of(term1.bigIntegerValue().compareTo(term2.bigIntegerValue()) <= 0);
     }
 
-    private static Random randomGenerator = new Random();
+    private static final Random randomGenerator = new Random();
 
     public static IntToken rand(IntToken upperBound, TermContext context) {
         if (upperBound.bigIntegerValue().compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {

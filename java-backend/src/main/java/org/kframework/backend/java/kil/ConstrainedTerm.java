@@ -16,7 +16,7 @@ import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.Lists;
@@ -71,7 +71,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     }
 
-    private Data data;
+    private final Data data;
 
     private final TermContext context;
 
@@ -254,9 +254,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Constants.NO_HASHCODE) {
             h = 1;
-            h = h * Utils.HASH_PRIME + data.hashCode();
+            h = h * Constants.HASH_PRIME + data.hashCode();
             h = h == 0 ? 1 : h;
             hashCode = h;
         }

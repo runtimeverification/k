@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.kil.CellCollection.Cell;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.PatternMatcher;
@@ -39,11 +38,10 @@ public class KAbstractRewriteMachine {
     private final List<MatchingInstruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
-    private List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
+    private final List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
 
     // program counter
     private int pc = 1;
-    private MatchingInstruction nextInstr;
     private boolean success = true;
     private boolean isStarNested = false;
 
@@ -279,7 +277,7 @@ public class KAbstractRewriteMachine {
         }
 
         while (true) {
-            nextInstr = nextInstruction();
+            MatchingInstruction nextInstr = nextInstruction();
 
             if (nextInstr == MatchingInstruction.UP) {
                 return;

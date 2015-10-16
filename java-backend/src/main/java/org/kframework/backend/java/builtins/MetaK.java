@@ -98,7 +98,7 @@ public class MetaK {
             return term;
         }
 
-        Set<Variable> variables = new HashSet<Variable>();
+        Set<Variable> variables = new HashSet<>();
         for (Term element : builtinSet.elements()) {
             if (!(element instanceof MetaVariable)) {
                 return term;
@@ -114,7 +114,7 @@ public class MetaK {
             }
         });
 
-        return KLabelInjection.injectionOf(term.substitute(Variable.getFreshSubstitution(variables), context), context);
+        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables), context), context);
     }
 
     /**
@@ -128,7 +128,7 @@ public class MetaK {
      */
     public static Term renameVariables(Term term, TermContext context) {
         Set<Variable> variables = term.variableSet();
-        return term.substitute(Variable.getFreshSubstitution(variables), context);
+        return term.substitute(Variable.rename(variables), context);
     }
 
     public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {

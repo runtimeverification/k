@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<tests>
+
+<!-- TODO: include free-variable-capture once superheat supported -->
+  <include file="../../../1_lambda/lesson_1/tests/config.xml"
+           skip="pdf"
+           exclude="omega free-variable-capture"
+           results=".">
+    <kompile-option name="--superheat"
+                    value="strict" />
+    <kompile-option name="--kore" />
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      <krun-option name="--kore" />
+      <krun-option name="--parser" value="kast --kore --sort Exp" />
+    </all-programs>
+  </include>
+
+</tests>

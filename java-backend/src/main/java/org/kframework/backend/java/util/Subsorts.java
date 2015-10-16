@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import org.kframework.Collections;
 import org.kframework.backend.java.kil.Sort;
-import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.errorsystem.KEMException;

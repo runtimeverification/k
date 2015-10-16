@@ -13,14 +13,15 @@ import collection.JavaConverters._
 
 
 object ADT {
-
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
 
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
-  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply
+  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply {
+    def items = klist.items
+  }
 
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava

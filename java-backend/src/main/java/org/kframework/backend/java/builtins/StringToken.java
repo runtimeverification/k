@@ -6,7 +6,6 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.MapCache;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.StringUtil;
 
@@ -16,6 +15,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A string token. String tokens represent a sequence of unicode code points.
@@ -29,7 +30,7 @@ public final class StringToken extends Token implements MaximalSharing {
     public static final Sort SORT = Sort.STRING;
 
     /* StringToken cache */
-    private static final MapCache<String, StringToken> cache = new MapCache<>();
+    private static final Map<String, StringToken> cache = new ConcurrentHashMap<>();
 
     /* String value wrapped by this StringToken */
     private final String value;
@@ -46,7 +47,7 @@ public final class StringToken extends Token implements MaximalSharing {
      * @param value A UTF-16 representation of this sequence of code points.
      */
     public static StringToken of(String value) {
-        return cache.get(value, () -> new StringToken(value));
+        return cache.computeIfAbsent(value, StringToken::new);
     }
 
     /**
@@ -126,7 +127,7 @@ public final class StringToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        return cache.get(value, () -> this);
+        return cache.computeIfAbsent(value, v -> this);
     }
 
 }

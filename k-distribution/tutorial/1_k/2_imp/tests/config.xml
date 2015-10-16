@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 
 <!-- Expected to be called from k/1_k/2_imp, with the command
 
@@ -7,10 +7,13 @@
 
 -->
 <tests>
+<!-- NOTE: use temporary config.xml during KORE translation
   <include file="../lesson_1/tests/config.xml" directory="lesson_1" />
   <include file="../lesson_2/tests/config.xml" directory="lesson_2" />
   <include file="../lesson_3/tests/config.xml" directory="lesson_3" />
   <include file="../lesson_4/tests/config.xml" directory="lesson_4" />
   <include file="../lesson_5/tests/config.xml" directory="lesson_5" />
+-->
+  <include file="../lesson_5/tests-kore/config.xml" directory="lesson_5" />
 </tests>
 
