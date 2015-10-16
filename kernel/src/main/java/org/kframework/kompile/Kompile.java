@@ -146,7 +146,7 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, true).convert(s)), "convert data structures to lookups");
+        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s)), "convert data structures to lookups");
 
 
         return def -> func(this::resolveIOStreams)
@@ -161,8 +161,9 @@ public class Kompile {
                 .andThen(func(this::concretizeTransformer))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTop, "bubble out rewrites below cells"))
                 .andThen(convertDataStructureToLookup)
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(Kompile::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))

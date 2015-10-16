@@ -27,4 +27,16 @@ object RewriteToTop {
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map bubbleRewriteOutOfKSeq, t.att)
     case other => other
   }
+
+  def bubbleRewriteToTop(k: K): K = k match {
+    case kapp: KApply =>
+      if (kapp.klabel.name.startsWith("<") && kapp.klabel.name.endsWith(">"))
+        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTop, kapp.att)
+      else
+        foo(k)
+    case _ => foo(k)
+  }
+
+  def foo(k: K): K = if (toLeft(k) != toRight(k)) ADT.KRewrite(toLeft(k), toRight(k)) else k
+
 }

@@ -560,7 +560,7 @@ public class KItem extends Term implements KItemRepresentation {
      *
      * @return the result on success, or this {@code KItem} otherwise
      */
-    private Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
+    public Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
         if (!isAnywhereApplicable(context)) {
             return this;
         }
