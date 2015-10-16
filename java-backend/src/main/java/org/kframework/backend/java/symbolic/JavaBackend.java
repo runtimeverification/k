@@ -23,7 +23,7 @@ public class JavaBackend implements Backend {
     @Override
     public Function<Definition, Definition> steps(Kompile kompile) {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.from(
-                m -> ModuleTransformer.fromSentenceTransformer(new ConvertDataStructureToLookup(m, true)::convert, "convert data structures to lookups").apply(m),
+                m -> ModuleTransformer.fromSentenceTransformer(new ConvertDataStructureToLookup(m, false)::convert, "convert data structures to lookups").apply(m),
                 "convert data structures to lookups");
         return d -> convertDataStructureToLookup.apply(kompile.defaultSteps().apply(d));
 
