@@ -93,8 +93,8 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       }
 
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
-      .groupBy(x => (x._1, x._1.att.getOptional[String]("sort").orElse("K")))
-      .map({ case ((k, _), set) => (k, set.map(_._2)) })
+      .groupBy(_._1)
+      .map({ case (k, set) => (k, set.map(_._2)) })
       .map({ case (k, rulePs) => (k, makeOr(rulePs.toSeq: _*)) })
 
     val entireDisjunction: Iterable[(K, K)] = disjunctionOfKApplies ++ disjunctionOfOthers

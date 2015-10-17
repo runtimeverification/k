@@ -3,6 +3,7 @@ package org.kframework.kore
 import org.kframework.builtin.KLabels
 import org.kframework.kore
 import org.kframework.attributes._
+import org.kframework.kore.ADT.{KList, KApply}
 import collection.JavaConverters._
 
 /**
@@ -13,6 +14,7 @@ import collection.JavaConverters._
 
 
 object ADT {
+
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
 
@@ -67,5 +69,21 @@ object ADT {
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite
 
   case class InjectedKLabel(klabel: kore.KLabel, att: Att) extends kore.InjectedKLabel
+
+}
+
+object SortedADT {
+
+  case class SortedKVariable(name: String, att: Att = Att()) extends kore.KVariable {
+    def apply(ks: K*) = KApply(this, KList(ks.toList))
+
+    val sort: Sort = ADT.Sort(att.getOptional[String]("sort").orElse("K"))
+
+    override def equals(other: Any) = other match {
+      case v: SortedKVariable => name == v.name && sort == v.sort
+//      case v: KVariable => throw new UnsupportedOperationException(s"should not mix SortedKVariables with KVariables for variable $this and $v")
+      case _ => false
+    }
+  }
 
 }

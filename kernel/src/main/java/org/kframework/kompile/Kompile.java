@@ -29,6 +29,7 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.SortedADT;
 import org.kframework.kore.compile.*;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
@@ -170,11 +171,20 @@ public class Kompile {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTop, "bubble out rewrites below cells"))
                 .andThen(convertDataStructureToLookup)
                 //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(Kompile::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(Kompile::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(this::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(def);
+    }
+
+    private static K ADTKVariableToSortedVariable(K ruleBody) {
+        return new TransformKORE() {
+            public K apply(KVariable kvar) {
+                return new SortedADT.SortedKVariable(kvar.name(), kvar.att());
+            }
+        }.apply(ruleBody);
     }
 
     private static K convertKSeqToKApply(K ruleBody) {
@@ -206,7 +216,7 @@ public class Kompile {
             TransformKORE markerAdder = new TransformKORE() {
                 public K apply(KVariable kvar) {
                     if (varCount.get(kvar) == 1) {
-                        return KORE.KVariable("THE_VARIABLE".intern());
+                        return new SortedADT.SortedKVariable("THE_VARIABLE", Att());
                     } else {
                         return kvar;
                     }
