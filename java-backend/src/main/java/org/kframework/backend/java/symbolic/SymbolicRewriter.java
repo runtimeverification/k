@@ -50,32 +50,43 @@ public class SymbolicRewriter {
     private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
     private FastRuleMatcher theFastMatcher;
     private final Definition definition;
+    private final KompileOptions kompileOptions;
     private final BitSet allRuleBits;
 
     public static final Stopwatch matchStopwatch = Stopwatch.createUnstarted();
+    private boolean isKore;
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
         this.definition = definition;
+        this.kompileOptions = kompileOptions;
         this.allRuleBits = BitSet.apply(definition.ruleTable.size());
         this.allRuleBits.makeOnes(definition.ruleTable.size());
         this.javaOptions = javaOptions;
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-
+        this.isKore = this.kompileOptions.experimental.kore;
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext(), allRuleBits.length(), 90);
+        if (isKore) {
+            this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext(), allRuleBits.length(), 90);
+        }
 
         stopwatch.start();
         KRunState finalState = null;
         int step = 1;
         while (step <= bound || bound < 0) {
             /* get the first solution */
-            List<ConstrainedTerm> results = fastComputeRewriteStep(constrainedTerm, true);
+            List<ConstrainedTerm> results;
+            if (isKore) {
+                results = fastComputeRewriteStep(constrainedTerm, true);
+            } else {
+                results = computeRewriteStep(constrainedTerm, step, true);
+
+            }
             if (!results.isEmpty()) {
                 constrainedTerm = results.get(0);
                 if (step == bound) {
