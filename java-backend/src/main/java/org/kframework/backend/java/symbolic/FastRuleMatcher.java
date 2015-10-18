@@ -108,7 +108,7 @@ public class FastRuleMatcher {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
             }
 
-            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel)) {
+            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel) && threadCellBagLabel.ordinal() < automatonDisjunction.kItemDisjunctionsArray.length) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[threadCellBagLabel.ordinal()]);
             }
 
