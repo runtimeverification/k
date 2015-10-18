@@ -376,6 +376,9 @@ public class SymbolicRewriter {
             SearchType searchType,
             TermContext context) {
         stopwatch.start();
+        if (isKore) {
+            this.theFastMatcher = new FastRuleMatcher(context, allRuleBits.length(), 90);
+        }
 
         List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
