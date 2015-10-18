@@ -218,6 +218,10 @@ public class FastRuleMatcher {
             return ruleMask;
         }
 
+        if (!context.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
+            return empty;
+        }
+
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
             if (substitutions[i].plus(variable, term) == null) {
                 ruleMask.clear(i);
