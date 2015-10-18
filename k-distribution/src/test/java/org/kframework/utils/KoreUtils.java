@@ -3,6 +3,7 @@ package org.kframework.utils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -65,7 +66,8 @@ public class KoreUtils {
             e.printStackTrace();
         }
 
-        compiledDef = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false).run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K());
+        Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(), new JavaBackend().steps(kompile));
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
