@@ -58,7 +58,14 @@ public class KoreUtils {
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
-        compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K());
+        KompileOptions kompileOptions = new KompileOptions();
+        try {
+            KompileOptions.Experimental.class.getField("kore").set(kompileOptions.experimental, true);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        compiledDef = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false).run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K());
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
@@ -69,6 +76,7 @@ public class KoreUtils {
                 bind(Stage.class).toInstance(Stage.REWRITING);
                 bind(FileSystem.class).to(PortableFileSystem.class);
                 bind(FileUtil.class).toInstance(FileUtil.testFileUtil());
+                bind(KompileOptions.class).toInstance(kompileOptions);
 
                 bindScope(RequestScoped.class, requestScope);
                 bindScope(DefinitionScoped.class, requestScope);

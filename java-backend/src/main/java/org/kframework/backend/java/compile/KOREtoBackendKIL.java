@@ -57,7 +57,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final KItem kDot;
 
     private final HashMap<String, Variable> variableTable = new HashMap<>();
-    
+
     public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean useCellCollections, boolean freshRules) {
         this.module = module;
         this.definition = definition;
