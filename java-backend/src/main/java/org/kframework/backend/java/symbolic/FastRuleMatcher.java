@@ -62,7 +62,6 @@ public class FastRuleMatcher {
     }
 
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask) {
-        SymbolicRewriter.matchStopwatch.start();
         assert subject.isGround();
 
         ruleMask.stream().forEach(i -> substitutions[i].clear());
@@ -77,22 +76,12 @@ public class FastRuleMatcher {
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
             theResult.add(Pair.of(substitutions[i], i));
         }
-
-        SymbolicRewriter.matchStopwatch.stop();
         return theResult;
     }
-
-    static long counter1 = 0;
-    static long counter2 = 0;
-    static long counter3 = 0;
-    static long counter4 = 0;
-    static long counter5 = 0;
-    static long counter6 = 0;
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
-            counter1++;
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
             //BitSet returnSet = BitSet.apply(ruleCount);
             BitSet returnSet = automatonDisjunction.ruleMask;
@@ -100,7 +89,6 @@ public class FastRuleMatcher {
 
             List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
             for (Pair<Variable, BitSet> p : pairs) {
-                counter2++;
                 if (ruleMask.intersects(p.getRight())) {
                     BitSet localRuleMask = ruleMask.clone();
                     localRuleMask.and(p.getRight());
@@ -109,15 +97,12 @@ public class FastRuleMatcher {
             }
 
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                counter3++;
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
             }
 
             if (subject instanceof KItem) {
-                counter4++;
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
-                counter5++;
                 Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
                 if (p != null) {
                     BitSet localRuleMask = ((BitSet) ruleMask.clone());
@@ -139,7 +124,6 @@ public class FastRuleMatcher {
 
             for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
                 if (innerRHSRewrite.theRHS[i] != null) {
-                    counter6++;
                     rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
                 }
             }

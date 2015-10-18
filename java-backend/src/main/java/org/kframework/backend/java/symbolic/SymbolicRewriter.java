@@ -53,7 +53,6 @@ public class SymbolicRewriter {
     private final KompileOptions kompileOptions;
     private final BitSet allRuleBits;
 
-    public static final Stopwatch matchStopwatch = Stopwatch.createUnstarted();
     private boolean isKore;
 
     @Inject
@@ -99,14 +98,7 @@ public class SymbolicRewriter {
             step++;
         }
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + ", " + matchStopwatch +
-                " c1 " + FastRuleMatcher.counter1 +
-                " c2 " + FastRuleMatcher.counter2 +
-                " c3 " + FastRuleMatcher.counter3 +
-                " c4 " + FastRuleMatcher.counter4 +
-                " c5 " + FastRuleMatcher.counter5 +
-                " c6 " + FastRuleMatcher.counter6 +
-                "]");
+        System.err.println("[" + step + ", " + stopwatch + " ]");
 
         return finalState;
     }

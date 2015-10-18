@@ -179,28 +179,23 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             Set<Variable> variables) {
         assert (instructions == null) == (cells == null);
         /* unify the subject term and the pattern term without considering those associated constraints */
-        SymbolicRewriter.matchStopwatch.start();
         ConjunctiveFormula constraint;
         if (instructions != null) {
             constraint = AbstractKMachine.unify(this, instructions, cells, termContext());
             if (constraint == null) {
-                SymbolicRewriter.matchStopwatch.stop();
                 return Collections.emptyList();
             }
         } else {
             SymbolicUnifier unifier = new SymbolicUnifier(termContext());
             if (!unifier.symbolicUnify(term(), constrainedTerm.term())) {
-                SymbolicRewriter.matchStopwatch.stop();
                 return Collections.emptyList();
             }
             constraint = unifier.constraint();
         }
         constraint = constraint.simplify();
         if (constraint.isFalse()) {
-            SymbolicRewriter.matchStopwatch.stop();
             return Collections.emptyList();
         }
-        SymbolicRewriter.matchStopwatch.stop();
 
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
                 .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
