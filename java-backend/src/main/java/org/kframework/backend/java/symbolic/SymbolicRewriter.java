@@ -419,7 +419,13 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results;
+
+                if (isKore)
+                    results = fastComputeRewriteStep(term, false);
+                else
+                    results = computeRewriteStep(term, step, false);
+                
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
                         break label;
