@@ -90,7 +90,7 @@ public class JavaBackend implements Backend {
 
             TransformKORE markerAdder = new TransformKORE() {
                 public K apply(KVariable kvar) {
-                    if (varCount.get(kvar) == 1) {
+                    if (kvar instanceof SortedADT.SortedKVariable && ((SortedADT.SortedKVariable) kvar).sort().equals(KORE.Sort("K")) && varCount.get(kvar) == 1) {
                         return new SortedADT.SortedKVariable("THE_VARIABLE", Att());
                     } else {
                         return kvar;

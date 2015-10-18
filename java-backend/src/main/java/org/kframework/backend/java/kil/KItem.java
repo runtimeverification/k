@@ -15,6 +15,7 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
@@ -567,6 +568,12 @@ public class KItem extends Term implements KItemRepresentation {
      * @return the result on success, or this {@code KItem} otherwise
      */
     public Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
+        if (kLabel.toString().equals(KLabels.KSEQ)
+                && kList instanceof KList
+                && (((KList) kList).get(0) instanceof KItem && ((KItem) ((KList) kList).get(0)).kLabel.toString().equals(KLabels.DOTK) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+            return ((KList) kList).get(1);
+        }
+
         if (!isAnywhereApplicable(context)) {
             return this;
         }
