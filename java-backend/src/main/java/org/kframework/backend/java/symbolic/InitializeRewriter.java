@@ -121,7 +121,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, TermContext.of(rewritingContext), false, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(rewritingContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, TermContext.of(rewritingContext, backendKil, BigInteger.ZERO)), depth.orElse(-1));
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());

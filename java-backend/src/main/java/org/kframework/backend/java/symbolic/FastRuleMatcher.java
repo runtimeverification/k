@@ -44,11 +44,19 @@ public class FastRuleMatcher {
     private final KLabelConstant kDotLabel;
     private final KItem kDot;
 
+    private final KLabelConstant threadCellBagLabel;
+    private final KItem dotThreadCellBag;
+
+
     public FastRuleMatcher(TermContext context, int ruleCount, int variableCount) {
         this.context = context;
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, context.definition());
         kDotLabel = KLabelConstant.of(KLabels.DOTK, context.definition());
         kDot = KItem.of(kDotLabel, KList.concatenate(), context);
+
+        // remove hack when A/AC is properly supported
+        threadCellBagLabel = KLabelConstant.of("_ThreadCellBag_", context.definition());
+        dotThreadCellBag = KItem.of(KLabelConstant.of(".ThreadCellBag", context.definition()), KList.concatenate(), context);
 
         this.ruleCount = ruleCount;
         substitutions = new Substitution[this.ruleCount];
@@ -111,6 +119,10 @@ public class FastRuleMatcher {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
             }
 
+            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel)) {
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[threadCellBagLabel.ordinal()]);
+            }
+
             if (subject instanceof KItem) {
                 counter4++;
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
@@ -153,6 +165,11 @@ public class FastRuleMatcher {
         // normalize KSeq representations
         if (isKSeq(pattern)) {
             subject = upKSeq(subject);
+        }
+
+        if (pattern instanceof KItem && ((KItem) pattern).kLabel().equals(threadCellBagLabel)
+                && !subject.sort().equals(Sort.of("ThreadCellBag"))) {
+            subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), context);
         }
 
         if (subject instanceof KItem && pattern instanceof KItem) {
