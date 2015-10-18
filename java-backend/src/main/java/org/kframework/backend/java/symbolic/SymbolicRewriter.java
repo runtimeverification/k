@@ -425,7 +425,7 @@ public class SymbolicRewriter {
                     results = fastComputeRewriteStep(term, false);
                 else
                     results = computeRewriteStep(term, step, false);
-                
+
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
                         break label;
