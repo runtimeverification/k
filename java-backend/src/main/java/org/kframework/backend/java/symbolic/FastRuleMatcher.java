@@ -70,7 +70,7 @@ public class FastRuleMatcher {
     }
 
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask) {
-        assert subject.isGround();
+        assert subject.isGround() : subject;
 
         ruleMask.stream().forEach(i -> substitutions[i].clear());
         rewrites = new Map[ruleMask.length()];
