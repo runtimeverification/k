@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.ksimulation.Simulator;
@@ -63,7 +64,7 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         injector.getInstance(Key.get(Prover.class, Main.class));
     }
 
-    @Test
+    @Test @Ignore
     public void testCreateInjectionSimulation() {
 
         context.kompileOptions.backend = "java";
