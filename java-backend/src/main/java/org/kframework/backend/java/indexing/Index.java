@@ -9,6 +9,6 @@ import java.io.Serializable;
  */
 public interface Index extends Serializable {
 
-    public boolean isUnifiable(Index index);
+    boolean isUnifiable(Index index);
 
 }

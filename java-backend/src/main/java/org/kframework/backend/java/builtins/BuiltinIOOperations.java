@@ -133,8 +133,7 @@ public class BuiltinIOOperations {
             org.kframework.kil.Term kast = rp.get().runParser(
                     termContext.global().krunOptions.configurationCreation.parser(),
                     term1.stringValue(), true, Sort.of(term2.stringValue()));
-            Term term = kilTransformer.get().transformAndEval(kast);
-            return term;
+            return kilTransformer.get().transformAndEval(kast);
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);
         }

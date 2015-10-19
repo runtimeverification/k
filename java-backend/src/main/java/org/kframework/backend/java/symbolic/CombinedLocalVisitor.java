@@ -15,10 +15,10 @@ import java.util.List;
  */
 public class CombinedLocalVisitor extends LocalVisitor {
 
-    List<LocalVisitor> Visitors;
+    final List<LocalVisitor> Visitors;
 
     public CombinedLocalVisitor() {
-        Visitors = new ArrayList<LocalVisitor>();
+        Visitors = new ArrayList<>();
     }
 
     public CombinedLocalVisitor(LocalVisitor... localVisitors) {

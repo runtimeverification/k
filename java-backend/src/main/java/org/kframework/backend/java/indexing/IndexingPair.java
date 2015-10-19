@@ -2,7 +2,7 @@
 package org.kframework.backend.java.indexing;
 
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 
 import java.io.Serializable;
 
@@ -78,7 +78,7 @@ public class IndexingPair implements Serializable {
 
         if (!(pattern instanceof BuiltinList)) {
             return definition.indexingData.TOP_INDEXING_PAIR;
-        };
+        }
         BuiltinList instream = (BuiltinList) pattern;
 
         if (!instream.isConcreteCollection()) {
@@ -151,8 +151,8 @@ public class IndexingPair implements Serializable {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = hash * Utils.HASH_PRIME + first.hashCode();
-        hash = hash * Utils.HASH_PRIME + second.hashCode();
+        hash = hash * Constants.HASH_PRIME + first.hashCode();
+        hash = hash * Constants.HASH_PRIME + second.hashCode();
         return hash;
     }
 

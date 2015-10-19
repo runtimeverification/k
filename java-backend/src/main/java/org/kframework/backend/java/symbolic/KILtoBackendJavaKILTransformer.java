@@ -73,7 +73,7 @@ import com.google.inject.Inject;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
-    private boolean freshRules;
+    private final boolean freshRules;
 
     /**
      * Maps variables representing concrete collections to their sizes. This
@@ -120,7 +120,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     public Rule transformAndEval(org.kframework.kil.Rule node) {
-        Rule rule = null;
+        Rule rule;
         rule = new MacroExpander(TermContext.of(globalContext), kem).processRule((Rule) this.visitNode(node));
         rule = evaluateRule(rule, globalContext);
 
@@ -135,7 +135,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     public static Term expandAndEvaluate(GlobalContext globalContext, KExceptionManager kem, Term term) {
-        term = new MacroExpander(TermContext.of(globalContext), kem).processTerm((Term) term);
+        term = new MacroExpander(TermContext.of(globalContext), kem).processTerm(term);
         term = term.evaluate(TermContext.of(globalContext));
         return term;
     }
@@ -248,7 +248,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KList node, Void _void)  {
-        List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> list = new ArrayList<>();
         KILtoBackendJavaKILTransformer.flattenKList(list, node.getContents());
 
         Variable variable = null;
@@ -280,7 +280,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Bag node, Void _void) {
-        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> contents = new ArrayList<>();
         org.kframework.kil.Bag.flatten(contents, node.getContents());
 
         CellCollection.Builder builder = CellCollection.builder(null, globalContext.getDefinition());
@@ -351,7 +351,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.SetUpdate node, Void _void)  {
         Variable set = (Variable) this.visitNode(node.set());
 
-        HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
+        HashSet<Term> removeSet = new HashSet<>(node.removeEntries().size());
         for (org.kframework.kil.Term term : node.removeEntries()) {
             removeSet.add((Term) this.visitNode(term));
         }
@@ -363,12 +363,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.MapUpdate node, Void _void)  {
         Variable map = (Variable) this.visitNode(node.map());
 
-        HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
+        HashSet<Term> removeSet = new HashSet<>(node.removeEntries().size());
         for (org.kframework.kil.Term term : node.removeEntries().keySet()) {
             removeSet.add((Term) this.visitNode(term));
         }
 
-        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateEntries().size());
+        HashMap<Term, Term> updateMap = new HashMap<>(node.updateEntries().size());
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.updateEntries().entrySet()) {
             Term key = (Term) this.visitNode(entry.getKey());

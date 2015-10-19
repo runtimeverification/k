@@ -23,14 +23,14 @@ public class JavaTransition extends Transition {
     /**
      * Backend specific Rule converted lazily to generic rule on get()
      */
-    private Rule javaRule;
+    private final Rule javaRule;
 
     /**
      * Backend specific Substitution converted lazily to generic substitution on get()
      */
-    private Map<org.kframework.backend.java.kil.Variable, org.kframework.backend.java.kil.Term> javaSubs;
+    private final Map<org.kframework.backend.java.kil.Variable, org.kframework.backend.java.kil.Term> javaSubs;
 
-    private Context context;
+    private final Context context;
 
     public JavaTransition(Rule javaRule,
                           Map<org.kframework.backend.java.kil.Variable, org.kframework.backend.java.kil.Term> javaSubs,

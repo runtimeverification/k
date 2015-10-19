@@ -392,12 +392,12 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Es ::= E "," Es
         prod1 = Production(sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("right"));
+                attrsWithKilProductionId.remove("klabel").add("klabel", dropQuote(p.getKLabel())).add("right"));
 
 
         // Es ::= ".Es"
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
+                attrsWithKilProductionId.remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
 
         res.add(prod1);
         res.add(prod3);

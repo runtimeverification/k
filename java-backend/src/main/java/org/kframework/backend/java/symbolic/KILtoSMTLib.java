@@ -7,7 +7,6 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -503,7 +502,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             // smtlib expression instead of operator
             String expression = label;
             for (int i = 0; i < kList.getContents().size(); i++) {
-                expression = expression.replaceAll("\\#" + (i + 1) + "(?![0-9])", ((SMTLibTerm) kList.get(i).accept(this)).expression());
+                expression = expression.replaceAll("#" + (i + 1) + "(?![0-9])", ((SMTLibTerm) kList.get(i).accept(this)).expression());
             }
             return new SMTLibTerm(expression);
         }
@@ -558,12 +557,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
         assert !context.global().krunOptions.experimental.smt.floatsAsPO;
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format(
+        return new SMTLibTerm(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",
                 floatToken.exponent(), floatToken.bigFloatValue().precision(),
                 floatToken.bigFloatValue().toString("%f")));
-        return new SMTLibTerm(sb.toString());
     }
 
     @Override

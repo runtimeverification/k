@@ -72,7 +72,7 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
             MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
                     binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
-            checkPointBinder.addBinding("java").toInstance(new Integer(500));
+            checkPointBinder.addBinding("java").toInstance(500);
 
             //bind(Map.class).annotatedWith(Names.named("checkpointIntervalMap")).toInstance((Map) checkPointBinder);
 

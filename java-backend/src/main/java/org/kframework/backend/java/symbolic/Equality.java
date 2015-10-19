@@ -3,14 +3,12 @@
 package org.kframework.backend.java.symbolic;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KCollection;
@@ -22,11 +20,10 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.kframework.kil.MapBuiltin;
 
 /**
  * An equality between two canonicalized terms.
@@ -160,8 +157,8 @@ public class Equality implements Serializable {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + leftHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + rightHandSide.hashCode();
         return hashCode;
     }
 

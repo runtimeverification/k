@@ -18,7 +18,7 @@ import org.kframework.backend.java.kil.Term;
  */
 public class UnsafeSharingDetector extends PrePostVisitor {
 
-    private final Set<Term> visitedTerms = Collections.newSetFromMap(new IdentityHashMap<Term, Boolean>());
+    private final Set<Term> visitedTerms = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public static void visitTerm(Term term) {
         term.accept(new UnsafeSharingDetector());
@@ -48,7 +48,6 @@ public class UnsafeSharingDetector extends PrePostVisitor {
             }
 
             visitedTerms.add(term);
-            return;
         }
     }
 }

@@ -7,12 +7,11 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multiset;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
-import org.kframework.kore.KApply;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
@@ -70,8 +69,8 @@ public class CellCollection extends Collection implements CollectionInternalRepr
         @Override
         public int hashCode() {
             int hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + cellLabel.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
+            hashCode = hashCode * Constants.HASH_PRIME + cellLabel.hashCode();
+            hashCode = hashCode * Constants.HASH_PRIME + content.hashCode();
             return hashCode;
         }
 
@@ -301,8 +300,8 @@ public class CellCollection extends Collection implements CollectionInternalRepr
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + values().hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionVariables.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + values().hashCode();
         return hashCode;
     }
 

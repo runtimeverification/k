@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 public class DoubleLinkedList<E> {
 
     private static class Entry<E> {
-        private E value;
+        private final E value;
         private Entry<E> next;
         private Entry<E> prev;
 

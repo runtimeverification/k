@@ -45,9 +45,9 @@ import com.google.common.collect.Lists;
 public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     private boolean compiledForFastRewriting;
-    private Set<String> cellsOfInterest = new HashSet<>();
-    private Map<String, Term> readCell2LHS = new HashMap<>();
-    private Map<String, Term> writeCell2RHS = new HashMap<>();
+    private final Set<String> cellsOfInterest = new HashSet<>();
+    private final Map<String, Term> readCell2LHS = new HashMap<>();
+    private final Map<String, Term> writeCell2RHS = new HashMap<>();
 
     private int nestedCellCount;
     private boolean hasRewrite;

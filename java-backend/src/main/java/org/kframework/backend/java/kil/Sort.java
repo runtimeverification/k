@@ -4,10 +4,11 @@ package org.kframework.backend.java.kil;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.backend.java.util.MapCache;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -19,7 +20,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
-    private static final MapCache<String, Sort> cache = new MapCache<>(new PatriciaTrie<>());
+    private static final Map<String, Sort> cache = Collections.synchronizedMap(new PatriciaTrie<>());
 
     public static final Sort KITEM          =   Sort.of("KItem");
     public static final Sort KSEQUENCE      =   Sort.of("K");
@@ -61,7 +62,7 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * @return the sort
      */
     public static Sort of(String name) {
-        return cache.get(name, () -> new Sort(name));
+        return cache.computeIfAbsent(name, Sort::new);
     }
 
     public static Sort of(org.kframework.kil.Sort sort) {
@@ -113,7 +114,7 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        return cache.get(name, () -> this);
+        return cache.computeIfAbsent(name, x -> this);
     }
 
 }

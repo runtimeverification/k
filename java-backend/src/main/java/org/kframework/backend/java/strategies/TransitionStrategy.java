@@ -84,5 +84,5 @@ public class TransitionStrategy implements Strategy {
 
     private Collection<Rule> transition;
     private Collection<Rule> structural;
-    private Collection<String> tags;
+    private final Collection<String> tags;
 }

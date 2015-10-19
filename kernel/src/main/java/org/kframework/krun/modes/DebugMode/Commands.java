@@ -42,6 +42,7 @@ public class Commands {
                 utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
                         s -> System.out.println(s));
                 utils.print("Final State Reached", s -> System.out.println(s));
+                utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
                 return;
             }
             utils.print(stepCount + " Step(s) Taken.", s -> System.out.println(s));

@@ -15,18 +15,16 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.rewriter.SearchType;
-import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.RewriteRelation;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.tools.Executor;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,9 +86,6 @@ public class JavaSymbolicExecutor implements Executor {
 
     /**
      * Given a term, return the TermContext constructed from the globalContext
-     *
-     * @param term
-     * @return
      */
     private TermContext getTermContext(Term term) {
         TermContext termContext = TermContext.of(globalContext);
@@ -102,26 +97,25 @@ public class JavaSymbolicExecutor implements Executor {
     private RewriteRelation patternMatcherRewriteRun(Term term, TermContext termContext, int bound, boolean computeGraph) {
 
         if (computeGraph) {
-            KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+            throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
         }
         ConstrainedTerm rewriteResult = new ConstrainedTerm(getPatternMatchRewriter().rewrite(term, bound, termContext), termContext);
-        JavaKRunState finalState = new JavaKRunState(rewriteResult, context, counter, Optional.empty());
+        JavaKRunState finalState = new JavaKRunState(rewriteResult, counter, Optional.empty());
         return new RewriteRelation(finalState, null);
     }
 
-    private RewriteRelation conventionalRewriteRun(ConstrainedTerm constrainedTerm, int bound, boolean computeGraph) {
+    private RewriteRelation conventionalRewriteRun(ConstrainedTerm constrainedTerm, int bound) {
         SymbolicRewriter rewriter = symbolicRewriter.get();
         KRunState finalState = rewriter.rewrite(
                 constrainedTerm,
-                context,
-                bound,
-                computeGraph);
+                bound
+        );
 
-        return new RewriteRelation(finalState, rewriter.getExecutionGraph());
+        return new RewriteRelation(finalState, null);
     }
 
     /**
-     * Rewrite Enginre run that creates a new KRun State.
+     * Rewrite Engine run that creates a new KRun State.
      * @param cfg The term configuration to begin with.
      * @param bound The number of steps
      * @param computeGraph Option to compute Execution Graph,
@@ -134,20 +128,8 @@ public class JavaSymbolicExecutor implements Executor {
             return patternMatcherRewriteRun(term, termContext, bound, computeGraph);
         }
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, ConjunctiveFormula.of(termContext));
-        return conventionalRewriteRun(constrainedTerm, bound, computeGraph);
+        return conventionalRewriteRun(constrainedTerm, bound);
     }
-
-    /**
-     * Rewrite Engine Run with existing krun State.
-     * @param initialState The existing State
-     * @param bound The number of steps
-     * @param computeGraph Option to compute Execution Graph.
-     * @return The execution relation.
-     */
-    private RewriteRelation javaRewriteEngineRun(JavaKRunState initialState, int bound, boolean computeGraph) {
-        return conventionalRewriteRun(initialState.getConstrainedTerm(), bound, computeGraph);
-    }
-
 
     @Override
     public SearchResults search(
@@ -159,7 +141,6 @@ public class JavaSymbolicExecutor implements Executor {
             RuleCompilerSteps compilationInfo,
             boolean computeGraph) throws KRunExecutionException {
 
-        List<Rule> claims = Collections.emptyList();
         if (bound == null) {
             bound = -1;
         }
@@ -175,29 +156,26 @@ public class JavaSymbolicExecutor implements Executor {
         pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
         Rule patternRule = transformer.transformAndEval(pattern);
 
-        List<SearchResult> searchResults = new ArrayList<SearchResult>();
+        List<SearchResult> searchResults = new ArrayList<>();
         List<Substitution<Variable, Term>> hits;
         Term initialTerm = kilTransformer.transformAndEval(cfg);
-        Term targetTerm = null;
         TermContext termContext = TermContext.of(globalContext);
-        KRunGraph executionGraph = null;
         if (!javaOptions.symbolicExecution) {
             if (computeGraph) {
-                KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
+                throw KEMException.criticalError("Compute Graph with Pattern Matching Not Implemented Yet");
             }
             hits = getPatternMatchRewriter().search(initialTerm,
                     patternRule, bound, depth, searchType, termContext);
         } else {
             SymbolicRewriter rewriter = getSymbolicRewriter();
             hits = rewriter.search(initialTerm,
-                    patternRule, bound, depth, searchType, termContext, computeGraph);
-            executionGraph = rewriter.getExecutionGraph();
+                    patternRule, bound, depth, searchType, termContext);
         }
 
         for (Map<Variable, Term> map : hits) {
             // Construct substitution map from the search results
             Map<String, org.kframework.kil.Term> substitutionMap =
-                    new HashMap<String, org.kframework.kil.Term>();
+                    new HashMap<>();
             for (Variable var : map.keySet()) {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
@@ -216,11 +194,7 @@ public class JavaSymbolicExecutor implements Executor {
                     compilationInfo));
         }
 
-        SearchResults retval = new SearchResults(
-                searchResults,
-                executionGraph);
-
-        return retval;
+        return new SearchResults(searchResults, null);
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 
@@ -69,8 +69,8 @@ public class MetaVariable extends Token {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 

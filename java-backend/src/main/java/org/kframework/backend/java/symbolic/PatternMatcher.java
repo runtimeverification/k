@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -196,7 +195,11 @@ public class PatternMatcher extends AbstractUnifier {
      */
     @Override
     void add(Term term, Term variableTerm) {
-        assert variableTerm instanceof Variable;
+        if (!(variableTerm instanceof Variable)) {
+            fail(variableTerm, term);
+            return;
+        }
+
         Variable variable = (Variable) variableTerm;
         if (variable.equals(term)) {
             return;
@@ -322,7 +325,6 @@ public class PatternMatcher extends AbstractUnifier {
             fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
             if (fSubstitution.isFalse()) {
                 fail(builtinMap, patternBuiltinMap);
-                return;
             }
         }
     }
@@ -584,14 +586,7 @@ public class PatternMatcher extends AbstractUnifier {
 
     private ListMultimap<CellLabel, CellCollection.Cell> getRemainingCellMap(
             CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
-        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
-            @Override
-            public boolean apply(CellLabel cellLabel) {
-                return !labelsToRemove.contains(cellLabel);
-            }
-        };
-
-        return Multimaps.filterKeys(cellCollection.cells(), notRemoved);
+        return Multimaps.filterKeys(cellCollection.cells(), l -> !labelsToRemove.contains(l));
     }
 
     @Override
@@ -616,7 +611,6 @@ public class PatternMatcher extends AbstractUnifier {
             }
         } else {
             fail(kCollection, pattern);
-            return;
         }
     }
 

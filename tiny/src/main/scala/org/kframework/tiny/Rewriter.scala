@@ -47,7 +47,7 @@ class FullTinyRewriter(module: definition.Module) extends rewriter.Rewriter {
   val innerRewriter = new Rewriter(moduleWithoutFunctions, KIndex, new TheoryWithFunctions(module))
 
   def execute(k: kore.K, depth:java.util.Optional[Integer]): RewriterResult = new RewriterResult(java.util.Optional.of(-1), innerRewriter.execute(k))
-  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: org.kframework.definition.Rule): (kore.K, java.util.List[java.util.Map[kore.KVariable, kore.K]]) = ???
+  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: org.kframework.definition.Rule): (RewriterResult, java.util.List[java.util.Map[kore.KVariable, kore.K]]) = ???
   def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: org.kframework.definition.Rule, searchType: SearchType): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]] = ???
   override def `match`(k: kore.K, rule: org.kframework.definition.Rule): java.util.List[java.util.Map[kore.KVariable, kore.K]] = ???
 

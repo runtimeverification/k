@@ -332,11 +332,11 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(Rule rule) {
         Term processedLeftHandSide = (Term) rule.leftHandSide().accept(this);
         Term processedRightHandSide = (Term) rule.rightHandSide().accept(this);
-        List<Term> processedRequires = new ArrayList<Term>(rule.requires().size());
+        List<Term> processedRequires = new ArrayList<>(rule.requires().size());
         for (Term conditionItem : rule.requires()) {
             processedRequires.add((Term) conditionItem.accept(this));
         }
-        List<Term> processedEnsures = new ArrayList<Term>(rule.ensures().size());
+        List<Term> processedEnsures = new ArrayList<>(rule.ensures().size());
         for (Term conditionItem : rule.ensures()) {
             processedEnsures.add((Term) conditionItem.accept(this));
         }

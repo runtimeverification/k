@@ -59,7 +59,7 @@ public class IndexingTable implements Serializable, RuleIndex {
     @Override
     public void buildIndex() {
         /* populate the table of rules rewriting the top configuration */
-        Set<Index> indices = new HashSet<Index>();
+        Set<Index> indices = new HashSet<>();
         indices.add(data.TOP_INDEX);
         indices.add(data.BOTTOM_INDEX);
         for (Rule rule : definition.rules()) {

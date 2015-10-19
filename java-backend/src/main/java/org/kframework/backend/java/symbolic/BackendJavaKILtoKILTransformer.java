@@ -200,7 +200,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     private List<org.kframework.kil.Term> transformTerms(KCollection kCollection) {
-        List<org.kframework.kil.Term> terms = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> terms = new ArrayList<>();
         for (Term term : kCollection) {
             terms.add((org.kframework.kil.Term) term.accept(this));
         }
@@ -213,8 +213,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinSet set) {
         if (cache.containsKey(set)) return cache.get(set);
-        List<org.kframework.kil.Term> elements = new ArrayList<org.kframework.kil.Term>();
-        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elements = new ArrayList<>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         for (Term entry : set.elements()) {
             elements.add((org.kframework.kil.Term)entry.accept(this));
         }
@@ -235,9 +235,9 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         if (cache.containsKey(builtinList)) return cache.get(builtinList);
-        List<org.kframework.kil.Term> elementsLeft = new ArrayList<org.kframework.kil.Term>();
-        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
-        List<org.kframework.kil.Term> elementsRight = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elementsLeft = new ArrayList<>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
+        List<org.kframework.kil.Term> elementsRight = new ArrayList<>();
         for (Term entry : builtinList.elementsLeft()) {
             elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
         }
@@ -258,7 +258,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     public ASTNode transform(BuiltinMap map) {
         if (cache.containsKey(map)) return cache.get(map);
         final Map<Term, Term> entries = map.getEntries();
-        List<Term> keys = new ArrayList<Term>(entries.keySet());
+        List<Term> keys = new ArrayList<>(entries.keySet());
         Collections.sort(keys);
         Map<org.kframework.kil.Term, org.kframework.kil.Term> elements = new HashMap<>();
         List<org.kframework.kil.Term> baseTerms = new ArrayList<>();

@@ -44,9 +44,8 @@ public class PatternMatchRewriter {
     private boolean transition;
 
     private final TransitionCompositeStrategy strategy;
-    private int step;
     private final List<Term> results = new ArrayList<>();
-    private RuleIndex ruleIndex;
+    private final RuleIndex ruleIndex;
 
     @Inject
     public PatternMatchRewriter(
@@ -88,8 +87,9 @@ public class PatternMatchRewriter {
          * transformer with the copy-on-share version and supply it with
          * the correct reusable variables obtained from the pattern match
          * phase */
+        int step;
         for (step = 0; step != bound; ++step) {
-            computeRewriteStep(subject, 1, termContext);
+            computeRewriteStep(subject, step, 1, termContext);
             Term result = getTransition(0);
             if (result != null) {
                 if (ENABLE_DEBUG_MODE) {
@@ -130,7 +130,7 @@ public class PatternMatchRewriter {
         return ruleIndex.getRules(term);
     }
 
-    private final Term getTransition(int n) {
+    private Term getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
 
@@ -141,7 +141,7 @@ public class PatternMatchRewriter {
      * This method is extracted to simplify the profiling script.
      * </p>
      */
-    private final List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
+    private List<Substitution<Variable,Term>> getMatchingResults(Term subject, Rule rule, TermContext termContext) {
         return PatternMatcher.match(subject, rule, termContext);
     }
 
@@ -149,7 +149,7 @@ public class PatternMatchRewriter {
         indexingCells = IndexingCellsCollector.getIndexingCells(subject, termContext.definition());
     }
 
-    private final void computeSearchRewriteStep(Term subject, int successorBound, TermContext termContext) {
+    private void computeSearchRewriteStep(Term subject, int successorBound, TermContext termContext) {
         results.clear();
 
         if (successorBound == 0) {
@@ -164,7 +164,7 @@ public class PatternMatchRewriter {
 
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
-            ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
+            ArrayList<Rule> rules = new ArrayList<>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
                 for (Map<Variable, Term> subst : getMatchingResults(subject, rule, termContext)) {
@@ -187,7 +187,7 @@ public class PatternMatchRewriter {
         return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
     }
 
-    private final void computeRewriteStep(Term subject, int successorBound, TermContext termContext) {
+    private void computeRewriteStep(Term subject, int step, int successorBound, TermContext termContext) {
         results.clear();
         assert successorBound == 1;
 
@@ -203,7 +203,7 @@ public class PatternMatchRewriter {
         try {
 
             while (strategy.hasNext()) {
-                ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
+                ArrayList<Rule> rules = new ArrayList<>(strategy.next());
     //            System.out.println("rules.size: "+rules.size());
                 for (Rule rule : rules) {
                     try {
@@ -293,7 +293,7 @@ public class PatternMatchRewriter {
         }
     }
 
-    private final Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution, TermContext termContext) {
+    private Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution, TermContext termContext) {
         Term rhs = DeepCloner.clone(rule.rightHandSide());
         Term result = rhs.copyOnShareSubstAndEval(substitution,
                 rule.reusableVariables().elementSet(), termContext);
@@ -327,7 +327,7 @@ public class PatternMatchRewriter {
         stopwatch.start();
 
         List<Substitution<Variable,Term>> searchResults = new ArrayList<>();
-        Set<Term> visited = new HashSet<Term>();
+        Set<Term> visited = new HashSet<>();
 
         // If depth is 0 then we are just trying to match the pattern.
         // A more clean solution would require a bit of a rework to how patterns
@@ -336,14 +336,14 @@ public class PatternMatchRewriter {
             addSearchResult(searchResults, initialTerm, pattern, termContext, bound);
             stopwatch.stop();
             if (options.experimental.statistics) {
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             }
             return searchResults;
         }
 
         // The search queues will map terms to their depth in terms of transitions.
-        Map<Term,Integer> queue = new LinkedHashMap<Term,Integer>();
-        Map<Term,Integer> nextQueue = new LinkedHashMap<Term,Integer>();
+        Map<Term,Integer> queue = new LinkedHashMap<>();
+        Map<Term,Integer> nextQueue = new LinkedHashMap<>();
 
         visited.add(initialTerm);
         queue.put(initialTerm, 0);
@@ -354,12 +354,13 @@ public class PatternMatchRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initialTerm, pattern, termContext, bound)) {
                 stopwatch.stop();
-                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+                System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return searchResults;
             }
         }
 
-        label:
+        int step;
+    label:
         for (step = 0; !queue.isEmpty(); ++step) {
             for (Map.Entry<Term, Integer> entry : queue.entrySet()) {
                 Term term = entry.getKey();
