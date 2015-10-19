@@ -81,12 +81,13 @@ public class Kompile {
     private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
+    public final KompileOptions kompileOptions;
+
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final boolean cacheParses;
     private final BinaryLoader loader;
-    private final KompileOptions kompileOptions;
     private final Stopwatch sw;
 
     private final AtomicInteger parsedBubbles = new AtomicInteger(0);
@@ -110,9 +111,9 @@ public class Kompile {
     }
 
     public Kompile(KompileOptions kompileOptions, GlobalOptions global, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
-        this.kompileOptions = kompileOptions;
         this.parser = new ParserUtils(files, kem, global);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);

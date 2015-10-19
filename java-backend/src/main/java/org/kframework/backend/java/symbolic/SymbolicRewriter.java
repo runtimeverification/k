@@ -15,9 +15,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.backend.java.util.JavaTransition;
 import org.kframework.backend.java.util.RewriteEngineUtils;
-import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
@@ -53,7 +51,7 @@ public class SymbolicRewriter {
     private final KompileOptions kompileOptions;
     private final BitSet allRuleBits;
 
-    private boolean isKore;
+    private boolean useFastRewriting;
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -66,11 +64,11 @@ public class SymbolicRewriter {
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-        this.isKore = this.kompileOptions.experimental.kore;
+        this.useFastRewriting = this.kompileOptions.experimental.kore && !this.kompileOptions.experimental.koreProve;
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        if (isKore) {
+        if (useFastRewriting) {
             this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext(), allRuleBits.length(), 90);
         }
 
@@ -80,7 +78,7 @@ public class SymbolicRewriter {
         while (step <= bound || bound < 0) {
             /* get the first solution */
             List<ConstrainedTerm> results;
-            if (isKore) {
+            if (useFastRewriting) {
                 results = fastComputeRewriteStep(constrainedTerm, true);
             } else {
                 results = computeRewriteStep(constrainedTerm, step, true);
@@ -376,7 +374,7 @@ public class SymbolicRewriter {
             SearchType searchType,
             TermContext context) {
         stopwatch.start();
-        if (isKore) {
+        if (useFastRewriting) {
             this.theFastMatcher = new FastRuleMatcher(context, allRuleBits.length(), 90);
         }
 
@@ -424,7 +422,7 @@ public class SymbolicRewriter {
 
                 List<ConstrainedTerm> results;
 
-                if (isKore)
+                if (useFastRewriting)
                     results = fastComputeRewriteStep(term, false);
                 else
                     results = computeRewriteStep(term, step, false);

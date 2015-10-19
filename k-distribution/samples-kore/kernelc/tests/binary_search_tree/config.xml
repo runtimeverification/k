@@ -8,6 +8,7 @@
         extension="c"
         >
     <kompile-option name="--kore" />
+    <kompile-option name="--kore-prove" />
     <program name="find.c">
       <krun-option name="--kore" />
       <krun-option name="--prove" value="tests/binary_search_tree/find_spec.k" />

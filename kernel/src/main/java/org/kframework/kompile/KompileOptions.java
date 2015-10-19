@@ -145,5 +145,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--kore", description="Compile with the new pipeline.")
         public boolean kore = false;
+
+        @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
+        public boolean koreProve = false;
     }
 }

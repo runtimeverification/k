@@ -42,6 +42,10 @@ public class JavaBackend implements Backend {
     public Function<Definition, Definition> steps(Kompile kompile) {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s)), "convert data structures to lookups");
 
+        if (kompile.kompileOptions.experimental.koreProve) {
+            return d -> convertDataStructureToLookup.apply(kompile.defaultSteps().apply(d));
+        }
+
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTop, "bubble out rewrites below cells"))
                 .andThen(convertDataStructureToLookup)
