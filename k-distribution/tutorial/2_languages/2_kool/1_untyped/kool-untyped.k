@@ -517,8 +517,13 @@ current object. */
        <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-//context HOLE:Exp(_:Exps)
-//  when getKLabel(HOLE) ==K #klabel(`'_(_)`) orBool getKLabel(HOLE) ==K #klabel(`'_[_]`)
+//context fcall(HOLE:Exp,_:Exps)
+//  when getKLabel(HOLE) ==K #klabel(`fcall`) orBool getKLabel(HOLE) ==K #klabel(`farray`)
+
+  rule fcall(fcall(A:Exp,B:Exps),C:Exps) => fcall(A,B) ~> #freezerXXX(C)
+  rule fcall(farray(A:Exp,B:Exps),C:Exps) => farray(A,B) ~> #freezerXXX(C)
+  rule V:Val ~> #freezerXXX(C:Exps) => fcall(V,C)
+  syntax KItem ::= "#freezerXXX" "(" K ")"
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]
