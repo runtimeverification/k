@@ -312,5 +312,9 @@ public final class KRunOptions {
         @Parameter(names="--native-libraries", description="Native libraries to link the rewrite engine against. Useful in defining rewriter plugins.",
                 listConverter=StringListConverter.class)
         public List<String> nativeLibraries = Collections.emptyList();
+
+        @Parameter(names="--native-library-path", description="Directories to search for native libraries in for linking. Useful in defining rewriter plugins.",
+                listConverter=StringListConverter.class)
+        public List<String> nativeLibraryPath = Collections.emptyList();
     }
 }
