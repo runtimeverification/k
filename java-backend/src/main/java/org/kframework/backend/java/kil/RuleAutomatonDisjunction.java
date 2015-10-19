@@ -30,7 +30,7 @@ public class RuleAutomatonDisjunction extends Term {
 
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
-        this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize];
+        this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize()];
         children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .forEach(p -> {
