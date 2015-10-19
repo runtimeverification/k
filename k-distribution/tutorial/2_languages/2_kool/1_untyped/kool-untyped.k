@@ -24,7 +24,7 @@ module KOOL-UNTYPED-COMMON
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict,klabel("farray")]
                > Exp "(" Exps ")"        [strict(2),klabel("fcall")]    // was strict in SIMPLE
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
@@ -157,18 +157,19 @@ definition. */
   rule <k> var X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
-                          `L +Int 1` ... `L +Int N` |-> undefined ...</store>
+                          frange(L +Int 1, L +Int N, undefined) ...</store>
+//                        `L +Int 1` ... `L +Int N` |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
 
   syntax Id ::= "$1" | "$2"
-  rule var X:Id[N1:Int, N2:Int, Vs:Vals];
+  rule var farray(X:Id, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals)));
     => var X[N1];
        {
          var $1=X;
          for(var $2=0; $2 <= N1 - 1; ++$2) {
-           var X[N2,Vs];
+           var farray(X, `_,_`(N2,Vs));
            $1[$2] = X;
          }
        }
@@ -206,7 +207,7 @@ definition. */
   rule false || E => E
 
 
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+  rule farray(V:Val, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals))) => farray(V[N1], `_,_`(N2, Vs))
     [structural, anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
@@ -325,10 +326,14 @@ definition. */
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
 
-  syntax Map ::= Int "..." Int "|->" K
-    [function, latex({#1}\ldots{#2}\mapsto{#3})]
-  rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K:K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+//syntax Map ::= Int "..." Int "|->" K
+//  [function, latex({#1}\ldots{#2}\mapsto{#3})]
+//rule N...M |-> _ => .Map  when N >Int M
+//rule N...M |-> K:K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+
+  syntax Map ::= frange(Int,Int,K) [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  rule frange(N,M,_) => .Map  when N >Int M
+  rule frange(N,M,K) => N |-> K frange(N +Int 1, M, K)  when N <=Int M
 
 
   syntax KItem ::= "execute"
