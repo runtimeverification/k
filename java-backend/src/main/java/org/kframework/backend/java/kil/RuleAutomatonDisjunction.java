@@ -37,7 +37,9 @@ public class RuleAutomatonDisjunction extends Term {
                     this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
                 });
 
-        this.variableDisjunctionsArray = new List[Sort.cache.size()];
+        synchronized (Sort.cache) {
+            this.variableDisjunctionsArray = new List[Sort.cache.size()];
+        }
         context.definition().allSorts().forEach(s -> {
             this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
                     .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))

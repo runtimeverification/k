@@ -13,10 +13,9 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 
 /**
@@ -27,7 +26,13 @@ import java.util.stream.Collectors;
 public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
     /* KLabelConstant cache */
-    private static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new ConcurrentHashMap<>();
+    private static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
+
+    public static int cacheSize() {
+        synchronized (cache) {
+            return cache.values().stream().mapToInt(Map::size).sum();
+        }
+    }
 
     /* un-escaped label */
     private final String label;
@@ -102,17 +107,15 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Definition definition) {
-        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> Collections.synchronizedMap(new PatriciaTrie<>()))
-                .computeIfAbsent(label, l -> new KLabelConstant(
-                        l,
-                        cacheSize(),
-                        definition.signaturesOf(l),
-                        definition.allSorts(),
-                        definition.kLabelAttributesOf(l)));
-    }
-
-    public static int cacheSize() {
-        return cache.get().entrySet().stream().map(p -> p.getValue().size()).reduce(0, (a, b) -> a + b);
+        synchronized (cache) {
+            return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> Collections.synchronizedMap(new PatriciaTrie<>()))
+                    .computeIfAbsent(label, l -> new KLabelConstant(
+                            l,
+                            cacheSize(),
+                            definition.signaturesOf(l),
+                            definition.allSorts(),
+                            definition.kLabelAttributesOf(l)));
+        }
     }
 
     /**
@@ -219,9 +222,11 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
      * instance.
      */
     private Object readResolve() {
-        Map<String, KLabelConstant> trie = cache.computeIfAbsent(Pair.of(signatures, productionAttributes),
-                p -> Collections.synchronizedMap(new PatriciaTrie<>()));
-        return trie.computeIfAbsent(label, l -> this);
+        synchronized (cache) {
+            Map<String, KLabelConstant> trie = cache.computeIfAbsent(Pair.of(signatures, productionAttributes),
+                    p -> Collections.synchronizedMap(new PatriciaTrie<>()));
+            return trie.computeIfAbsent(label, l -> this);
+        }
     }
 
     public String getAttr(String attribute) {
