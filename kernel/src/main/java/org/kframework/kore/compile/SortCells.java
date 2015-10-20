@@ -332,6 +332,17 @@ public class SortCells {
                         return getSplit(k.klist().items().get(0)).entrySet().stream()
                                 .map(e -> (K) KApply(KLabel("is" + getPredicateSort(e.getKey())), e.getValue()))
                                 .reduce(BooleanUtils.TRUE, BooleanUtils::and);
+                    } else if(k.klabel().name().equals("isBag")
+                            && k.klist().size() == 1
+                            && k.klist().items().get(0) instanceof KVariable) {
+                        KVariable var = (KVariable)k.klist().items().get(0);
+                        VarInfo info = variables.get(var);
+                        if (info != null) {
+                            kem.registerCompilerWarning("Accepting deprecated use of isBag as predicate for a cell fragment", k);
+                            return info.getSplit(var).entrySet().stream()
+                                    .map(e -> (K) KApply(KLabel("is" + getPredicateSort(e.getKey())), e.getValue()))
+                                    .reduce(BooleanUtils.TRUE, BooleanUtils::and);
+                        }
                     }
                     return super.apply(k);
                 } else {
