@@ -167,6 +167,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         return label;
     }
 
+    /**
+     * @return an unique integer representing the KLabel -- used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     */
     public int ordinal() {
         return ordinal;
     }
@@ -178,6 +181,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         return signatures;
     }
 
+    /**
+     * @return the SMTLIB name of this KLabel
+     */
     public String smtlib() {
         return smtlib;
     }

@@ -2,26 +2,29 @@
 
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.BitSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.kframework.utils.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * A disjunction of terms coming from different rewrite rules.
+ * Used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+ */
 public class RuleAutomatonDisjunction extends Term {
 
+    /**
+     * the KApplies in the disjunction, indexed (via the array) by their source rule
+     */
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
     public final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;

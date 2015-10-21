@@ -2,18 +2,16 @@
 
 package org.kframework.backend.java.kil;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 
 import java.util.Arrays;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
+/**
+ * Holds the RHS of multiple rewrites (from different rules) which has not been bubbled up to the top.
+ * Used in conjunction with the {@link org.kframework.backend.java.symbolic.FastRuleMatcher}.
+ */
 public class InnerRHSRewrite extends Term {
     public final Term[] theRHS;
 
@@ -38,7 +36,6 @@ public class InnerRHSRewrite extends Term {
     public int computeHash() {
         return Arrays.hashCode(theRHS);
     }
-
 
     @Override
     public boolean isExactSort() {

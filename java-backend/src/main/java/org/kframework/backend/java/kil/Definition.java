@@ -290,6 +290,9 @@ public class Definition extends JavaSymbolicObject {
         return builder.build();
     }
 
+    /**
+     * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
+     */
     public void addKoreRules(Module module, TermContext termContext) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, false, termContext.global().krunOptions.experimental.prove != null);
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
