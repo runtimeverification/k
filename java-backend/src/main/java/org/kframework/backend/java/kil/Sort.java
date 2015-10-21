@@ -122,6 +122,9 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      */
     Object readResolve() throws ObjectStreamException {
         synchronized (cache) {
+            if (cache.containsKey(name) && cache.get(name).ordinal != this.ordinal) {
+                throw new AssertionError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal + " in the cache and " + this.ordinal + " serialized.");
+            }
             return cache.computeIfAbsent(name, x -> this);
         }
     }

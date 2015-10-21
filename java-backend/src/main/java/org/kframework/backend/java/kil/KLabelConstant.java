@@ -26,7 +26,7 @@ import java.util.Set;
 public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
     /* KLabelConstant cache */
-    private static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
+    public static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
 
     public static int cacheSize() {
         synchronized (cache) {
@@ -225,6 +225,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
         synchronized (cache) {
             Map<String, KLabelConstant> trie = cache.computeIfAbsent(Pair.of(signatures, productionAttributes),
                     p -> Collections.synchronizedMap(new PatriciaTrie<>()));
+            if(trie.containsKey(label) && trie.get(label).ordinal != this.ordinal) {
+                throw new AssertionError("The ordinal for klabel: " + label + " is " + trie.get(label).ordinal + " in the cache and " + this.ordinal + " serialized.");
+            }
             return trie.computeIfAbsent(label, l -> this);
         }
     }
