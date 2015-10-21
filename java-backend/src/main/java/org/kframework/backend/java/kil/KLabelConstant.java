@@ -11,6 +11,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -226,7 +227,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
             Map<String, KLabelConstant> trie = cache.computeIfAbsent(Pair.of(signatures, productionAttributes),
                     p -> Collections.synchronizedMap(new PatriciaTrie<>()));
             if(trie.containsKey(label) && trie.get(label).ordinal != this.ordinal) {
-                throw new AssertionError("The ordinal for klabel: " + label + " is " + trie.get(label).ordinal + " in the cache and " + this.ordinal + " serialized.");
+                KEMException.criticalError("The ordinal for klabel: " + label + " is " + trie.get(label).ordinal + " in the cache and " + this.ordinal + " serialized.");
             }
             return trie.computeIfAbsent(label, l -> this);
         }
