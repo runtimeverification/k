@@ -4,6 +4,7 @@
 
   <include file="../../lesson_7/tests/config.xml"
            skip="pdf"
+           exclude="spawn"
            more-results="." >
     <kompile-option name="--kore" />
     <kompile-option name="--transition"
