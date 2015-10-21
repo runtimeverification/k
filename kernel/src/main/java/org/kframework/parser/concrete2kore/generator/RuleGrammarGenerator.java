@@ -190,7 +190,7 @@ public class RuleGrammarGenerator {
                     if (cfgInfo.isLeafCell(p.sort())) {
                         body = p.items().tail().head();
                     } else {
-                        body = NonTerminal(Sort("K"));
+                        body = NonTerminal(Sort("Bag"));
                     }
                     final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
                     Seq<ProductionItem> pi = Seq(p.items().head(), optDots, body, optDots, p.items().last());
