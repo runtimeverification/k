@@ -127,11 +127,14 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
      * @return
      */
     private String marshalValue(K value) {
-        String ocaml = converter.marshal(value, files.resolveTemp("run.out").getAbsolutePath());
-        files.saveToTemp("marshalvalue.ml", ocaml);
+        String ocaml = converter.marshal(files, value);
         try {
-            new OcamlRewriter(files, converter, options).compileOcaml("marshalvalue.ml");
-            int exit = files.getProcessBuilder().command(files.resolveTemp("a.out").getAbsolutePath()).directory(files.resolveTemp(".")).start().waitFor();
+            if (!files.resolveKompiled("marshalvalue").exists()) {
+                files.saveToKompiled("marshalvalue.ml", ocaml);
+                new OcamlRewriter(files, converter, options).compileOcaml("marshalvalue.ml");
+                FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
+            }
+            int exit = files.getProcessBuilder().command(files.resolveKompiled("marshalvalue").getAbsolutePath()).directory(files.resolveTemp(".")).start().waitFor();
             if (exit != 0) {
                 throw KEMException.criticalError("Failed to precompile program variables.");
             }

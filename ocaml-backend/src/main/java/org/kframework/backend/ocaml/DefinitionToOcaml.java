@@ -188,7 +188,10 @@ public class DefinitionToOcaml implements Serializable {
         anywhereKLabels = serialized.anywhereKLabels;
         options = serialized.options;
         constants = serialized.constants;
-        expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+        if (serialized.expandMacros == null) {
+            serialized.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+            expandMacros = serialized.expandMacros;
+        }
         sortHooks = userSortHooks;
     }
 
@@ -378,22 +381,21 @@ public class DefinitionToOcaml implements Serializable {
 
     private void ocamlTermInput(K k, StringBuilder sb) {
         sb.append("let input = Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append(enquoteString(ToKast.apply(expandMacros.expand(k))));
         sb.append("\n");
     }
 
     /**
      * Generates a string that, when compiled, writes a particular K term as binary to the specified file using the
      * Marshal module.
-     * @param k
-     * @param file
      * @return
      */
-    public String marshal(K k, String file) {
+    public String marshal(FileUtil files, K k) {
+        files.saveToTemp("run.in", ToKast.apply(expandMacros.expand(k)));
         StringBuilder sb = new StringBuilder();
         ocamlProgramHeader(sb);
-        ocamlTermInput(k, sb);
-        sb.append("let file = open_out ").append(enquoteString(file)).append("\n");
+        sb.append("let input = Lexer.parse_k_file \"run.in\"\n");
+        sb.append("let file = open_out \"run.out\"\n");
         sb.append("let str = Marshal.to_string (input : Prelude.k) [Marshal.No_sharing]\n");
         sb.append("let () = output_string file (String.escaped str)\n");
         return sb.toString();
@@ -1118,6 +1120,8 @@ public class DefinitionToOcaml implements Serializable {
             }
         }
     }
+
+
 
     private enum RuleType {
         FUNCTION, ANYWHERE, REGULAR, PATTERN
