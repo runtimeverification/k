@@ -48,7 +48,6 @@
         <program name="div.imp">
             <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-            <krun-option name="--search" />
         </program>
     </include>
 
