@@ -386,7 +386,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     /**
-     * Generates a string that, when compiled, writes a particular K term as binary to the specified file using the
+     * Generates a string that, when compiled, writes a K term parsed from run.in into run.out using the
      * Marshal module.
      * @return
      */
