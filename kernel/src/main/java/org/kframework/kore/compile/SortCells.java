@@ -104,7 +104,7 @@ public class SortCells {
         }
     }
 
-    // Information on uses of a particular variable
+    // Information on uses of a particular cell fragment variable
     private class VarInfo {
         KVariable var;
         KLabel parentCell;
@@ -199,10 +199,11 @@ public class SortCells {
     }
 
     private Map<KVariable, VarInfo> variables = new HashMap<>();
+    private Map<KVariable, Sort> cellVariables = new HashMap<>();
     private Set<KVariable> previousVars = new HashSet<>();
 
     private void resetVars() {
-        variables.clear(); previousVars.clear(); counter = 0;
+        variables.clear(); cellVariables.clear(); previousVars.clear(); counter = 0;
     }
 
     private void analyzeVars(K term) {
@@ -253,23 +254,42 @@ public class SortCells {
                 List<KVariable> bagVars = new ArrayList<>();
                 for (K item : items) {
                     if (item instanceof KVariable) {
-                        KVariable var = (KVariable)item;
+                        KVariable var = (KVariable) item;
                         if (var.att().contains(Attribute.SORT_KEY)) {
                             Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
-                            if (!cfg.cfg.isCell(sort)) {
-                                bagVars.add(var);
+                            if (cfg.cfg.isCell(sort)) {
+                                if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
+                                    Sort prevSort = cellVariables.get(var);
+                                    throw KEMException.compilerError("Variable "+var+" occurs annotated as multiple cell sorts, "+sort+" and "+prevSort,
+                                            item);
+                                }
+                                if (variables.containsKey(var)) {
+                                    throw KEMException.compilerError("Variable "+var+" occurs with cell sort "+sort+" after occurance without cell sort annotation");
+                                }
+                                cellVariables.put(var,sort);
+                                continue;
+                            } else {
+                                if (cellVariables.containsKey(var)) {
+                                    throw KEMException.compilerError("Variable "+var+" occurs annotated as non-cell sort "+sort+" after appearing as cell sort "+cellVariables.get(var),item);
+                                }
                             }
                         }
-                        if (!variables.containsKey(var)) {
-                            variables.put(var, new VarInfo());
+                        if (cellVariables.containsKey(var)) {
+                            throw KEMException.compilerError("Variable "+var+" occurs without sort annotation after appearing as cell sort "+cellVariables.get(var),item);
                         }
-                        variables.get(var).addOccurances(parentCell.klabel(), var, items);
+                        bagVars.add(var);
                     }
                 }
                 if (!allowRhs && bagVars.size() > 1) {
                     throw KEMException.compilerError(
                             "AC matching of multiple cell variables not yet supported. "
                                     + "encountered variables " + bagVars + " in cell " + parentCell.klabel(), parentCell);
+                }
+                for (KVariable var : bagVars) {
+                    if (!variables.containsKey(var)) {
+                        variables.put(var, new VarInfo());
+                    }
+                    variables.get(var).addOccurances(parentCell.klabel(), var, items);
                 }
             }
 
@@ -375,7 +395,12 @@ public class SortCells {
                 if (item instanceof KVariable) {
                     VarInfo info = variables.get(item);
                     if (info == null) {
-                        throw new IllegalArgumentException("Unknown variable " + item);
+                        Sort cellSort = cellVariables.get(item);
+                        if (cellSort == null) {
+                            throw new IllegalArgumentException("Unknown variable " + item);
+                        } else {
+                            return ImmutableMap.of(cellSort,item);
+                        }
                     }
                     return info.getSplit((KVariable) item);
                 } else if (item instanceof KApply) {
