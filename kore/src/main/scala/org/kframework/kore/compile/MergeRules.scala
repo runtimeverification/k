@@ -8,7 +8,9 @@ import org.kframework.kore._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 
-
+/**
+ * Compiler pass for merging the rules as expected by FastRuleMatcher
+ */
 class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
   import c._

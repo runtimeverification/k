@@ -2,7 +2,9 @@
 
 package org.kframework.utils;
 
-
+/**
+ * {@link BitSet} implementation backed by four words. Faster than using the JDK {@link java.util.BitSet}.
+ */
 public class FourWordBitSet implements BitSet<FourWordBitSet> {
 
     private static final long WORD_MASK = 0xffffffffffffffffL;

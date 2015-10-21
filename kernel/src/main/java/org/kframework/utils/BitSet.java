@@ -8,7 +8,9 @@ import java.util.Spliterators;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-
+/**
+ * Generic interface for BitSets so we can easily switch implementations.
+ */
 public interface BitSet<T extends BitSet<?>> extends Cloneable {
 
     static BitSet apply(int length) {

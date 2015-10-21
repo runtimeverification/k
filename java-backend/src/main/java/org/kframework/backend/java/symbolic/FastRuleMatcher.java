@@ -27,7 +27,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-
+/**
+ * A very fast interpreted matching implementation based on merging the rules into a decision-tree like structure.
+ * All possible matches are computed in one matching step. The merged term is obtained by putting a Matching Logic
+ * disjunction between the bodies of all rules, and then pushing the disjunction down into the term by identifying
+ * common structure. Information about the originating rule is retained via a predicate attached to each element of the
+ * disjunction.
+ */
 public class FastRuleMatcher {
 
     private Substitution<Variable, Term>[] substitutions;
@@ -69,6 +75,11 @@ public class FastRuleMatcher {
 
     }
 
+    /**
+     * Match the subject against the possibly-merged pattern.
+     *
+     * @return a list of substitutions tagged with the Integer identifier of the rule they belong to.
+     */
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask) {
         assert subject.isGround() : subject;
 

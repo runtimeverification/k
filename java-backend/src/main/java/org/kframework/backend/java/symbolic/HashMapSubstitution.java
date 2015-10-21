@@ -11,7 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * A HashMap-backed {@link Substitution}. Surprisingly, it is faster than {@link ArraySubstitution} for non-trivial
+ * definitions.
+ */
 public class HashMapSubstitution extends HashMap<Variable, Term> implements Substitution<Variable, Term> {
 
     @Override

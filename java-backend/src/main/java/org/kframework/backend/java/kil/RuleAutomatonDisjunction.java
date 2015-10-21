@@ -31,6 +31,13 @@ public class RuleAutomatonDisjunction extends Term {
 
     public final BitSet ruleMask;
 
+    /**
+     * Creates the disjunction based on a list of (Term, rules that contain that term).
+     * It expects the disjunctions to have already been pushed down the term, i.e., there can be at most
+     * one term with a particular KLabel in the list.
+     * @param children
+     * @param context
+     */
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
         this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize()];
@@ -56,10 +63,16 @@ public class RuleAutomatonDisjunction extends Term {
         ruleMask = BitSet.apply(context.definition().reverseRuleTable.size());
     }
 
+    /**
+     * @return the parts of the disjunction which are tokens.
+     */
     public Map<Token, Pair<Token, BitSet>> tokenDisjunctions() {
         return tokenDisjunctions;
     }
 
+    /**
+     * @return all elements of the disjunction. As expected by the disjunction constructor.
+     */
     public List<Pair<Term, BitSet>> disjunctions() {
         Set<Pair<Term, BitSet>> disjunctions = new HashSet<>();
         disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) Arrays.asList(kItemDisjunctionsArray));

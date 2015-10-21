@@ -4,19 +4,25 @@ package org.kframework.utils;
 
 import java.util.stream.IntStream;
 
+/**
+ * {@link BitSet} implementation special-casing for just one integer in the set. Not particularly good so could
+ * delete at some point.
+ */
 public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> {
     int oneValue = -1;
     java.util.BitSet severalValues = null;
     int count = 0;
 
-//    java.util.BitSet oracle = new java.util.BitSet();
+    java.util.BitSet oracle = new java.util.BitSet();
 
     void checkOracle() {
-//        java.util.BitSet x = new java.util.BitSet();
-//        this.stream().forEach(x::set);
-//        if (!x.equals(oracle)) {
-//            throw new AssertionError("bum");
-//        }
+        if (false) {
+            java.util.BitSet x = new java.util.BitSet();
+            this.stream().forEach(x::set);
+            if (!x.equals(oracle)) {
+                throw new AssertionError("bum");
+            }
+        }
     }
 
     @Override

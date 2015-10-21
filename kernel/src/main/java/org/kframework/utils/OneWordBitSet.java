@@ -2,7 +2,9 @@
 
 package org.kframework.utils;
 
-
+/**
+ * {@link BitSet} implementation backed by a single work.
+ */
 public class OneWordBitSet implements BitSet<OneWordBitSet> {
 
     private static final long WORD_MASK = 0xffffffffffffffffL;

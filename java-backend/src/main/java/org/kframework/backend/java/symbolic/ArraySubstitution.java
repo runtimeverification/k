@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * A {@link Substitution}implementation backed by an array.
+ */
 public class ArraySubstitution implements Substitution<Variable, Term> {
 
     private final Term[] entries;
