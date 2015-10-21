@@ -36,22 +36,19 @@
         <program name="primes.imp">
             <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-            <krun-option name="--output" value="none"/>
         </program>
         <program name="sum.imp">
             <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-            <krun-option name="--output" value="none"/>
         </program>
         <program name="collatz.imp">
             <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-            <krun-option name="--output" value="none"/>
         </program>
         <program name="div.imp">
             <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-            <krun-option name="--output" value="none"/>
+            <krun-option name="--search" />
         </program>
     </include>
 
