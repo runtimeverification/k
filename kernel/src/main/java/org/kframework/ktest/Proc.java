@@ -113,18 +113,17 @@ public class Proc<T> implements Runnable {
     private final Map<String, String> env;
 
     /**
-     *
-     * @param obj this is basically an arbitrary object to keep in a process,
-     *            this used to know which TestCase a process is running
-     * @param args arguments to pass to process
-     * @param inputFile process' input source -- used for logging
-     * @param procInput null or empty string to not pass anything to program input
-     * @param expectedOut null to ignore the program output, output messages are ignored when
-     *                    program fails with an error
-     * @param expectedErr null if not testing for error output, error messages are ignored when
-     *                    program returns 0
+     * @param obj           this is basically an arbitrary object to keep in a process,
+     *                      this used to know which TestCase a process is running
+     * @param args          arguments to pass to process
+     * @param inputFile     process' input source -- used for logging
+     * @param procInput     null or empty string to not pass anything to program input
+     * @param expectedOut   null to ignore the program output, output messages are ignored when
+     *                      program fails with an error
+     * @param expectedErr   null if not testing for error output, error messages are ignored when
+     *                      program returns 0
      * @param strComparator comparator object to compare program outputs with expected outputs
-     * @param outputFile output file to be updated when --update-out is used
+     * @param outputFile    output file to be updated when --update-out is used
      * @param newOutputFile output file to generated when --generate-out is used
      */
     public Proc(T obj, String[] args, File inputFile, String procInput,
@@ -166,43 +165,50 @@ public class Proc<T> implements Runnable {
 
     @Override
     public void run() {
-        synchronized (Proc.class) {
-            // pass the --warnings-to-errors flag to all processes if specified to ktest
-            String[] warningsArgs = args;
-            if (warnings2errors) {
-                warningsArgs = Arrays.copyOf(args, args.length + 1);
-                warningsArgs[args.length] = "--warnings-to-errors";
-            }
-            if (options.getDebug()) {
-                String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
-                debugArgs[warningsArgs.length] = "--debug";
-                if (expectedErr != null) {
-                    // We want to use --debug and compare error outputs too. In this case we need to
-                    // make two runs:
-                    // 1) We pass --debug and collect output with stack trace.
-                    // 2) We don't pass --debug and use output for comparison.
-                    ProcOutput debugOutput = runProc(debugArgs);
-                    procOutput = runProc(warningsArgs);
-                    if (!options.dry) {
-                        handlePgmResult(procOutput, debugOutput);
-                    }
-                } else {
-                    // Make one run with --debug
-                    procOutput = runProc(debugArgs);
-                    if (!options.dry) {
-                        handlePgmResult(procOutput, null);
-                    }
+        // pass the --warnings-to-errors flag to all processes if specified to ktest
+        String[] warningsArgs = args;
+        if (warnings2errors) {
+            warningsArgs = Arrays.copyOf(args, args.length + 1);
+            warningsArgs[args.length] = "--warnings-to-errors";
+        }
+        if (options.getDebug()) {
+            String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
+            debugArgs[warningsArgs.length] = "--debug";
+            if (expectedErr != null) {
+                // We want to use --debug and compare error outputs too. In this case we need to
+                // make two runs:
+                // 1) We pass --debug and collect output with stack trace.
+                // 2) We don't pass --debug and use output for comparison.
+                ProcOutput debugOutput = runProc(debugArgs);
+                procOutput = runProc(warningsArgs);
+                if (!options.dry) {
+                    handlePgmResult(procOutput, debugOutput);
                 }
             } else {
-                procOutput = runProc(warningsArgs);
+                // Make one run with --debug
+                procOutput = runProc(debugArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, null);
                 }
+            }
+        } else {
+            procOutput = runProc(warningsArgs);
+            if (!options.dry) {
+                handlePgmResult(procOutput, null);
             }
         }
     }
 
     private ProcOutput runProc(String[] args) {
+        if (Arrays.asList(args).stream().anyMatch(s -> s.contains("--kore"))) {
+            synchronized (Proc.class) {
+                return getProcInner(args);
+            }
+        } else
+            return getProcInner(args);
+    }
+
+    private ProcOutput getProcInner(String[] args) {
         if (options.dry) {
             StringBuilder dryStr = new StringBuilder();
             dryStr.append(toLogString(args));
@@ -285,7 +291,7 @@ public class Proc<T> implements Runnable {
 
     /**
      * @return Program output. null when proces is not started yet or it's failed before
-     *         producing output (i.e. when killed because of timeout)
+     * producing output (i.e. when killed because of timeout)
      */
     public String getPgmOut() {
         return procOutput.stdout;
@@ -293,7 +299,7 @@ public class Proc<T> implements Runnable {
 
     /**
      * @return Program error output. null when proces is not started yet or it's failed before
-     *         producing error output (i.e. when killed because of timeout)
+     * producing error output (i.e. when killed because of timeout)
      */
     public String getPgmErr() {
         return procOutput.stderr;
@@ -349,9 +355,9 @@ public class Proc<T> implements Runnable {
                 } catch (MatchFailure e) {
                     // outputs don't match
                     System.out.format(
-                        "%sERROR: [%s] output doesn't match with expected output " +
-                        "%s (time: %d ms)%s%n",
-                        red, logStr, expectedOut.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
+                            "%sERROR: [%s] output doesn't match with expected output " +
+                                    "%s (time: %d ms)%s%n",
+                            red, logStr, expectedOut.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
                     reportOutMatch(e.getMessage());
                     System.out.println(getReason());
                     doGenerateOut = true;
@@ -404,9 +410,9 @@ public class Proc<T> implements Runnable {
                 } catch (MatchFailure e) {
                     // error outputs don't match
                     System.out.format(
-                        "%sERROR: [%s] throwed error, but expected error message doesn't match " +
-                        "%s (time: %d ms)%s%n",
-                        red, logStr, expectedErr.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
+                            "%sERROR: [%s] throwed error, but expected error message doesn't match " +
+                                    "%s (time: %d ms)%s%n",
+                            red, logStr, expectedErr.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
                     if (debugOutput != null) {
                         System.out.format("error output was (except the stack trace): %s%n",
                                 debugOutput.stderr);
