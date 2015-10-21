@@ -97,6 +97,9 @@ public class OcamlBackend implements Backend {
                 new OcamlRewriter(files, def, new KRunOptions()).compileOcaml("marshalvalue.ml");
                 FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
                 files.resolveKompiled("marshalvalue").setExecutable(true);
+            } else {
+                ocaml = def.marshal();
+                files.saveToKompiled("marshalvalue.ml", ocaml);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
