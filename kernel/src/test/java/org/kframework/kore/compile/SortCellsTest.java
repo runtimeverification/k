@@ -13,6 +13,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -48,8 +49,23 @@ public class SortCellsTest {
 
     @Test
     public void testSimpleSplitting() {
-        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"));
-        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    /**
+     * Ensure that a variable does not become a cell fragment if it is annotated
+     * with a single-cell sort.
+     */
+    @Test
+    public void testSortedVar() {
+        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), Y);
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), Y);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
@@ -253,8 +269,9 @@ public class SortCellsTest {
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
-    /** Check that the splitting in {@linkplain #testPredicateExpansion()} doesn't happen with
-     *
+    /** Ensure that the splitting in {@linkplain #testPredicateExpansion()} does not happen
+     * in a term which applies the sort predicate for a <em>different</em> cell fragment sort
+     * to a cell fragment variable.
      */
     @Test
     public void testUnrelatedPredicate() {
