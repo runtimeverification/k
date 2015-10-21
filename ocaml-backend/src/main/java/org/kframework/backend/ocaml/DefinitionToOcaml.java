@@ -190,8 +190,8 @@ public class DefinitionToOcaml implements Serializable {
         constants = serialized.constants;
         if (serialized.expandMacros == null) {
             serialized.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
-            expandMacros = serialized.expandMacros;
         }
+        expandMacros = serialized.expandMacros;
         sortHooks = userSortHooks;
     }
 
