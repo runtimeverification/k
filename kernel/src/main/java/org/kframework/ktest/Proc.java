@@ -166,36 +166,38 @@ public class Proc<T> implements Runnable {
 
     @Override
     public void run() {
-        // pass the --warnings-to-errors flag to all processes if specified to ktest
-        String[] warningsArgs = args;
-        if (warnings2errors) {
-            warningsArgs = Arrays.copyOf(args, args.length + 1);
-            warningsArgs[args.length] = "--warnings-to-errors";
-        }
-        if (options.getDebug()) {
-            String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
-            debugArgs[warningsArgs.length] = "--debug";
-            if (expectedErr != null) {
-                // We want to use --debug and compare error outputs too. In this case we need to
-                // make two runs:
-                // 1) We pass --debug and collect output with stack trace.
-                // 2) We don't pass --debug and use output for comparison.
-                ProcOutput debugOutput = runProc(debugArgs);
-                procOutput = runProc(warningsArgs);
-                if (!options.dry) {
-                    handlePgmResult(procOutput, debugOutput);
+        synchronized (Proc.class) {
+            // pass the --warnings-to-errors flag to all processes if specified to ktest
+            String[] warningsArgs = args;
+            if (warnings2errors) {
+                warningsArgs = Arrays.copyOf(args, args.length + 1);
+                warningsArgs[args.length] = "--warnings-to-errors";
+            }
+            if (options.getDebug()) {
+                String[] debugArgs = Arrays.copyOf(warningsArgs, warningsArgs.length + 1);
+                debugArgs[warningsArgs.length] = "--debug";
+                if (expectedErr != null) {
+                    // We want to use --debug and compare error outputs too. In this case we need to
+                    // make two runs:
+                    // 1) We pass --debug and collect output with stack trace.
+                    // 2) We don't pass --debug and use output for comparison.
+                    ProcOutput debugOutput = runProc(debugArgs);
+                    procOutput = runProc(warningsArgs);
+                    if (!options.dry) {
+                        handlePgmResult(procOutput, debugOutput);
+                    }
+                } else {
+                    // Make one run with --debug
+                    procOutput = runProc(debugArgs);
+                    if (!options.dry) {
+                        handlePgmResult(procOutput, null);
+                    }
                 }
             } else {
-                // Make one run with --debug
-                procOutput = runProc(debugArgs);
+                procOutput = runProc(warningsArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, null);
                 }
-            }
-        } else {
-            procOutput = runProc(warningsArgs);
-            if (!options.dry) {
-                handlePgmResult(procOutput, null);
             }
         }
     }
