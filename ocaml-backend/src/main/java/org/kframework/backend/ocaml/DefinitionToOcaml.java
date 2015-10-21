@@ -390,8 +390,7 @@ public class DefinitionToOcaml implements Serializable {
      * Marshal module.
      * @return
      */
-    public String marshal(FileUtil files, K k) {
-        files.saveToTemp("run.in", ToKast.apply(expandMacros.expand(k)));
+    public String marshal() {
         StringBuilder sb = new StringBuilder();
         ocamlProgramHeader(sb);
         sb.append("let input = Lexer.parse_k_file \"run.in\"\n");
@@ -399,6 +398,10 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let str = Marshal.to_string (input : Prelude.k) [Marshal.No_sharing]\n");
         sb.append("let () = output_string file (String.escaped str)\n");
         return sb.toString();
+    }
+
+    public K preprocess(K k) {
+        return expandMacros.expand(k);
     }
 
     public String constants() {

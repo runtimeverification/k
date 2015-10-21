@@ -3,6 +3,7 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.kframework.kore.ToKast;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
@@ -127,13 +128,8 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
      * @return
      */
     private String marshalValue(K value) {
-        String ocaml = converter.marshal(files, value);
+        files.saveToTemp("run.in", ToKast.apply(converter.preprocess(value)));
         try {
-            if (!files.resolveKompiled("marshalvalue").exists()) {
-                files.saveToKompiled("marshalvalue.ml", ocaml);
-                new OcamlRewriter(files, converter, options).compileOcaml("marshalvalue.ml");
-                FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
-            }
             int exit = files.getProcessBuilder().command(files.resolveKompiled("marshalvalue").getAbsolutePath()).directory(files.resolveTemp(".")).start().waitFor();
             if (exit != 0) {
                 throw KEMException.criticalError("Failed to precompile program variables.");

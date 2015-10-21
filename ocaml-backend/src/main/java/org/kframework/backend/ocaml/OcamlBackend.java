@@ -8,6 +8,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.compile.Backend;
+import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
@@ -91,6 +92,11 @@ public class OcamlBackend implements Backend {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }
             }
+            ocaml = def.marshal();
+            files.saveToTemp("marshalvalue.ml", ocaml);
+            new OcamlRewriter(files, def, new KRunOptions()).compileOcaml("marshalvalue.ml");
+            FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
+            files.resolveKompiled("marshalvalue").setExecutable(true);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw KEMException.criticalError("Ocaml process interrupted.", e);
