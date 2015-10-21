@@ -91,12 +91,13 @@ public class OcamlBackend implements Backend {
                 if (exit != 0) {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }
+
+                ocaml = def.marshal();
+                files.saveToTemp("marshalvalue.ml", ocaml);
+                new OcamlRewriter(files, def, new KRunOptions()).compileOcaml("marshalvalue.ml");
+                FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
+                files.resolveKompiled("marshalvalue").setExecutable(true);
             }
-            ocaml = def.marshal();
-            files.saveToTemp("marshalvalue.ml", ocaml);
-            new OcamlRewriter(files, def, new KRunOptions()).compileOcaml("marshalvalue.ml");
-            FileUtils.copyFile(files.resolveTemp("a.out"), files.resolveKompiled("marshalvalue"));
-            files.resolveKompiled("marshalvalue").setExecutable(true);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw KEMException.criticalError("Ocaml process interrupted.", e);
