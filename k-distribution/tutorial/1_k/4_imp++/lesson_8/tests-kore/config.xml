@@ -12,7 +12,6 @@
     <all-programs>
       <krun-option name="--kore" />
       <krun-option name="--parser" value="kast --kore --sort Stmts" />
-      <krun-option name="--output" value="none" />
     </all-programs>
     <!--<program name="spawn.imp" >-->
       <!--<krun-option name="&#45;&#45;kore" />-->
