@@ -29,8 +29,6 @@ public class RuleAutomatonDisjunction extends Term {
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
     public final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
 
-    public final BitSet ruleMask;
-
     /**
      * Creates the disjunction based on a list of (Term, rules that contain that term).
      * It expects the disjunctions to have already been pushed down the term, i.e., there can be at most
@@ -59,8 +57,6 @@ public class RuleAutomatonDisjunction extends Term {
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
-
-        ruleMask = BitSet.apply(context.definition().reverseRuleTable.size());
     }
 
     /**
