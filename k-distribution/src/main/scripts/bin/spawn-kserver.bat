@@ -1,5 +1,6 @@
 @ECHO off
 SETLOCAL ENABLEEXTENSIONS
 IF ERRORLEVEL 1 ECHO Unable to enable extensions
-start wscript "%~dp0\invisible.vbs" "%~dp0\kserver.bat" >  %1
+set PATH=%PATH%;C:\cygwin\bin;C:\cygwin\usr\bin;C:\cygwin\usr\local\bin
+start wscript "%~dp0..\lib\invisible.vbs" "%~dp0\kserver.bat" 
 exit
