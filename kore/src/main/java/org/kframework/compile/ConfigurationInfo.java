@@ -33,6 +33,9 @@ public interface ConfigurationInfo {
     /** True if sort k is actually a cell sort */
     boolean isCell(Sort k);
 
+    /** True if sort s is the collection sort for a multiplicity star cell. */
+    boolean isCellCollection(Sort s);
+
     /** True if kLabel is the KLabel of a cell */
     boolean isCellLabel(KLabel kLabel);
 
@@ -91,7 +94,7 @@ public interface ConfigurationInfo {
     Option<Sort> getCellForConcat(KLabel concat);
 
     /** Returns the cell associated with this unit */
-    Option<Sort> getCellForUnit(KApply unit);
+    Option<Sort> getCellForUnit(KLabel unit);
 
     /** Declared mulitplicitly of a cell */
     enum Multiplicity {

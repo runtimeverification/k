@@ -161,9 +161,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             org.kframework.kore.KList klist = ((KApply) k).klist();
             if (useCellCollections && definition.configurationInfo().getCellForConcat(klabel).isDefined())
                 return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
-            if (useCellCollections && definition.configurationInfo().getCellForUnit((KApply) k).isDefined())
+            if (useCellCollections && definition.configurationInfo().getCellForUnit(klabel).isDefined() && klist.size() == 0)
                 return KLabelInjection.injectionOf(
-                        CellCollection.empty(definition.configurationInfo().getCellForUnit((KApply) k).get(), definition),
+                        CellCollection.empty(definition.configurationInfo().getCellForUnit(klabel).get(), definition),
                         context);
             else if (useCellCollections && definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(

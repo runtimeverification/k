@@ -89,6 +89,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def getParent(k: Sort): Sort = edges collectFirst { case (p, `k`) => p } get
   override def isCell(k: Sort): Boolean = cellSorts.contains(k)
+  override def isCellCollection(s: Sort): Boolean = cellBagSorts.contains(s)
   override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
   override def isLeafCell(k: Sort): Boolean = !isParentCell(k)
 
@@ -140,10 +141,13 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     .map(_._1)
     .headOption
 
-  override def getCellForUnit(unit: KApply): Option[Sort] = cellSorts
-    .map(s => (s, getCellBagSortsOfCell(s)))
-    .filter(_._2.size == 1)
-    .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get[String]("unit").get)).equals(unit))
-    .map(_._1)
-    .headOption
+  override def getCellForUnit(unitLabel: KLabel): Option[Sort] = {
+    val unit = KApply(unitLabel)
+    cellSorts
+      .map(s => (s, getCellBagSortsOfCell(s)))
+      .filter(_._2.size == 1)
+      .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get[String]("unit").get)).equals(unit))
+      .map(_._1)
+      .headOption
+  }
 }

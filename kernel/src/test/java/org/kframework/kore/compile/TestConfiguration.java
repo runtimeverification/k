@@ -2,6 +2,8 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import org.kframework.compile.ConfigurationInfo;
@@ -32,11 +34,12 @@ class TestConfiguration implements ConfigurationInfo {
 
     Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
     Map<Sort, K> defaultCells = Maps.newHashMap();
-    Map<Sort, KApply> units = Maps.newHashMap();
-    Map<Sort, KLabel> concats = Maps.newHashMap();
+    BiMap<Sort, KLabel> units = HashBiMap.create();
+    BiMap<Sort, KLabel> concats = HashBiMap.create();
     Map<Sort, KLabel> cellLabels = Maps.newHashMap();
     Map<Sort, KLabel> cellFragmentLabels = Maps.newHashMap();
     Map<Sort, KLabel> cellAbsentLabels = Maps.newHashMap();
+    Map<Sort, Sort> cellCollectionSorts = Maps.newHashMap();
 
     public void addCell(String parent, String child, String label) {
         addCell(parent, child, label, Multiplicity.ONE);
@@ -56,6 +59,9 @@ class TestConfiguration implements ConfigurationInfo {
             if (m != Multiplicity.STAR) {
                 cellAbsentLabels.put(Sort(child),KLabel("no"+child));
             }
+            if (m == Multiplicity.STAR) {
+                cellCollectionSorts.put(Sort(child+"Bag"),Sort(child));
+            }
             parents.put(Sort(child), Sort(parent));
             children.put(Sort(parent), Sort(child));
             levels.put(Sort(child), 1 + levels.get(Sort(parent)));
@@ -73,7 +79,7 @@ class TestConfiguration implements ConfigurationInfo {
         defaultCells.put(Sort(cell), term);
     }
 
-    public void addUnit(String cell, KApply term) { units.put(Sort(cell), term); }
+    public void addUnit(String cell, KLabel label) { units.put(Sort(cell), label); }
 
     public void addConcat(String cell, KLabel label) { concats.put(Sort(cell), label); }
 
@@ -103,6 +109,11 @@ class TestConfiguration implements ConfigurationInfo {
     @Override
     public boolean isCell(Sort k) {
         return levels.containsKey(k);
+    }
+
+    @Override
+    public boolean isCellCollection(Sort s) {
+        return cellCollectionSorts.containsKey(s);
     }
 
     @Override
@@ -171,19 +182,19 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
-    public KApply getUnit(Sort k) { return units.get(k); }
+    public KApply getUnit(Sort k) { return KApply(units.get(k)); }
 
     @Override
     public KLabel getConcat(Sort k) { return concats.get(k); }
 
     @Override
     public Option<Sort> getCellForConcat(KLabel concat) {
-        throw new UnsupportedOperationException();
+        return Option.apply(concats.inverse().get(concat));
     }
 
     @Override
-    public Option<Sort> getCellForUnit(KApply unit) {
-        throw new UnsupportedOperationException();
+    public Option<Sort> getCellForUnit(KLabel unit) {
+        return Option.apply(units.inverse().get(unit));
     }
 
     @Override
