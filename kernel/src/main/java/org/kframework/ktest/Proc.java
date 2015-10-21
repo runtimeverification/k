@@ -30,6 +30,7 @@ import java.util.concurrent.Future;
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
  */
+
 public class Proc<T> implements Runnable {
 
     /**
