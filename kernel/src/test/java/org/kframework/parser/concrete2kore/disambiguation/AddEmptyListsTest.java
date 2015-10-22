@@ -152,7 +152,6 @@ public class AddEmptyListsTest {
         parseTerm("f(`.List{\"'_,_\"}`(.KList))", "K", KApply(F, NIL));
     }
 
-    @Ignore("BUG: need to consider argument sorts in labeled terms")
     @Test
     public void testArgumentLabeledConsSub1() {
         parseTerm("h(`_,_`(b,.Bs))", "K", KApply(H, KApply(CONS, B, NIL)));
@@ -164,7 +163,6 @@ public class AddEmptyListsTest {
         parseTerm("h(`_,_`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
     }
 
-    @Ignore("BUG: need to consider argument sorts in labeled terms")
     @Test
     public void testArgumentLabeledNilSub1() {
         parseTerm("h(`.List{\"'_,_\"}`(.KList))", "K", KApply(H, NIL));
