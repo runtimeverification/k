@@ -95,6 +95,8 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
         if (changed) {
             Collections.reverse(newItems); // TermCons with PStack requires the elements to be in the reverse order
             tc = TermCons.apply(ConsPStack.from(newItems), tc.production(), tc.location(), tc.source());
+        }
+        if (!warnings.isEmpty()) {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = super.apply(tc);
             return new Tuple2<>(Right.apply(rez._1().right().get()), this.mergeWarnings(warnings, rez._2()));
         } else {
