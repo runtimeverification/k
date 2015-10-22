@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <!-- Expected to be called from k/2_languages/2_kool with the command
 
   ktest tests/config.xml
@@ -8,7 +8,10 @@
 
 <tests>
 
+<!-- NOTE: use temporary config.xml during KORE translation
   <include file="../1_untyped/tests/config.xml" directory="1_untyped" />
+-->
+  <include file="../1_untyped/tests/config-kore.xml" directory="1_untyped" />
   <include file="../2_typed/1_dynamic/tests/config.xml" directory="2_typed/1_dynamic" />
   <include file="../2_typed/2_static/tests/config.xml" directory="2_typed/2_static" />
 

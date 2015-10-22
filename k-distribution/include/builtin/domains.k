@@ -207,6 +207,7 @@ module BOOL
                 > left:
                   Bool "==Bool" Bool      [function, left, smtlib(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, left, smtlib(distinct), hook(BOOL.ne)]
+  syntax Bool ::= "(" Bool ")" [bracket]
 
   rule notBool true => false
   rule notBool false => true
