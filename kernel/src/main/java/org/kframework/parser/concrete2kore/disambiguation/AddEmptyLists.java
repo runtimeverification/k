@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 
+import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -96,7 +97,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             Collections.reverse(newItems); // TermCons with PStack requires the elements to be in the reverse order
             tc = TermCons.apply(ConsPStack.from(newItems), tc.production(), tc.location(), tc.source());
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = super.apply(tc);
-            return new Tuple2<>(Right.apply(rez._1().right().get()), this.mergeWarnings(warnings, rez._2()));
+            return new Tuple2<>(Right.apply(rez._1().right().get()), Sets.union(warnings, rez._2()));
         } else {
             return super.apply(tc);
         }

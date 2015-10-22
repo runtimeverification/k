@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import com.google.common.collect.Sets;
 import org.kframework.kore.K;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
@@ -62,6 +63,6 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
                 new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
 
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = this.apply(amb.items().iterator().next());
-        return new Tuple2<>(Right.apply(rez._1().right().get()), this.mergeWarnings(this.makeWarningSet(w), rez._2()));
+        return new Tuple2<>(Right.apply(rez._1().right().get()), Sets.union(Sets.newHashSet(w), rez._2()));
     }
 }
