@@ -76,7 +76,8 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             Sort expectedSort = ((NonTerminal) pi).sort();
             ProductionReference child = (ProductionReference) items.next();
             Sort childSort = child.production().sort();
-            if (listSorts.contains(expectedSort) && !expectedSort.equals(childSort)) {
+            if (listSorts.contains(expectedSort) &&
+                    !(subsorts.lessThanEq(childSort, expectedSort) && listSorts.contains(childSort))) {
                 final boolean isBracket = child.production().att().contains("bracket");
                 if (isBracket
                         || (child.production().klabel().isDefined()

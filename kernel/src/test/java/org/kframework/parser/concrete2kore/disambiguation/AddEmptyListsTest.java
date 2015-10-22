@@ -184,7 +184,6 @@ public class AddEmptyListsTest {
         parseTerm("f(V:As)", "K", KApply(F, KApply(CAST_AS, KVariable("V"))));
     }
 
-    @Ignore("BUG: Need to allow terms of list sorts which are subsorts of the expected list")
     @Test
     public void testArgumentAnnSubListVar() {
         parseTerm("f(V:Bs)", "K", KApply(F, KApply(CAST_BS, KVariable("V"))));
