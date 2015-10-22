@@ -142,32 +142,29 @@ public class AddEmptyListsTest {
         parseTerm("V:As", "K", KApply(CAST_AS, KVariable("V")));
     }
 
-    @Ignore("BUG: Need to handle labeled applications in AddEmptyLists")
     @Test
     public void testArgumentLabeledCons() {
         parseTerm("f(`_,_`(a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
     }
 
-    @Ignore("BUG: Need to handle labeled applications in AddEmptyLists")
     @Test
     public void testArgumentLabeledNil() {
         parseTerm("f(`.List{\"'_,_\"}`(.KList))", "K", KApply(F, NIL));
     }
 
-    @Ignore("BUG: need to process labeled terms")
+    @Ignore("BUG: need to consider argument sorts in labeled terms")
     @Test
     public void testArgumentLabeledConsSub1() {
         parseTerm("h(`_,_`(b,.Bs))", "K", KApply(H, KApply(CONS, B, NIL)));
     }
 
-    @Ignore("BUG: need to process labeled terms")
     @Test
     public void testArgumentLabeledConsSub2() {
         // gets a warning because the argument of sort As does not fit.n
         parseTerm("h(`_,_`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
     }
 
-    @Ignore("BUG: need to process labeled terms")
+    @Ignore("BUG: need to consider argument sorts in labeled terms")
     @Test
     public void testArgumentLabeledNilSub1() {
         parseTerm("h(`.List{\"'_,_\"}`(.KList))", "K", KApply(H, NIL));
