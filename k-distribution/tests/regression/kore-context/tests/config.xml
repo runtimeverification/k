@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+  <tests>
+    <test
+        definition="i.k"
+        skip="pdf"
+        programs="."
+        extension="i"
+        results="." >
+      <kompile-option name="--kore" />
+      <all-programs>
+        <krun-option name="--kore" />
+      </all-programs>
+    </test>
+  </tests>
