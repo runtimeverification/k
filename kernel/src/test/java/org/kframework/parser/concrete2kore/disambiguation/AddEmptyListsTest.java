@@ -137,6 +137,22 @@ public class AddEmptyListsTest {
         parseTerm("f(b,b)", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
     }
 
+    @Ignore("BUG: need to also propagate correct sorts to arguments of labeled application")
+    @Test
+    public void testLabeledFunSingleItem() {
+        parseTerm("`f`(a)", "K", KApply(F, KApply(CONS, A, NIL)));
+    }
+
+    @Test
+    public void testLabedFunConcreteArgument() {
+        parseTerm("`f`(.As)", "K", KApply(F, NIL));
+        parseTerm("`f`(`a,a`)", "K", KApply(F, KApply(CONS, A, KApply(CONS, A, NIL))));
+        parseTerm("`f`(`a,.As`)", "K", KApply(F, KApply(CONS, A, NIL)));
+        parseTerm("`f`(`a,b`)", "K", KApply(F, KApply(CONS, A, KApply(CONS, B, NIL))));
+        parseTerm("`f`(`b,.Bs`)", "K", KApply(F, KApply(CONS, B, NIL)));
+        parseTerm("`f`(`b,b`)", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
+    }
+
     @Test
     public void testAnnVar() {
         parseTerm("V:As", "K", KApply(CAST_AS, KVariable("V")));
