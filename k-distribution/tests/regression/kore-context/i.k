@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 require "domains.k"
 
 module I-SYNTAX
