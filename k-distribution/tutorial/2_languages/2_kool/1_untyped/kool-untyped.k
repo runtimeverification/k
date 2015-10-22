@@ -372,13 +372,17 @@ object and method closures. */
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
 
-  // TODO(KORE): clarify sort inferences
+  // TODO(KORE): clarify sort inferences #1803
   syntax Exp ::= "undefined"  [latex(\bot)]
   /*
   syntax KItem ::= "undefined"  [latex(\bot)]
   */
 
+  // TODO(KORE): Change .K back to . throughout this definition #1772
   rule <k> var X:Id; => .K ...</k>
+  /*
+  rule <k> var X:Id; => . ...</k>
+  */
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -443,7 +447,11 @@ definition. */
 
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
+  // TODO(KORE): Casting should not be needed, fix it once the sort inferencer works. #1803
   rule ! T:Bool => notBool(T)
+  /*
+  rule ! T => notBool(T)
+  */
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
@@ -484,7 +492,11 @@ interestingly, the semantics of return stays unchanged. */
 
   context (HOLE => lvalue(HOLE)) = _
 
+  // TODO(KORE): casting of _ should not be needed #1803
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_:Exp => V) ...</store>
+  /*
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
+  */
     [assignment]
 
 
@@ -568,7 +580,7 @@ from SIMPLE unchanged. */
   rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
-  // TODO(KORE): clarify sort inferences
+  // TODO(KORE): clarify sort inferences #1803
   syntax Exp ::= lookup(Int)
   /*
   syntax KItem ::= lookup(Int)
@@ -1136,7 +1148,7 @@ member's location based on the current class of the object. */
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  // TODO(KORE): clarify sort inferences
+  // TODO(KORE): clarify sort inferences #1803
   syntax Exp ::= lookupMember(EnvStackCell,Id)  [function]
   /*
   syntax KItem ::= lookupMember(EnvStackCell,Id)  [function]
