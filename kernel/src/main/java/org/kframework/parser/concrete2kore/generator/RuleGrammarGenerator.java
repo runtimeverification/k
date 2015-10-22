@@ -194,7 +194,7 @@ public class RuleGrammarGenerator {
                     }
                     final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
                     Seq<ProductionItem> pi = Seq(p.items().head(), optDots, body, optDots, p.items().last());
-                    Production p1 = Production(p.klabel().get().name(), p.sort(), pi, p.att());
+                    Production p1 = Production(p.klabel().get().name(), Sort("Cell"), pi, p.att());
                     Production p2 = Production(Sort("Cell"), Seq(NonTerminal(p.sort())));
                     return Stream.of(p1, p2);
                 }
