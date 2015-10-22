@@ -14,25 +14,34 @@ else
     exit 1
 fi
 
+function setarch {
+  echo $version | grep '64-Bit' >& /dev/null
+  if [ $? -eq 0 ]; then
+    ARCH=64
+  else
+    ARCH=32
+  fi
+}
+
 version=$(ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.JavaVersion 2>&1)
 if [ $? -eq 0 ]; then
+  setarch
   JAVA="ng --nailgun-server local:$HOME/.kserver/socket"
 else
   version=$(ng org.kframework.main.JavaVersion 2>&1)
   if [ $? -eq 0 ]; then
+    setarch
     JAVA=ng
   else
-    JAVA="java -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$0")/java/*\""
     version=$("$_java" -version 2>&1)
+    setarch
+    if [ $ARCH -eq 64 ]; then
+      TIERED=-XX:+TieredCompilation
+    fi
+    export K_OPTS="-Xms64m -Xmx1024m -Xss32m $TIERED $K_OPTS"
+    JAVA="java -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$0")/java/*\""
   fi
 fi
-echo $version | grep '64-Bit' >& /dev/null
-if [ $? -eq 0 ]; then
-  ARCH=64
-else
-  ARCH=32
-fi
-
 
 
 if [[ "$_java" ]]; then
