@@ -372,11 +372,7 @@ object and method closures. */
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
 
-  // TODO(KORE): clarify sort inferences #1803
-  syntax Exp ::= "undefined"  [latex(\bot)]
-  /*
   syntax KItem ::= "undefined"  [latex(\bot)]
-  */
 
   // TODO(KORE): Change .K back to . throughout this definition #1772
   rule <k> var X:Id; => .K ...</k>
@@ -492,11 +488,7 @@ interestingly, the semantics of return stays unchanged. */
 
   context (HOLE => lvalue(HOLE)) = _
 
-  // TODO(KORE): casting of _ should not be needed #1803
-  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_:Exp => V) ...</store>
-  /*
-  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
-  */
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> `_ => V` ...</store>
     [assignment]
 
 
