@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+
 /**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
  */
@@ -59,6 +60,15 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
         Iterator<Term> items = reversed.iterator();
         List<Term> newItems = new LinkedList<>();
         boolean changed = false;
+
+        final String tcLabelName = tc.production().klabel().get().name();
+        // Never add a list wrapper between a sort annotation and the annotated term
+        if (tcLabelName.equals("#SyntacticCast")
+                || tcLabelName.startsWith("#SemanticCastTo")
+                || tcLabelName.equals("#InnerCast")) {
+            return super.apply(tc);
+        }
+
         for (ProductionItem pi : mutable(p.items())) {
             if (!(pi instanceof NonTerminal))
                 continue;
@@ -67,12 +77,10 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             ProductionReference child = (ProductionReference) items.next();
             Sort childSort = child.production().sort();
             if (listSorts.contains(expectedSort) && !expectedSort.equals(childSort)) {
-                if (child.production().att().contains("bracket")
+                final boolean isBracket = child.production().att().contains("bracket");
+                if (isBracket
                         || (child.production().klabel().isDefined()
-                        && (child.production().klabel().get().name().equals("#KRewrite")
-                        || tc.production().klabel().get().name().equals("#SyntacticCast")
-                        || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                        || tc.production().klabel().get().name().equals("#InnerCast")))) {
+                        && child.production().klabel().get().name().equals("#KRewrite"))) {
                     newItems.add(child);
                 } else if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
                     String msg = "Found sort '" + childSort + "' where list sort '" + expectedSort + "' was expected. Moving on.";
