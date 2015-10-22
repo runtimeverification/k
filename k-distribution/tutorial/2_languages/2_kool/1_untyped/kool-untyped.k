@@ -690,14 +690,14 @@ with the unchanged semantics of SIMPLE above.  */
   syntax KItem ::= (Map,K,ControlCellFragment)
 
   // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  //             fix duplicated rules once cell fragment issues #1744 #1748 are fixed
+  //             fix duplicated rules once cell fragment issues #1744 #1747 #1748 are fixed
   rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment <crntClass>_</crntClass> Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
+       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
        <control>
           C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj' </crntObj> </control>-fragment))
+          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 Obj2 </crntObj>
        </control>
@@ -705,10 +705,10 @@ with the unchanged semantics of SIMPLE above.  */
   rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment <crntClass>_</crntClass> Obj1:EnvStackCell noLocationCell </crntObj>-fragment)...</store>
+       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell noLocationCell </crntObj>-fragment)...</store>
        <control>
           C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj' </crntObj> </control>-fragment))
+          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 </crntObj>
        </control>
@@ -825,11 +825,15 @@ refer to it (see rule above). */
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
+                      // TODO(KORE): drop cell sort casting #1747
+                      <envStack> ListItem((Object, `<env>.Map</env>`:>EnvCell)) </envStack>
+                      /*
                       <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
+                      */
                       <location> L </location>
          </crntObj>
-         // TODO(KORE): fix cell fragment issues #1744 #1748
-         <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C <crntObj> Obj </crntObj> </control>-fragment)) ...</fstack>
+         // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+         <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj </crntObj>`:>CrntObjCell </control>-fragment)) ...</fstack>
          /*
          <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
          */
@@ -872,7 +876,11 @@ empty). */
   rule <k> addEnvLayer => .K ...</k>
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
+       // TODO(KORE): drop cell sort casting #1747
+       <envStack> .List => ListItem((Class, `<env>Env</env>`:>EnvCell)) ...</envStack>
+       /*
        <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
+       */
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -934,22 +942,26 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]*/
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
   rule objectClosure(<crntObj>-fragment
-                     <crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>
+                     `<crntClass> Class:Id </crntClass>`:>CrntClassCell
+                     `<envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>`:>EnvStackCell
                      _ </crntObj>-fragment)
   /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
   */
        . X:Id
+    // TODO(KORE): drop cell sort casting #1747
+    => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell, X)
+    /*
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
+    */
     [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1748
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
   rule objectClosure(<crntObj>-fragment
-                     <crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+                     `<crntClass> Class:Id </crntClass>`:>CrntClassCell
+                     `<envStack> ListItem((Class':Id,_)) => .List ...</envStack>`:>EnvStackCell
                      _ </crntObj>-fragment)
   /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
@@ -962,7 +974,11 @@ invocations see the entire object, as needed for dynamic method dispatch. */
        <crntClass> Class </crntClass>
        <envStack>... (Class,EnvC) EStack </envStack>
     [structural]*/
+  // TODO(KORE): drop cell sort casting #1747
+  rule <k> super . X => lookupMember(`<envStack>EStack</envStack>`:>EnvStackCell, X) ...</k>
+  /*
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
+  */
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem((Class,_)) EStack </envStack>
     [structural]
@@ -1003,12 +1019,13 @@ method call or the array access.  */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
-  rule (objectClosure(<crntObj>-fragment _ <envStack> EStack </envStack> _ </crntObj>-fragment) . X
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+  rule (objectClosure(<crntObj>-fragment _ `<envStack> EStack </envStack>`:>EnvStackCell _ </crntObj>-fragment) . X
+    => lookupMember(`<envStack> EStack </envStack>`:>EnvStackCell, X:Id))(_:Exps)  [structural]
   /*
   rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
-  */
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
+  */
 
 /*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
@@ -1016,7 +1033,11 @@ method call or the array access.  */
        <envStack>... (Class,_) EStack </envStack>
     [structural]*/
   rule <k> (super . X
+            // TODO(KORE): drop cell sort casting #1747
+            => lookupMember(`<envStack>EStack</envStack>`:>EnvStackCell,X))(_:Exps)...</k>
+            /*
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
+            */
        <crntClass> Class </crntClass>
        <envStack> ListItem((Class,_)) EStack </envStack>
     [structural]
@@ -1054,23 +1075,23 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
-  rule objectClosure(<crntObj>-fragment _ <envStack> ListItem((C,_)) ...</envStack> _ </crntObj>-fragment)
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+  rule objectClosure(<crntObj>-fragment _ `<envStack> ListItem((C,_)) ...</envStack>`:>EnvStackCell _ </crntObj>-fragment)
   /*
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
   */
        instanceOf C => true
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
-  rule objectClosure(<crntObj>-fragment _ <envStack> ListItem((C::Id,_)) => .List ...</envStack> _ </crntObj>-fragment)
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+  rule objectClosure(<crntObj>-fragment _ `<envStack> ListItem((C::Id,_)) => .List ...</envStack>`:>EnvStackCell _ </crntObj>-fragment)
   /*
   rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
   */
        instanceOf C'  when C =/=K C'  [structural]
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
-  rule objectClosure(<crntObj>-fragment _ <envStack> .List </envStack> _ </crntObj>-fragment) instanceOf _ => false
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+  rule objectClosure(<crntObj>-fragment _ `<envStack> .List </envStack>`:>EnvStackCell _ </crntObj>-fragment) instanceOf _ => false
   /*
   rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
   */
@@ -1086,9 +1107,9 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1748
-  rule (C) objectClosure(<crntObj>-fragment <crntClass> _ </crntClass> Obj1 Obj2 </crntObj>-fragment)
-    => objectClosure(<crntObj>-fragment <crntClass> C </crntClass> Obj1 Obj2 </crntObj>-fragment)
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
+  rule (C) objectClosure(<crntObj>-fragment `<crntClass> _ </crntClass>`:>CrntClassCell Obj1 Obj2 </crntObj>-fragment)
+    => objectClosure(<crntObj>-fragment `<crntClass> C </crntClass>`:>CrntClassCell Obj1 Obj2 </crntObj>-fragment)
   /*
   rule (C) objectClosure(<crntClass> _ </crntClass> Obj)
     => objectClosure(<crntClass> C </crntClass> Obj)
@@ -1122,22 +1143,26 @@ member's location based on the current class of the object. */
               . X
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]*/
-  // TODO(KORE): fix cell fragment issues #1744 #1748
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
   rule lvalue(objectClosure(<crntObj>-fragment
-                            <crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>
+                            `<crntClass> Class </crntClass>`:>CrntClassCell
+                            `<envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>`:>EnvStackCell
                             _ </crntObj>-fragment)
   /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
                             <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
   */
               . X
+              // TODO(KORE): drop cell sort casting #1747
+              => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell,
+              /*
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
+              */
                               X))  [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1748
+  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
   rule lvalue(objectClosure(<crntObj>-fragment
-                            <crntClass> Class </crntClass>
-                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+                            `<crntClass> Class </crntClass>`:>CrntClassCell
+                            `<envStack> ListItem((Class':Id,_)) => .List ...</envStack>`:>EnvStackCell
                             _ </crntObj>-fragment)
   /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
@@ -1160,13 +1185,22 @@ starting with the most concrete class and going up in the hierarchy. */
 
 //  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
 //    => lookup(L)
+  // TODO(KORE): drop cell sort casting #1747
+  rule lookupMember(``<envStack> ListItem((_, `<env>... X|->L ...</env>`:>EnvCell)) ...</envStack>``:>EnvStackCell, X)
+  /*
   rule lookupMember(<envStack> ListItem((_, <env>... X|->L ...</env>)) ...</envStack>, X)
+  */
     => lookup(L)
 
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
 //    when notBool(X in keys(Env))
+  // TODO(KORE): drop cell sort casting #1747
+  rule lookupMember(``<envStack> ListItem((_, `<env> Env </env>`:>EnvCell)) Rest </envStack>``:>EnvStackCell, X) =>
+       lookupMember(`<envStack> Rest </envStack>`:>EnvStackCell, X)
+  /*
   rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
        lookupMember(<envStack> Rest </envStack>, X)
+  */
     when notBool(X in keys(Env))
 //TODO: beautify the above
 
