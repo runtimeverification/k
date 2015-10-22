@@ -2,8 +2,11 @@
 if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
   "$(dirname "$0")/k.bat" "$@"
 else
-  export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation $K_OPTS"
   source "$(dirname "$0")/setenv"
+  if [ $ARCH -eq 64 ]; then
+    TIERED=-XX:+TieredCompilation
+  fi
+  export K_OPTS="-Xms64m -Xmx1024m -Xss32m $TIERED $K_OPTS"
   ulimit -s `ulimit -H -s`
   eval $JAVA org.kframework.main.Main '"$@"'
 fi

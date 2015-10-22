@@ -4,7 +4,10 @@ if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
 else
   source "$(dirname "$0")/../lib/setenv"
   ulimit -s `ulimit -H -s`
-  export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation $K_OPTS"
+  if [ $ARCH -eq 64 ]; then
+    TIERED=-XX:+TieredCompilation
+  fi
+  export K_OPTS="-Xms64m -Xmx1024m -Xss32m $TIERED $K_OPTS"
   if "$(dirname "$0")/../lib/checkJava"; then
     trap 'kill -TERM $PID' TERM INT
     java -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"&
