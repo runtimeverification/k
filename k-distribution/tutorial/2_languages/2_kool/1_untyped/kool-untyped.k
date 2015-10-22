@@ -443,11 +443,7 @@ definition. */
 
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  // TODO(KORE): Casting should not be needed, fix it once the sort inferencer works. #1803
-  rule ! T:Bool => notBool(T)
-  /*
   rule ! T => notBool(T)
-  */
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
