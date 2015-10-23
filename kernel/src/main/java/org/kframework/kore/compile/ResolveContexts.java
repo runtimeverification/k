@@ -68,7 +68,8 @@ public class ResolveContexts {
     private Stream<? extends Sentence> resolve(Context context, Module input) {
         final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
         K body = context.body();
-        K requires = context.requires();
+        K requiresHeat = context.requires();
+        K requiresCool = BooleanUtils.TRUE;
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitKORE() {
@@ -151,7 +152,7 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(KRewrite(cooled, KSequence(heated, frozen)), requires, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(KRewrite(KSequence(heated, frozen), cooled), requires, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
+                Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
     }
 }

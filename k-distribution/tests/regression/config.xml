@@ -85,5 +85,10 @@
            programs="smt-sort-flattening"
            results="smt-sort-flattening" />-->
 
+  <include file="kore-context/tests/config.xml"
+           directory="kore-context"
+           programs="kore-context/tests"
+           results="kore-context/tests" />
+
 </tests>
 
