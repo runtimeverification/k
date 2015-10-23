@@ -2,11 +2,10 @@
 package org.kframework.backend.java.symbolic;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -18,8 +17,6 @@ import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.Module;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRunProofResult;
@@ -52,59 +49,40 @@ public class JavaSymbolicProver implements Prover {
     }
 
     @Override
-    public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module) throws KRunExecutionException {
-        TermContext termContext = TermContext.builder(globalContext).freshCounter(0).build();
-        List<Rule> rules = new ArrayList<>();
-        for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
-            if (!(moduleItem instanceof org.kframework.kil.Rule)) {
-                continue;
-            }
+    public KRunProofResult<Set<org.kframework.kil.Term>> prove(org.kframework.kil.Module module)
+            throws KRunExecutionException {
+        List<Rule> rules = module.getItems().stream()
+                .filter(r -> r instanceof org.kframework.kil.Rule)
+                .map(r -> (org.kframework.kil.Rule) r)
+                .map(transformer::transformAndEval)
+                .collect(Collectors.toList());
 
-            Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
-            Rule freshRule = rule.getFreshRule(termContext);
-            rules.add(freshRule);
-        }
+//        CounterGetter counterGetter = new CounterGetter(context);
+//                counterGetter.visitNode(module);
+//                BigInteger counter = counterGetter.counter.add(BigInteger.ONE);
 
-        CounterGetter counterGetter = new CounterGetter(context);
-        counterGetter.visitNode(module);
-        BigInteger counter = counterGetter.counter.add(BigInteger.ONE);
 
         SymbolicRewriter symbolicRewriter = executor.getSymbolicRewriter();
-        List<ConstrainedTerm> proofResults = new ArrayList<>();
-        for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
-            if (!(moduleItem instanceof org.kframework.kil.Rule) || moduleItem.containsAttribute(Attribute.TRUSTED_KEY)) {
-                continue;
-            }
+        TermContext termContext = TermContext.builder(globalContext).freshCounter(0).build();
+        List<ConstrainedTerm> proofResults = rules.stream()
+                .filter(r -> !r.containsAttribute(Attribute.TRUSTED_KEY))
+                .map(Rule::getFreshRule)
+                .map(r -> symbolicRewriter.proveRule(r.createLhsPattern(termContext), r.createRhsPattern(), rules))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
-            Rule rule = transformer.transformAndEval((org.kframework.kil.Rule) moduleItem);
-            ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    rule.leftHandSide(),
-                    ConjunctiveFormula.of(globalContext).addAll(rule.requires()),
-                    termContext);
-            ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    rule.rightHandSide(),
-                    ConjunctiveFormula.of(globalContext).addAll(rule.ensures()),
-                    termContext);
-            proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
-        }
-
-        return new KRunProofResult<>(proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet());
+        return new KRunProofResult<>(proofResults.isEmpty(), Collections.emptySet());
     }
 
     @Override
-    public Module preprocess(Module module, Term cfg) throws KRunExecutionException {
-        Map<Term, Term> substitution;
+    public org.kframework.kil.Module preprocess(org.kframework.kil.Module module,
+                                                org.kframework.kil.Term cfg)
+            throws KRunExecutionException {
         if (cfg != null) {
             cfg = executor.run(cfg, false).getFinalState().getRawResult();
-            cfg = (Term) (new DataStructure2Cell(context)).visitNode(cfg);
-            ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
-                    new ConfigurationSubstitutionVisitor(context);
-            configurationSubstitutionVisitor.visitNode(cfg);
-            substitution = configurationSubstitutionVisitor.getSubstitution();
-//            System.out.println(substitution);
-            Module mod = (Module) new Substitution(substitution,context).visitNode(module);
-//                System.out.println(mod.toString());
-            module = mod;
+            cfg = (org.kframework.kil.Term) (new DataStructure2Cell(context)).visitNode(cfg);
+            module = (org.kframework.kil.Module) new Substitution(
+                    ConfigurationSubstitutionVisitor.getSubstitution(cfg, context), context).visitNode(module);
         }
         try {
             module = new SpecificationCompilerSteps(context, kem).compile(module, null);
@@ -114,6 +92,7 @@ public class JavaSymbolicProver implements Prover {
         return module;
     }
 
+    @SuppressWarnings("unused")
     private static class CounterGetter extends org.kframework.kil.visitors.BasicVisitor {
 
         public BigInteger counter = BigInteger.ZERO;

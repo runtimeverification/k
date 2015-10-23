@@ -23,13 +23,19 @@ import com.google.common.collect.Multimap;
  */
 public class ConfigurationSubstitutionVisitor extends BasicVisitor {
 
-    private final Multimap<Term, Term> substitutionMultimap;
-    public ConfigurationSubstitutionVisitor(Context context) {
+    private final Multimap<Term, Term> substitutionMultimap = HashMultimap.create();
+
+    private ConfigurationSubstitutionVisitor(Context context) {
         super(context);
-        substitutionMultimap = HashMultimap.create();
     }
 
-    public Map<Term, Term> getSubstitution() {
+    public static Map<Term, Term> getSubstitution(org.kframework.kil.Term cfg, Context context) {
+        ConfigurationSubstitutionVisitor visitor = new ConfigurationSubstitutionVisitor(context);
+        visitor.visitNode(cfg);
+        return visitor.getSubstitution();
+    }
+
+    private Map<Term, Term> getSubstitution() {
         Map<Term, Term> substitutionMap = Maps.newHashMap();
         substitutionMultimap.asMap().entrySet().stream().forEach(entry -> {
                 if (entry.getValue().size() == 1) {

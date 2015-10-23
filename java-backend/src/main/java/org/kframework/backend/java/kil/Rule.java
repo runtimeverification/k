@@ -51,6 +51,7 @@ public class Rule extends JavaSymbolicObject {
     private final ConjunctiveFormula lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
+    private final GlobalContext global;
 
     /**
      * Specifies whether this rule has been compiled to generate instructions
@@ -131,6 +132,7 @@ public class Rule extends JavaSymbolicObject {
         this.freshConstants = ImmutableSet.copyOf(freshConstants);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
+        this.global = global;
 
         copyAttributesFrom(oldRule);
         setLocation(oldRule.getLocation());
@@ -352,6 +354,22 @@ public class Rule extends JavaSymbolicObject {
         return ensures;
     }
 
+    public ConstrainedTerm createLhsPattern(TermContext termContext) {
+        // TODO(YilongL): remove TermContext from the signature once
+        // ConstrainedTerm doesn't hold a TermContext anymore
+        return new ConstrainedTerm(
+                leftHandSide,
+                ConjunctiveFormula.of(global).addAll(requires),
+                termContext);
+    }
+
+    public ConstrainedTerm createRhsPattern() {
+        return new ConstrainedTerm(
+                rightHandSide,
+                ConjunctiveFormula.of(global).addAll(ensures),
+                TermContext.builder(global).build());
+    }
+
     public ImmutableSet<Variable> freshConstants() {
         return freshConstants;
     }
@@ -421,8 +439,8 @@ public class Rule extends JavaSymbolicObject {
     /**
      * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
      */
-    public Rule getFreshRule(TermContext context) {
-        return this.substitute(Variable.rename(variableSet()), context);
+    public Rule getFreshRule() {
+        return substitute(Variable.rename(variableSet()), TermContext.builder(global).build());
     }
 
     public IndexingPair indexingPair() {

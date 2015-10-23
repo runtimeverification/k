@@ -165,22 +165,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());
             List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
-                    .map(r -> r.getFreshRule(termContext))
+                    .map(r -> r.getFreshRule())
                     .collect(Collectors.toList());
 
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.containsAttribute(Attribute.TRUSTED_KEY))
-                    .flatMap(r -> {
-                        ConstrainedTerm initialTerm = new ConstrainedTerm(
-                                r.leftHandSide(),
-                                ConjunctiveFormula.of(rewritingContext).addAll(r.requires()),
-                                termContext);
-                        ConstrainedTerm targetTerm = new ConstrainedTerm(
-                                r.rightHandSide(),
-                                ConjunctiveFormula.of(rewritingContext).addAll(r.ensures()),
-                                termContext);
-                        return rewriter.proveRule(initialTerm, targetTerm, allRules).stream();
-                    })
+                    .map(r -> rewriter.proveRule(r.createLhsPattern(termContext), r.createRhsPattern(), allRules))
+                    .flatMap(List::stream)
                     .collect(Collectors.toList());
 
             return proofResults.stream()
