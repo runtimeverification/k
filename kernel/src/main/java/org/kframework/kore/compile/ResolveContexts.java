@@ -69,7 +69,7 @@ public class ResolveContexts {
         final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
         K body = context.body();
         K requiresHeat = context.requires();
-        K requiresCool = KToken("true", Sort("Bool"));
+        K requiresCool = BooleanUtils.TRUE;
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitKORE() {
