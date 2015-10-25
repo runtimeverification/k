@@ -13,11 +13,14 @@ import java.util.Arrays;
  * Used in conjunction with the {@link org.kframework.backend.java.symbolic.FastRuleMatcher}.
  */
 public class InnerRHSRewrite extends Term {
+    /**
+     * the RHS terms indexed by their corresponding rules.
+     */
     public final Term[] theRHS;
 
     public InnerRHSRewrite(Term[] theRHS) {
         super(Kind.KITEM);
-        this.theRHS = theRHS;
+        this.theRHS = theRHS.clone();
     }
 
     @Override

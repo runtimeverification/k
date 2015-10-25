@@ -20,7 +20,7 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
-    public static final Map<String, Sort> cache = new PatriciaTrie<>();
+    private static final Map<String, Sort> cache = new PatriciaTrie<>();
 
     public static final Sort KITEM = Sort.of("KItem");
     public static final Sort KSEQUENCE = Sort.of("K");
@@ -130,4 +130,9 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
         }
     }
 
+    public static int cacheSize() {
+        synchronized (cache) {
+            return Sort.cache.size();
+        }
+    }
 }

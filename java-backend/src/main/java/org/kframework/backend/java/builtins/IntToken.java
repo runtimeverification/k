@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author AndreiS
  */
-public final class IntToken extends Token implements MaximalSharing {
+public final class IntToken extends Token {
 
     public static final Sort SORT = Sort.INT;
 

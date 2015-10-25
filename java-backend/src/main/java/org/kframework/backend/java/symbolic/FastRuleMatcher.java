@@ -124,10 +124,10 @@ public class FastRuleMatcher {
             if (subject instanceof KItem) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
-                Pair<Token, BitSet> p = automatonDisjunction.tokenDisjunctions().get((Token) subject);
-                if (p != null) {
-                    BitSet localRuleMask = ((BitSet) ruleMask.clone());
-                    localRuleMask.and(p.getRight());
+                BitSet rules = automatonDisjunction.tokenDisjunctions.get(subject);
+                if (rules != null) {
+                    BitSet localRuleMask = ruleMask.clone();
+                    localRuleMask.and(rules);
                     returnSet.or(localRuleMask);
                 }
             }
@@ -185,8 +185,9 @@ public class FastRuleMatcher {
             }
 
             for (int i = 0; i < size; ++i) {
-                if (kitemPattern.childrenDontCareRuleMask != null && kitemPattern.childrenDontCareRuleMask[i] != null) {
-                    if (ruleMask.subset(kitemPattern.childrenDontCareRuleMask[i])) {
+                BitSet childrenDontCareRuleMaskForPosition = kitemPattern.getChildrenDontCareRuleMaskForPosition(i);
+                if (childrenDontCareRuleMaskForPosition != null) {
+                    if (ruleMask.subset(childrenDontCareRuleMaskForPosition)) {
                         continue;
                     }
                 }

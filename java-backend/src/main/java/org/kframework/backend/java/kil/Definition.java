@@ -126,8 +126,15 @@ public class Definition extends JavaSymbolicObject {
     public final IndexingTable.Data indexingData;
 
     // new indexing data
+    /**
+     * the automaton rule used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     */
     public Rule automaton = null;
+    /**
+     * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     */
     public Map<Integer, Rule> ruleTable = new HashMap<>();
+
     public Map<Integer, Integer> reverseRuleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();

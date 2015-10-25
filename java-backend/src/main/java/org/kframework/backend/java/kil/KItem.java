@@ -38,11 +38,11 @@ import java.util.Set;
  * Or in the usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- *
+ * <p>
  * <pre>
  * syntax KItem ::= KLabel "(" KList ")"
  * </pre>
- *
+ * <p>
  * </blockquote>
  * <p>
  *
@@ -64,7 +64,7 @@ public class KItem extends Term implements KItemRepresentation {
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
-    public BitSet[] childrenDontCareRuleMask = null;
+    private BitSet[] childrenDontCareRuleMask = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
         return of(kLabel, kList, termContext, null, null);
@@ -228,9 +228,9 @@ public class KItem extends Term implements KItemRepresentation {
         Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
         if (sort == null) {
             throw KExceptionManager.criticalError("Cannot compute least sort of term: " +
-                            this.toString() + "\nPossible least sorts are: " + sorts +
-                            "\nAll terms must have a unique least sort; " +
-                            "consider assigning unique KLabels to overloaded productions", this);
+                    this.toString() + "\nPossible least sorts are: " + sorts +
+                    "\nAll terms must have a unique least sort; " +
+                    "consider assigning unique KLabels to overloaded productions", this);
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
@@ -264,6 +264,25 @@ public class KItem extends Term implements KItemRepresentation {
         return this;
     }
 
+    /**
+     * @param i
+     * @return the rules for which position i only matches "don't care" variables (i.e., variables that do not appear
+     * in the RHS or conditions)
+     */
+    public BitSet getChildrenDontCareRuleMaskForPosition(int i) {
+        if (childrenDontCareRuleMask != null)
+            return childrenDontCareRuleMask[i];
+        else
+            return null;
+    }
+
+    /**
+     * The rule mask
+     */
+    public void setChildrenDontCareRuleMask(BitSet[] childrenDontCareRuleMask) {
+        this.childrenDontCareRuleMask = childrenDontCareRuleMask;
+    }
+
     public static class KItemOperations {
 
         private final Stage stage;
@@ -292,20 +311,16 @@ public class KItem extends Term implements KItemRepresentation {
          * Evaluates this {@code KItem} if it is a predicate or function; otherwise,
          * applies [anywhere] rules associated with this {@code KItem}
          *
-         * @param copyOnShareSubstAndEval
-         *            specifies whether to use
-         *            {@link CopyOnShareSubstAndEvalTransformer} when applying rules
-         *
-         * @param context
-         *            a term context
-         *
+         * @param copyOnShareSubstAndEval specifies whether to use
+         *                                {@link CopyOnShareSubstAndEvalTransformer} when applying rules
+         * @param context                 a term context
          * @return the reduced result on success, or this {@code KItem} otherwise
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
             try {
                 Term result = kItem.isEvaluable(context) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
-                            kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+                        kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
                     if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
@@ -362,14 +377,10 @@ public class KItem extends Term implements KItemRepresentation {
         /**
          * Evaluates this {@code KItem} if it is a predicate or function
          *
-         * @param copyOnShareSubstAndEval
-         *            specifies whether to use
-         *            {@link CopyOnShareSubstAndEvalTransformer} when applying
-         *            user-defined function rules
-         *
-         * @param context
-         *            a term context
-         *
+         * @param copyOnShareSubstAndEval specifies whether to use
+         *                                {@link CopyOnShareSubstAndEvalTransformer} when applying
+         *                                user-defined function rules
+         * @param context                 a term context
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
         public Term evaluateFunction(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
@@ -393,17 +404,17 @@ public class KItem extends Term implements KItemRepresentation {
                             return result;
                         }
                     } catch (ClassCastException e) {
-                    // DISABLE EXCEPTION CHECKSTYLE
+                        // DISABLE EXCEPTION CHECKSTYLE
                     } catch (ImpureFunctionException e) {
                         // do not do anything further: immediately assume this function is not ready to be evaluated yet.
                         return kItem;
                     } catch (Throwable t) {
-                    // ENABLE EXCEPTION CHECKSTYLE
+                        // ENABLE EXCEPTION CHECKSTYLE
                         if (t instanceof Error) {
-                            throw (Error)t;
+                            throw (Error) t;
                         }
                         if (t instanceof KEMException) {
-                            throw (RuntimeException)t;
+                            throw (RuntimeException) t;
                         }
                         if (t instanceof RuntimeException) {
                             kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
@@ -550,21 +561,17 @@ public class KItem extends Term implements KItemRepresentation {
 
         anywhereApplicable = (kLabel instanceof KLabelConstant)
                 && !context.definition().anywhereRules()
-                        .get((KLabelConstant) kLabel).isEmpty();
+                .get((KLabelConstant) kLabel).isEmpty();
         return anywhereApplicable;
     }
 
     /**
      * Apply [anywhere] associated with this {@code KItem}.
      *
-     * @param copyOnShareSubstAndEval
-     *            specifies whether to use
-     *            {@link CopyOnShareSubstAndEvalTransformer} when applying
-     *            [anywhere] rules
-     *
-     * @param context
-     *            a term context
-     *
+     * @param copyOnShareSubstAndEval specifies whether to use
+     *                                {@link CopyOnShareSubstAndEvalTransformer} when applying
+     *                                [anywhere] rules
+     * @param context                 a term context
      * @return the result on success, or this {@code KItem} otherwise
      */
     public Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
@@ -739,7 +746,7 @@ public class KItem extends Term implements KItemRepresentation {
             bools = new boolean[kList.concreteSize()];
             int idx = 0;
             for (Term term : kList) {
-                if (term instanceof KItem){
+                if (term instanceof KItem) {
                     KItem kItem = (KItem) term;
                     if (kItem.kLabel instanceof KLabelInjection) {
                         term = ((KLabelInjection) kItem.kLabel).term();
@@ -779,6 +786,7 @@ public class KItem extends Term implements KItemRepresentation {
 
     /**
      * When serializing a KItem, compute its sort so that we don't end up serializing the TermContext
+     *
      * @param out
      * @throws IOException
      */

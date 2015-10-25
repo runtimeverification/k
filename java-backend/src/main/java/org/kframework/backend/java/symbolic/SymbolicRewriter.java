@@ -96,7 +96,9 @@ public class SymbolicRewriter {
             step++;
         }
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + " ]");
+        if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
+            System.err.println("[" + step + ", " + stopwatch + " ]");
+        }
 
         return finalState;
     }
@@ -251,20 +253,20 @@ public class SymbolicRewriter {
             throw e;
         } finally {
             if (!results.isEmpty()) {
-//                RuleAuditing.succeed(rule);
+                RuleAuditing.succeed(rule);
                 Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, subject);
                 Coverage.print(subject.termContext().global().krunOptions.experimental.coverage, rule);
             }
 
-//            if (RuleAuditing.isAuditBegun()) {
-//                if (RuleAuditing.getAuditingRule() == rule) {
-//                    RuleAuditing.endAudit();
-//                }
-//                if (!RuleAuditing.isSuccess()
-//                        && RuleAuditing.getAuditingRule() == rule) {
-//                    throw RuleAuditing.fail();
-//                }
-//            }
+            if (RuleAuditing.isAuditBegun()) {
+                if (RuleAuditing.getAuditingRule() == rule) {
+                    RuleAuditing.endAudit();
+                }
+                if (!RuleAuditing.isSuccess()
+                        && RuleAuditing.getAuditingRule() == rule) {
+                    throw RuleAuditing.fail();
+                }
+            }
         }
     }
 

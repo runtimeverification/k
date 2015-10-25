@@ -10,6 +10,7 @@ import org.kframework.utils.BitSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,18 +27,27 @@ public class RuleAutomatonDisjunction extends Term {
      * the KApplies in the disjunction, indexed (via the array) by their source rule
      */
     public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+    /**
+     * pairs of variable-rule where it appears, indexed by the variable's sort
+     */
     public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
-    public final Map<Token, Pair<Token, BitSet>> tokenDisjunctions;
+    /**
+     * a mapping from Tokens to the rules where they appear in this disjunction
+     */
+    public final Map<Token, BitSet> tokenDisjunctions;
+    private final List<Pair<Term, BitSet>> disjunctions;
 
     /**
      * Creates the disjunction based on a list of (Term, rules that contain that term).
      * It expects the disjunctions to have already been pushed down the term, i.e., there can be at most
      * one term with a particular KLabel in the list.
+     *
      * @param children
      * @param context
      */
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
+        disjunctions = Collections.unmodifiableList(children);
         this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize()];
         children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
@@ -45,9 +55,9 @@ public class RuleAutomatonDisjunction extends Term {
                     this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
                 });
 
-        synchronized (Sort.cache) {
-            this.variableDisjunctionsArray = new List[Sort.cache.size()];
-        }
+
+        this.variableDisjunctionsArray = new List[Sort.cacheSize()];
+
         context.definition().allSorts().forEach(s -> {
             this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
                     .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
@@ -56,26 +66,14 @@ public class RuleAutomatonDisjunction extends Term {
 
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
-                .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> (Pair<Token, BitSet>) (Object) p));
-    }
-
-    /**
-     * @return the parts of the disjunction which are tokens.
-     */
-    public Map<Token, Pair<Token, BitSet>> tokenDisjunctions() {
-        return tokenDisjunctions;
+                .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> p.getRight()));
     }
 
     /**
      * @return all elements of the disjunction. As expected by the disjunction constructor.
      */
     public List<Pair<Term, BitSet>> disjunctions() {
-        Set<Pair<Term, BitSet>> disjunctions = new HashSet<>();
-        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) Arrays.asList(kItemDisjunctionsArray));
-        ((List<List<Pair<Term, BitSet>>>) (Object) Arrays.asList(variableDisjunctionsArray)).stream().filter(l -> l != null).forEach(disjunctions::addAll);
-        disjunctions.addAll((java.util.Collection<Pair<Term, BitSet>>) (Object) tokenDisjunctions.values());
-        disjunctions.removeIf(e -> e == null);
-        return new ArrayList<>(disjunctions);
+        return disjunctions;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.symbolic.AbstractUnifier;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.builtin.KLabels;
@@ -101,28 +102,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
      * TODO: rename the method to KApply when the backend fully implements KORE
      */
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
+
         if (klabel.name().equals(KLabels.KREWRITE)) {
-
-            K kk = klist.items().get(1);
-
-            if (!(kk instanceof KApply))
-                throw new AssertionError("k should be a KApply");
-
-            KApply k = (KApply) kk;
-
-            Set<KApply> orContents = getOrContents(k);
-
-            Term[] theRHSs = new Term[this.definition.reverseRuleTable.size()];
-
-            orContents.forEach(c -> {
-                if (!c.klabel().name().equals(KLabels.ML_AND))
-                    throw new AssertionError("c should be an KApply AND but is " + c.klabel().name());
-                K term = c.klist().items().get(0);
-                Integer ruleIndex = getRuleIndex((KApply) c.klist().items().get(1));
-                theRHSs[ruleIndex] = convert(term);
-            });
-
-            return KItem.of(convert(klabel), KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), context);
+            return convertKRewrite(klabel, klist);
         }
 
         if (klabel.name().equals(KLabels.ML_OR)) {
@@ -131,7 +113,28 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                     context);
         }
 
+        // we've encountered a regular KApply
+
         KList convertedKList = KList(klist.items());
+        BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
+
+        KItem kItem = KItem.of(convert(klabel), convertedKList, context);
+        kItem.setChildrenDontCareRuleMask(childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
+        if (AbstractUnifier.isKSeq(kItem)) {
+            return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
+                    .map(Term.class::cast)
+                    .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), context))
+                    .get();
+        } else {
+            return kItem;
+        }
+    }
+
+    /**
+     * @param convertedKList the klist of the KApply
+     * @return the {@link KItem}.childrenDontCareRule mask
+     */
+    private BitSet[] constructDontCareRuleMask(KList convertedKList) {
         BitSet childrenDontCareRuleMask[] = null;
         if (convertedKList.stream().anyMatch(RuleAutomatonDisjunction.class::isInstance)) {
             childrenDontCareRuleMask = new BitSet[convertedKList.size()];
@@ -145,17 +148,38 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 }
             }
         }
+        return childrenDontCareRuleMask;
+    }
 
-        KItem kItem = KItem.of(convert(klabel), convertedKList, context);
-        kItem.childrenDontCareRuleMask = childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask;
-        if (AbstractUnifier.isKSeq(kItem)) {
-            return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
-                    .map(Term.class::cast)
-                    .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), context))
-                    .get();
-        } else {
-            return kItem;
-        }
+    /**
+     * Converts a KRewrite to an rule-labeled ML OR ({@link RuleAutomatonDisjunction}) on the left and
+     * a {@link InnerRHSRewrite} on the right.
+     *
+     * @param klabel is the KRewrite
+     * @param klist  contains the LHS and RHS
+     * @return
+     */
+    private Term convertKRewrite(KLabel klabel, org.kframework.kore.KList klist) {
+        K kk = klist.items().get(1);
+
+        if (!(kk instanceof KApply))
+            throw new AssertionError("k should be a KApply");
+
+        KApply k = (KApply) kk;
+
+        Set<KApply> orContents = getOrContents(k);
+
+        Term[] theRHSs = new Term[this.definition.reverseRuleTable.size()];
+
+        orContents.forEach(c -> {
+            if (!c.klabel().name().equals(KLabels.ML_AND))
+                throw new AssertionError("c should be an KApply AND but is " + c.klabel().name());
+            K term = c.klist().items().get(0);
+            Integer ruleIndex = getRuleIndex((KApply) c.klist().items().get(1));
+            theRHSs[ruleIndex] = convert(term);
+        });
+
+        return KItem.of(convert(klabel), org.kframework.backend.java.kil.KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), context);
     }
 
     private BitSet getRuleSet(KApply k) {
