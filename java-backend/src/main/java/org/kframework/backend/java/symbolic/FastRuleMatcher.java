@@ -187,10 +187,8 @@ public class FastRuleMatcher {
 
             for (int i = 0; i < size; ++i) {
                 BitSet childrenDontCareRuleMaskForPosition = kitemPattern.getChildrenDontCareRuleMaskForPosition(i);
-                if (childrenDontCareRuleMaskForPosition != null) {
-                    if (ruleMask.subset(childrenDontCareRuleMaskForPosition)) {
-                        continue;
-                    }
+                if (childrenDontCareRuleMaskForPosition != null && ruleMask.subset(childrenDontCareRuleMaskForPosition)) {
+                    continue;
                 }
 
                 ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(i));
