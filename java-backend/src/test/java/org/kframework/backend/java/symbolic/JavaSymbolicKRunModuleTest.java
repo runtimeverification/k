@@ -64,7 +64,7 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         injector.getInstance(Key.get(Prover.class, Main.class));
     }
 
-    @Test @Ignore
+    @Test @Ignore("irrelevant until we convert to kore")
     public void testCreateInjectionSimulation() {
 
         context.kompileOptions.backend = "java";

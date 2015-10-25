@@ -181,6 +181,7 @@ public class BasicVisitor implements Visitor {
 
     @Override
     public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        ruleAutomatonDisjunction.disjunctions().stream().map(p -> p.getLeft()).forEach(this::visitNode);
     }
 
     @Override

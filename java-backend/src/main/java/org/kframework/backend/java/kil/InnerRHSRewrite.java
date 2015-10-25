@@ -30,9 +30,7 @@ public class InnerRHSRewrite extends Term {
 
         InnerRHSRewrite that = (InnerRHSRewrite) o;
 
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(theRHS, that.theRHS);
-
     }
 
     @Override

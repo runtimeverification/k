@@ -178,8 +178,11 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void visit(InnerRHSRewrite innerRHSRewrite) { }
+    public void visit(InnerRHSRewrite innerRHSRewrite) {
+    }
 }

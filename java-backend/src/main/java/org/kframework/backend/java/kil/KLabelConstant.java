@@ -27,7 +27,7 @@ import java.util.Set;
 public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
     /* KLabelConstant cache */
-    public static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
+    private static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
 
     public static int cacheSize() {
         synchronized (cache) {

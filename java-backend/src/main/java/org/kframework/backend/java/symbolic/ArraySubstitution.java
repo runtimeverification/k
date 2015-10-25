@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link Substitution}implementation backed by an array.
+ * A mutable {@link Substitution} implementation backed by an array.
  */
 public class ArraySubstitution implements Substitution<Variable, Term> {
 

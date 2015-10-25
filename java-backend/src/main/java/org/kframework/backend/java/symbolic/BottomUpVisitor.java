@@ -127,7 +127,9 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) { }
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        ruleAutomatonDisjunction.disjunctions().stream().forEach(p -> p.getLeft().accept(this));
+    }
 
     @Override
     public void visit(InnerRHSRewrite innerRHSRewrite) { }

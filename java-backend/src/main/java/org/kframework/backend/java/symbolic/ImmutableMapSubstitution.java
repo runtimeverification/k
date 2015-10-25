@@ -23,10 +23,10 @@ import com.google.common.collect.Sets;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
-
-/**
- */
 // TODO(AndreiS): extend/implement KItem
+/**
+ * Immutable-map-backed implementation of {@link Substitution}
+ */
 public class ImmutableMapSubstitution<K extends Term, V extends Term> implements Substitution<K,V>, Serializable {
 
     private static final ImmutableMapSubstitution EMPTY = new ImmutableMapSubstitution<>(

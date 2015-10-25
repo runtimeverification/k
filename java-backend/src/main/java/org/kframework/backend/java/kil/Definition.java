@@ -61,6 +61,8 @@ import static org.kframework.kore.KORE.Sort;
  */
 public class Definition extends JavaSymbolicObject {
 
+    public static final String AUTOMATON = "automaton";
+
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
         public final Set<Sort> builtinSorts;
@@ -308,7 +310,7 @@ public class Definition extends JavaSymbolicObject {
                 .collect(Collectors.toList());
         koreRules.forEach(r -> {
             if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
-                if (!r.att().contains("automaton")) {
+                if (!r.att().contains(AUTOMATON)) {
                     reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
                 }
             }
@@ -317,7 +319,7 @@ public class Definition extends JavaSymbolicObject {
             Rule convertedRule = transformer.convert(Optional.of(module), r);
             addRule(convertedRule);
             if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
-                if (!r.att().contains("automaton")) {
+                if (!r.att().contains(AUTOMATON)) {
                     ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
                 } else {
                     automaton = convertedRule;

@@ -59,6 +59,12 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
 
     private final int ordinal;
 
+    /**
+     * @param name
+     * @param sort
+     * @param anonymous
+     * @param ordinal   a unique index identifying the variable
+     */
     public Variable(String name, Sort sort, boolean anonymous, int ordinal) {
         super(Kind.of(sort));
 
@@ -100,6 +106,9 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
         return anonymous;
     }
 
+    /**
+     * @return the ordinal, a unique index indentifing the variable
+     */
     public int ordinal() {
         return ordinal;
     }

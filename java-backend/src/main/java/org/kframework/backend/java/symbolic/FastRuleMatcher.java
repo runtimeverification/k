@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.math3.analysis.function.Abs;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
@@ -158,7 +159,7 @@ public class FastRuleMatcher {
         }
 
         // normalize KSeq representations
-        if (isKSeq(pattern)) {
+        if (AbstractUnifier.isKSeq(pattern)) {
             subject = upKSeq(subject);
         }
 
@@ -242,16 +243,8 @@ public class FastRuleMatcher {
     }
 
 
-    private static boolean isKSeq(Term term) {
-        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
-    }
-
-    private static boolean isKSeqVar(Term term) {
-        return term instanceof Variable && term.sort().equals(Sort.KSEQUENCE);
-    }
-
     private Term upKSeq(Term otherTerm) {
-        if (!isKSeq(otherTerm) && !isKSeqVar(otherTerm))
+        if (!AbstractUnifier.isKSeq(otherTerm) && !AbstractUnifier.isKSeqVar(otherTerm))
             otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), context);
         return otherTerm;
     }

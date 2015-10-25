@@ -77,13 +77,10 @@ public class SymbolicRewriter {
         int step = 1;
         while (step <= bound || bound < 0) {
             /* get the first solution */
-            List<ConstrainedTerm> results;
-            if (useFastRewriting) {
-                results = fastComputeRewriteStep(constrainedTerm, true);
-            } else {
-                results = computeRewriteStep(constrainedTerm, step, true);
+            List<ConstrainedTerm> results = useFastRewriting ?
+                    fastComputeRewriteStep(constrainedTerm, true) :
+                    computeRewriteStep(constrainedTerm, step, true);
 
-            }
             if (!results.isEmpty()) {
                 constrainedTerm = results.get(0);
                 if (step == bound) {
@@ -187,7 +184,7 @@ public class SymbolicRewriter {
                 if (cleanedUpRewrites.size() == 1)
                     theNew = buildRHS(subject.term(), substitution, cleanedUpRewrites.get(0).getLeft(), cleanedUpRewrites.get(0).getRight(), subject.termContext());
                 else
-                    theNew = buildRHS((KItem) subject.term(), substitution, cleanedUpRewrites, subject.termContext());
+                    theNew = buildRHS(subject.term(), substitution, cleanedUpRewrites, subject.termContext());
 
                 results.add(new ConstrainedTerm(theNew, subject.termContext()));
                 if (computeOne) {
@@ -422,12 +419,9 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                List<ConstrainedTerm> results;
-
-                if (useFastRewriting)
-                    results = fastComputeRewriteStep(term, false);
-                else
-                    results = computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = useFastRewriting ?
+                        fastComputeRewriteStep(term, false) :
+                        computeRewriteStep(term, step, false);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {

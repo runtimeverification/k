@@ -106,7 +106,6 @@ public class RuleAutomatonDisjunction extends Term {
         return Arrays.equals(kItemDisjunctionsArray, that.kItemDisjunctionsArray)
                 && Arrays.equals(variableDisjunctionsArray, that.variableDisjunctionsArray)
                 && tokenDisjunctions.equals(that.tokenDisjunctions);
-
     }
 
     @Override
