@@ -20,6 +20,10 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
+    /**
+     * N.B.: used concurrently, synchronized on itself. New instances of Sort have ordinal cache.size() and the access
+     * needs to be synchronized.
+     */
     private static final Map<String, Sort> cache = new PatriciaTrie<>();
 
     public static final Sort KITEM = Sort.of("KItem");
