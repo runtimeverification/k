@@ -120,7 +120,8 @@ public class MacroExpander extends CopyOnWriteTransformer {
      */
     private JavaSymbolicObject expandMacro(JavaSymbolicObject node) {
         JavaSymbolicObject expandedNode = (JavaSymbolicObject) node.accept(this);
-        while (!node.equals(expandedNode)) {
+        // while some macro rule has applied, making the term references different
+        while (node != expandedNode) {
             node = expandedNode;
             expandedNode = (JavaSymbolicObject) node.accept(this);
         }
