@@ -35,7 +35,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ *
+ *
  * @author AndreiS
+ *
  */
 public class SymbolicRewriter {
 
@@ -359,13 +362,14 @@ public class SymbolicRewriter {
 
     /**
      * @param initialTerm
-     * @param pattern     the pattern we are searching for
-     * @param bound       a negative value specifies no bound
-     * @param depth       a negative value specifies no bound
-     * @param searchType  defines when we will attempt to match the pattern
+     * @param pattern the pattern we are searching for
+     * @param bound a negative value specifies no bound
+     * @param depth a negative value specifies no bound
+     * @param searchType defines when we will attempt to match the pattern
+
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable, Term>> search(
+    public List<Substitution<Variable,Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -377,7 +381,7 @@ public class SymbolicRewriter {
             this.theFastMatcher = new FastRuleMatcher(context, allRuleBits.length(), 90);
         }
 
-        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
+        List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -388,7 +392,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            if (context.global().krunOptions.experimental.statistics)
+            if(context.global().krunOptions.experimental.statistics)
                 System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             return searchResults;
         }
@@ -406,7 +410,7 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                if (context.global().krunOptions.experimental.statistics)
+                if(context.global().krunOptions.experimental.statistics)
                     System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return searchResults;
             }

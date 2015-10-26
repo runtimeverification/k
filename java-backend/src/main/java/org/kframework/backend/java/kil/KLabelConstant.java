@@ -262,8 +262,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
     public Multimap<Integer, Integer> getBinderMap() {
         if (isBinder()) {
             return productionAttributes.getAttr(Attribute.Key.get(
-                    new TypeToken<Multimap<Integer, Integer>>() {
-                    },
+                    new TypeToken<Multimap<Integer, Integer>>() {},
                     Names.named("binder")));
         } else {
             return null;
@@ -279,8 +278,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
     public Multimap<Integer, Integer> getMetaBinderMap() {
         if (isMetaBinder()) {
             return productionAttributes.getAttr(Attribute.Key.get(
-                    new TypeToken<Multimap<Integer, Integer>>() {
-                    },
+                    new TypeToken<Multimap<Integer, Integer>>() {},
                     Names.named("metabinder")));
         } else {
             return null;

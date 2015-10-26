@@ -60,7 +60,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      * Private helper method that translates Java backend specific KIL term back
      * to generic KIL term.
      *
-     * @param term the term to be translated
+     * @param term
+     *            the term to be translated
      * @return the translated term
      */
     private ASTNode transformJavaBackendSpecificTerm(Term term) {
@@ -215,7 +216,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         List<org.kframework.kil.Term> elements = new ArrayList<>();
         List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         for (Term entry : set.elements()) {
-            elements.add((org.kframework.kil.Term) entry.accept(this));
+            elements.add((org.kframework.kil.Term)entry.accept(this));
         }
         Collections.sort(elements);
         for (Term term : set.baseTerms()) {
@@ -238,13 +239,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         List<org.kframework.kil.Term> elementsRight = new ArrayList<>();
         for (Term entry : builtinList.elementsLeft()) {
-            elementsLeft.add((org.kframework.kil.Term) entry.accept(this));
+            elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
         }
         for (Term term : builtinList.baseTerms()) {
             baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
         for (Term entry : builtinList.elementsRight()) {
-            elementsRight.add((org.kframework.kil.Term) entry.accept(this));
+            elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
         ASTNode kil = ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
                 baseTerms, elementsLeft, elementsRight);

@@ -175,8 +175,7 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("binder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {
-                                    },
+                                    new TypeToken<Multimap<Integer, Integer>>() {},
                                     Names.named("binder")),
                             p.getBinderMap()));
                 }
@@ -472,13 +471,13 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public KItem.CacheTableValue getSortCacheValue(KItem.CacheTableColKey key) {
-        synchronized (sortCacheTable) {
+        synchronized(sortCacheTable) {
             return sortCacheTable.get(key);
         }
     }
 
     public void putSortCacheValue(KItem.CacheTableColKey key, KItem.CacheTableValue value) {
-        synchronized (sortCacheTable) {
+        synchronized(sortCacheTable) {
             sortCacheTable.put(key, value);
         }
     }

@@ -14,11 +14,8 @@ trait ScalaSugared[K <: kore.K] {
   import c._
 
   implicit def stringToToken(s: String) = KToken(s, Sorts.String, Att())
-
   def stringToId(s: String): K = KToken(s, Sorts.Id, Att())
-
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
-
   implicit def intToToken(n: Int): K = KToken(n.toString, Sorts.Int, Att())
 
   implicit class ApplicableKLabel(klabel: KLabel) {
@@ -31,23 +28,14 @@ trait ScalaSugared[K <: kore.K] {
 
   implicit class EnhancedK(k: K) {
     def ~>(other: K) = KSequence(Seq(k, other).asJava, Att())
-
     def ==>(other: K) = KRewrite(k, other, Att())
-
     def +(other: K) = KLabel("+")(k, other)
-
     def -(other: K) = KLabel("-")(k, other)
-
     def *(other: K) = KLabel("*")(k, other)
-
     def /(other: K) = KLabel("/")(k, other)
-
     def &(other: K) = KLabel("&")(k, other)
-
     def ~(other: K) = KLabel("~")(k, other)
-
     def &&(other: K) = KLabel(KLabels.AND)(k, other)
-
     def ||(other: K) = KLabel(KLabels.OR)(k, other)
   }
 

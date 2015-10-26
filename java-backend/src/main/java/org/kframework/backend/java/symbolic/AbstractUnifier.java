@@ -283,9 +283,9 @@ public abstract class AbstractUnifier implements Unifier {
                     Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
-                        Term bindingExp = terms.get(bindingExpPosition - 1);
+                        Term bindingExp = terms.get(bindingExpPosition-1);
                         Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
-                        terms.set(bindingExpPosition - 1, freshbindingExp);
+                        terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
                 kList = KList.concatenate(terms);

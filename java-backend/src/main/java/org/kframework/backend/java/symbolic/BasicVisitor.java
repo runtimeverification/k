@@ -245,9 +245,7 @@ public class BasicVisitor implements Visitor {
         disjunctiveFormula.conjunctions().stream().forEach(this::visitNode);
     }
 
-    @Override
-    public void visit(Term term) {
-    }
+    @Override public void visit(Term term) { }
 
     @Override
     public void visit(Token token) {

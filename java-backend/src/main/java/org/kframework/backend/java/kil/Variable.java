@@ -31,7 +31,8 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
      * Given a set of {@link Variable}s, returns a substitution that maps each
      * element inside to a fresh {@code Variable}.
      *
-     * @param variableSet the set of {@code Variable}s
+     * @param variableSet
+     *            the set of {@code Variable}s
      * @return the substitution
      */
     public static BiMap<Variable, Variable> rename(Set<Variable> variableSet) {
@@ -45,7 +46,8 @@ public class Variable extends Term implements Immutable, org.kframework.kore.KVa
     /**
      * Returns a fresh anonymous {@code Variable} of a given sort.
      *
-     * @param sort the given sort
+     * @param sort
+     *            the given sort
      * @return the fresh variable
      */
     public static Variable getAnonVariable(Sort sort) {

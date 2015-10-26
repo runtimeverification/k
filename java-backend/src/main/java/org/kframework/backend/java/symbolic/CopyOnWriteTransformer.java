@@ -343,7 +343,7 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
         BuiltinSet.Builder builder = BuiltinSet.builder(context);
-        for (Term element : builtinSet.elements()) {
+        for(Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
             changed = changed || (transformedElement != element);
