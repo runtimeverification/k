@@ -13,7 +13,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.JavaConversions;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -139,10 +138,10 @@ public class Subsorts implements Serializable {
 
     private Set<Sort> getLowerBounds(Set<Sort> subset) {
         if (subset == null || subset.size() == 0) {
-            return Collections.emptySet();
+            return java.util.Collections.emptySet();
         }
         if (subset.size() == 1) {
-            return Collections.singleton(subset.iterator().next());
+            return java.util.Collections.singleton(subset.iterator().next());
         }
 
         Set<Sort> lowerBounds = new HashSet<>();
@@ -164,7 +163,8 @@ public class Subsorts implements Serializable {
 
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
         Set<Sort> lowerBounds = getLowerBounds(sort1, sort2);
-        return !lowerBounds.isEmpty() && !lowerBounds.equals(Collections.singleton(Sort.BOTTOM));
+        return !lowerBounds.isEmpty() &&
+                !(lowerBounds.size() == 1 && lowerBounds.iterator().next().equals(Sort.BOTTOM));
     }
 
 }
