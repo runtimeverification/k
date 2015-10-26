@@ -10,6 +10,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.BitSet;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -124,11 +125,16 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
-        return new RuleAutomatonDisjunction(
-                ruleAutomatonDisjunction.disjunctions().stream()
-                        .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
-                        .collect(Collectors.toList()),
-                context);
+        List<Pair<Term, BitSet>> children = ruleAutomatonDisjunction.disjunctions().stream()
+                .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
+                .collect(Collectors.toList());
+        if (children.equals(ruleAutomatonDisjunction.disjunctions())) {
+            return ruleAutomatonDisjunction;
+        } else {
+            return new RuleAutomatonDisjunction(
+                    children,
+                    context);
+        }
     }
 
     @Override
@@ -138,7 +144,11 @@ public class CopyOnWriteTransformer implements Transformer {
             if (innerRHSRewrite.theRHS[i] != null)
                 theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
         }
-        return new InnerRHSRewrite(theNewRHS);
+        if(Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
+            return innerRHSRewrite;
+        } else {
+            return new InnerRHSRewrite(theNewRHS);
+        }
     }
 
     @Override
