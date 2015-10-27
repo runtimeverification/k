@@ -70,6 +70,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         for (Sort sort : iterable(sortSet)) { // for every declared sort
             if (subsorts.lessThanEq(sort, Sort("KBott")))
                 continue;
+            if (subsorts.greaterThan(sort, Sort("K")))
+                continue;
             for (Sort bound : bounds)
                 if (!subsorts.greaterThanEq(bound, sort))
                     continue nextsort;
