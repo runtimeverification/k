@@ -68,7 +68,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         Set<Sort> mins = new HashSet<>();
         nextsort:
         for (Sort sort : iterable(sortSet)) { // for every declared sort
-            // Sorts at or below KBott, or above K, are assumed to be 
+            // Sorts at or below KBott, or above K, are assumed to be
             // sorts from kast.k representing meta-syntax that is not a real sort.
             // This is done to prevent variables from being inferred as KBott or
             // as KList.
