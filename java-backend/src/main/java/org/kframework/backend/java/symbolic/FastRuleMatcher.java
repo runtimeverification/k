@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -41,6 +42,9 @@ public class FastRuleMatcher {
     private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
     private final int ruleCount;
 
+    /**
+     * @return maps from AST paths to the corresponding rewrite RHSs, indexed by the rule ordinal
+     */
     public Map<scala.collection.immutable.List<Integer>, Term>[] getRewrites() {
         return rewrites;
     }
@@ -146,7 +150,7 @@ public class FastRuleMatcher {
 
             for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
                 if (innerRHSRewrite.theRHS[i] != null) {
-                    rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
+                    rewrites[i].put(path.reverse(), innerRHSRewrite.theRHS[i]);
                 }
             }
 //            for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
