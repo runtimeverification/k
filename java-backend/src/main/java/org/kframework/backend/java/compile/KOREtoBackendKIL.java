@@ -118,8 +118,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KList convertedKList = KList(klist.items());
         BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
 
-        KItem kItem = KItem.of(convert(klabel), convertedKList, context);
-        kItem.setChildrenDontCareRuleMask(childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
+        KItem kItem = KItem.of(convert(klabel), convertedKList, context, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
         if (AbstractUnifier.isKSeq(kItem)) {
             return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
                     .map(Term.class::cast)

@@ -67,16 +67,24 @@ public class KItem extends Term implements KItemRepresentation {
     private BitSet[] childrenDontCareRuleMask = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        return of(kLabel, kList, termContext, null, null);
+        return of(kLabel, kList, termContext, null, null, null);
+    }
+
+    public static KItem of(Term kLabel, KList kList, TermContext termContext, BitSet[] childrenDontCareRuleMask) {
+        return of(kLabel, kList, termContext, null, null, childrenDontCareRuleMask);
     }
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
+        return of(kLabel, kList, termContext, source, location, null);
+    }
+
+    public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location, BitSet[] childrenDontCareRuleMask) {
         /* YilongL: since KList.Builder always canonicalizes its result, the
          * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
 
         // TODO(yilongli): break the dependency on the Tool object
-        return new KItem(kLabel, kList, termContext, termContext.global().stage, source, location);
+        return new KItem(kLabel, kList, termContext, termContext.global().stage, source, location, childrenDontCareRuleMask);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -98,12 +106,13 @@ public class KItem extends Term implements KItemRepresentation {
         this.enableCache = false;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location) {
+    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location, BitSet[] childrenDonCareRuleMask) {
         super(Kind.KITEM, source, location);
         this.kLabel = kLabel;
         this.kList = kList;
 
         Definition definition = termContext.definition();
+        this.childrenDontCareRuleMask = childrenDonCareRuleMask;
 
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
@@ -273,13 +282,6 @@ public class KItem extends Term implements KItemRepresentation {
             return childrenDontCareRuleMask[i];
         else
             return null;
-    }
-
-    /**
-     * The rule mask
-     */
-    public void setChildrenDontCareRuleMask(BitSet[] childrenDontCareRuleMask) {
-        this.childrenDontCareRuleMask = childrenDontCareRuleMask;
     }
 
     public static class KItemOperations {
