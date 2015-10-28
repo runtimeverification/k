@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -26,20 +29,20 @@ import java.util.Set;
  */
 public class KLabelConstant extends KLabel implements MaximalSharing, org.kframework.kore.KLabel {
 
-    /**
-     * N.B.: used concurrently, synchronized on itself. New instances of KLabelConstant have ordinal cacheSize().
-     */
-    private static final Map<Pair<Set<SortSignature>, Attributes>, Map<String, KLabelConstant>> cache = new HashMap<>();
+    private static final ConcurrentMap<Pair<Set<SortSignature>, Attributes>,
+            ConcurrentMap<String, KLabelConstant>> cache = new ConcurrentHashMap<>();
 
-    public static int cacheSize() {
-        synchronized (cache) {
-            return cache.values().stream().mapToInt(Map::size).sum();
-        }
-    }
+    /**
+     * see {@link #ordinal()}
+     */
+    public static final AtomicInteger maxOrdinal = new AtomicInteger(0);
 
     /* un-escaped label */
     private final String label;
 
+    /**
+     * see {@link #ordinal()}
+     */
     private final int ordinal;
 
     /* the sort signatures of the productions generating this {@code KLabelConstant} */
@@ -110,15 +113,13 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
      * @return AST term representation the the KLabel;
      */
     public static KLabelConstant of(String label, Definition definition) {
-        synchronized (cache) {
-            return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> Collections.synchronizedMap(new PatriciaTrie<>()))
-                    .computeIfAbsent(label, l -> new KLabelConstant(
-                            l,
-                            cacheSize(),
-                            definition.signaturesOf(l),
-                            definition.allSorts(),
-                            definition.kLabelAttributesOf(l)));
-        }
+        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> new ConcurrentHashMap<>())
+                .computeIfAbsent(label, l -> new KLabelConstant(
+                        l,
+                        maxOrdinal.getAndIncrement(),
+                        definition.signaturesOf(l),
+                        definition.allSorts(),
+                        definition.kLabelAttributesOf(l)));
     }
 
     /**
@@ -231,14 +232,15 @@ public class KLabelConstant extends KLabel implements MaximalSharing, org.kframe
      * instance.
      */
     private Object readResolve() {
-        synchronized (cache) {
-            Map<String, KLabelConstant> trie = cache.computeIfAbsent(Pair.of(signatures, productionAttributes),
-                    p -> Collections.synchronizedMap(new PatriciaTrie<>()));
-            if(trie.containsKey(label) && trie.get(label).ordinal != this.ordinal) {
-                KEMException.criticalError("The ordinal for klabel: " + label + " is " + trie.get(label).ordinal + " in the cache and " + this.ordinal + " serialized.");
-            }
-            return trie.computeIfAbsent(label, l -> this);
+        Map<String, KLabelConstant> localCache = cache.computeIfAbsent(
+                Pair.of(signatures, productionAttributes),
+                p -> new ConcurrentHashMap<>());
+        if (localCache.containsKey(label) && localCache.get(label).ordinal != this.ordinal) {
+            KEMException.criticalError("The ordinal for klabel: " + label + " is " + localCache.get(label).ordinal +
+                    " in the cache and " + this.ordinal + " serialized.");
         }
+        // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects
+        return localCache.computeIfAbsent(label, l -> this);
     }
 
     public String getAttr(String attribute) {

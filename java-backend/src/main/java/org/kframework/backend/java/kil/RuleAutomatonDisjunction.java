@@ -48,7 +48,7 @@ public class RuleAutomatonDisjunction extends Term {
     public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
         super(Kind.KITEM);
         disjunctions = Collections.unmodifiableList(children);
-        this.kItemDisjunctionsArray = new Pair[KLabelConstant.cacheSize()];
+        this.kItemDisjunctionsArray = new Pair[KLabelConstant.maxOrdinal.get()];
         children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .forEach(p -> {
@@ -56,7 +56,7 @@ public class RuleAutomatonDisjunction extends Term {
                 });
 
 
-        this.variableDisjunctionsArray = new List[Sort.cacheSize()];
+        this.variableDisjunctionsArray = new List[Sort.maxOrdinal.get()];
 
         context.definition().allSorts().forEach(s -> {
             this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()

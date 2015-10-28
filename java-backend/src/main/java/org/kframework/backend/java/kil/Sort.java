@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
@@ -21,11 +24,13 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
+    private static final ConcurrentMap<String, Sort> cache = new ConcurrentHashMap<>();
+
     /**
-     * N.B.: used concurrently, synchronized on itself. New instances of Sort have ordinal cache.size() and the access
-     * needs to be synchronized.
+     * see {@link #ordinal()}
      */
-    private static final Map<String, Sort> cache = new PatriciaTrie<>();
+    public static final AtomicInteger maxOrdinal = new AtomicInteger(0);
+
 
     public static final Sort KITEM          =   Sort.of("KItem");
     public static final Sort KSEQUENCE      =   Sort.of("K");
@@ -69,9 +74,7 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * @return the sort
      */
     public static Sort of(String name) {
-        synchronized (cache) {
-            return cache.computeIfAbsent(name, s -> new Sort(s, cache.size()));
-        }
+        return cache.computeIfAbsent(name, s -> new Sort(s, maxOrdinal.getAndIncrement()));
     }
 
     public static Sort of(org.kframework.kil.Sort sort) {
@@ -128,17 +131,11 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        synchronized (cache) {
-            if (cache.containsKey(name) && cache.get(name).ordinal != this.ordinal) {
-                KEMException.criticalError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal + " in the cache and " + this.ordinal + " serialized.");
-            }
-            return cache.computeIfAbsent(name, x -> this);
+        if (cache.containsKey(name) && cache.get(name).ordinal != this.ordinal) {
+            KEMException.criticalError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal +
+                    " in the cache and " + this.ordinal + " serialized.");
         }
-    }
-
-    public static int cacheSize() {
-        synchronized (cache) {
-            return Sort.cache.size();
-        }
+        // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects
+        return cache.computeIfAbsent(name, x -> this);
     }
 }
