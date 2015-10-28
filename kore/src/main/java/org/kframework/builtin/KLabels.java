@@ -18,5 +18,5 @@ public class KLabels {
 
     public static String CELLS = "#cells";
 
-    public static String KREWRITE = "=>";
+    public static String KREWRITE = "#KRewrite";
 }
