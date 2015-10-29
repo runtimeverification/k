@@ -14,9 +14,12 @@ class Ignore
 
 object Ignore extends Ignore
 
-trait ChildrenMapping[E, W] {
+abstract class ChildrenMapping[E, W] {
 
   def applyTerm(t: Term): (Either[E, Term], W)
+
+  protected def simpleError(err:E) : (Either[E, Term], W) = (Left(err),warningUnit)
+  protected def simpleResult(result:Term): (Either[E, Term], W) = (Right(result),warningUnit)
 
   /**
    * Transforms all children of the current item. If any of them is problematic,
@@ -118,7 +121,7 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   def apply(a: Ambiguity): (Either[E, Term], W) = mapChildren(a)
   def apply(tc: TermCons): (Either[E, Term], W) = mapChildrenStrict(tc)
   def apply(kl: KList): (Either[E, Term], W) = mapChildrenStrict(kl)
-  def apply(c: Constant): (Either[E, Term], W) = { (Right(c), warningUnit) }
+  def apply(c: Constant): (Either[E, Term], W) = simpleResult(c)
 }
 
 trait EAsSet[E] {
@@ -127,19 +130,15 @@ trait EAsSet[E] {
    */
   def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = Sets.union(a, b)
 
-  val errorUnit: java.util.Set[E] = makeErrorSet()
-
-  @annotation.varargs def makeErrorSet(l:E*) = l.toSet.asJava
+  val errorUnit: java.util.Set[E] = Sets.newHashSet()
 }
 
 trait WAsSet[W] {
-  val warningUnit: java.util.Set[W] = makeWarningSet()
+  val warningUnit: java.util.Set[W] = Sets.newHashSet();
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
   def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = Sets.union(a, b)
-
-  @annotation.varargs def makeWarningSet(l:W*) = l.toSet.asJava
 }
 
 abstract class SetsGeneralTransformer[E, W]

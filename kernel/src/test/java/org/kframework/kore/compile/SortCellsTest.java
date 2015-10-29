@@ -11,6 +11,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -32,8 +33,8 @@ public class SortCellsTest {
         addCell("ThreadCell", "KCell", "<k>", Sorts.K());
         addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
         addCell("ThreadCell", "OptCell", "<opt>", Multiplicity.OPTIONAL, Sorts.K());
-        addUnit("OptCell", KApply(KLabel(".OptCell")));
-        addUnit("ThreadCell", KApply(KLabel(".ThreadCellBag")));
+        addUnit("OptCell", KLabel(".OptCell"));
+        addUnit("ThreadCell", KLabel(".ThreadCellBag"));
         addConcat("ThreadCell", KLabel("_ThreadCellBag_"));
     }};
     LabelInfo labelInfo = new LabelInfo() {{
@@ -187,7 +188,7 @@ public class SortCellsTest {
         addCell(null, "TopCell", "<top>");
         addCell("TopCell", "ThreadCell", "<t>", Multiplicity.STAR, Sorts.K());
         addCell("TopCell", "ExtraCell", "<extra>");
-        addUnit("ThreadCell", KApply(KLabel(".ThreadCellBag")));
+        addUnit("ThreadCell", KLabel(".ThreadCellBag"));
         addConcat("ThreadCell", KLabel("_ThreadCellBag_"));
     }};
     LabelInfo bagLabelInfo = new LabelInfo() {{
@@ -195,6 +196,7 @@ public class SortCellsTest {
         addLabel("ThreadCell", "<t>");
         addLabel("ExtraCell", "<extra>");
         addLabel("K", "restore");
+        addLabel("ThreadCellBag","_ThreadCellBag_");
     }};
     @Test
     public void testFragmentBag() {
@@ -231,6 +233,29 @@ public class SortCellsTest {
     }
 
 
+
+    /**
+     * Test that splitting works properly if an item under a parent cell is
+     * already a collection of multiplicity * cells joined by the proper label.
+     */
+    @Test
+    public void testMultipleCells() {
+        KVariable T1 = KVariable("T1",Att().add(Attribute.SORT_KEY,"ThreadCell"));
+        KVariable T2 = KVariable("T2",Att().add(Attribute.SORT_KEY,"ThreadCell"));
+        K term = cell("<top>",
+                    KVariable("F"),
+                    cell("<t>", KVariable("T")),
+                    app("_ThreadCellBag_",T1,T2));
+        K expected = cell("<top>",
+                app("_ThreadCellBag_",
+                        app("_ThreadCellBag_", KVariable("_0"), cell("<t>", KVariable("T"))),
+                        app("_ThreadCellBag_", T1, T2)),
+                        KVariable("_1"));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+
+    }
 
     KApply app(String name, K... ks) {
         return KApply(KLabel(name), ks);

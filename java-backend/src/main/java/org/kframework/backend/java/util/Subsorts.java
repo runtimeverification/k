@@ -101,19 +101,8 @@ public class Subsorts implements Serializable {
         if (subset.size() == 1) {
             return subset.iterator().next();
         }
-        Set<Sort> lowerBounds = new HashSet<>();
-        for (Sort elem : sorts) {
-            boolean isLowerBound = true;
-            for (Sort subsetElem : subset) {
-                if (!(isSubsorted(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLowerBound = false;
-                    break;
-                }
-            }
-            if (isLowerBound) {
-                lowerBounds.add(elem);
-            }
-        }
+
+        Set<Sort> lowerBounds = getLowerBounds(subset);
         if (lowerBounds.size() == 0) {
             return null;
         }
@@ -143,9 +132,39 @@ public class Subsorts implements Serializable {
         return candidate;
     }
 
+    public Set<Sort> getLowerBounds(Sort... sorts) {
+        return getLowerBounds(Sets.newHashSet(sorts));
+    }
+
+    private Set<Sort> getLowerBounds(Set<Sort> subset) {
+        if (subset == null || subset.size() == 0) {
+            return java.util.Collections.emptySet();
+        }
+        if (subset.size() == 1) {
+            return java.util.Collections.singleton(subset.iterator().next());
+        }
+
+        Set<Sort> lowerBounds = new HashSet<>();
+        for (Sort elem : sorts) {
+            boolean isLowerBound = true;
+            for (Sort subsetElem : subset) {
+                if (!(isSubsorted(subsetElem, elem) || elem.equals(subsetElem))) {
+                    isLowerBound = false;
+                    break;
+                }
+            }
+            if (isLowerBound) {
+                lowerBounds.add(elem);
+            }
+        }
+
+        return lowerBounds;
+    }
+
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        Sort glbSort = getGLBSort(sort1, sort2);
-        return glbSort != null && !glbSort.equals(Sort.BOTTOM);
+        Set<Sort> lowerBounds = getLowerBounds(sort1, sort2);
+        return !lowerBounds.isEmpty() &&
+                !(lowerBounds.size() == 1 && lowerBounds.iterator().next().equals(Sort.BOTTOM));
     }
 
 }

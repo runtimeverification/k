@@ -367,9 +367,13 @@ public class SortCells {
                 } else if (item instanceof KApply) {
                     List<K> children = IncompleteCellUtils.flattenCells(item);
                     if(children.size() == 1 && children.get(0) == item) {
-                        Sort s = cfg.getCellSort(((KApply) item).klabel());
+                        final KLabel label = ((KApply) item).klabel();
+                        Sort s = cfg.getCellSort(label);
                         if (s == null) {
-                            throw new IllegalArgumentException("Attempting to split non-cell term "+item);
+                            s = cfg.getCellCollectionCell(label);
+                            if (s == null) {
+                                throw new IllegalArgumentException("Attempting to split non-cell term " + item);
+                            }
                         }
                         return Collections.singletonMap(s, apply(item));
                     }

@@ -20,4 +20,7 @@ rule token = parse
 { 
 let parse_k (str: string) =
   let lexbuf = Lexing.from_string str in Parser.top token lexbuf
+
+let parse_k_file (file: string) =
+  let lexbuf = Lexing.from_channel (open_in file) in Parser.top token lexbuf
 }
