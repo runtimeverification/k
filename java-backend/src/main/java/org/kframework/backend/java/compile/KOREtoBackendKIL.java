@@ -19,6 +19,7 @@ import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.RewriteToTop;
@@ -118,7 +119,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KList convertedKList = KList(klist.items());
         BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
 
-        KItem kItem = KItem.of(convert(klabel), convertedKList, context, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
+        KItem kItem = KItem.of(convert1(klabel), convertedKList, context, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
         if (AbstractUnifier.isKSeq(kItem)) {
             return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
                     .map(Term.class::cast)
@@ -178,7 +179,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             theRHSs[ruleIndex] = convert(term);
         });
 
-        return KItem.of(convert(klabel), org.kframework.backend.java.kil.KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), context);
+        return KItem.of(convert1(klabel), org.kframework.backend.java.kil.KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), context);
     }
 
     private BitSet getRuleSet(KApply k) {
@@ -226,10 +227,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
-        return new InjectedKLabel(convert(klabel));
+        return new InjectedKLabel(convert1(klabel));
     }
 
-    private Term convert(KLabel klabel) {
+    private Term convert1(KLabel klabel) {
         if (klabel instanceof KVariable) {
             return KVariable(klabel.name(), ((KVariable) klabel).att().add(Attribute.SORT_KEY, "KLabel"));
         } else {
@@ -283,7 +284,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
         else if (k instanceof org.kframework.kore.InjectedKLabel)
             return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
-        else
+        else if (k instanceof org.kframework.kore.KRewrite) {
+            return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), context);
+        } else
             throw new AssertionError("BUM!");
     }
 

@@ -65,15 +65,17 @@ public class KoreUtils {
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
+        GlobalOptions globalOptions = new GlobalOptions();
 
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
-        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(), new JavaBackend().steps(kompile));
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(),
+                new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
             protected void configure() {
                 super.configure();
-                bind(GlobalOptions.class).toInstance(new GlobalOptions());
+                bind(GlobalOptions.class).toInstance(globalOptions);
                 bind(SMTOptions.class).toInstance(new SMTOptions());
                 bind(Stage.class).toInstance(Stage.REWRITING);
                 bind(FileSystem.class).to(PortableFileSystem.class);

@@ -184,6 +184,8 @@ public class SymbolicRewriter {
                 // get a map from AST paths to (fine-grained, inner) rewrite RHSs
                 Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrites()[pair.getRight()];
 
+                assert(rewrites.size() > 0);
+
                 Term theNew;
                 if (rewrites.size() == 1)
                     // use the more efficient implementation if we only have one rewrite

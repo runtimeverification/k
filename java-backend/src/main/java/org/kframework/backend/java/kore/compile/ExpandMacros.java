@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kore.compile;
 
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -108,8 +109,7 @@ public class ExpandMacros {
     }
 
     private Rule expand(Rule rule) {
-        return Rule(
-                KRewrite(expand(RewriteToTop.toLeft(rule.body())), expand(RewriteToTop.toRight(rule.body()))),
+        return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());

@@ -1,6 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.inject.Inject;
+import org.kframework.backend.java.kore.compile.ExpandMacros;
+import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.compile.CleanKSeq;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
@@ -10,6 +13,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -23,6 +27,9 @@ import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.compile.TransformKORE;
 import org.kframework.kore.compile.VisitKORE;
+import org.kframework.main.GlobalOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import static scala.compat.java8.JFunction.*;
 
@@ -34,13 +41,27 @@ import static org.kframework.definition.Constructors.Att;
 
 public class JavaBackend implements Backend {
 
+    private final KExceptionManager kem;
+    private final FileUtil files;
+    private final GlobalOptions globalOptions;
+    private final KompileOptions kompileOptions;
+
     @Override
     public void accept(CompiledDefinition def) {
+    }
+
+    @Inject
+    public JavaBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
+        this.kem = kem;
+        this.files = files;
+        this.globalOptions = globalOptions;
+        this.kompileOptions = kompileOptions;
     }
 
     @Override
     public Function<Definition, Definition> steps(Kompile kompile) {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s)), "convert data structures to lookups");
+        ExpandMacrosDefinitionTransformer expandMacrosDefinitionTransformer = new ExpandMacrosDefinitionTransformer(kem, files, globalOptions, kompileOptions);
 
         if (kompile.kompileOptions.experimental.koreProve) {
             return d -> convertDataStructureToLookup.apply(kompile.defaultSteps().apply(d));
@@ -50,6 +71,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 .andThen(convertDataStructureToLookup)
                         //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
