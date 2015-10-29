@@ -589,7 +589,7 @@ public class KItem extends Term implements KItemRepresentation {
      */
     public Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
         // apply a .K ~> K => K normalization
-        if (kLabel.toString().equals(KLabels.KSEQ)
+        if (((KLabelConstant)kLabel).name().equals(KLabels.KSEQ)
                 && kList instanceof KList
                 && (((KList) kList).get(0) instanceof KItem && ((KItem) ((KList) kList).get(0)).kLabel.toString().equals(KLabels.DOTK) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
             return ((KList) kList).get(1);
