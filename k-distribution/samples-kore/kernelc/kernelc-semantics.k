@@ -49,12 +49,12 @@ module KERNELC-SEMANTICS
   /*
    * anywheres
    */
-  rule return; => return tv(void, undef);                   [anywhere]
-  rule NULL => tv(void *, null)                             [anywhere]
+  rule return; => return tv(void, undef);                   [macro]
+  rule NULL => tv(void *, null)                             [macro]
 
   /* block without declarations anywhere (for use in the semantics only) */
   syntax Block ::= "{" Statements "}"
-  rule { Ss:Statements } => { .VariableDeclarations Ss }    [anywhere]
+  rule { Ss:Statements } => { .VariableDeclarations Ss }    [macro]
 
 
   /*

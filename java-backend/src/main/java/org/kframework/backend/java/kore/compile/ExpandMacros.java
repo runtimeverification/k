@@ -130,7 +130,7 @@ public class ExpandMacros {
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule) {
+        if (s instanceof Rule && !s.att().contains("macro")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

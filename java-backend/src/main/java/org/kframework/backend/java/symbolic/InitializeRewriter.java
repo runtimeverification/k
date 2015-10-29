@@ -208,11 +208,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .forEach(definition::addKLabel);
             definition.addKoreRules(module, termContext);
 
-            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext.global(), kem);
+            Definition evaluatedDefinition = KILtoBackendJavaKILTransformer.evaluateDefinition(initializingContext);
+            initializingContext.setDefinition(evaluatedDefinition);
 
-            evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
-            cache.put(module, evaluatedDef);
-            return evaluatedDef;
+            evaluatedDefinition.setIndex(new IndexingTable(() -> evaluatedDefinition, new IndexingTable.Data()));
+            cache.put(module, evaluatedDefinition);
+            return evaluatedDefinition;
         }
     }
 }

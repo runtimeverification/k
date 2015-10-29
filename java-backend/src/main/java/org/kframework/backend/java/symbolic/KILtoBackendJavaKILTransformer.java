@@ -574,7 +574,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     /**
      * Partially evaluate the right-hand side and the conditions for each rule.
      */
-    private static Definition evaluateDefinition(GlobalContext globalContext) {
+    public static Definition evaluateDefinition(GlobalContext globalContext) {
         Definition definition = globalContext.getDefinition();
         /* replace the unevaluated rules defining functions with their partially evaluated counterparts */
         ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
