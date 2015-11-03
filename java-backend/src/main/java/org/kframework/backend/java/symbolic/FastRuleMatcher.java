@@ -168,7 +168,8 @@ public class FastRuleMatcher {
         }
 
         if (pattern instanceof KItem && ((KItem) pattern).kLabel().equals(threadCellBagLabel)
-                && !subject.sort().equals(Sort.of("ThreadCellBag"))) {
+                && !subject.sort().equals(Sort.of("ThreadCellBag")) &&
+                !((subject instanceof KItem) && ((KItem) subject).kLabel().equals(threadCellBagLabel))) {
             subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), context);
         }
 
