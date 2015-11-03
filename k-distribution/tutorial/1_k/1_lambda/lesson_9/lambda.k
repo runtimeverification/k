@@ -164,4 +164,7 @@ and faster to execute. */
 
   rule letrec F:Id X:Id = E in E' => let F = mu F . lambda X . E in E' [macro]
   rule mu X . E => E[(mu X . E) / X]
+
+  configuration <T> <k> $PGM:K </k> </T>
+  // TODO: remove after adding an "add top cell wrapper" pass to the kompiler
 endmodule
