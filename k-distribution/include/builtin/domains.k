@@ -420,13 +420,14 @@ module STRING
   syntax Int ::= "findChar" "(" String "," String "," Int ")"     [function, klabel(findChar), hook(STRING.findChar)]
   syntax Int ::= "rfindChar" "(" String "," String "," Int ")"    [function, klabel(rfindChar), hook(STRING.rfindChar)]
 
-  syntax String ::= "Float2String" "(" Float ")"            [function, klabel(Float2String), hook(STRING.float2string)]
-  syntax String ::= "Float2String" "(" Float "," String ")" [function, klabel(FloatFormat), hook(STRING.floatFormat)]
-  syntax Float  ::= "String2Float" "(" String ")"           [function, klabel(String2Float), hook(STRING.string2float)]
-  syntax Int    ::= "String2Int"   "(" String ")"           [function, klabel(String2Int), hook(STRING.string2int)]
-  syntax String ::= "Int2String"   "(" Int ")"              [function, klabel(Int2String), hook(STRING.int2string)]
-  syntax String ::= "Base2String"  "(" Int "," Int ")"      [function, klabel(Base2String), hook(STRING.base2string)]
-  syntax Int    ::= "String2Base"  "(" String "," Int ")"   [function, klabel(String2Base), hook(STRING.string2base)]
+  syntax String ::= "Float2String" "(" Float ")"              [function, klabel(Float2String), hook(STRING.float2string)]
+  syntax String ::= "Float2String" "(" Float "," String ")"   [function, klabel(FloatFormat), hook(STRING.floatFormat)]
+  syntax Float  ::= "String2Float" "(" String ")"             [function, klabel(String2Float), hook(STRING.string2float)]
+  syntax Int    ::= "String2Int"   "(" String ")"             [function, klabel(String2Int), hook(STRING.string2int)]
+  syntax String ::= "Int2String"   "(" Int ")"                [function, klabel(Int2String), hook(STRING.int2string)]
+  syntax String ::= "Base2String"  "(" Int "," Int ")"        [function, klabel(Base2String), hook(STRING.base2string)]
+  syntax Int    ::= "String2Base"  "(" String "," Int ")"     [function, klabel(String2Base), hook(STRING.string2base)]
+  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.string2token)]
 
 
   syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(STRING.replaceAll)]
@@ -481,7 +482,16 @@ module ID
 endmodule
 
 module EMPTY-ID
+  imports STRING
+
   syntax Id
+
+  syntax String ::= "Id2String" "(" Id ")"    [function, hook(STRING.token2string), klabel(Id2String)]
+  syntax Id ::= "String2Id" "(" String ")"    [function, klabel(String2Id)]
+  rule String2Id(S) => #parseToken("Id", S)
+
+  syntax Id ::= freshId(Int)    [freshGenerator, function]
+  rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
 module K-EQUAL
