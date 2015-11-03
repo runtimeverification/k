@@ -109,13 +109,13 @@ public class SymbolicRewriter {
                     rule2Results = rules.stream().collect(
                             Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
                                     (u, v) -> u, IdentityHashMap::new));
-                    rule2Results.forEach((rule, terms) -> {
-                        if (terms.isEmpty()) {
+                    for (Rule rule : rules) {
+                        if (rule2Results.get(rule).isEmpty()) {
                             failedRules.add(rule);
                         } else {
-                            results.addAll(terms);
+                            results.addAll(rule2Results.get(rule));
                         }
-                    });
+                    }
                 }
 
                 // If we've found matching results from one equivalence class then
