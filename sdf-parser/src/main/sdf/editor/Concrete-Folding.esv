@@ -1,9 +1,0 @@
-module Concrete-Folding
-
-imports Concrete-Folding.generated
-
-folding
-  
-  // This file can be used for custom folding rules.
-  //
-  // See the imported file for a brief introduction and examples.
