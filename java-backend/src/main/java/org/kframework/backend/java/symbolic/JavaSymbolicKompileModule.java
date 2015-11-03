@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
-import org.kframework.backend.Backend;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Definition;
@@ -29,10 +28,6 @@ public class JavaSymbolicKompileModule extends AbstractModule {
         for (IndexingAlgorithm enumVal : IndexingAlgorithm.values()) {
             indexBinder.addBinding(enumVal).to(enumVal.clazz);
         }
-
-        MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
-                binder(), String.class, Backend.class);
-        mapBinder.addBinding("java").to(JavaSymbolicBackend.class);
 
         MapBinder<String, org.kframework.kore.compile.Backend> koreBackendBinder = MapBinder.newMapBinder(
                 binder(), String.class, org.kframework.kore.compile.Backend.class);

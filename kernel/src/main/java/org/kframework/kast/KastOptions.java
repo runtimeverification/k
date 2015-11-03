@@ -9,11 +9,9 @@ import com.google.inject.Provider;
 import org.kframework.attributes.Source;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ParserType;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
-import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import java.io.Reader;
@@ -74,21 +72,6 @@ public final class KastOptions {
     "line. It is an error to provide both this option and a file to parse.")
     private String expression;
 
-    @Parameter(names="--parser", converter=ParserTypeConverter.class, description="Choose a parser. <parser> is either [program|newprogram|ground|rule|binary].")
-    public ParserType parser = ParserType.PROGRAM;
-
-    public static class ParserTypeConverter extends BaseEnumConverter<ParserType> {
-
-        public ParserTypeConverter(String optionName) {
-            super(optionName);
-        }
-
-        @Override
-        public Class<ParserType> enumClass() {
-            return ParserType.class;
-        }
-    }
-
     @Parameter(names={"--sort", "-s"}, converter=SortTypeConverter.class, description="The start sort for the default parser. " +
             "The default is the sort of $PGM from the configuration. A sort may also be specified " +
             "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
@@ -110,8 +93,5 @@ public final class KastOptions {
     public Experimental experimental = new Experimental();
 
     public static final class Experimental {
-
-        @Parameter(names="--kore", description="Parse with the new pipeline.")
-        public boolean kore = false;
     }
 }

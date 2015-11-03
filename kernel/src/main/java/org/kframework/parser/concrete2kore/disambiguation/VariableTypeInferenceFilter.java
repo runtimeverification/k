@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.kore.KLabel;
@@ -140,12 +139,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public boolean isAnyVar() {
-            return var.value().equals(MetaK.Constants.anyVarSymbol);
+            return var.value().equals("_");
         }
     }
 
     private static VarKey getVarKey(Constant c) {
-        if (c.value().equals(MetaK.Constants.anyVarSymbol)) {
+        if (c.value().equals("_")) {
             return new VarKey(c); // wildcard values are compared including location
         } else {
             return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));

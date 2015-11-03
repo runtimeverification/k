@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -115,7 +114,7 @@ public class CheckVariables extends BasicVisitor {
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
-            if (MetaK.isAnonVar(v) && !(v.isFreshVariable() || v.isFreshConstant())) {
+            if (v.getName().startsWith("_") && !(v.isFreshVariable() || v.isFreshConstant())) {
                 throw KExceptionManager.compilerError(
                         "Anonymous variable found in the right hand side of a rewrite.",
                         this, v);
@@ -133,7 +132,7 @@ public class CheckVariables extends BasicVisitor {
                         "Variable " + key + " has the same name as a fresh variable.",
                         this, key);
             }
-            if (MetaK.isAnonVar(key)) continue;
+            if (key.getName().startsWith("_")) continue;
             if (e.getValue().intValue() > 1) continue;
             if (!right.containsKey(key)) {
                 kem.register(new KException(KException.ExceptionType.HIDDENWARNING,

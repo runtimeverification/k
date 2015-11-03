@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.BackendFilter;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
@@ -305,7 +304,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Variable var, Void _void) {
-        if (var.getName().equals(MetaK.Constants.anyVarSymbol)) {
+        if (var.getName().equals("_")) {
             result.append("\\AnyVar");
         } else {
             result.append("\\variable");
@@ -313,7 +312,7 @@ public class LatexFilter extends BackendFilter {
         if (var.getSort() != null) {
             result.append("[" + StringUtil.latexify(var.getSort().getName()) + "]");
         }
-        if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
+        if (!var.getName().equals("_")) {
             result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
         }
         result.append("{");

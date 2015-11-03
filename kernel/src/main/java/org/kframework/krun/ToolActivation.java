@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.transformation;
+package org.kframework.krun;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;

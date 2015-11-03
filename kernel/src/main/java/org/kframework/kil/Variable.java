@@ -1,11 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 /**
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
@@ -30,31 +26,6 @@ public class Variable extends Term {
 
     public void setExpectedSort(Sort expectedSort) {
         this.expectedSort = expectedSort;
-    }
-
-    public Variable(Element element, JavaClassesFactory factory) {
-        super(element);
-        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
-        this.name = element.getAttribute(Constants.NAME_name_ATTR);
-        this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
-
-        java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
-        if (its.size() > 0) {
-            getAttributes().putAll((Attributes) factory.getTerm(its.get(0)));
-        }
-
-        if (this.name.startsWith("?")) {
-            this.freshVariable = true;
-            this.freshConstant = false;
-            this.name = this.name.substring(1);
-        } else if (this.name.startsWith("!")) {
-            this.freshConstant = true;
-            this.freshVariable = false;
-            this.name = this.name.substring(1);
-        } else {
-            this.freshVariable = false;
-            this.freshConstant = false;
-        }
     }
 
     public Variable(String name, Sort sort, boolean freshVariable, boolean freshConstant) {

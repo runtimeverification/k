@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -66,7 +65,7 @@ public class ResolveAnonVar {
         return new TransformKORE() {
             @Override
             public K apply(KVariable k) {
-                if (k.name().equals(MetaK.Constants.anyVarSymbol)) {
+                if (k.name().equals("_")) {
                     return newDotVariable();
                 }
                 return super.apply(k);
