@@ -109,6 +109,7 @@ public class FastRuleMatcher {
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
             BitSet returnSet = BitSet.apply(ruleCount);
 
+            // handle variables in the disjunction
             List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
             for (Pair<Variable, BitSet> p : pairs) {
                 if (ruleMask.intersects(p.getRight())) {
@@ -118,17 +119,21 @@ public class FastRuleMatcher {
                 }
             }
 
+            // try to match the subject as-if it is a singleton kseq, i.e. subject ~> .K
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
             }
 
+            // TODO: hack for threads to behave like the kseq above; remove once AC works
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel) && threadCellBagLabel.ordinal() < automatonDisjunction.kItemDisjunctionsArray.length) {
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[threadCellBagLabel.ordinal()]);
             }
 
             if (subject instanceof KItem) {
+                // main match of KItems
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
             } else if (subject instanceof Token) {
+                // and matching Tokens
                 BitSet rules = automatonDisjunction.tokenDisjunctions.get(subject);
                 if (rules != null) {
                     BitSet localRuleMask = ruleMask.clone();
@@ -139,10 +144,13 @@ public class FastRuleMatcher {
 
             return returnSet;
         }
+
+        // if the pattern is a variable, try to add its binding to the current solution
         if (pattern instanceof Variable) {
             return add((Variable) pattern, subject, ruleMask);
         }
 
+        // register the RHS of the rewrite we have just encountered, and continue matching on its LHS
         if (pattern instanceof KItem && ((KItem) pattern).kLabel().toString().equals(KLabels.KREWRITE)) {
             KApply rw = (KApply) pattern;
             InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
@@ -153,12 +161,6 @@ public class FastRuleMatcher {
                     rewrites[i].put(path.reverse(), innerRHSRewrite.theRHS[i]);
                 }
             }
-//            for (int i = 0; i < innerRHSRewrite.theRHS.length; i++) {
-//                if (innerRHSRewrite.theRHS[i] != null && theNewMask.get(i)) {
-//                    counter6++;
-//                    rewrites[i].put(path, innerRHSRewrite.theRHS[i]);
-//                }
-//            }
             return theNewMask;
         }
 
@@ -167,6 +169,7 @@ public class FastRuleMatcher {
             subject = upKSeq(subject);
         }
 
+        // TODO: remove the hack below once AC works
         if (pattern instanceof KItem && ((KItem) pattern).kLabel().equals(threadCellBagLabel)
                 && !subject.sort().equals(Sort.of("ThreadCellBag")) &&
                 !((subject instanceof KItem) && ((KItem) subject).kLabel().equals(threadCellBagLabel))) {
@@ -190,8 +193,10 @@ public class FastRuleMatcher {
                 return empty;
             }
 
+            // main loop matching the klist
             for (int i = 0; i < size; ++i) {
                 BitSet childrenDontCareRuleMaskForPosition = kitemPattern.getChildrenDontCareRuleMaskForPosition(i);
+                // continue if the pattern under this position only contains "don't care" variables
                 if (childrenDontCareRuleMaskForPosition != null && ruleMask.subset(childrenDontCareRuleMaskForPosition)) {
                     continue;
                 }
