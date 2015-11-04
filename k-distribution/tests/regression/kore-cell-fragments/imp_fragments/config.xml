@@ -6,10 +6,8 @@
         programs="."
         extension="imp"
         results="." >
-      <kompile-option name="--kore"/>
       <kompile-option name="--main-module" value="IMP" />
       <all-programs>
-        <krun-option name="--kore" />
         <krun-option name="--smt" value="none" />
       </all-programs>
     </test>

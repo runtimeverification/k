@@ -30,8 +30,8 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
     public Void visit(Configuration node, Void _void) {
         Term t = node.getBody();
         Cell top = new Cell();
-        top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
-        top.setId(MetaK.Constants.generatedCfgAbsTopCellLabel);
+        top.setLabel("___CONTEXT_ABSTRACTION_TOP_CELL___");
+        top.setId("___CONTEXT_ABSTRACTION_TOP_CELL___");
         top.setContents(t);
         this.visitNode(top);
         return null;

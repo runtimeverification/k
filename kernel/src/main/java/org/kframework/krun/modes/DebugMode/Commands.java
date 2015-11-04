@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun.modes.DebugMode;
 
-import org.kframework.backend.unparser.OutputModes;
+import org.kframework.unparser.OutputModes;
 import org.kframework.debugger.DebuggerMatchResult;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;

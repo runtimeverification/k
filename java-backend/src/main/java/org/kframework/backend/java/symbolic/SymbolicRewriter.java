@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.Backends;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,10 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author AndreiS
- *
  */
 public class SymbolicRewriter {
 
@@ -67,7 +66,7 @@ public class SymbolicRewriter {
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-        this.useFastRewriting = this.kompileOptions.experimental.kore && !this.kompileOptions.experimental.koreProve;
+        this.useFastRewriting = !this.kompileOptions.experimental.koreProve;
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -136,14 +135,14 @@ public class SymbolicRewriter {
                 } else {
                     rule2Results = rules.stream().collect(
                             Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
-                                    (u, v) -> u, LinkedHashMap::new));
-                    rule2Results.forEach((rule, terms) -> {
-                        if (terms.isEmpty()) {
+                                    (u, v) -> u, IdentityHashMap::new));
+                    for (Rule rule : rules) {
+                        if (rule2Results.get(rule).isEmpty()) {
                             failedRules.add(rule);
                         } else {
-                            results.addAll(terms);
+                            results.addAll(rule2Results.get(rule));
                         }
-                    });
+                    }
                 }
 
                 // If we've found matching results from one equivalence class then
@@ -184,7 +183,7 @@ public class SymbolicRewriter {
                 // get a map from AST paths to (fine-grained, inner) rewrite RHSs
                 Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrites()[pair.getRight()];
 
-                assert(rewrites.size() > 0);
+                assert (rewrites.size() > 0);
 
                 Term theNew;
                 if (rewrites.size() == 1)
@@ -377,14 +376,13 @@ public class SymbolicRewriter {
 
     /**
      * @param initialTerm
-     * @param pattern the pattern we are searching for
-     * @param bound a negative value specifies no bound
-     * @param depth a negative value specifies no bound
-     * @param searchType defines when we will attempt to match the pattern
-
+     * @param pattern     the pattern we are searching for
+     * @param bound       a negative value specifies no bound
+     * @param depth       a negative value specifies no bound
+     * @param searchType  defines when we will attempt to match the pattern
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable,Term>> search(
+    public List<Substitution<Variable, Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -396,7 +394,7 @@ public class SymbolicRewriter {
             this.theFastMatcher = new FastRuleMatcher(context, allRuleBits.length(), 90);
         }
 
-        List<Substitution<Variable,Term>> searchResults = Lists.newArrayList();
+        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -407,7 +405,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound);
             stopwatch.stop();
-            if(context.global().krunOptions.experimental.statistics)
+            if (context.global().krunOptions.experimental.statistics)
                 System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             return searchResults;
         }
@@ -425,7 +423,7 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound)) {
                 stopwatch.stop();
-                if(context.global().krunOptions.experimental.statistics)
+                if (context.global().krunOptions.experimental.statistics)
                     System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return searchResults;
             }

@@ -1,11 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Visitor;
-import org.w3c.dom.Element;
-
 import com.google.common.collect.Sets;
+import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
 
@@ -13,10 +10,6 @@ import java.util.ArrayList;
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
  */
 public class Ambiguity extends Collection {
-
-    public Ambiguity(Element element, JavaClassesFactory factory) {
-        super(element, factory);
-    }
 
     public Ambiguity(Ambiguity node) {
         super(node);

@@ -6,11 +6,9 @@
              skip="pdf"
              exclude="spawn"
              more-results=".">
-        <kompile-option name="--kore"/>
         <kompile-option name="--transition"
                         value="lookup increment assignment read print"/>
         <all-programs>
-            <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
         </all-programs>
         <!--<program name="spawn.imp" >-->
@@ -19,35 +17,16 @@
         <!--<krun-option name="&#45;&#45;search" />-->
         <!--</program>-->
         <program name="io.imp">
-            <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
             <krun-option name="--output" value="none"/>
         </program>
         <program name="locals.imp">
-            <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
             <krun-option name="--output" value="none"/>
         </program>
         <program name="sum-io.imp">
-            <krun-option name="--kore"/>
             <krun-option name="--parser" value="kast --kore --sort Stmts"/>
             <krun-option name="--output" value="none"/>
-        </program>
-        <program name="primes.imp">
-            <krun-option name="--kore"/>
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-        </program>
-        <program name="sum.imp">
-            <krun-option name="--kore"/>
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-        </program>
-        <program name="collatz.imp">
-            <krun-option name="--kore"/>
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
-        </program>
-        <program name="div.imp">
-            <krun-option name="--kore"/>
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
         </program>
     </include>
 

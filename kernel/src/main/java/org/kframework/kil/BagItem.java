@@ -3,19 +3,11 @@ package org.kframework.kil;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 public class BagItem extends CollectionItem {
     public BagItem(Location location, Source source) {
         super(location, source, Sort.BAG_ITEM);
-    }
-
-    public BagItem(Element element, JavaClassesFactory factory) {
-        super(element);
-        this.value = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
     public BagItem(BagItem node) {

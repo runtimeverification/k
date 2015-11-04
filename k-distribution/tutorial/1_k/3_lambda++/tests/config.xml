@@ -8,8 +8,8 @@
 
 <tests>
 
-  <include file="../lesson_1/tests/config.xml" directory="lesson_1" />
 <!-- NOTE: use temporary config.xml during KORE translation
+  <include file="../lesson_1/tests/config.xml" directory="lesson_1" />
   <include file="../lesson_2/tests/config.xml" directory="lesson_2" />
   <include file="../lesson_3/tests/config.xml" directory="lesson_3" />
   <include file="../lesson_4/tests/config.xml" directory="lesson_4" />

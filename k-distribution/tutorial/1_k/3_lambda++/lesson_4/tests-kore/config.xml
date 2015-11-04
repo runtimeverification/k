@@ -6,12 +6,10 @@
            skip="pdf"
            more-results="../../lesson_2/tests ../../lesson_3/tests-kore ."
            exclude="omega fibbo closed-variable-capture free-variable-capture callcc-with-let" >
-    <kompile-option name="--kore" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      <krun-option name="--kore" />
-      <krun-option name="--parser" value="kast --kore --sort Exp" />
+      <krun-option name="--parser" value="kast --sort Exp" />
     </all-programs>
   </include>
 
@@ -20,13 +18,11 @@
            exclude="omega free-variable-capture callcc-env1 callcc-env2 callcc-with-let"
            more-programs="../../lesson_1/tests ../tests"
            more-results="../../lesson_1/tests ../tests .">
-    <kompile-option name="--kore" />
     <kompile-option name="--superheat"
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />
     <all-programs>
-      <krun-option name="--kore" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
       <krun-option name="--directory"

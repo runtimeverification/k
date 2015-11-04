@@ -3,13 +3,9 @@ package org.kframework.kil;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -89,22 +85,6 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         super(label.getLocation(), label.getSource(), Sort.KITEM);
         setLabel(label);
         setChild(child);
-    }
-
-    /**
-     * Constructs a {@link KApp} object from an XML {@link Element}.
-     */
-    public KApp(Element element, JavaClassesFactory factory) {
-        super(element);
-        List<Element> childrenElements = XML.getChildrenElements(element);
-        Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
-        setLabel((Term) factory.getTerm(body));
-        Term term = (Term) factory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals(Sort.KLIST) || term instanceof Ambiguity)) {
-            setChild(new KList(Collections.<Term> singletonList(term)));
-        } else {
-            setChild(term);
-        }
     }
 
     private KApp(KApp node) {
