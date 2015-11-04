@@ -51,6 +51,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.Sort;
+import static org.kframework.Collections.*;
 
 
 /**
