@@ -2,13 +2,12 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
-import org.kframework.backend.java.kore.compile.ExpandMacros;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
+import org.kframework.builtin.KLabels;
 import org.kframework.compile.CleanKSeq;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
@@ -102,7 +101,7 @@ public class JavaBackend implements Backend {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
 
-            if (!(r.body() instanceof KApply) || !((KApply) r.body()).klabel().name().equals("<T>"))
+            if (!(r.body() instanceof KApply) || !((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL))
                 return r;
 
             Map<KVariable, Integer> varCount = new HashMap<>();

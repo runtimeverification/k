@@ -19,6 +19,7 @@ import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -48,9 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.Sort;
 
 
@@ -308,7 +307,7 @@ public class Definition extends JavaSymbolicObject {
                 .map(org.kframework.definition.Rule.class::cast)
                 .collect(Collectors.toList());
         koreRules.forEach(r -> {
-            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL)) {
                 if (!r.att().contains(AUTOMATON)) {
                     reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
                 }
@@ -317,7 +316,7 @@ public class Definition extends JavaSymbolicObject {
         koreRules.forEach(r -> {
             Rule convertedRule = transformer.convert(Optional.of(module), r);
             addRule(convertedRule);
-            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals("<T>")) {
+            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL)) {
                 if (!r.att().contains(AUTOMATON)) {
                     ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
                 } else {
