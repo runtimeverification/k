@@ -9,7 +9,7 @@
         <kompile-option name="--transition"
                         value="lookup increment assignment read print"/>
         <all-programs>
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
+            <krun-option name="--parser" value="kast --sort Stmts"/>
         </all-programs>
         <!--<program name="spawn.imp" >-->
         <!--<krun-option name="&#45;&#45;kore" />-->
@@ -17,15 +17,15 @@
         <!--<krun-option name="&#45;&#45;search" />-->
         <!--</program>-->
         <program name="io.imp">
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
+            <krun-option name="--parser" value="kast --sort Stmts"/>
             <krun-option name="--output" value="none"/>
         </program>
         <program name="locals.imp">
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
+            <krun-option name="--parser" value="kast --sort Stmts"/>
             <krun-option name="--output" value="none"/>
         </program>
         <program name="sum-io.imp">
-            <krun-option name="--parser" value="kast --kore --sort Stmts"/>
+            <krun-option name="--parser" value="kast --sort Stmts"/>
             <krun-option name="--output" value="none"/>
         </program>
     </include>
