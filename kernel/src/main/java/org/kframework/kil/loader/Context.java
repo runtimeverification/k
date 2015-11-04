@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
+import org.kframework.builtin.KLabels;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attribute.Key;
@@ -192,9 +193,7 @@ public class Context implements Serializable {
         if (sort == null) {
             if (cell.getLabel().equals("k"))
                 sort = Sort.K;
-            else if (cell.getLabel().equals("T"))
-                sort = Sort.BAG;
-            else if (cell.getLabel().equals("generatedTop"))
+            else if (cell.getLabel().equals(KLabels.GENERATED_TOP_LABEL))
                 sort = Sort.BAG;
             else if (cell.getLabel().equals("freshCounter"))
                 sort = Sort.K;
