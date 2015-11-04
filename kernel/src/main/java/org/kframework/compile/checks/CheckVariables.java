@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public class CheckVariables extends BasicVisitor {
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
-            if (v.getName().startsWith("_") && !(v.isFreshVariable() || v.isFreshConstant())) {
+            if (v.getName().startsWith(ResolveAnonVar.ANON_VAR.name()) && !(v.isFreshVariable() || v.isFreshConstant())) {
                 throw KExceptionManager.compilerError(
                         "Anonymous variable found in the right hand side of a rewrite.",
                         this, v);
@@ -132,7 +133,7 @@ public class CheckVariables extends BasicVisitor {
                         "Variable " + key + " has the same name as a fresh variable.",
                         this, key);
             }
-            if (key.getName().startsWith("_")) continue;
+            if (key.getName().startsWith(ResolveAnonVar.ANON_VAR.name())) continue;
             if (e.getValue().intValue() > 1) continue;
             if (!right.containsKey(key)) {
                 kem.register(new KException(KException.ExceptionType.HIDDENWARNING,

@@ -11,6 +11,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.SafeTransformer;
@@ -139,12 +140,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public boolean isAnyVar() {
-            return var.value().equals("_");
+            return var.value().equals(ResolveAnonVar.ANON_VAR.name());
         }
     }
 
     private static VarKey getVarKey(Constant c) {
-        if (c.value().equals("_")) {
+        if (c.value().equals(ResolveAnonVar.ANON_VAR.name())) {
             return new VarKey(c); // wildcard values are compared including location
         } else {
             return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));
