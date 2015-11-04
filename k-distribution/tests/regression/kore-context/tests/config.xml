@@ -7,9 +7,5 @@
         programs="."
         extension="i"
         results="." >
-      <kompile-option name="--kore" />
-      <all-programs>
-        <krun-option name="--kore" />
-      </all-programs>
     </test>
   </tests>

@@ -6,9 +6,7 @@
            skip="pdf"
            more-results="." >
     
-    <kompile-option name="--kore" />
     <all-programs>
-        <krun-option name="--kore" />
         <krun-option name="--search" />
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
