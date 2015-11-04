@@ -5,9 +5,6 @@
       <value>
         <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="100" />
         <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
-        <ScalaCodeStyleSettings>
-          <option name="SPACES_IN_ONE_LINE_BLOCKS" value="true" />
-        </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
@@ -25,4 +22,3 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
 </project>
-
