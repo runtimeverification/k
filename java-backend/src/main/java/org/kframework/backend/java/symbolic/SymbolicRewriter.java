@@ -37,7 +37,7 @@ public class SymbolicRewriter {
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
-    private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
+    private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new IdentityHashMap<>();
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -108,14 +108,14 @@ public class SymbolicRewriter {
                 } else {
                     rule2Results = rules.stream().collect(
                             Collectors.toMap(r -> r, r -> computeRewriteStepByRule(subject, r),
-                                    (u, v) -> u, LinkedHashMap::new));
-                    rule2Results.forEach((rule, terms) -> {
-                        if (terms.isEmpty()) {
+                                    (u, v) -> u, IdentityHashMap::new));
+                    for (Rule rule : rules) {
+                        if (rule2Results.get(rule).isEmpty()) {
                             failedRules.add(rule);
                         } else {
-                            results.addAll(terms);
+                            results.addAll(rule2Results.get(rule));
                         }
-                    });
+                    }
                 }
 
                 // If we've found matching results from one equivalence class then
