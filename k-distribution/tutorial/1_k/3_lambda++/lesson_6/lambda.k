@@ -150,12 +150,12 @@ division rule. */
 
 //@ \subsection{Let Binder}
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [anywhere]
+  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
 /*@ \subsection{Letrec Binder}
 We define \texttt{letrec} in term of \texttt{mu}, whose semantics is below. */
 
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [anywhere]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
 
 /*@ \subsection{Mu}
 To save the number of locations needed to evaluate $\mu X . E$, we replace it

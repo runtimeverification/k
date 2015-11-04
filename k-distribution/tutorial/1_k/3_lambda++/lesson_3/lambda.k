@@ -62,12 +62,12 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [anywhere]
+  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
   syntax Id ::= "$x" | "$y"
   rule letrec F:Id X:Id = E in E'
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'                                                            [anywhere]
+       in E'                                                            [macro]
 endmodule

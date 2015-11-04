@@ -65,9 +65,9 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [anywhere]
+  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [anywhere]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
 
   syntax Exp ::= muclosure(Map,Exp)
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
