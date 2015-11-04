@@ -64,14 +64,16 @@ public class JavaBackend implements Backend {
         ExpandMacrosDefinitionTransformer expandMacrosDefinitionTransformer = new ExpandMacrosDefinitionTransformer(kem, files, globalOptions, kompileOptions);
 
         if (kompile.kompileOptions.experimental.koreProve) {
-            return d -> convertDataStructureToLookup.apply(kompile.defaultSteps().apply(d));
+            return kompile.defaultSteps()
+                    .andThen(expandMacrosDefinitionTransformer::apply)
+                    .andThen(convertDataStructureToLookup::apply);
         }
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
-                .andThen(convertDataStructureToLookup)
                         //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
+                .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
