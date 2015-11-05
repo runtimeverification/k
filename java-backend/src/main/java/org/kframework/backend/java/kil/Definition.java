@@ -16,6 +16,7 @@ import com.google.inject.name.Names;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
@@ -24,7 +25,10 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.Sentence;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
@@ -52,7 +56,7 @@ import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.Sort;
 import static org.kframework.Collections.*;
-
+import static scala.compat.java8.JFunction.*;
 
 /**
  * A K definition in the format of the Java Rewrite Engine.
@@ -175,7 +179,8 @@ public class Definition extends JavaSymbolicObject {
                 if (p.containsAttribute("binder")) {
                     attributes.add(new Attribute<>(
                             Attribute.Key.get(
-                                    new TypeToken<Multimap<Integer, Integer>>() {},
+                                    new TypeToken<Multimap<Integer, Integer>>() {
+                                    },
                                     Names.named("binder")),
                             p.getBinderMap()));
                 }
@@ -299,6 +304,11 @@ public class Definition extends JavaSymbolicObject {
     }
 
     /**
+     * attribute marking the top rule label
+     */
+    public static final String TOP_RULE = "topRule";
+
+    /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, TermContext termContext) {
@@ -308,7 +318,8 @@ public class Definition extends JavaSymbolicObject {
                 .map(org.kframework.definition.Rule.class::cast)
                 .collect(Collectors.toList());
         koreRules.forEach(r -> {
-            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL)) {
+            if (r.att().contains(TOP_RULE)) {
+//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
                 if (!r.att().contains(AUTOMATON)) {
                     reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
                 }
@@ -317,12 +328,14 @@ public class Definition extends JavaSymbolicObject {
         koreRules.forEach(r -> {
             Rule convertedRule = transformer.convert(Optional.of(module), r);
             addRule(convertedRule);
-            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL)) {
+//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
+            if (r.att().contains(TOP_RULE)) {
                 if (!r.att().contains(AUTOMATON)) {
                     ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
-                } else {
-                    automaton = convertedRule;
                 }
+            }
+            if (r.att().contains(AUTOMATON)) {
+                automaton = convertedRule;
             }
         });
     }

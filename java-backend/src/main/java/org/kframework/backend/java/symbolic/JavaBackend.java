@@ -5,9 +5,13 @@ import com.google.inject.Inject;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.CleanKSeq;
+import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
+import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
@@ -76,9 +80,24 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
+                .andThen(func(dd -> markRegularRules(dd)))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(d);
+    }
+
+    private static Definition markRegularRules(Definition d) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
+        return DefinitionTransformer.fromSentenceTransformer((Sentence s) -> {
+            if (s instanceof org.kframework.definition.Rule) {
+                org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
+                if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
+                    return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(org.kframework.backend.java.kil.Definition.TOP_RULE));
+                } else
+                    return r;
+            } else
+                return s;
+        }, "mark regular rules").apply(d);
     }
 
     private static K ADTKVariableToSortedVariable(K ruleBody) {
@@ -101,7 +120,7 @@ public class JavaBackend implements Backend {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
 
-            if (!(r.body() instanceof KApply) || !((KApply) r.body()).klabel().name().equals(KLabels.TOP_CELL))
+            if (!r.att().contains(org.kframework.backend.java.kil.Definition.TOP_RULE))
                 return r;
 
             Map<KVariable, Integer> varCount = new HashMap<>();
