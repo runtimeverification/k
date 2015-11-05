@@ -1,17 +1,17 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.backend.latex;
 
+import org.kframework.backend.BackendFilter;
+import org.kframework.kil.*;
+import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.LiterateComment.LiterateCommentType;
+import org.kframework.kore.compile.ResolveAnonVar;
+import org.kframework.utils.StringUtil;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.kframework.backend.BackendFilter;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
-import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
     public LatexFilter(org.kframework.kil.loader.Context context) {
@@ -305,7 +305,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Variable var, Void _void) {
-        if (var.getName().equals(MetaK.Constants.anyVarSymbol)) {
+        if (var.getName().equals(ResolveAnonVar.ANON_VAR.name())) {
             result.append("\\AnyVar");
         } else {
             result.append("\\variable");
@@ -313,7 +313,7 @@ public class LatexFilter extends BackendFilter {
         if (var.getSort() != null) {
             result.append("[" + StringUtil.latexify(var.getSort().getName()) + "]");
         }
-        if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
+        if (!var.getName().equals(ResolveAnonVar.ANON_VAR.name())) {
             result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
         }
         result.append("{");

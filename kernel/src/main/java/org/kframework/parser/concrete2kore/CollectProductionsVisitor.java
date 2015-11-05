@@ -1,7 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
-package org.kframework.kil.loader;
+package org.kframework.parser.concrete2kore;
 
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectProductionsVisitor extends BasicVisitor {

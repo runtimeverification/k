@@ -1,21 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.main;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.Backend;
-import org.kframework.backend.PosterBackend;
-import org.kframework.krun.tools.Executor;
-import org.kframework.krun.tools.LtlModelChecker;
-import org.kframework.krun.tools.Prover;
-import org.kframework.main.KModule;
-import org.kframework.utils.inject.Builtins;
-import org.kframework.utils.inject.Options;
-
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -23,12 +8,17 @@ import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.PosterBackend;
+import org.kframework.utils.inject.Builtins;
+import org.kframework.utils.inject.Options;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public abstract class AbstractKModule implements KModule {
-
-    public List<Pair<String, Class<? extends Backend>>> backends() {
-        return Collections.emptyList();
-    }
 
     public List<Pair<String, Class<? extends PosterBackend>>> posterTypes() {
         return Collections.emptyList();
@@ -39,18 +29,6 @@ public abstract class AbstractKModule implements KModule {
     }
 
     public List<Pair<Class<?>, Boolean>> krunOptions() {
-        return Collections.emptyList();
-    }
-
-    public List<Pair<String, Class<? extends Executor>>> executors() {
-        return Collections.emptyList();
-    }
-
-    public List<Pair<String, Class<? extends LtlModelChecker>>> ltlModelCheckers() {
-        return Collections.emptyList();
-    }
-
-    public List<Pair<String, Class<? extends Prover>>> provers() {
         return Collections.emptyList();
     }
 
@@ -100,12 +78,6 @@ public abstract class AbstractKModule implements KModule {
             protected void configure() {
                 bindOptions(AbstractKModule.this::kompileOptions, binder());
 
-                MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
-                        binder(), String.class, Backend.class);
-                for (Pair<String, Class<? extends Backend>> backend : backends()) {
-                    mapBinder.addBinding(backend.getKey()).to(backend.getValue());
-                }
-
                 bindJavaBackendHooks(binder());
             }
         });
@@ -134,23 +106,6 @@ public abstract class AbstractKModule implements KModule {
             @Override
             protected void configure() {
                 //bind backend implementations of tools to their interfaces
-                MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
-                        binder(), String.class, Executor.class);
-                for (Pair<String, Class<? extends Executor>> executor : executors()) {
-                    executorBinder.addBinding(executor.getKey()).to(executor.getValue());
-                }
-
-                MapBinder<String, LtlModelChecker> ltlBinder = MapBinder.newMapBinder(
-                        binder(), String.class, LtlModelChecker.class);
-                for (Pair<String, Class<? extends LtlModelChecker>> modelChecker : ltlModelCheckers()) {
-                    ltlBinder.addBinding(modelChecker.getKey()).to(modelChecker.getValue());
-                }
-
-                MapBinder<String, Prover> proverBinder = MapBinder.newMapBinder(
-                        binder(), String.class, Prover.class);
-                for (Pair<String, Class<? extends Prover>> prover : provers()) {
-                    proverBinder.addBinding(prover.getKey()).to(prover.getValue());
-                }
                 bindJavaBackendHooks(binder());
             }
         });

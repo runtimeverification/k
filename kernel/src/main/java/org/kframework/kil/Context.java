@@ -1,9 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.w3c.dom.Element;
 
 /**
  * A context declaration.
@@ -12,10 +10,6 @@ import org.w3c.dom.Element;
  * left hand side is {@link Hole}.
  */
 public class Context extends Sentence {
-
-    public Context(Element element, JavaClassesFactory factory) {
-        super(element, factory);
-    }
 
     public Context(Context node) {
         super(node);

@@ -7,7 +7,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.CollectProductionsVisitor;
+import org.kframework.parser.concrete2kore.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.outer.Outer;
 
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
-public abstract class BaseTest extends SDFCompilerTest {
+public abstract class BaseTest {
 
     private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
 
@@ -31,10 +31,6 @@ public abstract class BaseTest extends SDFCompilerTest {
 
     protected void outerOnlyTest() throws IOException {
         testConversion(this::parseUsingOuter);
-    }
-
-    protected void sdfTest() throws IOException {
-        testConversion(this::parseUsingSDF);
     }
 
     public static class DefinitionWithContext {
@@ -86,14 +82,6 @@ public abstract class BaseTest extends SDFCompilerTest {
     protected abstract String convert(DefinitionWithContext defWithContext);
 
     protected abstract String expectedFilePostfix();
-
-    private DefinitionWithContext parseUsingSDF(File definitionFile) {
-        try {
-            return parse(definitionFile, "TEST", false);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     protected DefinitionWithContext parseUsingOuter(File definitionFile) {
         Definition def = new Definition();

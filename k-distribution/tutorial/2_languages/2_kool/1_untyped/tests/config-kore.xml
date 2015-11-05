@@ -8,10 +8,8 @@
         exclude="cycle"
         skip="pdf"
         results="." >
-    <kompile-option name="--kore" />
     <all-programs>
-      <krun-option name="--kore" />
-      <krun-option name="--parser" value="kast --kore --sort Stmts" />
+      <krun-option name="--parser" value="kast --sort Stmts" />
       <krun-option name="--output" value="none" />
     </all-programs>
   </test>

@@ -3,12 +3,12 @@
 
 <tests>
 
-  <include file="tests/config.xml" />
+<!--  <include file="tests/config.xml" />-->
 <!-- TODO(dwightguth): add back in when we have assoc matching and BagItem -->
 <!--  <include file="regression-maude/tests/config.xml" directory="regression-maude" /> -->
 
+<!--
   <include file="java-rewrite-engine/config.xml" directory="java-rewrite-engine" />
-
   <test
       definition="addbrackets/issue.k"
       programs="addbrackets/programs"
@@ -16,8 +16,8 @@
       extension="issue"
       >
     <all-programs>
-      <krun-option name="--output" value="sound" />
-	    <krun-option name="--parser" value="kast --parser ground" />
+      <krun-option name="-output" value="sound" />
+	    <krun-option name="-parser" value="kast -parser ground" />
     </all-programs>
   </test>
 
@@ -30,8 +30,8 @@
       >
     <kompile-option name="-w" value="all" />
       <all-programs>
-        <krun-option name="--output" value="none" />
-        <krun-option name="--color" value="off" />
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
       </all-programs>
   </test>
 
@@ -61,7 +61,7 @@
   <include file="external/tests/config.xml"
            directory="external"
            programs="external/tests"
-           results="external/tests" />
+           results="external/tests" />-->
 
   <include file="kore-io/tests/config.xml"
            directory="kore-io"

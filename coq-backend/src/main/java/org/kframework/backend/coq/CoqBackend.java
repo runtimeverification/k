@@ -1,18 +1,10 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.coq;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
-import org.kframework.backend.BasicBackend;
-import org.kframework.backend.FirstStep;
-import org.kframework.backend.LastStep;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.StrictnessToContexts;
-import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -21,22 +13,24 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.File;
+import java.io.IOException;
 
-public class CoqBackend extends BasicBackend {
+public class CoqBackend {
 
     private final FileUtil files;
     private final Provider<ProcessBuilder> pb;
+    private final Context context;
+    private final KompileOptions options;
 
     @Inject
     public CoqBackend(Stopwatch sw, Context context, KompileOptions options, Provider<ProcessBuilder> pb, FileUtil files) {
-        super(sw, context, options);
+        this.context = context;
+        this.options = options;
         this.pb = pb;
         this.files = files;
     }
 
-    @Override
     public void run(Definition definition) {
         final String labelFile = FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".labeled_rules";
         final String langName = definition.getMainModule().toLowerCase();
@@ -90,28 +84,13 @@ public class CoqBackend extends BasicBackend {
         }
     }
 
-
-    @Override
     public String getDefaultStep() {
         return "LastStep";
     }
 
-    @Override
-    public CompilerSteps<Definition> getCompilationSteps() {
-        CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
-        steps.add(new FirstStep(this, context));
-        steps.add(new StrictnessToContexts(context));
-        steps.add(new ContextsToHeating(context));
-        steps.add(new AddHeatingConditions(context));
-        steps.add(new LastStep(this, context));
-        return steps;
-    }
-
-    @Override
     public String autoincludedFile() {
         return Backends.AUTOINCLUDE_JAVA;
     }
-    @Override
     public boolean generatesDefinition() {
         return false;
     }

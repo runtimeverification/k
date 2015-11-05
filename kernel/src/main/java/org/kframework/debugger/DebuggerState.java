@@ -3,7 +3,6 @@ package org.kframework.debugger;
 
 import com.google.common.collect.Maps;
 import org.kframework.kore.K;
-import org.kframework.krun.tools.Debugger;
 
 import java.util.ArrayList;
 import java.util.Collections;

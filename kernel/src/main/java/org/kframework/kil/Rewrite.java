@@ -1,12 +1,8 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 /**
  * Represents {@code =>} in the syntax of rules. May occur in multiple places in the body of a {@link Rule}, but may not be nested.
@@ -14,18 +10,6 @@ import org.w3c.dom.Element;
 public class Rewrite extends Term {
     private Term left;
     private Term right;
-
-    public Rewrite(Element element, JavaClassesFactory factory, Context context) {
-        super(element);
-
-        Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
-        temp = XML.getChildrenElements(temp).get(0);
-        left = (Term) factory.getTerm(temp);
-        temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
-        temp = XML.getChildrenElements(temp).get(0);
-        right = (Term) factory.getTerm(temp);
-        recomputeSort(context);
-    }
 
     public Rewrite(Rewrite node) {
         super(node);

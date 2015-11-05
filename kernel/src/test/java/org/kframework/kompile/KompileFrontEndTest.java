@@ -3,8 +3,6 @@ package org.kframework.kompile;
 
 import com.google.inject.util.Providers;
 import org.junit.Test;
-import org.kframework.backend.Backend;
-import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.IOTestCase;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -18,13 +16,7 @@ import static org.mockito.Mockito.*;
 public class KompileFrontEndTest extends IOTestCase {
 
     @Mock
-    Backend backend;
-
-    @Mock
     org.kframework.kore.compile.Backend koreBackend;
-
-    @Mock
-    DefinitionLoader defLoader;
 
     @Mock
     JarInfo jarInfo;
@@ -36,25 +28,23 @@ public class KompileFrontEndTest extends IOTestCase {
 
     @Test
     public void testHelp() throws IOException {
-        when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.help = true;
-        new KompileFrontEnd(context, options, "foo", "", Providers.of(backend), Providers.of(koreBackend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
         assertEquals("foo", stdout.toString());
     }
 
 
     @Test
     public void testExperimentalHelp() throws IOException {
-        when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.helpExperimental = true;
-        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), Providers.of(koreBackend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         options.global.version = true;
-        new KompileFrontEnd(context, options, "", "foo", Providers.of(backend), Providers.of(koreBackend), sw, kem, loader, Providers.of(defLoader), jarInfo, files).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
         verify(jarInfo).printVersionMessage();
     }
 }

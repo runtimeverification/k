@@ -4,14 +4,11 @@ package org.kframework.kil;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Scanner;
-import java.util.Set;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -266,7 +263,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Updates the value of an attribute in the list of attributes.
-     *
+     *get
      * @param key
      * @param val
      */
@@ -308,16 +305,6 @@ public abstract class ASTNode implements Serializable {
         if (node.attributes == null)
             return;
         this.getAttributes().putAll(node.attributes);
-    }
-
-    /**
-     * Retrieves the syntax production descendants of this ASTNode by attribute key.
-     *
-     * @param key
-     * @return Set<Production> object containing the production descendants
-     */
-    public Set<Production> getSyntaxByTag(String key, Context context) {
-        return SyntaxByTag.get(this, key, context);
     }
 
     /**
