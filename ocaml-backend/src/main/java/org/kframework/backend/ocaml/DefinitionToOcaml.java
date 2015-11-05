@@ -878,12 +878,11 @@ public class DefinitionToOcaml implements Serializable {
                             sb.append(",");
                         }
                     }
-                    sb.append(" -> [KApply").append(arity).append("(lbl, ");
+                    if (arity == 0)
+                        sb.append("()");
+                    sb.append(" -> [KApply").append(arity).append("(lbl");
                     for (int i = 0; i < arity; i++) {
-                        sb.append("k").append(i);
-                        if (i != arity - 1) {
-                            sb.append(",");
-                        }
+                        sb.append(", k").append(i);
                     }
                     sb.append(")]\n");
                     conn = "and ";
