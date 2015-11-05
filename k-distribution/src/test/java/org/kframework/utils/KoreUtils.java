@@ -60,11 +60,6 @@ public class KoreUtils {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
-        try {
-            KompileOptions.Experimental.class.getField("kore").set(kompileOptions.experimental, true);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
         GlobalOptions globalOptions = new GlobalOptions();
 
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);

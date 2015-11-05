@@ -20,5 +20,5 @@ public class KLabels {
 
     public static final String KREWRITE = "#KRewrite";
 
-    public static final String TOP_CELL = "<T>";
+    public static final String GENERATED_TOP_CELL = "<T>";
 }

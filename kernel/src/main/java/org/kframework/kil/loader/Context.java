@@ -193,7 +193,7 @@ public class Context implements Serializable {
         if (sort == null) {
             if (cell.getLabel().equals("k"))
                 sort = Sort.K;
-            else if (cell.getLabel().equals(KLabels.TOP_CELL))
+            else if (cell.getLabel().equals(KLabels.GENERATED_TOP_CELL))
                 sort = Sort.BAG;
             else if (cell.getLabel().equals("freshCounter"))
                 sort = Sort.K;
