@@ -64,12 +64,12 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public JavaSymbolicObject substituteWithBinders(
             Map<Variable, ? extends Term> substitution,
-            TermContext context) {
+            GlobalContext global) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution, context));
+        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution, global));
     }
 
     /**
@@ -78,12 +78,12 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public JavaSymbolicObject substitute(
             Map<Variable, ? extends Term> substitution,
-            TermContext context) {
+            GlobalContext global) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
+        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, global));
     }
 
     /**
@@ -97,16 +97,16 @@ public abstract class JavaSymbolicObject extends ASTNode
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
      * substituting variable (in a binder sensitive way) with term.
      */
-    public JavaSymbolicObject substituteWithBinders(Variable variable, Term term, TermContext context) {
-        return substituteWithBinders(Collections.singletonMap(variable, term), context);
+    public JavaSymbolicObject substituteWithBinders(Variable variable, Term term, GlobalContext global) {
+        return substituteWithBinders(Collections.singletonMap(variable, term), global);
     }
 
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
      * substituting variable (in a binder insensitive way) with term.
      */
-    public JavaSymbolicObject substitute(Variable variable, Term term, TermContext context) {
-        return substitute(Collections.singletonMap(variable, term), context);
+    public JavaSymbolicObject substitute(Variable variable, Term term, GlobalContext global) {
+        return substitute(Collections.singletonMap(variable, term), global);
     }
 
     /**

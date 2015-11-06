@@ -108,14 +108,15 @@ public class MetaK {
             variables.add(new Variable((MetaVariable) element));
         }
 
-        term = (Term) term.accept(new CopyOnWriteTransformer(context) {
+        GlobalContext global = context.global();
+        term = (Term) term.accept(new CopyOnWriteTransformer(global) {
             @Override
             public ASTNode transform(MetaVariable metaVariable) {
                 return new Variable(metaVariable);
             }
         });
 
-        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables), context), context.global());
+        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables), global), global);
     }
 
     /**
@@ -129,7 +130,7 @@ public class MetaK {
      */
     public static Term renameVariables(Term term, TermContext context) {
         Set<Variable> variables = term.variableSet();
-        return term.substitute(Variable.rename(variables), context);
+        return term.substitute(Variable.rename(variables), context.global());
     }
 
     public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {

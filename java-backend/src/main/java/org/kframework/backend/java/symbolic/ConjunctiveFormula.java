@@ -537,7 +537,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
 
         TermContext context = TermContext.builder(global).build();
-        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, context)).simplify(context);
+        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, global)).simplify(context);
     }
 
     public ConjunctiveFormula expandPatterns(boolean narrowing, TermContext context) {

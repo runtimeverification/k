@@ -228,8 +228,8 @@ public class SymbolicRewriter {
         Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
         /* rename rule variables in both the term and the constraint */
-        term = term.substituteWithBinders(renameSubst, context);
-        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, context)).simplify(context);
+        term = term.substituteWithBinders(renameSubst, context.global());
+        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, context.global())).simplify(context);
 
         ConstrainedTerm result = new ConstrainedTerm(term, constraint, context);
         if (expandPattern) {
