@@ -47,10 +47,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         super(context);
     }
 
-    public PrePostTransformer() {
-        super();
-    }
-
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         ASTNode astNode = cellCollection.accept(preTransformer);

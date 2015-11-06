@@ -219,7 +219,7 @@ public class PatternMatchRewriter {
                             if (ENABLE_DEBUG_MODE) {
                                 referenceResults = Lists.newArrayList();
                                 for (Map<Variable, Term> subst : getMatchingResults(subject, rule, termContext)) {
-                                    Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst, termContext), termContext);
+                                    Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst, termContext), termContext.global());
                                     referenceResults.add(ref);
                                 }
 
@@ -242,7 +242,7 @@ public class PatternMatchRewriter {
 
                                 /* the result of rewrite machine must be in the reference results */
                                 if (ENABLE_DEBUG_MODE) {
-                                    assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext));
+                                    assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext.global()));
                                 }
                             } else {
                                 if (ENABLE_DEBUG_MODE) {

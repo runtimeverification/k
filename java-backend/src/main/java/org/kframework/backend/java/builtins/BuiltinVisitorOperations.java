@@ -49,7 +49,7 @@ public class BuiltinVisitorOperations {
             this.visitLabel = visitLabel;
             this.visitParams = visitParams;
 
-            preTransformer.addTransformer(new LocalTransformer(context) {
+            preTransformer.addTransformer(new LocalTransformer() {
                 @Override
                 public ASTNode transform(Term term) {
                     if (term instanceof KLabel) {
@@ -82,7 +82,7 @@ public class BuiltinVisitorOperations {
             term = KItem.of(
                     visitLabel,
                     KList.concatenate(visitParams),
-                    context.global(),
+                    global,
                     term.getSource(), term.getLocation());
             return ((KItem) term).evaluateFunction(true/*to be safe*/, context);
         }
@@ -92,7 +92,7 @@ public class BuiltinVisitorOperations {
             KItem test = KItem.of(
                     ifLabel,
                     KList.concatenate(ifParams),
-                    context.global(),
+                    global,
                     term.getSource(), term.getLocation());
             // TODO: Think about what happens when test has symbolic values in it.
             return test.evaluate(context) == BoolToken.TRUE;

@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  *
  * @author AndreiS
  */
-public class CopyOnWriteTransformer implements Transformer {
+public abstract class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
     protected final Definition definition;
@@ -38,19 +38,11 @@ public class CopyOnWriteTransformer implements Transformer {
     public CopyOnWriteTransformer(TermContext context) {
         this.context = context;
         this.global = context.global();
-        this.definition = context.definition();
-    }
-
-    public CopyOnWriteTransformer(GlobalContext global) {
-        this.context = TermContext.builder(global).build();
-        this.global = global;
         this.definition = global.getDefinition();
     }
 
-    public CopyOnWriteTransformer() {
-        this.context = null;
-        this.global = null;
-        this.definition = null;
+    public CopyOnWriteTransformer(GlobalContext global) {
+        this(TermContext.builder(global).build());
     }
 
     @Override
@@ -85,7 +77,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term term = (Term) constrainedTerm.term().accept(this);
         ConjunctiveFormula constraint = (ConjunctiveFormula) constrainedTerm.constraint().accept(this);
         if (term != constrainedTerm.term() || constraint != constrainedTerm.constraint()) {
-            constrainedTerm = new ConstrainedTerm(term, constraint, context);
+            constrainedTerm = new ConstrainedTerm(term, constraint, constrainedTerm.termContext().fork());
         }
         return constrainedTerm;
     }
