@@ -9,6 +9,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
+import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
@@ -20,6 +21,9 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.Seq;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -60,9 +64,16 @@ import static org.kframework.kore.KORE.*;
 public class SortCells {
     private final ConcretizationInfo cfg;
     private final KExceptionManager kem;
+    private final Module module;
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, Module module, KExceptionManager kem) {
+        this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
+        this.kem = kem;
+        this.module = module;
+    }
     public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, KExceptionManager kem) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
         this.kem = kem;
+        this.module = null;
     }
 
     public synchronized K sortCells(K term) {
@@ -77,11 +88,17 @@ public class SortCells {
         analyzeVars(rule.body());
         analyzeVars(rule.requires());
         analyzeVars(rule.ensures());
-        return Rule(
+        rule = Rule(
                 processVars(rule.body()),
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
                 rule.att());
+        Rule r = Rule(
+                resolveIncompleteCellFragment(rule.body()),
+                resolveIncompleteCellFragment(rule.requires()),
+                resolveIncompleteCellFragment(rule.ensures()),
+                rule.att());
+        return r;
     }
 
     private Context sortCells(Context context) {
@@ -440,5 +457,259 @@ public class SortCells {
                 }
             }
         }.apply(term);
+    }
+
+
+    public synchronized Sentence preprocess(Sentence s) {
+        if (s instanceof Rule) {
+            return preprocess((Rule) s);
+        } else {
+            return s;
+        }
+    }
+
+    public synchronized Sentence postprocess(Sentence s) {
+        if (s instanceof Rule) {
+            return postprocess((Rule) s);
+        } else {
+            return s;
+        }
+    }
+
+    private Rule preprocess(Rule rule) {
+        return Rule(
+                preprocess(rule.body()),
+                preprocess(rule.requires()),
+                preprocess(rule.ensures()),
+                rule.att());
+    }
+
+    private Rule postprocess(Rule rule) {
+        return Rule(
+                postprocess(rule.body()),
+                postprocess(rule.requires()),
+                postprocess(rule.ensures()),
+                rule.att());
+    }
+
+    private K preprocess(K term) {
+
+        HashSet<KVariable> cellFragmentVars = new HashSet<>();
+        HashSet<K> cellFragmentVarsCell = new HashSet<>();
+        new VisitKORE() {
+            @Override
+            public Void apply(KApply k) {
+                if (k.klabel().name().equals("#cells")) {
+                    for (int i = 0; i < k.klist().size(); i++) {
+                        K item = k.klist().items().get(i);
+                        if (item instanceof KVariable) {
+                            KVariable var = (KVariable) item;
+                            if (var.att().contains(Attribute.SORT_KEY)) {
+                                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                if (!cfg.cfg.isCell(sort)) {
+                                    cellFragmentVars.add(var);
+                                    cellFragmentVarsCell.add(k);
+                                }
+                            } else {
+                                cellFragmentVars.add(var);
+                                cellFragmentVarsCell.add(k);
+                            }
+                        }
+                    }
+                    return null;
+                }
+                return super.apply(k);
+            }
+        }.apply(term);
+
+        if (cellFragmentVars.isEmpty()) {
+            return term;
+        }
+
+        boolean hasCellFragmentVarAssocWithCell = new VisitKORE() {
+            private boolean found = false;
+            private boolean inKCell = false;
+            @Override
+            public Void apply(KApply k) {
+                if (k.klabel().name().equals("<k>")) {
+                    assert !inKCell;
+                    inKCell = true;
+                    super.apply(k);
+                    inKCell = false;
+                    return null;
+                }
+                return super.apply(k);
+            }
+            @Override
+            public Void apply(KVariable var) {
+                if (!inKCell && cellFragmentVars.contains(var)) {
+                    found = true;
+                }
+                return null;
+            }
+            public boolean hasCellFragmentVarAssocWithCell(K k) {
+                found = false;
+                this.apply(k);
+                return found;
+            }
+        }.hasCellFragmentVarAssocWithCell(term);
+
+        if (!hasCellFragmentVarAssocWithCell) {
+            return new TransformKORE() {
+                @Override
+                public K apply(KApply k0) {
+                    if (hasCells(k0)) {
+                        ArrayList<K> klist0 = new ArrayList<K>(Collections.nCopies(k0.klist().size(), null));
+                        for (int idx = 0; idx < k0.klist().size(); idx++) {
+                            K item0 = k0.klist().items().get(idx);
+                            klist0.set(idx, item0);
+                            if (item0 instanceof KApply) {
+                                KApply k = (KApply) item0;
+                                if (k.klabel().name().equals("#cells")) {
+                                    if (cellFragmentVarsCell.contains(k)) {
+                                        Sort cellFragmentSort = nthArgSort(k0.klabel(), idx);
+                                        assert cellFragmentSort != null; // TODO: exception
+                                        if (cellFragmentSort.name().endsWith("Fragment")) {
+                                            Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
+                                            KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+                                            klist0.set(idx, KApply(cellLabel, KList(item0), Att(KApply(KLabel("dummy_cell")))));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return KApply(k0.klabel(), KList(klist0), k0.att());
+                    }
+                    return super.apply(k0);
+                }
+                @Override
+                public K apply(KRewrite k) {
+                    K left =  super.apply(k.left());
+                    return KRewrite(left, k.right(), k.att());
+                }
+            }.apply(term);
+        } else {
+            return term;
+        }
+    }
+
+    private K postprocess(K term) {
+        return new TransformKORE() {
+            @Override
+            public K apply(KApply k) {
+                if (k.att().contains("dummy_cell")) {
+                    KLabel klabel = KLabel(k.klabel().name() + "-fragment");
+                    return KApply(klabel, k.klist(), k.att());
+                }
+                return super.apply(k);
+            }
+        }.apply(term);
+    }
+
+    private K resolveIncompleteCellFragment(K term) {
+        return new TransformKORE() {
+            @Override
+            public K apply(KApply k0) {
+                if (hasCells(k0)) {
+                    ArrayList<K> klist0 = new ArrayList<K>(Collections.nCopies(k0.klist().size(), null));
+
+                    for (int idx = 0; idx < k0.klist().size(); idx++) {
+                        K item0 = k0.klist().items().get(idx);
+                        klist0.set(idx, item0);
+                        if (item0 instanceof KApply) {
+                            KApply k = (KApply) item0;
+
+                            if (k.klabel().name().equals("#cells")) {
+
+                                Sort cellFragmentSort = nthArgSort(k0.klabel(), idx);
+                                assert cellFragmentSort != null; // TODO: exception
+
+                                if (cellFragmentSort.name().endsWith("Fragment")) {
+
+                                    Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
+                                    KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+
+                                    List<Sort> subcellSorts = cfg.getChildren(cellLabel);
+
+                                    KApply cellFragment = null;
+                                    ArrayList<K> klist = new ArrayList<K>(Collections.nCopies(subcellSorts.size(), null));
+                                    for (int i = 0; i < k.klist().size(); i++) {
+                                        K item = k.klist().items().get(i);
+                                        if (item instanceof KApply) {
+                                            KApply kapp = (KApply) item;
+                                            if (cfg.cfg.isCellLabel(kapp.klabel())) {
+                                                Sort sort = cfg.getCellSort(kapp.klabel());
+                                                klist.set(subcellSorts.indexOf(sort), item); // TODO: exception: no such sort
+                                            } else if (kapp.klabel().name().endsWith("-fragment")) {
+                                                cellFragment = kapp;
+                                                assert cellFragment.klist().size() == subcellSorts.size();
+                                                assert cellFragment.klabel().name().equals(cellLabel.name() + "-fragment");
+                                            } else {
+                                                throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                            }
+                                        } else if (item instanceof KVariable) {
+                                            KVariable var = (KVariable) item;
+                                            if (!var.att().contains(Attribute.SORT_KEY) && variables.containsKey(var)) {
+                                                VarInfo varinfo = variables.get(var);
+                                                if (varinfo.var != null)
+                                                    var = varinfo.var;
+                                            }
+                                            if (var.att().contains(Attribute.SORT_KEY)) {
+                                                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                                if (cfg.cfg.isCell(sort)) {
+                                                    klist.set(subcellSorts.indexOf(sort), item); // TODO: exception: no such sort
+                                                } else {
+                                                    throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                                }
+                                            } else {
+                                                throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                            }
+                                        } else {
+                                            // TODO: support rewrite
+                                            throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                        }
+                                    }
+
+                                    for (int i = 0; i < subcellSorts.size(); i++) {
+                                        if (klist.get(i) == null) {
+                                            if (cellFragment != null) {
+                                                klist.set(i, cellFragment.klist().items().get(i));
+                                            } else {
+                                                klist.set(i, KApply(KLabel("no" + subcellSorts.get(i).name())));
+                                            }
+                                        }
+                                    }
+
+                                    klist0.set(idx, KApply(KLabel(cellLabel.name() + "-fragment"), KList(klist)));
+                                }
+                            }
+                        }
+                    }
+                    return KApply(k0.klabel(), KList(klist0), k0.att());
+                }
+                return super.apply(k0);
+            }
+
+        }.apply(term);
+    }
+
+    private boolean hasCells(KApply k) {
+        for (int i = 0; i < k.klist().size(); i++) {
+            K item = k.klist().items().get(i);
+            if (item instanceof KApply && ((KApply) item).klabel().name().equals("#cells")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Sort nthArgSort(KLabel klabel, int n) {
+        // TODO: error handling: no label, no n, multiple signatures
+        java.util.Set<Tuple2<Seq<Sort>,Sort>> sig =
+                mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
+        for (Tuple2<Seq<Sort>,Sort> p : sig) {
+            return JavaConversions.seqAsJavaList(p._1()).get(n);
+        }
+        return null;
     }
 }

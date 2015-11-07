@@ -220,7 +220,7 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kem)::concretize,
                 "concretizing configuration"
         ).apply(input);
     }
@@ -229,7 +229,7 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kem).concretize(s);
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
