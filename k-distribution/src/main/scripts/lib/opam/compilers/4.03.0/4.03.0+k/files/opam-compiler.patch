@@ -1,0 +1,20 @@
+--- a/bytecomp/matching.ml  2015-10-19 10:50:12.000000000 -0500
++++ b/bytecomp/matching.ml  2015-10-19 14:50:56.560932567 -0500
+@@ -79,7 +79,7 @@
+       else small_enough (n-1) rem
+
+ let ctx_lshift ctx =
+-  if small_enough 31 ctx then
++  if small_enough (*3*)1 ctx then
+     List.map lshift ctx
+   else (* Context pruning *) begin
+     get_mins le_ctx (List.map lforget ctx)
+@@ -2169,7 +2169,7 @@
+       | _  -> scan_def ((List.map fst now,idef)::env) later rem in
+
+   let fail_pats = complete_pats_constrs seen in
+-  if List.length fail_pats < 32 then begin
++  if List.length fail_pats < (*3*)2 then begin
+     let fail,jmps =
+       scan_def
+         []  

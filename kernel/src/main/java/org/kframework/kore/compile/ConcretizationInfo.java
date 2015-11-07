@@ -9,6 +9,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import scala.Option;
 
 import java.util.List;
 
@@ -60,6 +61,17 @@ public class ConcretizationInfo {
         Sort s = labels.getCodomain(cellLabel);
         return cfg.isCell(s) ? s : null;
     }
+
+    /** If {@code label} is a label making a cell collection, return the
+     * Sort of the cells in that collection.
+     */
+    public Sort getCellCollectionCell(KLabel label) {
+        Option<Sort> result = cfg.getCellForConcat(label);
+        if (result.isEmpty()) {
+            result = cfg.getCellForUnit(label);
+        }
+        return result.isDefined() ? result.get() : null;
+    }
     public KLabel getCellFragmentLabel(KLabel cellLabel) {
         Sort s = labels.getCodomain(cellLabel);
         return cfg.getCellFragmentLabel(s);
@@ -68,6 +80,11 @@ public class ConcretizationInfo {
     public K getCellAbsentTerm(Sort cellSort) {
         KLabel l = cfg.getCellAbsentLabel(cellSort);
         return l == null ? null : KApply(l);
+    }
+
+    public boolean isCellCollection(KLabel klabel) {
+        Sort s = labels.getCodomain(klabel);
+        return cfg.isCellCollection(s);
     }
 
     public boolean isCell(KLabel klabel) {

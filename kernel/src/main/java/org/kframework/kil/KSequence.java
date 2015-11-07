@@ -1,21 +1,15 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.visitors.Visitor;
+
 import java.util.Collections;
 import java.util.List;
-
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Visitor;
-import org.w3c.dom.Element;
 
 /** Represents the contents (all of sort KItem) joined by ~>. */
 public class KSequence extends Collection {
 
     public static final KSequence EMPTY = new KSequence(Collections.<Term> emptyList());
-
-    public KSequence(Element element, JavaClassesFactory factory) {
-        super(element, factory);
-    }
 
     public KSequence(KSequence node) {
         super(node);

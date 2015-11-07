@@ -92,7 +92,7 @@ public class RuleGrammarGenerator {
      */
     public Module getRuleGrammar(Module mod) {
         // import RULE-CELLS in order to parse cells specific to rules
-        Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), null);
+        Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), Att());
         return newM;
     }
 
@@ -104,7 +104,7 @@ public class RuleGrammarGenerator {
      */
     public Module getConfigGrammar(Module mod) {
         // import CONFIG-CELLS in order to parse cells specific to configurations
-        Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), null);
+        Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), Att());
         return newM;
     }
 
@@ -116,7 +116,7 @@ public class RuleGrammarGenerator {
      */
     public Module getProgramsGrammar(Module mod) {
         // import PROGRAM-LISTS so user lists are modified to parse programs
-        Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), null);
+        Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), Att());
         return newM;
     }
 

@@ -7,7 +7,6 @@ import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
-import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;

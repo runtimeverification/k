@@ -9,6 +9,9 @@ import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 
+import javax.annotation.Nonnull
+
+import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 
 trait OuterKORE
@@ -42,8 +45,9 @@ case class Definition(
   def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
 }
 
-case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
+case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], @(Nonnull @param) att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
+  assert(att != null)
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap {
     _.sentences

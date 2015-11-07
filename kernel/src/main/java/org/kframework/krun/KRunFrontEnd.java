@@ -5,18 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.modes.ExecutionMode;
-import org.kframework.krun.tools.Executor;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
-import org.kframework.transformation.AmbiguousTransformationException;
-import org.kframework.transformation.Transformation;
-import org.kframework.transformation.TransformationNotSatisfiedException;
-import org.kframework.transformation.TransformationProvider;
-import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -52,96 +45,55 @@ public class KRunFrontEnd extends FrontEnd {
     }
 
 
-    private final TransformationProvider<Transformation<Void, Void>> toolProvider;
     private final DefinitionScope scope;
     private final Provider<File> kompiledDir;
-    private final KRunOptions kRunOptions;
-    private final Provider<NewKRunFrontEnd> newFrontEnd;
+    private final KExceptionManager kem;
+    private final KRunOptions krunOptions;
+    private final FileUtil files;
+    private final Provider<CompiledDefinition> compiledDef;
+    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter;
+    private final Provider<ExecutionMode> executionMode;
+    private final TTYInfo tty;
 
     @Inject
     KRunFrontEnd(
             GlobalOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            TransformationProvider<Transformation<Void, Void>> toolProvider,
-            KExceptionManager kem,
             JarInfo jarInfo,
-            @Main FileUtil files,
             DefinitionScope scope,
             @Main(KompiledDir.class) Provider<File> kompiledDir,
-            KRunOptions kRunOptions,
-            Provider<NewKRunFrontEnd> newFrontEnd) {
+            KExceptionManager kem,
+            KRunOptions krunOptions,
+            @Main FileUtil files,
+            @Main Provider<CompiledDefinition> compiledDef,
+            @Main Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
+            @Main Provider<ExecutionMode> executionMode,
+            TTYInfo tty) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
-        this.toolProvider = toolProvider;
         this.scope = scope;
         this.kompiledDir = kompiledDir;
-        this.kRunOptions = kRunOptions;
-        this.newFrontEnd = newFrontEnd;
-    }
-
-    // TODO(dwightguth): inline when we remove kil
-    public static class NewKRunFrontEnd {
-
-        private final KExceptionManager kem;
-        private final KRunOptions krunOptions;
-        private final FileUtil files;
-        private final CompiledDefinition compiledDef;
-        private final Function<org.kframework.definition.Module, Rewriter> initializeRewriter;
-        private final ExecutionMode executionMode;
-        private final TTYInfo tty;
-
-        @Inject
-        public NewKRunFrontEnd(
-                KExceptionManager kem,
-                KRunOptions krunOptions,
-                @Main FileUtil files,
-                @Main CompiledDefinition compiledDef,
-                @Main Function<org.kframework.definition.Module, Rewriter> initializeRewriter,
-                @Main ExecutionMode executionMode,
-                TTYInfo tty) {
-            this.kem = kem;
-            this.krunOptions = krunOptions;
-            this.files = files;
-            this.compiledDef = compiledDef;
-            this.initializeRewriter = initializeRewriter;
-            this.executionMode = executionMode;
-            this.tty = tty;
-        }
-
-        public int run() {
-            return new KRun(kem, files, tty.stdin).run(compiledDef,
-                    krunOptions,
-                    initializeRewriter,
-                    executionMode);
-        }
+        this.kem = kem;
+        this.krunOptions = krunOptions;
+        this.files = files;
+        this.compiledDef = compiledDef;
+        this.initializeRewriter = initializeRewriter;
+        this.executionMode = executionMode;
+        this.tty = tty;
     }
 
     /**
-     * @param cmds represents the arguments/options given to krun command..
-     * @return true if the application completed normally; false otherwise
+     * @return the exit code returned from executing krun.
      */
     public int run() {
+        scope.enter(kompiledDir.get());
         try {
-            scope.enter(kompiledDir.get());
-            try {
-                if (kRunOptions.experimental.kore) {
-                    return newFrontEnd.get().run();
-                } else {
-                    Transformation<Void, Void> tool = toolProvider.get();
-                    Attributes a = new Attributes();
-                    tool.run(null, a);
-                    Integer exitCode = a.typeSafeGet(Integer.class, Executor.Tool.EXIT_CODE);
-                    if (exitCode == null) {
-                        exitCode = 0;
-                    }
-                    return exitCode;
-                }
-            } finally {
-                scope.exit();
-            }
-        } catch (TransformationNotSatisfiedException
-                | AmbiguousTransformationException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
+            return new KRun(kem, files, tty.stdin).run(compiledDef.get(),
+                    krunOptions,
+                    initializeRewriter.get(),
+                    executionMode.get());
+        } finally {
+            scope.exit();
         }
     }
 }

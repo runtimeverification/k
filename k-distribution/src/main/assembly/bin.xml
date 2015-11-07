@@ -29,9 +29,6 @@
           <include>*:so:*</include>
           <include>*:dylib:*</include>
         </includes>
-        <excludes>
-          <exclude>*:cygwin1:dll:*</exclude>
-        </excludes>
         <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
       </dependencySet>
     </dependencySets>

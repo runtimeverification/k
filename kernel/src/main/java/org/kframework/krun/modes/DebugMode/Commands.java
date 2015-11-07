@@ -1,7 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.krun.modes.DebugMode;
 
-import org.kframework.backend.unparser.OutputModes;
+import org.kframework.unparser.OutputModes;
 import org.kframework.debugger.DebuggerMatchResult;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
@@ -42,6 +42,7 @@ public class Commands {
                 utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
                         s -> System.out.println(s));
                 utils.print("Final State Reached", s -> System.out.println(s));
+                utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
                 return;
             }
             utils.print(stepCount + " Step(s) Taken.", s -> System.out.println(s));

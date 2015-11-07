@@ -188,7 +188,10 @@ public class DefinitionToOcaml implements Serializable {
         anywhereKLabels = serialized.anywhereKLabels;
         options = serialized.options;
         constants = serialized.constants;
-        expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+        if (serialized.expandMacros == null) {
+            serialized.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+        }
+        expandMacros = serialized.expandMacros;
         sortHooks = userSortHooks;
     }
 
@@ -344,7 +347,7 @@ public class DefinitionToOcaml implements Serializable {
 
     private String ocamlFinishCompile(Rule exitCode, Integer dumpExitCode, StringBuilder sb) {
         ocamlMatchPattern(exitCode, sb);
-        sb.append("let _ = let res, _ = run(input) (-1) in let subst = try_match res res (-1) in\n");
+        sb.append("let _ = try let res, _ = run(input) (-1) in let subst = try_match res res (-1) in\n");
         sb.append("let code = get_exit_code subst in\n");
         if (dumpExitCode != null) {
             sb.append("(if code = ").append(dumpExitCode).append(" then\n");
@@ -353,6 +356,8 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
+        sb.append("with Stuck(res) -> (print_string \"Execution failed (configuration dumped)\\n\";\n");
+        sb.append("let out = open_out \"config\" in output_string out (print_k res))\n");
         return sb.toString();
     }
 
@@ -378,25 +383,27 @@ public class DefinitionToOcaml implements Serializable {
 
     private void ocamlTermInput(K k, StringBuilder sb) {
         sb.append("let input = Lexer.parse_k\n");
-        sb.append(enquoteString(ToKast.apply(new LiftToKSequence().lift(expandMacros.expand(k)))));
+        sb.append(enquoteString(ToKast.apply(expandMacros.expand(k))));
         sb.append("\n");
     }
 
     /**
-     * Generates a string that, when compiled, writes a particular K term as binary to the specified file using the
+     * Generates a string that, when compiled, writes a K term parsed from run.in into run.out using the
      * Marshal module.
-     * @param k
-     * @param file
      * @return
      */
-    public String marshal(K k, String file) {
+    public String marshal() {
         StringBuilder sb = new StringBuilder();
         ocamlProgramHeader(sb);
-        ocamlTermInput(k, sb);
-        sb.append("let file = open_out ").append(enquoteString(file)).append("\n");
+        sb.append("let input = Lexer.parse_k_file \"run.in\"\n");
+        sb.append("let file = open_out \"run.out\"\n");
         sb.append("let str = Marshal.to_string (input : Prelude.k) [Marshal.No_sharing]\n");
         sb.append("let () = output_string file (String.escaped str)\n");
         return sb.toString();
+    }
+
+    public K preprocess(K k) {
+        return expandMacros.expand(k);
     }
 
     public String constants() {
@@ -871,12 +878,11 @@ public class DefinitionToOcaml implements Serializable {
                             sb.append(",");
                         }
                     }
-                    sb.append(" -> [KApply").append(arity).append("(lbl, ");
+                    if (arity == 0)
+                        sb.append("()");
+                    sb.append(" -> [KApply").append(arity).append("(lbl");
                     for (int i = 0; i < arity; i++) {
-                        sb.append("k").append(i);
-                        if (i != arity - 1) {
-                            sb.append(",");
-                        }
+                        sb.append(", k").append(i);
                     }
                     sb.append(")]\n");
                     conn = "and ";
@@ -1118,6 +1124,8 @@ public class DefinitionToOcaml implements Serializable {
             }
         }
     }
+
+
 
     private enum RuleType {
         FUNCTION, ANYWHERE, REGULAR, PATTERN

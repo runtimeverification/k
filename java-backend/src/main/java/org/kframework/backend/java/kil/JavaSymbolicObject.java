@@ -148,7 +148,7 @@ public abstract class JavaSymbolicObject extends ASTNode
                     new LocalVisitor() {
                         @Override
                         public void visit(Term term) {
-                            if (global.getDefinition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
+                            if (!(term instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
                                 intermediate.get(term).add(term);
                             }
                         }
