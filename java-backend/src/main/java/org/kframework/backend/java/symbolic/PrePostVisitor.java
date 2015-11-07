@@ -18,20 +18,12 @@ public class PrePostVisitor implements Visitor {
         return preVisitor;
     }
 
-    public void setPreVisitor(CombinedLocalVisitor preVisitor) {
-        this.preVisitor = preVisitor;
-    }
-
     public CombinedLocalVisitor getPostVisitor() {
         return postVisitor;
     }
 
-    public void setPostVisitor(CombinedLocalVisitor postVisitor) {
-        this.postVisitor = postVisitor;
-    }
-
-    CombinedLocalVisitor preVisitor = new CombinedLocalVisitor();
-    CombinedLocalVisitor postVisitor = new CombinedLocalVisitor();
+    protected final CombinedLocalVisitor preVisitor = new CombinedLocalVisitor();
+    protected final CombinedLocalVisitor postVisitor = new CombinedLocalVisitor();
 
     @Override
     public String getName() {

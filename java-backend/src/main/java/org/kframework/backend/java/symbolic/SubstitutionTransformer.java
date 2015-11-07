@@ -23,8 +23,8 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     protected final Map<Variable, ? extends Term> substitution;
 
-    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, GlobalContext global) {
-        super(global);
+    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution) {
+        super();
         this.substitution = substitution;
     }
 

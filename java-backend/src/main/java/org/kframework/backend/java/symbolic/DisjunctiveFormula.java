@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.HasGlobalContext;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.CollectionInternalRepresentation;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  *
  * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
-public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation {
+public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 
@@ -37,6 +38,10 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     public PersistentUniqueList<ConjunctiveFormula> conjunctions() {
         return conjunctions;
+    }
+
+    public GlobalContext globalContext() {
+        return global;
     }
 
     @Override

@@ -237,11 +237,11 @@ public abstract class AbstractUnifier implements Unifier {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
                     Map<Variable,Variable> freshSubstitution = Variable.rename(variables);
-                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext.global());
+                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
                         Term bindingExp = terms.get(bindingExpPosition-1);
-                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext.global());
+                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution);
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }

@@ -29,7 +29,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
         super(context);
         this.constraint = constraint;
         this.narrowing = narrowing;
-        extraConstraint = ConjunctiveFormula.of(global);
+        extraConstraint = ConjunctiveFormula.of(context.global());
     }
 
     public ConjunctiveFormula extraConstraint() {
@@ -53,10 +53,10 @@ public class PatternExpander extends CopyOnWriteTransformer {
         List<ConstrainedTerm> results = new ArrayList<>();
         Term inputKList = KList.concatenate(kItem.getPatternInput());
         Term outputKList = KList.concatenate(kItem.getPatternOutput());
-        for (Rule rule : global.getDefinition().patternRules().get(kLabel)) {
+        for (Rule rule : kItem.globalContext().getDefinition().patternRules().get(kLabel)) {
             Term ruleInputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternInput());
             Term ruleOutputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternOutput());
-            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.of(global)
+            ConjunctiveFormula unificationConstraint = ConjunctiveFormula.of(context.global())
                     .add(inputKList, ruleInputKList)
                     .simplify(context);
             // TODO(AndreiS): there is only one solution here, so no list of constraints

@@ -74,7 +74,7 @@ public class RewriteEngineUtils {
 
                 if (RuleAuditing.isAuditBegun()) {
                     System.err.println("Matching failure: unable to resolve collection operation "
-                    + lookupOrChoice.substitute(crntSubst, context.global()) + "; evaluated to "
+                    + lookupOrChoice.substitute(crntSubst) + "; evaluated to "
                     + evalLookupOrChoice);
                 }
             } else {
@@ -136,7 +136,7 @@ public class RewriteEngineUtils {
                         continue;
                     }
                     if (RuleAuditing.isAuditBegun()) {
-                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst, context.global()) + " evaluated to " + evaluatedReq);
+                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst) + " evaluated to " + evaluatedReq);
                     }
                     crntSubst = null;
                     break;

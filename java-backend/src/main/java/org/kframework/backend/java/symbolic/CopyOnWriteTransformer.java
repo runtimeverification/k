@@ -32,22 +32,36 @@ import java.util.stream.Collectors;
 public abstract class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
-    protected final Definition definition;
-    protected final GlobalContext global;
 
     public CopyOnWriteTransformer(TermContext context) {
         this.context = context;
-        this.global = context.global();
-        this.definition = global.getDefinition();
     }
 
-    public CopyOnWriteTransformer(GlobalContext global) {
-        this(TermContext.builder(global).build());
+    public CopyOnWriteTransformer() {
+        this(null);
     }
 
     @Override
     public String getName() {
         return this.getClass().toString();
+    }
+
+    /**
+     * Decides whether to use the {@link GlobalContext} carried by {@code term}
+     * or the one provided externally in {@link CopyOnWriteTransformer#context}.
+     * <p>
+     * YilongL: I think we should eventually get rid of {@code TermContext} from
+     * this class and always use the {@code GlobalContext} carried in {@code term}.
+     * This requires us to properly reset the data inside {@code GlobalContext} after
+     * deserialization. However, a single {@link Definition} is currently shared
+     * between multiple KRun instances in kserver mode so the reset cannot be easily
+     * done and we have to rely on such ad-hoc mechanism to bypass the invalid
+     * {@code GlobalContext} inside those {@code term}'s that belong to the
+     * {@code Definition} object.
+     * </p>
+     */
+    private GlobalContext resolveGlobalContext(HasGlobalContext term) {
+        return context == null ? term.globalContext() : context.global();
     }
 
     @Override
@@ -133,7 +147,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = KItem.of(kLabel, kList, global, kItem.getSource(), kItem.getLocation());
+            kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
         return kItem;
     }
@@ -244,7 +258,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
-        BuiltinList.Builder builder = BuiltinList.builder(global);
+        BuiltinList.Builder builder = BuiltinList.builder(resolveGlobalContext(builtinList));
         for (Term term : builtinList.elementsLeft()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
@@ -266,7 +280,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         boolean changed = false;
-        BuiltinMap.Builder builder = BuiltinMap.builder(global);
+        BuiltinMap.Builder builder = BuiltinMap.builder(resolveGlobalContext(builtinMap));
 
         for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
@@ -310,7 +324,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
-        BuiltinSet.Builder builder = BuiltinSet.builder(global);
+        BuiltinSet.Builder builder = BuiltinSet.builder(resolveGlobalContext(builtinSet));
         for(Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
@@ -371,6 +385,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
                 || processedEnsures.equals(rule.ensures())
                 || processedFreshConstants.equals(rule.freshConstants())
                 || processedLookups != rule.lookups()) {
+            GlobalContext global = context == null ? rule.globalContext() : context.global();
             return new Rule(
                     rule.label(),
                     processedLeftHandSide,
@@ -394,7 +409,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(global);
+        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(resolveGlobalContext(conjunctiveFormula));
 
         for (Map.Entry<Variable, Term> entry : conjunctiveFormula.substitution().entrySet()) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.add(
@@ -413,8 +428,12 @@ public abstract class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        if (global.stage == Stage.REWRITING) {
-            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify(context);
+        if (conjunctiveFormula.globalContext().stage == Stage.REWRITING) {
+            // TODO(YilongL): I don't think this piece of code belongs here
+            // because a SubstitutionTransformer may only want to do substitution
+            transformedConjunctiveFormula = context == null ?
+                    transformedConjunctiveFormula.simplify() :
+                    transformedConjunctiveFormula.simplify(context);
         }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
                 transformedConjunctiveFormula :
@@ -426,7 +445,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
                 disjunctiveFormula.conjunctions().stream()
                         .map(c -> (ConjunctiveFormula) c.accept(this))
-                        .collect(Collectors.toList()), global);
+                        .collect(Collectors.toList()), resolveGlobalContext(disjunctiveFormula));
         return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
                 transformedDisjunctiveFormula :
                 disjunctiveFormula;

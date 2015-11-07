@@ -7,6 +7,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -212,6 +213,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
+    private final Definition definition;
+    private final GlobalContext global;
+
     /**
      * Flag set to true if it is sounds to skip equalities that cannot be translated.
      */
@@ -220,7 +224,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
 
     public KILtoSMTLib(boolean skipEqualities, GlobalContext global) {
-        super(global);
+        this.global = global;
+        this.definition = global.getDefinition();
         this.skipEqualities = skipEqualities;
         variables = new HashSet<>();
     }
@@ -276,7 +281,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     private String getAxioms() {
         StringBuilder sb = new StringBuilder();
-        for (Rule rule : global.getDefinition().functionRules().values()) {
+        for (Rule rule : definition.functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
                 try {
                     KILtoSMTLib transformer = new KILtoSMTLib(false, global);
@@ -389,9 +394,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
         if (!skipEqualities) {
             constraint.substitution().entrySet().stream()
-                    .map(entry -> new Equality(entry.getKey(), entry.getValue(), global))
+                    .map(entry -> new Equality(entry.getKey(), entry.getValue(), constraint.globalContext()))
                     .forEach(equalities::add);
-
         }
 
         if (equalities.isEmpty()) {
@@ -577,7 +581,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         //return builtinList.toKore().accept(this);
-        return ((BuiltinList) BuiltinList.concatenate(global, builtinList)).toKore().accept(this);
+        return ((BuiltinList) BuiltinList.concatenate(builtinList.globalContext(), builtinList)).toKore().accept(this);
     }
 
     @Override

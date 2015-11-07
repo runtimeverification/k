@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
 
     public static final String SEPARATOR = " /\\ ";
 
@@ -304,6 +304,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
+
+    public ConjunctiveFormula simplify() {
+        return simplify(false, true, TermContext.builder(global).build());
+    }
+
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
@@ -329,7 +334,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    public ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
         assert !isFalse();
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
@@ -537,7 +542,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
 
         TermContext context = TermContext.builder(global).build();
-        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, global)).simplify(context);
+        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution)).simplify(context);
     }
 
     public ConjunctiveFormula expandPatterns(boolean narrowing, TermContext context) {

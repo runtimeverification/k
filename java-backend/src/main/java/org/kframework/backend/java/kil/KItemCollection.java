@@ -4,9 +4,7 @@ package org.kframework.backend.java.kil;
 /**
  * Created by dwightguth on 5/8/15.
  */
-public interface KItemCollection extends CollectionInternalRepresentation {
-
-    GlobalContext globalContext();
+public interface KItemCollection extends CollectionInternalRepresentation, HasGlobalContext {
 
     @Override
     default KLabel constructorLabel() {

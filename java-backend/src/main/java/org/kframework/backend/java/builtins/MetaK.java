@@ -109,14 +109,14 @@ public class MetaK {
         }
 
         GlobalContext global = context.global();
-        term = (Term) term.accept(new CopyOnWriteTransformer(global) {
+        term = (Term) term.accept(new CopyOnWriteTransformer() {
             @Override
             public ASTNode transform(MetaVariable metaVariable) {
                 return new Variable(metaVariable);
             }
         });
 
-        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables), global), global);
+        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables)), global);
     }
 
     /**
@@ -130,13 +130,13 @@ public class MetaK {
      */
     public static Term renameVariables(Term term, TermContext context) {
         Set<Variable> variables = term.variableSet();
-        return term.substitute(Variable.rename(variables), context.global());
+        return term.substitute(Variable.rename(variables));
     }
 
     public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {
         BuiltinSet variables = trueVariables(termWithBoundVars, context);
         GlobalContext global = context.global();
-        return KLabelInjection.injectionOf((Term) termToFreeze.accept(new CopyOnWriteTransformer(global) {
+        return KLabelInjection.injectionOf((Term) termToFreeze.accept(new CopyOnWriteTransformer() {
             @Override
             public ASTNode transform(Variable variable) {
                 if (!variables.contains(variable)) {

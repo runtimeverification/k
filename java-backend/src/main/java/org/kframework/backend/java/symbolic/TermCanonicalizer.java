@@ -10,7 +10,6 @@ import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -22,13 +21,8 @@ import org.kframework.kil.ASTNode;
  */
 public class TermCanonicalizer extends CopyOnWriteTransformer {
 
-    public static Term canonicalize(Term term, GlobalContext global) {
-        TermCanonicalizer transformer = new TermCanonicalizer(global);
-        return (Term) term.accept(transformer);
-    }
-
-    private TermCanonicalizer(GlobalContext global) {
-        super(global);
+    public static Term canonicalize(Term term) {
+        return (Term) term.accept(new TermCanonicalizer());
     }
 
     @Override

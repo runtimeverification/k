@@ -47,7 +47,7 @@ import java.util.Set;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term implements KItemRepresentation {
+public class KItem extends Term implements KItemRepresentation, HasGlobalContext {
 
     private final Term kLabel;
     private final Term kList;
@@ -619,6 +619,10 @@ public class KItem extends Term implements KItemRepresentation {
     @Override
     public Term kList() {
         return kList;
+    }
+
+    public GlobalContext globalContext() {
+        return global;
     }
 
     @Override

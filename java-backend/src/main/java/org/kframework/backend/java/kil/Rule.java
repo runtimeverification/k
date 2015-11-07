@@ -346,6 +346,10 @@ public class Rule extends JavaSymbolicObject {
         return label;
     }
 
+    public GlobalContext globalContext() {
+        return global;
+    }
+
     public ImmutableList<Term> requires() {
         return requires;
     }
@@ -440,7 +444,7 @@ public class Rule extends JavaSymbolicObject {
      * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
      */
     public Rule getFreshRule() {
-        return substitute(Variable.rename(variableSet()), global);
+        return substitute(Variable.rename(variableSet()));
     }
 
     public IndexingPair indexingPair() {
@@ -523,17 +527,8 @@ public class Rule extends JavaSymbolicObject {
     }
 
     @Override
-    public Rule substitute(Map<Variable, ? extends Term> substitution, GlobalContext global) {
-        return (Rule) super.substitute(substitution, global);
-    }
-
-    /**
-     * Returns a new {@code Rule} instance obtained from this rule by substituting variable with
-     * term.
-     */
-    @Override
-    public Rule substituteWithBinders(Variable variable, Term term, GlobalContext global) {
-        return (Rule) super.substituteWithBinders(variable, term, global);
+    public Rule substitute(Map<Variable, ? extends Term> substitution) {
+        return (Rule) super.substitute(substitution);
     }
 
     @Override

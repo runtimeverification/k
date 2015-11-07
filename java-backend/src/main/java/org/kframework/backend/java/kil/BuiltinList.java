@@ -37,6 +37,8 @@ public class BuiltinList extends Collection implements KItemCollection {
     private final ImmutableList<BaseTermType> baseTermTypes;
     private final ImmutableList<Variable> listVariables;
 
+    private final GlobalContext global;
+
     /**
      * Private efficient constructor used by {@link BuiltinList.Builder}.
      */
@@ -47,12 +49,13 @@ public class BuiltinList extends Collection implements KItemCollection {
             ImmutableList<BaseTermType> baseTermTypes,
             ImmutableList<Variable> listVariables,
             GlobalContext global) {
-        super(computeFrame(baseTerms), Kind.KITEM, global);
+        super(computeFrame(baseTerms), Kind.KITEM);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
         this.baseTermTypes = baseTermTypes;
         this.listVariables = listVariables;
+        this.global = global;
     }
 
     private static Variable computeFrame(List<Term> baseTerms) {
@@ -246,6 +249,11 @@ public class BuiltinList extends Collection implements KItemCollection {
         elementsRight.stream().forEach(addElementToComponents);
 
         return components;
+    }
+
+    @Override
+    public GlobalContext globalContext() {
+        return global;
     }
 
     public static Builder builder(GlobalContext global) {
