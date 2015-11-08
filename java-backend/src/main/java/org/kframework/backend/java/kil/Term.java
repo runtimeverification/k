@@ -9,7 +9,6 @@ import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
-import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.kore.convertors.KILtoInnerKORE;
 
@@ -24,7 +23,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Transformable, Comparable<Term>,
+public abstract class Term extends JavaSymbolicObject<Term> implements Comparable<Term>,
         org.kframework.kore.K {
 
     protected final Kind kind;
@@ -100,22 +99,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      */
     public Term evaluate(TermContext context) {
         return Evaluator.evaluate(this, context);
-    }
-
-    /**
-     * Returns a new {@code Term} instance obtained from this term by applying a binder insensitive substitution.
-     */
-    @Override
-    public Term substitute(Map<Variable, ? extends Term> substitution) {
-        return (Term) super.substitute(substitution);
-    }
-
-    /**
-     * Returns a new {@code Term} instance obtained from this term by applying a binder-aware substitution.
-     */
-    @Override
-    public Term substituteWithBinders(Map<Variable, ? extends Term> substitution) {
-        return (Term) super.substituteWithBinders(substitution);
     }
 
     /**

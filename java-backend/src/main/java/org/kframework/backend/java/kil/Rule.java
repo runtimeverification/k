@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  *
  * @author AndreiS
  */
-public class Rule extends JavaSymbolicObject {
+public class Rule extends JavaSymbolicObject<Rule> {
 
     private final String label;
     private final Term leftHandSide;
@@ -440,13 +440,6 @@ public class Rule extends JavaSymbolicObject {
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }
 
-    /**
-     * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
-     */
-    public Rule getFreshRule() {
-        return substitute(Variable.rename(variableSet()));
-    }
-
     public IndexingPair indexingPair() {
         return indexingPair;
     }
@@ -524,11 +517,6 @@ public class Rule extends JavaSymbolicObject {
 
     public Set<Variable> matchingVariables() {
         return matchingVariables;
-    }
-
-    @Override
-    public Rule substitute(Map<Variable, ? extends Term> substitution) {
-        return (Rule) super.substitute(substitution);
     }
 
     @Override

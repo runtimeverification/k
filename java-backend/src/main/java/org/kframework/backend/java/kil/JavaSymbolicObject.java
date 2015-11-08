@@ -14,7 +14,6 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.visitors.Visitor;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -29,8 +28,8 @@ import org.pcollections.PSet;
  *
  * @author AndreiS
  */
-public abstract class JavaSymbolicObject extends ASTNode
-        implements Transformable, Visitable, Serializable {
+public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>> extends ASTNode
+        implements Transformable, Visitable {
 
     /**
      * Field used for caching the hash code
@@ -62,26 +61,33 @@ public abstract class JavaSymbolicObject extends ASTNode
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
      * applying a substitution in (in a binder sensitive way) .
      */
-    public JavaSymbolicObject substituteWithBinders(
+    public T substituteWithBinders(
             Map<Variable, ? extends Term> substitution) {
         if (substitution.isEmpty() || isGround()) {
-            return this;
+            return (T) this;
         }
 
-        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution));
+        return (T) accept(new BinderSubstitutionTransformer(substitution));
     }
 
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
      * applying a substitution in (in a binder insensitive way) .
      */
-    public JavaSymbolicObject substitute(
+    public T substitute(
             Map<Variable, ? extends Term> substitution) {
         if (substitution.isEmpty() || isGround()) {
-            return this;
+            return (T) this;
         }
 
-        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution));
+        return (T) accept(new SubstitutionTransformer(substitution));
+    }
+
+    /**
+     * Returns a copy of this {@code JavaSymbolicObject} with each {@link Variable} renamed to a fresh name.
+     */
+    public T renameVariables() {
+        return substitute(Variable.rename(variableSet()));
     }
 
     /**

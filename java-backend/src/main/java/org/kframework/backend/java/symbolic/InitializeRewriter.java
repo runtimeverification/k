@@ -165,7 +165,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());
             List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
-                    .map(r -> r.getFreshRule())
+                    .map(r -> r.renameVariables())
                     .collect(Collectors.toList());
 
             List<ConstrainedTerm> proofResults = javaRules.stream()

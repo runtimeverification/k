@@ -242,7 +242,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 oldRule,
                 global);
         if (freshRules) {
-            backendKILRule = backendKILRule.getFreshRule();
+            backendKILRule = backendKILRule.renameVariables();
         }
         return backendKILRule;
     }
