@@ -682,23 +682,12 @@ with the unchanged semantics of SIMPLE above.  */
   rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
+       <store>... OL |-> objectClosure(#cells(<crntClass>_</crntClass>, Obj))...</store>
        <control>
           C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
+          <fstack> .List => ListItem((Env, K, #cells(C, <crntObj> Obj' </crntObj>)))
           ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 Obj2 </crntObj>
-       </control>
-  //
-  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
-           => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell noLocationCell </crntObj>-fragment)...</store>
-       <control>
-          C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
-          ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 </crntObj>
+          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
   /*
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
@@ -821,7 +810,7 @@ refer to it (see rule above). */
                       <location> L </location>
          </crntObj>
          // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-         <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj </crntObj>`:>CrntObjCell </control>-fragment)) ...</fstack>
+         <fstack> .List => ListItem((Env, K, #cells(C, <crntObj> Obj </crntObj>))) ...</fstack>
          /*
          <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
          */

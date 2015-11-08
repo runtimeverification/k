@@ -176,10 +176,10 @@ public class SortCells {
                 for (Sort child : children) {
                     K arg = split.get(child);
                     if (arg == null) {
-                        if (cfg.getMultiplicity(child) == Multiplicity.STAR) {
-                            arg = cfg.cfg.getUnit(child);
-                        } else {
+                        if (cfg.getMultiplicity(child) == Multiplicity.ONE) {
                             arg = cfg.getCellAbsentTerm(child);
+                        } else {
+                            arg = cfg.cfg.getUnit(child);
                         }
                     }
                     assert arg != null;
@@ -649,8 +649,11 @@ public class SortCells {
                                             }
                                         } else if (item instanceof KVariable) {
                                             KVariable var = (KVariable) item;
-                                            if (!var.att().contains(Attribute.SORT_KEY) && variables.containsKey(var)) {
-                                                VarInfo varinfo = variables.get(var);
+                                            VarInfo varinfo = null;
+                                            if (variables.containsKey(var)) {
+                                                varinfo = variables.get(var);
+                                            }
+                                            if (!var.att().contains(Attribute.SORT_KEY) && varinfo != null) {
                                                 if (varinfo.var != null)
                                                     var = varinfo.var;
                                             }
@@ -659,6 +662,13 @@ public class SortCells {
                                                 if (cfg.cfg.isCell(sort)) {
                                                     klist.set(subcellSorts.indexOf(sort), item); // TODO: exception: no such sort
                                                 } else {
+                                                    if (varinfo != null && varinfo.remainingCells != null && varinfo.remainingCells.size() == 1) {
+                                                        Sort s = Iterables.getOnlyElement(varinfo.remainingCells);
+                                                        if (cfg.cfg.isCell(s)) {
+                                                            klist.set(subcellSorts.indexOf(s), item); // TODO: exception: no such sort
+                                                            continue;
+                                                        }
+                                                    }
                                                     throw KEMException.compilerError("Unsupported cell fragment element.", item);
                                                 }
                                             } else {
@@ -675,8 +685,13 @@ public class SortCells {
                                             if (cellFragment != null) {
                                                 klist.set(i, cellFragment.klist().items().get(i));
                                             } else {
-                                                klist.set(i, KApply(KLabel("no" + subcellSorts.get(i).name())));
+                                                if (cfg.getMultiplicity(subcellSorts.get(i)) == Multiplicity.ONE) {
+                                                    klist.set(i, cfg.getCellAbsentTerm(subcellSorts.get(i)));
+                                                } else { // Multiplicity.OPTIONAL || Multiplicity.STAR
+                                                    klist.set(i, cfg.cfg.getUnit(subcellSorts.get(i)));
+                                                }
                                             }
+
                                         }
                                     }
 
