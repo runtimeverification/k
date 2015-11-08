@@ -363,7 +363,7 @@ public class Rule extends JavaSymbolicObject {
         // ConstrainedTerm doesn't hold a TermContext anymore
         return new ConstrainedTerm(
                 leftHandSide,
-                ConjunctiveFormula.of(global).addAll(requires),
+                ConjunctiveFormula.of(lookups).addAll(requires),
                 termContext);
     }
 

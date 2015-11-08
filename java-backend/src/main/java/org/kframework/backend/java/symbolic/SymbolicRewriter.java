@@ -152,7 +152,7 @@ public class SymbolicRewriter {
                 System.err.println("\nAuditing " + rule + "...\n");
             }
 
-            return results = subject.unify(buildPattern(rule, subject.termContext()),
+            return results = subject.unify(rule.createLhsPattern(subject.termContext()),
                     rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())
                     .stream()
                     .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight(), subject.termContext()))
@@ -177,17 +177,6 @@ public class SymbolicRewriter {
                 }
             }
         }
-    }
-
-    /**
-     * Builds the pattern term used in unification by composing the left-hand
-     * side of the rule and its preconditions.
-     */
-    private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
-        return new ConstrainedTerm(
-                rule.leftHandSide(),
-                ConjunctiveFormula.of(context.global()).add(rule.lookups()).addAll(rule.requires()),
-                context);
     }
 
     /**
@@ -481,7 +470,7 @@ public class SymbolicRewriter {
      */
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
-            ConstrainedTerm pattern = buildPattern(specRule, constrainedTerm.termContext());
+            ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
                 return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
