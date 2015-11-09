@@ -231,7 +231,11 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             Constant labelCon = (Constant) labelTerm;
             if (labelCon.production().sort().name().equals("KLabel")) {
                 String labelVal = labelCon.value();
-                return Optional.of(KLabel(labelVal.substring(1, labelVal.length() - 1)));
+                if (labelVal.charAt(0) == '`') {
+                    return Optional.of(KLabel(labelVal.substring(1, labelVal.length() - 1)));
+                } else {
+                    return Optional.of(KLabel(labelVal));
+                }
             }
         }
         return Optional.empty();
