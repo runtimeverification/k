@@ -186,20 +186,18 @@ public class KExceptionManager {
     }
 
     public void print() {
-        Collections.sort(exceptions, new Comparator<KException>() {
-            @Override
-            public int compare(KException arg0, KException arg1) {
-                return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
-            }
-        });
+        Collections.sort(exceptions, (arg0, arg1) ->
+                arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose)));
         KException last = null;
-        for (KException e : exceptions) {
-            if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
-                continue;
+        synchronized (exceptions) {
+            for (KException e : exceptions) {
+                if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
+                    continue;
+                }
+                printStackTrace(e);
+                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+                last = e;
             }
-            printStackTrace(e);
-            System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
-            last = e;
         }
     }
 
