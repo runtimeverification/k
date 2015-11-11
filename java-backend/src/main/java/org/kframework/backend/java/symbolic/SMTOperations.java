@@ -59,6 +59,8 @@ public class SMTOperations {
                         smtOptions.z3ImplTimeout);
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
+            } catch (SMTTranslationFailure e) {
+                e.printStackTrace();
             }
         }
         return false;
