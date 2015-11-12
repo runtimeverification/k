@@ -2,6 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
@@ -225,6 +226,9 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         List<String> args = new ArrayList<>(Arrays.asList("-g", "-o", "a.out", "-package", "gmp", "-package", "zarith",
                 "-package", "str", "-package", "unix", "-linkpkg", "-safe-string"));
         args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
+        // -cclib -foo is used to pass -foo to gcc which is called to do linking. -cclib -Wl,-foo is used to pass
+        // -foo to ld which is called by gcc.
+        args.addAll(options.experimental.nativeLibraryPath.stream().flatMap(lib -> Stream.of("-cclib", "-L" + lib)).collect(Collectors.toList()));
         args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", "-l" + lib)).collect(Collectors.toList()));
         String ocamlfind = OcamlBackend.getOcamlFind(files);
         if (converter.options.ocamlopt) {
@@ -252,6 +256,9 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     files.resolveKompiled("parser.cmo").getAbsolutePath(), files.resolveKompiled("lexer.cmo").getAbsolutePath(),
                     name));
             pb = pb.command(args);
+        }
+        if (options.global.verbose) {
+            System.err.println("+ " + StringUtils.join(args, " "));
         }
         Process p = pb.directory(files.resolveTemp("."))
                 .redirectError(files.resolveTemp("compile.err"))

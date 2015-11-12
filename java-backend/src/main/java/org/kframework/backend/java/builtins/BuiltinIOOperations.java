@@ -2,7 +2,6 @@
 package org.kframework.backend.java.builtins;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -10,13 +9,9 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.kil.Sort;
-import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
-import org.kframework.utils.errorsystem.ParseFailedException;
 
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
@@ -30,20 +25,11 @@ import java.util.Map;
 public class BuiltinIOOperations {
 
     private final FileSystem fs;
-    private final Provider<KILtoBackendJavaKILTransformer> kilTransformer;
-    private final Provider<RunProcess> rp;
-    private final KRunOptions kRunOptions;
 
     @Inject
     public BuiltinIOOperations(
-            FileSystem fs,
-            Provider<KILtoBackendJavaKILTransformer> kilTransformer,
-            Provider<RunProcess> rp,
-            KRunOptions kRunOptions) {
+            FileSystem fs) {
         this.fs = fs;
-        this.kilTransformer = kilTransformer;
-        this.rp = rp;
-        this.kRunOptions = kRunOptions;
     }
 
     public Term open(StringToken term1, StringToken term2, TermContext termContext) {
@@ -113,12 +99,7 @@ public class BuiltinIOOperations {
     public Term write(IntToken term1, StringToken term2, TermContext termContext) {
         try {
             fs.get(term1.longValue()).write(term2.byteArrayValue());
-            // TODO(daejunpark): hack: should implement the injection mechanism in kore
-            if (kRunOptions.experimental.kore) {
-                return KSequence.EMPTY;
-            } else {
-                return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
-            }
+            return KSequence.EMPTY;
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {
@@ -129,14 +110,7 @@ public class BuiltinIOOperations {
     }
 
     public Term parse(StringToken term1, StringToken term2, TermContext termContext) {
-        try {
-            org.kframework.kil.Term kast = rp.get().runParser(
-                    termContext.global().krunOptions.configurationCreation.parser(),
-                    term1.stringValue(), true, Sort.of(term2.stringValue()));
-            return kilTransformer.get().transformAndEval(kast);
-        } catch (ParseFailedException e) {
-            return processIOException("noparse", termContext);
-        }
+        throw new RuntimeException("Not implemented!");
     }
 
     public Term parseInModule(StringToken input, StringToken startSymbol, StringToken moduleName, TermContext termContext) {

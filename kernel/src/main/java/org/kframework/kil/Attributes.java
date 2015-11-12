@@ -1,15 +1,11 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import com.google.inject.name.Names;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Attribute.Key;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
-
-import com.google.inject.name.Names;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -44,15 +40,6 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     public Attributes(Location location, Source source) {
         super(location, source);
         contents = new LinkedHashMap<>();
-    }
-
-    public Attributes(Element element, JavaClassesFactory factory) {
-        super(element);
-
-        contents = new LinkedHashMap<>();
-        List<Element> children = XML.getChildrenElements(element);
-        for (Element e : children)
-            add((Attribute<?>) factory.getTerm(e));
     }
 
     public Attributes() {

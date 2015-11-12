@@ -347,7 +347,7 @@ public class DefinitionToOcaml implements Serializable {
 
     private String ocamlFinishCompile(Rule exitCode, Integer dumpExitCode, StringBuilder sb) {
         ocamlMatchPattern(exitCode, sb);
-        sb.append("let _ = let res, _ = run(input) (-1) in let subst = try_match res res (-1) in\n");
+        sb.append("let _ = try let res, _ = run(input) (-1) in let subst = try_match res res (-1) in\n");
         sb.append("let code = get_exit_code subst in\n");
         if (dumpExitCode != null) {
             sb.append("(if code = ").append(dumpExitCode).append(" then\n");
@@ -356,6 +356,8 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
+        sb.append("with Stuck(res) -> (print_string \"Execution failed (configuration dumped)\\n\";\n");
+        sb.append("let out = open_out \"config\" in output_string out (print_k res))\n");
         return sb.toString();
     }
 
@@ -876,12 +878,11 @@ public class DefinitionToOcaml implements Serializable {
                             sb.append(",");
                         }
                     }
-                    sb.append(" -> [KApply").append(arity).append("(lbl, ");
+                    if (arity == 0)
+                        sb.append("()");
+                    sb.append(" -> [KApply").append(arity).append("(lbl");
                     for (int i = 0; i < arity; i++) {
-                        sb.append("k").append(i);
-                        if (i != arity - 1) {
-                            sb.append(",");
-                        }
+                        sb.append(", k").append(i);
                     }
                     sb.append(")]\n");
                     conn = "and ";

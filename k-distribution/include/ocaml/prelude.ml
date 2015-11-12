@@ -415,8 +415,20 @@ struct
   let hook_base2string c lbl sort config ff = match c with
       [Int i], [Int base] -> [String (to_string_base (Z.to_int base) i)]
     | _ -> raise Not_implemented
+  let hook_string2token c lbl sort config ff = match c with
+      [String sort], [String value] -> [ktoken (parse_sort sort) value]
+    | _ -> raise Not_implemented
+  let hook_token2string c lbl sort config ff = match c with
+      [KToken(_,s)] -> [String s]
+    | [Bool b] -> [String (string_of_bool b)]
+    | [String s] -> [String ("\"" ^ (k_string_escape s) ^ "\"")]
+    | [Int i] -> [String (Z.to_string i)]
+    | [Float(f,_,_)] -> [String (float_to_string f)]
+    | _ -> raise Not_implemented
+  let hook_float2string c lbl sort config ff = match c with
+      [Float (f,_,_)] -> [String (Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f)]
+    | _ -> raise Not_implemented
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
-  let hook_float2string c lbl sort config ff = raise Not_implemented
   let hook_string2float c lbl sort config ff = raise Not_implemented
   let hook_replace c lbl sort config ff = raise Not_implemented
   let hook_replaceAll c lbl sort config ff = raise Not_implemented

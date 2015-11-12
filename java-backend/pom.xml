@@ -159,21 +159,21 @@
       <artifactId>vcomp100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>64</classifier>
+      <classifier>windows64</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>msvcp100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>64</classifier>
+      <classifier>windows64</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>msvcr100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>64</classifier>
+      <classifier>windows64</classifier>
     </dependency>
 
     <dependency>
@@ -181,21 +181,21 @@
       <artifactId>vcomp100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>32</classifier>
+      <classifier>windows32</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>msvcp100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>32</classifier>
+      <classifier>windows32</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>msvcr100</artifactId>
       <version>10.0</version>
       <type>dll</type>
-      <classifier>32</classifier>
+      <classifier>windows32</classifier>
     </dependency>
  
   </dependencies>
@@ -215,7 +215,7 @@
               <stripVersion>true</stripVersion>
               <stripClassifier>true</stripClassifier>
               <includeTypes>so,dylib,dll</includeTypes>
-              <includeClassifiers>${native.arch.classifier},${native.classifier},${native.os.classifier}</includeClassifiers>
+              <includeClassifiers>${native.classifier},${native.os.classifier}</includeClassifiers>
               <includeScope>runtime</includeScope>
               <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>

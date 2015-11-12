@@ -168,7 +168,6 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.attributes.Source;
@@ -832,12 +831,9 @@ void Sentence(Module module) :
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
       { syn.setPriorityBlocks(pblocks); }
-    | Attributes(syn)
-    | "-/-" Group(sb, DEFAULT) ("." { sb.append(specialAndImage()); } Group(sb, DEFAULT))*
-      { module.appendModuleItem(markLoc(loc, new Restrictions(
-          new NonTerminal(syn.getDeclaredSort().getRealSort()), null, sb.toString()))); return; } )?
+    | Attributes(syn) )?
     { module.appendModuleItem(markLoc(loc, syn)); }
-  
+
   | ("priority" | "priorities")
       { List<PriorityBlockExtended> pblocks =
           new ArrayList<PriorityBlockExtended>(); }
@@ -847,11 +843,6 @@ void Sentence(Module module) :
   | ("left" | "right" | "non-assoc") { SwitchTo(KLABEL_STATE); type = image(); }
       list = KLabels()
     { module.appendModuleItem(markLoc(loc, new PriorityExtendedAssoc(type, list))); }
-  
-  | type = String() "-/-"
-      Group(sb, DEFAULT) ("." { sb.append(specialAndImage()); } Group(sb, DEFAULT))*
-      { module.appendModuleItem(markLoc(loc, new Restrictions(
-          null, new Terminal(type), sb.toString()))); }
   )
 }
 

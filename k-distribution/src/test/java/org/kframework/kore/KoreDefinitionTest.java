@@ -6,7 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
-import org.kframework.kil.loader.CollectProductionsVisitor;
+import org.kframework.parser.concrete2kore.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kore.convertors.BubbleParsing;
 import org.kframework.kore.convertors.KILtoKORE;

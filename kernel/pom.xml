@@ -167,49 +167,6 @@
       <classifier>windows</classifier>
       <type>exe</type>
     </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>sdf2table</artifactId>
-      <version>1.0</version>
-      <type>uexe</type>
-      <classifier>linux</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>sdf2table</artifactId>
-      <version>1.0</version>
-      <type>uexe</type>
-      <classifier>osx</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>sdf2table</artifactId>
-      <version>1.0</version>
-      <type>exe</type>
-      <classifier>windows</classifier>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>cygwin1</artifactId>
-      <version>1.0</version>
-      <type>dll</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>strj</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>implodePT</artifactId>
-      <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 
   <build>

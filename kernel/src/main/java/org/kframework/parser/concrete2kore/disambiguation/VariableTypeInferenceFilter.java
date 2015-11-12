@@ -7,11 +7,11 @@ import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.SafeTransformer;
@@ -62,13 +62,19 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     /** Return the set of all known sorts which are a lower bound on
-     * all sorts in {@code bounds}, leaving out internal sorts below "KBott".
+     * all sorts in {@code bounds}, leaving out internal sorts below "KBott" or above "K".
      */
     private Set<Sort> lowerBounds(Collection<Sort> bounds) {
         Set<Sort> mins = new HashSet<>();
         nextsort:
         for (Sort sort : iterable(sortSet)) { // for every declared sort
+            // Sorts at or below KBott, or above K, are assumed to be
+            // sorts from kast.k representing meta-syntax that is not a real sort.
+            // This is done to prevent variables from being inferred as KBott or
+            // as KList.
             if (subsorts.lessThanEq(sort, Sort("KBott")))
+                continue;
+            if (subsorts.greaterThan(sort, Sort("K")))
                 continue;
             for (Sort bound : bounds)
                 if (!subsorts.greaterThanEq(bound, sort))
@@ -140,12 +146,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public boolean isAnyVar() {
-            return var.value().equals(MetaK.Constants.anyVarSymbol);
+            return var.value().equals(ResolveAnonVar.ANON_VAR.name());
         }
     }
 
     private static VarKey getVarKey(Constant c) {
-        if (c.value().equals(MetaK.Constants.anyVarSymbol)) {
+        if (c.value().equals(ResolveAnonVar.ANON_VAR.name())) {
             return new VarKey(c); // wildcard values are compared including location
         } else {
             return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));

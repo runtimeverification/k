@@ -1,7 +1,0 @@
-module Integration
-
-imports Common
-imports KTechnique
-imports KBuiltinsBasic
-imports Variables
-

@@ -3,11 +3,13 @@ package org.kframework.kore.compile;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -47,8 +49,23 @@ public class SortCellsTest {
 
     @Test
     public void testSimpleSplitting() {
-        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"));
-        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"));
+        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
+
+    /**
+     * Ensure that a variable does not become a cell fragment if it is annotated
+     * with a single-cell sort.
+     */
+    @Test
+    public void testSortedVar() {
+        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), Y);
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), Y);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
@@ -232,7 +249,46 @@ public class SortCellsTest {
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
+    /** When a cell fragment variable occurs as an argument to the appropriate cell fragment sort predict, we
+     * specialize the expansion by splitting it into a conjunction of individual sort predicate tests on
+     * the variables the cell fragment variable splits into, rather than just using the generic replacement term.
+     * This is a very special case of statically simplifying predicate applications.
+     */
+    @Test
+    public void testPredicateExpansion() {
+        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"))
+                , app("isThreadCellFragment",KVariable("X"))
+                , BooleanUtils.TRUE
+                , Att());
+        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))),
+                cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+        Rule expected = new Rule(expectedBody
+                , BooleanUtils.and(BooleanUtils.TRUE, app("isKCell", KVariable("X")))
+                , BooleanUtils.TRUE, Att());
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
 
+    /** Ensure that the splitting in {@linkplain #testPredicateExpansion()} does not happen
+     * in a term which applies the sort predicate for a <em>different</em> cell fragment sort
+     * to a cell fragment variable.
+     */
+    @Test
+    public void testUnrelatedPredicate() {
+        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"))
+                , app("isTopCellFragment",KVariable("X"))
+                , BooleanUtils.TRUE
+                , Att());
+        K replacement = app("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell"));
+        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), replacement);
+        Rule expected = new Rule(expectedBody
+                , app("isTopCellFragment", replacement)
+                , BooleanUtils.TRUE, Att());
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(0, kem.getExceptions().size());
+    }
 
     /**
      * Test that splitting works properly if an item under a parent cell is

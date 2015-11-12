@@ -4,10 +4,7 @@ package org.kframework.kil;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
@@ -45,11 +42,6 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
     public Bracket(Location location, Source source, Term t, Context context) {
         super(location, source, t.getSort());
         this.content = t;
-    }
-
-    public Bracket(Element element, JavaClassesFactory factory) {
-        super(element);
-        this.content = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
     public Bracket(Sort sort) {

@@ -8,13 +8,10 @@
         extension="c"
         exclude="io"
         >
-    <kompile-option name="--kore" />
     <all-programs>
-      <krun-option name="--kore" />
       <krun-option name="--output" value="none" />
     </all-programs>
     <program name="undefined.c">
-      <krun-option name="--kore" />
       <krun-option name="--output" value="pretty" />
     </program>
   </test>
