@@ -44,17 +44,13 @@ public class ConcretizeCells {
     }
 
     public Sentence concretize(Sentence s) {
-//        return sortCells.sortCells(
-//                closeCells.close(
-//                        addParentCells.concretize(
-//                                addRootCell.addImplicitCells(s))));
-        Sentence s1 = addRootCell.addImplicitCells(s);
-        Sentence s2 = addParentCells.concretize(s1);
-        Sentence s3 = closeCells.close(s2);
+        s = addRootCell.addImplicitCells(s);
+        s = addParentCells.concretize(s);
+        s = closeCells.close(s);
 
-        Sentence s4 = sortCells.preprocess(s3);
-        Sentence s5 = sortCells.sortCells(s4);
-        Sentence s6 = sortCells.postprocess(s5);
-        return s6;
+        s = sortCells.preprocess(s);
+        s = sortCells.sortCells(s);
+        s = sortCells.postprocess(s);
+        return s;
     }
 }

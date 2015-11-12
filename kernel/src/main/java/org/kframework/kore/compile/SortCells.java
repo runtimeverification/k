@@ -93,12 +93,12 @@ public class SortCells {
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
                 rule.att());
-        Rule r = Rule(
+        rule = Rule(
                 resolveIncompleteCellFragment(rule.body()),
                 resolveIncompleteCellFragment(rule.requires()),
                 resolveIncompleteCellFragment(rule.ensures()),
                 rule.att());
-        return r;
+        return rule;
     }
 
     private Context sortCells(Context context) {
@@ -722,9 +722,13 @@ public class SortCells {
         // TODO: error handling: no label, no n, multiple signatures
         java.util.Set<Tuple2<Seq<Sort>,Sort>> sig =
                 mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
+        Sort s = null;
         for (Tuple2<Seq<Sort>,Sort> p : sig) {
-            return JavaConversions.seqAsJavaList(p._1()).get(n);
+            s = JavaConversions.seqAsJavaList(p._1()).get(n);
+            if (!s.name().equals("K")) {
+                return s;
+            }
         }
-        return null;
+        return s;
     }
 }

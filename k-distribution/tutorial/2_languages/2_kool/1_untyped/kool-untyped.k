@@ -511,6 +511,7 @@ interestingly, the semantics of return stays unchanged. */
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
+                 | (Id,Stmt,K,Map,K)
 
   syntax KItem ::= "popx"
 
@@ -647,6 +648,7 @@ called function application in SIMPLE), we need to add two more values
 to the language, namely object and method closures: */
 
   syntax Val ::= objectClosure(CrntObjCellFragment)
+               | objectClosure(K)
                | methodClosure(Id,Int,Ids,Stmt)
 
 /*@  An object value consists of an \texttt{objectClosure}-wrapped bag
@@ -676,32 +678,23 @@ the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
   syntax KItem ::= (Map,K,ControlCellFragment)
+                 | (Map,K,K)
 
   // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  //             fix duplicated rules once cell fragment issues #1744 #1747 #1748 are fixed
   rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
-           => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(#cells(<crntClass>_</crntClass>, Obj))...</store>
-       <control>
-          C
-          <fstack> .List => ListItem((Env, K, #cells(C, <crntObj> Obj' </crntObj>)))
-          ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
-       </control>
   /*
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
+  */
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
-       <br/>
+     //<br/> // TODO(KORE): support latex annotations #1799
        <control>
           C
           <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
-  */
 
 
 /*@ \subsubsection{Spawn}
@@ -809,11 +802,7 @@ refer to it (see rule above). */
                       */
                       <location> L </location>
          </crntObj>
-         // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-         <fstack> .List => ListItem((Env, K, #cells(C, <crntObj> Obj </crntObj>))) ...</fstack>
-         /*
          <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
-         */
        </control>
 
 /*@ The creation of a new object (the memory allocation part only) is
@@ -919,15 +908,8 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]*/
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(#cells(
-                     <crntClass> Class:Id </crntClass>,
-                     <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>,
-                     _))
-  /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
-  */
+                     <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>)
        . X:Id
     // TODO(KORE): drop cell sort casting #1747
     => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell, X)
@@ -935,15 +917,8 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     */
     [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(#cells(
-                     <crntClass> Class:Id </crntClass>,
-                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>,
-                     _))
-  /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
-  */
        . X:Id
     when Class =/=K Class'  [structural]
 
@@ -996,11 +971,10 @@ method call or the array access.  */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule (objectClosure(#cells(<envStack> EStack </envStack>, _)) . X
+  rule (objectClosure(<envStack> EStack </envStack> _) . X
+  // TODO(KORE): drop cell sort casting #1747
     => lookupMember(`<envStack> EStack </envStack>`:>EnvStackCell, X:Id))(_:Exps)  [structural]
   /*
-  rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
   */
 
@@ -1052,26 +1026,14 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(#cells(<envStack> ListItem((C,_)) ...</envStack>, _))
-  /*
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
-  */
        instanceOf C => true
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(#cells(<envStack> ListItem((C::Id,_)) => .List ...</envStack>, _))
-  /*
   rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
-  */
        instanceOf C'  when C =/=K C'  [structural]
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(#cells(<envStack> .List </envStack>, _)) instanceOf _ => false
-  /*
   rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
-  */
 
 
 /*@ \subsubsection{Cast}
@@ -1084,13 +1046,8 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule (C) objectClosure(#cells(<crntClass> _ </crntClass>, Obj))
-    => objectClosure(#cells(<crntClass> C </crntClass>, Obj))
-  /*
   rule (C) objectClosure(<crntClass> _ </crntClass> Obj)
     => objectClosure(<crntClass> C </crntClass> Obj)
-  */
 
 
 /*@ \subsection{KOOL-specific auxiliary declarations and operations}
@@ -1120,15 +1077,8 @@ member's location based on the current class of the object. */
               . X
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]*/
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule lvalue(objectClosure(#cells(
-                            <crntClass> Class </crntClass>,
-                            <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>,
-                            _))
-  /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
-  */
+                            <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>)
               . X
               // TODO(KORE): drop cell sort casting #1747
               => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell,
@@ -1136,15 +1086,8 @@ member's location based on the current class of the object. */
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
               */
                               X))  [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule lvalue(objectClosure(#cells(
-                            <crntClass> Class </crntClass>,
-                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>,
-                            _))
-  /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
                             <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
-  */
               . X)
     when Class =/=K Class'  [structural]
 
