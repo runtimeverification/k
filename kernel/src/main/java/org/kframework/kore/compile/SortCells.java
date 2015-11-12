@@ -683,6 +683,9 @@ public class SortCells {
       }.apply(term);
     }
 
+    /**
+     * Pre-process terms before processVar
+     */
     public synchronized Sentence preprocess(Sentence s) {
         if (s instanceof Rule) {
             return preprocess((Rule) s);
@@ -691,6 +694,9 @@ public class SortCells {
         }
     }
 
+    /**
+     * Post-process terms after processVar
+     */
     public synchronized Sentence postprocess(Sentence s) {
         if (s instanceof Rule) {
             return postprocess((Rule) s);
