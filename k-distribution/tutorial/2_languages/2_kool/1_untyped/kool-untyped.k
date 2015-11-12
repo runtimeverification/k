@@ -511,6 +511,7 @@ interestingly, the semantics of return stays unchanged. */
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
                  | (Id,Stmt,K,Map,K)
 
   syntax KItem ::= "popx"
@@ -648,8 +649,9 @@ called function application in SIMPLE), we need to add two more values
 to the language, namely object and method closures: */
 
   syntax Val ::= objectClosure(CrntObjCellFragment)
-               | objectClosure(K)
                | methodClosure(Id,Int,Ids,Stmt)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
+               | objectClosure(K)
 
 /*@  An object value consists of an \texttt{objectClosure}-wrapped bag
 containing the current class of the object and the environment stack
@@ -678,6 +680,7 @@ the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
   syntax KItem ::= (Map,K,ControlCellFragment)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
                  | (Map,K,K)
 
   // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
