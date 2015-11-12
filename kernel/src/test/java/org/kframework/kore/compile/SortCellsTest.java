@@ -162,7 +162,7 @@ public class SortCellsTest {
         K expected = cell("<top>",app("_ThreadCellBag_",
                 cell("<t>", KVariable("_0"), KVariable("_1"), cell("<opt>", KVariable("O"))),
                 cell("<t>", cell("<k>", KRewrite(KSequence(KVariable("Rest")),
-                                KSequence(cell("<t>-fragment", KVariable("_0"), KVariable("_1"), app(".OptCell")), KVariable("Rest")))),
+                                KSequence(cell("<t>-fragment", KVariable("_0"), KVariable("_1"), app("noOptCell")), KVariable("Rest")))),
                         KVariable("_2"),
                         KVariable("_3"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());

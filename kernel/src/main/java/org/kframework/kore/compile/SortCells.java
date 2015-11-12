@@ -176,10 +176,10 @@ public class SortCells {
                 for (Sort child : children) {
                     K arg = split.get(child);
                     if (arg == null) {
-                        if (cfg.getMultiplicity(child) == Multiplicity.ONE) {
-                            arg = cfg.getCellAbsentTerm(child);
-                        } else {
+                        if (cfg.getMultiplicity(child) == Multiplicity.STAR) {
                             arg = cfg.cfg.getUnit(child);
+                        } else {
+                            arg = cfg.getCellAbsentTerm(child);
                         }
                     }
                     assert arg != null;
