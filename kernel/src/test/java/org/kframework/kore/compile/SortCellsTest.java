@@ -51,7 +51,7 @@ public class SortCellsTest {
     public void testSimpleSplitting() {
         KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
-        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+        K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
         Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
@@ -179,7 +179,7 @@ public class SortCellsTest {
         K expected = cell("<top>",app("_ThreadCellBag_",
                 cell("<t>", KVariable("_0"), KVariable("_1"), cell("<opt>", KVariable("O"))),
                 cell("<t>", cell("<k>", KRewrite(KSequence(KVariable("Rest")),
-                                KSequence(cell("<t>-fragment", KVariable("_0"), KVariable("_1"), app("noOptCell")), KVariable("Rest")))),
+                                KSequence(cell("<t>-fragment", KVariable("_0"), KVariable("_1"), app(".OptCell")), KVariable("Rest")))),
                         KVariable("_2"),
                         KVariable("_3"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
@@ -261,7 +261,7 @@ public class SortCellsTest {
                 , BooleanUtils.TRUE
                 , Att());
         K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))),
-                cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell")));
+                cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
         Rule expected = new Rule(expectedBody
                 , BooleanUtils.and(BooleanUtils.TRUE, app("isKCell", KVariable("X")))
                 , BooleanUtils.TRUE, Att());
@@ -280,7 +280,7 @@ public class SortCellsTest {
                 , app("isTopCellFragment",KVariable("X"))
                 , BooleanUtils.TRUE
                 , Att());
-        K replacement = app("<t>-fragment", KVariable("X"), app("noEnvCell"), app("noOptCell"));
+        K replacement = app("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell"));
         K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), replacement);
         Rule expected = new Rule(expectedBody
                 , app("isTopCellFragment", replacement)
