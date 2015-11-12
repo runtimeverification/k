@@ -52,6 +52,9 @@ public class SymbolicRewriter {
         stopwatch.start();
         KRunState finalState = null;
         int step = 1;
+        if (bound == 0) {
+            finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(0));
+        }
         while (step <= bound || bound < 0) {
             /* get the first solution */
             List<ConstrainedTerm> results = computeRewriteStep(constrainedTerm, step, true);
