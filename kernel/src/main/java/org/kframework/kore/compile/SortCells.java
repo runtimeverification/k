@@ -583,13 +583,13 @@ public class SortCells {
 
                             /*
                               fix an invalid cell fragment term, e.g.,
-                              
+
                               Case 1.
                               from
                                 foo(<x>-fragment A B </x>-fragment <c>C</c>)
                               into
                                 foo(<x>-fragment A B <c>C</c> </x>-fragment)
-                              
+
                               Case 2.
                               from
                                 foo(B C)
@@ -862,10 +862,9 @@ public class SortCells {
     // find nth argument sort for a given klabel
     // if multiple signiture exist, then return arbitrary one of them that is not K
     private Sort nthArgSort(KLabel klabel, int n) {
-        java.util.Set<Tuple2<Seq<Sort>,Sort>> sigs;
-        try {
-            sigs = mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
-        } catch (Exception e) {
+        java.util.Set<Tuple2<Seq<Sort>,Sort>> sigs =
+                mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
+        if (sigs == null) {
             throw new IllegalArgumentException("Not found signature for label: " + klabel);
         }
         Sort sort = null;
