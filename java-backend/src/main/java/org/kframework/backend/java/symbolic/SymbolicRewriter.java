@@ -71,6 +71,9 @@ public class SymbolicRewriter {
         if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + "]");
         }
+        if (finalState == null) {
+            finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(0));
+        }
 
         return finalState;
     }
