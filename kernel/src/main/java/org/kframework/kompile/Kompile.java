@@ -80,7 +80,7 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
+    private static final String REQUIRE_KAST_K = "requires \"kast.k\"\nrequires \"domains.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     private final FileUtil files;
