@@ -50,25 +50,15 @@ public class SymbolicRewriter {
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
-        KRunState finalState = null;
-        int step = 1;
-        if (bound == 0) {
-            finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(0));
-        }
-        while (step <= bound || bound < 0) {
+        int step = 0;
+        List<ConstrainedTerm> results;
+        while (step != bound &&
+                !(results = computeRewriteStep(constrainedTerm, step+1, true)).isEmpty()) {
             /* get the first solution */
-            List<ConstrainedTerm> results = computeRewriteStep(constrainedTerm, step, true);
-            if (!results.isEmpty()) {
-                constrainedTerm = results.get(0);
-                if (step == bound) {
-                    finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
-                }
-            } else {
-                finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step - 1));
-                break;
-            }
+            constrainedTerm = results.get(0);
             step++;
         }
+        KRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
 
         stopwatch.stop();
         if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
