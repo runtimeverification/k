@@ -16,6 +16,7 @@ import org.kframework.utils.options.StringListConverter;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -115,6 +116,9 @@ public class KompileOptions implements Serializable {
     private boolean nonStrict;
 
     public boolean strict() { return !nonStrict; }
+
+    @Parameter(names="-I", description="Add a directory to the search path for requires statements.", variableArity = true)
+    public List<String> includes = new ArrayList<>();
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
