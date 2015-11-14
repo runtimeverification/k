@@ -3,7 +3,6 @@ package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Source;
-import org.kframework.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -21,6 +20,7 @@ import org.kframework.parser.ProductionReference;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -104,14 +105,23 @@ public class KRun {
 
     private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
         List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
-        if (searchResult == null || searchResult.isEmpty()) {
+        if (searchResult.isEmpty()) {
             outputFile("No Search Results \n", options);
         }
         int i = 0;
+        List<String> results = new ArrayList<>();
         for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-            outputFile("Solution: " + (i++) + "\n", options);
-            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, s -> outputFile(s, options));
+            StringBuilder sb = new StringBuilder();
+            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, sb::append);
+            results.add(sb.toString());
         }
+        Collections.sort(results);
+        StringBuilder sb = new StringBuilder();
+        for (String solution : results) {
+            sb.append("Solution: ").append(i++).append("\n");
+            sb.append(solution);
+        }
+        outputFile(sb.toString(), options);
     }
 
     /**

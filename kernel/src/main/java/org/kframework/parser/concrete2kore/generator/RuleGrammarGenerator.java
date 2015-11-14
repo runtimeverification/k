@@ -74,6 +74,13 @@ public class RuleGrammarGenerator {
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
     public static final String RULE_LISTS = "RULE-LISTS";
 
+    /**
+     * Initialize a grammar generator.
+     * @param baseK A Definition containing a K module giving the syntax of K itself.
+     *              The default K syntax is defined in include/kast.k.
+     * @param strict true if the generated parsers should retain inferred variable
+     *               sorts as sort predicate in the requires clause.
+     */
     public RuleGrammarGenerator(Definition baseK, boolean strict) {
         this.baseK = baseK;
         this.strict = strict;
@@ -190,7 +197,7 @@ public class RuleGrammarGenerator {
                     if (cfgInfo.isLeafCell(p.sort())) {
                         body = p.items().tail().head();
                     } else {
-                        body = NonTerminal(Sort("K"));
+                        body = NonTerminal(Sort("Bag"));
                     }
                     final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
                     Seq<ProductionItem> pi = Seq(p.items().head(), optDots, body, optDots, p.items().last());

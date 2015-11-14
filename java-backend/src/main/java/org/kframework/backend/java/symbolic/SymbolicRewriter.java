@@ -75,9 +75,10 @@ public class SymbolicRewriter {
         }
 
         stopwatch.start();
-        KRunState finalState = null;
-        int step = 1;
-        while (step <= bound || bound < 0) {
+        int step = 0;
+        List<ConstrainedTerm> results;
+        while (step != bound &&
+                !(results = computeRewriteStep(constrainedTerm, step+1, true)).isEmpty()) {
             /* get the first solution */
             List<ConstrainedTerm> results = useFastRewriting ?
                     fastComputeRewriteStep(constrainedTerm, true) :

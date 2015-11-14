@@ -62,13 +62,19 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     /** Return the set of all known sorts which are a lower bound on
-     * all sorts in {@code bounds}, leaving out internal sorts below "KBott".
+     * all sorts in {@code bounds}, leaving out internal sorts below "KBott" or above "K".
      */
     private Set<Sort> lowerBounds(Collection<Sort> bounds) {
         Set<Sort> mins = new HashSet<>();
         nextsort:
         for (Sort sort : iterable(sortSet)) { // for every declared sort
+            // Sorts at or below KBott, or above K, are assumed to be
+            // sorts from kast.k representing meta-syntax that is not a real sort.
+            // This is done to prevent variables from being inferred as KBott or
+            // as KList.
             if (subsorts.lessThanEq(sort, Sort("KBott")))
+                continue;
+            if (subsorts.greaterThan(sort, Sort("K")))
                 continue;
             for (Sort bound : bounds)
                 if (!subsorts.greaterThanEq(bound, sort))
