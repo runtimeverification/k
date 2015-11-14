@@ -77,25 +77,16 @@ public class SymbolicRewriter {
         stopwatch.start();
         int step = 0;
         List<ConstrainedTerm> results;
-        JavaKRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
         while (step != bound &&
-                !(results = computeRewriteStep(constrainedTerm, step+1, true)).isEmpty()) {
+                !(results = useFastRewriting ?
+                        fastComputeRewriteStep(constrainedTerm, true) :
+                        computeRewriteStep(constrainedTerm, step, true)).isEmpty()) {
             /* get the first solution */
-            results = useFastRewriting ?
-                    fastComputeRewriteStep(constrainedTerm, true) :
-                    computeRewriteStep(constrainedTerm, step, true);
-
-            if (!results.isEmpty()) {
-                constrainedTerm = results.get(0);
-                if (step == bound) {
-                    finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
-                }
-            } else {
-                finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step - 1));
-                break;
-            }
+            constrainedTerm = results.get(0);
             step++;
         }
+        KRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
+
         stopwatch.stop();
         if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + " ]");
