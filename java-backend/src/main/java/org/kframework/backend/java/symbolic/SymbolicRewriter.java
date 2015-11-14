@@ -77,7 +77,7 @@ public class SymbolicRewriter {
         stopwatch.start();
         int step = 0;
         List<ConstrainedTerm> results;
-        JavaKRunState finalState = null;
+        JavaKRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
         while (step != bound &&
                 !(results = computeRewriteStep(constrainedTerm, step+1, true)).isEmpty()) {
             /* get the first solution */
