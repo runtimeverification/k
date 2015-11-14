@@ -110,7 +110,7 @@ public class FastRuleMatcher {
             BitSet returnSet = BitSet.apply(ruleCount);
 
             // handle variables in the disjunction
-            List<Pair<Variable, BitSet>> pairs = automatonDisjunction.variableDisjunctionsArray[subject.sort().ordinal()];
+            List<Pair<Variable, BitSet>> pairs = automatonDisjunction.getVariablesForSort(subject.sort());
             for (Pair<Variable, BitSet> p : pairs) {
                 if (ruleMask.intersects(p.getRight())) {
                     BitSet localRuleMask = ruleMask.clone();
@@ -121,17 +121,17 @@ public class FastRuleMatcher {
 
             // try to match the subject as-if it is a singleton kseq, i.e. subject ~> .K
             if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[kSeqLabel.ordinal()]);
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel(kSeqLabel));
             }
 
             // TODO: hack for threads to behave like the kseq above; remove once AC works
-            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel) && threadCellBagLabel.ordinal() < automatonDisjunction.kItemDisjunctionsArray.length) {
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[threadCellBagLabel.ordinal()]);
+            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel) && threadCellBagLabel.ordinal() < automatonDisjunction.getKLabelMaxOrdinal()) {
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel(threadCellBagLabel));
             }
 
             if (subject instanceof KItem) {
                 // main match of KItems
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.kItemDisjunctionsArray[((KLabelConstant) ((KItem) subject).kLabel()).ordinal()]);
+                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel((KLabelConstant) ((KItem) subject).kLabel()));
             } else if (subject instanceof Token) {
                 // and matching Tokens
                 BitSet rules = automatonDisjunction.tokenDisjunctions.get(subject);

@@ -140,7 +140,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             childrenDontCareRuleMask = new BitSet[convertedKList.size()];
             for (int i = 0; i < convertedKList.size(); ++i) {
                 if (convertedKList.get(i) instanceof RuleAutomatonDisjunction) {
-                    BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).variableDisjunctionsArray[Sort.KSEQUENCE.ordinal()].stream()
+                    BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).getVariablesForSort(Sort.KSEQUENCE).stream()
                             .filter(p -> p.getLeft().name().equals(THE_VARIABLE)).findAny().map(Pair::getRight).orElseGet(() -> null);
                     childrenDontCareRuleMask[i] = the_variable;
                 } else {

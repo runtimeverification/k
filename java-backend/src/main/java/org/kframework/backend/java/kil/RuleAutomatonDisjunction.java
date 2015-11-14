@@ -11,7 +11,6 @@ import org.kframework.utils.BitSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,13 +23,14 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term {
 
     /**
-     * the KApplies in the disjunction, indexed (via the array) by their source rule
+     *  (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
      */
-    public final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+    private final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+
     /**
      * pairs of variable-rule where it appears, indexed by the variable's sort
      */
-    public final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
+    private final List<Pair<Variable, BitSet>>[] variableDisjunctionsArray;
     /**
      * a mapping from Tokens to the rules where they appear in this disjunction
      */
@@ -67,6 +67,21 @@ public class RuleAutomatonDisjunction extends Term {
         this.tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> p.getRight()));
+    }
+
+
+    /**
+     * Gets the (pattern, appearing-in-rules) pair for the klabel.
+     */
+    public Pair<KItem, BitSet> getKItemPatternForKLabel(KLabelConstant klabel) {
+        return this.kItemDisjunctionsArray[klabel.ordinal()];
+    }
+
+    /**
+     * Gets the variables and the rules where they appear for a sort
+     */
+    public List<Pair<Variable, BitSet>> getVariablesForSort(Sort sort) {
+        return this.variableDisjunctionsArray[sort.ordinal()];
     }
 
     /**
@@ -130,5 +145,12 @@ public class RuleAutomatonDisjunction extends Term {
     @Override
     public String toString() {
         return disjunctions().stream().map(Object::toString).reduce("", (a, b) -> a + " OR " + b);
+    }
+
+    /**
+     * @return the maximal KLabel ordinal for the KItem patterns appearing in this disjunction
+     */
+    public int getKLabelMaxOrdinal() {
+        return kItemDisjunctionsArray.length;
     }
 }
