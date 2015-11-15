@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.Backends;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +51,7 @@ public class SymbolicRewriter {
     private final KompileOptions kompileOptions;
     private final BitSet allRuleBits;
 
-    private boolean useFastRewriting;
+    private final boolean useFastRewriting;
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
@@ -77,10 +75,7 @@ public class SymbolicRewriter {
         stopwatch.start();
         int step = 0;
         List<ConstrainedTerm> results;
-        while (step != bound &&
-                !(results = useFastRewriting ?
-                        fastComputeRewriteStep(constrainedTerm, true) :
-                        computeRewriteStep(constrainedTerm, step, true)).isEmpty()) {
+        while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true)).isEmpty()) {
             /* get the first solution */
             constrainedTerm = results.get(0);
             step++;
@@ -95,7 +90,13 @@ public class SymbolicRewriter {
         return finalState;
     }
 
-    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
+    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
+        return useFastRewriting ?
+                fastComputeRewriteStep(constrainedTerm, true) :
+                slowComputeRewriteStep(constrainedTerm, step, true);
+    }
+
+    private List<ConstrainedTerm> slowComputeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
         RuleAuditing.setAuditingRule(javaOptions, step, subject.termContext().definition());
         try {
             subject.termContext().setTopTerm(subject.term());
@@ -429,9 +430,7 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                List<ConstrainedTerm> results = useFastRewriting ?
-                        fastComputeRewriteStep(term, false) :
-                        computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound)) {
@@ -526,7 +525,7 @@ public class SymbolicRewriter {
                     }
                 }
 
-                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = slowComputeRewriteStep(term, step, false);
                 if (results.isEmpty()) {
                     /* final term */
                     proofResults.add(term);
