@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -79,7 +80,7 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
+    private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     private final FileUtil files;
@@ -276,12 +277,18 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+        String prelude = REQUIRE_PRELUDE_K;
+        if (kompileOptions.noPrelude) {
+            prelude = "";
+        }
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, REQUIRE_KAST_K + "require " + StringUtil.enquoteCString(definitionFile.getPath()),
+                mainProgramsModule, prelude + "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getPath()),
                 definitionFile.getParentFile(),
-                Lists.newArrayList(BUILTIN_DIRECTORY),
+                ListUtils.union(kompileOptions.includes.stream()
+                                .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                        Lists.newArrayList(BUILTIN_DIRECTORY)),
                 dropQuote);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
