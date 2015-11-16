@@ -120,6 +120,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="-I", description="Add a directory to the search path for requires statements.", variableArity = true)
     public List<String> includes = new ArrayList<>();
 
+    @Parameter(names="--no-prelude", description="Do not implicitly require prelude.k.")
+    public boolean noPrelude = false;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
@@ -137,9 +140,6 @@ public class KompileOptions implements Serializable {
 
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
-
-        @Parameter(names="--no-prelude", description="Do not include anything automatically.")
-        public boolean noPrelude = false;
 
         @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
         public List<String> documentation = Collections.singletonList("documentation");
