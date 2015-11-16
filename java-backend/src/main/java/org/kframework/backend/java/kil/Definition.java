@@ -13,6 +13,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
@@ -303,11 +304,6 @@ public class Definition extends JavaSymbolicObject {
     }
 
     /**
-     * attribute marking the top rule label
-     */
-    public static final String TOP_RULE = "topRule";
-
-    /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, TermContext termContext) {
@@ -317,7 +313,7 @@ public class Definition extends JavaSymbolicObject {
                 .map(org.kframework.definition.Rule.class::cast)
                 .collect(Collectors.toList());
         koreRules.forEach(r -> {
-            if (r.att().contains(TOP_RULE)) {
+            if (r.att().contains(Att.topRule())) {
 //            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
                 if (!r.att().contains(AUTOMATON)) {
                     reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
@@ -328,7 +324,7 @@ public class Definition extends JavaSymbolicObject {
             Rule convertedRule = transformer.convert(Optional.of(module), r);
             addRule(convertedRule);
 //            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
-            if (r.att().contains(TOP_RULE)) {
+            if (r.att().contains(Att.topRule())) {
                 if (!r.att().contains(AUTOMATON)) {
                     ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
                 }
@@ -483,13 +479,13 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public KItem.CacheTableValue getSortCacheValue(KItem.CacheTableColKey key) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             return sortCacheTable.get(key);
         }
     }
 
     public void putSortCacheValue(KItem.CacheTableColKey key, KItem.CacheTableValue value) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             sortCacheTable.put(key, value);
         }
     }

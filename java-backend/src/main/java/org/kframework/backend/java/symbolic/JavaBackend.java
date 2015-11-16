@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.CleanKSeq;
@@ -92,7 +93,7 @@ public class JavaBackend implements Backend {
             if (s instanceof org.kframework.definition.Rule) {
                 org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
                 if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
-                    return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(org.kframework.backend.java.kil.Definition.TOP_RULE));
+                    return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(Att.topRule()));
                 } else
                     return r;
             } else
@@ -120,7 +121,7 @@ public class JavaBackend implements Backend {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
 
-            if (!r.att().contains(org.kframework.backend.java.kil.Definition.TOP_RULE))
+            if (!r.att().contains(Att.topRule()))
                 return r;
 
             Map<KVariable, Integer> varCount = new HashMap<>();

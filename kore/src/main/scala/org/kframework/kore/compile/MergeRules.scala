@@ -32,11 +32,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   val isRulePredicate = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    val topRules = m.rules filter { r => r.body match {
-      case app: KApply => app.klabel.name == "<T>"
-      case _ => false
-    }
-    }
+    val topRules = m.rules filter {_.att.contains(Att.topRule)}
 
     if (topRules.nonEmpty) {
 
@@ -89,7 +85,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
             setOfLists.head.indices
               .map(i => setOfLists.map(l => l(i)))
               .map(pushDisjunction)
-          val rulePs = ks map { _._2 } toSeq
+          val rulePs = ks map {_._2} toSeq
 
           (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
       }
@@ -112,5 +108,5 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     }
   }
 
-  def normalizeKSeq(k: K): K = Assoc.flatten(KLabel(KLabels.KSEQ), Seq(k), KLabel(KLabels.DOTK)) reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() }
+  def normalizeKSeq(k: K): K = Assoc.flatten(KLabel(KLabels.KSEQ), Seq(k), KLabel(KLabels.DOTK)) reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse {KLabel(KLabels.DOTK)()}
 }
