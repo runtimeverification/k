@@ -122,7 +122,7 @@ public class CheckVariables extends BasicVisitor {
             }
             if (!left.containsKey(v)) {
                 throw KExceptionManager.compilerError(
-                        "Unbounded variable " + v.toString() + "should start with ? or !.",
+                        "Unbounded variable " + v.toString() + " should start with ? or !.",
                         this, v);
             }
         }
