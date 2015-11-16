@@ -6,6 +6,7 @@ import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -218,11 +219,13 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final boolean skipEqualities;
     private final HashSet<Variable> variables;
     private final HashMap<Term, Variable> termAbstractionMap = Maps.newHashMap();
+    private final HashMap<UninterpretedToken, Integer> tokenEncoding;
 
     public KILtoSMTLib(boolean skipEqualities, TermContext context) {
         super(context);
         this.skipEqualities = skipEqualities;
         variables = new HashSet<>();
+        tokenEncoding = new HashMap<>();
     }
 
 
@@ -367,6 +370,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         sort = definition.smtSortFlattening().getOrDefault(sort, sort);
         if (sort == Sort.LIST) {
             return Sort.of("IntSeq");
+        } else if (sort == Sort.of("Id")) {
+            return Sort.INT;
         } else {
             return sort;
         }
@@ -572,6 +577,14 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append(value.testBit(i) ? "1" : "0");
         }
         return new SMTLibTerm(sb.toString());
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedToken uninterpretedToken) {
+        if (tokenEncoding.get(uninterpretedToken) == null) {
+            tokenEncoding.put(uninterpretedToken, tokenEncoding.size());
+        }
+        return new SMTLibTerm(Integer.toString(tokenEncoding.get(uninterpretedToken)));
     }
 
     @Override
