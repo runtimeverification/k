@@ -114,7 +114,7 @@ public class MetaK {
             }
         });
 
-        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables), context), context);
+        return term.substitute(Variable.rename(variables), context);
     }
 
     /**
@@ -133,7 +133,7 @@ public class MetaK {
 
     public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {
         BuiltinSet variables = trueVariables(termWithBoundVars, context);
-        return KLabelInjection.injectionOf((Term) termToFreeze.accept(new CopyOnWriteTransformer(context) {
+        return (Term) termToFreeze.accept(new CopyOnWriteTransformer(context) {
             @Override
             public ASTNode transform(Variable variable) {
                 if (!variables.contains(variable)) {
@@ -141,7 +141,7 @@ public class MetaK {
                 }
                 return variable;
             }
-        }), context);
+        });
     }
 
     /**
