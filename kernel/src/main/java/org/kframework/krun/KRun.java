@@ -12,7 +12,8 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.ToKast;
+import org.kframework.unparser.ToBinary;
+import org.kframework.unparser.ToKast;
 import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
@@ -26,7 +27,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.koreparser.KoreParser;
+import org.kframework.parser.kore.KoreParser;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
@@ -203,6 +204,9 @@ public class KRun {
         case PRETTY:
             Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
             print.accept(unparseTerm(result, unparsingModule) + "\n");
+            break;
+        case BINARY:
+            print.accept(ToBinary.apply(result));
             break;
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);

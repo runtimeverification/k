@@ -4,6 +4,7 @@ import org.junit.{Before, Assert}
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Module, Production}
+import org.kframework.unparser.Unparse
 
 
 trait AbstractTest {

@@ -9,7 +9,7 @@ options {
 }
 
 PARSER_BEGIN(KoreParser)
-package org.kframework.utils.koreparser;
+package org.kframework.parser.kore;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;

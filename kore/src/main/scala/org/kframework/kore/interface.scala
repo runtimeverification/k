@@ -1,6 +1,7 @@
 package org.kframework.kore
 
 import org.kframework.attributes._
+import org.kframework.unparser.Unparse
 
 /**
  * This file contains all inner KORE interfaces.

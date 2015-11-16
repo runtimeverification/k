@@ -2,6 +2,9 @@
 package org.kframework.utils;
 
 import com.google.inject.Inject;
+import org.kframework.kore.K;
+import org.kframework.parser.binary.BinaryParser;
+import org.kframework.unparser.ToBinary;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
@@ -64,18 +67,22 @@ public class BinaryLoader {
     }
 
     public void save(OutputStream out, Object o) throws IOException {
-        try(ObjectOutputStream serializer
-                = new ObjectOutputStream(new BufferedOutputStream(out))) {
-            serializer.writeObject(o);
+        if (o instanceof K) {
+            ToBinary.apply(out, (K)o);
+        } else {
+            try (ObjectOutputStream serializer
+                         = new ObjectOutputStream(new BufferedOutputStream(out))) {
+                serializer.writeObject(o);
+            }
         }
     }
 
     public <T> T load(Class<T> cls, File fileName) throws IOException, ClassNotFoundException {
-        return cls.cast(load(fileName));
+        return cls.cast(load(fileName, K.class.isAssignableFrom(cls)));
     }
 
     public <T> T load(Class<T> cls, InputStream in) throws IOException, ClassNotFoundException {
-        return cls.cast(load(in));
+        return cls.cast(load(in, K.class.isAssignableFrom(cls)));
     }
 
     public <T> T loadOrDie(Class<T> cls, File fileName) {
@@ -86,22 +93,25 @@ public class BinaryLoader {
         }
     }
 
-    public Object load(InputStream in) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream deserializer
-                = new ObjectInputStream(in)) {
-            Object obj = deserializer.readObject();
-            return obj;
+    private Object load(InputStream in, boolean isK) throws IOException, ClassNotFoundException {
+        if (isK) {
+            return BinaryParser.parse(in);
+        } else {
+            try (ObjectInputStream deserializer
+                         = new ObjectInputStream(in)) {
+                Object obj = deserializer.readObject();
+                return obj;
+            }
         }
     }
 
-    public Object load(File fileName) throws IOException, ClassNotFoundException {
+    private Object load(File fileName, boolean isK) throws IOException, ClassNotFoundException {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
-            return load(in);
+            return load(in, isK);
         }
     }
 
     public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
-
         try {
             return load(cls, in);
         } catch (ClassNotFoundException e) {

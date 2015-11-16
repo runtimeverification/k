@@ -3,6 +3,7 @@ package org.kframework.kore
 import org.junit.{Assert, Test}
 import org.kframework.attributes.Att
 import org.kframework.kore.KORE._
+import org.kframework.unparser.ToKast
 
 class UnparseTest {
   @Test def Token() {
