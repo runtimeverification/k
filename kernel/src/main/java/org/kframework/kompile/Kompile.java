@@ -283,7 +283,7 @@ public class Kompile {
         }
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, prelude + "require " + StringUtil.enquoteCString(definitionFile.getPath()),
+                mainProgramsModule, prelude + FileUtil.load(definitionFile),
                 Source.apply(definitionFile.getPath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(kompileOptions.includes.stream()
