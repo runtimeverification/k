@@ -11,6 +11,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.kil.Production;
@@ -53,7 +54,6 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         injector.getInstance(Key.get(ExecutionMode.class, Main.class));
         injector.getInstance(Key.get(InitializeRewriter.class, Main.class));
     }
-
 
     @Test
     public void testCreateInjectionJavaKompile() {

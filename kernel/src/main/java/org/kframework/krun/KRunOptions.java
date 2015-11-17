@@ -247,8 +247,6 @@ public final class KRunOptions {
     @Parameter(names="--exit-code", description="Specify a matching pattern containing an integer variable which will be used as the exit status of krun.")
     public String exitCodePattern;
 
-    public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
-
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;
 

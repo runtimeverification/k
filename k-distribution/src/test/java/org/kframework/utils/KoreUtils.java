@@ -3,6 +3,7 @@ package org.kframework.utils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -44,32 +45,37 @@ import static org.kframework.kore.KORE.KToken;
 
 public class KoreUtils {
 
-    private static CompiledDefinition compiledDef;
-    private static Injector injector;
-    private static KExceptionManager kem;
-    private static SimpleScope requestScope;
-    private static BiFunction<String, Source, K> programParser;
-    private static Rewriter rewriter = null;
-
+    public final CompiledDefinition compiledDef;
+    public final Injector injector;
+    public final KExceptionManager kem;
+    public final SimpleScope requestScope;
+    public final BiFunction<String, Source, K> programParser;
+    public Rewriter rewriter;
 
     protected File testResource(String baseName) throws URISyntaxException {
         return new File(KoreUtils.class.getResource(baseName).toURI());
     }
 
-    public KoreUtils(String fileName) throws URISyntaxException {
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
-        compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
+        KompileOptions kompileOptions = new KompileOptions();
+        GlobalOptions globalOptions = new GlobalOptions();
+
+        Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(),
+                new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
             protected void configure() {
                 super.configure();
-                bind(GlobalOptions.class).toInstance(new GlobalOptions());
+                bind(GlobalOptions.class).toInstance(globalOptions);
                 bind(SMTOptions.class).toInstance(new SMTOptions());
                 bind(Stage.class).toInstance(Stage.REWRITING);
                 bind(FileSystem.class).to(PortableFileSystem.class);
                 bind(FileUtil.class).toInstance(FileUtil.testFileUtil());
+                bind(KompileOptions.class).toInstance(kompileOptions);
 
                 bindScope(RequestScoped.class, requestScope);
                 bindScope(DefinitionScoped.class, requestScope);
@@ -107,14 +113,6 @@ public class KoreUtils {
 
     public Module getUnparsingModule() {
         return compiledDef.getExtensionModule(compiledDef.languageParsingModule());
-
     }
 
-    public static CompiledDefinition getCompiledDef() {
-        return compiledDef;
-    }
-
-    public static KExceptionManager getKem() {
-        return kem;
-    }
 }

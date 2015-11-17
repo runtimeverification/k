@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kore.compile;
 
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -120,8 +121,7 @@ public class ExpandMacros {
     }
 
     private Rule expand(Rule rule) {
-        return Rule(
-                KRewrite(expand(RewriteToTop.toLeft(rule.body())), expand(RewriteToTop.toRight(rule.body()))),
+        return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());
@@ -145,7 +145,7 @@ public class ExpandMacros {
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule) {
+        if (s instanceof Rule && !s.att().contains("macro")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

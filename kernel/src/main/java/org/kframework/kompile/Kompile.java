@@ -7,8 +7,11 @@ import com.google.inject.Inject;
 import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Source;
+import org.kframework.backend.Backends;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.CleanKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -17,23 +20,19 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.ADT;
+import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.compile.AddImplicitComputationCell;
-import org.kframework.kore.compile.ConcretizeCells;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
-import org.kframework.kore.compile.GenerateSortPredicateSyntax;
-import org.kframework.kore.compile.ResolveAnonVar;
-import org.kframework.kore.compile.ResolveContexts;
-import org.kframework.kore.compile.ResolveFreshConstants;
-import org.kframework.kore.compile.ResolveHeatCoolAttribute;
-import org.kframework.kore.compile.ResolveIOStreams;
-import org.kframework.kore.compile.ResolveSemanticCasts;
-import org.kframework.kore.compile.ResolveStrict;
-import org.kframework.kore.compile.SortInfo;
+import org.kframework.kore.SortedADT;
+import org.kframework.kore.compile.*;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
@@ -50,6 +49,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
+import scala.collection.immutable.Seq;
 import scala.collection.immutable.Set;
 import scala.util.Either;
 
@@ -83,12 +83,13 @@ public class Kompile {
     private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
+    public final KompileOptions kompileOptions;
+
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final boolean cacheParses;
     private final BinaryLoader loader;
-    private final KompileOptions kompileOptions;
     private final Stopwatch sw;
 
     private final AtomicInteger parsedBubbles = new AtomicInteger(0);
@@ -112,9 +113,9 @@ public class Kompile {
     }
 
     public Kompile(KompileOptions kompileOptions, GlobalOptions global, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
-        this.kompileOptions = kompileOptions;
         this.parser = new ParserUtils(files, kem, global);
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(kem);
@@ -153,7 +154,7 @@ public class Kompile {
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute()::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
         return def -> func(this::resolveIOStreams)
@@ -432,7 +433,7 @@ public class Kompile {
 
     public Rule compileRule(CompiledDefinition compiledDef, Rule parsedRule) {
         return (Rule) func(new ResolveAnonVar()::resolve)
-                .andThen(func(new ResolveSemanticCasts()::resolve))
+                .andThen(func(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve))
                 .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))
                 .apply(parsedRule);
     }

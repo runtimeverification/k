@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
@@ -9,14 +10,18 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.BitSet;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -116,6 +121,34 @@ public class CopyOnWriteTransformer implements Transformer {
             injectedKLabel = new InjectedKLabel(term);
         }
         return injectedKLabel;
+    }
+
+    @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        List<Pair<Term, BitSet>> children = ruleAutomatonDisjunction.disjunctions().stream()
+                .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
+                .collect(Collectors.toList());
+        if (children.equals(ruleAutomatonDisjunction.disjunctions())) {
+            return ruleAutomatonDisjunction;
+        } else {
+            return new RuleAutomatonDisjunction(
+                    children,
+                    context);
+        }
+    }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        Term[] theNewRHS = new Term[innerRHSRewrite.theRHS.length];
+        for (int i = 0; i < theNewRHS.length; i++) {
+            if (innerRHSRewrite.theRHS[i] != null)
+                theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
+        }
+        if(Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
+            return innerRHSRewrite;
+        } else {
+            return new InnerRHSRewrite(theNewRHS);
+        }
     }
 
     @Override

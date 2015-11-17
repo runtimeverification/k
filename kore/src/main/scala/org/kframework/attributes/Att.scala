@@ -90,6 +90,11 @@ object Att {
 
   implicit def asK(key: String, value: String) =
     KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
+
+  /**
+    * attribute marking the top rule label
+    */
+  val topRule = "topRule"
 }
 
 trait AttributesToString {

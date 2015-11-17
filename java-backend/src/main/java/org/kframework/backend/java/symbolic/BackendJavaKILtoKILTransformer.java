@@ -307,6 +307,16 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public ASTNode transform(BitVector bitVector) {
         return transform((Token) bitVector);
     }

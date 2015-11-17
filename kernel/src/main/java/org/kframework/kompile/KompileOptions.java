@@ -146,5 +146,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--legacy-kast", description="Compile with settings based on the old KAST structure")
         public boolean legacyKast = false;
+
+        @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
+        public boolean koreProve = false;
     }
 }

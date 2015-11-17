@@ -59,8 +59,6 @@ public class PatternMatcher extends AbstractUnifier {
      */
     private final boolean disjointVariables;
 
-    private final TermContext termContext;
-
     public Substitution<Variable, Term> substitution() {
         assert fSubstitution.isSubstitution();
         return fSubstitution.substitution();
@@ -122,9 +120,9 @@ public class PatternMatcher extends AbstractUnifier {
     }
 
     public PatternMatcher(boolean matchOnFunctionSymbol, boolean disjointVariables, TermContext context) {
+        super(context);
         this.matchOnFunctionSymbol = matchOnFunctionSymbol;
         this.disjointVariables = disjointVariables;
-        this.termContext = context;
         this.fSubstitution = ConjunctiveFormula.of(context);
     }
 
@@ -265,7 +263,7 @@ public class PatternMatcher extends AbstractUnifier {
         Set<PartialSubstitution> partialSubstitutions = new HashSet<>();
         partialSubstitutions.add(new PartialSubstitution(
                 ImmutableSet.<Term>of(),
-                Substitution.empty()));
+                ImmutableMapSubstitution.empty()));
 
         /* match each entry from the pattern */
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {

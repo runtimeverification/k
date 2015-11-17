@@ -148,6 +148,14 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) { }
+
+    @Override
     public void visit(KItem kItem) {
         preVisitor.resetProceed();
         kItem.accept(preVisitor);
