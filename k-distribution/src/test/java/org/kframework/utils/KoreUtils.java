@@ -56,7 +56,7 @@ public class KoreUtils {
         return new File(KoreUtils.class.getResource(baseName).toURI());
     }
 
-    public KoreUtils(String fileName) throws URISyntaxException {
+    public KoreUtils(String fileName) throws URISyntaxException, IOException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         compiledDef = new Kompile(new KompileOptions(), FileUtil.testFileUtil(), kem, false).run(definitionFile, "IMP", "IMP-SYNTAX", Sorts.K());
