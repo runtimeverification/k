@@ -75,9 +75,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     private final TermContext context;
 
     public ConstrainedTerm(Term term, ConjunctiveFormula constraint) {
-        Data data = new Data(term, constraint);
-        this.data = data;
-        this.context = data.constraint.termContext();
+        this.data = new Data(term, constraint);
+        this.context = constraint.termContext().fork();
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
