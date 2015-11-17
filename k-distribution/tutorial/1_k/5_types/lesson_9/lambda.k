@@ -71,5 +71,5 @@ module LAMBDA
   rule T = T => .K
 
   syntax KItem ::= tenv(Map)
-  rule <k> `T:Type ~> tenv(TEnv) => T` ...</k> <tenv> `_ => TEnv` </tenv>
+  rule <k> T:Type ~> tenv(TEnv) => T ...</k> <tenv> _ => TEnv </tenv>
 endmodule
