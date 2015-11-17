@@ -2,7 +2,6 @@
 <!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
 
 <tests>
-<!--
   <include file="execution/config.xml" />
 
   <include file="simple/config.xml" />
