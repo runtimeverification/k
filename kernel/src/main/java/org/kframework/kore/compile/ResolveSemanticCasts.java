@@ -23,8 +23,14 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveSemanticCasts {
 
+    private final boolean skipSortPredicates;
     private Set<KApply> casts = new HashSet<>();
     private Map<KVariable, KVariable> varToTypedVar = new HashMap<>();
+
+    public ResolveSemanticCasts(boolean skipSortPredicates) {
+
+        this.skipSortPredicates = skipSortPredicates;
+    }
 
     void resetCasts() {
         casts.clear();
@@ -54,23 +60,27 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        Optional<KApply> sideCondition = casts.stream().map(k -> {
-            return new TransformKORE() {
-                @Override
-                public K apply(KVariable k) {
-                    if (varToTypedVar.containsKey(k)) {
-                        return varToTypedVar.get(k);
-                    }
-                    return k;
-                }
-            }.apply(k);
-        }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply)k)), transform(k))).reduce(BooleanUtils::and);
-        if (!sideCondition.isPresent()) {
+        if (skipSortPredicates)
             return requires;
-        } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
-            return sideCondition.get();
-        } else {
-            return BooleanUtils.and(sideCondition.get(), requires);
+        else {
+            Optional<KApply> sideCondition = casts.stream().map(k -> {
+                return new TransformKORE() {
+                    @Override
+                    public K apply(KVariable k) {
+                        if (varToTypedVar.containsKey(k)) {
+                            return varToTypedVar.get(k);
+                        }
+                        return k;
+                    }
+                }.apply(k);
+            }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply) k)), transform(k))).reduce(BooleanUtils::and);
+            if (!sideCondition.isPresent()) {
+                return requires;
+            } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
+                return sideCondition.get();
+            } else {
+                return BooleanUtils.and(sideCondition.get(), requires);
+            }
         }
     }
 

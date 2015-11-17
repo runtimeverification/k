@@ -9,12 +9,10 @@
            results=".">
     <kompile-option name="--superheat"
                     value="strict" />
-    <kompile-option name="--kore" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      <krun-option name="--kore" />
-      <krun-option name="--parser" value="kast --kore --sort Exp" />
+      <krun-option name="--parser" value="kast --sort Exp" />
     </all-programs>
   </include>
 

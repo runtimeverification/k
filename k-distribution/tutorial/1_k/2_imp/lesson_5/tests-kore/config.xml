@@ -5,10 +5,8 @@
   <include file="../../lesson_4/tests/config.xml"
            skip="pdf"
            more-results="." >
-    <kompile-option name="--kore" />
     <all-programs>
-      <krun-option name="--kore" />
-      <krun-option name="--parser" value="kast --kore --sort Pgm" />
+      <krun-option name="--parser" value="kast --sort Pgm" />
     </all-programs>
   </include>
 

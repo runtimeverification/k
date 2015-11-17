@@ -14,6 +14,7 @@ import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Equality;
+import org.kframework.backend.java.symbolic.ImmutableMapSubstitution;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.Substitution;
@@ -162,7 +163,7 @@ public class RewriteEngineUtils {
             TermContext context) {
         /* handle fresh variables, data structure lookups, and side conditions */
         return substitutions.stream()
-                .map(s -> evaluateConditions(rule, Substitution.from(s), context))
+                .map(s -> evaluateConditions(rule, ImmutableMapSubstitution.from(s), context))
                 .filter(s -> s != null)
                 .collect(Collectors.toList());
     }

@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 
 import com.google.common.collect.Lists;
+import org.kframework.backend.java.symbolic.ImmutableMapSubstitution;
 import org.kframework.backend.java.symbolic.Substitution;
 
 /**
@@ -33,7 +34,7 @@ class ExtendedSubstitution {
     private final List<CellCollection.Cell> writeCells;
 
     ExtendedSubstitution() {
-        subst = Substitution.empty();
+        subst = ImmutableMapSubstitution.empty();
         writeCells = Lists.newArrayList();
     }
 

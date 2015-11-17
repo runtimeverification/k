@@ -1,14 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
+
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
-
-import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.compile.transformers.Cell2DataStructure;
-import org.kframework.compile.utils.MetaK;
 
 /**
  * Label of a cell.
@@ -20,7 +18,6 @@ public final class CellLabel implements MaximalSharing, Serializable {
 
     private static final Map<String, CellLabel> cache = Collections.synchronizedMap(new PatriciaTrie<>());
 
-    public static final CellLabel GENERATED_TOP =   CellLabel.of(MetaK.Constants.generatedTopCellLabel);
     public static final CellLabel K             =   CellLabel.of("k");
 
     /**
@@ -49,12 +46,12 @@ public final class CellLabel implements MaximalSharing, Serializable {
     }
 
     public boolean isMapCell() {
-        return name.startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX);
+        return name.startsWith("value-cell-label-prefix-");
     }
 
     public CellLabel getRealCellLabel() {
         assert isMapCell();
-        return CellLabel.of(name.substring(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX.length()));
+        return CellLabel.of(name.substring("value-cell-label-prefix-".length()));
     }
 
     @Override

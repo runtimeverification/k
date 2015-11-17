@@ -43,10 +43,10 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     public SymbolicUnifier(boolean patternFold, boolean partialSimpl, TermContext context) {
+        super(context);
         this.constraint = ConjunctiveFormula.of(context);
         this.patternFold = patternFold;
         this.partialSimpl = partialSimpl;
-        this.termContext = context;
     }
 
     public ConjunctiveFormula constraint() {

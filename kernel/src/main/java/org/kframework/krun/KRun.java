@@ -2,13 +2,10 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
-import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -18,10 +15,12 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
 import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
-import org.kframework.transformation.Transformation;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -30,8 +29,12 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +48,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * The KORE-based KRun
  */
-public class KRun implements Transformation<Void, Void> {
+public class KRun {
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -102,14 +105,23 @@ public class KRun implements Transformation<Void, Void> {
 
     private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
         List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
-        if (searchResult == null || searchResult.isEmpty()) {
+        if (searchResult.isEmpty()) {
             outputFile("No Search Results \n", options);
         }
         int i = 0;
+        List<String> results = new ArrayList<>();
         for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-            outputFile("Solution: " + (i++) + "\n", options);
-            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, s -> outputFile(s, options));
+            StringBuilder sb = new StringBuilder();
+            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, sb::append);
+            results.add(sb.toString());
         }
+        Collections.sort(results);
+        StringBuilder sb = new StringBuilder();
+        for (String solution : results) {
+            sb.append("Solution: ").append(i++).append("\n");
+            sb.append(solution);
+        }
+        outputFile(sb.toString(), options);
     }
 
     /**
@@ -254,11 +266,33 @@ public class KRun implements Transformation<Void, Void> {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
-            String stdin = InitialConfigurationProvider.getStdinBuffer(ttyStdin);
+            String stdin = getStdinBuffer(ttyStdin);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
         return plugConfigVars(compiledDef, output);
+    }
+
+    public static String getStdinBuffer(boolean ttyStdin) {
+        String buffer = "";
+
+        try {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(System.in));
+            // detect if the input comes from console or redirected
+            // from a pipeline
+
+            if ((Main.isNailgun() && !ttyStdin)
+                    || (!Main.isNailgun() && br.ready())) {
+                buffer = br.readLine();
+            }
+        } catch (IOException e) {
+            throw KEMException.internalError("IO error detected reading from stdin", e);
+        }
+        if (buffer == null) {
+            return "";
+        }
+        return buffer + "\n";
     }
 
     public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
@@ -269,11 +303,6 @@ public class KRun implements Transformation<Void, Void> {
         return KOREToTreeNodes.toString(
                 new AddBrackets(test).addBrackets((ProductionReference)
                         KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
-    }
-
-    @Override
-    public Void run(Void aVoid, Attributes attrs) {
-        return null;
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
@@ -291,10 +320,5 @@ public class KRun implements Transformation<Void, Void> {
 
         String kast = output.stdout != null ? output.stdout : "";
         return KoreParser.parse(kast, source);
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }

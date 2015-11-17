@@ -1,23 +1,17 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
+import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 
 /**
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
@@ -58,16 +52,6 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     /** Must equal with {@link #label} */
     String endLabel;
 
-    /**
-     * label and endLabel should be equal;  however, this is not checked during parsing, but later during compilation.
-     * @return the end label
-     *
-     * @see org.kframework.parser.concrete.disambiguate.CellEndLabelFilter
-     */
-    public String getEndLabel() {
-        return endLabel;
-    }
-
     public void setEndLabel(String endLabel) {
         this.endLabel = endLabel;
     }
@@ -78,28 +62,6 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     public Cell(Location location, Source source) {
         super(location, source, Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
-    }
-
-    public Cell(Element element, JavaClassesFactory factory) {
-        super(element);
-        this.sort = Sort.BAG_ITEM;
-        this.label = element.getAttribute(Constants.LABEL_label_ATTR);
-        this.endLabel = element.getAttribute(Constants.ENDLABEL_label_ATTR);
-        this.contents = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
-
-        NamedNodeMap its = element.getAttributes();
-        cellAttributes = new HashMap<String, String>();
-        setEllipses(element.getAttribute(Constants.ELLIPSES_ellipses_ATTR));
-
-        for (int i = 0; i < its.getLength(); i++) {
-            if (!its.item(i).getNodeName().equals(Constants.FILENAME_filename_ATTR)
-                    && !its.item(i).getNodeName().equals(Constants.LOC_loc_ATTR) // &&
-                                                                                    // !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
-                    && !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)
-                    && !its.item(i).getNodeName().equals(Constants.ENDLABEL_label_ATTR)) {
-                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteKString("\"" + its.item(i).getNodeValue() + "\""));
-            }
-        }
     }
 
     public Cell(Cell node) {

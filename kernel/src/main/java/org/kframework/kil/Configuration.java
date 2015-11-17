@@ -1,9 +1,7 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.w3c.dom.Element;
 
 /**
  * Configuration declaration.
@@ -15,10 +13,6 @@ public class Configuration extends Sentence {
 
     public Configuration() {
         super();
-    }
-
-    public Configuration(Element element, JavaClassesFactory factory) {
-        super(element, factory);
     }
 
     public Configuration(Configuration node) {

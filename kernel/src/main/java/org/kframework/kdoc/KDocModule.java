@@ -1,16 +1,17 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kdoc;
 
-import java.util.Map;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import org.kframework.backend.Backends;
 import org.kframework.backend.PosterBackend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.latex.DocumentationBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
-import org.kframework.backend.unparser.UnflattenBackend;
-import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -22,11 +23,7 @@ import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
+import java.util.Map;
 
 public class KDocModule extends AbstractModule {
 
@@ -49,8 +46,6 @@ public class KDocModule extends AbstractModule {
         posterBinder.addBinding(Backends.LATEX).to(LatexBackend.class);
         posterBinder.addBinding(Backends.DOC).to(DocumentationBackend.class);
         posterBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
-        posterBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
-        posterBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
     }
 
     @Provides

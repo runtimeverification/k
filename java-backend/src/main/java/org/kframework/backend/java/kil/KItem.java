@@ -15,9 +15,11 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.BitSet;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
@@ -36,11 +38,11 @@ import java.util.Set;
  * Or in the usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- *
+ * <p>
  * <pre>
  * syntax KItem ::= KLabel "(" KList ")"
  * </pre>
- *
+ * <p>
  * </blockquote>
  * <p>
  *
@@ -62,13 +64,27 @@ public class KItem extends Term implements KItemRepresentation {
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
+    private BitSet[] childrenDontCareRuleMask = null;
+
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        return of(kLabel, kList, termContext, null, null);
+        return of(kLabel, kList, termContext, null, null, null);
+    }
+
+    public static KItem of(Term kLabel, KList kList, TermContext termContext, BitSet[] childrenDontCareRuleMask) {
+        return of(kLabel, kList, termContext, null, null, childrenDontCareRuleMask);
     }
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location) {
-        return new KItem(kLabel, KCollection.upKind(kList, Kind.KLIST), termContext,
-                termContext.global().stage, source, location);
+        return of(kLabel, kList, termContext, source, location, null);
+    }
+
+    public static KItem of(Term kLabel, Term kList, TermContext termContext, Source source, Location location, BitSet[] childrenDontCareRuleMask) {
+        /* YilongL: since KList.Builder always canonicalizes its result, the
+         * following conversion is necessary */
+        kList = KCollection.upKind(kList, Kind.KLIST);
+
+        // TODO(yilongli): break the dependency on the Tool object
+        return new KItem(kLabel, kList, termContext, termContext.global().stage, source, location, childrenDontCareRuleMask);
     }
 
     public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -90,13 +106,14 @@ public class KItem extends Term implements KItemRepresentation {
         this.enableCache = false;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location) {
+    private KItem(Term kLabel, Term kList, TermContext termContext, Stage stage, Source source, Location location, BitSet[] childrenDonCareRuleMask) {
         super(Kind.KITEM, source, location);
         this.kLabel = kLabel;
         this.kList = kList;
         this.termContext = termContext;
 
         Definition definition = termContext.definition();
+        this.childrenDontCareRuleMask = childrenDonCareRuleMask;
 
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
@@ -214,9 +231,9 @@ public class KItem extends Term implements KItemRepresentation {
         Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
         if (sort == null) {
             throw KExceptionManager.criticalError("Cannot compute least sort of term: " +
-                            this.toString() + "\nPossible least sorts are: " + sorts +
-                            "\nAll terms must have a unique least sort; " +
-                            "consider assigning unique KLabels to overloaded productions", this);
+                    this.toString() + "\nPossible least sorts are: " + sorts +
+                    "\nAll terms must have a unique least sort; " +
+                    "consider assigning unique KLabels to overloaded productions", this);
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
@@ -248,6 +265,18 @@ public class KItem extends Term implements KItemRepresentation {
     @Override
     public Term toKore() {
         return this;
+    }
+
+    /**
+     * @param i
+     * @return the rules for which position i only matches "don't care" variables (i.e., variables that do not appear
+     * in the RHS or conditions)
+     */
+    public BitSet getChildrenDontCareRuleMaskForPosition(int i) {
+        if (childrenDontCareRuleMask != null)
+            return childrenDontCareRuleMask[i];
+        else
+            return null;
     }
 
     public static class KItemOperations {
@@ -291,7 +320,7 @@ public class KItem extends Term implements KItemRepresentation {
             try {
                 Term result = kItem.isEvaluable(context) ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
-                            kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+                        kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
                     if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
@@ -386,10 +415,10 @@ public class KItem extends Term implements KItemRepresentation {
                     } catch (Throwable t) {
                     // ENABLE EXCEPTION CHECKSTYLE
                         if (t instanceof Error) {
-                            throw (Error)t;
+                            throw (Error) t;
                         }
                         if (t instanceof KEMException) {
-                            throw (RuntimeException)t;
+                            throw (RuntimeException) t;
                         }
                         if (t instanceof RuntimeException) {
                             kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
@@ -553,7 +582,14 @@ public class KItem extends Term implements KItemRepresentation {
      *
      * @return the result on success, or this {@code KItem} otherwise
      */
-    private Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
+    public Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
+        // apply a .K ~> K => K normalization
+        if ((kLabel instanceof KLabelConstant) && ((KLabelConstant) kLabel).name().equals(KLabels.KSEQ)
+                && kList instanceof KList
+                && (((KList) kList).get(0) instanceof KItem && ((KItem) ((KList) kList).get(0)).kLabel.toString().equals(KLabels.DOTK) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+            return ((KList) kList).get(1);
+        }
+
         if (!isAnywhereApplicable(context)) {
             return this;
         }
@@ -719,7 +755,7 @@ public class KItem extends Term implements KItemRepresentation {
             bools = new boolean[kList.concreteSize()];
             int idx = 0;
             for (Term term : kList) {
-                if (term instanceof KItem){
+                if (term instanceof KItem) {
                     KItem kItem = (KItem) term;
                     if (kItem.kLabel instanceof KLabelInjection) {
                         term = ((KLabelInjection) kItem.kLabel).term();

@@ -1,13 +1,14 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import java.io.File;
-
-import com.google.inject.multibindings.MapBinder;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provides;
+import com.google.inject.name.Names;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.kframework.kdoc.KDocOptions;
-import org.kframework.backend.Backend;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -18,17 +19,13 @@ import org.kframework.main.Main;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.SimpleScope;
-import org.kframework.utils.inject.Concrete;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provides;
-import com.google.inject.name.Names;
+import java.io.File;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseTestCase {
@@ -99,8 +96,6 @@ public abstract class BaseTestCase {
             bind(RunProcess.class).toInstance(rp);
             bind(KDocOptions.class).toInstance(new KDocOptions());
             bind(KRunOptions.class).toInstance(new KRunOptions());
-            MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(binder(), String.class, Backend.class);
-            mapBinder.addBinding("test").to(TestBackend.class);
         }
 
     }
@@ -108,6 +103,8 @@ public abstract class BaseTestCase {
     public void prepInjector(Injector injector, String tool, String[] args) {
         SimpleScope scope = injector.getInstance(Key.get(SimpleScope.class, Names.named("requestScope")));
         scope.enter();
+        DefinitionScope definitionScope = injector.getInstance(DefinitionScope.class);
+        definitionScope.enter(new File("."));
         Main.seedInjector(scope, tool, args, new File("."), System.getenv());
     }
 }

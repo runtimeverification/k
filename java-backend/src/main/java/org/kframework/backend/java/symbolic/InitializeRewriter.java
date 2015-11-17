@@ -127,7 +127,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, false, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
@@ -213,11 +213,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .forEach(definition::addKLabel);
             definition.addKoreRules(module, termContext);
 
-            Definition evaluatedDef = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem);
-
-            evaluatedDef.setIndex(new IndexingTable(() -> evaluatedDef, new IndexingTable.Data()));
-            cache.put(module, evaluatedDef);
-            return evaluatedDef;
+            definition.setIndex(new IndexingTable(() -> definition, new IndexingTable.Data()));
+            cache.put(module, definition);
+            return definition;
         }
     }
 }

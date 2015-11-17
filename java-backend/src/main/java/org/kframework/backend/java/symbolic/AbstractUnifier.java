@@ -5,6 +5,9 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.DoubleLinkedList;
+import org.kframework.builtin.KLabels;
+import org.kframework.kore.Assoc;
+import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +57,18 @@ public abstract class AbstractUnifier implements Unifier {
 
     //private boolean matchOnFunctionSymbol;
     //
-    protected TermContext termContext;
+    protected final TermContext termContext;
+
+    private final KLabelConstant kSeqLabel;
+    private final KLabelConstant kDotLabel;
+    private final KItem kDot;
+
+    protected AbstractUnifier(TermContext termContext) {
+        this.termContext = termContext;
+        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
+        kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
+        kDot = KItem.of(kDotLabel, KList.concatenate(), termContext);
+    }
 
     void addUnificationTask(Term term, Term otherTerm) {
         taskBuffer.add(Pair.of(term, otherTerm));
@@ -124,6 +138,18 @@ public abstract class AbstractUnifier implements Unifier {
                     }
                 }
 
+                if (isKSeq(term) || isKSeq(otherTerm)) {
+                    term = getCanonicalKSeq(term);
+                    otherTerm = getCanonicalKSeq(otherTerm);
+
+                    if (isKSeq(term)) {
+                        otherTerm = upKSeq(otherTerm);
+                    }
+                    if (isKSeq(otherTerm)) {
+                        term = upKSeq(term);
+                    }
+                }
+
                 if (term.kind() != otherTerm.kind()) {
                     term = KCollection.upKind(term, otherTerm.kind());
                     otherTerm = KCollection.upKind(otherTerm, term.kind());
@@ -189,6 +215,27 @@ public abstract class AbstractUnifier implements Unifier {
             flushTaskBuffer();
         }
         return !failed;
+    }
+
+    public static boolean isKSeq(Term term) {
+        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+    }
+
+    public static boolean isKSeqVar(Term term) {
+        return term instanceof Variable && term.sort().equals(Sort.KSEQUENCE);
+    }
+
+    private Term upKSeq(Term otherTerm) {
+        if (!isKSeq(otherTerm) && !isKSeqVar(otherTerm))
+            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), termContext);
+        return otherTerm;
+    }
+
+    private Term getCanonicalKSeq(Term term) {
+        return stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                .map(Term.class::cast)
+                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext))
+                .orElse(kDot);
     }
 
     private void flushTaskBuffer() {
