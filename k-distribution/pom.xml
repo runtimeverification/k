@@ -38,7 +38,7 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.rv_match</groupId>
       <artifactId>ocaml-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -187,7 +187,7 @@
           </execution>
           <execution>
             <id>assembly-archive</id>
-            <phase>install</phase>
+            <phase>verify</phase>
             <goals>
               <goal>single</goal>
             </goals>

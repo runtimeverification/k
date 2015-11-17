@@ -35,7 +35,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public static ConjunctiveFormula of(GlobalContext global) {
         return new ConjunctiveFormula(
-                Substitution.empty(),
+                ImmutableMapSubstitution.empty(),
                 PersistentUniqueList.empty(),
                 PersistentUniqueList.empty(),
                 TruthValue.TRUE,
@@ -382,7 +382,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     } else if (leftHandSide instanceof Variable
                             && !rightHandSide.variableSet().contains(leftHandSide)) {
                         // eliminate
-                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
                                 (Variable) leftHandSide,
                                 rightHandSide);
                         if (eliminationSubstitution == null) {
@@ -390,7 +390,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                             continue;
                         }
 
-                        substitution = Substitution.composeAndEvaluate(
+                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
                                 substitution,
                                 eliminationSubstitution,
                                 context);
@@ -401,7 +401,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     } else if (rightHandSide instanceof Variable
                             && !leftHandSide.variableSet().contains(rightHandSide)) {
                         // swap + eliminate
-                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
                                 (Variable) rightHandSide,
                                 leftHandSide);
                         if (eliminationSubstitution == null) {
@@ -409,7 +409,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                             continue;
                         }
 
-                        substitution = Substitution.composeAndEvaluate(
+                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
                                 substitution,
                                 eliminationSubstitution,
                                 context);
@@ -457,12 +457,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
-    public Substitution<Variable, Term> getSubstitution(Variable variable, Term term) {
+    public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {
         if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
-            return Substitution.singleton(variable, term);
+            return ImmutableMapSubstitution.singleton(variable, term);
         } else if (term instanceof Variable) {
             if (RewriteEngineUtils.isSubsortedEq(term, variable, global.getDefinition())) {
-                return Substitution.singleton((Variable) term, variable);
+                return ImmutableMapSubstitution.singleton((Variable) term, variable);
             } else {
                 Sort leastSort = global.getDefinition().subsorts().getGLBSort(
                         variable.sort(),
@@ -470,7 +470,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 assert leastSort != null;
 
                 Variable freshVariable = Variable.getAnonVariable(leastSort);
-                return Substitution.<Variable, Term>singleton(variable, freshVariable)
+                return ImmutableMapSubstitution.<Variable, Term>singleton(variable, freshVariable)
                         .plus((Variable) term, freshVariable);
             }
         } else {
@@ -526,7 +526,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .filter(e -> e.getValue() instanceof Variable)
                 .forEach(e -> equivalenceClasses.put((Variable) e.getValue(), e.getKey()));
 
-        Substitution<Variable, Variable> orientationSubstitution = Substitution.empty();
+        Substitution<Variable, Variable> orientationSubstitution = ImmutableMapSubstitution.empty();
         for (Map.Entry<Variable, Collection<Variable>> entry : equivalenceClasses.asMap().entrySet()) {
             if (variables.contains(entry.getKey())) {
                 Optional<Variable> replacement = entry.getValue().stream()

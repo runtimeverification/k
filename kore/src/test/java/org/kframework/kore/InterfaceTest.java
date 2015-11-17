@@ -7,6 +7,7 @@ import org.kframework.builtin.Sorts;
 
 import static org.junit.Assert.*;
 import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
 
 public class InterfaceTest {
 
@@ -15,7 +16,7 @@ public class InterfaceTest {
         // Creating "A + 0 => A" programmatically
 
         KRewrite k = KRewrite(
-                KApply(KLabel("_+_"), KList((K)KVariable("A"), (K)KToken("0", Sort("Int")))),
+                KApply(KLabel("_+_"), (K)KVariable("A"), (K)KToken("0", Sort("Int"))),
                 KVariable("A"));
 
         // Navigating it
@@ -30,13 +31,13 @@ public class InterfaceTest {
 
     @Test
     public void manipulatingKList() {
-        KList l = KList(KToken("1", Sorts.Int()), KToken("2", Sorts.Int())).stream().map(x -> KToken("3", Sorts.Int())).collect(toKList());
-        assertEquals(KList(KToken("3", Sorts.Int()), KToken("3", Sorts.Int())), l);
+        KList l = KList(Seq(KToken("1", Sorts.Int()), KToken("2", Sorts.Int()))).stream().map(x -> KToken("3", Sorts.Int())).collect(toKList());
+        assertEquals(KList(Seq(KToken("3", Sorts.Int()), KToken("3", Sorts.Int()))), l);
     }
 
     @Test
     public void kSeqIsAssociative() {
-        assertEquals(KSequence(KToken("1", Sorts.Int()), KToken("2", Sorts.Int())), KSequence(KToken("1", Sorts.Int()), KSequence(KToken("2", Sorts.Int()))));
+        assertEquals(KSequence(Seq(KToken("1", Sorts.Int()), KToken("2", Sorts.Int()))), KSequence(Seq(KToken("1", Sorts.Int()), KSequence(Seq(KToken("2", Sorts.Int()))))));
     }
 
 //    @Test

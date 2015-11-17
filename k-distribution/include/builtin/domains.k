@@ -488,7 +488,7 @@ module EMPTY-ID
 
   syntax String ::= "Id2String" "(" Id ")"    [function, hook(STRING.token2string), klabel(Id2String)]
   syntax Id ::= "String2Id" "(" String ")"    [function, klabel(String2Id)]
-  rule String2Id(S) => #parseToken("Id", S)
+  rule String2Id(S:String) => #parseToken("Id", S)
 
   syntax Id ::= freshId(Int)    [freshGenerator, function]
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
