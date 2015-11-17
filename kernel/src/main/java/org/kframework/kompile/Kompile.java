@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.collections15.ListUtils;
-import org.apache.commons.io.FileUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -123,7 +122,7 @@ public class Kompile {
     }
 
 
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) throws IOException {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
     }
 
@@ -136,7 +135,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) throws IOException {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
 
@@ -277,14 +276,14 @@ public class Kompile {
         return parsedMod;
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) throws IOException {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         String prelude = REQUIRE_PRELUDE_K;
         if (kompileOptions.noPrelude) {
             prelude = "";
         }
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, prelude + FileUtils.readFileToString(definitionFile),
+                mainProgramsModule, prelude + "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getPath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(kompileOptions.includes.stream()
