@@ -206,7 +206,7 @@ public class KRun {
             print.accept(unparseTerm(result, unparsingModule) + "\n");
             break;
         case BINARY:
-            print.accept(ToBinary.apply(result));
+            print.accept(new String(ToBinary.apply(result)));
             break;
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);

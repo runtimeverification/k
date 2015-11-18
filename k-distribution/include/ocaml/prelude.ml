@@ -50,6 +50,53 @@ let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 let k_string_escape str = 
   let buf = Buffer.create (String.length str) in
   String.iter (k_char_escape buf) str; Buffer.contents buf
+let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
+  let ktoken_code = "\x01" in
+  let kapply_code = "\x02" in
+  let ksequence_code = "\x03" in
+  let injectedklabel_code = "\x06" in
+  let end_code = "\x07" in
+  let intern = Hashtbl.create 16 in
+  let print_int (i: int) : unit =
+    let one = (i lsr 24) land 0xff in
+    let two = (i lsr 16) land 0xff in
+    let three = (i lsr 8) land 0xff in
+    let four = (i lsr 0) land 0xff in
+    Buffer.add_char buf (Char.chr one);
+    Buffer.add_char buf (Char.chr two);
+    Buffer.add_char buf (Char.chr three);
+    Buffer.add_char buf (Char.chr four) in
+  let print_string (s: string) : unit =
+    let idx = try Hashtbl.find intern s with Not_found -> 0 in
+    print_int idx;
+    if idx = 0 then 
+      (print_int (String.length s);
+      for i = 0 to (String.length s) - 1 do
+        Buffer.add_char buf '\x00';
+        Buffer.add_char buf (String.get s i)
+      done;
+      Hashtbl.add intern s ((Hashtbl.length intern) + 1))
+    else () in
+  let rec print_klist(c: k list) : unit = match c with
+  | [] -> ()
+  | e::l  -> print_k e 0; print_klist l
+  and print_k(c: k) (size: int) : unit = match c with
+  | [] -> if size <> 1 then (Buffer.add_string buf ksequence_code; print_int size) else ()
+  | e::l -> print_kitem(normalize e); print_k l (size + 1)
+  and print_kitem(c: normal_kitem) : unit = match c with
+  | KApply(klabel, klist) -> print_klist klist; Buffer.add_string buf kapply_code; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'; print_int (List.length klist)
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf ktoken_code; print_string s; print_string (print_sort sort)
+  | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf injectedklabel_code; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'
+  | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
+  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
+  | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
+  | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
+  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []))
+  | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
+  | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
+  | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+  in Buffer.add_string buf "\x7fKAST\x04\x00\x00"; print_k c 0; Buffer.add_string buf end_code; Buffer.contents buf
+
 let print_k (c: k) : string = let buf = Buffer.create 16 in
   let rec print_klist(c: k list) : unit = match c with
   | [] -> Buffer.add_string buf ".KList"
@@ -68,7 +115,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
   | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
-  | KItem (Bottom) -> Buffer.add_string buf "`#Bottom`(.KList)"
+  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []))
   | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
@@ -76,6 +123,8 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
+let print_subst_binary (out: out_channel) (c: k Subst.t) : unit =
+  output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k_binary k) ^ "\n")) c
 let emin (exp: int) (prec: int) : int = (- (1 lsl (exp - 1))) + 4 - prec
 let emin_normal (exp: int) : int = (- (1 lsl (exp - 1))) + 2
 let emax (exp: int) : int = 1 lsl (exp - 1)
@@ -248,12 +297,12 @@ struct
   let hook_get c lbl sort config ff = match c with
       [List (_,_,l1)], [Int i] -> 
         let i = Z.to_int i in (try if i >= 0 then List.nth l1 i else List.nth l1 ((List.length l1) + i) 
-                               with Failure "nth" -> [Bottom] | Invalid_argument "List.nth" -> [Bottom])
+                               with Failure _ -> [Bottom] | Invalid_argument _ -> [Bottom])
     | _ -> raise Not_implemented
   let hook_range c lbl sort config ff = match c with
       [List (s,lbl,l1)], [Int i1], [Int i2] -> 
         (try [List (s,lbl,(list_range (l1, (Z.to_int i1), (List.length(l1) - (Z.to_int i2) - (Z.to_int i1)))))] 
-         with Failure "list_range" -> [Bottom])
+         with Failure _ -> [Bottom])
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
       [List (_,_,l)] -> [Int (Z.of_int (List.length l))]

@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.binary;
 
 import org.kframework.kore.K;
@@ -24,8 +25,6 @@ public class BinaryParser {
 
     private static final byte[] MAGIC = {0x7f, 'K', 'A', 'S', 'T'};
 
-    // DO NOT CHANGE THESE. If we need to add new AST nodes to KORE, keep backwards compatibility by adding new numbers instead
-    // of reusing old ones.
     public static final int BEGIN = 0, KTOKEN = 1, KAPPLY = 2, KSEQUENCE = 3, KVARIABLE = 4, KREWRITE = 5,
             INJECTEDKLABEL = 6, END = 7;
 
@@ -49,7 +48,7 @@ public class BinaryParser {
                 stack.push(KToken(readString(), Sort(readString())));
                 break;
             case KAPPLY:
-                KLabel lbl = KLabel(readString());
+                KLabel lbl = readKLabel();
                 arity = data.readInt();
                 items = new LinkedList<>();
                 for (int i = 0; i < arity; i++) {
@@ -74,7 +73,7 @@ public class BinaryParser {
                 stack.push(KRewrite(left, right));
                 break;
             case INJECTEDKLABEL:
-                stack.push(InjectedKLabel(KLabel(readString())));
+                stack.push(InjectedKLabel(readKLabel()));
                 break;
             case END:
                 break;
@@ -85,10 +84,22 @@ public class BinaryParser {
         return stack.peek();
     }
 
+    private KLabel readKLabel() throws IOException {
+        String lbl = readString();
+        if (data.readBoolean())
+            return KVariable(lbl);
+        return KLabel(lbl);
+    }
+
     private String readString() throws IOException {
         int idx = data.readInt();
         if (idx == 0) {
-            String s = data.readUTF();
+            int len = data.readInt();
+            char[] buf = new char[len];
+            for (int i = 0; i < len; i++) {
+                buf[i] = data.readChar();
+            }
+            String s = new String(buf);
             interns.add(s);
             return s;
         } else {
@@ -96,8 +107,8 @@ public class BinaryParser {
         }
     }
 
-    public static K parse(String s) {
-        ByteArrayInputStream in = new ByteArrayInputStream(s.getBytes());
+    public static K parse(byte[] s) {
+        ByteArrayInputStream in = new ByteArrayInputStream(s);
         return parse(in);
     }
 

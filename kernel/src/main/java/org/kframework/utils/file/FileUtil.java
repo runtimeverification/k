@@ -136,6 +136,10 @@ public class FileUtil {
         save(resolveTemp(file), content);
     }
 
+    public void saveToTemp(String file, byte[] content) {
+        save(resolveTemp(file), content);
+    }
+
     public String loadFromKBase(String file) {
         return load(resolveKBase(file));
     }
@@ -197,6 +201,18 @@ public class FileUtil {
                 throw KEMException.criticalError("Could not create directory " + dir);
             }
             FileUtils.writeStringToFile(file, content);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write to file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static void save(File file, byte[] content) {
+        try {
+            File dir = file.getAbsoluteFile().getParentFile();
+            if (!dir.exists() && !dir.mkdirs()) {
+                throw KEMException.criticalError("Could not create directory " + dir);
+            }
+            FileUtils.writeByteArrayToFile(file, content);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write to file " + file.getAbsolutePath(), e);
         }

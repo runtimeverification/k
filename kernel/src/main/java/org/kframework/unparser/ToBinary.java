@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
 import org.kframework.kore.InjectedKLabel;
@@ -36,17 +37,17 @@ public class ToBinary {
             data.writeByte(0);
             data.writeByte(0);
             new Traverse(data).apply(k);
-            data.writeByte(7);
+            data.writeByte(BinaryParser.END);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write K term to binary", e, k);
         }
 
     }
 
-    public static String apply(K k) {
+    public static byte[] apply(K k) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         apply(out, k);
-        return new String(out.toByteArray());
+        return out.toByteArray();
     }
 
     private static class Traverse {
@@ -73,6 +74,7 @@ public class ToBinary {
                 }
                 data.writeByte(BinaryParser.KAPPLY);
                 writeString(app.klabel().name());
+                data.writeBoolean(app.klabel() instanceof KVariable);
                 data.writeInt(app.items().size());
 
             } else if (k instanceof KSequence) {
@@ -80,7 +82,7 @@ public class ToBinary {
 
                 for (K item : seq.items()) {
                     apply(item);
-                }
+                    }
                 data.writeByte(BinaryParser.KSEQUENCE);
                 data.writeInt(seq.items().size());
 
@@ -102,6 +104,7 @@ public class ToBinary {
 
                 data.writeByte(BinaryParser.INJECTEDKLABEL);
                 writeString(inj.klabel().name());
+                data.writeBoolean(inj.klabel() instanceof KVariable);
 
             }
         }
@@ -110,7 +113,8 @@ public class ToBinary {
             int idx = interns.getOrDefault(s, 0);
             data.writeInt(idx);
             if (idx == 0) {
-                data.writeUTF(s);
+                data.writeInt(s.length());
+                data.writeChars(s);
                 interns.put(s, interns.size() + 1);
             }
         }
