@@ -132,6 +132,10 @@ public class FileUtil {
         return load(resolveTemp(file));
     }
 
+    public byte[] loadBytesFromTemp(String file) {
+        return loadBytes(resolveTemp(file));
+    }
+
     public void saveToTemp(String file, String content) {
         save(resolveTemp(file), content);
     }
@@ -221,6 +225,14 @@ public class FileUtil {
     public static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static byte[] loadBytes(File file) {
+        try {
+            return FileUtils.readFileToByteArray(file);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
         }

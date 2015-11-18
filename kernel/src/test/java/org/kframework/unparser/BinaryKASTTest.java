@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
@@ -13,7 +14,7 @@ import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -37,7 +38,7 @@ public class BinaryKASTTest {
         assertEquals(term, result2);
     }
 
-    @Test
+    @Test @Ignore
     public void testLarger() throws Exception {
         BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
         String kast = FileUtil.testFileUtil().loadFromWorkingDirectory("/home/dwightguth/c-semantics/tmp-kcc-IxHhCoP");

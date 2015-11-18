@@ -75,7 +75,9 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
         Buffer.add_char buf '\x00';
         Buffer.add_char buf (String.get s i)
       done;
-      Hashtbl.add intern s ((Hashtbl.length intern) + 1))
+      let new_idx = (Hashtbl.length intern) + 1 in
+      assert (not (Hashtbl.mem intern s));
+      Hashtbl.add intern s new_idx)
     else () in
   let rec print_klist(c: k list) : unit = match c with
   | [] -> ()

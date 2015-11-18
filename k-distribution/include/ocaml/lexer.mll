@@ -49,7 +49,7 @@ let parse_k_binary_string (s: char Stream.t) (interns: string list ref) : string
     for i = 0 to len - 1 do
       Stream.junk s;
       Bytes.set bytes i (Stream.next s)
-    done
+    done;
     let str = Bytes.to_string bytes in
     interns := !interns @ [str];
     str
