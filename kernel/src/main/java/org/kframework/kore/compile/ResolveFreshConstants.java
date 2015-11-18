@@ -103,11 +103,11 @@ public class ResolveFreshConstants {
     }
 
     public Module resolve(Module m) {
-        Set<Sentence> sentences = stream(m.localSentences()).map(this::resolve).collect(Collections.toSet());
+        Set<Sentence> sentences = map(this::resolve, m.localSentences());
         if (sentences.equals(m.localSentences())) {
             return m;
         }
-        return Module(m.name(), Stream.concat(Stream.of(def.getModule("K-REFLECTION").get()), stream(m.imports())).collect(Collections.toSet()), sentences, m.att());
+        return Module(m.name(), m.imports().$plus(def.getModule("K-REFLECTION").get()), sentences, m.att());
     }
 }
 
