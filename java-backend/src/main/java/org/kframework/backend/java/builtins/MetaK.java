@@ -3,7 +3,6 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
@@ -108,7 +107,6 @@ public class MetaK {
             variables.add(new Variable((MetaVariable) element));
         }
 
-        GlobalContext global = context.global();
         term = (Term) term.accept(new CopyOnWriteTransformer() {
             @Override
             public ASTNode transform(MetaVariable metaVariable) {
@@ -116,7 +114,7 @@ public class MetaK {
             }
         });
 
-        return KLabelInjection.injectionOf(term.substitute(Variable.rename(variables)), global);
+        return term.substitute(Variable.rename(variables));
     }
 
     /**
@@ -135,8 +133,7 @@ public class MetaK {
 
     public static Term freezeVariables(Term termToFreeze, Term termWithBoundVars, TermContext context) {
         BuiltinSet variables = trueVariables(termWithBoundVars, context);
-        GlobalContext global = context.global();
-        return KLabelInjection.injectionOf((Term) termToFreeze.accept(new CopyOnWriteTransformer() {
+        return (Term) termToFreeze.accept(new CopyOnWriteTransformer(context) {
             @Override
             public ASTNode transform(Variable variable) {
                 if (!variables.contains(variable)) {
@@ -144,7 +141,7 @@ public class MetaK {
                 }
                 return variable;
             }
-        }), global);
+        });
     }
 
     /**

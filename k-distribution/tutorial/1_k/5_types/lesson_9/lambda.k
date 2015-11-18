@@ -1,9 +1,14 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
-require "modules/unification.k"
+require "domains.k"
+require "unification.k"
 
-module LAMBDA
-  imports UNIFICATION
+module LAMBDA-SYNTAX
+  imports LAMBDA-COMMON
+  imports ID
+endmodule
 
+module LAMBDA-COMMON
+  imports DOMAINS-COMMON
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
                | Exp Exp                          [strict, left]
@@ -22,6 +27,13 @@ module LAMBDA
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
+endmodule
+
+module LAMBDA
+  imports LAMBDA-COMMON
+  imports DOMAINS
+  imports UNIFICATION
+
   syntax Variable ::= Id
   syntax KResult ::= Type
 
@@ -46,18 +58,18 @@ module LAMBDA
   syntax Type ::= MetaVariable
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <tenv> TEnv
-        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) #freezeVariables(T, tenv(TEnv))]
+        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) #freezeVariables(T, tenv(TEnv)):>Type]
        </tenv>
   rule <k> X:Id => #rename(T, Tvs) ...</k>
-       <tenv>... X |-> (forall Tvs) T ...</tenv>
+       <tenv>... X |-> (forall Tvs) T:>Type ...</tenv>
 
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   syntax KItem ::= Type "=" Type
-  rule T = T => .
+  rule T = T => .K
 
   syntax KItem ::= tenv(Map)
-  rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
+  rule <k> T:Type ~> tenv(TEnv) => T ...</k> <tenv> _ => TEnv </tenv>
 endmodule
