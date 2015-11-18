@@ -315,7 +315,7 @@ public class SortCells {
 
     private Sort getPredicateSort(Sort s) {
         if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
-            scala.collection.immutable.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
+            scala.collection.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
             if (sorts.size() != 1) {
                 throw KEMException.compilerError("Expected exactly one cell collection sort for the sort " + s + "; found " + sorts);
             }

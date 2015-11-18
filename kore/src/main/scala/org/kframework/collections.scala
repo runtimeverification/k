@@ -12,6 +12,7 @@ import java.util.function.BiConsumer
 import java.util.function.BinaryOperator
 import java.util.function.Supplier
 import scala.collection.mutable.SetBuilder
+import collection._
 
 object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala

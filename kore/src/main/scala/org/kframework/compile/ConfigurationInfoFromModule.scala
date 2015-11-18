@@ -11,6 +11,7 @@ import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
 import org.kframework.kore._
 import org.kframework.TopologicalSort._
+import collection._
 
 object ConfigurationInfoFromModule
 

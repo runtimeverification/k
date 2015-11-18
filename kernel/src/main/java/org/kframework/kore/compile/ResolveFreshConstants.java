@@ -15,7 +15,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 
 import java.util.HashSet;
 import java.util.Optional;

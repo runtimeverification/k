@@ -50,7 +50,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
 import scala.collection.immutable.Seq;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 import scala.util.Either;
 
 import java.io.File;

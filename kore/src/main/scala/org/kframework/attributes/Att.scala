@@ -1,12 +1,12 @@
 package org.kframework.attributes
 
-import org.kframework.Collections._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KApply, K, KORE}
 import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
+import collection._
 
 case class Att(att: Set[K]) extends AttributesToString {
 
@@ -89,7 +89,7 @@ object Att {
   val up = new Up(KORE, includes)
 
   implicit def asK(key: String, value: String) =
-    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
+    KORE.KApply(KORE.KLabel(key), KORE.KList(List(KORE.KToken(value, Sorts.KString, Att())).asJava), Att())
 
   /**
     * attribute marking the top rule label

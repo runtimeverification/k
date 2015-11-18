@@ -5,6 +5,7 @@ import org.kframework.attributes.Att
 
 import scala.collection.mutable.ListBuffer
 import collection.JavaConverters._
+import collection._
 
 /**
  *

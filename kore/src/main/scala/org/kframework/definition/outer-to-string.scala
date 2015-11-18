@@ -1,6 +1,7 @@
 package org.kframework.definition
 
 import org.apache.commons.lang3.StringEscapeUtils
+import collection._
 
 trait ModuleToString {
   self: Module =>

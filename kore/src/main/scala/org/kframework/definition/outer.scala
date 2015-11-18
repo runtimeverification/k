@@ -14,6 +14,8 @@ import javax.annotation.Nonnull
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 
+import collection._
+
 trait OuterKORE
 
 case class NonTerminalsWithUndefinedSortException(nonTerminals: Set[NonTerminal])
@@ -240,7 +242,7 @@ object Associativity extends Enumeration {
 
 case class SyntaxAssociativity(
   assoc: Associativity.Value,
-  tags: collection.immutable.Set[Tag],
+  tags: Set[Tag],
   att: Att = Att())
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
