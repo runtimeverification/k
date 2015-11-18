@@ -1,6 +1,4 @@
-Search results:
-
-Solution 1:
-V:K -->
-bool -> _0:Type = (int -> _1:Type) ~> _1 ~> if _0 then HOLE else f 2 ~> tenv (
-   x |-> bool -> _0 ) ~> (bool -> _0) -> HOLE ~> tenv ( .Map )
+Solution: 0
+V
+---> 
+` ` int -> _513 ` = ` bool -> _656 ` ` ~> _656 ~> #freezer13 ( _513 , _513 ) ~> tenv ( x |-> ` int -> _513 ` ) ~> ` ` int -> _513 ` -> _473 ` ~> tenv ( .Map )
