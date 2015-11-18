@@ -47,7 +47,7 @@ let parse_k_binary_string (s: char Stream.t) (interns: string list ref) : string
     let len = parse_k_binary_int s in
     let bytes = Bytes.create len in
     for i = 0 to len - 1 do
-      Stream.junk s;
+      ignore(Stream.next s);
       Bytes.set bytes i (Stream.next s)
     done;
     let str = Bytes.to_string bytes in
@@ -65,7 +65,7 @@ let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: stri
   parse_k_binary_term s stack interns
 | 2 -> (* kapply *)
   let lbl = parse_k_binary_string s interns in
-  Stream.junk s;
+  ignore(Stream.next s);
   let arity = parse_k_binary_int s in
   let items = parse_k_binary_stack stack arity [] in
   Stack.push (Def.eval (KApply((parse_klabel lbl), items)) []) stack;
@@ -81,7 +81,7 @@ let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: stri
   failwith "Unsupported: rewrites in subject"
 | 6 -> (* injectedklabel *)
   let lbl = parse_k_binary_string s interns in
-  Stream.junk s;
+  ignore(Stream.next s);
   Stack.push [InjectedKLabel (parse_klabel lbl)] stack;
   parse_k_binary_term s stack interns
 | 7 -> (* end *)

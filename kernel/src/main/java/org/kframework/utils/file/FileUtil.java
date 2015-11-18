@@ -120,6 +120,10 @@ public class FileUtil {
         save(resolveWorkingDirectory(file), content);
     }
 
+    public void saveToWorkingDirectory(String file, byte[] content) {
+        save(resolveWorkingDirectory(file), content);
+    }
+
     public String loadFromKompiled(String file) {
         return load(resolveKompiled(file));
     }

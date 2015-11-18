@@ -112,6 +112,10 @@ public class BinaryParser {
         return parse(in);
     }
 
+    public static boolean isBinaryKast(byte[] bytes) {
+        return Arrays.equals(Arrays.copyOfRange(bytes, 0, 5), MAGIC);
+    }
+
     public static K parse(InputStream in) {
         try {
             DataInputStream data = new DataInputStream(in);

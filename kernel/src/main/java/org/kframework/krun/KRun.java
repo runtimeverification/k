@@ -12,6 +12,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.parser.binary.BinaryParser;
 import org.kframework.unparser.ToBinary;
 import org.kframework.unparser.ToKast;
 import org.kframework.kore.compile.VisitKORE;
@@ -158,6 +159,9 @@ public class KRun {
 
     //TODO(dwightguth): use Writer
     public void outputFile(String output, KRunOptions options) {
+        outputFile(output.getBytes(), options);
+    }
+    public void outputFile(byte[] output, KRunOptions options) {
         if (options.outputFile == null) {
             System.out.print(output);
         } else {
@@ -193,20 +197,20 @@ public class KRun {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
 
-    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<String> print, K result) {
+    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<byte[]> print, K result) {
         switch (output) {
         case KAST:
-            print.accept(ToKast.apply(result) + "\n");
+            print.accept((ToKast.apply(result) + "\n").getBytes());
             break;
         case NONE:
-            print.accept("");
+            print.accept("".getBytes());
             break;
         case PRETTY:
             Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
-            print.accept(unparseTerm(result, unparsingModule) + "\n");
+            print.accept((unparseTerm(result, unparsingModule) + "\n").getBytes());
             break;
         case BINARY:
-            print.accept(new String(ToBinary.apply(result)));
+            print.accept(ToBinary.apply(result));
             break;
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
@@ -227,7 +231,7 @@ public class KRun {
     public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst,
                                                Rule parsedPattern, CompiledDefinition compiledDefinition,
                                                OutputModes outputModes,
-                                               Consumer<String> print) {
+                                               Consumer<byte[]> print) {
         if (subst.isEmpty()) {
             return;
         }
@@ -248,7 +252,7 @@ public class KRun {
                     return;
                 }
                 prettyPrint(compiledDefinition, outputModes, print, variable);
-                print.accept("---> \n");
+                print.accept("---> \n".getBytes());
                 prettyPrint(compiledDefinition, outputModes, print, value);
             }
         }
@@ -322,7 +326,11 @@ public class KRun {
                     + output.exitCode + "\nStdout:\n" + output.stdout + "\nStderr:\n" + output.stderr));
         }
 
-        String kast = output.stdout != null ? output.stdout : "";
-        return KoreParser.parse(kast, source);
+        byte[] kast = output.stdout != null ? output.stdout : new byte[0];
+        if (BinaryParser.isBinaryKast(kast)) {
+            return BinaryParser.parse(kast);
+        } else {
+            return KoreParser.parse(new String(kast), source);
+        }
     }
 }
