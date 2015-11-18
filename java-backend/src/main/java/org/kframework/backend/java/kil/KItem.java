@@ -252,16 +252,16 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
         }
     }
 
-    public boolean isEvaluable(GlobalContext context) {
-        return context.kItemOps.isEvaluable(this, context.getDefinition());
+    public boolean isEvaluable() {
+        return global.kItemOps.isEvaluable(this, global.getDefinition());
     }
 
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
-        return context.global().kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
+        return global.kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
     }
 
     public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
-        return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+        return global.kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
     }
 
     @Override
@@ -320,10 +320,10 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
          */
         public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
             try {
-                Term result = kItem.isEvaluable(context.global()) ?
+                Term result = kItem.isEvaluable() ?
                         evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
                         kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
-                if (result instanceof KItem && ((KItem) result).isEvaluable(context.global()) && result.isGround()) {
+                if (result instanceof KItem && ((KItem) result).isEvaluable() && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
                     if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
                         StringBuilder sb = new StringBuilder();
@@ -390,7 +390,7 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
         public Term evaluateFunction(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
-            if (!kItem.isEvaluable(context.global())) {
+            if (!kItem.isEvaluable()) {
                 return kItem;
             }
 
@@ -435,7 +435,7 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
                 // applying user-defined rules to allow the users to provide their
                 // own rules for checking sort membership
                 if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
-                    Term checkResult = SortMembership.check(kItem, context.definition());
+                    Term checkResult = SortMembership.check(kItem, definition);
                     if (checkResult != kItem) {
                         return checkResult;
                     }
