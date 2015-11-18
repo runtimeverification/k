@@ -63,6 +63,10 @@ public class BasicVisitor implements Visitor {
             visit((Rule) node);
         } else if (node instanceof Bottom) {
             visit((Bottom) node);
+        } else if (node instanceof RuleAutomatonDisjunction) {
+            visit((RuleAutomatonDisjunction) node);
+        } else if (node instanceof InnerRHSRewrite) {
+            visit((InnerRHSRewrite) node);
         } else {
             assert false : "unexpected class " + node.getClass();
         }
@@ -173,6 +177,15 @@ public class BasicVisitor implements Visitor {
     public void visit(InjectedKLabel injectedKLabel) {
         visitNode(injectedKLabel.injectedKLabel());
         visit((Term) injectedKLabel);
+    }
+
+    @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        ruleAutomatonDisjunction.disjunctions().stream().map(p -> p.getLeft()).forEach(this::visitNode);
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) {
     }
 
     @Override

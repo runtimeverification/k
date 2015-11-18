@@ -326,11 +326,7 @@ member declarations (\textsf{declarations}).
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
-                     <class multiplicity="*" color="Fuchsia">
-                        <className color="Fuchsia"> Main </className>
-                        <extends color="Fuchsia"> Object </extends>
-                        <declarations color="Fuchsia"> .K </declarations>
-                     </class>
+                    .Map
                   </classes>
                 </T>
 
@@ -745,12 +741,9 @@ environment. */
 Initially, the classes forming the program are moved into their
 corresponding cells: */
 
+  syntax KItem ::= ClassBody(K, K)
   rule <k> class Class1 extends Class2 { S } => .K ...</k>
-       <classes>... `.Bag => <class>
-                            <className> Class1 </className>
-                            <extends> Class2 </extends>
-                            <declarations> S </declarations>
-                        </class>`
+       <classes>... `.Map => Class1 |-> ClassBody(Class2, S)`
        ...</classes>  [structural]
 
 /*@ \subsubsection{Method declaration}
@@ -838,9 +831,8 @@ members (both fields and methods) of that class. */
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
-       <className> Class </className>
-       <extends> Class1:Id </extends>
-       <declarations> S </declarations>  [structural]
+       <classes>...`Class |-> ClassBody(Class1:Id, S)`...</classes>
+       [structural]
 
   rule <k> create(Object) => .K ...</k>  [structural]
 

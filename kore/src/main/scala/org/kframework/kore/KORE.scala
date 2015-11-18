@@ -16,7 +16,8 @@ import collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  *
  */
-object KORE extends Constructors[K] with ScalaSugar[K] {
+object KORE extends Constructors[K] with ScalaSugared[K] {
+  val c = KORE
 
   val constructor = this
 

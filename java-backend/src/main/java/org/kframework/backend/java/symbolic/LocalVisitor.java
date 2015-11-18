@@ -176,4 +176,13 @@ public class LocalVisitor implements Visitor {
     public void visit(InjectedKLabel injectedKLabel) {
         visit((Term) injectedKLabel);
     }
+
+    @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) {
+    }
 }

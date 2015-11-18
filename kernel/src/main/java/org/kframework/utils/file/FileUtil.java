@@ -202,7 +202,7 @@ public class FileUtil {
         }
     }
 
-    private static String load(File file) {
+    public static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {
