@@ -2,7 +2,6 @@
 package org.kframework.backend.java.kore.compile;
 
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -19,7 +18,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.compile.KtoKORE;
-import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.main.GlobalOptions;
@@ -138,7 +136,7 @@ public class ExpandMacros {
         if (noMacros) {
             return term;
         }
-        TermContext tc = TermContext.of(rewriter.rewritingContext);
+        TermContext tc = TermContext.builder(rewriter.rewritingContext).build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
         Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc, false, false).convert(term));
         return new KtoKORE().apply(t);

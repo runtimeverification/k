@@ -58,7 +58,7 @@ public class TstTinyOnKORE_IT {
                 "<T>(<k>(while(_)_(_<=_(0,n:Id),{_}(__(_=_;(s:Id,_+_(s:Id,n:Id)),_=_;(n:Id,_+_(n:Id,-1)))))),<state>(_Map_()))");
     }
 
-    @Test
+    @Test @Ignore("tiny backend does not work with domains.k")
     public void simpleNestedFunctions() throws IOException, URISyntaxException {
         executeTest("FUNC", "FUNC",
                 "`foo`(bar)",
