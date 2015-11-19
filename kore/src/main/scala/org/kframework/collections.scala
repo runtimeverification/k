@@ -38,6 +38,8 @@ object Collections {
   def map[T](f: java.util.function.Function[T, T])(s: List[T]): List[T] = s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
 
+  def add[T](e: T)(s: Set[T]): Set[T] = s + e
+
   @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
   @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
   @annotation.varargs def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)
