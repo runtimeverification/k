@@ -69,22 +69,22 @@ public class ToBinary {
             } else if (k instanceof KApply) {
                 KApply app = (KApply) k;
 
-                for (K item : app.items()) {
+                for (K item : app.asIterable()) {
                     apply(item);
                 }
                 data.writeByte(BinaryParser.KAPPLY);
                 writeString(app.klabel().name());
                 data.writeBoolean(app.klabel() instanceof KVariable);
-                data.writeInt(app.items().size());
+                data.writeInt(app.size());
 
             } else if (k instanceof KSequence) {
                 KSequence seq = (KSequence) k;
 
-                for (K item : seq.items()) {
+                for (K item : seq.asIterable()) {
                     apply(item);
-                    }
+                }
                 data.writeByte(BinaryParser.KSEQUENCE);
-                data.writeInt(seq.items().size());
+                data.writeInt(seq.size());
 
             } else if (k instanceof KVariable) {
                 KVariable var = (KVariable) k;

@@ -194,4 +194,9 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
     public int size() {
         return items().size();
     }
+
+    @Override
+    public Iterable<? extends K> asIterable() {
+        return this;
+    }
 }

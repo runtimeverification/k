@@ -23,10 +23,14 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply {
     def items = klist.items
+    def size = klist.size
+    def asIterable = klist.asIterable
   }
 
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
+    val size: Int = elements.size
+    val asIterable: java.lang.Iterable[K] = new ListIterable(elements)
     val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
       case k: kore.KApply => k
       case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
@@ -62,6 +66,8 @@ object ADT {
     elements foreach { e => assert(e.isInstanceOf[K]) }
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
+    val size = elements.size
+    val asIterable = new ListIterable(elements)
   }
 
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite

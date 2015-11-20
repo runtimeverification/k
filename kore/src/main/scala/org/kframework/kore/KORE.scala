@@ -21,21 +21,23 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   val constructor = this
 
+  lazy val emptyAtt = Attributes()
+
   def Attributes(ks: Set[K]) = attributes.Att(ks.toSeq: _*)
   @annotation.varargs def Attributes(ks: K*) = attributes.Att(ks: _*)
 
   def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine,
     startColumn, endLine, endColumn)
 
-  def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Attributes())
+  def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, emptyAtt)
 
-  def KToken(string: String, sort: Sort): KToken = KToken(string, sort, Attributes())
+  def KToken(string: String, sort: Sort): KToken = KToken(string, sort, emptyAtt)
 
-  def KSequence(ks: java.util.List[K]): KSequence = KSequence(ks, Att())
+  def KSequence(ks: java.util.List[K]): KSequence = KSequence(ks, emptyAtt)
 
-  def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, Attributes())
+  def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, emptyAtt)
 
-  def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, Att())
+  def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, emptyAtt)
 
   //  def toKList: Collector[K, KList] =
   //    Collector(() => new CombinerFromBuilder(KList.newBuilder()))
@@ -60,6 +62,8 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   override def KList[KK <: K](items: java.util.List[KK]): KList = ADT.KList(items.asScala.toList)
 
+  def KList[KK <: K](items: List[KK]): KList = ADT.KList(items)
+
   override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel = ADT.InjectedKLabel(klabel, att)
 
   def toKList: Collector[K, KList] =
@@ -76,5 +80,5 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   def self = this
 
-  @annotation.varargs override def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att())
+  @annotation.varargs override def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), emptyAtt)
 }

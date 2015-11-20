@@ -4,6 +4,8 @@ package org.kframework.parser.binary;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.immutable.List$;
+import scala.collection.immutable.Nil$;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -41,7 +43,7 @@ public class BinaryParser {
         int type = 0;
         while(type != END) {
             type = data.readByte();
-            List<K> items;
+            scala.collection.immutable.List<K> items;
             int arity;
             switch (type) {
             case KTOKEN:
@@ -50,17 +52,17 @@ public class BinaryParser {
             case KAPPLY:
                 KLabel lbl = readKLabel();
                 arity = data.readInt();
-                items = new LinkedList<>();
+                items = List$.MODULE$.<K>empty();
                 for (int i = 0; i < arity; i++) {
-                    items.add(0, stack.pop());
+                    items = items.$colon$colon(stack.pop());
                 }
                 stack.push(KApply(lbl, KList(items)));
                 break;
             case KSEQUENCE:
                 arity = data.readInt();
-                items = new LinkedList<>();
+                items = List$.MODULE$.<K>empty();
                 for (int i = 0; i < arity; i++) {
-                    items.add(0, stack.pop());
+                    items = items.$colon$colon(stack.pop());
                 }
                 stack.push(KSequence(items));
                 break;

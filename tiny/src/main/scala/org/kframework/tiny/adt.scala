@@ -5,7 +5,7 @@ import java.util.concurrent.Callable
 import org.kframework._
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
-import org.kframework.kore.ADT
+import org.kframework.kore.{ListIterable, ADT}
 import org.kframework.tiny.matcher._
 
 import scala.collection.JavaConverters._
@@ -69,6 +69,8 @@ object KApp {
 trait KApp extends {} with kore.KApply with K {
   // KApp seen as a collection Set(2, Set(3, 4)) is normalized and has size 3 and 2,3,4 as children
   def size: Int = children.size
+
+  def asIterable = new ListIterable[kore.K](children.toList)
 
   def items = children.toList.asJava.asInstanceOf[java.util.List[kore.K]]
 
