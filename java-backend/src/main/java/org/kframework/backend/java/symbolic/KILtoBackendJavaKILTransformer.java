@@ -535,7 +535,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     termContext.global());
 
             if (freshRules) {
-                return rule.getFreshRule();
+                return rule.renameVariables();
             }
             return rule;
         } catch (KEMException e) {
@@ -592,7 +592,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             partiallyEvaluatedRules.clear();
             for (Rule rule : Iterables.concat(definition.functionRules().values(),
                     definition.anywhereRules().values())) {
-                Rule freshRule = rule.getFreshRule();
+                Rule freshRule = rule.renameVariables();
                 Rule evaluatedRule = evaluateRule(freshRule, termContext);
                 partiallyEvaluatedRules.add(evaluatedRule);
 
