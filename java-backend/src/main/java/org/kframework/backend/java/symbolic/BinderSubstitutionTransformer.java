@@ -4,12 +4,12 @@ package org.kframework.backend.java.symbolic;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
@@ -21,16 +21,16 @@ import org.kframework.kil.ASTNode;
  */
 public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
-    public BinderSubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
-        super(substitution, context);
+    public BinderSubstitutionTransformer(Map<Variable, ? extends Term> substitution) {
+        super(substitution);
     }
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return proceed(kItem) ? super.transform(binderSensitiveSubstitute(kItem, context)) : kItem;
+        return proceed(kItem) ? super.transform(binderSensitiveSubstitute(kItem)) : kItem;
     }
 
-    public static KItem binderSensitiveSubstitute(KItem kItem, TermContext context) {
+    public static KItem binderSensitiveSubstitute(KItem kItem) {
         // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
         if (kItem.kLabel() instanceof KLabel && kItem.kList() instanceof KList) {
 //            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
@@ -50,10 +50,10 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Term bindingExp = kList.get(1);
                         Set<Variable> variables = boundVars.variableSet();
                         Map<Variable,Variable> renameSubst = Variable.rename(variables);
-                        Term freshBoundVars = boundVars.substitute(renameSubst, context);
-                        Term freshBindingExp = bindingExp.substitute(renameSubst, context);
-                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshBindingExp), context,
-                                    kItem.getSource(), kItem.getLocation());
+                        Term freshBoundVars = boundVars.substitute(renameSubst);
+                        Term freshBindingExp = bindingExp.substitute(renameSubst);
+                        kItem = KItem.of(kLabel, KList.concatenate(freshBoundVars, freshBindingExp),
+                                kItem.globalContext(), kItem.getSource(), kItem.getLocation());
 //                    }
                 }
             }

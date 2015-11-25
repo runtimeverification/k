@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -31,7 +32,7 @@ public interface Substitution<K extends Term, V extends Term> extends Map<K, V> 
 
     Substitution<K, V> evaluate(TermContext context);
 
-    List<Equality> equalities(TermContext context);
+    List<Equality> equalities(GlobalContext global);
 
-    boolean isFalse(TermContext context);
+    boolean isFalse(GlobalContext global);
 }

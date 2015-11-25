@@ -106,6 +106,7 @@ public class KAbstractRewriteMachine {
     public static Term construct(List<RHSInstruction> rhsInstructions,
             Map<Variable, Term> solution, Set<Variable> reusableVariables, TermContext context,
             boolean doClone) {
+        GlobalContext global = context.global();
 
         /* Special case for one-instruction lists that can be resolved without a stack;
          * The code falls through the general case. */
@@ -139,7 +140,7 @@ public class KAbstractRewriteMachine {
                 Constructor constructor = instruction.constructor();
                 switch (constructor.type()) {
                 case BUILTIN_LIST:
-                    BuiltinList.Builder builder = BuiltinList.builder(context);
+                    BuiltinList.Builder builder = BuiltinList.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder.addItem(stack.pop());
                     }
@@ -152,7 +153,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder.build());
                     break;
                 case BUILTIN_MAP:
-                    BuiltinMap.Builder builder1 = BuiltinMap.builder(context);
+                    BuiltinMap.Builder builder1 = BuiltinMap.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         Term key = stack.pop();
                         Term value = stack.pop();
@@ -164,7 +165,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder1.build());
                     break;
                 case BUILTIN_SET:
-                    BuiltinSet.Builder builder2 = BuiltinSet.builder(context);
+                    BuiltinSet.Builder builder2 = BuiltinSet.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder2.add(stack.pop());
                     }
@@ -176,7 +177,7 @@ public class KAbstractRewriteMachine {
                 case KITEM:
                     Term kLabel = stack.pop();
                     Term kList = stack.pop();
-                    stack.push(KItem.of(kLabel, kList, context, constructor.getSource(), constructor.getLocation()));
+                    stack.push(KItem.of(kLabel, kList, global, constructor.getSource(), constructor.getLocation()));
                     break;
                 case KITEM_PROJECTION:
                     stack.push(new KItemProjection(constructor.kind(), stack.pop()));

@@ -8,7 +8,6 @@ import java.util.Set;
 import org.kframework.backend.java.kil.Immutable;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -21,13 +20,11 @@ public class EliminateUnsafeSharingTransformer extends PrePostTransformer {
 
     private final Set<Term> visitedTerms = Collections.newSetFromMap(new IdentityHashMap<>());
 
-    public static Term transformTerm(Term term, TermContext context) {
-        Transformer transformer = new EliminateUnsafeSharingTransformer(context);
-        return (Term) term.accept(transformer);
+    public static Term transformTerm(Term term) {
+        return (Term) term.accept(new EliminateUnsafeSharingTransformer());
     }
 
-    private EliminateUnsafeSharingTransformer(TermContext context) {
-        super(context);
+    private EliminateUnsafeSharingTransformer() {
         preTransformer.addTransformer(new SharedMutableTermCopier());
     }
 

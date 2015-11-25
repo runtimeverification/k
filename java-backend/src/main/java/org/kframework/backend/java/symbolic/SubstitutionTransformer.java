@@ -6,25 +6,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KItemProjection;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.Sets;
@@ -41,8 +23,8 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     protected final Map<Variable, ? extends Term> substitution;
 
-    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
-        super(context);
+    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution) {
+        super();
         this.substitution = substitution;
     }
 

@@ -17,26 +17,20 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
-import org.kframework.definition.Sentence;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.KApply;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -306,8 +300,8 @@ public class Definition extends JavaSymbolicObject {
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
-    public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, false, termContext.global().krunOptions.experimental.prove != null);
+    public void addKoreRules(Module module, GlobalContext global) {
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, false, global.krunOptions.experimental.prove != null);
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
                 .filter(org.kframework.definition.Rule.class::isInstance)
                 .map(org.kframework.definition.Rule.class::cast)

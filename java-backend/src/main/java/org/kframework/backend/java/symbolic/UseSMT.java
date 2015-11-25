@@ -37,9 +37,9 @@ public class UseSMT implements Serializable {
             return null;
         }
 
-        BuiltinMap.Builder resultBuilder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder resultBuilder = BuiltinMap.builder(termContext.global());
         try {
-            ConjunctiveFormula constraint = ConjunctiveFormula.of(termContext)
+            ConjunctiveFormula constraint = ConjunctiveFormula.of(termContext.global())
                     .add(term, BoolToken.TRUE);
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
             Solver solver = context.mkSolver();

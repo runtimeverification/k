@@ -41,17 +41,17 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     }
 
 
-    public UserSubstitutionTransformer(Map<Term, Term> substitution, TermContext context) {
+    private UserSubstitutionTransformer(Map<Term, Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
         unboundedVars = new HashSet<>();
         for (Map.Entry<Term, Term> substPair : substitution.entrySet()) {
-            Set<Term> unboundedVars1 = UnboundedVariablesCollector.getUnboundedVars(substPair.getValue(), context);
+            Set<Term> unboundedVars1 = UnboundedVariablesCollector.getUnboundedVars(substPair.getValue(), context.global());
             unboundedVars1.remove(substPair.getKey());
             unboundedVars.addAll(unboundedVars1);
         }
 
-        preTransformer.addTransformer(new BinderSubstitution(context));
+        preTransformer.addTransformer(new BinderSubstitution());
         preTransformer.addTransformer(new LocalSubstitutionTransformer());
     }
 
@@ -72,9 +72,6 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     }
 
      private class BinderSubstitution extends LocalTransformer {
-        public BinderSubstitution(TermContext context) {
-            super(context);
-        }
 
         @Override
         public ASTNode transform(KItem kItem) {
@@ -106,7 +103,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         Map<Term, Term> newSubstitution = new HashMap<>(substitution);
                         if (backBinding.containsKey(idx)) { // if some variables are renamed for this position
                             for (Integer boundPosition : backBinding.get(idx)) { // for all positions which bind variables in this term
-                                for (Term variable :  kList.get(boundPosition).userVariableSet(context)) {
+                                for (Term variable :  kList.get(boundPosition).userVariableSet(kItem.globalContext())) {
                                     // for all variables bound at this position
                                     if (unboundedVars.contains(variable)) { // if they are potentially capturing
                                         // update the new substitution to rename this variable
@@ -123,7 +120,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         termList.set(idx, resultBindingExp);
                     }
 
-                    kItem = KItem.of(kLabel, KList.concatenate(termList), context,
+                    kItem = KItem.of(kLabel, KList.concatenate(termList), kItem.globalContext(),
                                 kItem.getSource(), kItem.getLocation());
                     return new DoneTransforming(kItem);
                 }
@@ -143,7 +140,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
              Table<Integer, Term, Term> freshSubstitution = HashBasedTable.create();
              for (int keyIndex : binderMap.keySet()) {
                  // retrieve all variables in the pattern at this position
-                 Set<Term> boundVars = termList.get(keyIndex).userVariableSet(context);
+                 Set<Term> boundVars = termList.get(keyIndex).userVariableSet(context.global());
                  Set<Term> capturingVars = new HashSet<>();
                  for (Term boundVar : boundVars) {
                      // all variables which are free in the substitution values or are bound by the substitution are problematic

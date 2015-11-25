@@ -4,24 +4,24 @@ package org.kframework.backend.java.kil;
 /**
  * Created by dwightguth on 5/8/15.
  */
-public interface KItemCollection extends CollectionInternalRepresentation {
-
-    TermContext context();
+public interface KItemCollection extends CollectionInternalRepresentation, HasGlobalContext {
 
     @Override
     default KLabel constructorLabel() {
+        Definition definition = globalContext().getDefinition();
         return KLabelConstant.of(
-                context().definition().dataStructureSortOf(sort()).constructorLabel(),
-                context().definition());
+                definition.dataStructureSortOf(sort()).constructorLabel(),
+                definition);
     }
 
     @Override
     default KItem unit() {
+        Definition definition = globalContext().getDefinition();
         return KItem.of(
                 KLabelConstant.of(
-                        context().definition().dataStructureSortOf(sort()).unitLabel(),
-                        context().definition()),
+                        definition.dataStructureSortOf(sort()).unitLabel(),
+                        definition),
                 KList.EMPTY,
-                context());
+                globalContext());
     }
 }

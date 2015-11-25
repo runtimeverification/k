@@ -6,6 +6,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
  */
 public class RewriteEngineUtils {
 
-    public static boolean isSubsortedEq(Term big, Term small, TermContext context) {
-        return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
+    public static boolean isSubsortedEq(Term big, Term small, Definition definition) {
+        return definition.subsorts().isSubsortedEq(big.sort(), small.sort());
     }
 
     /**
@@ -74,7 +75,7 @@ public class RewriteEngineUtils {
 
                 if (RuleAuditing.isAuditBegun()) {
                     System.err.println("Matching failure: unable to resolve collection operation "
-                    + lookupOrChoice.substitute(crntSubst, context) + "; evaluated to "
+                    + lookupOrChoice.substitute(crntSubst) + "; evaluated to "
                     + evalLookupOrChoice);
                 }
             } else {
@@ -131,12 +132,12 @@ public class RewriteEngineUtils {
                 if (!evaluatedReq.equals(BoolToken.TRUE)) {
                     if (!evaluatedReq.isGround()
                             && context.getTopConstraint() != null
-                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet())) {
+                            && context.getTopConstraint().implies(ConjunctiveFormula.of(context.global()).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet())) {
                         i++;
                         continue;
                     }
                     if (RuleAuditing.isAuditBegun()) {
-                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst, context) + " evaluated to " + evaluatedReq);
+                        System.err.println("Side condition failure: " + require.substituteWithBinders(crntSubst) + " evaluated to " + evaluatedReq);
                     }
                     crntSubst = null;
                     break;

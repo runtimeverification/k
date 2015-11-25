@@ -50,7 +50,7 @@ public class TermEquality {
      * simplifying it.
      */
     private static TruthValue getEqualityTruthValue(Term term1, Term term2, TermContext context) {
-        return ConjunctiveFormula.of(context).add(term1, term2).simplify().truthValue();
+        return ConjunctiveFormula.of(context.global()).add(term1, term2).simplify(context).truthValue();
     }
 
     private static boolean hasKLabelVariables(Term term) {

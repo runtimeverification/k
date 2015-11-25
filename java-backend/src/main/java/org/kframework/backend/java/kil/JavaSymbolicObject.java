@@ -63,13 +63,12 @@ public abstract class JavaSymbolicObject extends ASTNode
      * applying a substitution in (in a binder sensitive way) .
      */
     public JavaSymbolicObject substituteWithBinders(
-            Map<Variable, ? extends Term> substitution,
-            TermContext context) {
+            Map<Variable, ? extends Term> substitution) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution, context));
+        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution));
     }
 
     /**
@@ -77,13 +76,12 @@ public abstract class JavaSymbolicObject extends ASTNode
      * applying a substitution in (in a binder insensitive way) .
      */
     public JavaSymbolicObject substitute(
-            Map<Variable, ? extends Term> substitution,
-            TermContext context) {
+            Map<Variable, ? extends Term> substitution) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
+        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution));
     }
 
     /**
@@ -91,22 +89,6 @@ public abstract class JavaSymbolicObject extends ASTNode
      */
     public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
         return (!substitution.isEmpty() && !isGround()) || !isNormal();
-    }
-
-    /**
-     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
-     * substituting variable (in a binder sensitive way) with term.
-     */
-    public JavaSymbolicObject substituteWithBinders(Variable variable, Term term, TermContext context) {
-        return substituteWithBinders(Collections.singletonMap(variable, term), context);
-    }
-
-    /**
-     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
-     * substituting variable (in a binder insensitive way) with term.
-     */
-    public JavaSymbolicObject substitute(Variable variable, Term term, TermContext context) {
-        return substitute(Collections.singletonMap(variable, term), context);
     }
 
     /**
@@ -156,7 +138,7 @@ public abstract class JavaSymbolicObject extends ASTNode
      * When the set of user variables has not been computed, this method will do the
      * computation.
      */
-    public Set<Term> userVariableSet(TermContext context) {
+    public Set<Term> userVariableSet(GlobalContext global) {
         if (userVariableSet == null) {
             final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
             IncrementalCollector<Term> visitor = new IncrementalCollector<>(
@@ -166,7 +148,7 @@ public abstract class JavaSymbolicObject extends ASTNode
                     new LocalVisitor() {
                         @Override
                         public void visit(Term term) {
-                            if (!(term instanceof KList) && context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
+                            if (!(term instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.VARIABLE, term.sort())) {
                                 intermediate.get(term).add(term);
                             }
                         }

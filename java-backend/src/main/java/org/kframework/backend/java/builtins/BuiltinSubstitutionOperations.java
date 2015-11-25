@@ -18,7 +18,7 @@ import java.util.Map;
 public class BuiltinSubstitutionOperations {
 
     public static Term userSubstitution(Term term, Term substitute, Term variable, TermContext context) {
-        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(Collections.singletonMap(variable, substitute), term, context), context);
+        return KLabelInjection.injectionOf(UserSubstitutionTransformer.userSubstitution(Collections.singletonMap(variable, substitute), term, context), context.global());
     }
 
     public static Term userSubstitutionKore(Term term, Term substitute, Term variable, TermContext context) {

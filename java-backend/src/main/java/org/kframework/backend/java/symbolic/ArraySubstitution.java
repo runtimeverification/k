@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -55,12 +56,12 @@ public class ArraySubstitution implements Substitution<Variable, Term> {
     }
 
     @Override
-    public List<Equality> equalities(TermContext context) {
+    public List<Equality> equalities(GlobalContext global) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isFalse(TermContext context) {
+    public boolean isFalse(GlobalContext global) {
         throw new UnsupportedOperationException();
     }
 

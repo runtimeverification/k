@@ -25,15 +25,15 @@ public class BuiltinSetOperations {
         if (set1.sort() != Sort.SET || set2.sort() != Sort.SET) {
             throw new IllegalArgumentException();
         }
-        return BuiltinSet.concatenate(context, set1, set2);
+        return BuiltinSet.concatenate(context.global(), set1, set2);
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinSet.builder(context).build();
+        return BuiltinSet.builder(context.global()).build();
     }
 
     public static Term element(Term element, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.add(element);
         return builder.build();
     }
@@ -43,7 +43,7 @@ public class BuiltinSetOperations {
             return null;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.addAll(Sets.intersection(set1.elements(), set2.elements()));
         return builder.build();
     }
@@ -62,7 +62,7 @@ public class BuiltinSetOperations {
         }
         BuiltinSet builtinSet = (BuiltinSet) set;
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.concatenate(builtinSet);
 
         Set<Term> pendingRemoveSet = removeBuiltinSet.elements().stream()

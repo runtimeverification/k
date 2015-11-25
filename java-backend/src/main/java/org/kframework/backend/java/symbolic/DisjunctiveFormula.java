@@ -2,13 +2,14 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.HasGlobalContext;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.kil.ASTNode;
 
@@ -21,22 +22,26 @@ import java.util.stream.Collectors;
  *
  * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
-public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation {
+public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 
-    private transient final TermContext context;
+    private transient final GlobalContext global;
 
-    public DisjunctiveFormula(Collection<ConjunctiveFormula> conjunctions, TermContext context) {
+    public DisjunctiveFormula(Collection<ConjunctiveFormula> conjunctions, GlobalContext global) {
         super(Kind.KITEM);
         this.conjunctions = conjunctions instanceof PersistentUniqueList ?
                 (PersistentUniqueList<ConjunctiveFormula>) conjunctions :
                 PersistentUniqueList.<ConjunctiveFormula>empty().plusAll(conjunctions);
-        this.context = context;
+        this.global = global;
     }
 
     public PersistentUniqueList<ConjunctiveFormula> conjunctions() {
         return conjunctions;
+    }
+
+    public GlobalContext globalContext() {
+        return global;
     }
 
     @Override
@@ -66,7 +71,7 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("'_orBool_", context.definition());
+        return KLabelConstant.of("'_orBool_", global.getDefinition());
     }
 
     @Override
