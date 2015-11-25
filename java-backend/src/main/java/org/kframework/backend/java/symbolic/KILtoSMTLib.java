@@ -38,6 +38,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.kframework.krun.KRunOptions;
 
 
 public class KILtoSMTLib extends CopyOnWriteTransformer {
@@ -216,7 +217,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     }
 
     private final Definition definition;
-    private final GlobalContext global;
+
+    private final KRunOptions krunOptions;
 
     /**
      * Flag set to true if it is sounds to skip equalities that cannot be translated.
@@ -227,8 +229,12 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final HashMap<UninterpretedToken, Integer> tokenEncoding;
 
     public KILtoSMTLib(boolean skipEqualities, GlobalContext global) {
-        this.global = global;
-        this.definition = global.getDefinition();
+        this(skipEqualities, global.getDefinition(), global.krunOptions);
+    }
+
+    private KILtoSMTLib(boolean skipEqualities, Definition definition, KRunOptions krunOptions) {
+        this.definition = definition;
+        this.krunOptions = krunOptions;
         this.skipEqualities = skipEqualities;
         variables = new HashSet<>();
         tokenEncoding = new HashMap<>();
@@ -296,7 +302,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         for (Rule rule : definition.functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
                 try {
-                    KILtoSMTLib kil2SMT = new KILtoSMTLib(false, global);
+                    KILtoSMTLib kil2SMT = new KILtoSMTLib(false, definition, krunOptions);
                     String leftExpression = kil2SMT.translate(rule.leftHandSide()).expression();
                     String rightExpression = kil2SMT.translate(rule.rightHandSide()).expression();
                     sb.append("(assert ");
@@ -372,7 +378,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
             return "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")";
-        } else if (s == Sort.FLOAT && !global.krunOptions.experimental.smt.floatsAsPO) {
+        } else if (s == Sort.FLOAT && !krunOptions.experimental.smt.floatsAsPO) {
             Pair<Integer, Integer> pair = FloatToken.getExponentAndSignificandOrDie(node);
             return "(_ FP " + pair.getLeft() + " " + pair.getRight() + ")";
         } else {
@@ -484,7 +490,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             throw new UnsupportedOperationException("missing SMTLib translation for " + kLabel);
         }
 
-        if (global.krunOptions.experimental.smt.floatsAsPO) {
+        if (krunOptions.experimental.smt.floatsAsPO) {
             switch (kLabel.label()) {
                 case "'_<Float_":
                     label = "float_lt";
@@ -569,11 +575,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(FloatToken floatToken) {
-        if (global.krunOptions.experimental.smt.floatsAsPO
+        if (krunOptions.experimental.smt.floatsAsPO
                 && (floatToken.bigFloatValue().isPositiveZero() || floatToken.bigFloatValue().isNegativeZero())) {
             return new SMTLibTerm("float_zero");
         }
-        assert !global.krunOptions.experimental.smt.floatsAsPO;
+        assert !krunOptions.experimental.smt.floatsAsPO;
 
         return new SMTLibTerm(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",

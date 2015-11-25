@@ -20,7 +20,7 @@ public class Equality implements Serializable {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private transient final GlobalContext global;
+    private final GlobalContext global;
 
     private TruthValue truthValue = null;
 
@@ -217,7 +217,7 @@ public class Equality implements Serializable {
                 // syntax ThreadId ::= Int | "foo" | "getThreadId" [function]
                 // ThreadId:Int ?= getThreadId
                 if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
-                        && !((KItem)rightHandSide).isEvaluable(equality.global)) {
+                        && !((KItem)rightHandSide).isEvaluable()) {
                     for (Sort sort : ((KItem) rightHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(leftHandSide.sort(), sort);
                     }
@@ -225,7 +225,7 @@ public class Equality implements Serializable {
                         return true;
                     }
                 } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
-                        && !((KItem)leftHandSide).isEvaluable(equality.global)) {
+                        && !((KItem)leftHandSide).isEvaluable()) {
                     for (Sort sort : ((KItem) leftHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(rightHandSide.sort(), sort);
                     }

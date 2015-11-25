@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <tests>
 
   <include file="../../lesson_8/tests/config.xml"
            more-programs="."
-           more-results="." />
+           more-results="." >
+
+      <all-programs>
+          <krun-option name="--search" />
+          <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </all-programs>
+  </include>
 
 </tests>
