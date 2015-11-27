@@ -37,7 +37,7 @@ public class ConcretizeCells {
         addRootCell = new AddTopCellToRules(configurationInfo, labelInfo);
         addParentCells = new AddParentCells(configurationInfo, labelInfo);
         closeCells = new CloseCells(configurationInfo, sortInfo, labelInfo);
-        sortCells = new SortCells(configurationInfo, labelInfo, kem);
+        sortCells = new SortCells(configurationInfo, labelInfo);
     }
 
     public Sentence concretize(Sentence s) {
