@@ -26,7 +26,6 @@ object Strategy {
               val newBody = r.body match {
                 case KApply(klabel, _) if !module.attributesFor.contains(klabel) || klabel.att.contains(Att.Function) =>
                   // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
-                  println(r)
                   val strategy =
                     if (r.att.contains(Att.heat))
                       KORE.KApply(KORE.KLabel("heat"))

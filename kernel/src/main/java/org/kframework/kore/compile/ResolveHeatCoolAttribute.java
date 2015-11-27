@@ -32,7 +32,6 @@ public class ResolveHeatCoolAttribute {
         String sort = att.<String>getOptional("result").orElse("KResult");
         K predicate = KApply(KLabel("is" + sort), KVariable("HOLE"));
         if (att.contains("heat")) {
-            System.out.println(att);
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
             if (att.contains("transition")) {
