@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
@@ -53,7 +52,7 @@ public class SortCellsTest {
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
         K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -67,7 +66,7 @@ public class SortCellsTest {
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), Y);
         K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), Y);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -76,7 +75,7 @@ public class SortCellsTest {
         K term = cell("<t>", cell("<env>"), cell("<k>"), cell("<opt>"), KVariable("X"));
         K expected = cell("<t>", cell("<k>"), cell("<env>"), cell("<opt>"));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -85,7 +84,7 @@ public class SortCellsTest {
         K term = KRewrite(cell("<t>", KVariable("X")), KVariable("Y"));
         K expected = KRewrite(cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")), KVariable("Y"));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -94,7 +93,7 @@ public class SortCellsTest {
         K term = cell("<t>", KVariable("X"), KRewrite(cells(), cell("<opt>")));
         K expected = cell("<t>", KVariable("_0"), KVariable("_1"), KRewrite(KApply(KLabel(".OptCell")), cell("<opt>")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -103,7 +102,7 @@ public class SortCellsTest {
         K term = cell("<t>", KVariable("X"), KRewrite(cell("<opt>"), cells()));
         K expected = cell("<t>", KVariable("_0"), KVariable("_1"), KRewrite(cell("<opt>"), KApply(KLabel(".OptCell"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -112,7 +111,7 @@ public class SortCellsTest {
         K term = cell("<top>", KRewrite(cells(), cell("<t>", KVariable("X"))));
         K expected = cell("<top>", KRewrite(KApply(KLabel(".ThreadCellBag")), cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -121,7 +120,7 @@ public class SortCellsTest {
         K term = cell("<top>", KRewrite(cell("<t>", KVariable("X")), cells()));
         K expected = cell("<top>", KRewrite(cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")), KApply(KLabel(".ThreadCellBag"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -131,7 +130,7 @@ public class SortCellsTest {
         K term = cell("<top>", KRewrite(KVariable("Y"), cells(KVariable("Y"), cell("<t>", KVariable("X")))));
         K expected = cell("<top>", KRewrite(KVariable("Y"), KApply(KLabel("_ThreadCellBag_"), KVariable("Y"), cell("<t>", KVariable("_0"), KVariable("_1"), KVariable("_2")))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -140,7 +139,7 @@ public class SortCellsTest {
         K term = cell("<top>", KRewrite(KVariable("Y"), cells()));
         K expected = cell("<top>", KRewrite(KVariable("Y"), KApply(KLabel(".ThreadCellBag"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -155,7 +154,7 @@ public class SortCellsTest {
                         KVariable("_3"),
                         KVariable("_4"))));
                 KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
     @Test
@@ -169,7 +168,7 @@ public class SortCellsTest {
                         KVariable("_2"),
                         KVariable("_3"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
     @Test
@@ -183,7 +182,7 @@ public class SortCellsTest {
                         KVariable("_2"),
                         KVariable("_3"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
     @Test
@@ -197,7 +196,7 @@ public class SortCellsTest {
                         KVariable("_2"),
                         KVariable("_3"))));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -224,7 +223,7 @@ public class SortCellsTest {
                                 KSequence(app("<top>-fragment",KVariable("_0"),KVariable("_1")),KVariable("Rest"))))),
                 KVariable("_1"));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -245,7 +244,7 @@ public class SortCellsTest {
                                 KVariable("_0"))),
                 KRewrite(KVariable("_4"),KVariable("_2")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -266,7 +265,7 @@ public class SortCellsTest {
                 , BooleanUtils.and(BooleanUtils.TRUE, app("isKCell", KVariable("X")))
                 , BooleanUtils.TRUE, Att());
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -286,7 +285,7 @@ public class SortCellsTest {
                 , app("isTopCellFragment", replacement)
                 , BooleanUtils.TRUE, Att());
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
     }
 
@@ -308,7 +307,7 @@ public class SortCellsTest {
                         app("_ThreadCellBag_", T1, T2)),
                         KVariable("_1"));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo, kem).sortCells(term));
+        Assert.assertEquals(expected, new SortCells(bagCfgInfo, bagLabelInfo).sortCells(term));
         Assert.assertEquals(0, kem.getExceptions().size());
 
     }
