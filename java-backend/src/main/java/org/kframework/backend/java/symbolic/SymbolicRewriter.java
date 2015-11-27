@@ -20,7 +20,6 @@ import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
 import org.kframework.utils.errorsystem.KEMException;
@@ -32,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +46,7 @@ public class SymbolicRewriter {
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+    private final KOREtoBackendKIL constructor;
     private boolean transition;
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
@@ -58,7 +59,8 @@ public class SymbolicRewriter {
 
     @Inject
     public SymbolicRewriter(GlobalContext global, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
-                            KRunState.Counter counter) {
+                            KRunState.Counter counter, KOREtoBackendKIL constructor) {
+        this.constructor = constructor;
         this.definition = global.getDefinition();
         this.allRuleBits = BitSet.apply(definition.ruleTable.size());
         this.allRuleBits.makeOnes(definition.ruleTable.size());
@@ -161,15 +163,13 @@ public class SymbolicRewriter {
         } finally {
             RuleAuditing.clearAuditingRule();
         }
-
-        getUnstuck(subject);
     }
 
     /**
      * This method adds a #STUCK item on the top of the strategy cell of the stuck configuration and adds
      * the resulting configuration to this.results, allowing the rewriting to continue.
      */
-    private void getUnstuck(ConstrainedTerm subject) {
+    private Optional<ConstrainedTerm> getUnstuck(ConstrainedTerm subject) {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
                 .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
                 .findFirst();
@@ -181,10 +181,11 @@ public class SymbolicRewriter {
 
         boolean isStuck = topOfStrategyCell.klabel().name().equals(Att.stuck());
 
+        // if we are stuck (i.e., in this method) and the #STUCK marker is not on the top of the strategy cell,
+        // add it
         if (theStrategy.isPresent() && !isStuck) {
             Att emptyAtt = Att.apply();
 
-            KOREtoBackendKIL constructor = new KOREtoBackendKIL(definition.module, definition, subject.termContext());
             K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(), emptyAtt);
             List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
             items.add(0, stuck);
@@ -193,7 +194,9 @@ public class SymbolicRewriter {
             K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                     constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
                             k instanceof KApply && ((KApply) k).klabel().name().contains("<s>") ? s : k).collect(Collectors.toList())), emptyAtt);
-            results.add(new ConstrainedTerm((Term) entireConf, subject.constraint()));
+            return Optional.of(new ConstrainedTerm((Term) entireConf, subject.termContext()));
+        } else {
+            return Optional.empty();
         }
     }
 
