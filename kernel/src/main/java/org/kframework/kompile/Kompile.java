@@ -4,11 +4,15 @@ package org.kframework.kompile;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
 import org.kframework.Strategy;
 import org.kframework.attributes.Source;
+import org.kframework.backend.Backends;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.CleanKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -17,23 +21,20 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.ADT;
+import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.compile.AddImplicitComputationCell;
-import org.kframework.kore.compile.ConcretizeCells;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
-import org.kframework.kore.compile.GenerateSortPredicateSyntax;
-import org.kframework.kore.compile.ResolveAnonVar;
-import org.kframework.kore.compile.ResolveContexts;
-import org.kframework.kore.compile.ResolveFreshConstants;
-import org.kframework.kore.compile.ResolveHeatCoolAttribute;
-import org.kframework.kore.compile.ResolveIOStreams;
-import org.kframework.kore.compile.ResolveSemanticCasts;
-import org.kframework.kore.compile.ResolveStrict;
-import org.kframework.kore.compile.SortInfo;
+import org.kframework.kore.SortedADT;
+import org.kframework.kore.compile.*;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParseCache.ParsedSentence;
@@ -50,6 +51,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
+import scala.collection.immutable.Seq;
 import scala.collection.immutable.Set;
 import scala.util.Either;
 
@@ -80,28 +82,23 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_KAST_K = "requires \"kast.k\"\n";
+    private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
+
+    public final KompileOptions kompileOptions;
 
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final boolean cacheParses;
     private final BinaryLoader loader;
-    private final KompileOptions kompileOptions;
     private final Stopwatch sw;
 
     private final AtomicInteger parsedBubbles = new AtomicInteger(0);
     private final AtomicInteger cachedBubbles = new AtomicInteger(0);
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
-        this.files = files;
-        this.kem = kem;
-        this.kompileOptions = kompileOptions;
-        this.parser = new ParserUtils(files, kem, kompileOptions.global);
-        this.cacheParses = cacheParses;
-        this.loader = new BinaryLoader(kem);
-        this.sw = sw;
+        this(kompileOptions, kompileOptions.global, files, kem, sw, cacheParses);
     }
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
@@ -116,6 +113,17 @@ public class Kompile {
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
         this(kompileOptions, files, kem, sw, true);
     }
+
+    public Kompile(KompileOptions kompileOptions, GlobalOptions global, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.kompileOptions = kompileOptions;
+        this.files = files;
+        this.kem = kem;
+        this.parser = new ParserUtils(files, kem, global);
+        this.cacheParses = cacheParses;
+        this.loader = new BinaryLoader(kem);
+        this.sw = sw;
+    }
+
 
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
@@ -143,12 +151,12 @@ public class Kompile {
     }
 
     public Function<Definition, Definition> defaultSteps() {
-        DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict()::resolve, "resolving strict and seqstrict attributes");
-        DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts()::resolve, "resolving context sentences");
+        DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
+        DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts(kompileOptions)::resolve, "resolving context sentences");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute()::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts()::resolve, "resolving semantic casts");
+                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         
         return def -> func(this::resolveIOStreams)
@@ -207,7 +215,7 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return DefinitionTransformer.fromRuleBodyTranformer(
+        return DefinitionTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
                 "concretizing configuration").apply(input);
     }
@@ -229,13 +237,62 @@ public class Kompile {
         return new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(s);
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
-        Definition definition = parser.loadDefinition(
-                mainModuleName,
-                mainProgramsModule, REQUIRE_KAST_K + "require " + StringUtil.enquoteCString(definitionFile.getPath()),
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
+        java.util.Set<Module> modules = parser.loadModules(
+                mutable(definition.getParsedDefinition().modules()),
+                "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getPath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
+                dropQuote);
+
+        if (modules.size() != 1) {
+            throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
+        }
+
+        Module module = modules.iterator().next();
+
+        errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
+        caches = new HashMap<>();
+
+        if (cacheParses) {
+            try {
+                caches = loader.load(Map.class, files.resolveKompiled("cache.bin"));
+            } catch (FileNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
+                kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
+            }
+        }
+
+        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
+        Module modWithConfig = resolveConfig(module, definition.getParsedDefinition());
+
+        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
+        Module parsedMod = resolveBubbles(modWithConfig);
+
+        if(cacheParses) {
+            loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
+        }
+        if (!errors.isEmpty()) {
+            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
+        }
+        return parsedMod;
+    }
+
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+        String prelude = REQUIRE_PRELUDE_K;
+        if (kompileOptions.noPrelude) {
+            prelude = "";
+        }
+        Definition definition = parser.loadDefinition(
+                mainModuleName,
+                mainProgramsModule, prelude + FileUtil.load(definitionFile),
+                Source.apply(definitionFile.getPath()),
+                definitionFile.getParentFile(),
+                ListUtils.union(kompileOptions.includes.stream()
+                                .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                        Lists.newArrayList(BUILTIN_DIRECTORY)),
                 dropQuote);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
@@ -380,12 +437,16 @@ public class Kompile {
         return upRule(res.iterator().next());
     }
 
-    public Rule compileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
-        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+    public Rule compileRule(CompiledDefinition compiledDef, Rule parsedRule) {
         return (Rule) func(new ResolveAnonVar()::resolve)
-                .andThen(func(new ResolveSemanticCasts()::resolve))
+                .andThen(func(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve))
                 .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))
-                .apply(parsed);
+                .apply(parsedRule);
+    }
+
+    public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
+        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+        return compileRule(compiledDef, parsed);
     }
 
     private Rule upRule(K contents) {

@@ -1,5 +1,0 @@
-- set maximal width (needs perhaps more fine tuning)
-- check that all JavaClasses are supported
-- add parenthesis between user syntax and k syntax
-- add support for non "(" ")" brackets
-- add test cases

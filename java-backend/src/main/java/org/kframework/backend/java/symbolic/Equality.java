@@ -3,30 +3,13 @@
 package org.kframework.backend.java.symbolic;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.util.Constants;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.kframework.kil.MapBuiltin;
 
 /**
  * An equality between two canonicalized terms.
@@ -37,11 +20,11 @@ public class Equality implements Serializable {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private transient final TermContext context;
+    private final GlobalContext global;
 
     private TruthValue truthValue = null;
 
-    public Equality(Term leftHandSide, Term rightHandSide, TermContext context) {
+    public Equality(Term leftHandSide, Term rightHandSide, GlobalContext global) {
         // TODO(YilongL): this seems a little bit ad-hoc...
         if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
             KList kList = (KList) (((KItem) leftHandSide).kList());
@@ -67,7 +50,7 @@ public class Equality implements Serializable {
 
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
-        this.context = context;
+        this.global = global;
     }
 
     public Term leftHandSide() {
@@ -81,7 +64,7 @@ public class Equality implements Serializable {
     private boolean isTermEquality(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && ((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_");
+                && (((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_") || ((KLabelConstant) ((KItem) term).kLabel()).label().equals("_==K_"));
     }
 
     private Term canonicalize(Term term) {
@@ -118,7 +101,7 @@ public class Equality implements Serializable {
     }
 
     public boolean isFalse() {
-        return context.global().equalityOps.isFalse(this);
+        return global.equalityOps.isFalse(this);
     }
 
     /**
@@ -135,11 +118,11 @@ public class Equality implements Serializable {
                 || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
     }
 
-    public KItem toK(TermContext context) {
+    public KItem toK() {
         return KItem.of(
-                KLabelConstant.of("'_==K_", context.definition()),
+                KLabelConstant.of("'_==K_", global.getDefinition()),
                 KList.concatenate(leftHandSide, rightHandSide),
-                context);
+                global);
     }
 
     @Override
@@ -160,8 +143,8 @@ public class Equality implements Serializable {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + leftHandSide.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + rightHandSide.hashCode();
         return hashCode;
     }
 
@@ -234,7 +217,7 @@ public class Equality implements Serializable {
                 // syntax ThreadId ::= Int | "foo" | "getThreadId" [function]
                 // ThreadId:Int ?= getThreadId
                 if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
-                        && !((KItem)rightHandSide).isEvaluable(equality.context)) {
+                        && !((KItem)rightHandSide).isEvaluable()) {
                     for (Sort sort : ((KItem) rightHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(leftHandSide.sort(), sort);
                     }
@@ -242,7 +225,7 @@ public class Equality implements Serializable {
                         return true;
                     }
                 } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
-                        && !((KItem)leftHandSide).isEvaluable(equality.context)) {
+                        && !((KItem)leftHandSide).isEvaluable()) {
                     for (Sort sort : ((KItem) leftHandSide).possibleSorts()) {
                         unifiable = unifiable || definition.subsorts().isSubsortedEq(rightHandSide.sort(), sort);
                     }

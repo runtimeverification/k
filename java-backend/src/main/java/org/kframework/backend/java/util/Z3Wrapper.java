@@ -49,7 +49,7 @@ public class Z3Wrapper {
         SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
     }
 
-    public synchronized boolean checkQuery(String query, int timeout) {
+    public synchronized boolean isUnsat(String query, int timeout) {
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout);
         } else {
@@ -111,10 +111,8 @@ public class Z3Wrapper {
             if (globalOptions.debug) {
                 System.err.println("Z3 crashed on query:\n" + SMT_PRELUDE + query + "(check-sat)\n");
             }
-        } else if (result != null) {
-            if (globalOptions.debug && !Z3_QUERY_RESULTS.contains(result)) {
-                System.err.println("Unexpected Z3 query result:\n" + result);
-            }
+        } else if (globalOptions.debug && !Z3_QUERY_RESULTS.contains(result)) {
+            System.err.println("Unexpected Z3 query result:\n" + result);
         }
         return result.equals("unsat");
     }

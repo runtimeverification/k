@@ -2,7 +2,7 @@
 package org.kframework.debugger;
 
 
-import org.kframework.Rewriter;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Rule;
@@ -11,6 +11,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -185,7 +186,7 @@ public class KoreKDebug implements KDebug {
 
     @Override
     public List<? extends Map<? extends K, ? extends K>> search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds) {
-        return rewriter.search(stateList.get(activeStateIndex).getCurrentK(), depth, bounds, searchPattern);
+        return rewriter.search(stateList.get(activeStateIndex).getCurrentK(), depth, bounds, searchPattern, SearchType.FINAL);
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.parser.generator.SDFHelper;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -109,17 +108,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                     Optional<Module> theModule = allKilModules.stream()
                             .filter(m -> m.getName().equals(imp.getName()))
                             .findFirst();
-                    if (theModule.isPresent())
-                        return theModule.get();
-                    else
+                    if (theModule.isPresent()) {
+                        Module mod = theModule.get();
+                        org.kframework.definition.Module result = koreModules.get(mod.getName());
+                        if (result == null) {
+                            result = apply(mod, allKilModules, koreModules);
+                        }
+                        return result;
+                    } else if (koreModules.containsKey(imp.getName())) {
+                        return koreModules.get(imp.getName());
+                    } else
                         throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
-                })
-                .map(mod -> {
-                    org.kframework.definition.Module result = koreModules.get(mod.getName());
-                    if (result == null) {
-                        result = apply(mod, allKilModules, koreModules);
-                    }
-                    return result;
                 }).collect(Collectors.toSet());
 
 
@@ -257,8 +256,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().flatMap(l ->
-                SDFHelper.getProductionsForTag(l.getLabel(), context).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
+        return immutable(labels.stream().flatMap(l -> context.tags.get(l.getLabel()).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
     }
 
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
@@ -392,12 +390,12 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Es ::= E "," Es
         prod1 = Production(sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("klabel", dropQuote(p.getKLabel())).add("right"));
+                attrsWithKilProductionId.remove("klabel").add("klabel", dropQuote(p.getKLabel())).add("right"));
 
 
         // Es ::= ".Es"
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("strict").add("klabel", dropQuote(p.getTerminatorKLabel())));
+                attrsWithKilProductionId.remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
 
         res.add(prod1);
         res.add(prod3);

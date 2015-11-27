@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.parser.generator.CollectTerminalsVisitor;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

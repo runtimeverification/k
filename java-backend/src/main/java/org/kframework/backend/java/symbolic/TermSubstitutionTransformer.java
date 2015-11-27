@@ -17,15 +17,13 @@ public class TermSubstitutionTransformer extends PrePostTransformer {
     private final Map<? extends Term, ? extends Term> substitution;
 
     public static JavaSymbolicObject substitute(JavaSymbolicObject object,
-            Map<? extends Term, ? extends Term> substitution,
-            TermContext context) {
+                                                Map<? extends Term, ? extends Term> substitution) {
         TermSubstitutionTransformer transformer = new TermSubstitutionTransformer(
-                substitution, context);
+                substitution);
         return (JavaSymbolicObject) object.accept(transformer);
     }
 
-    private TermSubstitutionTransformer(Map<? extends Term, ? extends Term> substitution, TermContext context) {
-        super(context);
+    private TermSubstitutionTransformer(Map<? extends Term, ? extends Term> substitution) {
         this.substitution = substitution;
         preTransformer.addTransformer(new LocalSubstitutionTransformer());
     }

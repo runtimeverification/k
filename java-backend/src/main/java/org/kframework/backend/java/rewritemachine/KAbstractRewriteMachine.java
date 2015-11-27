@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.kil.CellCollection.Cell;
 import org.kframework.backend.java.rewritemachine.RHSInstruction.Constructor;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.PatternMatcher;
@@ -39,11 +38,10 @@ public class KAbstractRewriteMachine {
     private final List<MatchingInstruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
-    private List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
+    private final List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
 
     // program counter
     private int pc = 1;
-    private MatchingInstruction nextInstr;
     private boolean success = true;
     private boolean isStarNested = false;
 
@@ -108,6 +106,7 @@ public class KAbstractRewriteMachine {
     public static Term construct(List<RHSInstruction> rhsInstructions,
             Map<Variable, Term> solution, Set<Variable> reusableVariables, TermContext context,
             boolean doClone) {
+        GlobalContext global = context.global();
 
         /* Special case for one-instruction lists that can be resolved without a stack;
          * The code falls through the general case. */
@@ -141,7 +140,7 @@ public class KAbstractRewriteMachine {
                 Constructor constructor = instruction.constructor();
                 switch (constructor.type()) {
                 case BUILTIN_LIST:
-                    BuiltinList.Builder builder = BuiltinList.builder(context);
+                    BuiltinList.Builder builder = BuiltinList.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder.addItem(stack.pop());
                     }
@@ -154,7 +153,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder.build());
                     break;
                 case BUILTIN_MAP:
-                    BuiltinMap.Builder builder1 = BuiltinMap.builder(context);
+                    BuiltinMap.Builder builder1 = BuiltinMap.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         Term key = stack.pop();
                         Term value = stack.pop();
@@ -166,7 +165,7 @@ public class KAbstractRewriteMachine {
                     stack.push(builder1.build());
                     break;
                 case BUILTIN_SET:
-                    BuiltinSet.Builder builder2 = BuiltinSet.builder(context);
+                    BuiltinSet.Builder builder2 = BuiltinSet.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder2.add(stack.pop());
                     }
@@ -178,7 +177,7 @@ public class KAbstractRewriteMachine {
                 case KITEM:
                     Term kLabel = stack.pop();
                     Term kList = stack.pop();
-                    stack.push(KItem.of(kLabel, kList, context, constructor.getSource(), constructor.getLocation()));
+                    stack.push(KItem.of(kLabel, kList, global, constructor.getSource(), constructor.getLocation()));
                     break;
                 case KITEM_PROJECTION:
                     stack.push(new KItemProjection(constructor.kind(), stack.pop()));
@@ -279,7 +278,7 @@ public class KAbstractRewriteMachine {
         }
 
         while (true) {
-            nextInstr = nextInstruction();
+            MatchingInstruction nextInstr = nextInstruction();
 
             if (nextInstr == MatchingInstruction.UP) {
                 return;

@@ -18,7 +18,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.compile.KtoKORE;
-import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.main.GlobalOptions;
@@ -28,6 +27,7 @@ import org.kframework.utils.file.FileUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,20 +48,28 @@ public class ExpandMacros {
 
     private final InitializeRewriter.SymbolicRewriterGlue rewriter;
     private final KExceptionManager kem;
+    private final boolean noMacros;
 
     public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
         this.kem = kem;
-        rewriter = (InitializeRewriter.SymbolicRewriterGlue) new InitializeRewriter(
-                new PortableFileSystem(kem, files),
-                new JavaExecutionOptions(),
-                globalOptions,
-                kem,
-                kompileOptions.experimental.smt,
-                new HashMap<>(),
-                kompileOptions,
-                new KRunOptions(),
-                files,
-                new InitializeRewriter.InitializeDefinition()).apply(getMacroModule(mod));
+        Optional<Module> macroModule = getMacroModule(mod);
+        if (macroModule.isPresent()) {
+            rewriter = (InitializeRewriter.SymbolicRewriterGlue) new InitializeRewriter(
+                    new PortableFileSystem(kem, files),
+                    new JavaExecutionOptions(),
+                    globalOptions,
+                    kem,
+                    kompileOptions.experimental.smt,
+                    new HashMap<>(),
+                    kompileOptions,
+                    new KRunOptions(),
+                    files,
+                    new InitializeRewriter.InitializeDefinition()).apply(macroModule.get());
+            noMacros = false;
+        } else {
+            noMacros = true;
+            rewriter = null;
+        }
     }
 
     private static boolean isSortPredicates(K term, Module mod) {
@@ -86,7 +94,7 @@ public class ExpandMacros {
                 atts.get(Attribute.PREDICATE_KEY).exists(func(s -> !s.equals("")))));
     }
 
-    private static Module getMacroModule(Module mod) {
+    private static Optional<Module> getMacroModule(Module mod) {
         Set<Sentence> sentences = new HashSet<>();
         sentences.addAll(mutable(mod.productions()));
         sentences.addAll(mutable(mod.sortDeclarations()));
@@ -104,12 +112,14 @@ public class ExpandMacros {
                 })
                 .collect(Collectors.toSet());
         sentences.addAll(macroRules);
-        return Module(mod.name(), Set(), immutable(sentences), mod.att());
+        if (macroRules.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(Module(mod.name(), Set(), immutable(sentences), mod.att()));
     }
 
     private Rule expand(Rule rule) {
-        return Rule(
-                KRewrite(expand(RewriteToTop.toLeft(rule.body())), expand(RewriteToTop.toRight(rule.body()))),
+        return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());
@@ -123,14 +133,17 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        TermContext tc = TermContext.of(rewriter.rewritingContext);
+        if (noMacros) {
+            return term;
+        }
+        TermContext tc = TermContext.builder(rewriter.rewritingContext).build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
-        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc).convert(term));
+        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc.global(), false, false).convert(term));
         return new KtoKORE().apply(t);
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule) {
+        if (s instanceof Rule && !s.att().contains("macro")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

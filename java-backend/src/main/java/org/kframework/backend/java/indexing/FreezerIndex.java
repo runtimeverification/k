@@ -2,7 +2,7 @@
 package org.kframework.backend.java.indexing;
 
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 
 
 /**
@@ -47,8 +47,8 @@ public class FreezerIndex implements Index {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = hash * Utils.HASH_PRIME + kLabel.hashCode();
-        hash = hash * Utils.HASH_PRIME + holeIndex;
+        hash = hash * Constants.HASH_PRIME + kLabel.hashCode();
+        hash = hash * Constants.HASH_PRIME + holeIndex;
         return hash;
     }
 

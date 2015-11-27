@@ -23,10 +23,14 @@ public class TransformKORE extends AbstractKORETransformer<K> {
             change = change || (in != out);
         }
         if (change) {
-            return KApply(k.klabel(), KList(newItems), k.att());
+            return KApply(apply(k.klabel()), KList(newItems), k.att());
         } else {
             return k;
         }
+    }
+
+    private KLabel apply(KLabel klabel) {
+        return klabel;
     }
 
     @Override

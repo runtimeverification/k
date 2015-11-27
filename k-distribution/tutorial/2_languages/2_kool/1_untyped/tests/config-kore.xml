@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+<tests>
+
+  <test definition="kool-untyped"
+        programs="."
+        extension="kool"
+        exclude="cycle"
+        skip="pdf"
+        results="." >
+    <all-programs>
+      <krun-option name="--parser" value="kast --sort Stmts" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
+</tests>

@@ -7,6 +7,7 @@ import com.google.common.collect.Multiset;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -86,7 +87,7 @@ public class ConvertDataStructureToLookup {
                 set.add(Tuple2.apply(KLabel(p.att().<String>get("wrapElement").get()), p.klabel().get()));
             }
             return set.stream();
-        }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+        }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
     }
 
     private Rule convert(Rule rule) {
@@ -222,6 +223,9 @@ public class ConvertDataStructureToLookup {
         return new TransformKORE() {
             @Override
             public K apply(KApply k) {
+                if (k.klabel().name().equals(KLabels.KSEQ))
+                    return super.apply(k);
+
                 if (collectionFor.containsKey(k.klabel())) {
                     KLabel collectionLabel = collectionFor.get(k.klabel());
                     Att att = m.attributesFor().apply(collectionLabel);
@@ -504,13 +508,22 @@ public class ConvertDataStructureToLookup {
         if (s.att().contains(Attribute.LEMMA_KEY)
                 || s.att().contains(Attribute.SMT_LEMMA_KEY)
                 || s.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
-          return s;
+            return s;
         } else if (s instanceof Rule) {
             return convert((Rule) s);
         } else if (s instanceof Context) {
             return convert((Context) s);
         } else {
-            return s;
+          return s;
         }
     }
+
+    public static boolean isLookupKLabel(KLabel k) {
+        return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#setChoice");
+    }
+
+    public static boolean isLookupKLabel(KApply k) {
+        return isLookupKLabel(k.klabel());
+    }
+
 }

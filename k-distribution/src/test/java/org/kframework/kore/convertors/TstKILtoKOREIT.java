@@ -2,11 +2,11 @@
 
 package org.kframework.kore.convertors;
 
-import java.io.IOException;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import java.io.IOException;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TstKILtoKOREIT extends BaseTest {
@@ -31,35 +31,9 @@ public class TstKILtoKOREIT extends BaseTest {
         outerOnlyTest();
     }
 
-    // we'll have to eventually convert the configuration
-    // to macro rules, as Grigore wrote on the wiki
-    // for now, we'll do this conversion:
-    // <k foo="bla"> .K </k> becomes:
-    // KApply(KLabel("k"), KList(EmptyK), Att(KApply(KLabel("foo",
-    // KToken(String, "bla"))))
-    @Test
-    public void configuration() throws IOException {
-        sdfTest();
-    }
-
-    @Test
-    public void context() throws IOException {
-        sdfTest();
-    }
-
     @Test
     public void imports() throws IOException {
         outerOnlyTest();
-    }
-
-    @Test
-    public void simpleRule() throws IOException {
-        sdfTest();
-    }
-
-    @Test
-    public void ruleWithRequiresEnsures() throws IOException {
-        sdfTest();
     }
 
     @Test
@@ -75,26 +49,6 @@ public class TstKILtoKOREIT extends BaseTest {
     @Test
     public void syntaxWithOR() throws IOException {
         outerOnlyTest();
-    }
-
-    @Test
-    public void userList() throws IOException {
-        sdfTest();
-    }
-
-    @Test
-    public void userListNonEmpty() throws IOException {
-        sdfTest();
-    }
-
-    @Test
-    public void kapp() throws IOException {
-        sdfTest();
-    }
-
-    @Test
-    public void complex() throws IOException {
-        sdfTest();
     }
 
     protected String convert(DefinitionWithContext defWithContext) {

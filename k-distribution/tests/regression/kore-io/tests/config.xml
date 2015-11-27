@@ -6,9 +6,7 @@
         programs="."
         extension="imp"
         results="." >
-      <kompile-option name="--kore" />
       <all-programs>
-        <krun-option name="--kore" />
         <krun-option name="--smt" value="none" />
         <krun-option name="--output" value="none" />
       </all-programs>

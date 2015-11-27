@@ -1,15 +1,10 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.visitors.Visitor;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 /**
  * Applications that are not in sort K, or have not yet been flattened.
@@ -28,17 +23,6 @@ public class TermCons extends ProductionReference implements Interfaces.MutableL
 
     private int cachedHashCode = 0;
     private boolean upToDateHash = false;
-
-    public TermCons(Element element, JavaClassesFactory factory, Map<String, Production> conses){
-        super(element, conses);
-        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
-        assert this.production != null;
-
-        contents = new ArrayList<Term>();
-        List<Element> children = XML.getChildrenElements(element);
-        for (Element e : children)
-            contents.add((Term) factory.getTerm(e));
-    }
 
     public TermCons(Sort sort, Production p) {
         this(sort, new ArrayList<Term>(), p);

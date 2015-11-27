@@ -6,9 +6,11 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.MapCache;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -20,7 +22,7 @@ import org.kframework.kil.ASTNode;
 public final class UninterpretedToken extends Token implements MaximalSharing {
 
     /* Token cache */
-    private static final MapCache<Sort, MapCache<String, UninterpretedToken>> cache = new MapCache<>();
+    private static final Map<Sort, Map<String, UninterpretedToken>> cache = new ConcurrentHashMap<>();
 
     private final Sort sort;
     private final String value;
@@ -36,8 +38,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
     public static UninterpretedToken of(Sort sort, String value) {
-        MapCache<String, UninterpretedToken> sortCache = cache.get(sort, MapCache::new);
-        return sortCache.get(value, () -> new UninterpretedToken(sort, value));
+        Map<String, UninterpretedToken> sortCache = cache.computeIfAbsent(sort, p -> new ConcurrentHashMap<>());
+        return sortCache.computeIfAbsent(value, v -> new UninterpretedToken(sort, v));
     }
 
     @Override
@@ -56,8 +58,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 
@@ -82,8 +84,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * instance.
      */
     private Object readResolve() {
-        MapCache<String, UninterpretedToken> sortCache = cache.get(sort, MapCache::new);
-        return sortCache.get(value, () -> this);
+        Map<String, UninterpretedToken> sortCache = cache.computeIfAbsent(sort, p -> new ConcurrentHashMap<>());
+        return sortCache.computeIfAbsent(value, v -> this);
     }
 
 }

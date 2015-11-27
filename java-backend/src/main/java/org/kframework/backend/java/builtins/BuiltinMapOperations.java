@@ -26,15 +26,15 @@ public class BuiltinMapOperations {
         if (map1.sort() != Sort.MAP || map2.sort() != Sort.MAP) {
             throw new IllegalArgumentException();
         }
-        return BuiltinMap.concatenate(context, map1, map2);
+        return BuiltinMap.concatenate(context.global(), map1, map2);
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinMap.builder(context).build();
+        return BuiltinMap.builder(context.global()).build();
     }
 
     public static Term entry(Term key, Term value, TermContext context) {
-        BuiltinMap.Builder builder = new BuiltinMap.Builder(context);
+        BuiltinMap.Builder builder = new BuiltinMap.Builder(context.global());
         builder.put(key, value);
         return builder.build();
     }
@@ -71,19 +71,19 @@ public class BuiltinMapOperations {
     }
 
     public static Term update(Term map, Term key, Term value, TermContext context) {
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
         builder.put(key, value);
         return updateAll(map, (BuiltinMap) builder.build(), context);
     }
 
     public static Term remove(Term map, Term key, TermContext context) {
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.add(key);
         return removeAll(map, (BuiltinSet) builder.build(), context);
     }
 
     public static Term difference(BuiltinMap map1, BuiltinMap map2, TermContext context) {
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
         if (!map1.isGround() || !map2.isGround()) {
             if (map1.getEntries().entrySet().containsAll(map2.getEntries().entrySet())
                     && Multisets.containsOccurrences(map1.baseTerms(), map2.baseTerms())) {
@@ -119,7 +119,7 @@ public class BuiltinMapOperations {
         }
         BuiltinMap builtinMap = (BuiltinMap) map;
 
-        BuiltinMap.Builder builder = new BuiltinMap.Builder(context);
+        BuiltinMap.Builder builder = new BuiltinMap.Builder(context.global());
         builder.update(builtinMap, updateBuiltinMap);
         BuiltinMap updatedMap = (BuiltinMap) builder.build();
         if (builtinMap.isConcreteCollection()
@@ -144,7 +144,7 @@ public class BuiltinMapOperations {
         }
         BuiltinMap builtinMap = (BuiltinMap) map;
 
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
         builder.concatenate(builtinMap);
 
         Set<Term> pendingRemoveSet = removeBuiltinSet.elements().stream()
@@ -162,13 +162,13 @@ public class BuiltinMapOperations {
         if (map.getEntries().isEmpty() && !map.isEmpty()) {
             return null;
         }
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.addAll(map.getEntries().keySet());
         if (!map.isConcreteCollection()) {
             builder.add(KItem.of(
                     KLabelConstant.of("'keys", context.definition()),
-                    KList.concatenate(BuiltinMap.concatenate(context, map.baseTerms())),
-                    context));
+                    KList.concatenate(BuiltinMap.concatenate(context.global(), map.baseTerms())),
+                    context.global()));
         }
         return (BuiltinSet) builder.build();
     }
@@ -179,7 +179,7 @@ public class BuiltinMapOperations {
         }
 
         List<Term> elements = new ArrayList<>(map.getEntries().values());
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder(context.global());
         builder.addItems(elements);
         return (BuiltinList) builder.build();
     }

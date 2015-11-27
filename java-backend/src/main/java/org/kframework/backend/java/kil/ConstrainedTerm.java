@@ -15,7 +15,7 @@ import org.kframework.backend.java.symbolic.PatternExpander;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.Lists;
@@ -74,15 +74,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     private final TermContext context;
 
-    public ConstrainedTerm(Term term, ConjunctiveFormula constraint) {
-        Data data = new Data(term, constraint);
-        this.data = data;
-        this.context = TermContext.of(data.constraint.termContext().global(),
-                term, data.constraint.termContext().getCounter());
+    public ConstrainedTerm(Term term, ConjunctiveFormula constraint, TermContext context) {
+        this.data = new Data(term, constraint);
+        this.context = context;
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, ConjunctiveFormula.of(context));
+        this(term, ConjunctiveFormula.of(context.global()), context);
     }
 
     public TermContext termContext() {
@@ -110,7 +108,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
             result = new ConstrainedTerm(
                     expandedTerm.term().substituteAndEvaluate(patternExpander.extraConstraint().substitution(), context),
-                    expandedTerm.constraint().add(patternExpander.extraConstraint()).simplify());
+                    expandedTerm.constraint().add(patternExpander.extraConstraint()).simplify(context),
+                    context);
         }
 
         return result;
@@ -122,43 +121,43 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * existentially quantified.
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext())
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
-                .simplifyBeforePatternFolding();
+                .simplifyBeforePatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }
 
         /* apply pattern folding */
-        constraint = constraint.simplifyModuloPatternFolding()
+        constraint = constraint.simplifyModuloPatternFolding(context)
                 .add(constrainedTerm.data.constraint)
-                .simplifyModuloPatternFolding();
+                .simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }
 
         if (expand) {
-            constraint = constraint.expandPatterns(false).simplifyModuloPatternFolding();
+            constraint = constraint.expandPatterns(false, context).simplifyModuloPatternFolding(context);
             if (constraint.isFalse()) {
                 return null;
             }
         }
 
-        constraint.termContext().setTopConstraint(data.constraint);
-        constraint = (ConjunctiveFormula) constraint.evaluate(constraint.termContext());
+        context.setTopConstraint(data.constraint);
+        constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
         constraint = constraint.orientSubstitution(rightOnlyVariables);
 
         ConjunctiveFormula leftHandSide = data.constraint;
         ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
-        rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution(), context);
+        rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution());
         if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
         }
 
-        return data.constraint.addAndSimplify(constraint);
+        return data.constraint.addAndSimplify(constraint, context);
     }
 
     public Term term() {
@@ -192,19 +191,19 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
             constraint = unifier.constraint();
         }
-        constraint = constraint.simplify();
+        constraint = constraint.simplify(context);
         if (constraint.isFalse()) {
             return Collections.emptyList();
         }
 
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
-                .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
+                .map(c -> c.addAndSimplify(constrainedTerm.constraint(), context))
                 .filter(c -> !c.isFalse())
                 .map(ConjunctiveFormula::resolveNonDeterministicLookups)
                 .map(ConjunctiveFormula::getDisjunctiveNormalForm)
                 .map(DisjunctiveFormula::conjunctions)
                 .flatMap(List::stream)
-                .map(ConjunctiveFormula::simplify)
+                .map(c -> c.simplify(context))
                 .filter(c -> !c.isFalse())
                 .collect(Collectors.toList());
 
@@ -213,7 +212,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             variables = variables == null ? constrainedTerm.variableSet() : variables;
             candidate = candidate.orientSubstitution(variables);
 
-            ConjunctiveFormula solution = candidate.addAndSimplify(constraint());
+            ConjunctiveFormula solution = candidate.addAndSimplify(constraint(), context);
             if (solution.isFalse()) {
                 continue;
             }
@@ -249,9 +248,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         int h = hashCode;
-        if (h == Utils.NO_HASHCODE) {
+        if (h == Constants.NO_HASHCODE) {
             h = 1;
-            h = h * Utils.HASH_PRIME + data.hashCode();
+            h = h * Constants.HASH_PRIME + data.hashCode();
             h = h == 0 ? 1 : h;
             hashCode = h;
         }

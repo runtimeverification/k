@@ -7,9 +7,9 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.unparser.OutputModes;
-import org.kframework.krun.api.SearchType;
+import org.kframework.unparser.OutputModes;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
@@ -75,9 +75,9 @@ public final class KRunOptions {
         public String parser(String mainModuleName) {
             if (parser == null) {
                 if (term()) {
-                    return "kast --kore -m " + mainModuleName;
+                    return "kast -m " + mainModuleName;
                 } else {
-                    return "kast --kore";
+                    return "kast";
                 }
             } else {
                 return parser;
@@ -114,7 +114,7 @@ public final class KRunOptions {
         public Map<String, Pair<String, String>> configVars(String mainModuleName) {
             Map<String, Pair<String, String>> result = new HashMap<>();
             for (Map.Entry<String, String> entry : configVars.entrySet()) {
-                String cfgParser = "kast --kore -m " + mainModuleName + " -e";
+                String cfgParser = "kast -m " + mainModuleName + " -e";
                 if (configVarParsers.get(entry.getKey()) != null) {
                     cfgParser = configVarParsers.get(entry.getKey());
                 }
@@ -247,9 +247,6 @@ public final class KRunOptions {
     @Parameter(names="--exit-code", description="Specify a matching pattern containing an integer variable which will be used as the exit status of krun.")
     public String exitCodePattern;
 
-    public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
-
-
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;
 
@@ -307,11 +304,12 @@ public final class KRunOptions {
         @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
         public File coverage = null;
 
-        @Parameter(names="--kore", description="Execute with the new pipeline.")
-        public boolean kore = false;
-
         @Parameter(names="--native-libraries", description="Native libraries to link the rewrite engine against. Useful in defining rewriter plugins.",
                 listConverter=StringListConverter.class)
         public List<String> nativeLibraries = Collections.emptyList();
+
+        @Parameter(names="--native-library-path", description="Directories to search for native libraries in for linking. Useful in defining rewriter plugins.",
+                listConverter=StringListConverter.class)
+        public List<String> nativeLibraryPath = Collections.emptyList();
     }
 }

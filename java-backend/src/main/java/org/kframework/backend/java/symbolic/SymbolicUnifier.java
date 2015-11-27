@@ -38,15 +38,18 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     private final boolean partialSimpl;
 
+    private final GlobalContext global;
+
     public SymbolicUnifier(TermContext context) {
         this(false, false, context);
     }
 
     public SymbolicUnifier(boolean patternFold, boolean partialSimpl, TermContext context) {
-        this.constraint = ConjunctiveFormula.of(context);
+        super(context);
+        this.global = context.global();
+        this.constraint = ConjunctiveFormula.of(global);
         this.patternFold = patternFold;
         this.partialSimpl = partialSimpl;
-        this.termContext = context;
     }
 
     public ConjunctiveFormula constraint() {
@@ -57,7 +60,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      * Unifies two given terms. Returns true if the unification succeeds.
      */
     public boolean symbolicUnify(Term term, Term otherTerm) {
-        return symbolicUnify(term, otherTerm, ConjunctiveFormula.of(termContext));
+        return symbolicUnify(term, otherTerm, ConjunctiveFormula.of(global));
     }
 
     /**
@@ -189,13 +192,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             return;
         }
 
-        BuiltinList.Builder builder = BuiltinList.builder(termContext);
+        BuiltinList.Builder builder = BuiltinList.builder(global);
         builder.addItems(remainingElementsLeft);
         builder.concatenate(remainingBaseTerms);
         builder.addItems(remainingElementsRight);
         Term remainingList = builder.build();
 
-        BuiltinList.Builder otherBuilder = BuiltinList.builder(termContext);
+        BuiltinList.Builder otherBuilder = BuiltinList.builder(global);
         otherBuilder.addItems(otherRemainingElementsLeft);
         otherBuilder.concatenate(otherRemainingBaseTerms);
         otherBuilder.addItems(otherRemainingElementsRight);
@@ -205,14 +208,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
             if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
                 add(remainingList, otherRemainingList);
-                if (failed) {
-                    return;
-                }
             } else {
                 add(list, otherList);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -278,13 +275,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             return;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(termContext);
+        BuiltinSet.Builder builder = BuiltinSet.builder(global);
         builder.addAll(remainingElements);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingSet = builder.build();
 
-        BuiltinSet.Builder otherBuilder = BuiltinSet.builder(termContext);
+        BuiltinSet.Builder otherBuilder = BuiltinSet.builder(global);
         otherBuilder.addAll(otherRemainingElements);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
@@ -295,16 +292,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (remainingSet instanceof Variable || otherRemainingSet instanceof Variable || partialSimpl) {
                 // set equality resolved or partial simplification enabled
                 add(remainingSet, otherRemainingSet);
-                if (failed) {
-                    return;
-                }
             } else {
                 /* unable to dissolve the entire map equality; thus, we need to
                  * preserve the original set terms for pattern folding */
                 add(set, otherSet);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -321,7 +312,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         queue.add(map);
         while (!queue.isEmpty()) {
             BuiltinMap candidate = queue.remove();
-            for (Rule rule : termContext.definition().patternFoldingRules()) {
+            for (Rule rule : global.getDefinition().patternFoldingRules()) {
                 for (Substitution<Variable, Term> substitution : PatternMatcher.match(candidate, rule, termContext)) {
                     BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
                     if (foldedMaps.add(result)) {
@@ -331,7 +322,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                         if (!unifier.symbolicUnify(result, otherMap)) {
                             continue;
                         }
-                        ConjunctiveFormula resultConstraint = unifier.constraint().simplify();
+                        ConjunctiveFormula resultConstraint = unifier.constraint().simplify(termContext);
 
                         /* since here we have a non-deterministic choice to make, we only make
                          * a choice if it eliminates all map equalities */
@@ -352,9 +343,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         /* made no progress */
         add(map, otherMap);
-        if (failed) {
-            return;
-        }
     }
 
     private void unifyMap(BuiltinMap map, BuiltinMap otherMap) {
@@ -431,13 +419,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             return;
         }
 
-        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder builder = BuiltinMap.builder(global);
         builder.putAll(remainingEntries);
         builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
         builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
         Term remainingMap = builder.build();
 
-        BuiltinMap.Builder otherBuilder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder otherBuilder = BuiltinMap.builder(global);
         otherBuilder.putAll(otherRemainingEntries);
         otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
         otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
@@ -448,16 +436,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable || partialSimpl) {
                 // map equality resolved or partial simplification enabled
                 add(remainingMap, otherRemainingMap);
-                if (failed) {
-                    return;
-                }
             } else {
                 /* unable to dissolve the entire map equality; thus, we need to
                  * preserve the original map terms for pattern folding */
                 add(map, otherMap);
-                if (failed) {
-                    return;
-                }
             }
         }
     }
@@ -499,7 +481,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
         int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
-        Definition definition = termContext.definition();
+        Definition definition = global.getDefinition();
 
         /*
          * CASE 1: cellCollection has no explicitly specified starred-cell;
@@ -525,10 +507,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
                 return;
             } else if (frame == null && otherFrame == null) {
-                if (numOfDiffCellLabels > 0 || numOfOtherDiffCellLabels > 0) {
-                    fail(cellCollection, otherCellCollection);
-                    return;
-                }
+                assert numOfDiffCellLabels == 0 && numOfOtherDiffCellLabels == 0;
             } else {
                 add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels),
                             frame, cellCollection.cellSort(), definition),
@@ -600,7 +579,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             // start searching for all possible unifiers
         label:
             do {
-                ConjunctiveFormula nestedConstraint = ConjunctiveFormula.of(termContext);
+                ConjunctiveFormula nestedConstraint = ConjunctiveFormula.of(global);
 
                 for (int i = 0; i < otherCells.length; ++i) {
                     SymbolicUnifier unifier = new SymbolicUnifier(patternFold, partialSimpl, termContext);
@@ -636,7 +615,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             } else {
                 this.constraint = this.constraint.add(new DisjunctiveFormula(
                         constraints,
-                        termContext));
+                        global));
             }
         }
     }
@@ -668,34 +647,19 @@ public class SymbolicUnifier extends AbstractUnifier {
                 return;
             }
             add(kCollection.frame(), otherKCollection.fragment(length));
-            if (failed) {
-                return;
-            }
         } else if (otherKCollection.concreteSize() < kCollection.concreteSize()) {
             if (!otherKCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
                 return;
             }
             add(kCollection.fragment(length), otherKCollection.frame());
-            if (failed) {
-                return;
-            }
         } else {
             if (kCollection.hasFrame() && otherKCollection.hasFrame()) {
                 add(kCollection.frame(), otherKCollection.frame());
-                if (failed) {
-                    return;
-                }
             } else if (kCollection.hasFrame()) {
                 add(kCollection.frame(), otherKCollection.fragment(length));
-                if (failed) {
-                    return;
-                }
             } else if (otherKCollection.hasFrame()) {
                 add(kCollection.fragment(length), otherKCollection.frame());
-                if (failed) {
-                    return;
-                }
             }
         }
     }

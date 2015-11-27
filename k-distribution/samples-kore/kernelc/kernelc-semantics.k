@@ -16,11 +16,11 @@ module KERNELC-CONFIGURATION
    * KernelC configuration
    */
   configuration
-    <config>
+    <T>
+      <k> $PGM:File:K ~> main(.Expressions) </k>
       <struct> .Map </struct>
       <fun> .Map </fun>
 
-      <k> $PGM:File:K ~> main(.Expressions) </k>
       <env> .Map </env>
       <locals> .List </locals>
       //<fun-id> String2Id("") </fun-id>
@@ -29,9 +29,9 @@ module KERNELC-CONFIGURATION
 
       <heap> .Map </heap>
 
-      <in stream="stdin"> .List </in>
-      <out stream="stdout"> .List </out>
-    </config>
+      <in> .List </in>
+      <out> .List </out>
+    </T>
 endmodule
 
 
@@ -400,14 +400,14 @@ module KERNELC-SEMANTICS
   rule tv(T1:Type *, _:Pointer) == tv(T2:Type * => T1 *, null)
     requires T1 =/=K T2
     [structural]
-  rule tv(T1:Type * => T2 *, null) == tv(T2:Type *, _:Pointer)
-    requires T1 =/=K T2
+  rule tv(T1:Type * => T2 *, null) == tv(T2:Type *, P:Pointer)
+    requires T1 =/=K T2 andBool P =/=K null
     [structural]
   rule tv(T1:Type *, _:Pointer) != tv(T2:Type * => T1 *, null)
     requires T1 =/=K T2
     [structural]
-  rule tv(T1:Type * => T2 *, null) != tv(T2:Type *, _:Pointer)
-    requires T1 =/=K T2
+  rule tv(T1:Type * => T2 *, null) != tv(T2:Type *, P:Pointer)
+    requires T1 =/=K T2 andBool P =/=K null
     [structural]
   rule
     <fun>...

@@ -1,13 +1,12 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
+
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-
-import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.backend.java.util.MapCache;
-import org.kframework.compile.transformers.Cell2DataStructure;
-import org.kframework.compile.utils.MetaK;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Label of a cell.
@@ -17,9 +16,8 @@ import org.kframework.compile.utils.MetaK;
  */
 public final class CellLabel implements MaximalSharing, Serializable {
 
-    private static final MapCache<String, CellLabel> cache = new MapCache<>(new PatriciaTrie<>());
+    private static final Map<String, CellLabel> cache = Collections.synchronizedMap(new PatriciaTrie<>());
 
-    public static final CellLabel GENERATED_TOP =   CellLabel.of(MetaK.Constants.generatedTopCellLabel);
     public static final CellLabel K             =   CellLabel.of("k");
 
     /**
@@ -36,7 +34,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * @return the cell label
      */
     public static CellLabel of(String name) {
-        return cache.get(name, () -> new CellLabel(name));
+        return cache.computeIfAbsent(name, CellLabel::new);
     }
 
     private CellLabel(String name) {
@@ -48,12 +46,12 @@ public final class CellLabel implements MaximalSharing, Serializable {
     }
 
     public boolean isMapCell() {
-        return name.startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX);
+        return name.startsWith("value-cell-label-prefix-");
     }
 
     public CellLabel getRealCellLabel() {
         assert isMapCell();
-        return CellLabel.of(name.substring(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX.length()));
+        return CellLabel.of(name.substring("value-cell-label-prefix-".length()));
     }
 
     @Override
@@ -76,7 +74,7 @@ public final class CellLabel implements MaximalSharing, Serializable {
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
-        return cache.get(name, () -> this);
+        return cache.computeIfAbsent(name, x -> this);
     }
 
 }

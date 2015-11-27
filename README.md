@@ -78,8 +78,10 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux32`
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux64`
 
 ## Eclipse
+_N.B. the Eclipse internal compiler may generate false compilation errors (there are bugs in its support of Scala mixed compilation). We recommend using IntelliJ IDEA if at all possible._
+
 To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
-command line, and then go into each of the `kore' and `tiny' directories and run `sbt eclipse'.
+command line, and then go into each of the `kore` and `tiny` directories and run `sbt eclipse`.
 Then start eclipse and go to File->Import->General->Existing projects into workspace, and select
 the directory of the installation. You should only add the leaves to the workspace, because
 eclipse does not support hierarchical projects.

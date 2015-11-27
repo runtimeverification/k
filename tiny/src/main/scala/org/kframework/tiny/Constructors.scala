@@ -8,7 +8,8 @@ import org.kframework.{definition, kore, tiny}
 
 import scala.collection.JavaConverters._
 
-class Constructors(val module: definition.Module, implicit val theory: Theory) extends kore.Constructors[K] with ScalaSugar[K] {
+class Constructors(val module: definition.Module, implicit val theory: Theory) extends kore.Constructors[K] with ScalaSugared[K] {
+  val c = this
 
   implicit val theTheory = theory
 
@@ -112,12 +113,12 @@ class Constructors(val module: definition.Module, implicit val theory: Theory) e
 
   override def InjectedKLabel(klabel: kore.KLabel, att: Att): InjectedKLabel = InjectedLabel(convert(klabel), att)
 
-  def convert(l: kore.KLabel): Label = l match {
+  override def convert(l: kore.KLabel): Label = l match {
     case l: Label => l
     case Unapply.KLabel(name) => KLabel(name)
   }
 
-  def convert(k: kore.K): tiny.K = k match {
+  override def convert(k: kore.K): tiny.K = k match {
     case k: K => k
     case t@Unapply.KVariable(name) => KVariable(name, t.att)
     case t@Unapply.KToken(v, s) => KToken(v, s, t.att)

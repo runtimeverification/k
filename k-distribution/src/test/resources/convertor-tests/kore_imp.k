@@ -49,11 +49,9 @@ module IMP
 
   syntax KResult ::= Int | Bool
 
-  configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm:K </k>
-                  <state color="red"> .Map </state>
-                  <s color="red"> heat </s>
-                </T>
+  configuration <k color="green"> $PGM:Pgm:K </k>
+                <state color="red"> .Map </state>
+                <s color="red"> heat </s>
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>

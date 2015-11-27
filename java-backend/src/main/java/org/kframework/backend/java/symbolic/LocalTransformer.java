@@ -15,16 +15,6 @@ import org.kframework.kil.ASTNode;
  */
 public class LocalTransformer implements Transformer {
 
-    protected final TermContext context;
-
-    public LocalTransformer() {
-        this.context = null;
-    }
-
-    public LocalTransformer(TermContext context) {
-        this.context = context;
-    }
-
     @Override
     public String getName() {
         return "Identity Transformer";
@@ -182,5 +172,15 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(InjectedKLabel injectedKLabel) {
         return transform((Term) injectedKLabel);
+    }
+
+    @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        return transform((JavaSymbolicObject) ruleAutomatonDisjunction);
+    }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        return transform((JavaSymbolicObject) innerRHSRewrite);
     }
 }

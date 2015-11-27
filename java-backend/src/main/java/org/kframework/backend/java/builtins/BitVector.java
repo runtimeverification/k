@@ -7,7 +7,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.utils.errorsystem.KEMException;
@@ -126,8 +126,8 @@ public abstract class BitVector<T extends Number> extends Token {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
+        hashCode = hashCode * Constants.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + bitwidth;
         return hashCode;
     }
 

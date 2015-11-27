@@ -1,52 +1,67 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.math.BigInteger;
-
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.errorsystem.KEMException;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * An object containing context specific to a particular configuration.
  */
 public class TermContext extends JavaSymbolicObject {
 
-    private BigInteger counter = BigInteger.ZERO;
+    private final FreshCounter counter;
 
     private final GlobalContext global;
 
+    /**
+     * This class shall not be accessed by more than one thread,
+     * so it is made non-thread-safe intentionally.
+     */
+    private static class FreshCounter implements Serializable {
+        private BigInteger value;
+
+        private FreshCounter(BigInteger value) {
+            this.value = value;
+        }
+
+        private BigInteger incrementAndGet() {
+            value = value.add(BigInteger.ONE);
+            return value;
+        }
+    }
+
     private Term topTerm;
+
     private ConjunctiveFormula topConstraint;
 
-    private TermContext(GlobalContext global) {
+    private TermContext(GlobalContext global, FreshCounter counter) {
         this.global = global;
-    }
-
-    public static TermContext of(GlobalContext global) {
-        return new TermContext(global);
-    }
-
-    public static TermContext of(GlobalContext global, Term topTerm, BigInteger counter) {
-        TermContext termContext = new TermContext(global);
-        termContext.topTerm = topTerm;
-        termContext.counter = counter;
-        return termContext;
-    }
-
-    public BigInteger getCounter() {
-        return counter;
-    }
-
-    public void setCounter(BigInteger counter) {
         this.counter = counter;
     }
 
-    public BigInteger incrementCounter() {
-        counter = this.counter.add(BigInteger.ONE);
-        return counter;
+    /**
+     * Forks an identical {@link TermContext}.
+     */
+    public TermContext fork() {
+        return counter != null ? new TermContext(global, new FreshCounter(counter.value)) : this;
+    }
+
+    public BigInteger freshConstant() {
+        if (counter == null) {
+            throw KEMException.criticalError("No fresh counter available in this TermContext.");
+        }
+        return counter.incrementAndGet();
+    }
+
+    public BigInteger getCounterValue() {
+        return counter.value;
     }
 
     public Definition definition() {
@@ -86,4 +101,34 @@ public class TermContext extends JavaSymbolicObject {
     public void accept(Visitor visitor) {
         throw new UnsupportedOperationException();
     }
+
+    public static Builder builder(GlobalContext globalContext) {
+        return new Builder(globalContext);
+    }
+
+    public static class Builder {
+
+        private final GlobalContext globalContext;
+
+        private FreshCounter counter;
+
+        public Builder(GlobalContext globalContext) {
+            this.globalContext = globalContext;
+        }
+
+        public Builder freshCounter(long initialValue) {
+            return freshCounter(BigInteger.valueOf(initialValue));
+        }
+
+        public Builder freshCounter(BigInteger initialValue) {
+            this.counter = new FreshCounter(initialValue);
+            return this;
+        }
+
+        public TermContext build() {
+            return new TermContext(globalContext, counter);
+        }
+
+    }
+
 }

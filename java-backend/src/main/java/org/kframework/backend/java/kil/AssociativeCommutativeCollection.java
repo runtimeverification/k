@@ -16,20 +16,23 @@ public abstract class AssociativeCommutativeCollection extends Collection implem
     protected final ImmutableMultiset<Term> collectionFunctions;
     protected final ImmutableMultiset<Variable> collectionVariables;
 
+    protected final GlobalContext global;
+
     protected AssociativeCommutativeCollection(
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables,
-            TermContext context) {
+            GlobalContext global) {
         super(computeFrame(
                 collectionPatterns,
                 collectionFunctions,
                 collectionVariables),
-                Kind.KITEM,
-                context);
+                Kind.KITEM
+        );
         this.collectionPatterns = collectionPatterns;
         this.collectionVariables = collectionVariables;
         this.collectionFunctions = collectionFunctions;
+        this.global = global;
     }
 
     private static Variable computeFrame(
@@ -87,4 +90,10 @@ public abstract class AssociativeCommutativeCollection extends Collection implem
     public final boolean isGround() {
         return isConcreteCollection() && super.isGround();
     }
+
+    @Override
+    public GlobalContext globalContext() {
+        return global;
+    }
+
 }

@@ -44,5 +44,5 @@ public class TransitionCompositeStrategy extends CompositeStrategy {
         return temp;
     }
 
-    private TransitionStrategy transitionStrategy;
+    private final TransitionStrategy transitionStrategy;
 }

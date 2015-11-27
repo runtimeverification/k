@@ -59,7 +59,7 @@ public class Coverage {
         }
     }
 
-    private static void print(File file, String string) {
+    private synchronized static void print(File file, String string) {
         if (file != null && string != null) {
             try {
                 writeStringToFile(file, string + "\n", true);
@@ -87,7 +87,7 @@ public class Coverage {
     }
 
     private static String getSourceLocation(Rule rule) {
-        String s = null; // Return null, if location information is not available.
+        String s; // Return null, if location information is not available.
         Source source = rule.getSource();
         s = source.toString() + ":" + rule.getLocation().toString();
         return s;

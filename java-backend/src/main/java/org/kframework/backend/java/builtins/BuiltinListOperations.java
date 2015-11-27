@@ -24,15 +24,15 @@ public class BuiltinListOperations {
         if (list1.sort() != Sort.LIST || list2.sort() != Sort.LIST) {
             throw new IllegalArgumentException();
         }
-        return BuiltinList.concatenate(context, list1, list2);
+        return BuiltinList.concatenate(context.global(), list1, list2);
     }
 
     public static Term unit(TermContext context) {
-        return BuiltinList.builder(context).build();
+        return BuiltinList.builder(context.global()).build();
     }
 
     public static Term element(Term element, TermContext context) {
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder(context.global());
         builder.addItem(element);
         return builder.build();
     }
@@ -58,14 +58,21 @@ public class BuiltinListOperations {
         }
     }
 
-    public static Term range(BuiltinList list, IntToken int1, IntToken int2, TermContext context) {
+    public static Term range(Term list, IntToken int1, IntToken int2, TermContext context) {
         int removeLeft = int1.intValue();
         int removeRight = int2.intValue();
+        if (removeLeft == 0 && removeRight == 0) {
+            return list;
+        }
         int pendingRemoveLeft;
         int pendingRemoveRight;
-        List<Term> elementsLeft = list.elementsLeft();
-        List<Term> elementsRight = list.elementsRight();
-        if (list.isConcreteCollection()) {
+        if (!(list instanceof BuiltinList)) {
+            return null;
+        }
+        BuiltinList builtinList = (BuiltinList) list;
+        List<Term> elementsLeft = builtinList.elementsLeft();
+        List<Term> elementsRight = builtinList.elementsRight();
+        if (builtinList.isConcreteCollection()) {
             if (removeLeft + removeRight > elementsLeft.size()) {
                 return Bottom.BOTTOM;
             }
@@ -91,9 +98,9 @@ public class BuiltinListOperations {
             }
         }
 
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder(context.global());
         builder.addItems(elementsLeft);
-        builder.concatenate(list.baseTerms());
+        builder.concatenate(builtinList.baseTerms());
         builder.addItems(elementsRight);
 
         return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?

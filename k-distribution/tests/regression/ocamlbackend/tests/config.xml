@@ -6,11 +6,7 @@
         programs="."
         extension="imp"
         results="." >
-      <kompile-option name="--kore" />
       <kompile-option name="--backend" value="ocaml" />
       <kompile-option name="--non-strict" />
-      <all-programs>
-        <krun-option name="--kore" />
-      </all-programs>
     </test>
   </tests>

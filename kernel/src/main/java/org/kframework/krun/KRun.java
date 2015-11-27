@@ -2,13 +2,10 @@
 package org.kframework.krun;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.Rewriter;
 import org.kframework.attributes.Source;
-import org.kframework.backend.unparser.OutputModes;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kil.Attributes;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -16,11 +13,14 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
+import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
-import org.kframework.transformation.Transformation;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -29,8 +29,12 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.koreparser.KoreParser;
 import scala.Tuple2;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +48,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * The KORE-based KRun
  */
-public class KRun implements Transformation<Void, Void> {
+public class KRun {
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -73,7 +77,6 @@ public class KRun implements Transformation<Void, Void> {
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
-
             if (options.exitCodePattern != null) {
                 Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
@@ -85,11 +88,49 @@ public class KRun implements Transformation<Void, Void> {
                 prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
                 return (Integer) tuple._2();
             }
+            if (tuple._1() instanceof SearchResult && tuple._2() instanceof Integer) {
+                printSearchResult((SearchResult) tuple._1(), options, compiledDef);
+                return (Integer) tuple._2();
+            }
+        } else if (result instanceof SearchResult) {
+            printSearchResult((SearchResult) result, options, compiledDef);
+            return 0;
+        } else if (options.experimental.prove != null) {
+            if (((List) result).isEmpty()) {
+                System.out.println("true");
+            }
         }
-
         return 0;
     }
 
+    private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
+        List<? extends Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList();
+        if (searchResult.isEmpty()) {
+            outputFile("No Search Results \n", options);
+        }
+        int i = 0;
+        List<String> results = new ArrayList<>();
+        for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
+            StringBuilder sb = new StringBuilder();
+            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, sb::append);
+            results.add(sb.toString());
+        }
+        Collections.sort(results);
+        StringBuilder sb = new StringBuilder();
+        for (String solution : results) {
+            sb.append("Solution: ").append(i++).append("\n");
+            sb.append(solution);
+        }
+        outputFile(sb.toString(), options);
+    }
+
+    /**
+     * Function to return the exit code specified by the user given a substitution
+     *
+     * @param kem ExcpetionManager object
+     * @param res The substitution from the match of the user specified pattern on the Final Configuration.
+     * @return An int representing the error code.
+     */
     public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
         if (res.size() != 1) {
             kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
@@ -123,6 +164,15 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    /**
+     * Function to compile the String Pattern, if the pattern is not present in the cache. Note the difference between
+     * compilation and parsing. Compilation is the result of resolving anonymous variables, semantic casts, and concretizing
+     * sentences after parsing the pattern string.
+     *
+     * @param pattern The String specifying the pattern to be compiled
+     * @param source  Source of the pattern, usually either command line or file path.
+     * @return The pattern (represented by a Rule object) obtained from the compilation process.
+     */
     public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
         if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
             throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
@@ -130,6 +180,14 @@ public class KRun implements Transformation<Void, Void> {
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 
+    /**
+     * Function to parse the String Pattern. It's the step in the compilation process that occurs before resoving anonymous variables,
+     * semantic casts, and sentence concretizaiton
+     *
+     * @param pattern The String representing the pattern to be parsed.
+     * @param source  The Source of the pattern, usually either the command line or the file path.
+     * @return The pattern (represented by a Rule object) obtained from the parsing process.
+     */
     public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
@@ -151,6 +209,46 @@ public class KRun implements Transformation<Void, Void> {
         }
     }
 
+    /**
+     * Given a substitution, represented by a map of KVariables to K, print the substitution. The printing follows the following format:
+     * If Pattern is represented by a single variable, then entire substitution is printed without the pattern, else
+     * variable is printed, followed by --->, and then the substitution corresponding K.
+     *
+     * @param subst         A Map from KVariables to K representing the result of a match of a pattern on a configuration.
+     * @param parsedPattern The parsed (not compiled) pattern object. The parsed pattern is used to
+     *                      weed out variables not defined in the original string pattern by the user.
+     * @param outputModes   The output mode represented by the user.
+     * @param print         A consumer function that is called with the result of the unparsing process. The consumer must accept a String.
+     */
+    public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst,
+                                               Rule parsedPattern, CompiledDefinition compiledDefinition,
+                                               OutputModes outputModes,
+                                               Consumer<String> print) {
+        if (subst.isEmpty()) {
+            return;
+        }
+        List<String> varList = new ArrayList<>();
+        new VisitKORE() {
+            @Override
+            public Void apply(KVariable k) {
+                    /* Not Observing reflexivity Rule requires comparison by name */
+                varList.add(k.name());
+                return super.apply(k);
+            }
+        }.apply(parsedPattern.body());
+        for (KVariable variable : subst.keySet()) {
+            if (varList.contains(variable.name())) {
+                K value = subst.get(variable);
+                if (parsedPattern.body() instanceof KVariable) {
+                    prettyPrint(compiledDefinition, outputModes, print, value);
+                    return;
+                }
+                prettyPrint(compiledDefinition, outputModes, print, variable);
+                print.accept("---> \n");
+                prettyPrint(compiledDefinition, outputModes, print, value);
+            }
+        }
+    }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
@@ -168,11 +266,33 @@ public class KRun implements Transformation<Void, Void> {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
-            String stdin = InitialConfigurationProvider.getStdinBuffer(ttyStdin);
+            String stdin = getStdinBuffer(ttyStdin);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
         return plugConfigVars(compiledDef, output);
+    }
+
+    public static String getStdinBuffer(boolean ttyStdin) {
+        String buffer = "";
+
+        try {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(System.in));
+            // detect if the input comes from console or redirected
+            // from a pipeline
+
+            if ((Main.isNailgun() && !ttyStdin)
+                    || (!Main.isNailgun() && br.ready())) {
+                buffer = br.readLine();
+            }
+        } catch (IOException e) {
+            throw KEMException.internalError("IO error detected reading from stdin", e);
+        }
+        if (buffer == null) {
+            return "";
+        }
+        return buffer + "\n";
     }
 
     public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
@@ -183,11 +303,6 @@ public class KRun implements Transformation<Void, Void> {
         return KOREToTreeNodes.toString(
                 new AddBrackets(test).addBrackets((ProductionReference)
                         KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
-    }
-
-    @Override
-    public Void run(Void aVoid, Attributes attrs) {
-        return null;
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
@@ -205,10 +320,5 @@ public class KRun implements Transformation<Void, Void> {
 
         String kast = output.stdout != null ? output.stdout : "";
         return KoreParser.parse(kast, source);
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }

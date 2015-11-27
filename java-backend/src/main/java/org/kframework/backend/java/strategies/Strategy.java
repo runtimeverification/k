@@ -26,16 +26,16 @@ public interface Strategy {
     /**
      * Reset the strategy to work on the passed in Collection of rules.
      */
-    public abstract void reset(Collection<Rule> rules);
+    void reset(Collection<Rule> rules);
 
     /**
      * Returns the next equivalence class of rules or null if there is no next
      * equivalence class.
      */
-    public abstract Collection<Rule> next();
+    Collection<Rule> next();
 
     /**
      * Returns true iff there is a next equivalence class to be returned.
      */
-    public abstract boolean hasNext();
+    boolean hasNext();
 }

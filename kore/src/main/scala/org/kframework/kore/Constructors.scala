@@ -18,12 +18,23 @@ trait Constructors[KK <: K] {
   val injectedKListLabel = "INJECTED-KLIST"
 
   // default methods:
-  @annotation.varargs def KList[KKK <: KK](items: KKK*): KList = KList(items.asJava)
+  @annotation.varargs def KList(items: KK*): KList = KList(items.asJava)
   @annotation.varargs def KApply(klabel: KLabel, items: KK*): KK = KApply(klabel, KList(items.asJava), Att())
   @annotation.varargs def KSequence(list: KK*): KK = KSequence(list.toList.asJava, Att())
   def KVariable(name: String): KVariable with KK = KVariable(name, Att())
+
+  def convert(l: KLabel): KLabel = l match {
+    case Unapply.KLabel(name) => KLabel(name)
+  }
+
+  def convert(k: K): KK = k match {
+    case t@Unapply.KVariable(name) => KVariable(name, t.att)
+    case t@Unapply.KToken(v, s) => KToken(v, s, t.att)
+    case t@Unapply.KRewrite(left, right) => KRewrite(convert(left), convert(right), t.att)
+    case t@Unapply.KSequence(s) => KSequence((s map convert).asJava, t.att)
+    case t@Unapply.KApply(label, list) => KApply(label, KList((list map convert).asJava), t.att)
+  }
 }
 
 abstract class AbstractConstructors[KK <: K] extends Constructors[KK]
-
 

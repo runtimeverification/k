@@ -2,6 +2,8 @@
 
 package org.kframework.definition
 
+import javax.annotation.Nonnull
+
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.Att
@@ -9,6 +11,7 @@ import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 
+import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 
 trait OuterKORE
@@ -42,8 +45,9 @@ case class Definition(
   def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
 }
 
-case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], att: Att = Att())
+case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], @(Nonnull @param) att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE {
+  assert(att != null)
 
   val sentences: Set[Sentence] = localSentences | (imports flatMap {
     _.sentences
@@ -110,6 +114,8 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+
+  lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
 
   // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {

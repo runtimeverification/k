@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.utils.errorsystem.KEMException;
@@ -35,13 +35,13 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables,
-            TermContext context) {
-        super(collectionPatterns, collectionFunctions, collectionVariables, context);
+            GlobalContext global) {
+        super(collectionPatterns, collectionFunctions, collectionVariables, global);
         this.elements = elements;
     }
 
-    public static Term concatenate(TermContext context, Term... sets) {
-        Builder builder = new Builder(context);
+    public static Term concatenate(GlobalContext global, Term... sets) {
+        Builder builder = new Builder(global);
         builder.concatenate(sets);
         return builder.build();
     }
@@ -98,10 +98,10 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + elements.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionPatterns.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionFunctions.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
     }
 
@@ -146,14 +146,14 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
     @Override
     public List<Term> getKComponents() {
-        DataStructureSort sort = context.definition().dataStructureSortOf(sort());
+        DataStructureSort sort = global.getDefinition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
         elements.stream().forEach(element ->
                 components.add(KItem.of(
-                        KLabelConstant.of(sort.elementLabel(), context.definition()),
+                        KLabelConstant.of(sort.elementLabel(), global.getDefinition()),
                         KList.singleton(element),
-                        context, element.getSource(), element.getLocation())));
+                        global, element.getSource(), element.getLocation())));
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinSet) {
@@ -166,20 +166,20 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         return components;
     }
 
-    public static Builder builder(TermContext context) {
-        return new Builder(context);
+    public static Builder builder(GlobalContext global) {
+        return new Builder(global);
     }
 
     public static class Builder {
 
-        private Set<Term> elements = new HashSet<>();
-        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
-        private final TermContext context;
+        private final Set<Term> elements = new HashSet<>();
+        private final ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final GlobalContext global;
 
-        public Builder(TermContext context) {
-            this.context = context;
+        public Builder(GlobalContext global) {
+            this.global = global;
         }
 
         public boolean add(Term element) {
@@ -230,7 +230,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build(),
-                    context);
+                    global);
             return builtinSet.baseTerms().size() == 1 && builtinSet.concreteSize() == 0 ?
                     builtinSet.baseTerms().iterator().next() :
                     builtinSet;

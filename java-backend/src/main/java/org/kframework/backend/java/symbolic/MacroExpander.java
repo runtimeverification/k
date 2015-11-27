@@ -35,10 +35,13 @@ public class MacroExpander extends CopyOnWriteTransformer {
     }
 
     public Definition processDefinition() {
+        Definition definition = context.definition();
         Definition processedDefinition = new Definition(
                 definition.definitionData(),
                 kem,
-                definition.indexingData);
+                definition.indexingData,
+                definition.ruleTable,
+                definition.automaton);
         processedDefinition.addKLabelCollection(definition.kLabels());
         for (Rule rule : definition.rules()) {
             processedDefinition.addRule(processRule(rule));
@@ -101,7 +104,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 rule.cellsToCopy(),
                 rule.matchingInstructions(),
                 rule,
-                context);
+                rule.globalContext());
     }
 
     public Term processTerm(Term term) {
@@ -118,6 +121,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
      */
     private JavaSymbolicObject expandMacro(JavaSymbolicObject node) {
         JavaSymbolicObject expandedNode = (JavaSymbolicObject) node.accept(this);
+        // while some macro rule has applied, making the term references different
         while (node != expandedNode) {
             node = expandedNode;
             expandedNode = (JavaSymbolicObject) node.accept(this);
@@ -133,7 +137,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
     }
 
     private Term applyMacroRule(Term term) {
-        for (Rule rule : definition.macros()) {
+        for (Rule rule : context.definition().macros()) {
             Map<Variable, Term> solution;
             List<Substitution<Variable, Term>> matches = PatternMatcher.match(term, rule, context);
             if (matches.isEmpty()) {

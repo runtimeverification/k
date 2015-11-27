@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.utils.errorsystem.KEMException;
@@ -39,19 +39,19 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables,
-            TermContext context) {
-        super(collectionPatterns, collectionFunctions, collectionVariables, context);
+            GlobalContext global) {
+        super(collectionPatterns, collectionFunctions, collectionVariables, global);
         this.entries = entries;
     }
 
-    public static Term concatenate(TermContext context, Term... maps) {
-        Builder builder = new Builder(context);
+    public static Term concatenate(GlobalContext global, Term... maps) {
+        Builder builder = new Builder(global);
         builder.concatenate(maps);
         return builder.build();
     }
 
-    public static Term concatenate(TermContext context, Collection<Term> maps) {
-        Builder builder = new Builder(context);
+    public static Term concatenate(GlobalContext global, Collection<Term> maps) {
+        Builder builder = new Builder(global);
         builder.concatenate(maps);
         return builder.build();
     }
@@ -108,10 +108,10 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + entries.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionPatterns.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionFunctions.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
     }
 
@@ -162,14 +162,14 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
     @Override
     public List<Term> getKComponents() {
-        DataStructureSort sort = context.definition().dataStructureSortOf(sort());
+        DataStructureSort sort = global.getDefinition().dataStructureSortOf(sort());
 
         ArrayList<Term> components = Lists.newArrayList();
         entries.entrySet().stream().forEach(entry ->
                 components.add(KItem.of(
-                        KLabelConstant.of(sort.elementLabel(), context.definition()),
+                        KLabelConstant.of(sort.elementLabel(), global.getDefinition()),
                         KList.concatenate(entry.getKey(), entry.getValue()),
-                        context, entry.getKey().getSource(), entry.getKey().getLocation())));
+                        global, entry.getKey().getSource(), entry.getKey().getLocation())));
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinMap) {
@@ -182,20 +182,20 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return components;
     }
 
-    public static Builder builder(TermContext context) {
-        return new Builder(context);
+    public static Builder builder(GlobalContext global) {
+        return new Builder(global);
     }
 
     public static class Builder {
 
-        private Map<Term, Term> entries = new HashMap<>();
-        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
-        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
-        private final TermContext context;
+        private final Map<Term, Term> entries = new HashMap<>();
+        private final ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private final ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+        private final GlobalContext global;
 
-        public Builder(TermContext context) {
-            this.context = context;
+        public Builder(GlobalContext global) {
+            this.global = global;
         }
 
         public void put(Term key, Term value) {
@@ -285,7 +285,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build(),
-                    context);
+                    global);
             return builtinMap.baseTerms().size() == 1 && builtinMap.collectionVariables().size() == 1 && builtinMap.concreteSize() == 0 ?
                     builtinMap.baseTerms().iterator().next() : builtinMap;
         }

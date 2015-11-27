@@ -3,11 +3,11 @@ package org.kframework.backend.java.rewritemachine;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.util.MapCache;
-import org.kframework.backend.java.util.Utils;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.collect.Maps;
+import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.util.Constants;
 
 /**
  * Represents instructions of the {@link KAbstractRewriteMachine}.
@@ -24,21 +24,21 @@ public final class MatchingInstruction implements Serializable {
     public static final MatchingInstruction UP = new MatchingInstruction(Type.UP, null);
     public static final MatchingInstruction CHOICE = new MatchingInstruction(Type.CHOICE, null);
 
-    private static final MapCache<CellLabel, MatchingInstruction> cachedGOTOInstructions = new MapCache<>(Maps.newHashMapWithExpectedSize(100));
+    private static final Map<CellLabel, MatchingInstruction> cachedGOTOInstructions = new ConcurrentHashMap<>();
 
     private final Type type;
     private final CellLabel cellLabel;
     private final int hashCode;
 
     public static MatchingInstruction GOTO(CellLabel cellLabel) {
-        return cachedGOTOInstructions.get(cellLabel, () -> new MatchingInstruction(Type.GOTO, cellLabel));
+        return cachedGOTOInstructions.computeIfAbsent(cellLabel, l -> new MatchingInstruction(Type.GOTO, l));
     }
 
     private MatchingInstruction(Type type, CellLabel cellLabel) {
         this.type = type;
         this.cellLabel = cellLabel;
         this.hashCode = type == Type.GOTO ?
-                type.hashCode() * Utils.HASH_PRIME + cellLabel.hashCode() :
+                type.hashCode() * Constants.HASH_PRIME + cellLabel.hashCode() :
                 type.hashCode();
     }
 
@@ -76,7 +76,7 @@ public final class MatchingInstruction implements Serializable {
         case CHOICE:
             return CHOICE;
         case GOTO:
-            return cachedGOTOInstructions.get(cellLabel, () -> this);
+            return cachedGOTOInstructions.computeIfAbsent(cellLabel, l -> this);
         default:
             assert false;
             return null;

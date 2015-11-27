@@ -28,7 +28,7 @@ public class RuleAuditing {
         AuditState() {}
     }
 
-    private static ThreadLocal<AuditState> auditState = new ThreadLocal<>();
+    private static final ThreadLocal<AuditState> auditState = new ThreadLocal<>();
 
     public static Rule getAuditingRule() {
         if (!isAudit()) return null;

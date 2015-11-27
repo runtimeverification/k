@@ -1,13 +1,9 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.compile.sharing.DataStructureSortCollector;
-import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.Poset;
 
 import com.google.inject.Inject;
 
@@ -33,9 +29,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     /** An index of all modules in {@link #items} by name */
     private String mainSyntaxModule;
     public Map<String, ASTNode> locations = new HashMap<>();
-
-    // keeps easy to access information about the current definition
-    private transient DefinitionContext definitionContext = new DefinitionContext();
 
     public Definition() {
         super();
@@ -71,7 +64,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
 
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
-        definitionContext.setModules(items);
     }
 
     public List<DefinitionItem> getItems() {
@@ -100,35 +92,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
 
     public String getMainSyntaxModule() {
         return mainSyntaxModule;
-    }
-
-    public void preprocess(org.kframework.kil.loader.Context context, boolean autoinclude) {
-        // Collect information
-        // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
-        new UpdateReferencesVisitor(context).visitNode(this);
-        new CollectProductionsVisitor(context).visitNode(this);
-        new UpdateAssocVisitor(context).visitNode(this);
-        context.computeConses();
-        new CollectBracketsVisitor(context).visitNode(this);
-        new CollectSubsortsVisitor(context).visitNode(this);
-        new CollectPrioritiesVisitor(context).visitNode(this);
-        new CollectStartSymbolPgmVisitor(context).visitNode(this);
-        new CollectConfigCellsVisitor(context).visitNode(this);
-        new CollectLocationsVisitor().visitNode(this);
-        new FillInModuleContext().visitNode(this);
-        new CollectVariableTokens(context).visitNode(this);
-
-        /* collect lexical token sorts */
-        context.setTokenSorts(TokenSortCollector.collectTokenSorts(this, context));
-
-        /* collect the data structure sorts */
-        DataStructureSortCollector dataStructureSortCollector
-                = new DataStructureSortCollector(context);
-        dataStructureSortCollector.visitNode(this);
-        context.setDataStructureSorts(dataStructureSortCollector.getSorts());
-
-        context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
-        context.makeSMTSortFlatteningMap(this.getSyntaxByTag(Attribute.SMT_SORT_FLATTEN, context));
     }
 
     public Module getSingletonModule() {
@@ -164,11 +127,4 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         this.items = children;
     }
 
-    public DefinitionContext getDefinitionContext() {
-        return definitionContext;
-    }
-
-    public void setDefinitionContext(DefinitionContext definitionContext) {
-        this.definitionContext = definitionContext;
-    }
 }

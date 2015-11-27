@@ -38,7 +38,7 @@ public class SMTOperations {
         boolean result = false;
         try {
             String query = KILtoSMTLib.translateConstraint(constraint);
-            result = z3.checkQuery(query, smtOptions.z3CnstrTimeout);
+            result = z3.isUnsat(query, smtOptions.z3CnstrTimeout);
             if (result && RuleAuditing.isAuditBegun()) {
                 System.err.println("SMT query returned unsat: " + query);
             }
@@ -48,16 +48,21 @@ public class SMTOperations {
         return result;
     }
 
+    /**
+     * Checks if {@code left => right}, or {@code left /\ !right} is unsat.
+     */
     public boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
-                return z3.checkQuery(
+                return z3.isUnsat(
                         KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
                         smtOptions.z3ImplTimeout);
             } catch (UnsupportedOperationException e) {
+                e.printStackTrace();
+            } catch (SMTTranslationFailure e) {
                 e.printStackTrace();
             }
         }
