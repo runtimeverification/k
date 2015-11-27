@@ -166,10 +166,11 @@ public class SymbolicRewriter {
     }
 
     /**
-     * This method adds a #STUCK item on the top of the strategy cell of the stuck configuration and adds
-     * the resulting configuration to this.results, allowing the rewriting to continue.
+     * This method adds a #STUCK item on the top of the strategy cell of the stuck configuration and returns
+     * the resulting configuration. If the configuration already had the #STUCK flag, it returns Optional.empty()
+     * to end the rewriting.
      */
-    private Optional<ConstrainedTerm> getUnstuck(ConstrainedTerm subject) {
+    private Optional<ConstrainedTerm> addStuckFlagIfNotThere(ConstrainedTerm subject) {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
                 .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
                 .findFirst();
@@ -240,6 +241,11 @@ public class SymbolicRewriter {
 
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
+
+        if (results.isEmpty()) {
+            addStuckFlagIfNotThere(subject).ifPresent(results::add);
+        }
+
         return results;
     }
 
