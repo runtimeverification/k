@@ -4,15 +4,11 @@ package org.kframework.backend.java.symbolic;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
-import org.kframework.builtin.KLabels;
-import org.kframework.compile.CleanKSeq;
-import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.NormalizeKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
@@ -79,12 +75,11 @@ public class JavaBackend implements Backend {
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
-                //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(func(dd -> markRegularRules(dd)))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
