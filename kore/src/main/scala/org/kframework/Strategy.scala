@@ -17,7 +17,11 @@ object Strategy {
 
           import rich._
 
-          r match {
+          // hackish test for whether we're using strategies or not
+          // TODO: replace with something more principled
+          if (!module.definedSorts.exists(_.name.contains("SExp"))) {
+            r
+          } else r match {
             case r: Rule if !r.body.contains({ case KApply(KLabel("<s>"), _) => true }) =>
               val newBody = r.body match {
                 case KApply(klabel, _) if !module.attributesFor.contains(klabel) || klabel.att.contains(Att.Function) =>
