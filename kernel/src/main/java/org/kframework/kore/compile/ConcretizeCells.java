@@ -10,7 +10,8 @@ import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Sentence;
 
 /**
- * Apply the entire configuration concretization process.
+ * Apply the configuration concretization process.
+ * The implicit {@code <k>} cell is added by another stage, AddImplicitComputationCell.
  * <p>
  * The input may freely use various configuration abstractions
  * and Full K flexibilites. See {@link IncompleteCellUtils} for a
