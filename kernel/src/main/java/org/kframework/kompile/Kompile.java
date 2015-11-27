@@ -156,7 +156,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
                 .andThen(func(AddImplicitComputationCell::transformDefinition))
-                .andThen(func(this::concretizeTransformer))
+                .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
                 .apply(def);
@@ -196,16 +196,6 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(programsModule);
         return Definition(d.mainModule(), programsModule, immutable(allModules));
-    }
-
-    private Definition concretizeTransformer(Definition input) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
-        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
-        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize,
-                "concretizing configuration"
-        ).apply(input);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

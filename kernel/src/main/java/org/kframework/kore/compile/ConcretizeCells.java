@@ -2,7 +2,11 @@
 package org.kframework.kore.compile;
 
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.definition.Definition;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Sentence;
 
 /**
@@ -28,6 +32,16 @@ public class ConcretizeCells {
     final CloseCells closeCells;
     final SortCells sortCells;
     private final AddTopCellToRules addRootCell;
+
+    public static Definition transformDefinition(Definition input) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
+        return DefinitionTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize,
+                "concretizing configuration"
+        ).apply(input);
+    }
 
     public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo) {
         this.configurationInfo = configurationInfo;
