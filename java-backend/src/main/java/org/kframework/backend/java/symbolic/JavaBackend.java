@@ -62,6 +62,10 @@ public class JavaBackend implements Backend {
         this.kompileOptions = kompileOptions;
     }
 
+    /**
+     * @param the generic {@link Kompile}
+     * @return the special steps for the Java backend
+     */
     @Override
     public Function<Definition, Definition> steps(Kompile kompile) {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s)), "convert data structures to lookups");
@@ -75,7 +79,7 @@ public class JavaBackend implements Backend {
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
-                        //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
+                //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
@@ -87,6 +91,9 @@ public class JavaBackend implements Backend {
                 .apply(d);
     }
 
+    /**
+     * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.
+     */
     private static Definition markRegularRules(Definition d) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
         return DefinitionTransformer.fromSentenceTransformer((Sentence s) -> {
@@ -101,6 +108,9 @@ public class JavaBackend implements Backend {
         }, "mark regular rules").apply(d);
     }
 
+    /**
+     * The Java backend expects sorted variables, so transform them to the sorted flavor.
+     */
     private static K ADTKVariableToSortedVariable(K ruleBody) {
         return new TransformKORE() {
             public K apply(KVariable kvar) {
@@ -109,6 +119,9 @@ public class JavaBackend implements Backend {
         }.apply(ruleBody);
     }
 
+    /**
+     * In the Java backend, {@link KSequence}s are treated like {@link KApply}s, so tranform them.
+     */
     private static K convertKSeqToKApply(K ruleBody) {
         return new TransformKORE() {
             public K apply(KSequence kseq) {
@@ -117,6 +130,10 @@ public class JavaBackend implements Backend {
         }.apply(ruleBody);
     }
 
+    /**
+     * Replace variables which only appear once in the pattern and have no side condition on them (including no sorting),
+     * with a special marker called THE_VARIABLE which the backend uses for special speed optimisations.
+     */
     private static Sentence markSingleVariables(Sentence s) {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
