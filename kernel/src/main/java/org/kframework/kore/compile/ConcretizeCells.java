@@ -4,7 +4,6 @@ package org.kframework.kore.compile;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Sentence;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Apply the entire configuration concretization process.
@@ -30,7 +29,7 @@ public class ConcretizeCells {
     final SortCells sortCells;
     private final AddTopCellToRules addRootCell;
 
-    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, KExceptionManager kem) {
+    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo) {
         this.configurationInfo = configurationInfo;
         this.labelInfo = labelInfo;
         this.sortInfo = sortInfo;

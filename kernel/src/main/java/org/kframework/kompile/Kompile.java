@@ -9,9 +9,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.CleanKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -20,18 +18,11 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.ADT;
-import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KORE;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.SortedADT;
 import org.kframework.kore.compile.*;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
@@ -49,7 +40,6 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
-import scala.collection.immutable.Seq;
 import scala.collection.immutable.Set;
 import scala.util.Either;
 
@@ -213,7 +203,7 @@ public class Kompile {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize,
                 "concretizing configuration"
         ).apply(input);
     }
@@ -222,7 +212,7 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo).concretize(s);
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
