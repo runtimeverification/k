@@ -23,7 +23,7 @@ import org.kframework.kore.K;
 public abstract class KCollection extends Collection implements Iterable<Term>, org.kframework.kore.KCollection {
 
     protected KCollection(Variable frame, Kind kind) {
-        super(frame, kind, null);
+        super(frame, kind);
     }
 
     /**

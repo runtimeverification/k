@@ -15,24 +15,23 @@ import java.util.Set;
  * @author TraianSF
  */
 public class UnboundedVariablesCollector extends PrePostVisitor {
-    private final TermContext context;
+
     private final Multiset<Term> boundVariables;
     private final Set<Term> unboundedVariables;
 
     /**
      * Computes the set of unbounded (free) variables of a given term
      * @param term --- the term to compute the set of unbounded vars for
-     * @param context
+     * @param global
      * @return the set of unbounded vars in {@code term}
      */
-    public static Set<Term> getUnboundedVars(Term term, TermContext context) {
-        UnboundedVariablesCollector collector = new UnboundedVariablesCollector(context);
+    public static Set<Term> getUnboundedVars(Term term, GlobalContext global) {
+        UnboundedVariablesCollector collector = new UnboundedVariablesCollector(global);
         term.accept(collector);
         return collector.unboundedVariables;
     }
 
-    private UnboundedVariablesCollector(TermContext context) {
-        this.context = context;
+    private UnboundedVariablesCollector(GlobalContext global) {
         boundVariables = HashMultiset.create();
         unboundedVariables = new HashSet<>();
         // before visiting a term, add all variables bound by this term to the multiset of bound variables
@@ -53,7 +52,7 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
         preVisitor.addVisitor(new LocalVisitor(){
             @Override
             public void visit(Term node) {
-                if (!(node instanceof KList) && context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, node.sort())) {
+                if (!(node instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.VARIABLE, node.sort())) {
                     if (!boundVariables.contains(node)) {
                         unboundedVariables.add(node);
                     }
@@ -79,9 +78,9 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
                 for (Integer keyIndex : binderMap.keySet()) {
                     //since a pattern can be on a binding position, we need to collect and bind all variables in the pattern
                     if (add) {
-                        boundVariables.addAll(kList.get(keyIndex).userVariableSet(context));
+                        boundVariables.addAll(kList.get(keyIndex).userVariableSet(kItem.globalContext()));
                     } else {
-                        boundVariables.removeAll(kList.get(keyIndex).userVariableSet(context));
+                        boundVariables.removeAll(kList.get(keyIndex).userVariableSet(kItem.globalContext()));
                     }
                 }
             }

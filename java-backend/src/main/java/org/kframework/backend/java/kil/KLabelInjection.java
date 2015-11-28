@@ -17,8 +17,8 @@ public class KLabelInjection extends KLabel {
     /**
      * Returns an injection of the term into a {@link org.kframework.backend.java.kil.KItem}.
      */
-    public static KItem injectionOf(Term term, TermContext context) {
-        return KItem.of(new KLabelInjection(term), KList.EMPTY, context, term.getSource(), term.getLocation());
+    public static KItem injectionOf(Term term, GlobalContext global) {
+        return KItem.of(new KLabelInjection(term), KList.EMPTY, global, term.getSource(), term.getLocation());
     }
 
     private final Term term;

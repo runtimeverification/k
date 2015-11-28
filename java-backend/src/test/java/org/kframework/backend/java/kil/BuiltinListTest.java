@@ -5,11 +5,13 @@ package org.kframework.backend.java.kil;
 import com.google.common.collect.ImmutableList;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.kframework.backend.java.builtins.BuiltinListOperations;
 import org.kframework.backend.java.builtins.IntToken;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class BuiltinListTest {
 
     @Mock
@@ -17,7 +19,7 @@ public class BuiltinListTest {
 
     @Test
     public void testListRange() throws Exception {
-        BuiltinList.Builder builder = BuiltinList.builder(termContext);
+        BuiltinList.Builder builder = BuiltinList.builder(termContext.global());
         builder.addItem(IntToken.of(0));
         builder.concatenate(new Variable("L", Sort.LIST));
         builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
@@ -27,7 +29,7 @@ public class BuiltinListTest {
                 IntToken.of(1),
                 termContext);
 
-        builder = BuiltinList.builder(termContext);
+        builder = BuiltinList.builder(termContext.global());
         builder.addItems(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1)));
         builder.concatenate(baseBuiltinList);
         builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));

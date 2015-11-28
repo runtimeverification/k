@@ -4,15 +4,11 @@ package org.kframework.backend.java.symbolic;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
-import org.kframework.builtin.KLabels;
-import org.kframework.compile.CleanKSeq;
-import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.NormalizeKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
@@ -62,6 +58,10 @@ public class JavaBackend implements Backend {
         this.kompileOptions = kompileOptions;
     }
 
+    /**
+     * @param the generic {@link Kompile}
+     * @return the special steps for the Java backend
+     */
     @Override
     public Function<Definition, Definition> steps(Kompile kompile) {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer(func((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s)), "convert data structures to lookups");
@@ -75,18 +75,20 @@ public class JavaBackend implements Backend {
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
-                        //.andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteOutOfKSeq, "bubble rewrites out of kseq"))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(CleanKSeq.self(), "normalize kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(func(dd -> markRegularRules(dd)))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(d);
     }
 
+    /**
+     * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.
+     */
     private static Definition markRegularRules(Definition d) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
         return DefinitionTransformer.fromSentenceTransformer((Sentence s) -> {
@@ -101,6 +103,9 @@ public class JavaBackend implements Backend {
         }, "mark regular rules").apply(d);
     }
 
+    /**
+     * The Java backend expects sorted variables, so transform them to the sorted flavor.
+     */
     private static K ADTKVariableToSortedVariable(K ruleBody) {
         return new TransformKORE() {
             public K apply(KVariable kvar) {
@@ -109,6 +114,9 @@ public class JavaBackend implements Backend {
         }.apply(ruleBody);
     }
 
+    /**
+     * In the Java backend, {@link KSequence}s are treated like {@link KApply}s, so tranform them.
+     */
     private static K convertKSeqToKApply(K ruleBody) {
         return new TransformKORE() {
             public K apply(KSequence kseq) {
@@ -117,6 +125,10 @@ public class JavaBackend implements Backend {
         }.apply(ruleBody);
     }
 
+    /**
+     * Replace variables which only appear once in the pattern and have no side condition on them (including no sorting),
+     * with a special marker called THE_VARIABLE which the backend uses for special speed optimisations.
+     */
     private static Sentence markSingleVariables(Sentence s) {
         if (s instanceof Rule) {
             Rule r = (Rule) s;

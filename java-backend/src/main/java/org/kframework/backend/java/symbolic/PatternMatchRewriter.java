@@ -67,7 +67,7 @@ public class PatternMatchRewriter {
 
         /* first break any possible sharing of mutable terms introduced by macro
          * expansion or front-end */
-        subject = EliminateUnsafeSharingTransformer.transformTerm(subject, termContext);
+        subject = EliminateUnsafeSharingTransformer.transformTerm(subject);
         termContext.setTopTerm(subject);
 
         /* compute indexing cells of the subject term for the first time */
@@ -219,7 +219,7 @@ public class PatternMatchRewriter {
                             if (ENABLE_DEBUG_MODE) {
                                 referenceResults = Lists.newArrayList();
                                 for (Map<Variable, Term> subst : getMatchingResults(subject, rule, termContext)) {
-                                    Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst, termContext), termContext);
+                                    Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst, termContext));
                                     referenceResults.add(ref);
                                 }
 
@@ -242,7 +242,7 @@ public class PatternMatchRewriter {
 
                                 /* the result of rewrite machine must be in the reference results */
                                 if (ENABLE_DEBUG_MODE) {
-                                    assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext));
+                                    assert referenceResults.contains(TermCanonicalizer.canonicalize(subject));
                                 }
                             } else {
                                 if (ENABLE_DEBUG_MODE) {

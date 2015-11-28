@@ -138,7 +138,7 @@ public class CellCollection extends Collection implements CollectionInternalRepr
             boolean hasMultiplicityCell,
             org.kframework.kore.Sort cellSort,
             Definition definition) {
-        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION, null);
+        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
         this.hasMultiplicityCell = hasMultiplicityCell;

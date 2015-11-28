@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * A disjunction of terms coming from different rewrite rules.
  * Used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
  */
-public class RuleAutomatonDisjunction extends Term {
+public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     /**
      *  (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
@@ -37,16 +37,19 @@ public class RuleAutomatonDisjunction extends Term {
     public final Map<Token, BitSet> tokenDisjunctions;
     private final List<Pair<Term, BitSet>> disjunctions;
 
+    private final GlobalContext global;
+
     /**
      * Creates the disjunction based on a list of (Term, rules that contain that term).
      * It expects the disjunctions to have already been pushed down the term, i.e., there can be at most
      * one term with a particular KLabel in the list.
      *
      * @param children
-     * @param context
+     * @param global
      */
-    public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, TermContext context) {
+    public RuleAutomatonDisjunction(List<Pair<Term, BitSet>> children, GlobalContext global) {
         super(Kind.KITEM);
+        this.global = global;
         disjunctions = Collections.unmodifiableList(children);
         this.kItemDisjunctionsArray = new Pair[KLabelConstant.maxOrdinal.get()];
         children.stream()
@@ -58,9 +61,9 @@ public class RuleAutomatonDisjunction extends Term {
 
         this.variableDisjunctionsArray = new List[Sort.maxOrdinal.get()];
 
-        context.definition().allSorts().forEach(s -> {
+        global.getDefinition().allSorts().forEach(s -> {
             this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
-                    .filter(p -> p.getLeft() instanceof Variable && context.definition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
+                    .filter(p -> p.getLeft() instanceof Variable && global.getDefinition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
                     .collect(Collectors.toSet()));
         });
 
@@ -152,5 +155,10 @@ public class RuleAutomatonDisjunction extends Term {
      */
     public int getKLabelMaxOrdinal() {
         return kItemDisjunctionsArray.length;
+    }
+
+    @Override
+    public GlobalContext globalContext() {
+        return global;
     }
 }

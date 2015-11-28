@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  *
  * @author AndreiS
  */
-public class Rule extends JavaSymbolicObject {
+public class Rule extends JavaSymbolicObject<Rule> {
 
     private final String label;
     private final Term leftHandSide;
@@ -51,6 +51,7 @@ public class Rule extends JavaSymbolicObject {
     private final ConjunctiveFormula lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
+    private final GlobalContext global;
 
     /**
      * Specifies whether this rule has been compiled to generate instructions
@@ -122,7 +123,7 @@ public class Rule extends JavaSymbolicObject {
             Set<CellLabel> cellsToCopy,
             List<MatchingInstruction> instructions,
             ASTNode oldRule,
-            TermContext termContext) {
+            GlobalContext global) {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
@@ -131,6 +132,7 @@ public class Rule extends JavaSymbolicObject {
         this.freshConstants = ImmutableSet.copyOf(freshConstants);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
+        this.global = global;
 
         copyAttributesFrom(oldRule);
         setLocation(oldRule.getLocation());
@@ -140,7 +142,7 @@ public class Rule extends JavaSymbolicObject {
                 || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDOUT)
                 || oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
-            BuiltinList.Builder streamListBuilder = BuiltinList.builder(termContext);
+            BuiltinList.Builder streamListBuilder = BuiltinList.builder(global);
             for (Equality eq : lookups.equalities()) {
                 streamListBuilder.addItem(eq.rightHandSide());
             }
@@ -150,10 +152,10 @@ public class Rule extends JavaSymbolicObject {
 
             Term streamList = streamListBuilder.build();
             this.indexingPair = oldRule.containsAttribute(org.kframework.kil.loader.Constants.STDIN) ?
-                    IndexingPair.getInstreamIndexingPair(streamList, termContext.definition()) :
-                    IndexingPair.getOutstreamIndexingPair(streamList, termContext.definition());
+                    IndexingPair.getInstreamIndexingPair(streamList, global.getDefinition()) :
+                    IndexingPair.getOutstreamIndexingPair(streamList, global.getDefinition());
         } else {
-            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(termContext.definition());
+            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(global.getDefinition());
 
             /*
              * Compute indexing information only if the left-hand side of this rule has precisely one
@@ -162,7 +164,7 @@ public class Rule extends JavaSymbolicObject {
             if (indexingPairs.size() == 1) {
                 this.indexingPair = indexingPairs.iterator().next();
             } else {
-                this.indexingPair = termContext.definition().indexingData.TOP_INDEXING_PAIR;
+                this.indexingPair = global.getDefinition().indexingData.TOP_INDEXING_PAIR;
             }
         }
 
@@ -238,7 +240,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
             for (CellLabel wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (termContext.definition().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
+                if (global.getDefinition().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }
@@ -250,13 +252,13 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             final ImmutableSet.Builder<CellLabel> readBuilder = ImmutableSet.builder();
             lhsOfReadCells.keySet().stream().forEach(c -> {
-                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                global.getDefinition().getConfigurationStructureMap().descendants(c.name()).stream()
                         .forEach(s -> readBuilder.add(CellLabel.of(s)));
             });
             readCells = readBuilder.build();
             final ImmutableSet.Builder<CellLabel> writeBuilder = ImmutableSet.builder();
             rhsOfWriteCells.keySet().stream().forEach(c -> {
-                termContext.definition().getConfigurationStructureMap().descendants(c.name()).stream()
+                global.getDefinition().getConfigurationStructureMap().descendants(c.name()).stream()
                         .forEach(s -> writeBuilder.add(CellLabel.of(s)));
             });
             writeCells = writeBuilder.build();
@@ -344,12 +346,32 @@ public class Rule extends JavaSymbolicObject {
         return label;
     }
 
+    public GlobalContext globalContext() {
+        return global;
+    }
+
     public ImmutableList<Term> requires() {
         return requires;
     }
 
     public ImmutableList<Term> ensures() {
         return ensures;
+    }
+
+    public ConstrainedTerm createLhsPattern(TermContext termContext) {
+        // TODO(YilongL): remove TermContext from the signature once
+        // ConstrainedTerm doesn't hold a TermContext anymore
+        return new ConstrainedTerm(
+                leftHandSide,
+                ConjunctiveFormula.of(lookups).addAll(requires),
+                termContext);
+    }
+
+    public ConstrainedTerm createRhsPattern() {
+        return new ConstrainedTerm(
+                rightHandSide,
+                ConjunctiveFormula.of(global).addAll(ensures),
+                TermContext.builder(global).build());
     }
 
     public ImmutableSet<Variable> freshConstants() {
@@ -416,13 +438,6 @@ public class Rule extends JavaSymbolicObject {
         assert isAnywhere();
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
-    }
-
-    /**
-     * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
-     */
-    public Rule getFreshRule(TermContext context) {
-        return this.substitute(Variable.rename(variableSet()), context);
     }
 
     public IndexingPair indexingPair() {
@@ -502,20 +517,6 @@ public class Rule extends JavaSymbolicObject {
 
     public Set<Variable> matchingVariables() {
         return matchingVariables;
-    }
-
-    @Override
-    public Rule substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return (Rule) super.substitute(substitution, context);
-    }
-
-    /**
-     * Returns a new {@code Rule} instance obtained from this rule by substituting variable with
-     * term.
-     */
-    @Override
-    public Rule substituteWithBinders(Variable variable, Term term, TermContext context) {
-        return (Rule) super.substituteWithBinders(variable, term, context);
     }
 
     @Override

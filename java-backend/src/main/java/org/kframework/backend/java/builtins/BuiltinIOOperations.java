@@ -67,33 +67,33 @@ public class BuiltinIOOperations {
     public Term close(IntToken term, TermContext termContext) {
         try {
             fs.close(term.longValue());
-            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
+            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext.global());
         } catch (IOException e) {
             return KLabelInjection.injectionOf(
                     processIOException(e.getMessage(), termContext),
-                    termContext);
+                    termContext.global());
         }
     }
 
     public Term seek(IntToken term1, IntToken term2, TermContext termContext) {
         try {
             fs.get(term1.longValue()).seek(term2.longValue());
-            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
+            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext.global());
         } catch (IOException e) {
             return KLabelInjection.injectionOf(
                     processIOException(e.getMessage(), termContext),
-                    termContext);
+                    termContext.global());
         }
     }
 
     public Term putc(IntToken term1, IntToken term2, TermContext termContext) {
         try {
             fs.get(term1.longValue()).putc(term2.unsignedByteValue());
-            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext);
+            return KLabelInjection.injectionOf(KSequence.EMPTY, termContext.global());
         } catch (IOException e) {
             return KLabelInjection.injectionOf(
                     processIOException(e.getMessage(), termContext),
-                    termContext);
+                    termContext.global());
         }
     }
     public Term write(IntToken term1, StringToken term2, TermContext termContext) {
@@ -105,7 +105,7 @@ public class BuiltinIOOperations {
         } catch (IOException e) {
             return KLabelInjection.injectionOf(
                     processIOException(e.getMessage(), termContext),
-                    termContext);
+                    termContext.global());
         }
     }
 
@@ -132,14 +132,14 @@ public class BuiltinIOOperations {
         String stdout = output.stdout != null ? output.stdout : "";
         String stderr = output.stderr != null ? output.stderr : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext);
+            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
     }
 
     private KItem processIOException(String errno, Term klist, TermContext termContext) {
         String klabelString = "'#" + errno;
         KLabelConstant klabel = KLabelConstant.of(klabelString, termContext.definition());
         assert termContext.definition().kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
-        return KItem.of(klabel, klist, termContext);
+        return KItem.of(klabel, klist, termContext.global());
     }
 
     private KItem processIOException(String errno, TermContext termContext) {

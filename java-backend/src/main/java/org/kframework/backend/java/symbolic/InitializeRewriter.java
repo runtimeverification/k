@@ -91,7 +91,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     public synchronized Rewriter apply(Module module) {
         TermContext initializingContext = TermContext.builder(new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING))
                 .freshCounter(0).build();
-        Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext);
+        Definition evaluatedDef = initializeDefinition.invoke(module, kem, initializingContext.global());
 
         GlobalContext rewritingContext = new GlobalContext(fs, javaOptions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING);
         rewritingContext.setDefinition(evaluatedDef);
@@ -116,7 +116,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 BigInteger initCounterValue,
                 GlobalContext rewritingContext,
                 KExceptionManager kem) {
-            this.rewriter = new SymbolicRewriter(definition,  kompileOptions, javaOptions, new KRunState.Counter());
+            this.rewriter = new SymbolicRewriter(rewritingContext,  kompileOptions, javaOptions, new KRunState.Counter());
             this.definition = definition;
             this.module = module;
             this.initCounterValue = initCounterValue;
@@ -127,7 +127,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, false, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false, false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(k));
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return new RewriterResult(result.getStepsTaken(), result.getJavaKilTerm());
@@ -142,7 +142,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), true, false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
@@ -160,25 +160,18 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<K> prove(List<Rule> rules) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext, true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), true, false);
             List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());
             List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
-                    .map(r -> r.getFreshRule(termContext))
+                    .map(r -> r.renameVariables())
                     .collect(Collectors.toList());
 
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.containsAttribute(Attribute.TRUSTED_KEY))
-                    .flatMap(r -> {
-                        ConstrainedTerm initialTerm = new ConstrainedTerm(
-                                r.leftHandSide(),
-                                ConjunctiveFormula.of(termContext).addAll(r.requires()));
-                        ConstrainedTerm targetTerm = new ConstrainedTerm(
-                                r.rightHandSide(),
-                                ConjunctiveFormula.of(termContext).addAll(r.ensures()));
-                        return rewriter.proveRule(initialTerm, targetTerm, allRules).stream();
-                    })
+                    .map(r -> rewriter.proveRule(r.createLhsPattern(termContext), r.createRhsPattern(), allRules))
+                    .flatMap(List::stream)
                     .collect(Collectors.toList());
 
             return proofResults.stream()
@@ -200,18 +193,18 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
         };
 
-        public Definition invoke(Module module, KExceptionManager kem, TermContext termContext) {
+        public Definition invoke(Module module, KExceptionManager kem, GlobalContext global) {
             if (cache.containsKey(module)) {
                 return cache.get(module);
             }
             Definition definition = new Definition(module, kem);
 
-            termContext.global().setDefinition(definition);
+            global.setDefinition(definition);
 
             JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
                     .map(l -> KLabelConstant.of(l.name(), definition))
                     .forEach(definition::addKLabel);
-            definition.addKoreRules(module, termContext);
+            definition.addKoreRules(module, global);
 
             definition.setIndex(new IndexingTable(() -> definition, new IndexingTable.Data()));
             cache.put(module, definition);

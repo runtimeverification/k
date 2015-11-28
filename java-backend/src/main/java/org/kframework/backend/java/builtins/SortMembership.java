@@ -27,8 +27,8 @@ public class SortMembership {
      *
      * @param kItem
      *            the sort membership predicate
-     * @param context
-     *            the context
+     * @param definition
+     *            the definition
      * @return {@link BoolToken#TRUE} if the predicate is true; or
      *         {@link BoolToken#FALSE} if the predicate is false; otherwise, the
      *         {@code kItem} itself if the evaluation gets stuck

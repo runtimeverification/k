@@ -49,7 +49,7 @@ public class Z3Wrapper {
         SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
     }
 
-    public synchronized boolean checkQuery(String query, int timeout) {
+    public synchronized boolean isUnsat(String query, int timeout) {
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout);
         } else {

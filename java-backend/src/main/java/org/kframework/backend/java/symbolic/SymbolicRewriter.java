@@ -15,7 +15,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
@@ -46,32 +45,27 @@ public class SymbolicRewriter {
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
     private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
-    private FastRuleMatcher theFastMatcher;
+    private final FastRuleMatcher theFastMatcher;
     private final Definition definition;
-    private final KompileOptions kompileOptions;
     private final BitSet allRuleBits;
 
     private final boolean useFastRewriting;
 
     @Inject
-    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
+    public SymbolicRewriter(GlobalContext global, KompileOptions kompileOptions, JavaExecutionOptions javaOptions,
                             KRunState.Counter counter) {
-        this.definition = definition;
-        this.kompileOptions = kompileOptions;
+        this.definition = global.getDefinition();
         this.allRuleBits = BitSet.apply(definition.ruleTable.size());
         this.allRuleBits.makeOnes(definition.ruleTable.size());
         this.javaOptions = javaOptions;
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-        this.useFastRewriting = !this.kompileOptions.experimental.koreProve;
+        this.useFastRewriting = !kompileOptions.experimental.koreProve;
+        this.theFastMatcher = new FastRuleMatcher(global, allRuleBits.length());
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        if (useFastRewriting) {
-            this.theFastMatcher = new FastRuleMatcher(constrainedTerm.termContext(), allRuleBits.length(), 90);
-        }
-
         stopwatch.start();
         int step = 0;
         List<ConstrainedTerm> results;
@@ -92,8 +86,8 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
         return useFastRewriting ?
-                fastComputeRewriteStep(constrainedTerm, true) :
-                slowComputeRewriteStep(constrainedTerm, step, true);
+                fastComputeRewriteStep(constrainedTerm, computeOne) :
+                slowComputeRewriteStep(constrainedTerm, step, computeOne);
     }
 
     private List<ConstrainedTerm> slowComputeRewriteStep(ConstrainedTerm subject, int step, boolean computeOne) {
@@ -167,33 +161,32 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
+        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(
+                subject.term(),
+                definition.automaton.leftHandSide(),
+                allRuleBits,
+                computeOne,
+                subject.termContext());
         for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
-            Rule rule = definition.ruleTable.get(pair.getRight());
-            Substitution<Variable, Term> substitution = RewriteEngineUtils.evaluateConditions(rule, pair.getLeft(), subject.termContext());
-            if (substitution != null) {
-                // start the optimized substitution
+            Substitution<Variable, Term> substitution = pair.getLeft();
+            // start the optimized substitution
 
-                // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-                Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrites()[pair.getRight()];
+            // get a map from AST paths to (fine-grained, inner) rewrite RHSs
+            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(pair.getRight());
 
-                assert (rewrites.size() > 0);
+            assert (rewrites.size() > 0);
 
-                Term theNew;
-                if (rewrites.size() == 1)
-                    // use the more efficient implementation if we only have one rewrite
-                    theNew = buildRHS(subject.term(), substitution, rewrites.keySet().iterator().next(),
-                            rewrites.values().iterator().next(), subject.termContext());
-                else
-                    theNew = buildRHS(subject.term(), substitution,
-                            rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
-                            subject.termContext());
+            Term theNew;
+            if (rewrites.size() == 1)
+                // use the more efficient implementation if we only have one rewrite
+                theNew = buildRHS(subject.term(), substitution, rewrites.keySet().iterator().next(),
+                        rewrites.values().iterator().next(), subject.termContext());
+            else
+                theNew = buildRHS(subject.term(), substitution,
+                        rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
+                        subject.termContext());
 
-                results.add(new ConstrainedTerm(theNew, subject.termContext()));
-                if (computeOne) {
-                    break;
-                }
-            }
+            results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
         return results;
     }
@@ -209,7 +202,7 @@ public class SymbolicRewriter {
             KItem kItemSubject = (KItem) subject;
             List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
             newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, (scala.collection.immutable.List<Integer>) path.tail(), rhs, context));
-            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context).applyAnywhereRules(false, context);
+            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
         }
     }
 
@@ -239,7 +232,7 @@ public class SymbolicRewriter {
             }
         }
 
-        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context).applyAnywhereRules(false, context);
+        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
     }
 
     private List<ConstrainedTerm> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {
@@ -251,10 +244,10 @@ public class SymbolicRewriter {
                 System.err.println("\nAuditing " + rule + "...\n");
             }
 
-            return results = subject.unify(buildPattern(rule, subject.termContext()),
+            return results = subject.unify(rule.createLhsPattern(subject.termContext()),
                     rule.matchingInstructions(), rule.lhsOfReadCell(), rule.matchingVariables())
                     .stream()
-                    .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight()))
+                    .map(s -> buildResult(rule, s.getLeft(), subject.term(), !s.getRight(), subject.termContext()))
                     .collect(Collectors.toList());
         } catch (KEMException e) {
             e.exception.addTraceFrame("while evaluating rule at " + rule.getSource() + rule.getLocation());
@@ -279,16 +272,6 @@ public class SymbolicRewriter {
     }
 
     /**
-     * Builds the pattern term used in unification by composing the left-hand
-     * side of the rule and its preconditions.
-     */
-    private static ConstrainedTerm buildPattern(Rule rule, TermContext context) {
-        return new ConstrainedTerm(
-                rule.leftHandSide(),
-                ConjunctiveFormula.of(context).add(rule.lookups()).addAll(rule.requires()));
-    }
-
-    /**
      * Builds the result of rewrite based on the unification constraint.
      * It applies the unification constraint on the right-hand side of the rewrite rule,
      * if the rule is not compiled for fast rewriting.
@@ -298,24 +281,25 @@ public class SymbolicRewriter {
             Rule rule,
             ConjunctiveFormula constraint,
             Term subject,
-            boolean expandPattern) {
+            boolean expandPattern,
+            TermContext context) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
-                    FreshOperations.freshOfSort(variable.sort(), constraint.termContext()));
+                    FreshOperations.freshOfSort(variable.sort(), context));
         }
-        constraint = constraint.addAll(rule.ensures()).simplify();
+        constraint = constraint.addAll(rule.ensures()).simplify(context);
 
         Term term;
 
         /* apply the constraints substitution on the rule RHS */
-        constraint.termContext().setTopConstraint(constraint);
+        context.setTopConstraint(constraint);
         Set<Variable> substitutedVars = Sets.union(rule.freshConstants(), rule.matchingVariables());
         constraint = constraint.orientSubstitution(substitutedVars);
         if (rule.isCompiledForFastRewriting()) {
-            term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, constraint.termContext());
+            term = AbstractKMachine.apply((CellCollection) subject, constraint.substitution(), rule, context);
         } else {
-            term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), constraint.termContext());
+            term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), context);
         }
 
         /* eliminate bindings of the substituted variables */
@@ -325,13 +309,13 @@ public class SymbolicRewriter {
         Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
         /* rename rule variables in both the term and the constraint */
-        term = term.substituteWithBinders(renameSubst, constraint.termContext());
-        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst, constraint.termContext())).simplify();
+        term = term.substituteWithBinders(renameSubst);
+        constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst)).simplify(context);
 
-        ConstrainedTerm result = new ConstrainedTerm(term, constraint);
+        ConstrainedTerm result = new ConstrainedTerm(term, constraint, context);
         if (expandPattern) {
             if (rule.isCompiledForFastRewriting()) {
-                result = new ConstrainedTerm(term.substituteAndEvaluate(constraint.substitution(), constraint.termContext()), constraint);
+                result = new ConstrainedTerm(term.substituteAndEvaluate(constraint.substitution(), context), constraint, context);
             }
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
@@ -384,9 +368,6 @@ public class SymbolicRewriter {
             SearchType searchType,
             TermContext context) {
         stopwatch.start();
-        if (useFastRewriting) {
-            this.theFastMatcher = new FastRuleMatcher(context, allRuleBits.length(), 90);
-        }
 
         List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
@@ -556,7 +537,8 @@ public class SymbolicRewriter {
                             cterm.constraint().removeBindings(
                                     Sets.difference(
                                             cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())));
+                                            initialTerm.variableSet())),
+                            cterm.termContext());
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
@@ -580,10 +562,10 @@ public class SymbolicRewriter {
      */
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
-            ConstrainedTerm pattern = buildPattern(specRule, constrainedTerm.termContext());
+            ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true);
+                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
             }
         }
         return null;

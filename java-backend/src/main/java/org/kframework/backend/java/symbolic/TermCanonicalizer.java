@@ -5,11 +5,11 @@ import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -21,13 +21,8 @@ import org.kframework.kil.ASTNode;
  */
 public class TermCanonicalizer extends CopyOnWriteTransformer {
 
-    public static Term canonicalize(Term term, TermContext context) {
-        TermCanonicalizer transformer = new TermCanonicalizer(context);
-        return (Term) term.accept(transformer);
-    }
-
-    private TermCanonicalizer(TermContext context) {
-        super(context);
+    public static Term canonicalize(Term term) {
+        return (Term) term.accept(new TermCanonicalizer());
     }
 
     @Override

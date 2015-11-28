@@ -18,38 +18,14 @@ import org.kframework.kil.visitors.Visitor;
  */
 public abstract class PrePostTransformer extends CopyOnWriteTransformer {
 
-    /**
-     * Returns the {@code CombinedLocalTransformer} used for pre-processing.
-     */
-    public CombinedLocalTransformer getPreTransformer() {
-        return preTransformer;
-    }
-
-    public void setPreTransformer(CombinedLocalTransformer preTransformer) {
-        this.preTransformer = preTransformer;
-    }
-
-    /**
-     * Returns the {@code CombinedLocalTransformer} used for post-processing.
-     */
-    public CombinedLocalTransformer getPostTransformer() {
-        return postTransformer;
-    }
-
-    public void setPostTransformer(CombinedLocalTransformer postTransformer) {
-        this.postTransformer = postTransformer;
-    }
-
-    protected CombinedLocalTransformer preTransformer = new CombinedLocalTransformer();
-    protected CombinedLocalTransformer postTransformer = new CombinedLocalTransformer();
+    protected final CombinedLocalTransformer preTransformer = new CombinedLocalTransformer();
+    protected final CombinedLocalTransformer postTransformer = new CombinedLocalTransformer();
 
     public PrePostTransformer(TermContext context) {
         super(context);
     }
 
-    public PrePostTransformer() {
-        super();
-    }
+    public PrePostTransformer() { }
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
