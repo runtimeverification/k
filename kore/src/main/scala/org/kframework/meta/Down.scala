@@ -6,10 +6,8 @@ import org.kframework.kore.Unapply._
 import org.kframework.kore.KORE.Sort
 
 import scala.util.Try
+import collection._
 
-/**
- * Created by cos on 2/6/15.
- */
 case class Down(imports: Set[String]) extends (K => Any) {
 
   import org.kframework.builtin.Sorts.KString

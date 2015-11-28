@@ -2,6 +2,7 @@ package org.kframework.definition
 
 import org.kframework.kore
 import org.kframework.kore.ADT
+import collection._
 
 trait KLabelMappings {
   self: Module =>

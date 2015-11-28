@@ -29,7 +29,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
 import scala.Tuple3;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -273,7 +273,7 @@ public class GenerateSentencesFromConfigDecl {
         java.util.Set<Sentence> sentences = new HashSet<Sentence>();
 
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
-        Production cellProduction = Production("<" + cellName + ">", sort, items.stream().collect(Collections.toList()),
+        Production cellProduction = Production("<" + cellName + ">", sort, immutable(items),
                 cellProperties.addAll(configAtt));
         sentences.add(cellProduction);
 

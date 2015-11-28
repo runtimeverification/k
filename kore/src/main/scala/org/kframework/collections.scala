@@ -12,6 +12,7 @@ import java.util.function.BiConsumer
 import java.util.function.BinaryOperator
 import java.util.function.Supplier
 import scala.collection.mutable.SetBuilder
+import collection._
 
 object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala
@@ -33,7 +34,11 @@ object Collections {
   //  def stream[T](c: Collection[T]): java.util.stream.Stream[T] = c.stream
   def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
 
-  def map[T](s: Set[T], f: java.util.function.Function[T, T]): Set[T] = s.map(x => f(x))
+  def map[T](f: java.util.function.Function[T, T])(s: Set[T]): Set[T] = s.map(x => f(x))
+  def map[T](f: java.util.function.Function[T, T])(s: List[T]): List[T] = s.map(x => f(x))
+  def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
+
+  def add[T](e: T)(s: Set[T]): Set[T] = s + e
 
   @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
   @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)

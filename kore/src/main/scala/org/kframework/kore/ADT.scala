@@ -3,7 +3,6 @@ package org.kframework.kore
 import org.kframework.builtin.KLabels
 import org.kframework.kore
 import org.kframework.attributes._
-import org.kframework.kore.ADT.{KList, KApply}
 import collection.JavaConverters._
 
 /**
@@ -73,7 +72,7 @@ object ADT {
 object SortedADT {
 
   case class SortedKVariable(name: String, att: Att = Att()) extends kore.KVariable {
-    def apply(ks: K*) = KApply(this, KList(ks.toList))
+    def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
 
     val sort: Sort = ADT.Sort(att.getOptional[String]("sort").orElse("K"))
 

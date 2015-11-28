@@ -227,7 +227,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
-        scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags());
+        scala.collection.Set<Tag> tags = toTags(ii.getTags());
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
@@ -248,14 +248,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
-        Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
+        Seq<scala.collection.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
                 .stream().map(block -> toTags(block.getProductions()))
                 .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
+    public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
         return immutable(labels.stream().flatMap(l -> context.tags.get(l.getLabel()).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
     }
 
@@ -270,7 +270,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             return res;
         }
 
-        Function<PriorityBlock, scala.collection.immutable.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
+        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
                 .getProductions().stream().filter(p -> p.getKLabel() != null).map(p -> Tag(dropQuote(p.getKLabel())))
                 .collect(Collectors.toSet()));
 

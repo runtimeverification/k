@@ -2,7 +2,7 @@
 package org.kframework.kore;
 
 import org.kframework.attributes.Att;
-import scala.collection.immutable.Map;
+import scala.collection.Map;
 
 import java.util.Arrays;
 import java.util.List;
