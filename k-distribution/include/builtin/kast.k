@@ -86,13 +86,21 @@ module RULE-CELLS
                          | ""    [klabel(#noDots)]
 endmodule
 
+module MODULE-REFERENCE
+  syntax ModuleName         ::= r"[A-Z][A-Z\\-]*"       [token]
+  syntax ModuleReference    ::= "@" ModuleName          [klabel(#moduleReference)]
+endmodule
+
 module CONFIG-CELLS
   imports KCELLS
   imports RULE-LISTS
+  imports MODULE-REFERENCE
+
   syntax #CellName ::= r"[a-zA-Z0-9\\-]+"  [token]
 
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
   syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell)]
+  syntax Cell ::= ModuleReference
 
   syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList)]
                            | ""                            [klabel(#cellPropertyListTerminator)]
