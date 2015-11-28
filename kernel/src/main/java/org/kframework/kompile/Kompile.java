@@ -364,13 +364,20 @@ public class Kompile {
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                     .collect(Collections.toSet());
 
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(module.productions())
+                    .filter(p -> p.att().contains("cell"))
+                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+
+
             Module mapModule;
             if (def.getModule("MAP").isDefined()) {
                 mapModule = def.getModule("MAP").get();
             } else {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
+            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions).$bar(importedConfigurationSortsSubsortedToCell),
+                    module.att());
         }
     }
 

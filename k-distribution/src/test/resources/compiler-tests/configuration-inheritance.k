@@ -7,9 +7,15 @@ module A
 endmodule
 
 module B
-    imports A
+    syntax Exp ::= "foo"
+    configuration <b> foo </b>
+endmodule
 
-    configuration <t> initKCell(Init) </t>
+module C
+    imports A
+    imports B
+
+    configuration <t> initKCell(Init) initBCell </t>
 
     rule x => y
 endmodule
