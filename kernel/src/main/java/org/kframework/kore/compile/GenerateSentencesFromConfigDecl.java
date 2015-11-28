@@ -109,7 +109,7 @@ public class GenerateSentencesFromConfigDecl {
 
                                 boolean isLeafCell = childResult._1().isEmpty();
                                 Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, cfgAtt, m, cellName, cellProperties,
-                                        childResult._2(), childResult._3(), ensures, hasConfigVariable(cellContents));
+                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents));
                                 return Tuple3.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3());
                             }
                         }
@@ -187,19 +187,25 @@ public class GenerateSentencesFromConfigDecl {
      * Returns true if the specified term has a configuration variable
      * @param contents
      */
-    private static boolean hasConfigVariable(K contents) {
-        FindConfigVar visitor = new FindConfigVar();
+    private static boolean hasConfigOrRegularVariable(K contents) {
+        FindConfigOrRegularVar visitor = new FindConfigOrRegularVar();
         visitor.apply(contents);
         return visitor.hasConfigVar;
     }
 
-    private static class FindConfigVar extends VisitKORE {
+    private static class FindConfigOrRegularVar extends VisitKORE {
         boolean hasConfigVar;
         @Override
         public Void apply(KToken k) {
             if (k.sort().equals(Sorts.KConfigVar())) {
                 hasConfigVar = true;
             }
+            return null;
+        }
+
+        @Override
+        public Void apply(KVariable k) {
+            hasConfigVar = true;
             return null;
         }
     }
@@ -237,7 +243,8 @@ public class GenerateSentencesFromConfigDecl {
      * @param childSorts The list of sorts computed via recursion of the children of the current cell.
      * @param childInitializer The contents of the cell being processed, converted into the right hand side of an initializer.
      * @param ensures The ensures clause to be used; null if the cell is not a top cell.
-     * @param hasConfigurationVariable true if the initializer for the cell requires a configuration variable.
+     * @param hasConfigurationOrRegularVariable true if the initializer for the cell requires a configuration variable or a
+     *                                 regular variable (when refering directly to configuration initializers).
      *                                 This causes cells of multiplicity * or ? to be initialized to a non-empty bag,
      *                                 and the initializer to take a Map argument containing the values of the configuration
      *                                 variables.
@@ -255,7 +262,7 @@ public class GenerateSentencesFromConfigDecl {
             List<Sort> childSorts,
             K childInitializer,
             K ensures,
-            boolean hasConfigurationVariable) {
+            boolean hasConfigurationOrRegularVariable) {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
@@ -283,7 +290,7 @@ public class GenerateSentencesFromConfigDecl {
         String initLabel = getInitLabel(sort);
         Sentence initializer;
         Rule initializerRule;
-        if (hasConfigurationVariable || isStream) {
+        if (hasConfigurationOrRegularVariable || isStream) {
             initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
@@ -380,7 +387,7 @@ public class GenerateSentencesFromConfigDecl {
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
             cellsSort = bagSort;
-            rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
+            rhs = optionalCellInitializer(hasConfigurationOrRegularVariable, cellProperties, initLabel);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
@@ -393,13 +400,13 @@ public class GenerateSentencesFromConfigDecl {
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
             cellsSort = sort;
-            rhs = optionalCellInitializer(hasConfigurationVariable, cellProperties, initLabel);
+            rhs = optionalCellInitializer(hasConfigurationOrRegularVariable, cellProperties, initLabel);
         } else {
             // rule initCell => <cell> initChildren... </cell>
             // -or-
             // rule initCell(Init) => <cell> initChildren(Init)... </cell>
             cellsSort = sort;
-            if (hasConfigurationVariable || isStream) {
+            if (hasConfigurationOrRegularVariable || isStream) {
                 rhs = KApply(KLabel(initLabel), KVariable("Init"));
             } else {
                 rhs = KApply(KLabel(initLabel));

@@ -2,9 +2,14 @@
 requires "domains.k"
 
 module A
+    syntax Exp ::= "x" | "y"
     configuration <k> $PGM </k>
 endmodule
 
 module B
-    configuration <t> K::K </t>
+    imports A
+
+    configuration <t> initKCell(Init) </t>
+
+    rule x => y
 endmodule
