@@ -43,7 +43,7 @@ public class TstKDebugOnKORE_IT {
         debuggerSession = new KoreKDebug(parsed, new KoreUtils(fileName, "IMP", "IMP-SYNTAX").getRewriter(), new Integer(500), null, utils.kem, kRunOptions, utils.compiledDef);
     }
 
-    @Test
+    @Test @Ignore
     public void normalExecutionTest() throws IOException, URISyntaxException {
         int steps = getRandomSteps(1, 100);
         K debugResult = trans.apply(debuggerSession.step(debuggerSession.getActiveStateId(), steps).getCurrentK());
@@ -61,7 +61,7 @@ public class TstKDebugOnKORE_IT {
         assertEquals("Normal and Debug results don't match, when jump back called with random number of steps", expectedResult, debugResult);
     }
 
-    @Test @Ignore
+    @Test
     public void jumpCommandTest() {
         /*  Jumping on Debugger and 50 steps for normal executor */
         int stateNum = getRandomSteps(20, 50);
@@ -70,7 +70,7 @@ public class TstKDebugOnKORE_IT {
         assertEquals("Normal and Debug results don't match, when jump called with random number of steps", expectedResult, debugResult);
     }
 
-    @Test
+    @Test @Ignore
     public void multipleStepTest() {
         int steps1 = getRandomSteps(1, 50);
         int steps2 = getRandomSteps(1, 50);
