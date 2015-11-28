@@ -207,13 +207,11 @@ public class SymbolicRewriter {
     }
 
     private boolean strategyIsRestore(ConstrainedTerm subject) {
-//        throw new UnsupportedOperationException();
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     private boolean strategyIsSave(ConstrainedTerm subject) {
-//        throw new UnsupportedOperationException();
-        return false;
+        throw new UnsupportedOperationException();
     }
 
 
@@ -264,7 +262,7 @@ public class SymbolicRewriter {
         } else {
             KItem kItemSubject = (KItem) subject;
             List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
-            newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, (scala.collection.immutable.List<Integer>) path.tail(), rhs, context));
+            newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, path.tail(), rhs, context));
             return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
         }
     }
