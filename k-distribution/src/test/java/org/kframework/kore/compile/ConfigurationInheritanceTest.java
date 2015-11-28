@@ -30,6 +30,6 @@ public class ConfigurationInheritanceTest {
 
         String actual = KOREToTreeNodes.toString(new AddBrackets(unparsingModule).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(unparsingModule, kResult), unparsingModule)));
 
-        assertEquals("Execution failed", "<generatedTop> <k> y </k> </generatedTop>", actual);
+        assertEquals("Execution failed", "<t> <k> y ~> .::K </k> </t>", actual);
     }
 }
