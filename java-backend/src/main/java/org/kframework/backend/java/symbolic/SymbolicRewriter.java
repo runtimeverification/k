@@ -174,8 +174,8 @@ public class SymbolicRewriter {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
                 .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
                 .findFirst();
-        
-        if(!theStrategy.isPresent())
+
+        if (!theStrategy.isPresent())
             return Optional.empty();
 
         KApply topOfStrategyCell = (KApply) ((KApply) theStrategy.get()).klist().items().get(0);
