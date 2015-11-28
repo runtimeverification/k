@@ -61,7 +61,7 @@ public class TstKDebugOnKORE_IT {
         assertEquals("Normal and Debug results don't match, when jump back called with random number of steps", expectedResult, debugResult);
     }
 
-    @Test
+    @Test @Ignore
     public void jumpCommandTest() {
         /*  Jumping on Debugger and 50 steps for normal executor */
         int stateNum = getRandomSteps(20, 50);
