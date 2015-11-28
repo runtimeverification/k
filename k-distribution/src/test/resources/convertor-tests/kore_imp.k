@@ -6,8 +6,10 @@ module STRATEGY
   syntax SExp ::= "#STUCK"
   syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
 
-  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> heat` => regular, `#noDots`(.KList))
-  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> cool` => heat, `#noDots`(.KList))
+  rule <s> `#STUCK ~~> heat` => regular </s>
+  rule <s> `#STUCK ~~> cool` => heat </s>
+
+  configuration <s> heat </s>
 endmodule
 
 module IMP-CORE-SYNTAX
@@ -51,7 +53,7 @@ module IMP
 
   configuration <k color="green"> $PGM:Pgm:K </k>
                 <state color="red"> .Map </state>
-                <s color="red"> heat </s>
+                initSCell
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
