@@ -185,23 +185,25 @@ public class SymbolicRewriter {
 
         boolean isStuck = topOfStrategyCell.klabel().name().equals(Att.stuck());
 
-        // if we are stuck (i.e., in this method) and the #STUCK marker is not on the top of the strategy cell,
-        // add it
-        if (theStrategy.isPresent() && !isStuck) {
-            Att emptyAtt = Att.apply();
-
-            K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(), emptyAtt);
-            List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
-            items.add(0, stuck);
-            K sContent = constructor.KApply1(constructor.KLabel("#sseq"), constructor.KList(items), emptyAtt);
-            K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(sContent), emptyAtt);
-            K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
-                    constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
-                            k instanceof KApply && ((KApply) k).klabel().name().contains("<s>") ? s : k).collect(Collectors.toList())), emptyAtt);
-            return Optional.of(new ConstrainedTerm((Term) entireConf, subject.termContext()));
-        } else {
+        // if we are stuck (i.e., in this method) and the #STUCK marker is the top of the strategy cell, do nothing
+        if (isStuck) {
             return Optional.empty();
         }
+
+        // otherwise, add the #STUCK label to the top of the strategy cell
+
+        Att emptyAtt = Att.apply();
+
+        K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(), emptyAtt);
+        List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
+        items.add(0, stuck);
+        K sContent = constructor.KApply1(constructor.KLabel("#sseq"), constructor.KList(items), emptyAtt);
+        K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(sContent), emptyAtt);
+        K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
+                constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
+                        k instanceof KApply && ((KApply) k).klabel().name().contains("<s>") ? s : k).collect(Collectors.toList())), emptyAtt);
+        return Optional.of(new ConstrainedTerm((Term) entireConf, subject.termContext()));
+
     }
 
     private boolean strategyIsRestore(ConstrainedTerm subject) {

@@ -1,7 +1,17 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 requires "domains.k"
 
+module STRATEGY
+  syntax SExp ::= "heat" | "regular" | "cool"
+  syntax SExp ::= "#STUCK"
+  syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
+
+  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> heat` => regular, `#noDots`(.KList))
+  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> cool` => heat, `#noDots`(.KList))
+endmodule
+
 module IMP-CORE-SYNTAX
+  imports STRATEGY
   imports EMPTY-ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
@@ -32,20 +42,10 @@ module IMP-SYNTAX
   imports IMP-CORE-SYNTAX
 endmodule
 
-module STRATEGY
-  syntax SExp ::= "heat" | "regular" | "cool"
-  syntax SExp ::= "#STUCK"
-  syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
-
-  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> heat` => regular, `#noDots`(.KList))
-  rule `<s>`(`#noDots`(.KList), `#STUCK ~~> cool` => heat, `#noDots`(.KList))
-endmodule
-
 module IMP
   imports IMP-CORE-SYNTAX
   imports MAP
   imports INT
-  imports STRATEGY
 
   syntax KResult ::= Int | Bool
 
