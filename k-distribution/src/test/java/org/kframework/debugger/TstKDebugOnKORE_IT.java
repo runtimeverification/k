@@ -2,6 +2,7 @@
 package org.kframework.debugger;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
@@ -49,7 +50,7 @@ public class TstKDebugOnKORE_IT {
         K expectedResult = trans.apply(utils.stepRewrite(parsed, Optional.ofNullable(new Integer(steps))));
         assertEquals("Normal and Debug results don't match, when both allowed to run for some random steps", expectedResult, debugResult);
     }
-    @Test
+    @Test @Ignore
     public void jumpBackTest() {
         /* Going Back on Debugger */
         int forward = getRandomSteps(20, 150);
@@ -60,7 +61,7 @@ public class TstKDebugOnKORE_IT {
         assertEquals("Normal and Debug results don't match, when jump back called with random number of steps", expectedResult, debugResult);
     }
 
-    @Test
+    @Test @Ignore
     public void jumpCommandTest() {
         /*  Jumping on Debugger and 50 steps for normal executor */
         int stateNum = getRandomSteps(20, 50);
