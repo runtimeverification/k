@@ -5,8 +5,10 @@ import org.kframework.builtin.KLabels
 import org.kframework.kore.KORE._
 import org.kframework.kore._
 
-
-object CleanKSeq extends (K => K) {
+/**
+  * Assumes KSequences are KApplys and puts them in right-assoc normal form
+  */
+object NormalizeKSeq extends (K => K) {
   val self = this
 
   val dotk = KLabel(KLabels.DOTK)

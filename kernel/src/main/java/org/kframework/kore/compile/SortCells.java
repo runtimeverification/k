@@ -59,10 +59,8 @@ import static org.kframework.kore.KORE.*;
  */
 public class SortCells {
     private final ConcretizationInfo cfg;
-    private final KExceptionManager kem;
-    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, KExceptionManager kem) {
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
-        this.kem = kem;
     }
 
     public synchronized K sortCells(K term) {

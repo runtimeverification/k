@@ -2,12 +2,16 @@
 package org.kframework.kore.compile;
 
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.definition.Definition;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Sentence;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
- * Apply the entire configuration concretization process.
+ * Apply the configuration concretization process.
+ * The implicit {@code <k>} cell is added by another stage, AddImplicitComputationCell.
  * <p>
  * The input may freely use various configuration abstractions
  * and Full K flexibilites. See {@link IncompleteCellUtils} for a
@@ -30,14 +34,24 @@ public class ConcretizeCells {
     final SortCells sortCells;
     private final AddTopCellToRules addRootCell;
 
-    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, KExceptionManager kem) {
+    public static Definition transformDefinition(Definition input) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
+        return DefinitionTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize,
+                "concretizing configuration"
+        ).apply(input);
+    }
+
+    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo) {
         this.configurationInfo = configurationInfo;
         this.labelInfo = labelInfo;
         this.sortInfo = sortInfo;
         addRootCell = new AddTopCellToRules(configurationInfo, labelInfo);
         addParentCells = new AddParentCells(configurationInfo, labelInfo);
         closeCells = new CloseCells(configurationInfo, sortInfo, labelInfo);
-        sortCells = new SortCells(configurationInfo, labelInfo, kem);
+        sortCells = new SortCells(configurationInfo, labelInfo);
     }
 
     public Sentence concretize(Sentence s) {
