@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.Sort;
 import static org.kframework.Collections.*;
-import static scala.compat.java8.JFunction.*;
 
 /**
  * A K definition in the format of the Java Rewrite Engine.
@@ -134,9 +133,9 @@ public class Definition extends JavaSymbolicObject {
     /**
      * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
-    public Map<Integer, Rule> ruleTable = new HashMap<>();
+    public final Map<Integer, Rule> ruleTable;
 
-    public Map<Integer, Integer> reverseRuleTable = new HashMap<>();
+    public final Map<Integer, Integer> reverseRuleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
@@ -211,6 +210,7 @@ public class Definition extends JavaSymbolicObject {
                 null,
                 context.getConfigurationStructureMap());
         this.context = context;
+        this.ruleTable = new HashMap<>();
     }
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
@@ -260,6 +260,7 @@ public class Definition extends JavaSymbolicObject {
         context = null;
 
         this.indexingData = new IndexingTable.Data();
+        this.ruleTable = new HashMap<>();
     }
 
     private Map<org.kframework.kore.Sort, DataStructureSort> getDataStructureSorts(Module module) {

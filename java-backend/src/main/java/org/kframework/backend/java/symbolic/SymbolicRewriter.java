@@ -15,7 +15,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
-import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
@@ -63,7 +62,7 @@ public class SymbolicRewriter {
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
         this.useFastRewriting = !kompileOptions.experimental.koreProve;
-        this.theFastMatcher = new FastRuleMatcher(global, allRuleBits.length(), 90);
+        this.theFastMatcher = new FastRuleMatcher(global, allRuleBits.length());
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -162,39 +161,40 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(subject.term(), definition.automaton.leftHandSide(), allRuleBits);
+        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(
+                subject.term(),
+                definition.automaton.leftHandSide(),
+                allRuleBits,
+                computeOne,
+                subject.termContext());
         for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
+            Substitution<Variable, Term> substitution = pair.getLeft();
+            // start the optimized substitution
+
+            // get a map from AST paths to (fine-grained, inner) rewrite RHSs
+            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(pair.getRight());
+
+            assert (rewrites.size() > 0);
+
+            Term theNew;
+            if (rewrites.size() == 1)
+                // use the more efficient implementation if we only have one rewrite
+                theNew = buildRHS(subject.term(), substitution, rewrites.keySet().iterator().next(),
+                        rewrites.values().iterator().next(), subject.termContext());
+            else
+                theNew = buildRHS(subject.term(), substitution,
+                        rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
+                        subject.termContext());
+
             Rule rule = definition.ruleTable.get(pair.getRight());
-            Substitution<Variable, Term> substitution = RewriteEngineUtils.evaluateConditions(rule, pair.getLeft(), subject.termContext());
-            if (substitution != null) {
-                // start the optimized substitution
 
-                // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-                Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrites()[pair.getRight()];
+            /* get fresh substitutions of rule variables */
+            Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
-                assert (rewrites.size() > 0);
+            /* rename rule variables in the term */
+            theNew = theNew.substituteWithBinders(renameSubst);
 
-                Term theNew;
-                if (rewrites.size() == 1)
-                    // use the more efficient implementation if we only have one rewrite
-                    theNew = buildRHS(subject.term(), substitution, rewrites.keySet().iterator().next(),
-                            rewrites.values().iterator().next(), subject.termContext());
-                else
-                    theNew = buildRHS(subject.term(), substitution,
-                            rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
-                            subject.termContext());
-
-                /* get fresh substitutions of rule variables */
-                Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
-
-                 /* rename rule variables in the term */
-                theNew = theNew.substituteWithBinders(renameSubst);
-
-                results.add(new ConstrainedTerm(theNew, subject.termContext()));
-                if (computeOne) {
-                    break;
-                }
-            }
+            results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
         return results;
     }
