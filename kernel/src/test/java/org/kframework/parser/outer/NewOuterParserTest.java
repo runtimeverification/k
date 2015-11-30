@@ -38,7 +38,7 @@ public class NewOuterParserTest {
         ParserUtils parser = new ParserUtils(FileUtil.testFileUtil(), new KExceptionManager(new GlobalOptions()));
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, definitionString, source,
+                mainProgramsModule, definitionString, definitionFile,
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 true);

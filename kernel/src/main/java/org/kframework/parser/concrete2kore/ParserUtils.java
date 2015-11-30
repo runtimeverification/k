@@ -1,6 +1,8 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
@@ -109,17 +111,37 @@ public class ParserUtils {
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 
-    private List<org.kframework.kil.Module> slurp(
+    public static class SlurpedDefinition {
+        public SetMultimap<File, File> dependencies;
+        public List<org.kframework.kil.Module> modules;
+
+        public SlurpedDefinition(SetMultimap<File, File> dependencies, List<org.kframework.kil.Module> modules) {
+            this.dependencies = dependencies;
+            this.modules = modules;
+        }
+    }
+
+    public SlurpedDefinition slurp(
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories) {
-        List<DefinitionItem> items = Outer.parse(source, definitionText, null);
+        SetMultimap<File, File> dependencies = HashMultimap.create();
+        return new SlurpedDefinition(dependencies, slurp(definitionText, source, currentDirectory, lookupDirectories, dependencies));
+    }
+
+    private List<org.kframework.kil.Module> slurp(
+                String definitionText,
+                File source,
+                File currentDirectory,
+                List<File> lookupDirectories,
+                SetMultimap<File, File> dependencies) {
+        List<DefinitionItem> items = Outer.parse(Source.apply(source.getPath()), definitionText, null);
         if (options.verbose) {
             try {
-                System.out.println("Importing: " + new File(source.source()).getCanonicalPath());
+                System.out.println("Importing: " + source.getCanonicalPath());
             } catch (IOException e) {
-                System.out.println("Importing: " + new File(source.source()).getAbsolutePath());
+                System.out.println("Importing: " + source.getAbsolutePath());
             }
         }
         List<org.kframework.kil.Module> results = new ArrayList<>();
@@ -145,11 +167,17 @@ public class ParserUtils {
                         })
                         .filter(file -> file.exists()).findFirst();
 
-                if (definitionFile.isPresent())
+                if (definitionFile.isPresent()) {
+                    try {
+                        dependencies.put(source.getCanonicalFile(), definitionFile.get().getCanonicalFile());
+                    } catch (IOException e) {
+                        dependencies.put(source.getAbsoluteFile(), definitionFile.get().getAbsoluteFile());
+                    }
                     results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
-                            Source.apply(definitionFile.get().getAbsolutePath()),
+                            definitionFile.get(),
                             definitionFile.get().getParentFile(),
-                            lookupDirectories));
+                            lookupDirectories, dependencies));
+                }
                 else
                     throw KExceptionManager.criticalError("Could not find file: " +
                             definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
@@ -161,13 +189,13 @@ public class ParserUtils {
     public Set<Module> loadModules(
             Set<Module> previousModules,
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {
 
         List<org.kframework.kil.Module> kilModules =
-                slurp(definitionText, source, currentDirectory, lookupDirectories);
+                slurp(definitionText, source, currentDirectory, lookupDirectories).modules;
 
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
@@ -190,7 +218,7 @@ public class ParserUtils {
             String mainModuleName,
             String syntaxModuleName,
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {

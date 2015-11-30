@@ -70,6 +70,7 @@ public class KompileFrontEnd extends FrontEnd {
         CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         koreBackend.get().accept(def);
+        loader.saveOrDie(files.resolveKompiled("timestamp"), "");
         sw.printIntermediate("Save to disk");
         sw.printTotal("Total");
         return 0;
