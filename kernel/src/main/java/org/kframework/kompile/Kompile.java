@@ -234,8 +234,7 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
-        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition());
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict());
         Module modWithConfig = resolveConfig.apply(module);
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
@@ -298,8 +297,7 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definitionWithConfigBubble, kompileOptions.strict());
-        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble);
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict());
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
@@ -322,9 +320,11 @@ public class Kompile {
 
     class ResolveConfig implements UnaryOperator<Module> {
         private final Definition def;
+        private final RuleGrammarGenerator gen;
 
-        ResolveConfig(Definition def) {
+        ResolveConfig(Definition def, boolean isStrict) {
             this.def = def;
+            this.gen = new RuleGrammarGenerator(def, isStrict);
         }
 
         public Module apply(Module inputModule) {
