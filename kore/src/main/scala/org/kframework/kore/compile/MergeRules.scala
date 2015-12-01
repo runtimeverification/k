@@ -7,6 +7,7 @@ import org.kframework.kore._
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
+import collection._
 
 /**
  * Compiler pass for merging the rules as expected by FastRuleMatcher

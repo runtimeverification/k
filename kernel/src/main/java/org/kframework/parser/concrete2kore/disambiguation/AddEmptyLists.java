@@ -47,7 +47,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
 
     private final Module m;
     private final POSet<Sort> subsorts;
-    private final scala.collection.immutable.Set<Sort> listSorts;
+    private final scala.collection.Set<Sort> listSorts;
     private final Map<String, List<UserList>> lists;
 
     public AddEmptyLists(Module m) {

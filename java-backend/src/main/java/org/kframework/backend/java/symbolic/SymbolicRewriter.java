@@ -186,6 +186,14 @@ public class SymbolicRewriter {
                         rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
                         subject.termContext());
 
+            Rule rule = definition.ruleTable.get(pair.getRight());
+
+            /* get fresh substitutions of rule variables */
+            Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
+
+            /* rename rule variables in the term */
+            theNew = theNew.substituteWithBinders(renameSubst);
+
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
         return results;

@@ -2,14 +2,12 @@
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -20,9 +18,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.utils.StringUtil;
-import scala.collection.immutable.List;
-import scala.collection.immutable.Seq;
+import scala.collection.Seq;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -229,7 +225,7 @@ public class RuleGrammarGenerator {
                     // rewrite productions to contain follow restrictions for prefix terminals
                     // example _==_ and _==K_ can produce ambiguities. Rewrite the first into _(==(?![K])_
                     // this also takes care of casting and productions that have ":"
-                    List<ProductionItem> items = stream(p.items()).map(pi -> {
+                    Seq<ProductionItem> items = map(pi -> {
                         if (pi instanceof Terminal) {
                             Terminal t = (Terminal) pi;
                             if (t.value().trim().equals(""))
@@ -246,7 +242,7 @@ public class RuleGrammarGenerator {
                             }
                         }
                         return pi;
-                    }).collect(Collections.toList());
+                    }, p.items());
                     if (p.klabel().isDefined())
                         p = Production(p.klabel().get().name(), p.sort(), Seq(items), p.att());
                     else

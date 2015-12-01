@@ -15,7 +15,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -103,11 +103,11 @@ public class ResolveFreshConstants {
     }
 
     public Module resolve(Module m) {
-        Set<Sentence> sentences = stream(m.localSentences()).map(this::resolve).collect(Collections.toSet());
+        Set<Sentence> sentences = map(this::resolve, m.localSentences());
         if (sentences.equals(m.localSentences())) {
             return m;
         }
-        return Module(m.name(), Stream.concat(Stream.of(def.getModule("K-REFLECTION").get()), stream(m.imports())).collect(Collections.toSet()), sentences, m.att());
+        return Module(m.name(), add(def.getModule("K-REFLECTION").get(), m.imports()), sentences, m.att());
     }
 }
 
