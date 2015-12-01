@@ -2,7 +2,6 @@
 package org.kframework.kdep;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import org.apache.commons.collections15.ListUtils;
@@ -21,7 +20,6 @@ import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -83,15 +81,13 @@ public class KDepFrontEnd extends FrontEnd {
             prelude = "";
         }
 
-        SetMultimap<File, File> deps = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
+        List<org.kframework.kil.Module> modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
                 options.mainDefinitionFile(),
                 options.mainDefinitionFile().getParentFile(),
                 ListUtils.union(options.includes.stream()
                         .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
-                Lists.newArrayList(Kompile.BUILTIN_DIRECTORY))).dependencies;
-        Set<File> allFiles = new HashSet<>();
-        allFiles.addAll(deps.keySet());
-        allFiles.addAll(deps.values());
+                Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
+        Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.resolveWorkingDirectory(".").toURI().relativize(files.resolveKompiled("timestamp").toURI()).getPath() + " : \\");
         for (File file : allFiles) {
             System.out.println("    " + file.getAbsolutePath() + " \\");
