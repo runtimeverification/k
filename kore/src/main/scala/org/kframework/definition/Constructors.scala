@@ -4,6 +4,7 @@ package org.kframework.definition
 
 import org.kframework.{attributes, definition}
 import org.kframework.kore._
+import collection._
 
 /**
  *

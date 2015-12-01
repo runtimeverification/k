@@ -38,7 +38,7 @@ public class ExpandMacrosDefinitionTransformer implements Function<Definition, D
         return Definition.apply(
                 expandMacros.apply(definition.mainModule()),
                 expandMacros.apply(definition.mainSyntaxModule()),
-                stream(definition.entryModules()).map(expandMacros::apply).collect(Collections.<Module>toSet()),
+                map(expandMacros::apply, definition.entryModules()),
                 definition.att());
     }
 }

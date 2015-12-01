@@ -3,6 +3,7 @@ package org.kframework
 
 import java.util
 import java.util.Optional
+import collection._
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
 

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.junit.Test;
 
 import scala.collection.immutable.List;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 import static org.kframework.Collections.*;
 import static org.junit.Assert.*;
 
