@@ -327,16 +327,22 @@ public class Kompile {
             this.def = def;
         }
 
-        public Module apply(Module module) {
-            return new ModuleTransformer(func(this::applyInner), "resolve config").apply(module);
-        }
-
-        private Module applyInner(Module module) {
-            if (stream(module.localSentences())
+        public Module apply(Module inputModule) {
+            if (stream(inputModule.localSentences())
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
                     .filter(b -> b.sentenceType().equals("config")).count() == 0)
-                return module;
+                return inputModule;
+
+
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
+                    .filter(p -> p.att().contains("cell"))
+                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+
+            Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
+                    (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
+                    inputModule.att());
+
             Module configParserModule = gen.getConfigGrammar(module);
 
             ParseCache cache = loadCache(configParserModule);
@@ -364,10 +370,6 @@ public class Kompile {
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                     .collect(Collections.toSet());
 
-            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(module.productions())
-                    .filter(p -> p.att().contains("cell"))
-                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
-
 
             Module mapModule;
             if (def.getModule("MAP").isDefined()) {
@@ -376,7 +378,7 @@ public class Kompile {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions).$bar(importedConfigurationSortsSubsortedToCell),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions),
                     module.att());
         }
     }
