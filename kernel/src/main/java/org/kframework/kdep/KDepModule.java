@@ -18,7 +18,8 @@ import org.kframework.utils.inject.Options;
 import java.io.File;
 
 /**
- * Created by dwightguth on 11/30/15.
+ * Guice module for kdep tool. Binds the information needed to compute the kompiled directory as well as the options
+ * and frontend.
  */
 public class KDepModule extends AbstractModule {
     @Override

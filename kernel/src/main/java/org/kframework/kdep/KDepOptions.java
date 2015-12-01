@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dwightguth on 11/30/15.
+ * JCommander options for kdep. Essentially, this should contain all the kompile options needed in order to decide what
+ * files get slurped by the outer parser.
  */
 
 @RequestScoped

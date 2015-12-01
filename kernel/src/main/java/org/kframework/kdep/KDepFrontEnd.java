@@ -27,7 +27,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Created by dwightguth on 11/30/15.
+ * Frontend for kdep tool.
+ *
+ * kdep is designed to generate a Makefile that contains the dependencies
+ * that kompile has on files when you run it. This can be used in order to ensure that if any
+ * of the files required by a k definition are changed, the makefile will rerun kompile.
+ *
+ * Example Makefile snippet:
+ *
+ * <pre>
+ *     .depend:
+ *             kdep definition.k -d "directory" -I includes > .depend
+ *
+ *     include .depend
+ * </pre>
  */
 public class KDepFrontEnd extends FrontEnd {
 
