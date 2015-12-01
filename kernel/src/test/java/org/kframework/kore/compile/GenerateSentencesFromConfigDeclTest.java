@@ -51,7 +51,7 @@ public class GenerateSentencesFromConfigDeclTest {
 
         def =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
