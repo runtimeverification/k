@@ -72,7 +72,7 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
+    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     public final KompileOptions kompileOptions;
@@ -211,7 +211,7 @@ public class Kompile {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
-                Source.apply(definitionFile.getPath()),
+                definitionFile,
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 dropQuote);
@@ -258,7 +258,7 @@ public class Kompile {
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
-                Source.apply(definitionFile.getPath()),
+                definitionFile,
                 definitionFile.getParentFile(),
                 ListUtils.union(kompileOptions.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),

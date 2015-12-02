@@ -12,7 +12,6 @@ import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
-import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -46,7 +45,7 @@ public class AddBracketsTest {
 
         Definition baseK =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
