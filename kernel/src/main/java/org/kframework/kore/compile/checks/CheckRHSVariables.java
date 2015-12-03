@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile.checks;
 
 import com.google.common.collect.Sets;
