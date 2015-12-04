@@ -139,10 +139,10 @@ public class FastRuleMatcher {
                 // main match of KItem
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel((KLabelConstant) ((KItem) subject).kLabel()));
                 List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).items().size());
-                if (varLabelPatterns != null) {
-                    varLabelPatterns.stream().forEach(p -> {
+                if (!(varLabelPatterns == null)) {
+                    for (Pair<KItem, BitSet> p : varLabelPatterns) {
                         matchInside(subject, ruleMask, path, returnSet, p);
-                    });
+                    }
                 }
             } else if (subject instanceof Token) {
                 // and matching Tokens
