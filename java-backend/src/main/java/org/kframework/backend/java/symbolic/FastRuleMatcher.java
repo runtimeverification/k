@@ -188,12 +188,11 @@ public class FastRuleMatcher {
             subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), global);
         }
 
-        if (subject instanceof KItem && pattern instanceof KItem) {
+        if (subject instanceof KItem && pattern instanceof KItem && !(((KItem) pattern).klabel() instanceof Variable)) {
             KItem kitemPattern = (KItem) pattern;
-
             KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
-            KLabelConstant patternKLabel = (KLabelConstant) kitemPattern.kLabel();
-            if (subjectKLabel != patternKLabel) {
+            KLabelConstant patternKLabel = kitemPattern.kLabel() instanceof Variable ? null : (KLabelConstant) kitemPattern.kLabel();
+            if (patternKLabel != null && subjectKLabel != patternKLabel) {
                 return empty;
             }
 
