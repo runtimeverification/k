@@ -138,7 +138,7 @@ public class FastRuleMatcher {
             if (subject instanceof KItem) {
                 // main match of KItem
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel((KLabelConstant) ((KItem) subject).kLabel()));
-                List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).items().size());
+                List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).klist().items().size());
                 if (!(varLabelPatterns == null)) {
                     for (Pair<KItem, BitSet> p : varLabelPatterns) {
                         matchInside(subject, ruleMask, path, returnSet, p);
@@ -188,7 +188,7 @@ public class FastRuleMatcher {
             subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), global);
         }
 
-        if (subject instanceof KItem && pattern instanceof KItem && !(((KItem) pattern).klabel() instanceof Variable)) {
+        if (subject instanceof KItem && pattern instanceof KItem) {
             KItem kitemPattern = (KItem) pattern;
             KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
             KLabelConstant patternKLabel = kitemPattern.kLabel() instanceof Variable ? null : (KLabelConstant) kitemPattern.kLabel();
