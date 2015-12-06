@@ -15,6 +15,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
+import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
@@ -25,8 +26,7 @@ import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.RewriteToTop;
-import org.kframework.kore.compile.TransformKORE;
-import org.kframework.kore.compile.VisitKORE;
+import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -107,7 +107,7 @@ public class JavaBackend implements Backend {
      * The Java backend expects sorted variables, so transform them to the sorted flavor.
      */
     private static K ADTKVariableToSortedVariable(K ruleBody) {
-        return new TransformKORE() {
+        return new TransformK() {
             public K apply(KVariable kvar) {
                 return new SortedADT.SortedKVariable(kvar.name(), kvar.att());
             }
@@ -118,7 +118,7 @@ public class JavaBackend implements Backend {
      * In the Java backend, {@link KSequence}s are treated like {@link KApply}s, so tranform them.
      */
     private static K convertKSeqToKApply(K ruleBody) {
-        return new TransformKORE() {
+        return new TransformK() {
             public K apply(KSequence kseq) {
                 return ((ADT.KSequence) kseq).kApply();
             }
@@ -137,17 +137,16 @@ public class JavaBackend implements Backend {
                 return r;
 
             Map<KVariable, Integer> varCount = new HashMap<>();
-            VisitKORE markerVisitor = new VisitKORE() {
-                public Void apply(KVariable kvar) {
+            VisitK markerVisitor = new VisitK() {
+                public void apply(KVariable kvar) {
                     varCount.put(kvar, varCount.getOrDefault(kvar, 0) + 1);
-                    return null;
                 }
             };
             markerVisitor.apply(r.body());
             markerVisitor.apply(r.requires());
             markerVisitor.apply(r.ensures());
 
-            TransformKORE markerAdder = new TransformKORE() {
+            TransformK markerAdder = new TransformK() {
                 public K apply(KVariable kvar) {
                     if (kvar instanceof SortedADT.SortedKVariable && ((SortedADT.SortedKVariable) kvar).sort().equals(KORE.Sort("K")) && varCount.get(kvar) == 1) {
                         return new SortedADT.SortedKVariable("THE_VARIABLE", Att());

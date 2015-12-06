@@ -10,6 +10,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -72,7 +73,7 @@ public class ResolveContexts {
         K requiresCool = BooleanUtils.TRUE;
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
-        K heated = new VisitKORE() {
+        K heated = new VisitK() {
             K heated;
             KVariable holeVar;
             public K process(K k) {
@@ -83,29 +84,29 @@ public class ResolveContexts {
                     return holeVar;
             }
             @Override
-            public Void apply(KRewrite k) {
+            public void apply(KRewrite k) {
                 if (heated != null) {
                     throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
                 }
                 heated = k.right();
-                return super.apply(k);
+                super.apply(k);
             }
 
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
                     vars.put(k, k);
                 } else {
                     holeVar = k;
                 }
-                return super.apply(k);
+                super.apply(k);
             }
 
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (k.klabel() instanceof KVariable)
                     vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
-                return super.apply(k);
+                super.apply(k);
             }
         }.process(body);
 

@@ -7,12 +7,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KToken;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -44,11 +39,11 @@ public class DeconstructIntegerAndFloatLiterals {
     }
 
     void gatherVars(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable v) {
+            public void apply(KVariable v) {
                 vars.add(v);
-                return super.apply(v);
+                super.apply(v);
             }
         }.apply(term);
     }
@@ -120,7 +115,7 @@ public class DeconstructIntegerAndFloatLiterals {
         return new Transformer(true).apply(term);
     }
 
-    private class Transformer extends TransformKORE {
+    private class Transformer extends org.kframework.kore.TransformK {
 
         @Override
         public K apply(KToken k) {
