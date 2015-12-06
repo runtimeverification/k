@@ -164,7 +164,8 @@ public class FastRuleMatcher {
             return addSubstitution((Variable) pattern, subject, ruleMask);
         }
 
-        if (subject.isSymbolic() && pattern.isSymbolic()) {
+        if ((subject.isSymbolic() && !isThreadCellBag(subject) && !subject.equals(dotThreadCellBag))
+                || (pattern.isSymbolic() && !isThreadCellBag(pattern) && !pattern.equals(dotThreadCellBag))) {
             return addUnification(subject, pattern, ruleMask, path);
         }
 
@@ -174,9 +175,7 @@ public class FastRuleMatcher {
         }
 
         // TODO: remove the hack below once AC works
-        if (pattern instanceof KItem && ((KItem) pattern).kLabel().equals(threadCellBagLabel)
-                && !subject.sort().equals(Sort.of("ThreadCellBag")) &&
-                !((subject instanceof KItem) && ((KItem) subject).kLabel().equals(threadCellBagLabel))) {
+        if (isThreadCellBag(pattern) && !subject.sort().equals(Sort.of("ThreadCellBag")) && !isThreadCellBag(subject)) {
             subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), global);
         }
 
@@ -311,6 +310,10 @@ public class FastRuleMatcher {
         if (!AbstractUnifier.isKSeq(otherTerm) && !AbstractUnifier.isKSeqVar(otherTerm))
             otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), global);
         return otherTerm;
+    }
+
+    private boolean isThreadCellBag(Term term) {
+        return term instanceof KItem && ((KItem) term).kLabel().equals(threadCellBagLabel);
     }
 
 }
