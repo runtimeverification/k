@@ -38,8 +38,8 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class FastRuleMatcher {
 
-    private Substitution<Variable, Term>[] substitutions;
-    private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
+    private final ConjunctiveFormula[] constraints;
+    private final Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
     private final int ruleCount;
 
     /**
@@ -71,24 +71,17 @@ public class FastRuleMatcher {
         dotThreadCellBag = KItem.of(KLabelConstant.of(".ThreadCellBag", global.getDefinition()), KList.concatenate(), global);
 
         this.ruleCount = ruleCount;
-        substitutions = new Substitution[this.ruleCount];
-        for (int i = 0; i < this.ruleCount; ++i) {
-            //substitutions[i] = new ArraySubstitution(variableCount);
-            substitutions[i] = new HashMapSubstitution();
-        }
-
+        constraints = new ConjunctiveFormula[this.ruleCount];
+        rewrites = new Map[this.ruleCount];
     }
 
     /**
      * Match the subject against the possibly-merged pattern.
      *
-     * @return a list of substitutions tagged with the Integer identifier of the rule they belong to.
+     * @return a list of constraints tagged with the Integer identifier of the rule they belong to.
      */
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask, boolean computeOne, TermContext context) {
-        assert subject.isGround() : subject;
-
-        ruleMask.stream().forEach(i -> substitutions[i].clear());
-        rewrites = new Map[ruleMask.length()];
+        ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = BitSet.apply(ruleCount);
 
@@ -98,7 +91,8 @@ public class FastRuleMatcher {
 
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
             Rule rule = global.getDefinition().ruleTable.get(i);
-            Substitution<Variable, Term> subst = RewriteEngineUtils.evaluateConditions(rule, substitutions[i], context);
+            assert constraints[i].isSubstitution();
+            Substitution<Variable, Term> subst = RewriteEngineUtils.evaluateConditions(rule, constraints[i].substitution(), context);
             if (subst != null) {
                 theResult.add(Pair.of(subst, i));
                 if (computeOne) {
@@ -121,7 +115,7 @@ public class FastRuleMatcher {
                 if (ruleMask.intersects(p.getRight())) {
                     BitSet localRuleMask = ruleMask.clone();
                     localRuleMask.and(p.getRight());
-                    returnSet.or(add(p.getLeft(), subject, localRuleMask));
+                    returnSet.or(addSubstitution(p.getLeft(), subject, localRuleMask));
                 }
             }
 
@@ -151,11 +145,6 @@ public class FastRuleMatcher {
             return returnSet;
         }
 
-        // if the pattern is a variable, try to add its binding to the current solution
-        if (pattern instanceof Variable) {
-            return add((Variable) pattern, subject, ruleMask);
-        }
-
         // register the RHS of the rewrite we have just encountered, and continue matching on its LHS
         if (pattern instanceof KItem && ((KItem) pattern).kLabel().toString().equals(KLabels.KREWRITE)) {
             KApply rw = (KApply) pattern;
@@ -168,6 +157,15 @@ public class FastRuleMatcher {
                 }
             }
             return theNewMask;
+        }
+
+        // if the pattern is a variable, try to add its binding to the current solution
+        if (pattern instanceof Variable) {
+            return addSubstitution((Variable) pattern, subject, ruleMask);
+        }
+
+        if (subject.isSymbolic() && pattern.isSymbolic()) {
+            return addUnification(subject, pattern, ruleMask, path);
         }
 
         // normalize KSeq representations
@@ -234,7 +232,7 @@ public class FastRuleMatcher {
         }
     }
 
-    private BitSet add(Variable variable, Term term, BitSet ruleMask) {
+    private BitSet addSubstitution(Variable variable, Term term, BitSet ruleMask) {
         if (variable.name().equals(KOREtoBackendKIL.THE_VARIABLE)) {
             return ruleMask;
         }
@@ -248,7 +246,8 @@ public class FastRuleMatcher {
         }
 
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
-            if (substitutions[i].plus(variable, term) == null) {
+            constraints[i] = constraints[i].add(term, variable).simplify();
+            if (constraints[i].isFalse()) {
                 ruleMask.clear(i);
             }
         }
@@ -256,6 +255,57 @@ public class FastRuleMatcher {
         return ruleMask;
     }
 
+    private BitSet addUnification(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
+        for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
+            final int j = i;
+            Term leftHandSide = (Term) pattern.accept(new CopyOnWriteTransformer(null) {
+                @Override
+                public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+                    return ruleAutomatonDisjunction.disjunctions().stream()
+                            .filter(p -> p.getRight().get(j))
+                            .findAny().get().getLeft();
+                }
+
+                @Override
+                public Term transform(KItem kItem) {
+                    if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                        return (Term) super.transform(kItem);
+                    }
+
+                    return (Term) kItem.klist().items().get(0);
+                }
+            });
+            Term rightHandSide = (Term) pattern.accept(new CopyOnWriteTransformer(null) {
+                @Override
+                public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+                    return ruleAutomatonDisjunction.disjunctions().stream()
+                            .filter(p -> p.getRight().get(j))
+                            .findAny().get().getLeft();
+                }
+
+                @Override
+                public Term transform(KItem kItem) {
+                    if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                        return (Term) super.transform(kItem);
+                    }
+
+                    return ((InnerRHSRewrite) kItem.klist().items().get(1)).theRHS[j];
+                }
+            });
+
+            constraints[i] = constraints[i].add(subject, leftHandSide).simplify();
+            if (constraints[i].isFalse()) {
+                ruleMask.clear(i);
+                continue;
+            }
+
+            if (rightHandSide != null) {
+                rewrites[i].put(path.reverse(), rightHandSide);
+            }
+        }
+
+        return ruleMask;
+    }
 
     private Term upKSeq(Term otherTerm) {
         if (!AbstractUnifier.isKSeq(otherTerm) && !AbstractUnifier.isKSeqVar(otherTerm))
