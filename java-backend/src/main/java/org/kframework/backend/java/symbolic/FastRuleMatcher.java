@@ -245,7 +245,7 @@ public class FastRuleMatcher {
         }
 
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
-            constraints[i] = constraints[i].add(term, variable).simplify();
+            constraints[i] = constraints[i].add(variable, term).simplify();
             if (constraints[i].isFalse()) {
                 ruleMask.clear(i);
             }
