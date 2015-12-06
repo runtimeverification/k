@@ -2,7 +2,8 @@
 
 package org.kframework.kore
 
-import collection.JavaConverters._
+import collection._
+import JavaConverters._
 
 trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
@@ -28,7 +29,10 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
   def apply(k: InjectedKLabel): T
 }
 
-trait KMonoidTransformer[T] extends KTransformer[T] {
+/**
+  * Folds a K term into a T. T must be a monoid with the identity defined by unit and the operation by merge.
+  */
+trait FoldK[T] extends KTransformer[T] {
 
   def apply(k: KApply): T = merge(
     k.klabel match { case v: InjectedKLabel => apply(v); case _ => unit },
@@ -50,6 +54,10 @@ trait KMonoidTransformer[T] extends KTransformer[T] {
   def unit: T
 
   def merge(a: T, b: T): T
+}
+
+trait FoldKSetTransformer[E] extends FoldK[Set[E]] {
+
 }
 
 class KVisitor extends java.util.function.Consumer[K] {
@@ -97,4 +105,4 @@ abstract class AbstractKVisitor extends KVisitor
 
 abstract class AbstractKTransformer[T] extends KTransformer[T]
 
-abstract class AbstractKMonoidTransformer[T] extends KMonoidTransformer[T]
+abstract class AbstractFoldK[T] extends FoldK[T]
