@@ -74,7 +74,7 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
+    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     public final KompileOptions kompileOptions;
@@ -214,7 +214,7 @@ public class Kompile {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
-                Source.apply(definitionFile.getPath()),
+                definitionFile,
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 dropQuote);
@@ -237,8 +237,7 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
-        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition());
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict());
         Module modWithConfig = resolveConfig.apply(module);
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
@@ -262,7 +261,7 @@ public class Kompile {
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
-                Source.apply(definitionFile.getPath()),
+                definitionFile,
                 definitionFile.getParentFile(),
                 ListUtils.union(kompileOptions.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
@@ -301,8 +300,7 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definitionWithConfigBubble, kompileOptions.strict());
-        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble);
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict());
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
@@ -325,21 +323,29 @@ public class Kompile {
 
     class ResolveConfig implements UnaryOperator<Module> {
         private final Definition def;
+        private final RuleGrammarGenerator gen;
 
-        ResolveConfig(Definition def) {
+        ResolveConfig(Definition def, boolean isStrict) {
             this.def = def;
+            this.gen = new RuleGrammarGenerator(def, isStrict);
         }
 
-        public Module apply(Module module) {
-            return new ModuleTransformer(func(this::applyInner), "resolve config").apply(module);
-        }
-
-        private Module applyInner(Module module) {
-            if (stream(module.localSentences())
+        public Module apply(Module inputModule) {
+            if (stream(inputModule.localSentences())
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
                     .filter(b -> b.sentenceType().equals("config")).count() == 0)
-                return module;
+                return inputModule;
+
+
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
+                    .filter(p -> p.att().contains("cell"))
+                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+
+            Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
+                    (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
+                    inputModule.att());
+
             Module configParserModule = gen.getConfigGrammar(module);
 
             ParseCache cache = loadCache(configParserModule);
@@ -367,11 +373,6 @@ public class Kompile {
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                     .collect(Collections.toSet());
 
-            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(module.productions())
-                    .filter(p -> p.att().contains("cell"))
-                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
-
-
             Module mapModule;
             if (def.getModule("MAP").isDefined()) {
                 mapModule = def.getModule("MAP").get();
@@ -379,7 +380,7 @@ public class Kompile {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions).$bar(importedConfigurationSortsSubsortedToCell),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions),
                     module.att());
         }
     }

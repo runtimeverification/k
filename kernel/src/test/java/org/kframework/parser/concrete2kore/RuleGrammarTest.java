@@ -14,12 +14,10 @@ import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
-import org.kframework.kore.KSequence;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
-import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -29,8 +27,8 @@ import scala.util.Either;
 
 import java.io.File;
 import java.util.Set;
+
 import static org.kframework.kore.KORE.*;
-import static org.kframework.kore.Constructors.*;
 
 public class RuleGrammarTest {
     private final static Sort startSymbol = Kompile.START_SYMBOL;
@@ -50,7 +48,7 @@ public class RuleGrammarTest {
 
         Definition baseK =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
