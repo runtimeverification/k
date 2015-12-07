@@ -3,6 +3,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
@@ -15,7 +16,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
 import org.kframework.utils.BitSet;
@@ -26,8 +26,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
+import com.google.common.collect.Sets;
 
 /**
  * A very fast interpreted matching implementation based on merging the rules into a decision-tree like structure.
@@ -80,25 +84,47 @@ public class FastRuleMatcher {
      *
      * @return a list of constraints tagged with the Integer identifier of the rule they belong to.
      */
-    public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask, boolean computeOne, TermContext context) {
+    public List<Triple<ConjunctiveFormula, Boolean, Integer>> mainMatch(
+            ConstrainedTerm subject,
+            Term pattern,
+            BitSet ruleMask,
+            boolean computeOne,
+            TermContext context) {
         ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = BitSet.apply(ruleCount);
 
-        BitSet theMatchingRules = match(subject, pattern, ruleMask, List());
+        BitSet theMatchingRules = match(subject.term(), pattern, ruleMask, List());
 
-        List<Pair<Substitution<Variable, Term>, Integer>> theResult = new ArrayList<>();
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> theResult = new ArrayList<>();
 
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
             Rule rule = global.getDefinition().ruleTable.get(i);
-            assert constraints[i].isSubstitution();
-            Substitution<Variable, Term> subst = RewriteEngineUtils.evaluateConditions(rule, constraints[i].substitution(), context);
-            if (subst != null) {
-                theResult.add(Pair.of(subst, i));
+            // TODO(YilongL): remove TermContext from the signature once
+            // ConstrainedTerm doesn't hold a TermContext anymore
+            ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups()).addAll(rule.requires());
+            List<Pair<ConjunctiveFormula, Boolean>> ruleResults = ConstrainedTerm.evaluateConstraints(
+                    constraints[i],
+                    subject.constraint(),
+                    patternConstraint,
+                    Sets.union(getLeftHandSide(pattern, i).variableSet(), patternConstraint.variableSet()).stream()
+                            .filter(v -> !v.name().equals(KOREtoBackendKIL.THE_VARIABLE))
+                            .collect(Collectors.toSet()),
+                    context);
+            for (Pair<ConjunctiveFormula, Boolean> pair : ruleResults) {
+                theResult.add(Triple.of(pair.getLeft(), pair.getRight(), i));
                 if (computeOne) {
-                    break;
+                    return theResult;
                 }
             }
+//            assert constraints[i].isSubstitution();
+//            Substitution<Variable, Term> subst = RewriteEngineUtils.evaluateConditions(rule, constraints[i].substitution(), context);
+//            if (subst != null) {
+//                theResult.add(Pair.of(subst, i));
+//                if (computeOne) {
+//                    break;
+//                }
+//            }
         }
         return theResult;
     }
@@ -256,41 +282,8 @@ public class FastRuleMatcher {
 
     private BitSet addUnification(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
-            final int j = i;
-            Term leftHandSide = (Term) pattern.accept(new CopyOnWriteTransformer(null) {
-                @Override
-                public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
-                    return ruleAutomatonDisjunction.disjunctions().stream()
-                            .filter(p -> p.getRight().get(j))
-                            .findAny().get().getLeft();
-                }
-
-                @Override
-                public Term transform(KItem kItem) {
-                    if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
-                        return (Term) super.transform(kItem);
-                    }
-
-                    return (Term) kItem.klist().items().get(0);
-                }
-            });
-            Term rightHandSide = (Term) pattern.accept(new CopyOnWriteTransformer(null) {
-                @Override
-                public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
-                    return ruleAutomatonDisjunction.disjunctions().stream()
-                            .filter(p -> p.getRight().get(j))
-                            .findAny().get().getLeft();
-                }
-
-                @Override
-                public Term transform(KItem kItem) {
-                    if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
-                        return (Term) super.transform(kItem);
-                    }
-
-                    return ((InnerRHSRewrite) kItem.klist().items().get(1)).theRHS[j];
-                }
-            });
+            Term leftHandSide = getLeftHandSide(pattern, i);
+            Term rightHandSide = getRightHandSide(pattern, i);
 
             constraints[i] = constraints[i].add(subject, leftHandSide).simplify();
             if (constraints[i].isFalse()) {
@@ -304,6 +297,50 @@ public class FastRuleMatcher {
         }
 
         return ruleMask;
+    }
+
+    private Term getLeftHandSide(Term pattern, int i) {
+        return (Term) pattern.accept(new CopyOnWriteTransformer(null) {
+            @Override
+            public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+                return (Term) ruleAutomatonDisjunction.disjunctions().stream()
+                        .filter(p -> p.getRight().get(i))
+                        .map(Pair::getLeft)
+                        .findAny().get()
+                        .accept(this);
+            }
+
+            @Override
+            public Term transform(KItem kItem) {
+                if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                    return (Term) super.transform(kItem);
+                }
+
+                return (Term) ((Term) kItem.klist().items().get(0)).accept(this);
+            }
+        });
+    }
+
+    private Term getRightHandSide(Term pattern, int i) {
+        return (Term) pattern.accept(new CopyOnWriteTransformer(null) {
+            @Override
+            public Term transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+                return (Term) ruleAutomatonDisjunction.disjunctions().stream()
+                        .filter(p -> p.getRight().get(i))
+                        .map(Pair::getLeft)
+                        .findAny().get()
+                        .accept(this);
+            }
+
+            @Override
+            public Term transform(KItem kItem) {
+                if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                    return (Term) super.transform(kItem);
+                }
+
+                return ((InnerRHSRewrite) kItem.klist().items().get(1)).theRHS[i];
+            }
+        });
     }
 
     private Term upKSeq(Term otherTerm) {

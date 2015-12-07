@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -161,18 +162,20 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(
-                subject.term(),
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.mainMatch(
+                subject,
                 definition.automaton.leftHandSide(),
                 allRuleBits,
                 computeOne,
                 subject.termContext());
-        for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
-            Substitution<Variable, Term> substitution = pair.getLeft();
-            // start the optimized substitution
+        for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
+            assert triple.getLeft().isSubstitution();
+            Substitution<Variable, Term> substitution = triple.getLeft().substitution();
+            boolean isMatching = triple.getMiddle();
+            Rule rule = definition.ruleTable.get(triple.getRight());
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(pair.getRight());
+            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(triple.getRight());
 
             assert (rewrites.size() > 0);
 
@@ -186,15 +189,15 @@ public class SymbolicRewriter {
                         rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
                         subject.termContext());
 
-            Rule rule = definition.ruleTable.get(pair.getRight());
+            // rename rule variables in the term
+            theNew = theNew.substituteWithBinders(Variable.rename(rule.variableSet()));
 
-            /* get fresh substitutions of rule variables */
-            Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
-
-            /* rename rule variables in the term */
-            theNew = theNew.substituteWithBinders(renameSubst);
+            if (!isMatching) {
+                theNew = theNew.substituteAndEvaluate(substitution, subject.termContext());
+            }
 
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
+            //results.add(buildResult(rule, triple.getLeft(), subject.term(), true, subject.termContext()));
         }
         return results;
     }
