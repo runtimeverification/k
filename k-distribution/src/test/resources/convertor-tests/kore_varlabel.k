@@ -27,7 +27,7 @@ module VARLABEL
                   <k color="green"> $PGM:Holder </k>
                 </T>
 
-  rule Y:KLabel(X + 1) => Y(X + 2) 
+  rule Y:KLabel(X + 1) => Y(X + 2)
 
   rule Z:KLabel(X + 2) => finish
 
