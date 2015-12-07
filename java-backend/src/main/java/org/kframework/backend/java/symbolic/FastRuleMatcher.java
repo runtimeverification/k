@@ -18,6 +18,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.BitSet;
 
 import static org.kframework.Collections.*;
@@ -191,8 +192,8 @@ public class FastRuleMatcher {
         if (subject instanceof KItem && pattern instanceof KItem) {
             KItem kitemPattern = (KItem) pattern;
             KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
-            KLabelConstant patternKLabel = kitemPattern.kLabel() instanceof Variable ? null : (KLabelConstant) kitemPattern.kLabel();
-            if (patternKLabel != null && subjectKLabel != patternKLabel) {
+            KLabel patternKLabel = ((KItem) pattern).klabel();
+            if (!(patternKLabel instanceof Variable) && subjectKLabel != patternKLabel) {
                 return empty;
             }
 
@@ -216,6 +217,9 @@ public class FastRuleMatcher {
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
                 }
+            }
+            if (patternKLabel instanceof Variable) {
+                add((Variable) patternKLabel, ((KItem) subject).kLabel(), ruleMask);
             }
             return ruleMask;
         } else if (subject instanceof Token && pattern instanceof Token) {
