@@ -13,7 +13,6 @@ import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.tiny.KVar;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
@@ -371,9 +370,9 @@ public class ResolveIOStreams {
                     if (i instanceof KVariable) {
                         KVariable x = (KVariable) i;
                         switch(x.name()) {
-                        case "Sort":
+                        case "?Sort":
                             return KToken("\"" + sort + "\"", Sort("String"));
-                        case "Delimiters":
+                        case "?Delimiters":
                             // TODO(Daejun): support `delimiter` attribute in stream cell
                             return KToken("\" \\n\\t\\r\"", Sort("String"));
                         default:

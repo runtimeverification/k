@@ -30,8 +30,6 @@ public class CheckRHSVariables {
         this.errors = errors;
     }
     private void check(Rule rule) {
-        if (rule.att().contains("unblock"))
-            return;
         resetVars();
         gatherVars(rule.body());
         check(rule.body(), true);
