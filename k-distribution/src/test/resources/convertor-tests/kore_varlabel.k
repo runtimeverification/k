@@ -26,9 +26,9 @@ module VARLABEL
   configuration <T color="yellow">
                   <k color="green"> $PGM:Holder </k>
                 </T>
+  syntax KItem ::= "main""("Holder")"
+  rule Y(X + 1) => main(Y(X + 2))
 
-  rule Y:KLabel(X + 1) => Y(X + 2)
-
-  rule Z:KLabel(X + 2) => finish
-
+  rule Z(holder(X + 2)) => finish
+  
 endmodule
