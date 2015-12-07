@@ -7,7 +7,7 @@ import org.kframework.kore.KORE
 import org.kframework.kore.Unapply.{KApply, KLabel}
 
 
-object Strategy {
+class Strategy(heatCool: Boolean) {
 
   val addStrategyCellToRulesTransformer =
     DefinitionTransformer(
@@ -23,17 +23,28 @@ object Strategy {
             r
           } else
             r match {
-              case r: Rule if !r.body.contains({ case KApply(KLabel("<s>"), _) => true }) =>
+              case r: Rule if !r.body.contains({ case k: kore.KApply => k.klabel.name.contains("<s>") }) =>
                 val newBody = r.body match {
-                  case KApply(klabel, _) if !module.attributesFor.contains(klabel) || klabel.att.contains(Att.Function) =>
+                  case KApply(klabel, _) if !module.attributesFor.contains(klabel) || !klabel.att.contains(Att.Function) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
+
+                    def makeRewrite(tag: String) =
+                      KORE.KApply(KORE.KLabel(KLabels.KSEQ),
+                        KORE.KRewrite(
+                          KORE.KApply(KORE.KLabel("#applyRule"), KORE.KToken(tag, KORE.Sort("#RuleTag"))),
+                          KORE.KApply(KORE.KLabel("#appliedRule"), KORE.KToken(tag, KORE.Sort("#RuleTag")))),
+                        KORE.KVariable("SREST"))
+
                     val strategy =
-                      if (r.att.contains(Att.heat))
-                        KORE.KApply(KORE.KLabel("heat"))
-                      else if (r.att.contains(Att.cool))
-                        KORE.KApply(KORE.KLabel("cool"))
-                      else
-                        KORE.KRewrite(KORE.KApply(KORE.KLabel("regular")), KORE.KApply(KORE.KLabel("cool")))
+                      if (r.att.contains("tag")) {
+                        makeRewrite(r.att.get[String]("tag").get)
+                      } else if (heatCool && r.att.contains(Att.heat)) {
+                        makeRewrite("heat")
+                      } else if (heatCool && r.att.contains(Att.cool)) {
+                        makeRewrite("cool")
+                      } else {
+                        makeRewrite("regular")
+                      }
 
                     KORE.KApply(KORE.KLabel(KLabels.CELLS), r.body,
                       KORE.KApply(KORE.KLabel("<s>"),

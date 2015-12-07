@@ -77,7 +77,12 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
      * Gets the (pattern, appearing-in-rules) pair for the klabel.
      */
     public Pair<KItem, BitSet> getKItemPatternForKLabel(KLabelConstant klabel) {
-        return this.kItemDisjunctionsArray[klabel.ordinal()];
+        try {
+            return this.kItemDisjunctionsArray[klabel.ordinal()];
+        } catch(ArrayIndexOutOfBoundsException x) {
+            System.out.println("x = " + x);
+            throw x;
+        }
     }
 
     /**

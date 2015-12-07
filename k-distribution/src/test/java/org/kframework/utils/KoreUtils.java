@@ -4,6 +4,9 @@ package org.kframework.utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.kframework.backend.java.symbolic.JavaBackend;
+import org.kframework.kore.ADT;
+import org.kframework.kore.Sort;
+import org.kframework.krun.KRunOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -57,15 +60,25 @@ public class KoreUtils {
     }
 
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
+        this(fileName, mainModuleName, mainProgramsModuleName, false, false, Sorts.K());
+    }
+
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, boolean strategies, Sort sort) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
         GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.debug = true;
 
+        KRunOptions krunOptions = new KRunOptions();
+        krunOptions.search = search;
+
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
-        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(),
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, sort,
                 new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
+
+        System.out.println("compiledDef = " + compiledDef.executionModule().sentences().mkString("\n"));
+
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
@@ -77,6 +90,7 @@ public class KoreUtils {
                 bind(FileSystem.class).to(PortableFileSystem.class);
                 bind(FileUtil.class).toInstance(FileUtil.testFileUtil());
                 bind(KompileOptions.class).toInstance(kompileOptions);
+                bind(KRunOptions.class).toInstance(krunOptions);
 
                 bindScope(RequestScoped.class, requestScope);
                 bindScope(DefinitionScoped.class, requestScope);
@@ -96,7 +110,6 @@ public class KoreUtils {
         requestScope.enter();
         InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
         try {
-            InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
             K kResult = init.apply(compiledDef.executionModule()).execute(parsedPgm, depth).k();
             return kResult;
         } finally {

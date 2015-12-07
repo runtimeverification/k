@@ -160,7 +160,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
                 .andThen(func(AddImplicitComputationCell::transformDefinition))
-                .andThen(Strategy.addStrategyCellToRulesTransformer())
+                .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))

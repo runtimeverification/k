@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
+import org.kframework.builtin.KLabels;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -178,12 +179,14 @@ public class SymbolicRewriter {
         if (!theStrategy.isPresent())
             return Optional.empty();
 
-        KApply topOfStrategyCell = (KApply) ((KApply) theStrategy.get()).klist().items().get(0);
-        if (topOfStrategyCell.klabel().name().equals("#sseq")) {
-            topOfStrategyCell = (KApply) topOfStrategyCell.klist().items().get(0);
-        }
+        K topOfStrategyCell = ((KApply) theStrategy.get()).klist().items().get(0);
 
-        boolean isStuck = topOfStrategyCell.klabel().name().equals(Att.stuck());
+        if ((topOfStrategyCell instanceof KApply) && ((KApply) topOfStrategyCell).klabel().name().equals(KLabels.KSEQ)) {
+            topOfStrategyCell = ((KApply) topOfStrategyCell).klist().items().get(0);
+        }
+        boolean isStuck = !(topOfStrategyCell instanceof KApply) ||
+                ((KApply) topOfStrategyCell).klabel().name().equals(Att.stuck());
+
 
         // if we are stuck (i.e., in this method) and the #STUCK marker is the top of the strategy cell, do nothing
         if (isStuck) {
@@ -197,7 +200,7 @@ public class SymbolicRewriter {
         K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(), emptyAtt);
         List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
         items.add(0, stuck);
-        K sContent = constructor.KApply1(constructor.KLabel("#sseq"), constructor.KList(items), emptyAtt);
+        K sContent = constructor.KApply1(constructor.KLabel(KLabels.KSEQ), constructor.KList(items), emptyAtt);
         K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(sContent), emptyAtt);
         K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
