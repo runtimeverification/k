@@ -2,12 +2,12 @@
 requires "domains.k"
 
 module CONFIGURATION-PRIMITIVES
-    syntax K ::= "#THIS_CONFIGURATION" | "#RESTORE_CONFIGURATION" "(" K ")"
+    syntax K ::= "#RESTORE_CONFIGURATION" "(" K ")"  [klabel(#RESTORE_CONFIGURATION)]
 endmodule
 
 module STRATEGY
 
-    syntax #RuleTag ::= r"[a-z0-9]*"                    [token]
+    syntax #RuleTag ::= r"[a-zA-Z0-9]*"                    [token]
 
     syntax Strategy ::= "#STUCK"
 
@@ -39,7 +39,7 @@ module BASIC-STRATEGY
 
     rule <s> if false then B else C => C ...</s>
 
-    rule <s> if A:Strategy then B else C => `A ~> #FROZEN(#THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
+    rule <s> if A:Strategy then B else C => `A ~> #FROZEN(THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
 
     rule <s> false ~> #FROZEN(CONFIGURATION) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
 
@@ -66,15 +66,19 @@ endmodule
 module A
     imports A-STRATEGY
 
-    syntax Exp ::= "x" | "y" | "z" | "zz"
+    syntax Exp ::= "x" | "y" | "z" | "zz" | "saved" K
 
     rule x => y                 [tag(foo)]
 
     rule y => z                 [tag(bar)]
 
-    rule z => zz                [tag(foo)]
+    rule y => zz                [tag(foo)]
 
-    rule <s> #START => ^foo ; ^bar </s>
+    rule <s> #START => ^foo ; ^bar ; ^saveConfig ; ^restoreConfig </s>
+
+    rule z => saved THIS_CONFIGURATION              [tag(saveConfig)]
+
+    rule saved X => #RESTORE_CONFIGURATION(X)      [tag(restoreConfig)]
 
     configuration <t> <k> $PGM </k> initSCell </t>
 endmodule

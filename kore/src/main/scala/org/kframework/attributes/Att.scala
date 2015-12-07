@@ -103,6 +103,9 @@ object Att {
   val heat = "heat"
   val cool = "cool"
   val stuck = "#STUCK"
+
+  val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
+  val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
 }
 
 trait AttributesToString {

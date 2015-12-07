@@ -18,7 +18,9 @@ import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Coverage;
 import org.kframework.backend.java.util.JavaKRunState;
 import org.kframework.builtin.KLabels;
+import org.kframework.kil.ASTNode;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.krun.api.KRunState;
@@ -227,31 +229,60 @@ public class SymbolicRewriter {
                 computeOne,
                 subject.termContext());
         for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
-            Substitution<Variable, Term> substitution = pair.getLeft();
             // start the optimized substitution
+            Rule rule = definition.ruleTable.get(pair.getRight());
+
+            Substitution<Variable, Term> substitution =
+                    rule.containsAttribute(Att.refers_THIS_CONFIGURATION()) ?
+                            pair.getLeft().plus(new Variable("THIS_CONFIGURATION", Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
+                            pair.getLeft();
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
             Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(pair.getRight());
 
             assert (rewrites.size() > 0);
 
+
             Term theNew;
             if (rewrites.size() == 1)
-                // use the more efficient implementation if we only have one rewrite
+            // use the more efficient implementation if we only have one rewrite
+            {
                 theNew = buildRHS(subject.term(), substitution, rewrites.keySet().iterator().next(),
                         rewrites.values().iterator().next(), subject.termContext());
-            else
+            } else {
                 theNew = buildRHS(subject.term(), substitution,
                         rewrites.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).collect(Collectors.toList()),
                         subject.termContext());
+            }
 
-            Rule rule = definition.ruleTable.get(pair.getRight());
 
             /* get fresh substitutions of rule variables */
             Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
 
             /* rename rule variables in the term */
             theNew = theNew.substituteWithBinders(renameSubst);
+
+            if (rule.containsAttribute(Att.refers_RESTORE_CONFIGURATION())) {
+                K strategyCell = new FindK() {
+                    public scala.collection.Set<K> apply(KApply k) {
+                        if (k.klabel().name().equals("<s>"))
+                            return org.kframework.Collections.Set(k);
+                        else
+                            return super.apply(k);
+                    }
+                }.apply(theNew).head();
+
+                K theRestoredBody = new FindK() {
+                    public scala.collection.Set<K> apply(KApply k) {
+                        if (k.klabel().name().equals("#RESTORE_CONFIGURATION"))
+                            return org.kframework.Collections.Set(k.klist().items().get(0));
+                        else
+                            return super.apply(k);
+                    }
+                }.apply(theNew).head();
+
+                theNew = ((Term)theRestoredBody).substituteAndEvaluate(Collections.singletonMap(strategyCellPlaceholder, (Term) strategyCell), subject.termContext());
+            }
 
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
@@ -261,6 +292,22 @@ public class SymbolicRewriter {
         }
 
         return results;
+    }
+
+    Variable strategyCellPlaceholder = new Variable("STRATEGY_CELL_PLACEHOLDER", Sort.KSEQUENCE);
+
+    private Term filterOurStrategyCell(Term term) {
+        return (Term) term.accept(new CopyOnWriteTransformer() {
+            @Override
+            public ASTNode transform(KItem kItem) {
+
+                if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals("<s>")) {
+                    return strategyCellPlaceholder;
+                } else {
+                    return super.transform(kItem);
+                }
+            }
+        });
     }
 
     /**
