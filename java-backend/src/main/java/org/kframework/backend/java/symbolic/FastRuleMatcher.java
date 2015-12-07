@@ -139,12 +139,7 @@ public class FastRuleMatcher {
             if (subject instanceof KItem) {
                 // main match of KItem
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel((KLabelConstant) ((KItem) subject).kLabel()));
-                List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).klist().size());
-                if (!(varLabelPatterns == null)) {
-                    for (Pair<KItem, BitSet> p : varLabelPatterns) {
-                        matchInside(subject, ruleMask, path, returnSet, p);
-                    }
-                }
+                checkVarLabelPatterns(subject, ruleMask, path, automatonDisjunction, returnSet);
             } else if (subject instanceof Token) {
                 // and matching Tokens
                 BitSet rules = automatonDisjunction.tokenDisjunctions.get(subject);
@@ -229,6 +224,15 @@ public class FastRuleMatcher {
             return empty;
         } else {
             throw new AssertionError("unexpected class at matching: " + subject.getClass());
+        }
+    }
+
+    private void checkVarLabelPatterns(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, RuleAutomatonDisjunction automatonDisjunction, BitSet returnSet) {
+        List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).klist().size());
+        if (!(varLabelPatterns == null)) {
+            for (Pair<KItem, BitSet> p : varLabelPatterns) {
+                matchInside(subject, ruleMask, path, returnSet, p);
+            }
         }
     }
 
