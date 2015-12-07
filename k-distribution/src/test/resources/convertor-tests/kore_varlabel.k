@@ -30,5 +30,5 @@ module VARLABEL
   rule Y(X + 1) => main(Y(X + 2))
 
   rule Z(holder(X + 2)) => finish
-  
+
 endmodule
