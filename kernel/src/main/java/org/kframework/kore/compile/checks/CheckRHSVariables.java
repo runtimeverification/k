@@ -34,19 +34,16 @@ public class CheckRHSVariables {
             return;
         resetVars();
         gatherVars(rule.body());
-        gatherVars(rule.requires());
-        gatherVars(rule.ensures());
-        check(rule.body());
-        check(rule.requires());
-        check(rule.ensures());
+        check(rule.body(), true);
+        check(rule.requires(), false);
+        check(rule.ensures(), false);
     }
 
     private void check(Context context) {
         resetVars();
         gatherVars(context.body());
-        gatherVars(context.requires());
-        check(context.body());
-        check(context.requires());
+        check(context.body(), true);
+        check(context.requires(), false);
     }
 
     public void check(Sentence s) {
@@ -64,7 +61,7 @@ public class CheckRHSVariables {
     }
 
     void gatherVars(K term) {
-        new RewriteAwareVisitor() {
+        new RewriteAwareVisitor(true) {
             @Override
             public Void apply(KVariable v) {
                 if (isLHS() && !v.equals(ResolveAnonVar.ANON_VAR))
@@ -90,8 +87,8 @@ public class CheckRHSVariables {
         }.apply(term);
     }
 
-    private void check(K body) {
-        new RewriteAwareVisitor() {
+    private void check(K body, boolean isBody) {
+        new RewriteAwareVisitor(isBody) {
             @Override
             public Void apply(KVariable k) {
                 if (isRHS()) {

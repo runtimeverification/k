@@ -12,8 +12,19 @@ import org.kframework.kore.KRewrite;
  */
 public class RewriteAwareVisitor extends VisitKORE {
 
-    private boolean isRHS = true;
-    private boolean isLHS = true;
+    public RewriteAwareVisitor(boolean isBody) {
+        if (isBody) {
+            isRHS = true;
+            isLHS = true;
+        } else {
+            isRHS = true;
+            isLHS = false;
+        }
+    }
+
+
+    private boolean isRHS;
+    private boolean isLHS;
 
     public boolean isLHS() {
         return isLHS;
