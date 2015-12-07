@@ -7,14 +7,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
-import org.kframework.kore.KList;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
-import org.kframework.tiny.KVar;
+import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
@@ -164,7 +157,7 @@ public class ResolveIOStreams {
                 Rule rule = (Rule) s;
                 if (rule.att().contains("stream")) {
                     // Update cell names
-                    K body = new TransformKORE() {
+                    K body = new org.kframework.kore.TransformK() {
                         @Override
                         public K apply(KApply k) {
                             k = (KApply) super.apply(k);
@@ -243,7 +236,7 @@ public class ResolveIOStreams {
             Rule rule = r._1();
             String sort = r._2();
 
-            K body = new TransformKORE() {
+            K body = new org.kframework.kore.TransformK() {
                 @Override
                 public K apply(KApply k) {
                     if (k.klabel().name().equals(userCellLabel.name())) {
@@ -281,9 +274,9 @@ public class ResolveIOStreams {
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<String> sorts = new ArrayList<>();
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (k.klabel().name().equals(userCellLabel.name())) {
                     String sort = wellformedAndGetSortNameOfCast(k.klist());
                     if (!sort.isEmpty()) {
@@ -292,9 +285,8 @@ public class ResolveIOStreams {
                         //    throw KEMException.compilerError("Unsupported matching pattern in stdin stream cell." +
                         //        " Currently the supported pattern is: e.g., <in> ListItem(V:Sort) => .List ... </in>", k);
                     }
-                    return null;
                 }
-                return super.apply(k);
+                super.apply(k);
             }
 
             // TODO(Daejun): it support only pattern matching on the top of stream.
@@ -364,7 +356,7 @@ public class ResolveIOStreams {
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
 
-        return new TransformKORE() {
+        return new org.kframework.kore.TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {

@@ -71,21 +71,17 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   lazy val definedKLabels: Set[KLabel] =
     (productionsFor.keys.toSet | klabelsDefinedInRules.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
-  private def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map{ case (k,v) => k -> (v + map1.getOrElse(k,0)) }
-
   lazy val klabelsDefinedInRules: Map[KLabel, Int] = {
-    val transformer = new KORETransformer[Map[KLabel, Int]] {
-      override def apply(k: KApply): Map[KLabel, Int] = mergeMultiset(k.klist.items.asScala.map(apply).fold(Map())(mergeMultiset), Map((k.klabel, 1)))
+    def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map { case (k, v) => k -> (v + map1.getOrElse(k, 0)) }
 
-      override def apply(k: KRewrite): Map[KLabel, Int] = mergeMultiset(apply(k.left), apply(k.right))
-
-      override def apply(k: KToken): Map[KLabel, Int] = Map()
-
-      override def apply(k: KVariable): Map[KLabel, Int] = Map()
-
-      override def apply(k: KSequence): Map[KLabel, Int] = k.items.asScala.map(apply).fold(Map())(mergeMultiset)
+    val transformer = new FoldK[Map[KLabel, Int]] {
+      override def apply(k: KApply): Map[KLabel, Int] = merge(apply(k.klist), Map((k.klabel, 1)))
 
       override def apply(k: InjectedKLabel): Map[KLabel, Int] = Map((k.klabel, 1))
+
+      def unit = Map()
+
+      def merge(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = mergeMultiset(map1, map2)
     }
     rules.map(r => {
       mergeMultiset(transformer.apply(r.body), mergeMultiset(transformer.apply(r.requires), transformer.apply(r.ensures)))

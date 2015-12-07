@@ -2,7 +2,6 @@
 package org.kframework.kore.compile;
 
 import com.google.common.collect.Lists;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -16,14 +15,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.Assoc;
-import org.kframework.kore.InjectedKLabel;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KToken;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
@@ -193,20 +185,18 @@ public class GenerateSentencesFromConfigDecl {
         return visitor.hasConfigVar;
     }
 
-    private static class FindConfigOrRegularVar extends VisitKORE {
+    private static class FindConfigOrRegularVar extends VisitK {
         boolean hasConfigVar;
         @Override
-        public Void apply(KToken k) {
+        public void apply(KToken k) {
             if (k.sort().equals(Sorts.KConfigVar())) {
                 hasConfigVar = true;
             }
-            return null;
         }
 
         @Override
-        public Void apply(KVariable k) {
+        public void apply(KVariable k) {
             hasConfigVar = true;
-            return null;
         }
     }
 
@@ -217,7 +207,7 @@ public class GenerateSentencesFromConfigDecl {
      * @return
      */
     private static K getLeafInitializer(K leafContents) {
-        return new TransformKORE() {
+        return new org.kframework.kore.TransformK() {
             @Override
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
