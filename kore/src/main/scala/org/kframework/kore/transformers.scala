@@ -35,7 +35,7 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
 trait FoldK[T] extends KTransformer[T] {
 
   def apply(k: KApply): T = merge(
-    k.klabel match { case v: InjectedKLabel => apply(v); case _ => unit },
+    k.klabel match { case v: KVariable => apply(v); case _ => unit },
     apply(k.klist)
   )
 
@@ -49,7 +49,10 @@ trait FoldK[T] extends KTransformer[T] {
 
   def apply(k: KSequence): T = k.items.asScala.map(apply).fold(unit)(merge)
 
-  def apply(k: InjectedKLabel): T = unit
+  def apply(k: InjectedKLabel): T = k match {
+    case v: KVariable => apply(v.asInstanceOf[KVariable])
+    case _ => unit
+  }
 
   def unit: T
 
@@ -96,7 +99,10 @@ class KVisitor extends java.util.function.Consumer[K] {
     k.items forEach apply
   }
 
-  def apply(k: InjectedKLabel): Unit = {}
+  def apply(k: InjectedKLabel): Unit = k match {
+    case v: KVariable => apply(v.asInstanceOf[KVariable])
+    case _ =>
+  }
 }
 
 /* Java interfaces */
