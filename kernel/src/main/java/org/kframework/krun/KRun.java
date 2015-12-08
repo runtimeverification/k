@@ -7,13 +7,13 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.ToKast;
-import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
@@ -228,12 +228,12 @@ public class KRun {
             return;
         }
         List<String> varList = new ArrayList<>();
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                     /* Not Observing reflexivity Rule requires comparison by name */
                 varList.add(k.name());
-                return super.apply(k);
+                super.apply(k);
             }
         }.apply(parsedPattern.body());
         for (KVariable variable : subst.keySet()) {

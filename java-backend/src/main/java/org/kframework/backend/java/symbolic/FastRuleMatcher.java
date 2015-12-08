@@ -18,6 +18,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.BitSet;
 
 import static org.kframework.Collections.*;
@@ -136,8 +137,9 @@ public class FastRuleMatcher {
             }
 
             if (subject instanceof KItem) {
-                // main match of KItems
+                // main match of KItem
                 matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel((KLabelConstant) ((KItem) subject).kLabel()));
+                checkVarLabelPatterns(subject, ruleMask, path, automatonDisjunction, returnSet);
             } else if (subject instanceof Token) {
                 // and matching Tokens
                 BitSet rules = automatonDisjunction.tokenDisjunctions.get(subject);
@@ -184,10 +186,9 @@ public class FastRuleMatcher {
 
         if (subject instanceof KItem && pattern instanceof KItem) {
             KItem kitemPattern = (KItem) pattern;
-
             KLabelConstant subjectKLabel = (KLabelConstant) ((KItem) subject).kLabel();
-            KLabelConstant patternKLabel = (KLabelConstant) kitemPattern.kLabel();
-            if (subjectKLabel != patternKLabel) {
+            KLabel patternKLabel = ((KItem) pattern).klabel();
+            if (!(patternKLabel instanceof Variable) && subjectKLabel != patternKLabel) {
                 return empty;
             }
 
@@ -212,6 +213,9 @@ public class FastRuleMatcher {
                     return ruleMask;
                 }
             }
+            if (patternKLabel instanceof Variable) {
+                add((Variable) patternKLabel, ((KItem) subject).kLabel(), ruleMask);
+            }
             return ruleMask;
         } else if (subject instanceof Token && pattern instanceof Token) {
             // TODO: make tokens unique?
@@ -220,6 +224,15 @@ public class FastRuleMatcher {
             return empty;
         } else {
             throw new AssertionError("unexpected class at matching: " + subject.getClass());
+        }
+    }
+
+    private void checkVarLabelPatterns(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, RuleAutomatonDisjunction automatonDisjunction, BitSet returnSet) {
+        List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).klist().size());
+        if (!(varLabelPatterns == null)) {
+            for (Pair<KItem, BitSet> p : varLabelPatterns) {
+                matchInside(subject, ruleMask, path, returnSet, p);
+            }
         }
     }
 

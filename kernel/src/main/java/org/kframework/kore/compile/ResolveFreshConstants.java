@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
-import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
@@ -10,6 +9,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
@@ -19,7 +19,6 @@ import scala.collection.Set;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -47,13 +46,13 @@ public class ResolveFreshConstants {
     }
 
     private void analyze(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                 if (k.name().startsWith("!")) {
                     freshVars.add(k);
                 }
-                return super.apply(k);
+                super.apply(k);
             }
         }.apply(term);
     }

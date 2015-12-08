@@ -11,7 +11,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.ADT;
-import org.kframework.kore.AbstractKORETransformer;
+import org.kframework.kore.AbstractKTransformer;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -20,7 +20,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
-import org.kframework.kore.compile.TransformKORE;
+import org.kframework.kore.TransformK;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.GlobalOptions;
@@ -67,7 +67,7 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
         RewriterResult executionResult = rewriter.execute(k, Optional.<Integer>empty());
 
         ConfigurationInfo configurationInfo = new ConfigurationInfoFromModule(compiledDefinition.executionModule());
-        AbstractKORETransformer<Map<String, K>> cellPlaceholderSubstitutionCollector = new AbstractKORETransformer<Map<String, K>>() {
+        AbstractKTransformer<Map<String, K>> cellPlaceholderSubstitutionCollector = new AbstractKTransformer<Map<String, K>>() {
             @Override
             public Map<String, K> apply(KApply k) {
                 Map<String, K> substitution = processChildren(k.klist());
@@ -119,7 +119,7 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
                 .filter(e -> e.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        TransformKORE cellPlaceholderSubstitutionApplication = new TransformKORE() {
+        TransformK cellPlaceholderSubstitutionApplication = new TransformK() {
             @Override
             public K apply(KVariable k) {
                 return cellPlaceholderSubstitution.getOrDefault(k.name(), k);
