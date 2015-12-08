@@ -13,10 +13,10 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
+import org.kframework.definition.UserList;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
-import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.collection.Seq;
 

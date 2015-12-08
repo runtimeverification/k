@@ -10,7 +10,6 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
-import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.definition.*;
 import org.kframework.kore.Sort;
@@ -45,15 +44,15 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         }
 
         public Set<Sentence> collectAndRemoveListProds(Set<Sentence> sentences) {
-            List<org.kframework.parser.concrete2kore.generator.UserList> uls = org.kframework.parser.concrete2kore.generator.UserList.getLists(sentences);
-            for (org.kframework.parser.concrete2kore.generator.UserList ul : uls) {
+            List<org.kframework.definition.UserList> uls = org.kframework.definition.UserList.getLists(sentences);
+            for (org.kframework.definition.UserList ul : uls) {
                 userLists.add(makeUserList(ul));
             }
 
             return sentences.stream().filter(p -> !p.att().contains(Att.userList())).collect(Collectors.toSet());
         }
 
-        private org.kframework.kil.Syntax makeUserList(org.kframework.parser.concrete2kore.generator.UserList ul) {
+        private org.kframework.kil.Syntax makeUserList(org.kframework.definition.UserList ul) {
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
                     org.kframework.kil.Sort.of(ul.childSort), ul.separator, ul.nonEmpty ? "+" : "*");

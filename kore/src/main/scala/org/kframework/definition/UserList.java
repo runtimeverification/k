@@ -1,5 +1,5 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.generator;
+package org.kframework.definition;
 
 import org.kframework.attributes.Att;
 import org.kframework.definition.NonTerminal;
