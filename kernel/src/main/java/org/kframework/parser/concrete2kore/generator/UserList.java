@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
@@ -29,7 +30,7 @@ public class UserList {
     // Es ::= ".Es"     [userList, klabel(...)]
     public static java.util.List<UserList> getLists(Set<Sentence> sentences) {
         Map<Boolean, List<Sentence>> separatedProds
-                = sentences.stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(KOREtoKIL.USER_LIST_ATTRIBUTE)));
+                = sentences.stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(Att.userList())));
         Map<String, java.util.List<Sentence>> listsMap = separatedProds.getOrDefault(true, new LinkedList<>())
                 .stream().collect(Collectors.groupingBy(s -> ((Production) s).sort().name()));
 
@@ -45,7 +46,8 @@ public class UserList {
                     ul.separator = t.value();
                     ul.klabel = p.klabel().get().name();
                     ul.attrs = p.att().remove("klabel");
-                    ul.nonEmpty = ul.attrs.get(KOREtoKIL.USER_LIST_ATTRIBUTE).get().equals("+");
+                    // should work without the Att.userList() att, i.e. for any list -- see #1892
+                    ul.nonEmpty = ul.attrs.get(Att.userList()).get().equals("+");
                     ul.childSort = ((NonTerminal) p.items().head()).sort().name();
                     ul.pList = p;
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {

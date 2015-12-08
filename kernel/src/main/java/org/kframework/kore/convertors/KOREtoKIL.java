@@ -27,8 +27,6 @@ import static org.kframework.kore.KORE.*;
 
 public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
 
-    public static final String USER_LIST_ATTRIBUTE = "userList";
-
     private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
     }
@@ -52,7 +50,7 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
                 userLists.add(makeUserList(ul));
             }
 
-            return sentences.stream().filter(p -> !p.att().contains(USER_LIST_ATTRIBUTE)).collect(Collectors.toSet());
+            return sentences.stream().filter(p -> !p.att().contains(Att.userList())).collect(Collectors.toSet());
         }
 
         private org.kframework.kil.Syntax makeUserList(org.kframework.parser.concrete2kore.generator.UserList ul) {

@@ -95,6 +95,8 @@ object Att {
     * attribute marking the top rule label
     */
   val topRule = "topRule"
+
+  val userList = "userList"
 }
 
 trait AttributesToString {
