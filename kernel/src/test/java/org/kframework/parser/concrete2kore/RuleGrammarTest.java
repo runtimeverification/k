@@ -418,4 +418,20 @@ public class RuleGrammarTest {
                 KApply(KLabel("#EmptyK"))
                 )));
     }
+
+    // automatic subsort overloaded lists
+    // regression test for issue #1705
+    @Test
+    public void test25() {
+        String def = "" +
+                "module TEST " +
+                "syntax Int " +
+                "syntax Exp ::= Int " +
+                "            | Exp \"(\" Exps \")\" " +
+                "" +
+                "syntax Ints ::= List{Int,\",\"} " +
+                "syntax Exps ::= List{Exp,\",\"} " +
+                "endmodule";
+        parseRule("A:Exp(I:Int, Is:Ints)", def, 0, false);
+    }
 }
