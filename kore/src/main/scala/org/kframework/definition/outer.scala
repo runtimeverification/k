@@ -53,15 +53,44 @@ object Module {
   }
 }
 
+trait Sorting {
+  def computeSubsortPOSet(sentences: Set[Sentence]) = {
+    val subsortRelations: Set[(Sort, Sort)] = sentences collect {
+      case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
+    }
+
+    POSet(subsortRelations)
+  }
+}
+
+trait GeneratingListSubsortProductions extends Sorting {
+
+  def computeFromSentences(wipSentences: Set[Sentence]): Set[Sentence] = {
+    val userLists = UserList.apply(wipSentences)
+
+    val subsorts = computeSubsortPOSet(wipSentences)
+
+    val listProductions =
+      for (l1 <- userLists;
+           l2 <- userLists
+           if l1 != l2 && l1.klabel == l2.klabel &&
+             subsorts.>(ADT.Sort(l1.childSort), ADT.Sort(l2.childSort))) yield {
+        Production(ADT.Sort(l1.sort), Seq(NonTerminal(ADT.Sort(l2.sort))), Att().add(Att.generatedByListSubsorting))
+      }
+
+    listProductions.toSet
+  }
+}
+
 class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
-  extends ModuleToString with KLabelMappings with OuterKORE {
+  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions {
   assert(att != null)
 
   private val importedSentences = imports flatMap {_.sentences}
 
-  private val userLists = UserList.apply(unresolvedLocalSentences | importedSentences)
+  val listProductions = computeFromSentences(unresolvedLocalSentences | importedSentences)
 
-  val localSentences = unresolvedLocalSentences
+  val localSentences = unresolvedLocalSentences | listProductions
 
   val sentences: Set[Sentence] = localSentences | importedSentences
 
@@ -171,9 +200,7 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
     srt
   })
 
-  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-    case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
-  }
+  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
@@ -198,8 +225,6 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
         for (a <- ps; b <- ps) yield (a, b)
       }.flatten
   }
-
-  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
 
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
     productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))

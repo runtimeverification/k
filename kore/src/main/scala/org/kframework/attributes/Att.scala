@@ -97,6 +97,7 @@ object Att {
   val topRule = "topRule"
 
   val userList = "userList"
+  val generatedByListSubsorting = "generatedByListSubsorting"
 }
 
 trait AttributesToString {
