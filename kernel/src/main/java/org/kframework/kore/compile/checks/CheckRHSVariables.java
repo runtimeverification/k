@@ -2,6 +2,7 @@
 package org.kframework.kore.compile.checks;
 
 import com.google.common.collect.Sets;
+import org.kframework.builtin.KLabels;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -90,8 +91,9 @@ public class CheckRHSVariables {
             @Override
             public void apply(KVariable k) {
                 if (isRHS()) {
-                    if ((k.equals(ResolveAnonVar.ANON_VAR) && !isLHS())
-                        || (!k.equals(ResolveAnonVar.ANON_VAR) && !(k.name().startsWith("?") || k.name().startsWith("!")) && !vars.contains(k))) {
+                    if (!k.name().equals(KLabels.THIS_CONFIGURATION) &&
+                            ((k.equals(ResolveAnonVar.ANON_VAR) && !isLHS())
+                        || (!k.equals(ResolveAnonVar.ANON_VAR) && !(k.name().startsWith("?") || k.name().startsWith("!")) && !vars.contains(k)))) {
                         errors.add(KEMException.compilerError("Found variable " + k.name()
                                 + " on right hand side of rule, not bound on left hand side."
                                 + " Did you mean \"?" + k.name() + "\"?", k));

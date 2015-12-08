@@ -235,7 +235,7 @@ public class SymbolicRewriter {
 
             Substitution<Variable, Term> substitution =
                     rule.containsAttribute(Att.refers_THIS_CONFIGURATION()) ?
-                            pair.getLeft().plus(new Variable("THIS_CONFIGURATION", Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
+                            pair.getLeft().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
                             pair.getLeft();
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
