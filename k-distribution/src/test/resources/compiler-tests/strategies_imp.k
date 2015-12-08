@@ -1,17 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 requires "domains.k"
 
-module STRATEGY
-  syntax SExp ::= "heat" | "regular" | "cool"
-  syntax SExp ::= "#STUCK"
-  syntax SExp ::= SExp "~~>" SExp    [klabel(#sseq)]
-
-  rule <s> `#STUCK ~~> heat` => regular </s>
-  rule <s> `#STUCK ~~> cool` => heat </s>
-
-  configuration <s> heat </s>
-endmodule
-
 module IMP-CORE-SYNTAX
   imports STRATEGY
   imports EMPTY-ID
@@ -48,12 +37,12 @@ module IMP
   imports IMP-CORE-SYNTAX
   imports MAP
   imports INT
+//  imports BASIC-STRATEGY
 
   syntax KResult ::= Int | Bool
 
   configuration <k color="green"> $PGM:Pgm:K </k>
                 <state color="red"> .Map </state>
-                initSCell
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
