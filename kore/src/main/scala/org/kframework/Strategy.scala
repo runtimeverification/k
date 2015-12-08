@@ -6,8 +6,13 @@ import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Rule
 import org.kframework.kore.KORE
 import org.kframework.kore.Unapply.{KApply, KLabel}
 
+object Strategy {
+  val strategyCellName = "<s>"
+  val strategyCellLabel = KORE.KLabel(strategyCellName)
+}
 
 class Strategy(heatCool: Boolean) {
+  import Strategy._
 
   val addStrategyCellToRulesTransformer =
     DefinitionTransformer(
@@ -47,7 +52,7 @@ class Strategy(heatCool: Boolean) {
                       }
 
                     KORE.KApply(KORE.KLabel(KLabels.CELLS), r.body,
-                      KORE.KApply(KORE.KLabel("<s>"),
+                      KORE.KApply(strategyCellLabel,
                         KORE.KApply(KORE.KLabel(KLabels.NO_DOTS)),
                         strategy,
                         KORE.KApply(KORE.KLabel(KLabels.NO_DOTS))

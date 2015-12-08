@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
@@ -175,7 +176,7 @@ public class SymbolicRewriter {
      */
     private Optional<ConstrainedTerm> addStuckFlagIfNotThere(ConstrainedTerm subject) {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
-                .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains("<s>"))
+                .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().contains(Strategy.strategyCellName()))
                 .findFirst();
 
         if (!theStrategy.isPresent())
@@ -206,7 +207,7 @@ public class SymbolicRewriter {
         K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(sContent), emptyAtt);
         K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
-                        k instanceof KApply && ((KApply) k).klabel().name().contains("<s>") ? s : k).collect(Collectors.toList())), emptyAtt);
+                        k instanceof KApply && ((KApply) k).klabel().name().contains(Strategy.strategyCellName()) ? s : k).collect(Collectors.toList())), emptyAtt);
         return Optional.of(new ConstrainedTerm((Term) entireConf, subject.termContext()));
 
     }
@@ -278,7 +279,7 @@ public class SymbolicRewriter {
         if (rule.containsAttribute(Att.refers_RESTORE_CONFIGURATION())) {
             K strategyCell = new FindK() {
                 public scala.collection.Set<K> apply(KApply k) {
-                    if (k.klabel().name().equals("<s>"))
+                    if (k.klabel().name().equals(Strategy.strategyCellName()))
                         return org.kframework.Collections.Set(k);
                     else
                         return super.apply(k);
@@ -317,7 +318,7 @@ public class SymbolicRewriter {
             @Override
             public ASTNode transform(KItem kItem) {
 
-                if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals("<s>")) {
+                if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals(Strategy.strategyCellName())) {
                     return strategyCellPlaceholder;
                 } else {
                     return super.transform(kItem);
