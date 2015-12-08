@@ -64,15 +64,17 @@ public class KoreUtils {
     }
 
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
-        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K());
+        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false);
     }
 
-    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort) throws URISyntaxException {
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
         GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.debug = true;
+
+        kompileOptions.experimental.heatCoolStrategies = heatCoolStrategies;
 
         KRunOptions krunOptions = new KRunOptions();
         krunOptions.search = search;

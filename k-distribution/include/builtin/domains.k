@@ -972,12 +972,22 @@ module BASIC-STRATEGY
     syntax Strategy ::= Hole
 
     syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
+                        > Strategy "*"
+                        > Strategy "||" Strategy
                         > Strategy ";" Strategy
+                        > "(" Strategy ")"                      [bracket]
+
+    rule <s> S* => if S then S* else true ...</s>
+
+    rule <s> A || B => A ~> #FROZEN(THIS_CONFIGURATION) ~> #SHOLE || B ...</s> when notBool(isBool(A))
+    rule <s> A:Bool ~> #SHOLE || B => A || B ...</s>
+    rule <s> false || B => B ...</s>
+    rule <s> true || B => true ...</s>
 
     rule <s> if true then B else C => B ...</s>
     rule <s> if false then B else C => C ...</s>
 
-    rule <s> if A:Strategy then B else C => `A ~> #FROZEN(THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
+    rule <s> if A then B else C => `A ~> #FROZEN(THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
     rule <s> A:Bool ~> if #SHOLE then B else C => if A then B else C ...</s>
 
     rule <s> false ~> #FROZEN(CONFIGURATION) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
