@@ -25,7 +25,19 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
-import org.kframework.kore.compile.*;
+import org.kframework.kore.compile.AddImplicitComputationCell;
+import org.kframework.kore.compile.ConcretizeCells;
+import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.kore.compile.GenerateSortPredicateSyntax;
+import org.kframework.kore.compile.ResolveAnonVar;
+import org.kframework.kore.compile.ResolveContexts;
+import org.kframework.kore.compile.ResolveFreshConstants;
+import org.kframework.kore.compile.ResolveHeatCoolAttribute;
+import org.kframework.kore.compile.ResolveIOStreams;
+import org.kframework.kore.compile.ResolveSemanticCasts;
+import org.kframework.kore.compile.ResolveStrict;
+import org.kframework.kore.compile.SortInfo;
+import org.kframework.kore.compile.checks.CheckRHSVariables;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
@@ -134,12 +146,25 @@ public class Kompile {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
 
+        checkDefinition(parsedDef);
+
         Definition kompiledDefinition = pipeline.apply(parsedDef);
         sw.printIntermediate("Apply compile pipeline");
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
         return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+    }
+
+    private void checkDefinition(Definition parsedDef) {
+        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+
+        if (!errors.isEmpty()) {
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+            throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
+        }
+
     }
 
     public Function<Definition, Definition> defaultSteps() {
@@ -247,7 +272,7 @@ public class Kompile {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedMod;
@@ -311,14 +336,13 @@ public class Kompile {
         }
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(ParseFailedException::getKException).collect(Collectors.toList()));
-            kem.print();
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedDef;
     }
 
     Map<String, ParseCache> caches;
-    java.util.Set<ParseFailedException> errors;
+    java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 
     class ResolveConfig implements UnaryOperator<Module> {

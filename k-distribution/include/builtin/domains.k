@@ -662,7 +662,7 @@ module STDIN-STREAM
   // have a way to specify such patterns.
   rule [stdinUnblock]:
        <stdin>
-         `.List => ListItem(#parseInput(Sort:String, Delimiters:String))`
+         `.List => ListItem(#parseInput(?Sort:String, ?Delimiters:String))`
          ListItem(#buffer(_:String))
          ...
        </stdin>

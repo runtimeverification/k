@@ -490,7 +490,7 @@ public class GenerateSentencesFromConfigDecl {
             return Multiplicity.ONE;
         try {
             return Multiplicity.of(multiplicity.get());
-        } catch (IllegalArgumentException _) {
+        } catch (IllegalArgumentException x) {
             throw KEMException.compilerError("Invalid multiplicity found in cell: " + multiplicity.get(), body);
         }
     }
