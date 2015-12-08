@@ -2,10 +2,10 @@
 requires "domains.k"
 
 module IMP-CORE-SYNTAX
-  imports STRATEGY
   imports EMPTY-ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
+  imports BASIC-STRATEGY
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
@@ -26,6 +26,8 @@ module IMP-CORE-SYNTAX
                  > Stmt Stmt                  [left]
   syntax Pgm ::= "int" Ids ";" Stmt
   syntax Ids ::= List{Id,","}
+
+  syntax Exp ::= Pgm
 endmodule
 
 module IMP-SYNTAX
@@ -37,12 +39,12 @@ module IMP
   imports IMP-CORE-SYNTAX
   imports MAP
   imports INT
-//  imports BASIC-STRATEGY
 
   syntax KResult ::= Int | Bool
 
   configuration <k color="green"> $PGM:Pgm:K </k>
                 <state color="red"> .Map </state>
+                <s/>
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>

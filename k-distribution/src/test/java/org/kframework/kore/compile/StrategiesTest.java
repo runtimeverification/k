@@ -52,7 +52,7 @@ public class StrategiesTest {
         assertSearch(filename, mainModule, syntaxModule, pgm, expected, "if ^xy ; ^xy then ^xy else ^xz ; ^zzz ; ^zzz");
     }
 
-    @Test @Ignore
+    @Test
     public void imp() throws IOException, URISyntaxException {
         String filename = "/compiler-tests/strategies_imp.k";
         String mainModule = "IMP";
@@ -61,7 +61,7 @@ public class StrategiesTest {
         String pgm = "int s, n; n = 10; while(0<=n) { s = s + n; n = n + -1; }";
         String expected = "<generatedTop> <k> .::K </k> <state> s |-> 55 n |-> -1 </state> <s> #STUCK ~~> regular </s> </generatedTop>";
 
-        assertSearch(filename, mainModule, syntaxModule, pgm, expected, "");
+        assertSearch(filename, mainModule, syntaxModule, pgm, expected, "^regular");
     }
 
     private void assertSearch(String filename, String mainModule, String syntaxModule, String pgm, String expected, String strategies) throws URISyntaxException, IOException {
