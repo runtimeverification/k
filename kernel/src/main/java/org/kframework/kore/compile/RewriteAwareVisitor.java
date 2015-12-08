@@ -2,6 +2,7 @@
 package org.kframework.kore.compile;
 
 import org.kframework.kore.KRewrite;
+import org.kframework.kore.VisitK;
 
 /**
  * A visitor designed to track whether we are currently in the left hand side or right hand side of a term.
@@ -10,7 +11,7 @@ import org.kframework.kore.KRewrite;
  * that the term being visited is part of both the LHS and the RHS. Inside a rewrite, only one is true. It is an error
  * for both to be false.
  */
-public class RewriteAwareVisitor extends VisitKORE {
+public class RewriteAwareVisitor extends VisitK {
 
     public RewriteAwareVisitor(boolean isBody) {
         if (isBody) {
@@ -35,13 +36,12 @@ public class RewriteAwareVisitor extends VisitKORE {
     }
 
     @Override
-    public Void apply(KRewrite k) {
+    public void apply(KRewrite k) {
         isRHS = false;
         apply(k.left());
         isRHS = true;
         isLHS = false;
         apply(k.right());
         isLHS = true;
-        return null;
     }
 }
