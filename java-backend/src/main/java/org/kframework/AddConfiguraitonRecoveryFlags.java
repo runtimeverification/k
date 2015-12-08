@@ -17,7 +17,7 @@ import java.util.function.UnaryOperator;
  * Puts a {@link Att#refers_THIS_CONFIGURATION()} and {@link Att#refers_RESTORE_CONFIGURATION()} marker on rules that do.
  */
 public class AddConfiguraitonRecoveryFlags implements UnaryOperator<Sentence> {
-    
+
     public Sentence apply(Sentence s) {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
