@@ -77,7 +77,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       .map { p => (normalizeKSeq(p._1), p._2) }
 
     val disjunctionOfKApplies: Iterable[(K, K)] = normalizedTerms
-      .collect({ case (x: KApply, ruleP) => (x, ruleP) })
+      .collect({ case (x: KApply, ruleP) if ! x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
       .groupBy(_._1.klabel)
       .map {
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
@@ -91,12 +91,16 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
           (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
       }
 
+    val disjunctionOfVarKApplies : Iterable[(K, K)] = normalizedTerms
+      .collect({ case (x: KApply, ruleP:K) if x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
+      .toIndexedSeq
+
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
       .groupBy(_._1)
       .map({ case (k, set) => (k, set.map(_._2)) })
       .map({ case (k, rulePs) => (k, makeOr(rulePs.toSeq: _*)) })
 
-    val entireDisjunction: Iterable[(K, K)] = disjunctionOfKApplies ++ disjunctionOfOthers
+    val entireDisjunction: Iterable[(K, K)] = disjunctionOfKApplies ++ disjunctionOfVarKApplies ++ disjunctionOfOthers
     val theLHS = if (entireDisjunction.size == 1)
       entireDisjunction.head._1
     else

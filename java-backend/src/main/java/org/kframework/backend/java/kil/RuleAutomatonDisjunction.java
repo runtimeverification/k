@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -11,6 +12,7 @@ import org.kframework.utils.BitSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,9 +25,14 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     /**
-     *  (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
+     * (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
      */
     private final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
+
+    /**
+     * Map from variable KLabel KItem arities to the  a tuple of Item and the rule it occurs.
+     */
+    private final Map<Integer, List<Pair<KItem, BitSet>>> varKItemDisjunctionsMap;
 
     /**
      * pairs of variable-rule where it appears, indexed by the variable's sort
@@ -42,7 +49,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
     /**
      * Creates the disjunction based on a list of (Term, rules that contain that term).
      * It expects the disjunctions to have already been pushed down the term, i.e., there can be at most
-     * one term with a particular KLabel in the list.
+     * one term with a particular concrete KLabel in the list.
      *
      * @param children
      * @param global
@@ -52,12 +59,22 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
         this.global = global;
         disjunctions = Collections.unmodifiableList(children);
         this.kItemDisjunctionsArray = new Pair[KLabelConstant.maxOrdinal.get()];
+        varKItemDisjunctionsMap = new HashMap<>();
+
         children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .forEach(p -> {
-                    this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
+                    KItem item = ((KItem) p.getLeft());
+                    if (item.kLabel() instanceof Variable) {
+                        Integer arity = new Integer(item.klist().size());
+                        if (!varKItemDisjunctionsMap.containsKey(arity)) {
+                            varKItemDisjunctionsMap.put(arity, new ArrayList<>());
+                        }
+                        varKItemDisjunctionsMap.get(arity).add(new ImmutablePair<>((KItem) p.getLeft(), p.getRight()));
+                    } else {
+                        this.kItemDisjunctionsArray[((KLabelConstant) ((KItem) p.getLeft()).kLabel()).ordinal()] = (Pair<KItem, BitSet>) (Object) p;
+                    }
                 });
-
 
         this.variableDisjunctionsArray = new List[Sort.maxOrdinal.get()];
 
@@ -92,6 +109,14 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
      */
     public List<Pair<Term, BitSet>> disjunctions() {
         return disjunctions;
+    }
+
+    /**
+     * Given a variable KLabel, return all the KItems associated with that KLabel
+     * @return Return a list of pattern + bitset pairs, or null if no pattern with given arity exists.
+     */
+    public List<Pair<KItem, BitSet>> getKItemPatternByArity(int arity) {
+        return varKItemDisjunctionsMap.getOrDefault(new Integer(arity), null);
     }
 
     @Override
