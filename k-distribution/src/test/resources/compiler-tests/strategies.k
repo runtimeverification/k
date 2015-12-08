@@ -17,9 +17,7 @@ module STRATEGY
 
     syntax Strategy ::= StrategyApply | StrategyApplied
 
-    syntax Strategy ::= "#START"
-
-    configuration <s> #START:K  </s>
+    configuration <s> $STRATEGY:K  </s>
 endmodule
 
 module BASIC-STRATEGY
@@ -78,7 +76,5 @@ module A
 
     rule z => zz                [tag(zzz)]
 
-    rule <s> #START => if ^xy ; ^xy then ^xy else ^xz ; ^zzz ; ^zzz </s>
-
-    configuration <t> <k> $PGM </k> initSCell </t>
+    configuration <t> <k> $PGM </k> initSCell(Init) </t>
 endmodule
