@@ -335,7 +335,7 @@ public class Kompile {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(ParseFailedException::getKException).collect(Collectors.toList()));
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedDef;
