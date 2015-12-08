@@ -47,7 +47,7 @@ public class StrategiesTest {
         String syntaxModule = "A";
 
         String pgm = "x";
-        String expected = "<t> <k> z ~> .::K </k> <s> true ~> .::K </s> </t>";
+        String expected = "<t> <k> zz ~> .::K </k> <s> false ~> .::K </s> </t>";
 
         assertSearch(filename, mainModule, syntaxModule, pgm, expected);
     }

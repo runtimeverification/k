@@ -262,27 +262,7 @@ public class SymbolicRewriter {
             /* rename rule variables in the term */
             theNew = theNew.substituteWithBinders(renameSubst);
 
-            if (rule.containsAttribute(Att.refers_RESTORE_CONFIGURATION())) {
-                K strategyCell = new FindK() {
-                    public scala.collection.Set<K> apply(KApply k) {
-                        if (k.klabel().name().equals("<s>"))
-                            return org.kframework.Collections.Set(k);
-                        else
-                            return super.apply(k);
-                    }
-                }.apply(theNew).head();
-
-                K theRestoredBody = new FindK() {
-                    public scala.collection.Set<K> apply(KApply k) {
-                        if (k.klabel().name().equals("#RESTORE_CONFIGURATION"))
-                            return org.kframework.Collections.Set(k.klist().items().get(0));
-                        else
-                            return super.apply(k);
-                    }
-                }.apply(theNew).head();
-
-                theNew = ((Term)theRestoredBody).substituteAndEvaluate(Collections.singletonMap(strategyCellPlaceholder, (Term) strategyCell), subject.termContext());
-            }
+            theNew = restoreConfigurationIfNecessary(subject, rule, theNew);
 
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
         }
@@ -292,6 +272,42 @@ public class SymbolicRewriter {
         }
 
         return results;
+    }
+
+    private Term restoreConfigurationIfNecessary(ConstrainedTerm subject, Rule rule, Term theNew) {
+        if (rule.containsAttribute(Att.refers_RESTORE_CONFIGURATION())) {
+            K strategyCell = new FindK() {
+                public scala.collection.Set<K> apply(KApply k) {
+                    if (k.klabel().name().equals("<s>"))
+                        return org.kframework.Collections.Set(k);
+                    else
+                        return super.apply(k);
+                }
+            }.apply(theNew).head();
+
+            K theRestoredBody = new FindK() {
+                public scala.collection.Set<K> apply(KApply k) {
+                    if (k.klabel().name().equals("#RESTORE_CONFIGURATION"))
+                        return org.kframework.Collections.Set(k.klist().items().get(0));
+                    else
+                        return super.apply(k);
+                }
+            }.apply(theNew).head();
+
+            strategyCell = (K) ((Term) strategyCell).accept(new CopyOnWriteTransformer() {
+                @Override
+                public ASTNode transform(KItem kItem) {
+                    if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals("#RESTORE_CONFIGURATION")) {
+                        return KItem.of(KLabelConstant.of(KLabels.DOTK, definition), KList.EMPTY, subject.termContext().global());
+                    } else {
+                        return super.transform(kItem);
+                    }
+                }
+            });
+
+            theNew = ((Term) theRestoredBody).substituteAndEvaluate(Collections.singletonMap(strategyCellPlaceholder, (Term) strategyCell), subject.termContext());
+        }
+        return theNew;
     }
 
     Variable strategyCellPlaceholder = new Variable("STRATEGY_CELL_PLACEHOLDER", Sort.KSEQUENCE);

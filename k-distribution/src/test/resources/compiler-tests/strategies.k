@@ -34,12 +34,13 @@ module BASIC-STRATEGY
     syntax Strategy ::= Hole
 
     syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
+                        > Strategy ";" Strategy
 
     rule <s> if true then B else C => B ...</s>
-
     rule <s> if false then B else C => C ...</s>
 
     rule <s> if A:Strategy then B else C => `A ~> #FROZEN(THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
+    rule <s> A:Bool ~> if #SHOLE then B else C => if A then B else C ...</s>
 
     rule <s> false ~> #FROZEN(CONFIGURATION) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
 
@@ -48,7 +49,6 @@ module BASIC-STRATEGY
 //    rule <s> #STUCK ~> X:StrategyApply => false ...</s>
     rule <s> X:StrategyApplied => true ...</s>
 
-    syntax Strategy ::= Strategy ";" Strategy
 
     rule <s> A ; B => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
 
@@ -57,6 +57,10 @@ module BASIC-STRATEGY
     rule <s> true ; B => B ...</s>
 
     rule <s> false ; B => false ...</s>
+
+// the second rule is stupid but there a (likely parsing) bug making the first rule not eliminate #STUCK
+    rule <s> #STUCK ~> A:StrategyApply => false ...</s>
+    rule <s> #STUCK ~> false => false ...</s>
 endmodule
 
 module A-STRATEGY
@@ -68,17 +72,13 @@ module A
 
     syntax Exp ::= "x" | "y" | "z" | "zz" | "saved" K
 
-    rule x => y                 [tag(foo)]
+    rule x => y                 [tag(xy)]
 
-    rule y => z                 [tag(bar)]
+    rule x => z                 [tag(xz)]
 
-    rule y => zz                [tag(foo)]
+    rule z => zz                [tag(zzz)]
 
-    rule <s> #START => ^foo ; ^bar ; ^saveConfig ; ^restoreConfig </s>
-
-    rule z => saved THIS_CONFIGURATION              [tag(saveConfig)]
-
-    rule saved X => #RESTORE_CONFIGURATION(X)      [tag(restoreConfig)]
+    rule <s> #START => if ^xy ; ^xy then ^xy else ^xz ; ^zzz ; ^zzz </s>
 
     configuration <t> <k> $PGM </k> initSCell </t>
 endmodule

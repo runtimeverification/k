@@ -111,7 +111,6 @@ public class JavaBackend implements Backend {
             Att newAtt = has_THIS_CONFIGURATION ? r.att().add(Att.refers_THIS_CONFIGURATION()) : r.att();
             newAtt = has_RESTORE_CONFIGURATION ? newAtt.add(Att.refers_RESTORE_CONFIGURATION()) : newAtt;
 
-
             return Rule.apply(r.body(), r.requires(), r.ensures(), newAtt);
         } else
             return s;
