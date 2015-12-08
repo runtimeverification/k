@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
+import org.kframework.AddRefersThisConfiguration;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.compile.NormalizeKSeq;
@@ -15,7 +16,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
-import org.kframework.kore.ExistsK;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -82,38 +82,10 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(func(dd -> markRegularRules(dd)))
-                .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::add_refers_THIS_CONFIGURATION_marker, "add refers_THIS_CONFIGURATION_marker"))
+                .andThen(DefinitionTransformer.fromSentenceTransformer(new AddRefersThisConfiguration(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(d);
-    }
-
-    /**
-     * Puts a {@link Att#refers_THIS_CONFIGURATION()} marker on rules that do.
-     */
-    private static Sentence add_refers_THIS_CONFIGURATION_marker(Sentence s) {
-        if (s instanceof Rule) {
-            Rule r = (Rule) s;
-            boolean has_THIS_CONFIGURATION = new ExistsK() {
-                @Override
-                public Boolean apply(KVariable v) {
-                    return v.name().equals("THIS_CONFIGURATION");
-                }
-            }.apply(r.body());
-
-            boolean has_RESTORE_CONFIGURATION = new ExistsK() {
-                @Override
-                public Boolean apply(KApply k) {
-                    return k.klabel().name().equals("#RESTORE_CONFIGURATION") || super.apply(k);
-                }
-            }.apply(r.body());
-
-            Att newAtt = has_THIS_CONFIGURATION ? r.att().add(Att.refers_THIS_CONFIGURATION()) : r.att();
-            newAtt = has_RESTORE_CONFIGURATION ? newAtt.add(Att.refers_RESTORE_CONFIGURATION()) : newAtt;
-
-            return Rule.apply(r.body(), r.requires(), r.ensures(), newAtt);
-        } else
-            return s;
     }
 
     /**

@@ -17,7 +17,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.compile.KtoK;
+import org.kframework.kore.compile.KtoKORE;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.main.GlobalOptions;
@@ -139,7 +139,7 @@ public class ExpandMacros {
         TermContext tc = TermContext.builder(rewriter.rewritingContext).build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
         Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc.global(), false, false).convert(term));
-        return new KtoK().apply(t);
+        return new KtoKORE().apply(t);
     }
 
     public Sentence expand(Sentence s) {

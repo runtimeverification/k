@@ -47,7 +47,6 @@ module BASIC-STRATEGY
 //    rule <s> #STUCK ~> X:StrategyApply => false ...</s>
     rule <s> X:StrategyApplied => true ...</s>
 
-
     rule <s> A ; B => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
 
     rule <s> A:Bool ~> #SHOLE ; B => A ; B ...</s>
@@ -56,7 +55,7 @@ module BASIC-STRATEGY
 
     rule <s> false ; B => false ...</s>
 
-// the second rule is stupid but there a (likely parsing) bug making the first rule not eliminate #STUCK
+// the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
     rule <s> #STUCK ~> A:StrategyApply => false ...</s>
     rule <s> #STUCK ~> false => false ...</s>
 endmodule

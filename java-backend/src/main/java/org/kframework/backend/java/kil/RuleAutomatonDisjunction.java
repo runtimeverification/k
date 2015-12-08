@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     /**
-     *  (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
+     * (pattern, appearing-in-rules) pairs indexed (via the array) by the pattern's klabel ordinal
      */
     private final Pair<KItem, BitSet>[] kItemDisjunctionsArray;
 
@@ -77,12 +77,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
      * Gets the (pattern, appearing-in-rules) pair for the klabel.
      */
     public Pair<KItem, BitSet> getKItemPatternForKLabel(KLabelConstant klabel) {
-        try {
-            return this.kItemDisjunctionsArray[klabel.ordinal()];
-        } catch(ArrayIndexOutOfBoundsException x) {
-            System.out.println("x = " + x);
-            throw x;
-        }
+        return this.kItemDisjunctionsArray[klabel.ordinal()];
     }
 
     /**
