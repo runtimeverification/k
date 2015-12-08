@@ -6,10 +6,11 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Terminal;
-import org.kframework.kore.convertors.KOREtoKIL;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.kframework.Collections;
 
 /**
  * Class to hold easy to access information about user defined lists.
@@ -23,6 +24,10 @@ public class UserList {
     public boolean nonEmpty = false;
     public Production pList = null, pTerminator = null;
     public org.kframework.attributes.Att attrs = null;
+
+    public static scala.collection.Set<UserList> apply(scala.collection.Set<Sentence> sentences) {
+        return Collections.immutable(getLists(Collections.mutable(sentences))).toSet();
+    }
 
     // find all productions annotated with 'userList'
     // expecting to always find 2 of them of the form:

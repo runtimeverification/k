@@ -57,11 +57,13 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
   extends ModuleToString with KLabelMappings with OuterKORE {
   assert(att != null)
 
+  private val importedSentences = imports flatMap {_.sentences}
+
+  private val userLists = UserList.apply(unresolvedLocalSentences | importedSentences)
+
   val localSentences = unresolvedLocalSentences
 
-  val sentences: Set[Sentence] = localSentences | (imports flatMap {
-    _.sentences
-  })
+  val sentences: Set[Sentence] = localSentences | importedSentences
 
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {

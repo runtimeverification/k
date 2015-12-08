@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
 
 /**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
