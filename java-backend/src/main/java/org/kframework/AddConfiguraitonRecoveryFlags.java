@@ -11,12 +11,10 @@ import scala.Function1;
 import java.util.function.UnaryOperator;
 
 /**
- * Created by cos on 12/7/15.
+ * Puts a {@link Att#refers_THIS_CONFIGURATION()} and {@link Att#refers_RESTORE_CONFIGURATION()} marker on rules that do.
  */
-public class AddRefersThisConfiguration implements UnaryOperator<Sentence> {
-    /**
-     * Puts a {@link Att#refers_THIS_CONFIGURATION()} marker on rules that do.
-     */
+public class AddConfiguraitonRecoveryFlags implements UnaryOperator<Sentence> {
+
     public Sentence apply(Sentence s) {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
