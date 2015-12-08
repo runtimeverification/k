@@ -223,6 +223,10 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
   override lazy val hashCode: Int = name.hashCode
+
+  override def equals(that: Any) = that match {
+    case m: Module => m.name == name && m.sentences == sentences
+  }
 }
 
 // hooked but different from core, Import is a sentence here
