@@ -47,12 +47,6 @@ case class Definition(
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 }
 
-object Module {
-  def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
-    new Module(name, imports, unresolvedLocalSentences, att)
-  }
-}
-
 trait Sorting {
   def computeSubsortPOSet(sentences: Set[Sentence]) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences collect {
@@ -82,8 +76,14 @@ trait GeneratingListSubsortProductions extends Sorting {
   }
 }
 
+object Module {
+  def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
+    new Module(name, imports, unresolvedLocalSentences, att)
+  }
+}
+
 class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
-  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions {
+  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions with Serializable {
   assert(att != null)
 
   private val importedSentences = imports flatMap {_.sentences}
