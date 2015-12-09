@@ -6,9 +6,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KVariable;
+import org.kframework.kore.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,7 +62,7 @@ public class ResolveSemanticCasts {
             return requires;
         else {
             Optional<KApply> sideCondition = casts.stream().map(k -> {
-                return new TransformKORE() {
+                return new TransformK() {
                     @Override
                     public K apply(KVariable k) {
                         if (varToTypedVar.containsKey(k)) {
@@ -89,9 +87,9 @@ public class ResolveSemanticCasts {
     }
 
     void gatherCasts(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KApply v) {
+            public void apply(KApply v) {
                 if (v.klabel().name().startsWith("#SemanticCastTo")) {
                     casts.add(v);
                     K child = v.klist().items().get(0);
@@ -100,13 +98,13 @@ public class ResolveSemanticCasts {
                         varToTypedVar.put(var, KVariable(var.name(), var.att().add(Attribute.SORT_KEY, getSortNameOfCast(v))));
                     }
                 }
-                return super.apply(v);
+                super.apply(v);
             }
         }.apply(term);
     }
 
     K transform(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (casts.contains(k)) {
