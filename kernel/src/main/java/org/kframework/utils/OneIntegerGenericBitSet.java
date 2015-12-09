@@ -239,7 +239,17 @@ public class OneIntegerGenericBitSet implements BitSet<OneIntegerGenericBitSet> 
 
     @Override
     public boolean subset(OneIntegerGenericBitSet bitSet) {
-        throw new AssertionError("unimplemented");
+        if(count == 0)
+            return true;
+        if(count == 1)
+            return bitSet.get(oneValue);
+        if(bitSet.count <= 1)
+            return false;
+
+        java.util.BitSet x = new java.util.BitSet();
+        x.or(this.severalValues);
+        x.and(bitSet.severalValues);
+        return x.equals(this.severalValues);
     }
 
     @Override
