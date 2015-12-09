@@ -44,7 +44,7 @@ public class LiftToKSequence {
     }
 
     public K lift(K term) {
-        K result = new org.kframework.kore.TransformK()  {
+        K result = new TransformK()  {
             @Override
             public K apply(KApply k) {
                 List<K> children = new ArrayList<>();
@@ -67,7 +67,7 @@ public class LiftToKSequence {
     }
 
     public K lower(K term) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KSequence k) {
                 if (k.items().size() == 1) {

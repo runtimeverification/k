@@ -163,7 +163,7 @@ public class ResolveIOStreams {
                 Rule rule = (Rule) s;
                 if (rule.att().contains("stream")) {
                     // Update cell names
-                    K body = new org.kframework.kore.TransformK() {
+                    K body = new TransformK() {
                         @Override
                         public K apply(KApply k) {
                             k = (KApply) super.apply(k);
@@ -242,7 +242,7 @@ public class ResolveIOStreams {
             Rule rule = r._1();
             String sort = r._2();
 
-            K body = new org.kframework.kore.TransformK() {
+            K body = new TransformK() {
                 @Override
                 public K apply(KApply k) {
                     if (k.klabel().name().equals(userCellLabel.name())) {
@@ -362,7 +362,7 @@ public class ResolveIOStreams {
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
 
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {
