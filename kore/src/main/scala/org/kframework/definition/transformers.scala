@@ -43,9 +43,9 @@ object ModuleTransformer {
 }
 
 /**
- * Transform all modules, transforming each module after its imports.
- * The f function take a module with all the imported modules already transformed, and changes the current module.
- */
+  * Transform all modules, transforming each module after its imports.
+  * The f function take a module with all the imported modules already transformed, and changes the current module.
+  */
 class ModuleTransformer(f: Module => Module, name: String) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
 
@@ -86,5 +86,17 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
       moduleTransformer(d.mainModule),
       moduleTransformer(d.mainSyntaxModule),
       d.entryModules map moduleTransformer)
+  }
+}
+
+/**
+  * Only transforms modules which are reachable from mainModule or mainSyntaxModule
+  */
+class SelectiveDefinitionTransformer(moduleTransformer: ModuleTransformer) extends (Definition => Definition) {
+  override def apply(d: Definition): Definition = {
+    definition.Definition(
+      moduleTransformer(d.mainModule),
+      moduleTransformer(d.mainSyntaxModule),
+      d.entryModules map { m => moduleTransformer.memoization.getOrElse(m, m) })
   }
 }
