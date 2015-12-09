@@ -47,7 +47,7 @@ public class NormalizeVariables {
      */
     public K applyNormalization(K denormal, K... normals) {
         Map<KVariable, String> normalization = inferNormalizationFromTerm(normals);
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KVariable k) {
                 if (normalization.containsKey(k)) {
@@ -87,7 +87,7 @@ public class NormalizeVariables {
     }
 
     public K transform(K term) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KVariable k) {
                 return normalize(k);

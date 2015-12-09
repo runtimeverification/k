@@ -196,7 +196,7 @@ public class ConvertDataStructureToLookup {
         Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).<String>getOptional("wrapElement");
         if (wrapElement.isPresent()) {
             KLabel wrappedLabel = KLabel(wrapElement.get());
-            return new org.kframework.kore.TransformK() {
+            return new TransformK() {
                 @Override
                 public K apply(KApply k) {
                     if (k.klabel().equals(wrappedLabel)) {
@@ -215,7 +215,7 @@ public class ConvertDataStructureToLookup {
         //maintain the list of variables in the term so that we can deduce that a particular variable is unconstrained
         Multiset<KVariable> varConstraints = HashMultiset.create();
         gatherVars(RewriteToTop.toLeft(body), varConstraints);
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel().name().equals(KLabels.KSEQ))
