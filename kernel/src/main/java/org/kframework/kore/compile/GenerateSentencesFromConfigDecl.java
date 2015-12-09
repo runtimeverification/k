@@ -176,7 +176,7 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     /**
-     * Returns true if the specified term has a configuration variable
+     * Returns true if the specified term has a configuration or regular variable
      * @param contents
      */
     private static boolean hasConfigOrRegularVariable(K contents) {
