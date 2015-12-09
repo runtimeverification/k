@@ -21,9 +21,7 @@ class Strategy(heatCool: Boolean) {
           val rich = kore.Rich(module)
 
           import rich._
-
-          // hackish test for whether we're using strategies or not
-          // TODO: replace with something more principled
+          
           if (!module.importedModules.exists(_.name == "STRATEGY")) {
             r
           } else
