@@ -334,7 +334,7 @@ public class SortCells {
      * variables.
      */
     private K processVars(K term) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (!cfg.isParentCell(k.klabel())) {

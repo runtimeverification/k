@@ -115,7 +115,7 @@ public class DeconstructIntegerAndFloatLiterals {
         return new Transformer(true).apply(term);
     }
 
-    private class Transformer extends org.kframework.kore.TransformK {
+    private class Transformer extends TransformK {
 
         @Override
         public K apply(KToken k) {

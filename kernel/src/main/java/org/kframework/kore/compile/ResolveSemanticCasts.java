@@ -62,7 +62,7 @@ public class ResolveSemanticCasts {
             return requires;
         else {
             Optional<KApply> sideCondition = casts.stream().map(k -> {
-                return new org.kframework.kore.TransformK() {
+                return new TransformK() {
                     @Override
                     public K apply(KVariable k) {
                         if (varToTypedVar.containsKey(k)) {
@@ -104,7 +104,7 @@ public class ResolveSemanticCasts {
     }
 
     K transform(K term) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (casts.contains(k)) {

@@ -14,6 +14,7 @@ import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
@@ -41,7 +42,7 @@ public class ResolveIOStreams {
     /**
      * Update modules that declare stream cells in configuration,
      * by using builtin *-STREAM modules.
-     *
+     * <p>
      * Steps:
      * 1. Update the init rules of the stream cells.
      * 2. Update rules that refer to 'stdin' stream.
@@ -59,12 +60,12 @@ public class ResolveIOStreams {
             //      so that the duplication effect is not that much.
             // Step 1.
             for (Production p : streamProductions) {
-                sentences = sentences.stream().map(s -> resolveInitRule(p,s)).collect(Collectors.toSet());
+                sentences = sentences.stream().map(s -> resolveInitRule(p, s)).collect(Collectors.toSet());
             }
             // Step 2.
             for (Production p : streamProductions) {
                 if (p.att().<String>get("stream").get().equals("stdin")) {
-                    sentences.addAll(getStdinStreamUnblockingRules(p,sentences));
+                    sentences.addAll(getStdinStreamUnblockingRules(p, sentences));
                 }
             }
             // Step 3.
@@ -164,12 +165,13 @@ public class ResolveIOStreams {
                 Rule rule = (Rule) s;
                 if (rule.att().contains("stream")) {
                     // Update cell names
-                    K body = new org.kframework.kore.TransformK() {
+                    K body = new TransformK() {
                         @Override
                         public K apply(KApply k) {
                             k = (KApply) super.apply(k);
                             return KApply(apply(k.klabel()), k.klist(), k.att());
                         }
+
                         private KLabel apply(KLabel klabel) {
                             if (klabel.name().equals(builtinCellLabel)) {
                                 return userCellLabel;
@@ -225,25 +227,25 @@ public class ResolveIOStreams {
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         // find rules with currently supported matching patterns
-        java.util.Set<Tuple2<Rule,String>> rules = new HashSet<>();
+        java.util.Set<Tuple2<Rule, String>> rules = new HashSet<>();
         for (Sentence s : sentences) {
             if (s instanceof Rule) {
                 Rule rule = (Rule) s;
                 java.util.List<String> sorts = isSupportingRulePatternAndGetSortNameOfCast(streamProduction, rule);
                 assert sorts.size() <= 1;
                 if (sorts.size() == 1) {
-                    rules.add(Tuple2.apply(rule,sorts.get(0)));
+                    rules.add(Tuple2.apply(rule, sorts.get(0)));
                 }
             }
         }
 
         // generate additional unblocking rules for each of the above rules
         java.util.Set<Sentence> newSentences = new HashSet<>();
-        for (Tuple2<Rule,String> r : rules) {
+        for (Tuple2<Rule, String> r : rules) {
             Rule rule = r._1();
             String sort = r._2();
 
-            K body = new org.kframework.kore.TransformK() {
+            K body = new TransformK() {
                 @Override
                 public K apply(KApply k) {
                     if (k.klabel().name().equals(userCellLabel.name())) {
@@ -252,6 +254,7 @@ public class ResolveIOStreams {
                         return super.apply(k);
                     }
                 }
+
                 @Override
                 public K apply(KRewrite k) {
                     // drop rhs
@@ -353,7 +356,8 @@ public class ResolveIOStreams {
      *      </in>
      */
     private K getUnblockRuleBody(Production streamProduction, String sort) {
-        String streamName = streamProduction.att().<String>get("stream").get(); assert streamName.equals("stdin"); // stdin
+        String streamName = streamProduction.att().<String>get("stream").get();
+        assert streamName.equals("stdin"); // stdin
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
@@ -363,14 +367,14 @@ public class ResolveIOStreams {
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
 
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {
                     K i = k.klist().items().get(0);
                     if (i instanceof KVariable) {
                         KVariable x = (KVariable) i;
-                        switch(x.name()) {
+                        switch (x.name()) {
                         case "?Sort":
                             return KToken("\"" + sort + "\"", Sort("String"));
                         case "?Delimiters":
@@ -384,6 +388,7 @@ public class ResolveIOStreams {
                 k = (KApply) super.apply(k);
                 return KApply(apply(k.klabel()), k.klist(), k.att());
             }
+
             private KLabel apply(KLabel klabel) {
                 if (klabel.name().equals(builtinCellLabel)) {
                     return userCellLabel;

@@ -64,7 +64,7 @@ public class ResolveAnonVar {
     }
 
     K transform(K term) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KVariable k) {
                 if (ANON_VAR.equals(k)) {

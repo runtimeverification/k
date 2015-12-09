@@ -207,7 +207,7 @@ public class GenerateSentencesFromConfigDecl {
      * @return
      */
     private static K getLeafInitializer(K leafContents) {
-        return new org.kframework.kore.TransformK() {
+        return new TransformK() {
             @Override
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
