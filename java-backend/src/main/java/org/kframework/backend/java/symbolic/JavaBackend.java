@@ -2,7 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
-import org.kframework.AddConfiguraitonRecoveryFlags;
+import org.kframework.AddConfigurationRecoveryFlags;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.compile.NormalizeKSeq;
@@ -82,7 +82,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(func(dd -> markRegularRules(dd)))
-                .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfiguraitonRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
+                .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(d);

@@ -83,8 +83,6 @@ public class KoreUtils {
         compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, sort,
                 new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
 
-        System.out.println("compiledDef = " + compiledDef.executionModule().sentences().mkString("\n"));
-
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
