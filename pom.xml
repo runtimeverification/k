@@ -5,7 +5,7 @@
   <groupId>org.kframework.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0-beta3-SNAPSHOT</version>
+  <version>4.0-beta4-SNAPSHOT</version>
   <name>K Framework Tool Parent</name>
 
   <modules>

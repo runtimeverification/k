@@ -3,6 +3,7 @@ package org.kframework.kore.compile;
 
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.*;
+import org.kframework.kore.TransformK;
 
 import static org.kframework.kore.KORE.*;
 
@@ -11,7 +12,7 @@ import static org.kframework.kore.KORE.*;
  * to an equivalent term using the standard implementations
  * from {@link org.kframework.kore.KORE}.
  */
-public class KtoKORE extends TransformKORE {
+public class KtoK extends TransformK {
     @Override
     public K apply(KApply k) {
         if (k.klabel().name().equals(KLabels.KREWRITE)) {

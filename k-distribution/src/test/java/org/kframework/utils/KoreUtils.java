@@ -61,6 +61,7 @@ public class KoreUtils {
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
         GlobalOptions globalOptions = new GlobalOptions();
+        globalOptions.debug = true;
 
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
         compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(),
