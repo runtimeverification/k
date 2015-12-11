@@ -2,14 +2,14 @@
 
 package org.kframework.definition
 
+import javax.annotation.Nonnull
+
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.Att
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-
-import javax.annotation.Nonnull
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._

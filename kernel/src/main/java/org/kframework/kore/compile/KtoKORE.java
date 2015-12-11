@@ -12,7 +12,7 @@ import static org.kframework.kore.KORE.*;
  * to an equivalent term using the standard implementations
  * from {@link org.kframework.kore.KORE}.
  */
-public class KtoK extends TransformK {
+public class KtoKORE extends TransformK {
     @Override
     public K apply(KApply k) {
         if (k.klabel().name().equals(KLabels.KREWRITE)) {
