@@ -433,5 +433,11 @@ public class RuleGrammarTest {
                 "syntax Exps ::= List{Exp,\",\"} " +
                 "endmodule";
         parseRule("A:Exp(I:Int, Is:Ints)", def, 0, false);
+        parseRule("A:Exp, .Exps", def, 0,
+                KApply(KLabel("#ruleNoConditions"),
+                        KApply(KLabel("_,_"),
+                                KApply(KLabel("#SemanticCastToExp"), KToken("A", Sort("#KVariable"))),
+                                KApply(KLabel(".List{\"'_,_\"}"))
+                        )));
     }
 }
