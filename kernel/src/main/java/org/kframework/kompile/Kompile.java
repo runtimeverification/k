@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
+import org.kframework.Strategy;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.BooleanUtils;
@@ -48,6 +49,7 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -183,6 +185,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
                 .andThen(func(AddImplicitComputationCell::transformDefinition))
+                .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
                 .andThen(func(this::addProgramModule))
@@ -393,7 +396,6 @@ public class Kompile {
                     .flatMap(
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                     .collect(Collections.toSet());
-
 
             Module mapModule;
             if (def.getModule("MAP").isDefined()) {

@@ -4,7 +4,7 @@
 
     <include file="../../lesson_7/tests/config.xml"
              skip="pdf"
-             exclude="spawn"
+             exclude="spawn div"
              more-results=".">
         <kompile-option name="--transition"
                         value="lookup increment assignment read print"/>

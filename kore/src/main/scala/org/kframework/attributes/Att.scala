@@ -8,6 +8,7 @@ import org.kframework.meta.{Up, Down}
 import scala.collection.JavaConverters._
 import collection._
 
+
 case class Att(att: Set[K]) extends AttributesToString {
 
   val attMap: Map[String, KApply] = att map {
@@ -95,6 +96,16 @@ object Att {
     * attribute marking the top rule label
     */
   val topRule = "topRule"
+
+  val ClassFromUp = "classType"
+  val Location = "location"
+  val Function = "function"
+  val heat = "heat"
+  val cool = "cool"
+  val stuck = "#STUCK"
+
+  val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
+  val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
 }
 
 trait AttributesToString {
