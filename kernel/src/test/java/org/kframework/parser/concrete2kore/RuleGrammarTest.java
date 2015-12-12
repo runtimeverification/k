@@ -35,7 +35,7 @@ public class RuleGrammarTest {
     private RuleGrammarGenerator gen;
 
     @Before
-    public void setUp() throws  Exception{
+    public void setUp() throws Exception {
         gen = makeRuleGrammarGenerator();
     }
 
@@ -326,7 +326,7 @@ public class RuleGrammarTest {
     public void test17() {
         Automaton a = new RegExp("[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]").toAutomaton();
         RunAutomaton ra = new RunAutomaton(a, false);
-        System.out.println(ra.run("\"n\\\\\\\"\""));
+        Assert.assertTrue(ra.run("\"n\\\\\\\"\""));
     }
 
     // test unicode chars
@@ -427,7 +427,7 @@ public class RuleGrammarTest {
                 )));
     }
 
-    // automatic subsort overloaded lists
+    // automatic subsort overloaded lists, al sorts of program lists tests
     // regression test for issue #1705
     @Test
     public void test25() {
@@ -439,6 +439,7 @@ public class RuleGrammarTest {
                 "" +
                 "syntax Ints ::= List{Int,\",\"} " +
                 "syntax Exps ::= List{Exp,\",\"} " +
+                "syntax NeInts ::= NeList{Int,\",\"} " +
                 "endmodule";
         parseRule("A:Exp(I:Int, Is:Ints)", def, 0, false);
         parseRule("A:Exp, .Exps", def, 0,
@@ -447,10 +448,19 @@ public class RuleGrammarTest {
                                 KApply(KLabel("#SemanticCastToExp"), KToken("A", Sort("#KVariable"))),
                                 KApply(KLabel(".List{\"'_,_\"}"))
                         )));
-        parseProgram("1(1)", def, "Exp", 0, KApply(KLabel("_(_)"),
+        parseProgram("1(1, 1)", def, "Exp", 0, KApply(KLabel("_(_)"),
                 KApply(KLabel("1")),
-                KApply(KLabel("_,_"), KApply(KLabel("1")),
-                        KApply(KLabel(".List{\"'_,_\"}")))
+                KApply(KLabel("_,_"), KApply(KLabel("1")), // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
+                        KApply(KLabel("_,_"), KApply(KLabel("1")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
+                                KApply(KLabel(".List{\"'_,_\"}")))) // Es#Terminator ::= "" [klabel('.Es)]
         ));
+        parseProgram("1()", def, "Exp", 0, KApply(KLabel("_(_)"),
+                KApply(KLabel("1")),
+                KApply(KLabel(".List{\"'_,_\"}")) // Es#Terminator ::= "" [klabel('.Es)]
+        ));
+        parseProgram("", def, "NeInts", 0, true);
+        parseProgram("1", def, "NeInts", 0, KApply(KLabel("_,_"),
+                KApply(KLabel("1")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
+                KApply(KLabel(".List{\"'_,_\"}"))));
     }
 }
