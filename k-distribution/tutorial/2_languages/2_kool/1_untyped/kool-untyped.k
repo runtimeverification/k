@@ -178,13 +178,8 @@ for the KOOL object-oriented constructs.
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               // TODO(KORE): drop klabel once parsing issues #1682 are fixed
-               > Exp "[" Exps "]"        [strict,klabel("farray")]
-               > Exp "(" Exps ")"        [strict(2),klabel("fcall")]    // was strict in SIMPLE
-               /*
                > Exp "[" Exps "]"        [strict]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
-               */
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
                | "read" "(" ")"
@@ -958,9 +953,9 @@ method call or the array access.  */
     when Class =/=K Class'  [structural]
 
   // TODO(KORE): fix getKLabel #1801 and context issue #1802
-  rule fcall(fcall(A:Exp,B:Exps),C:Exps) => fcall(A,B) ~> #freezerFunCall(C)
-  rule fcall(farray(A:Exp,B:Exps),C:Exps) => farray(A,B) ~> #freezerFunCall(C)
-  rule V:Val ~> #freezerFunCall(C:Exps) => fcall(V,C)
+  rule `_(_)`(`_(_)`(A:Exp,B:Exps),C:Exps) => `_(_)`(A,B) ~> #freezerFunCall(C)
+  rule `_(_)`(`_[_]`(A:Exp,B:Exps),C:Exps) => `_[_]`(A,B) ~> #freezerFunCall(C)
+  rule V:Val ~> #freezerFunCall(C:Exps) => `_(_)`(V,C)
   syntax KItem ::= "#freezerFunCall" "(" K ")"
   /*
   context HOLE(_:Exps)
