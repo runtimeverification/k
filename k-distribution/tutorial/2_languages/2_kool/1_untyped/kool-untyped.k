@@ -667,11 +667,7 @@ with the unchanged semantics of SIMPLE above.  */
   // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
                  | (Map,K,K)
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
-  /*
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
-  */
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
@@ -766,13 +762,8 @@ refer to it (see rule above). */
 
   syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule <k> `new_(_)`(Class:Id, Vs:Vals) ~> K
-           => create(Class) ~> storeObj ~> ` fcall(Class,Vs) ; return this;` </k>
-  /*
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
-  */
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
      //<br/> // TODO(KORE): support latex annotations #1799
