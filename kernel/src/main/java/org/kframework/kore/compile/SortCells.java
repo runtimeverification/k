@@ -542,7 +542,7 @@ public class SortCells {
      * Note that this issue is not specifically about resolveIncompleteCellFragment.
      */
     private K resolveIncompleteCellFragment(K term) {
-      return new TransformKORE() {
+      return new TransformK() {
         @Override
         public K apply(KApply k0) {
             if (!hasCells(k0)) return super.apply(k0);
@@ -720,9 +720,9 @@ public class SortCells {
     private K preprocess(K term) {
         // find all of cell fragment variables
         HashMap<KVariable, HashSet<K>> cellFragmentVars = new HashMap<>();
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (k.klabel().name().equals("#cells")) {
                     for (int i = 0; i < k.klist().size(); i++) {
                         K item = k.klist().items().get(i);
@@ -744,9 +744,9 @@ public class SortCells {
                             }
                         }
                     }
-                    return null;
+                } else {
+                    super.apply(k);
                 }
-                return super.apply(k);
             }
         }.apply(term);
 
@@ -755,25 +755,24 @@ public class SortCells {
         }
 
         // find cell fragment variables only appear in <k> cell
-        new VisitKORE() {
+        new VisitK() {
             private boolean inKCell = false;
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (k.klabel().name().equals("<k>")) {
                     assert !inKCell;
                     inKCell = true;
                     super.apply(k);
                     inKCell = false;
-                    return null;
+                } else {
+                    super.apply(k);
                 }
-                return super.apply(k);
             }
             @Override
-            public Void apply(KVariable var) {
+            public void apply(KVariable var) {
                 if (!inKCell && cellFragmentVars.containsKey(var)) {
                     cellFragmentVars.remove(var);
                 }
-                return null;
             }
         }.apply(term);
 
@@ -787,7 +786,7 @@ public class SortCells {
         }
 
         // decorate such cell fragment terms with their parent cell label
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k0) {
                 if (hasCells(k0)) {
@@ -826,7 +825,7 @@ public class SortCells {
 
     // remove the dummy cell decoration introduced by preprocess
     private K postprocess(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.att().contains("dummy_cell")) {

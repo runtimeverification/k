@@ -41,12 +41,12 @@ public class ConcretizeCells {
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule())::concretize,
                 "concretizing configuration"
         ).apply(input);
     }
 
-    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module, KExceptionManager kem) {
+    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module) {
         this.configurationInfo = configurationInfo;
         this.labelInfo = labelInfo;
         this.sortInfo = sortInfo;
@@ -54,7 +54,7 @@ public class ConcretizeCells {
         addRootCell = new AddTopCellToRules(configurationInfo, labelInfo);
         addParentCells = new AddParentCells(configurationInfo, labelInfo);
         closeCells = new CloseCells(configurationInfo, sortInfo, labelInfo);
-        sortCells = new SortCells(configurationInfo, labelInfo, module, kem);
+        sortCells = new SortCells(configurationInfo, labelInfo, module);
     }
 
     public Sentence concretize(Sentence s) {

@@ -232,7 +232,7 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kem).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(s);
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
