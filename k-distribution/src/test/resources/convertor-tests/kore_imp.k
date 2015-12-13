@@ -38,10 +38,7 @@ module IMP
   imports INT
   syntax KResult ::= Int | Bool
 
-  configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm:K </k>
-                  <state color="red"> .Map </state>
-                </T>
+  configuration <k color="green"> $PGM:Pgm:K </k> <state color="red"> .Map </state>
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>

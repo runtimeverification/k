@@ -1,7 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import org.kframework.builtin.KLabels;
 import org.kframework.kore.*;
+import org.kframework.kore.TransformK;
 
 import static org.kframework.kore.KORE.*;
 
@@ -10,11 +12,15 @@ import static org.kframework.kore.KORE.*;
  * to an equivalent term using the standard implementations
  * from {@link org.kframework.kore.KORE}.
  */
-public class KtoKORE extends TransformKORE {
+public class KtoKORE extends TransformK {
     @Override
     public K apply(KApply k) {
-        k = (KApply) super.apply(k);
-        return KApply(apply(k.klabel()), k.klist(), k.att());
+        if (k.klabel().name().equals(KLabels.KREWRITE)) {
+            return KRewrite(apply(k.klist().items().get(0)), apply(k.klist().items().get(1)), k.att());
+        } else {
+            k = (KApply) super.apply(k);
+            return KApply(apply(k.klabel()), k.klist(), k.att());
+        }
     }
 
     private KLabel apply(KLabel klabel) {

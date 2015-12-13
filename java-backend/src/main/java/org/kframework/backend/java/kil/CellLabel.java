@@ -18,7 +18,6 @@ public final class CellLabel implements MaximalSharing, Serializable {
 
     private static final Map<String, CellLabel> cache = Collections.synchronizedMap(new PatriciaTrie<>());
 
-    public static final CellLabel GENERATED_TOP =   CellLabel.of("generatedTop");
     public static final CellLabel K             =   CellLabel.of("k");
 
     /**

@@ -59,7 +59,7 @@ public class PatternMatcher extends AbstractUnifier {
      */
     private final boolean disjointVariables;
 
-    private final TermContext termContext;
+    private final GlobalContext global;
 
     public Substitution<Variable, Term> substitution() {
         assert fSubstitution.isSubstitution();
@@ -68,7 +68,7 @@ public class PatternMatcher extends AbstractUnifier {
 
     public List<Substitution<Variable, Term>> substitutions() {
         return fSubstitution.getDisjunctiveNormalForm().conjunctions().stream()
-                .map(ConjunctiveFormula::simplify)
+                .map(c -> c.simplify(termContext))
                 .filter(c -> !c.isFalse())
                 .map(ConjunctiveFormula::substitution)
                 .collect(Collectors.toList());
@@ -122,17 +122,18 @@ public class PatternMatcher extends AbstractUnifier {
     }
 
     public PatternMatcher(boolean matchOnFunctionSymbol, boolean disjointVariables, TermContext context) {
+        super(context);
         this.matchOnFunctionSymbol = matchOnFunctionSymbol;
         this.disjointVariables = disjointVariables;
-        this.termContext = context;
-        this.fSubstitution = ConjunctiveFormula.of(context);
+        this.global = termContext.global();
+        this.fSubstitution = ConjunctiveFormula.of(global);
     }
 
     /**
      * Matches the subject term against the pattern. Returns true if the matching succeeds.
      */
     public boolean patternMatch(Term subject, Term pattern) {
-        return patternMatch(subject, pattern, ConjunctiveFormula.of(termContext));
+        return patternMatch(subject, pattern, ConjunctiveFormula.of(global));
     }
 
     /**
@@ -217,7 +218,7 @@ public class PatternMatcher extends AbstractUnifier {
         if (disjointVariables) {
             fSubstitution = fSubstitution.unsafeAddVariableBinding(variable, term);
         } else {
-            fSubstitution = fSubstitution.add(variable, term).simplify();
+            fSubstitution = fSubstitution.add(variable, term).simplify(termContext);
         }
         if (fSubstitution.isFalse()) {
             fail(variable, term);
@@ -228,8 +229,8 @@ public class PatternMatcher extends AbstractUnifier {
     public void unify(BuiltinList builtinList, BuiltinList patternList) {
         if (matchOnFunctionSymbol) {
             addUnificationTask(
-                    ((BuiltinList) BuiltinList.concatenate(termContext, builtinList)).toKore(),
-                    ((BuiltinList) BuiltinList.concatenate(termContext, patternList)).toKore());
+                    ((BuiltinList) BuiltinList.concatenate(global, builtinList)).toKore(),
+                    ((BuiltinList) BuiltinList.concatenate(global, patternList)).toKore());
             return;
         }
 
@@ -265,7 +266,7 @@ public class PatternMatcher extends AbstractUnifier {
         Set<PartialSubstitution> partialSubstitutions = new HashSet<>();
         partialSubstitutions.add(new PartialSubstitution(
                 ImmutableSet.<Term>of(),
-                Substitution.empty()));
+                ImmutableMapSubstitution.empty()));
 
         /* match each entry from the pattern */
         for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
@@ -318,11 +319,11 @@ public class PatternMatcher extends AbstractUnifier {
 
         if (substitutions.size() != 1) {
             List<ConjunctiveFormula> conjunctions = substitutions.stream()
-                    .map(s -> ConjunctiveFormula.of(s, termContext))
+                    .map(s -> ConjunctiveFormula.of(s, global))
                     .collect(Collectors.toList());
-            fSubstitution = fSubstitution.add(new DisjunctiveFormula(conjunctions, termContext));
+            fSubstitution = fSubstitution.add(new DisjunctiveFormula(conjunctions, global));
         } else {
-            fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+            fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0), termContext);
             if (fSubstitution.isFalse()) {
                 fail(builtinMap, patternBuiltinMap);
             }
@@ -340,7 +341,7 @@ public class PatternMatcher extends AbstractUnifier {
                 return null;
             }
 
-            BuiltinMap.Builder builder = BuiltinMap.builder(context);
+            BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
             for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
                 if (!ps.matched.contains(entry.getKey())) {
                     builder.put(entry.getKey(), entry.getValue());
@@ -530,7 +531,7 @@ public class PatternMatcher extends AbstractUnifier {
             // start searching for all possible unifiers
         label:
             do {
-                ConjunctiveFormula nestedSubstitution = ConjunctiveFormula.of(termContext);
+                ConjunctiveFormula nestedSubstitution = ConjunctiveFormula.of(global);
 
                 for (int i = 0; i < otherCells.length; ++i) {
                     PatternMatcher matcher = new PatternMatcher(matchOnFunctionSymbol, disjointVariables, termContext);
@@ -538,7 +539,7 @@ public class PatternMatcher extends AbstractUnifier {
                             cells[generator.getSelection(i)].content(),
                             otherCells[i].content());
                     if (matcher.unify()) {
-                        nestedSubstitution = nestedSubstitution.addAndSimplify(matcher.fSubstitution);
+                        nestedSubstitution = nestedSubstitution.addAndSimplify(matcher.fSubstitution, termContext);
                         if (nestedSubstitution.isFalse()) {
                             continue label;
                         }
@@ -558,7 +559,7 @@ public class PatternMatcher extends AbstractUnifier {
                     if (frame != null) {
                         builder.concatenate(frame);
                     }
-                    nestedSubstitution = nestedSubstitution.add(builder.build(), otherFrame).simplify();
+                    nestedSubstitution = nestedSubstitution.add(builder.build(), otherFrame).simplify(termContext);
                     if (nestedSubstitution.isFalse()) {
                         continue label;
                     }
@@ -571,7 +572,7 @@ public class PatternMatcher extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
                 return;
             } else if (substitutions.size() == 1) {
-                fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0));
+                fSubstitution = fSubstitution.addAndSimplify(substitutions.get(0), termContext);
                 if (fSubstitution.isFalse()) {
                     fail(cellCollection, otherCellCollection);
                     return;
@@ -579,7 +580,7 @@ public class PatternMatcher extends AbstractUnifier {
             } else {
                 fSubstitution = fSubstitution.add(new DisjunctiveFormula(
                         substitutions,
-                        termContext));
+                        global));
             }
         }
     }

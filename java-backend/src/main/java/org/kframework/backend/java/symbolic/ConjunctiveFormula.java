@@ -8,21 +8,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.CollectionInternalRepresentation;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.DataStructures;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
@@ -43,17 +29,17 @@ import java.util.stream.Stream;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
 
     public static final String SEPARATOR = " /\\ ";
 
-    public static ConjunctiveFormula of(TermContext context) {
+    public static ConjunctiveFormula of(GlobalContext global) {
         return new ConjunctiveFormula(
-                Substitution.empty(),
+                ImmutableMapSubstitution.empty(),
                 PersistentUniqueList.empty(),
                 PersistentUniqueList.empty(),
                 TruthValue.TRUE,
-                context);
+                global);
     }
 
     public static ConjunctiveFormula of(ConjunctiveFormula formula) {
@@ -63,29 +49,29 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 formula.disjunctions,
                 formula.truthValue,
                 formula.falsifyingEquality,
-                formula.context);
+                formula.global);
     }
 
-    public static ConjunctiveFormula of(Substitution<Variable, Term> substitution, TermContext context) {
+    public static ConjunctiveFormula of(Substitution<Variable, Term> substitution, GlobalContext global) {
         return new ConjunctiveFormula(
                 substitution,
                 PersistentUniqueList.empty(),
                 PersistentUniqueList.empty(),
                 substitution.isEmpty() ? TruthValue.TRUE : TruthValue.UNKNOWN,
-                context);
+                global);
     }
 
     public static ConjunctiveFormula of(
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
-            TermContext context) {
+            GlobalContext global) {
         return new ConjunctiveFormula(
                 substitution,
                 equalities,
                 disjunctions,
                 substitution.isEmpty() && equalities.isEmpty() && disjunctions.isEmpty() ? TruthValue.TRUE : TruthValue.UNKNOWN,
-                context);
+                global);
     }
 
     private final Substitution<Variable, Term> substitution;
@@ -96,7 +82,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private final Equality falsifyingEquality;
 
-    private transient final TermContext context;
+    private transient final GlobalContext global;
 
     public ConjunctiveFormula(
             Substitution<Variable, Term> substitution,
@@ -104,7 +90,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             TruthValue truthValue,
             Equality falsifyingEquality,
-            TermContext context) {
+            GlobalContext global) {
         super(Kind.KITEM);
 
         this.substitution = substitution;
@@ -112,7 +98,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.disjunctions = disjunctions;
         this.truthValue = truthValue;
         this.falsifyingEquality = falsifyingEquality;
-        this.context = context;
+        this.global = global;
     }
 
     public ConjunctiveFormula(
@@ -120,8 +106,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             TruthValue truthValue,
-            TermContext context) {
-        this(substitution, equalities, disjunctions, truthValue, null, context);
+            GlobalContext global) {
+        this(substitution, equalities, disjunctions, truthValue, null, global);
+    }
+
+    public GlobalContext globalContext() {
+        return global;
     }
 
     public Substitution<Variable, Term> substitution() {
@@ -134,10 +124,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public PersistentUniqueList<DisjunctiveFormula> disjunctions() {
         return disjunctions;
-    }
-
-    public TermContext termContext() {
-        return context;
     }
 
     /**
@@ -155,8 +141,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return result;
     }
 
-    public ConjunctiveFormula addAndSimplify(Object term) {
-        return add(term).simplify();
+    public ConjunctiveFormula addAndSimplify(Object term, TermContext context) {
+        return add(term).simplify(context);
     }
 
     public ConjunctiveFormula add(ConjunctiveFormula conjunction) {
@@ -166,7 +152,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public ConjunctiveFormula add(Substitution<Variable, Term> substitution) {
-        return addAll(substitution.equalities(context));
+        return addAll(substitution.equalities(global));
     }
 
     public ConjunctiveFormula add(Equality equality) {
@@ -224,7 +210,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 disjunctions,
                 truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
                 falsifyingEquality,
-                context);
+                global);
     }
 
     public ConjunctiveFormula unsafeAddVariableBinding(Variable variable, Term term) {
@@ -238,16 +224,16 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     equalities,
                     disjunctions,
                     truthValue,
-                    context);
+                    global);
         } else if (previousTerm.equals(term)) {
             return this;
         } else {
-            return falsify(substitution, equalities, disjunctions, new Equality(previousTerm, term, context));
+            return falsify(substitution, equalities, disjunctions, new Equality(previousTerm, term, global));
         }
     }
 
     public ConjunctiveFormula add(Term leftHandSide, Term rightHandSide) {
-        return add(new Equality(leftHandSide, rightHandSide, context));
+        return add(new Equality(leftHandSide, rightHandSide, global));
     }
 
     public ConjunctiveFormula add(DisjunctiveFormula disjunction) {
@@ -257,7 +243,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 disjunctions.plus(disjunction),
                 truthValue != TruthValue.FALSE ? TruthValue.UNKNOWN : TruthValue.FALSE,
                 falsifyingEquality,
-                context);
+                global);
     }
 
     @SuppressWarnings("unchecked")
@@ -315,35 +301,40 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 substitution.minusAll(variablesToRemove),
                 equalities,
                 disjunctions,
-                context);
+                global);
+    }
+
+
+    public ConjunctiveFormula simplify() {
+        return simplify(false, true, TermContext.builder(global).build());
     }
 
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    public ConjunctiveFormula simplify() {
-        return simplify(false, true);
+    public ConjunctiveFormula simplify(TermContext context) {
+        return simplify(false, true, context);
     }
 
     /**
-     * Similar to {@link ConjunctiveFormula#simplify()} except that equalities
+     * Similar to {@link ConjunctiveFormula#simplify(TermContext)} except that equalities
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding() {
-        return simplify(false, false);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context) {
+        return simplify(false, false, context);
     }
 
-    public ConjunctiveFormula simplifyModuloPatternFolding() {
-        return simplify(true, true);
+    public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
+        return simplify(true, true, context);
     }
 
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    public ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification) {
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
         assert !isFalse();
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
@@ -357,7 +348,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 Equality equality = equalities.get(i);
                 Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
                 Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
-                equality = new Equality(leftHandSide, rightHandSide, context);
+                equality = new Equality(leftHandSide, rightHandSide, global);
                 if (equality.isTrue()) {
                     // delete
                 } else if (equality.truthValue() == TruthValue.FALSE) {
@@ -378,7 +369,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                                     new Equality(
                                             unifier.unificationFailureLeftHandSide(),
                                             unifier.unificationFailureRightHandSide(),
-                                            context));
+                                            global));
                         }
                         // TODO(AndreiS): fix this in a general way
                         if (unifier.constraint().equalities.contains(equality)) {
@@ -386,12 +377,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                             continue;
                         }
                         equalities = equalities.plusAll(i + 1, unifier.constraint().equalities);
-                        equalities = equalities.plusAll(i + 1, unifier.constraint().substitution.equalities(context));
+                        equalities = equalities.plusAll(i + 1, unifier.constraint().substitution.equalities(global));
                         disjunctions = disjunctions.plusAll(unifier.constraint().disjunctions);
                     } else if (leftHandSide instanceof Variable
                             && !rightHandSide.variableSet().contains(leftHandSide)) {
                         // eliminate
-                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
                                 (Variable) leftHandSide,
                                 rightHandSide);
                         if (eliminationSubstitution == null) {
@@ -399,18 +390,18 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                             continue;
                         }
 
-                        substitution = Substitution.composeAndEvaluate(
+                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
                                 substitution,
                                 eliminationSubstitution,
                                 context);
                         change = true;
-                        if (substitution.isFalse(context)) {
+                        if (substitution.isFalse(global)) {
                             return falsify(substitution, equalities, disjunctions, equality);
                         }
                     } else if (rightHandSide instanceof Variable
                             && !leftHandSide.variableSet().contains(rightHandSide)) {
                         // swap + eliminate
-                        Substitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
                                 (Variable) rightHandSide,
                                 leftHandSide);
                         if (eliminationSubstitution == null) {
@@ -418,12 +409,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                             continue;
                         }
 
-                        substitution = Substitution.composeAndEvaluate(
+                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
                                 substitution,
                                 eliminationSubstitution,
                                 context);
                         change = true;
-                        if (substitution.isFalse(context)) {
+                        if (substitution.isFalse(global)) {
                             return falsify(substitution, equalities, disjunctions, equality);
                         }
                     } else if (leftHandSide instanceof Variable
@@ -445,7 +436,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             equalities = pendingEqualities;
         } while (change);
 
-        return ConjunctiveFormula.of(substitution, equalities, disjunctions, context);
+        return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
     }
 
     private ConjunctiveFormula falsify(
@@ -463,23 +454,23 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 disjunctions,
                 TruthValue.FALSE,
                 equality,
-                context);
+                global);
     }
 
-    public Substitution<Variable, Term> getSubstitution(Variable variable, Term term) {
-        if (RewriteEngineUtils.isSubsortedEq(variable, term, context)) {
-            return Substitution.singleton(variable, term);
+    public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {
+        if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
+            return ImmutableMapSubstitution.singleton(variable, term);
         } else if (term instanceof Variable) {
-            if (RewriteEngineUtils.isSubsortedEq(term, variable, context)) {
-                return Substitution.singleton((Variable) term, variable);
+            if (RewriteEngineUtils.isSubsortedEq(term, variable, global.getDefinition())) {
+                return ImmutableMapSubstitution.singleton((Variable) term, variable);
             } else {
-                Sort leastSort = context.definition().subsorts().getGLBSort(
+                Sort leastSort = global.getDefinition().subsorts().getGLBSort(
                         variable.sort(),
                         term.sort());
                 assert leastSort != null;
 
                 Variable freshVariable = Variable.getAnonVariable(leastSort);
-                return Substitution.<Variable, Term>singleton(variable, freshVariable)
+                return ImmutableMapSubstitution.<Variable, Term>singleton(variable, freshVariable)
                         .plus((Variable) term, freshVariable);
             }
         } else {
@@ -502,11 +493,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 && ((BuiltinMap) DataStructures.getLookupBase(term)).isConcreteCollection()) {
             result = result.add(new DisjunctiveFormula((
                     (BuiltinMap) DataStructures.getLookupBase(term)).getEntries().keySet().stream()
-                        .map(key -> new Equality(DataStructures.getLookupKey(term), key, context))
+                        .map(key -> new Equality(DataStructures.getLookupKey(term), key, global))
                         .filter(e -> !e.isFalse())
-                        .map(e -> ConjunctiveFormula.of(context).add(e))
+                        .map(e -> ConjunctiveFormula.of(global).add(e))
                         .collect(Collectors.toList()),
-                    context));
+                    global));
         }
         return result;
     }
@@ -535,7 +526,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .filter(e -> e.getValue() instanceof Variable)
                 .forEach(e -> equivalenceClasses.put((Variable) e.getValue(), e.getKey()));
 
-        Substitution<Variable, Variable> orientationSubstitution = Substitution.empty();
+        Substitution<Variable, Variable> orientationSubstitution = ImmutableMapSubstitution.empty();
         for (Map.Entry<Variable, Collection<Variable>> entry : equivalenceClasses.asMap().entrySet()) {
             if (variables.contains(entry.getKey())) {
                 Optional<Variable> replacement = entry.getValue().stream()
@@ -550,34 +541,35 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
         }
 
-        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution, context)).simplify();
+        TermContext context = TermContext.builder(global).build();
+        return ((ConjunctiveFormula) substituteWithBinders(orientationSubstitution)).simplify(context);
     }
 
-    public ConjunctiveFormula expandPatterns(boolean narrowing) {
-        return new ConstrainedTerm(Bottom.BOTTOM, this).expandPatterns(narrowing).constraint();
+    public ConjunctiveFormula expandPatterns(boolean narrowing, TermContext context) {
+        return new ConstrainedTerm(Bottom.BOTTOM, this, context).expandPatterns(narrowing).constraint();
     }
 
     public DisjunctiveFormula getDisjunctiveNormalForm() {
         if (disjunctions.isEmpty()) {
-            return new DisjunctiveFormula(PersistentUniqueList.singleton(this), context);
+            return new DisjunctiveFormula(PersistentUniqueList.singleton(this), global);
         }
 
         ConjunctiveFormula result = ConjunctiveFormula.of(
                 substitution,
                 equalities,
                 PersistentUniqueList.empty(),
-                context);
+                global);
 
         List<Set<ConjunctiveFormula>> collect = disjunctions.stream()
                 .map(disjunction -> ImmutableSet.<ConjunctiveFormula>copyOf(disjunction.conjunctions()))
                 .collect(Collectors.toList());
         return new DisjunctiveFormula(Sets.cartesianProduct(collect).stream()
                 .map(result::addAll)
-                .collect(Collectors.toList()), context);
+                .collect(Collectors.toList()), global);
     }
 
     public boolean checkUnsat() {
-        return context.global().constraintOps.checkUnsat(this);
+        return global.constraintOps.checkUnsat(this);
     }
 
     public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
@@ -594,7 +586,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (context.global().globalOptions.debug) {
+            if (global.globalOptions.debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
@@ -602,33 +594,34 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.global().globalOptions.debug) {
+                if (global.globalOptions.debug) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
             }
 
-            IfThenElseFinder ifThenElseFinder = new IfThenElseFinder(context);
+            IfThenElseFinder ifThenElseFinder = new IfThenElseFinder();
             right.accept(ifThenElseFinder);
             if (!ifThenElseFinder.result.isEmpty()) {
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.global().globalOptions.debug) {
+                if (global.globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
-                implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(), right));
-                implications.add(Pair.of(left.add(condition, BoolToken.FALSE).simplify(), right));
+                TermContext context = TermContext.builder(global).build();
+                implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));
+                implications.add(Pair.of(left.add(condition, BoolToken.FALSE).simplify(context), right));
                 continue;
             }
 
             if (!impliesSMT(left,right, rightOnlyVariables)) {
-                if (context.global().globalOptions.debug) {
+                if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.global().globalOptions.debug) {
+                if (global.globalOptions.debug) {
                     System.err.println("Proved!");
                 }
             }
@@ -645,14 +638,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         Substitution<Variable, Term> simplifiedSubstitution = constraint.substitution.minusAll(
                 Maps.difference(constraint.substitution, substitution).entriesInCommon().keySet());
         Predicate<Equality> inConstraint = equality -> !equalities().contains(equality)
-                && !equalities().contains(new Equality(equality.rightHandSide(), equality.leftHandSide(), context));
+                && !equalities().contains(new Equality(equality.rightHandSide(), equality.leftHandSide(), global));
         PersistentUniqueList<Equality> simplifiedEqualities= PersistentUniqueList.from(
                 constraint.equalities().stream().filter(inConstraint).collect(Collectors.toList()));
         ConjunctiveFormula simplifiedConstraint = ConjunctiveFormula.of(
                 simplifiedSubstitution,
                 simplifiedEqualities,
                 constraint.disjunctions,
-                constraint.context);
+                constraint.global);
 
         if (simplifiedConstraint.isTrue()) {
             return simplifiedConstraint;
@@ -678,7 +671,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
-        return left.context.global().constraintOps.impliesSMT(left, right, rightOnlyVariables);
+        return left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables);
     }
 
     public boolean hasMapEqualities() {
@@ -715,15 +708,15 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     public List<Term> getKComponents() {
         Stream<Term> stream = Stream.concat(
                 Stream.concat(
-                        substitution.equalities(context).stream().map(e -> e.toK(context)),
-                        equalities.stream().map(e -> e.toK(context))),
+                        substitution.equalities(global).stream().map(Equality::toK),
+                        equalities.stream().map(Equality::toK)),
                 disjunctions.stream().map(DisjunctiveFormula::toKore));
         return stream.collect(Collectors.toList());
     }
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("'_andBool_", context.definition());
+        return KLabelConstant.of("'_andBool_", global.getDefinition());
     }
 
     @Override

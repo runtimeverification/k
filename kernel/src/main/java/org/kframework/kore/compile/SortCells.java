@@ -13,14 +13,8 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 import scala.collection.Seq;
@@ -63,16 +57,13 @@ import static org.kframework.kore.KORE.*;
  */
 public class SortCells {
     private final ConcretizationInfo cfg;
-    private final KExceptionManager kem;
     private final Module module;
-    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, Module module, KExceptionManager kem) {
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, Module module) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
-        this.kem = kem;
         this.module = module;
     }
-    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, KExceptionManager kem) {
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
-        this.kem = kem;
         this.module = null;
     }
 
@@ -224,7 +215,7 @@ public class SortCells {
     }
 
     private void analyzeVars(K term) {
-        new VisitKORE() {
+        new VisitK() {
             private boolean inRewrite = false;
             private boolean inRhs = false;
 
@@ -248,7 +239,7 @@ public class SortCells {
             }
 
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (cfg.isParentCell(k.klabel())) {
                     if (inRewrite) {
                         processSide(k, inRhs, k.klist().stream()
@@ -264,7 +255,7 @@ public class SortCells {
                                 .collect(Collectors.toList()));
                     }
                 }
-                return super.apply(k);
+                super.apply(k);
             }
 
             private void processSide(KApply parentCell, boolean allowRhs, List<K> items) {
@@ -311,7 +302,7 @@ public class SortCells {
             }
 
             @Override
-            public Void apply(KRewrite k) {
+            public void apply(KRewrite k) {
                 assert !inRewrite;
                 inRewrite = true;
                 apply(k.left());
@@ -319,20 +310,18 @@ public class SortCells {
                 apply(k.right());
                 inRhs = false;
                 inRewrite = false;
-                return null;
             }
 
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                 previousVars.add(k);
-                return null;
             }
         }.apply(term);
     }
 
     private Sort getPredicateSort(Sort s) {
         if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
-            scala.collection.immutable.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
+            scala.collection.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
             if (sorts.size() != 1) {
                 throw KEMException.compilerError("Expected exactly one cell collection sort for the sort " + s + "; found " + sorts);
             }
@@ -361,7 +350,7 @@ public class SortCells {
      * variables.
      */
     private K processVars(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (!cfg.isParentCell(k.klabel())) {

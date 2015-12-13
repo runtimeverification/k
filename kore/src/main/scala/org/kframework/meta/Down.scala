@@ -6,10 +6,8 @@ import org.kframework.kore.Unapply._
 import org.kframework.kore.KORE.Sort
 
 import scala.util.Try
+import collection._
 
-/**
- * Created by cos on 2/6/15.
- */
 case class Down(imports: Set[String]) extends (K => Any) {
 
   import org.kframework.builtin.Sorts.KString
@@ -26,8 +24,8 @@ case class Down(imports: Set[String]) extends (K => Any) {
     //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
-    case t@KApply(KLabel(l), ks) if t.att.contains(ClassFromUp) =>
-      val classNameRecoveredFromUp = t.att.get[String](ClassFromUp).get
+    case t@KApply(KLabel(l), ks) if t.att.contains(Att.ClassFromUp) =>
+      val classNameRecoveredFromUp = t.att.get[String](Att.ClassFromUp).get
       Reflection.construct(classNameRecoveredFromUp, ks map {
         apply _
       })

@@ -109,17 +109,17 @@ public class ParserUtils {
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 
-    private List<org.kframework.kil.Module> slurp(
+    public List<org.kframework.kil.Module> slurp(
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories) {
-        List<DefinitionItem> items = Outer.parse(source, definitionText, null);
+        List<DefinitionItem> items = Outer.parse(Source.apply(source.getPath()), definitionText, null);
         if (options.verbose) {
             try {
-                System.out.println("Importing: " + new File(source.source()).getCanonicalPath());
+                System.out.println("Importing: " + source.getCanonicalPath());
             } catch (IOException e) {
-                System.out.println("Importing: " + new File(source.source()).getAbsolutePath());
+                System.out.println("Importing: " + source.getAbsolutePath());
             }
         }
         List<org.kframework.kil.Module> results = new ArrayList<>();
@@ -145,11 +145,12 @@ public class ParserUtils {
                         })
                         .filter(file -> file.exists()).findFirst();
 
-                if (definitionFile.isPresent())
+                if (definitionFile.isPresent()) {
                     results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
-                            Source.apply(definitionFile.get().getAbsolutePath()),
+                            definitionFile.get(),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
+                }
                 else
                     throw KExceptionManager.criticalError("Could not find file: " +
                             definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
@@ -161,7 +162,7 @@ public class ParserUtils {
     public Set<Module> loadModules(
             Set<Module> previousModules,
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {
@@ -190,7 +191,7 @@ public class ParserUtils {
             String mainModuleName,
             String syntaxModuleName,
             String definitionText,
-            Source source,
+            File source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {

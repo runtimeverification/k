@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
@@ -9,14 +10,18 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.BitSet;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -29,24 +34,39 @@ import java.util.stream.Collectors;
  *
  * @author AndreiS
  */
-public class CopyOnWriteTransformer implements Transformer {
+public abstract class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
-    protected final Definition definition;
 
     public CopyOnWriteTransformer(TermContext context) {
         this.context = context;
-        this.definition = context.definition();
     }
 
     public CopyOnWriteTransformer() {
-        this.context = null;
-        this.definition = null;
+        this(null);
     }
 
     @Override
     public String getName() {
         return this.getClass().toString();
+    }
+
+    /**
+     * Decides whether to use the {@link GlobalContext} carried by {@code term}
+     * or the one provided externally in {@link CopyOnWriteTransformer#context}.
+     * <p>
+     * YilongL: I think we should eventually get rid of {@code TermContext} from
+     * this class and always use the {@code GlobalContext} carried in {@code term}.
+     * This requires us to properly reset the data inside {@code GlobalContext} after
+     * deserialization. However, a single {@link Definition} is currently shared
+     * between multiple KRun instances in kserver mode so the reset cannot be easily
+     * done and we have to rely on such ad-hoc mechanism to bypass the invalid
+     * {@code GlobalContext} inside those {@code term}'s that belong to the
+     * {@code Definition} object.
+     * </p>
+     */
+    private GlobalContext resolveGlobalContext(HasGlobalContext term) {
+        return context == null ? term.globalContext() : context.global();
     }
 
     @Override
@@ -76,7 +96,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term term = (Term) constrainedTerm.term().accept(this);
         ConjunctiveFormula constraint = (ConjunctiveFormula) constrainedTerm.constraint().accept(this);
         if (term != constrainedTerm.term() || constraint != constrainedTerm.constraint()) {
-            constrainedTerm = new ConstrainedTerm(term, constraint);
+            constrainedTerm = new ConstrainedTerm(term, constraint, constrainedTerm.termContext().fork());
         }
         return constrainedTerm;
     }
@@ -119,6 +139,34 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        List<Pair<Term, BitSet>> children = ruleAutomatonDisjunction.disjunctions().stream()
+                .map(p -> Pair.of((Term) p.getLeft().accept(this), p.getRight()))
+                .collect(Collectors.toList());
+        if (children.equals(ruleAutomatonDisjunction.disjunctions())) {
+            return ruleAutomatonDisjunction;
+        } else {
+            return new RuleAutomatonDisjunction(
+                    children,
+                    resolveGlobalContext(ruleAutomatonDisjunction));
+        }
+    }
+
+    @Override
+    public ASTNode transform(InnerRHSRewrite innerRHSRewrite) {
+        Term[] theNewRHS = new Term[innerRHSRewrite.theRHS.length];
+        for (int i = 0; i < theNewRHS.length; i++) {
+            if (innerRHSRewrite.theRHS[i] != null)
+                theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
+        }
+        if(Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
+            return innerRHSRewrite;
+        } else {
+            return new InnerRHSRewrite(theNewRHS);
+        }
+    }
+
+    @Override
     public ASTNode transform(KItemProjection kItemProjection) {
         Term term = (Term) kItemProjection.term().accept(this);
         if (term != kItemProjection.term()) {
@@ -132,7 +180,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = KItem.of(kLabel, kList, context, kItem.getSource(), kItem.getLocation());
+            kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
         return kItem;
     }
@@ -243,7 +291,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
-        BuiltinList.Builder builder = BuiltinList.builder(context);
+        BuiltinList.Builder builder = BuiltinList.builder(resolveGlobalContext(builtinList));
         for (Term term : builtinList.elementsLeft()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
@@ -265,7 +313,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         boolean changed = false;
-        BuiltinMap.Builder builder = BuiltinMap.builder(context);
+        BuiltinMap.Builder builder = BuiltinMap.builder(resolveGlobalContext(builtinMap));
 
         for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
@@ -309,7 +357,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(resolveGlobalContext(builtinSet));
         for(Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
@@ -370,6 +418,7 @@ public class CopyOnWriteTransformer implements Transformer {
                 || processedEnsures.equals(rule.ensures())
                 || processedFreshConstants.equals(rule.freshConstants())
                 || processedLookups != rule.lookups()) {
+            GlobalContext global = context == null ? rule.globalContext() : context.global();
             return new Rule(
                     rule.label(),
                     processedLeftHandSide,
@@ -385,7 +434,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     rule.cellsToCopy(),
                     rule.matchingInstructions(),
                     rule,
-                    context);
+                    global);
         } else {
             return rule;
         }
@@ -393,7 +442,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConjunctiveFormula conjunctiveFormula) {
-        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(context);
+        ConjunctiveFormula transformedConjunctiveFormula = ConjunctiveFormula.of(resolveGlobalContext(conjunctiveFormula));
 
         for (Map.Entry<Variable, Term> entry : conjunctiveFormula.substitution().entrySet()) {
             transformedConjunctiveFormula = transformedConjunctiveFormula.add(
@@ -412,8 +461,12 @@ public class CopyOnWriteTransformer implements Transformer {
                     (DisjunctiveFormula) disjunctiveFormula.accept(this));
         }
 
-        if (context.global().stage == Stage.REWRITING) {
-            transformedConjunctiveFormula = transformedConjunctiveFormula.simplify();
+        if (conjunctiveFormula.globalContext().stage == Stage.REWRITING) {
+            // TODO(YilongL): I don't think this piece of code belongs here
+            // because a SubstitutionTransformer may only want to do substitution
+            transformedConjunctiveFormula = context == null ?
+                    transformedConjunctiveFormula.simplify() :
+                    transformedConjunctiveFormula.simplify(context);
         }
         return !transformedConjunctiveFormula.equals(conjunctiveFormula) ?
                 transformedConjunctiveFormula :
@@ -425,7 +478,7 @@ public class CopyOnWriteTransformer implements Transformer {
         DisjunctiveFormula transformedDisjunctiveFormula = new DisjunctiveFormula(
                 disjunctiveFormula.conjunctions().stream()
                         .map(c -> (ConjunctiveFormula) c.accept(this))
-                        .collect(Collectors.toList()), context);
+                        .collect(Collectors.toList()), resolveGlobalContext(disjunctiveFormula));
         return !transformedDisjunctiveFormula.equals(disjunctiveFormula) ?
                 transformedDisjunctiveFormula :
                 disjunctiveFormula;

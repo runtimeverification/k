@@ -5,7 +5,7 @@
   <groupId>org.kframework.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0-SNAPSHOT</version>
+  <version>4.0-beta4-SNAPSHOT</version>
   <name>K Framework Tool Parent</name>
 
   <modules>
@@ -14,7 +14,6 @@
     <module>k-distribution</module>
     <module>java-backend</module>
     <module>coq-backend</module>
-    <module>ocaml-backend</module>
     <module>tiny</module>
   </modules>
 

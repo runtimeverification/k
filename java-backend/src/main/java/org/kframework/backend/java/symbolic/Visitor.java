@@ -42,5 +42,6 @@ public interface Visitor {
     void visit(UninterpretedToken uninterpretedToken);
     void visit(Variable variable);
     void visit(InjectedKLabel injectedKLabel);
-
+    void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction);
+    void visit(InnerRHSRewrite innerRHSRewrite);
 }

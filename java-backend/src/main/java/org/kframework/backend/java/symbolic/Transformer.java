@@ -45,4 +45,6 @@ public interface Transformer {
     ASTNode transform(UninterpretedToken uninterpretedToken);
     ASTNode transform(Variable variable);
     ASTNode transform(InjectedKLabel injectedKLabel);
+    ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction);
+    ASTNode transform(InnerRHSRewrite innerRHSRewrite);
 }

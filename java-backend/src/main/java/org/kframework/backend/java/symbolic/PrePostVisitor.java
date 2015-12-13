@@ -18,20 +18,12 @@ public class PrePostVisitor implements Visitor {
         return preVisitor;
     }
 
-    public void setPreVisitor(CombinedLocalVisitor preVisitor) {
-        this.preVisitor = preVisitor;
-    }
-
     public CombinedLocalVisitor getPostVisitor() {
         return postVisitor;
     }
 
-    public void setPostVisitor(CombinedLocalVisitor postVisitor) {
-        this.postVisitor = postVisitor;
-    }
-
-    CombinedLocalVisitor preVisitor = new CombinedLocalVisitor();
-    CombinedLocalVisitor postVisitor = new CombinedLocalVisitor();
+    protected final CombinedLocalVisitor preVisitor = new CombinedLocalVisitor();
+    protected final CombinedLocalVisitor postVisitor = new CombinedLocalVisitor();
 
     @Override
     public String getName() {
@@ -146,6 +138,14 @@ public class PrePostVisitor implements Visitor {
         injectedKLabel.injectedKLabel().accept(this);
         injectedKLabel.accept(postVisitor);
     }
+
+    @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) { }
 
     @Override
     public void visit(KItem kItem) {

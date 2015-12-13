@@ -7,18 +7,14 @@ import com.google.common.collect.Multiset;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.Assoc;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KVariable;
+import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 
@@ -118,11 +114,11 @@ public class ConvertDataStructureToLookup {
      * Collects all the variables in {@code term} into {@code vars}.
      */
     void gatherVars(K term, Multiset<KVariable> vars) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable v) {
+            public void apply(KVariable v) {
                 vars.add(v);
-                return super.apply(v);
+                super.apply(v);
             }
         }.apply(term);
     }
@@ -200,7 +196,7 @@ public class ConvertDataStructureToLookup {
         Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).<String>getOptional("wrapElement");
         if (wrapElement.isPresent()) {
             KLabel wrappedLabel = KLabel(wrapElement.get());
-            return new TransformKORE() {
+            return new TransformK() {
                 @Override
                 public K apply(KApply k) {
                     if (k.klabel().equals(wrappedLabel)) {
@@ -219,9 +215,12 @@ public class ConvertDataStructureToLookup {
         //maintain the list of variables in the term so that we can deduce that a particular variable is unconstrained
         Multiset<KVariable> varConstraints = HashMultiset.create();
         gatherVars(RewriteToTop.toLeft(body), varConstraints);
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
+                if (k.klabel().name().equals(KLabels.KSEQ))
+                    return super.apply(k);
+
                 if (collectionFor.containsKey(k.klabel())) {
                     KLabel collectionLabel = collectionFor.get(k.klabel());
                     Att att = m.attributesFor().apply(collectionLabel);
@@ -504,13 +503,13 @@ public class ConvertDataStructureToLookup {
         if (s.att().contains(Attribute.LEMMA_KEY)
                 || s.att().contains(Attribute.SMT_LEMMA_KEY)
                 || s.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
-          return s;
+            return s;
         } else if (s instanceof Rule) {
             return convert((Rule) s);
         } else if (s instanceof Context) {
             return convert((Context) s);
         } else {
-            return s;
+          return s;
         }
     }
 

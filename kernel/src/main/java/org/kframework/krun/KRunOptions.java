@@ -192,7 +192,7 @@ public final class KRunOptions {
     }
 
     @Parameter(names="--search", description="In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).")
-    private boolean search = false;
+    public boolean search = false;
 
     @Parameter(names="--search-final", description="Same as --search but only return final states, even if --depth is provided.")
     private boolean searchFinal = false;
@@ -246,8 +246,6 @@ public final class KRunOptions {
 
     @Parameter(names="--exit-code", description="Specify a matching pattern containing an integer variable which will be used as the exit status of krun.")
     public String exitCodePattern;
-
-    public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
 
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;

@@ -1,0 +1,1 @@
+<T> <threads> <thread> <k> .::K </k> <env> n |-> 1 sum |-> 2 </env> <id> 0 </id> </thread> .ThreadCellBag </threads> <store> 1 |-> 0 2 |-> 5050 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "on" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "on" ) ListItem ( #buffer ( "" ) ) </out> </T>

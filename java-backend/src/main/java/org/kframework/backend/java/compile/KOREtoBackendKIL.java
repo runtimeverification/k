@@ -2,28 +2,15 @@
 
 package org.kframework.backend.java.compile;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.DataStructures;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.InjectedKLabel;
-import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.AbstractUnifier;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.Attribute;
@@ -32,14 +19,20 @@ import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.convertors.KOREtoKIL;
+import org.kframework.utils.BitSet;
+
 import static org.kframework.Collections.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -50,26 +43,36 @@ import com.google.common.collect.Lists;
  */
 public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<org.kframework.kore.K> {
 
+    public static final String THE_VARIABLE = "THE_VARIABLE";
+
     private final Module module;
     private final Definition definition;
-    private final TermContext context;
+    private final GlobalContext global;
     private final boolean useCellCollections;
     /**
      * Flag that controls whether the translator substitutes the variables in a {@code Rule} with fresh variables
      */
     private final boolean freshRules;
 
-    public KOREtoBackendKIL(Module module, Definition definition, TermContext context, boolean useCellCollections, boolean freshRules) {
+    private final KLabelConstant kSeqLabel;
+    private final KLabelConstant kDotLabel;
+
+    private final HashMap<String, Variable> variableTable = new HashMap<>();
+
+    public KOREtoBackendKIL(Module module, Definition definition, GlobalContext global, boolean useCellCollections, boolean freshRules) {
         this.module = module;
         this.definition = definition;
-        this.context = context;
+        this.global = global;
         this.useCellCollections = useCellCollections;
         this.freshRules = freshRules;
+
+        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, global.getDefinition());
+        kDotLabel = KLabelConstant.of(KLabels.DOTK, global.getDefinition());
     }
 
     @Override
     public KLabelConstant KLabel(String name) {
-        return KLabelConstant.of(name, context.definition());
+        return KLabelConstant.of(name, global.getDefinition());
     }
 
     @Override
@@ -94,8 +97,101 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         throw new AssertionError("Unsupported for now because KVariable is not a KLabel. See KApply1()");
     }
 
+    /**
+     * TODO: rename the method to KApply when the backend fully implements KORE
+     */
     public Term KApply1(org.kframework.kore.KLabel klabel, org.kframework.kore.KList klist, Att att) {
-        return KItem.of(convert(klabel), KList(klist.items()), context);
+        if (klabel.name().equals(KLabels.KREWRITE)) {
+            return convertKRewrite(klabel, klist);
+        }
+
+        if (klabel.name().equals(KLabels.ML_OR)) {
+            return new RuleAutomatonDisjunction(
+                    klist.stream().map(k -> ((KApply) k).klist().items()).map(l -> Pair.of(convert(l.get(0)), getRuleSet((KApply) l.get(1)))).collect(Collectors.toList()),
+                    global);
+        }
+
+        // we've encountered a regular KApply
+
+        KList convertedKList = KList(klist.items());
+        BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
+
+        KItem kItem = KItem.of(convert1(klabel), convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
+        if (AbstractUnifier.isKSeq(kItem)) {
+            return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
+                    .map(Term.class::cast)
+                    .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), global))
+                    .get();
+        } else {
+            return kItem;
+        }
+    }
+
+    /**
+     * @param convertedKList the klist of the KApply
+     * @return the {@link KItem}.childrenDontCareRule mask
+     */
+    private BitSet[] constructDontCareRuleMask(KList convertedKList) {
+        BitSet childrenDontCareRuleMask[] = null;
+        if (convertedKList.stream().anyMatch(RuleAutomatonDisjunction.class::isInstance)) {
+            childrenDontCareRuleMask = new BitSet[convertedKList.size()];
+            for (int i = 0; i < convertedKList.size(); ++i) {
+                if (convertedKList.get(i) instanceof RuleAutomatonDisjunction) {
+                    BitSet the_variable = ((RuleAutomatonDisjunction) convertedKList.get(i)).getVariablesForSort(Sort.KSEQUENCE).stream()
+                            .filter(p -> p.getLeft().name().equals(THE_VARIABLE)).findAny().map(Pair::getRight).orElseGet(() -> null);
+                    childrenDontCareRuleMask[i] = the_variable;
+                } else {
+                    childrenDontCareRuleMask[i] = null;
+                }
+            }
+        }
+        return childrenDontCareRuleMask;
+    }
+
+    /**
+     * Converts a KRewrite to an rule-labeled ML OR ({@link RuleAutomatonDisjunction}) on the left and
+     * a {@link InnerRHSRewrite} on the right.
+     *
+     * @param klabel is the KRewrite
+     * @param klist  contains the LHS and RHS
+     * @return
+     */
+    private Term convertKRewrite(KLabel klabel, org.kframework.kore.KList klist) {
+        K kk = klist.items().get(1);
+
+        if (!(kk instanceof KApply))
+            throw new AssertionError("k should be a KApply");
+
+        KApply k = (KApply) kk;
+
+        Set<KApply> orContents = getOrContents(k);
+
+        Term[] theRHSs = new Term[this.definition.reverseRuleTable.size()];
+
+        orContents.forEach(c -> {
+            if (!c.klabel().name().equals(KLabels.ML_AND))
+                throw new AssertionError("c should be an KApply AND but is " + c.klabel().name());
+            K term = c.klist().items().get(0);
+            Integer ruleIndex = getRuleIndex((KApply) c.klist().items().get(1));
+            theRHSs[ruleIndex] = convert(term);
+        });
+
+        return KItem.of(convert1(klabel), org.kframework.backend.java.kil.KList.concatenate(convert(klist.items().get(0)), new InnerRHSRewrite(theRHSs)), global);
+    }
+
+    private BitSet getRuleSet(KApply k) {
+        BitSet theRuleSetIndices = BitSet.apply(definition.reverseRuleTable.size());
+        Set<KApply> rulePs = getOrContents(k);
+        rulePs.stream().map(this::getRuleIndex).forEach(theRuleSetIndices::set);
+        return theRuleSetIndices;
+    }
+
+    private Integer getRuleIndex(KApply kk) {
+        return definition.reverseRuleTable.get(Integer.valueOf(((KToken) kk.klist().items().get(0)).s()));
+    }
+
+    private Set<KApply> getOrContents(KApply k) {
+        return k.klabel().name().equals(KLabels.ML_OR) ? k.klist().items().stream().map(KApply.class::cast).collect(Collectors.toSet()) : Collections.singleton(k);
     }
 
     @Override
@@ -108,9 +204,17 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public Variable KVariable(String name, Att att) {
-        Variable var = new Variable(name, Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K")));
+        Sort sort = Sort.of(att.<String>getOptional(Attribute.SORT_KEY).orElse("K"));
+        String key = name + sort;
+        if (variableTable.containsKey(key)) {
+            return variableTable.get(key);
+        }
+
+        Variable var = new Variable(name, sort, variableTable.size());
         var.setAttributes(new KOREtoKIL().convertAttributes(att));
+        variableTable.put(key, var);
         return var;
+
     }
 
     @Override
@@ -120,10 +224,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     @Override
     public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
-        return new InjectedKLabel(convert(klabel));
+        return new InjectedKLabel(convert1(klabel));
     }
 
-    private Term convert(KLabel klabel) {
+    private Term convert1(KLabel klabel) {
         if (klabel instanceof KVariable) {
             return KVariable(klabel.name(), ((KVariable) klabel).att().add(Attribute.SORT_KEY, "KLabel"));
         } else {
@@ -160,15 +264,15 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             KLabel klabel = ((KApply) k).klabel();
             org.kframework.kore.KList klist = ((KApply) k).klist();
             if (useCellCollections && definition.configurationInfo().getCellForConcat(klabel).isDefined())
-                return KLabelInjection.injectionOf(CellCollection(klabel, klist), context);
+                return KLabelInjection.injectionOf(CellCollection(klabel, klist), global);
             if (useCellCollections && definition.configurationInfo().getCellForUnit(klabel).isDefined() && klist.size() == 0)
                 return KLabelInjection.injectionOf(
                         CellCollection.empty(definition.configurationInfo().getCellForUnit(klabel).get(), definition),
-                        context);
+                        global);
             else if (useCellCollections && definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
                 return KLabelInjection.injectionOf(
                         CellCollection.singleton(CellLabel.of(klabel.name()), KList(klist.items()), definition.configurationInfo().getCellSort(klabel), definition),
-                        context);
+                        global);
             else
                 return KApply1(klabel, klist, k.att());
         } else if (k instanceof org.kframework.kore.KSequence)
@@ -177,7 +281,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
         else if (k instanceof org.kframework.kore.InjectedKLabel)
             return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
-        else
+        else if (k instanceof org.kframework.kore.KRewrite) {
+            return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), global);
+        } else
             throw new AssertionError("BUM!");
     }
 
@@ -207,7 +313,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
         /* split requires clauses into matches and non-matches */
         List<Term> requires = Lists.newArrayList();
-        ConjunctiveFormula lookups = ConjunctiveFormula.of(context);
+        ConjunctiveFormula lookups = ConjunctiveFormula.of(global);
         for (Term term : requiresAndLookups) {
             if (term instanceof KItem) {
                 if (((KItem) term).kLabel().equals(matchLabel)) {
@@ -219,14 +325,14 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                             KItem.of(
                                     KLabelConstant.of(DataStructures.SET_CHOICE, definition),
                                     KList.singleton(((KList) ((KItem) term).kList()).get(1)),
-                                    context),
+                                    global),
                             ((KList) ((KItem) term).kList()).get(0));
                 } else if (((KItem) term).kLabel().equals(mapChoiceLabel)) {
                     lookups = lookups.add(
                             KItem.of(
                                     KLabelConstant.of(DataStructures.MAP_CHOICE, definition),
                                     KList.singleton(((KList) ((KItem) term).kList()).get(1)),
-                                    context),
+                                    global),
                             ((KList) ((KItem) term).kList()).get(0));
                 } else {
                     requires.add(term);
@@ -255,9 +361,9 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                 null,
                 null,
                 oldRule,
-                context);
+                global);
         if (freshRules) {
-            backendKILRule = backendKILRule.getFreshRule(context);
+            backendKILRule = backendKILRule.renameVariables();
         }
         return backendKILRule;
     }

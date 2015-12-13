@@ -1,5 +1,6 @@
 package org.kframework.kore
 
+import org.kframework.builtin.KLabels
 import org.kframework.kore
 import org.kframework.attributes._
 import collection.JavaConverters._
@@ -12,8 +13,10 @@ import collection.JavaConverters._
 
 
 object ADT {
+
   case class KLabel(name: String) extends kore.KLabel {
     override def toString = name
+
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
@@ -22,8 +25,14 @@ object ADT {
   }
 
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
-    def items: java.util.List[K] = elements.asJava
+    val items: java.util.List[K] = elements.asJava
+    val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
+      case k: kore.KApply => k
+      case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
+    }
+
     def iterator: Iterator[K] = elements.iterator
+
     override def equals(that: Any) = that match {
       case s: KSequence => s.elements == elements
       case _ => false
@@ -57,5 +66,21 @@ object ADT {
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite
 
   case class InjectedKLabel(klabel: kore.KLabel, att: Att) extends kore.InjectedKLabel
+
+}
+
+object SortedADT {
+
+  case class SortedKVariable(name: String, att: Att = Att()) extends kore.KVariable {
+    def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
+
+    val sort: Sort = ADT.Sort(att.getOptional[String]("sort").orElse("K"))
+
+    override def equals(other: Any) = other match {
+      case v: SortedKVariable => name == v.name && sort == v.sort
+//      case v: KVariable => throw new UnsupportedOperationException(s"should not mix SortedKVariables with KVariables for variable $this and $v")
+      case _ => false
+    }
+  }
 
 }

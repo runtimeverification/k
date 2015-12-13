@@ -5,6 +5,7 @@ import org.kframework.attributes.Att
 
 import scala.collection.mutable.ListBuffer
 import collection.JavaConverters._
+import collection._
 
 /**
  *
@@ -16,7 +17,8 @@ import collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  *
  */
-object KORE extends Constructors[K] with ScalaSugar[K] {
+object KORE extends Constructors[K] with ScalaSugared[K] {
+  val c = KORE
 
   val constructor = this
 

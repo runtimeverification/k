@@ -7,10 +7,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.utils.errorsystem.KEMException;
 
 /**
  * Sort of a {@link Term}.
@@ -20,7 +24,13 @@ import com.google.common.collect.ImmutableSet;
  */
 public final class Sort implements MaximalSharing, Serializable, org.kframework.kore.Sort {
 
-    private static final Map<String, Sort> cache = Collections.synchronizedMap(new PatriciaTrie<>());
+    private static final ConcurrentMap<String, Sort> cache = new ConcurrentHashMap<>();
+
+    /**
+     * see {@link #ordinal()}
+     */
+    public static final AtomicInteger maxOrdinal = new AtomicInteger(0);
+
 
     public static final Sort KITEM          =   Sort.of("KItem");
     public static final Sort KSEQUENCE      =   Sort.of("K");
@@ -53,6 +63,8 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      */
     private final String name;
 
+    private final int ordinal;
+
     /**
      * Gets the corresponding {@code Sort} from its {@code String}
      * representation.
@@ -62,7 +74,7 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * @return the sort
      */
     public static Sort of(String name) {
-        return cache.computeIfAbsent(name, Sort::new);
+        return cache.computeIfAbsent(name, s -> new Sort(s, maxOrdinal.getAndIncrement()));
     }
 
     public static Sort of(org.kframework.kil.Sort sort) {
@@ -77,12 +89,17 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
         return builder.build();
     }
 
-    private Sort(String name) {
+    private Sort(String name, int ordinal) {
         this.name = name;
+        this.ordinal = ordinal;
     }
 
     public String name() {
         return name;
+    }
+
+    public int ordinal() {
+        return ordinal;
     }
 
     public Sort getUserListSort(String separator) {
@@ -114,7 +131,11 @@ public final class Sort implements MaximalSharing, Serializable, org.kframework.
      * there is a cached instance.
      */
     Object readResolve() throws ObjectStreamException {
+        if (cache.containsKey(name) && cache.get(name).ordinal != this.ordinal) {
+            KEMException.criticalError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal +
+                    " in the cache and " + this.ordinal + " serialized.");
+        }
+        // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects
         return cache.computeIfAbsent(name, x -> this);
     }
-
 }

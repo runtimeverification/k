@@ -5,6 +5,9 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.DoubleLinkedList;
+import org.kframework.builtin.KLabels;
+import org.kframework.kore.Assoc;
+import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +57,18 @@ public abstract class AbstractUnifier implements Unifier {
 
     //private boolean matchOnFunctionSymbol;
     //
-    protected TermContext termContext;
+    protected final TermContext termContext;
+
+    private final KLabelConstant kSeqLabel;
+    private final KLabelConstant kDotLabel;
+    private final KItem kDot;
+
+    protected AbstractUnifier(TermContext termContext) {
+        this.termContext = termContext;
+        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
+        kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
+        kDot = KItem.of(kDotLabel, KList.concatenate(), termContext.global());
+    }
 
     void addUnificationTask(Term term, Term otherTerm) {
         taskBuffer.add(Pair.of(term, otherTerm));
@@ -121,6 +135,18 @@ public abstract class AbstractUnifier implements Unifier {
                             }
                             term = ((KList) term).get(0);
                         }
+                    }
+                }
+
+                if (isKSeq(term) || isKSeq(otherTerm)) {
+                    term = getCanonicalKSeq(term);
+                    otherTerm = getCanonicalKSeq(otherTerm);
+
+                    if (isKSeq(term)) {
+                        otherTerm = upKSeq(otherTerm);
+                    }
+                    if (isKSeq(otherTerm)) {
+                        term = upKSeq(term);
                     }
                 }
 
@@ -191,6 +217,27 @@ public abstract class AbstractUnifier implements Unifier {
         return !failed;
     }
 
+    public static boolean isKSeq(Term term) {
+        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+    }
+
+    public static boolean isKSeqVar(Term term) {
+        return term instanceof Variable && term.sort().equals(Sort.KSEQUENCE);
+    }
+
+    private Term upKSeq(Term otherTerm) {
+        if (!isKSeq(otherTerm) && !isKSeqVar(otherTerm))
+            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), termContext.global());
+        return otherTerm;
+    }
+
+    private Term getCanonicalKSeq(Term term) {
+        return stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
+                .map(Term.class::cast)
+                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext.global()))
+                .orElse(kDot);
+    }
+
     private void flushTaskBuffer() {
         tasks.pushAll(taskBuffer);
     }
@@ -233,11 +280,11 @@ public abstract class AbstractUnifier implements Unifier {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
                     Map<Variable,Variable> freshSubstitution = Variable.rename(variables);
-                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
+                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
                         Term bindingExp = terms.get(bindingExpPosition-1);
-                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
+                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution);
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }

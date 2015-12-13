@@ -24,7 +24,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 
 import java.io.File;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ public class GenerateSentencesFromConfigDeclTest {
 
         def =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         true);
@@ -68,7 +68,8 @@ public class GenerateSentencesFromConfigDeclTest {
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def, true);
         Module m = parserGen.getCombinedGrammar(parserGen.getConfigGrammar(m1)).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
-        Att initializerAtts = Att().add("function").add("initializer");
+        Att initializerAtts = Att().add("initializer");
+        Att productionAtts = initializerAtts.add("function");
         Set<Sentence> reference = Set(Production("<threads>", Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
                         Att().add("cell").add("topcell")),
@@ -99,33 +100,33 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(Terminal(".OptCell"))),
                 Production("initThreadsCell", Sort("ThreadsCell"),
                         Seq(Terminal("initThreadsCell"), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")),
-                        initializerAtts),
+                        productionAtts),
                 Production("initThreadCell", Sort("ThreadCell"),
                         Seq(Terminal("initThreadCell"), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")),
-                        initializerAtts),
+                        productionAtts),
                 Production("initKCell", Sort("KCell"),
                         Seq(Terminal("initKCell"), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")),
-                        initializerAtts),
+                        productionAtts),
                 Production("initOptCell", Sort("OptCell"),
                         Seq(Terminal("initOptCell")),
-                        initializerAtts),
+                        productionAtts),
                 Rule(KRewrite(KApply(KLabel("initThreadsCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<threads>"), false,
                                         KApply(KLabel("initThreadCell"), KVariable("Init")), false)),
-                        BooleanUtils.TRUE, BooleanUtils.FALSE, Att()),
+                        BooleanUtils.TRUE, BooleanUtils.FALSE, initializerAtts),
                 Rule(KRewrite(KApply(KLabel("initThreadCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<thread>"), false,
                                         Arrays.asList(KApply(KLabel("initKCell"), KVariable("Init")),
                                                 KApply(KLabel(KLabels.CELLS))), false)),
-                        BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
+                        BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Rule(KRewrite(KApply(KLabel("initKCell"), KVariable("Init")),
                                 IncompleteCellUtils.make(KLabel("<k>"), false, KApply(KLabel("#SemanticCastToKItem"), KApply(KLabel("Map:lookup"),
                                         KVariable("Init"),
                                         KToken("$PGM", Sorts.KConfigVar()))), false)),
-                        BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
+                        BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Rule(KRewrite(KApply(KLabel("initOptCell")),
                                 IncompleteCellUtils.make(KLabel("<opt>"), false, KApply(KLabel(".Opt")), false)),
-                        BooleanUtils.TRUE, BooleanUtils.TRUE, Att()),
+                        BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Production("<threads>-fragment", Sort("ThreadsCellFragment"),
                         Seq(Terminal("<threads>-fragment"),NonTerminal(Sort("ThreadCellBag")),Terminal("</threads>-fragment")),
                         Att().add(Attribute.CELL_FRAGMENT_KEY,"ThreadsCell")),
@@ -138,8 +139,8 @@ public class GenerateSentencesFromConfigDeclTest {
                 Production("noKCell", Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, "KCell"))
             );
 
-        assertEquals("Missing expected productions", Set(), reference.$amp$tilde(gen));
         assertEquals("Produced unexpected productions", Set(), gen.$amp$tilde(reference));
+        assertEquals("Missing expected productions", Set(), reference.$amp$tilde(gen));
         // Production.equals ignores attributes, but they are important here
         nextgen:
         for (Sentence g : iterable(gen)) {

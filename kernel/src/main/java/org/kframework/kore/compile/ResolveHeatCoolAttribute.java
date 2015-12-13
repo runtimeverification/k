@@ -34,7 +34,13 @@ public class ResolveHeatCoolAttribute {
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            return BooleanUtils.and(requires, predicate);
+            if (att.contains("transition")) {
+                // if the cooling rule is a transition, do not add the isKResult predicate
+                // because that will inhibit search
+                return requires;
+            } else {
+                return BooleanUtils.and(requires, predicate);
+            }
         }
         throw new AssertionError("unreachable");
     }

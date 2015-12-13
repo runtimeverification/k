@@ -127,6 +127,14 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(RuleAutomatonDisjunction ruleAutomatonDisjunction) {
+        ruleAutomatonDisjunction.disjunctions().stream().forEach(p -> p.getLeft().accept(this));
+    }
+
+    @Override
+    public void visit(InnerRHSRewrite innerRHSRewrite) { }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);

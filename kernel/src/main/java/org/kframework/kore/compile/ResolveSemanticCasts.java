@@ -6,9 +6,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KVariable;
+import org.kframework.kore.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,8 +21,14 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveSemanticCasts {
 
+    private final boolean skipSortPredicates;
     private Set<KApply> casts = new HashSet<>();
     private Map<KVariable, KVariable> varToTypedVar = new HashMap<>();
+
+    public ResolveSemanticCasts(boolean skipSortPredicates) {
+
+        this.skipSortPredicates = skipSortPredicates;
+    }
 
     void resetCasts() {
         casts.clear();
@@ -54,23 +58,27 @@ public class ResolveSemanticCasts {
     }
 
     K addSideCondition(K requires) {
-        Optional<KApply> sideCondition = casts.stream().map(k -> {
-            return new TransformKORE() {
-                @Override
-                public K apply(KVariable k) {
-                    if (varToTypedVar.containsKey(k)) {
-                        return varToTypedVar.get(k);
-                    }
-                    return k;
-                }
-            }.apply(k);
-        }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply)k)), transform(k))).reduce(BooleanUtils::and);
-        if (!sideCondition.isPresent()) {
+        if (skipSortPredicates)
             return requires;
-        } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
-            return sideCondition.get();
-        } else {
-            return BooleanUtils.and(sideCondition.get(), requires);
+        else {
+            Optional<KApply> sideCondition = casts.stream().map(k -> {
+                return new TransformK() {
+                    @Override
+                    public K apply(KVariable k) {
+                        if (varToTypedVar.containsKey(k)) {
+                            return varToTypedVar.get(k);
+                        }
+                        return k;
+                    }
+                }.apply(k);
+            }).map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply) k)), transform(k))).reduce(BooleanUtils::and);
+            if (!sideCondition.isPresent()) {
+                return requires;
+            } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
+                return sideCondition.get();
+            } else {
+                return BooleanUtils.and(sideCondition.get(), requires);
+            }
         }
     }
 
@@ -79,9 +87,9 @@ public class ResolveSemanticCasts {
     }
 
     void gatherCasts(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KApply v) {
+            public void apply(KApply v) {
                 if (v.klabel().name().startsWith("#SemanticCastTo")) {
                     casts.add(v);
                     K child = v.klist().items().get(0);
@@ -90,13 +98,13 @@ public class ResolveSemanticCasts {
                         varToTypedVar.put(var, KVariable(var.name(), var.att().add(Attribute.SORT_KEY, getSortNameOfCast(v))));
                     }
                 }
-                return super.apply(v);
+                super.apply(v);
             }
         }.apply(term);
     }
 
     K transform(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (casts.contains(k)) {

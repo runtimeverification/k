@@ -18,7 +18,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.compile.KtoKORE;
-import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.main.GlobalOptions;
@@ -120,8 +119,7 @@ public class ExpandMacros {
     }
 
     private Rule expand(Rule rule) {
-        return Rule(
-                KRewrite(expand(RewriteToTop.toLeft(rule.body())), expand(RewriteToTop.toRight(rule.body()))),
+        return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());
@@ -138,14 +136,14 @@ public class ExpandMacros {
         if (noMacros) {
             return term;
         }
-        TermContext tc = TermContext.of(rewriter.rewritingContext);
+        TermContext tc = TermContext.builder(rewriter.rewritingContext).build();
         //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
-        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc, false, false).convert(term));
+        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc.global(), false, false).convert(term));
         return new KtoKORE().apply(t);
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule) {
+        if (s instanceof Rule && !s.att().contains("macro")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

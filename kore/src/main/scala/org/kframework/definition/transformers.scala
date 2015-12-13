@@ -33,6 +33,9 @@ object ModuleTransformer {
   def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): ModuleTransformer =
     fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
 
+  def fromRuleBodyTranformer(f: K => K, name: String): ModuleTransformer =
+    fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
+
   def apply(f: Module => Module, name: String): ModuleTransformer = f match {
     case f: ModuleTransformer => f
     case _ => new ModuleTransformer(f, name)
@@ -40,9 +43,9 @@ object ModuleTransformer {
 }
 
 /**
- * Transform all modules, transforming each module after its imports.
- * The f function take a module with all the imported modules already transformed, and changes the current module.
- */
+  * Transform all modules, transforming each module after its imports.
+  * The f function take a module with all the imported modules already transformed, and changes the current module.
+  */
 class ModuleTransformer(f: Module => Module, name: String) extends (Module => Module) {
   val memoization = collection.concurrent.TrieMap[Module, Module]()
 
@@ -61,7 +64,13 @@ object DefinitionTransformer {
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence], name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
 
+  def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
+
   def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromRuleBodyTranformer(f, name))
+
+  def fromRuleBodyTranformer(f: K => K, name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromRuleBodyTranformer(f, name))
 
   def from(f: java.util.function.UnaryOperator[Module], name: String): DefinitionTransformer = DefinitionTransformer(f(_), name)
@@ -76,6 +85,18 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
     definition.Definition(
       moduleTransformer(d.mainModule),
       moduleTransformer(d.mainSyntaxModule),
-      d.modules map moduleTransformer)
+      d.entryModules map moduleTransformer)
+  }
+}
+
+/**
+  * Only transforms modules which are reachable from mainModule or mainSyntaxModule
+  */
+class SelectiveDefinitionTransformer(moduleTransformer: ModuleTransformer) extends (Definition => Definition) {
+  override def apply(d: Definition): Definition = {
+    definition.Definition(
+      moduleTransformer(d.mainModule),
+      moduleTransformer(d.mainSyntaxModule),
+      d.entryModules map { m => moduleTransformer.memoization.getOrElse(m, m) })
   }
 }

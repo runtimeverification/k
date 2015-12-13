@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.kframework.k</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0-SNAPSHOT</version>
+    <version>4.0-beta4-SNAPSHOT</version>
   </parent>
   <artifactId>k-distribution</artifactId>
   <packaging>jar</packaging>
@@ -34,12 +34,6 @@
     <dependency>
       <groupId>org.kframework.k</groupId>
       <artifactId>java-backend</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.k</groupId>
-      <artifactId>ocaml-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -187,7 +181,7 @@
           </execution>
           <execution>
             <id>assembly-archive</id>
-            <phase>install</phase>
+            <phase>verify</phase>
             <goals>
               <goal>single</goal>
             </goals>

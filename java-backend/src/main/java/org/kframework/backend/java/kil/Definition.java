@@ -13,6 +13,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
@@ -48,9 +49,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.Sort;
-
+import static org.kframework.Collections.*;
 
 /**
  * A K definition in the format of the Java Rewrite Engine.
@@ -58,6 +58,10 @@ import static org.kframework.kore.KORE.Sort;
  * @author AndreiS
  */
 public class Definition extends JavaSymbolicObject {
+
+    public static final String AUTOMATON = "automaton";
+
+    public final Module module;
 
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
@@ -123,12 +127,25 @@ public class Definition extends JavaSymbolicObject {
     private RuleIndex index;
     public final IndexingTable.Data indexingData;
 
+    // new indexing data
+    /**
+     * the automaton rule used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     */
+    public Rule automaton = null;
+    /**
+     * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     */
+    public final Map<Integer, Rule> ruleTable;
+
+    public final Map<Integer, Integer> reverseRuleTable = new HashMap<>();
+
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.module = null;
 
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
@@ -196,9 +213,11 @@ public class Definition extends JavaSymbolicObject {
                 null,
                 context.getConfigurationStructureMap());
         this.context = context;
+        this.ruleTable = new HashMap<>();
     }
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
+        this.module = module;
         kLabels = new HashSet<>();
         this.kem = kem;
 
@@ -206,9 +225,7 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
-                JavaConversions.seqAsJavaList(p._1()).stream()
-                        .map(s -> Sort.of(s.name()))
-                        .forEach(sortsBuilder::add);
+                stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
                         e.getKey().name(),
                         new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
@@ -245,6 +262,7 @@ public class Definition extends JavaSymbolicObject {
         context = null;
 
         this.indexingData = new IndexingTable.Data();
+        this.ruleTable = new HashMap<>();
     }
 
     private Map<org.kframework.kore.Sort, DataStructureSort> getDataStructureSorts(Module module) {
@@ -282,20 +300,50 @@ public class Definition extends JavaSymbolicObject {
         return builder.build();
     }
 
-    public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, true, true);
-        JavaConversions.setAsJavaSet(module.sentences()).stream().forEach(s -> {
-            if (s instanceof org.kframework.definition.Rule) {
-                addRule(transformer.convert(Optional.of(module), (org.kframework.definition.Rule) s));
+    /**
+     * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
+     */
+    public void addKoreRules(Module module, GlobalContext global) {
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, false, global.krunOptions.experimental.prove != null);
+        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
+                .filter(org.kframework.definition.Rule.class::isInstance)
+                .map(org.kframework.definition.Rule.class::cast)
+                .collect(Collectors.toList());
+        koreRules.forEach(r -> {
+            if (r.att().contains(Att.topRule())) {
+//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
+                if (!r.att().contains(AUTOMATON)) {
+                    reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
+                }
+            }
+        });
+        koreRules.forEach(r -> {
+            Rule convertedRule = transformer.convert(Optional.of(module), r);
+            addRule(convertedRule);
+//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
+            if (r.att().contains(Att.topRule())) {
+                if (!r.att().contains(AUTOMATON)) {
+                    ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
+                }
+            }
+            if (r.att().contains(AUTOMATON)) {
+                automaton = convertedRule;
             }
         });
     }
 
     @Inject
     public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData) {
+        this(definitionData, kem, indexingData, new HashMap<>(), null);
+    }
+
+    public Definition(DefinitionData definitionData, KExceptionManager kem, IndexingTable.Data indexingData, Map<Integer, Rule> ruleTable, Rule automaton) {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.ruleTable = ruleTable;
+        this.automaton = automaton;
+        this.module = null;
 
         this.definitionData = definitionData;
         this.context = null;
@@ -429,13 +477,13 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public KItem.CacheTableValue getSortCacheValue(KItem.CacheTableColKey key) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             return sortCacheTable.get(key);
         }
     }
 
     public void putSortCacheValue(KItem.CacheTableColKey key, KItem.CacheTableValue value) {
-        synchronized(sortCacheTable) {
+        synchronized (sortCacheTable) {
             sortCacheTable.put(key, value);
         }
     }
