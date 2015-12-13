@@ -68,6 +68,11 @@
            programs="kore-io/tests"
            results="kore-io/tests" />
 
+  <include file="kore-cell-fragments/kool/tests/config.xml"
+           directory="kore-cell-fragments/kool"
+           programs="kore-cell-fragments/kool/tests"
+           results="kore-cell-fragments/kool/tests" />
+
   <include file="kore-cell-fragments/imp_fragments/config.xml"
            directory="kore-cell-fragments/imp_fragments/" />
 
