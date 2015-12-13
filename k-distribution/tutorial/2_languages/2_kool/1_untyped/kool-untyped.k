@@ -933,10 +933,16 @@ method call or the array access.  */
        <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-  // TODO(KORE): fix getKLabel #1801 and context issue #1802
+  // TODO(KORE): drop klabel once parsing issues #1682 are fixed
   rule fcall(fcall(A:Exp,B:Exps),C:Exps) => fcall(A,B) ~> #freezerFunCall(C)
   rule fcall(farray(A:Exp,B:Exps),C:Exps) => farray(A,B) ~> #freezerFunCall(C)
   rule V:Val ~> #freezerFunCall(C:Exps) => fcall(V,C)
+  /*
+  // TODO(KORE): fix getKLabel #1801 and context issue #1802
+  rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
+  rule (A:Exp[B:Exps])(C:Exps) => A[B] ~> #freezerFunCall(C)
+  rule V:Val ~> #freezerFunCall(C:Exps) => V(C)
+  */
   syntax KItem ::= "#freezerFunCall" "(" K ")"
   /*
   context HOLE(_:Exps)
