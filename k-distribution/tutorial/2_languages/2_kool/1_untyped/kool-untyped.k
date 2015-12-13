@@ -395,20 +395,12 @@ definition. */
 
 
   syntax Id ::= "$1" | "$2"
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule var farray(X:Id, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals)));
-  /*
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
-  */
     => var X[N1];
        {
          var $1=X;
          for(var $2=0; $2 <= N1 - 1; ++$2) {
-           // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-           var farray(X, `_,_`(N2,Vs));
-           /*
            var X[N2,Vs];
-           */
            $1[$2] = X;
          }
        }
@@ -446,11 +438,7 @@ definition. */
   rule false || E => E
 
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule farray(V:Val, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals))) => farray(V[N1], `_,_`(N2, Vs))
-  /*
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-  */
     [structural, anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
