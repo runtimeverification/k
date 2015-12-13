@@ -483,11 +483,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule `print(_);`(.Vals) => .K  [structural]
-  /*
-  rule print(.Vals); => .  [structural]
-  */
+  rule print(.Vals); => .K  [structural]
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
