@@ -44,7 +44,7 @@ import com.google.common.collect.Sets;
 public class FastRuleMatcher {
 
     private final ConjunctiveFormula[] constraints;
-    private final Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
+    private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
     private final int ruleCount;
 
     /**
@@ -239,7 +239,7 @@ public class FastRuleMatcher {
                 }
             }
             if (patternKLabel instanceof Variable) {
-                add((Variable) patternKLabel, ((KItem) subject).kLabel(), ruleMask);
+                addSubstitution((Variable) patternKLabel, ((KItem) subject).kLabel(), ruleMask);
             }
             return ruleMask;
         } else if (subject instanceof Token && pattern instanceof Token) {

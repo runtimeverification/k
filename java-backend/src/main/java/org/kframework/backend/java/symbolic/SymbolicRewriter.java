@@ -232,12 +232,12 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
             assert triple.getLeft().isSubstitution();
+            Rule rule = definition.ruleTable.get(triple.getRight());
             Substitution<Variable, Term> substitution =
                     rule.containsAttribute(Att.refers_THIS_CONFIGURATION()) ?
                             triple.getLeft().substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
                             triple.getLeft().substitution();
             boolean isMatching = triple.getMiddle();
-            Rule rule = definition.ruleTable.get(triple.getRight());
             // start the optimized substitution
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
