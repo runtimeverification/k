@@ -232,7 +232,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         }
         GlobalContext globalContext = leftChildRightTerm instanceof HasGlobalContext ?
                 resolveGlobalContext((HasGlobalContext) leftChildRightTerm) : context.global();
-        
+
         leftChildRightTerm = KItem.of(KLabelConstant.of("#KSequence", context.definition()), leftChildRightTermList, globalContext,
                 leftChildRightTerm.getSource(), leftChildRightTerm.location());
 
