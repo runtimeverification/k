@@ -135,6 +135,9 @@ public class KompileOptions implements Serializable {
         @Parameter(names="--add-top-cell", description="Add a top cell to configuration and all rules.")
         public boolean addTopCell = false;
 
+        @Parameter(names="--heat-cool-by-strategies", description="Control heating and cooling using strategies.")
+        public boolean heatCoolStrategies = false;
+
         @Parameter(names="--k-cells", description="Cells which contain komputations.")
         public List<String> kCells = Arrays.asList("k");
 

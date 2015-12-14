@@ -7,6 +7,7 @@ import static org.kframework.Collections.*;
 import org.kframework.Collections;
 import org.kframework.definition.Definition;
 import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.SelectiveDefinitionTransformer;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -35,10 +36,6 @@ public class ExpandMacrosDefinitionTransformer implements Function<Definition, D
     public Definition apply(Definition definition) {
         ExpandMacros macroExpander = new ExpandMacros(definition.mainModule(), kem, files, globalOptions, kompileOptions);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(macroExpander::expand, "expand macro rules");
-        return Definition.apply(
-                expandMacros.apply(definition.mainModule()),
-                expandMacros.apply(definition.mainSyntaxModule()),
-                map(expandMacros::apply, definition.entryModules()),
-                definition.att());
+        return new SelectiveDefinitionTransformer(expandMacros).apply(definition);
     }
 }

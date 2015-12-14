@@ -24,8 +24,8 @@ case class Down(imports: Set[String]) extends (K => Any) {
     //    case KApply(KLabel("List"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Seq"), ks, att) => ks.delegate map apply
     //    case KApply(KLabel("Set"), ks, att) => ks.delegate map apply toSet
-    case t@KApply(KLabel(l), ks) if t.att.contains(ClassFromUp) =>
-      val classNameRecoveredFromUp = t.att.get[String](ClassFromUp).get
+    case t@KApply(KLabel(l), ks) if t.att.contains(Att.ClassFromUp) =>
+      val classNameRecoveredFromUp = t.att.get[String](Att.ClassFromUp).get
       Reflection.construct(classNameRecoveredFromUp, ks map {
         apply _
       })

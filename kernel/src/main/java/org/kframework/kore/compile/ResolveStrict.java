@@ -113,7 +113,7 @@ public class ResolveStrict {
             } else {
                 requires = sideCondition.get();
             }
-            Context ctx = Context(KApply(production.klabel().get(), KList(items)), requires, Att());
+            Context ctx = Context(KApply(production.klabel().get(), KList(items)), requires, production.att());
             contexts.add(ctx);
         }
         return contexts;

@@ -86,8 +86,6 @@ public class FastRuleMatcher {
      * @return a list of substitutions tagged with the Integer identifier of the rule they belong to.
      */
     public List<Pair<Substitution<Variable, Term>, Integer>> mainMatch(Term subject, Term pattern, BitSet ruleMask, boolean computeOne, TermContext context) {
-        assert subject.isGround() : subject;
-
         ruleMask.stream().forEach(i -> substitutions[i].clear());
         rewrites = new Map[ruleMask.length()];
         ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
