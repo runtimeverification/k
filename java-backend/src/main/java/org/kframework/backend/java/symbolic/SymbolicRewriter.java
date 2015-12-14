@@ -25,7 +25,6 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KVariable;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
 import org.kframework.utils.errorsystem.KEMException;
@@ -43,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author AndreiS
@@ -88,7 +88,7 @@ public class SymbolicRewriter {
             step++;
         }
 
-        ConstrainedTerm afterVariableRename = new ConstrainedTerm(renameFreshVariables(constrainedTerm.term()), constrainedTerm.termContext());
+        ConstrainedTerm afterVariableRename = new ConstrainedTerm(new RenameAnonymousVariables().apply(constrainedTerm.term()), constrainedTerm.termContext());
 
         KRunState finalState = new JavaKRunState(afterVariableRename, counter, Optional.of(step));
 
@@ -98,20 +98,6 @@ public class SymbolicRewriter {
         }
 
         return finalState;
-    }
-
-    private Term renameFreshVariables(Term term) {
-        int newCount = 0;
-        return (Term) term.accept(new CopyOnWriteTransformer() {
-            @Override
-            public ASTNode transform(Variable var) {
-                if (var.isAnonymous()) {
-                    return new Variable("V" + newCount, var.sort());
-                } else {
-                    return var;
-                }
-            }
-        });
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
@@ -610,7 +596,14 @@ public class SymbolicRewriter {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
-        return searchResults;
+        List<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
+            RenameAnonymousVariables renameAnonymousVariables = new RenameAnonymousVariables();
+            Substitution<Variable, Term> subs = new HashMapSubstitution();
+            r.forEach((k, v) -> subs.plus(renameAnonymousVariables.getRenamedVariable(k), renameAnonymousVariables.apply(v)));
+            return subs;
+        }).collect(Collectors.toList());
+
+        return adaptedResults;
     }
 
     public List<ConstrainedTerm> proveRule(
