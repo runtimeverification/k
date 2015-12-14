@@ -25,6 +25,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KVariable;
 import org.kframework.krun.api.KRunState;
 import org.kframework.utils.BitSet;
 import org.kframework.utils.errorsystem.KEMException;
@@ -86,14 +87,31 @@ public class SymbolicRewriter {
             constrainedTerm = results.get(0);
             step++;
         }
-        KRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
+
+        ConstrainedTerm afterVariableRename = new ConstrainedTerm(renameFreshVariables(constrainedTerm.term()), constrainedTerm.termContext());
+
+        KRunState finalState = new JavaKRunState(afterVariableRename, counter, Optional.of(step));
 
         stopwatch.stop();
-        if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
+        if (afterVariableRename.termContext().global().krunOptions.experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + " ]");
         }
 
         return finalState;
+    }
+
+    private Term renameFreshVariables(Term term) {
+        int newCount = 0;
+        return (Term) term.accept(new CopyOnWriteTransformer() {
+            @Override
+            public ASTNode transform(Variable var) {
+                if (var.isAnonymous()) {
+                    return new Variable("V" + newCount, var.sort());
+                } else {
+                    return var;
+                }
+            }
+        });
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
