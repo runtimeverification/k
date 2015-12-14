@@ -205,12 +205,13 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KItem kItem) {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
-        KList castList = (KList) kList;
-        if (kItem.klabel().name().equals("#KSequence") && castList.size() > 0
-                && (castList.get(0) instanceof KItem) && ((KItem) castList.get(0)).klabel().name().equals("#KSequence")) {
-            kList = normalizeKSeqList(castList, castList.get(1));
+        if (kList instanceof KList) {
+            KList castList = (KList) kList;
+            if (kItem.klabel().name().equals("#KSequence") && castList.size() > 0
+                    && (castList.get(0) instanceof KItem) && ((KItem) castList.get(0)).klabel().name().equals("#KSequence")) {
+                kList = normalizeKSeqList(castList, castList.get(1));
+            }
         }
-
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
@@ -237,7 +238,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
                 leftChildRightTerm.getSource(), leftChildRightTerm.location());
 
         KList.Builder returnList = new KList.Builder();
-        returnList.concatenate(leftChild);
+        returnList.concatenate(((KList) leftChild.klist()).get(0));
         returnList.concatenate(leftChildRightTerm);
         return returnList.build();
     }
