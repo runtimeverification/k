@@ -159,7 +159,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
             if (innerRHSRewrite.theRHS[i] != null)
                 theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
         }
-        if(Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
+        if (Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
             return innerRHSRewrite;
         } else {
             return new InnerRHSRewrite(theNewRHS);
@@ -179,10 +179,44 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KItem kItem) {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
+        KList castList = (KList) kList;
+        if (kItem.klabel().name().equals("#KSequence") && castList.size() > 0
+                && (castList.get(0) instanceof KItem) && ((KItem) castList.get(0)).klabel().name().equals("#KSequence")) {
+            kList = normalizeKSeqList(castList, castList.get(1));
+        }
+
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
         return kItem;
+    }
+
+    private Term normalizeKSeqList(KList kList, Term toBeAdded) {
+        KItem leftChild = (KItem) kList.get(0);
+        Term leftChildRightTerm = ((KList) leftChild.klist()).get(1);
+        Term leftChildRightTermList;
+        if ((leftChildRightTerm instanceof KItem) && ((KItem) leftChildRightTerm).klabel().equals("#KSequence")) {
+            leftChildRightTermList = normalizeKSeqList((KList) ((KItem) leftChildRightTerm).kList(), toBeAdded);
+
+        } else {
+            KList.Builder builder = new KList.Builder();
+            builder.concatenate(leftChildRightTerm);
+            builder.concatenate(toBeAdded);
+            leftChildRightTermList = builder.build();
+        }
+        GlobalContext globalContext = leftChildRightTerm instanceof HasGlobalContext ?
+                resolveGlobalContext((HasGlobalContext) leftChildRightTerm) : context.global();
+        leftChildRightTerm = KItem.of(KLabelConstant.of("#KSequence", context.definition()), leftChildRightTermList, globalContext,
+                leftChildRightTerm.getSource(), leftChildRightTerm.location());
+
+        KList.Builder returnList = new KList.Builder();
+        returnList.concatenate(leftChild);
+        returnList.concatenate(leftChildRightTerm);
+        return returnList.build();
+    }
+
+    private Term addKSeqToList(Term currChild, Term toBeAddedTerm) {
+        if ((currChild instanceof KItem) && ((KItem) currChild).klabel().equals("KSequence"))
     }
 
     @Override
@@ -358,7 +392,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
         BuiltinSet.Builder builder = BuiltinSet.builder(resolveGlobalContext(builtinSet));
-        for(Term element : builtinSet.elements()) {
+        for (Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
             changed = changed || (transformedElement != element);
