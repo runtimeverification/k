@@ -16,7 +16,7 @@ class RenameAnonymousVariables {
 
     public Variable getRenamedVariable(Variable v) {
         if (v.isAnonymous()) {
-            return renames.getOrElseUpdate(v, func(() -> new Variable("V" + newCount, v.sort())));
+            return renames.getOrElseUpdate(v, func(() -> new Variable("V" + newCount++, v.sort())));
         } else {
             return v;
         }
