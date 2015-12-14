@@ -8,11 +8,38 @@ import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.HasGlobalContext;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectedKLabel;
+import org.kframework.backend.java.kil.InnerRHSRewrite;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemProjection;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.RuleAutomatonDisjunction;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.BitSet;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -206,6 +232,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         }
         GlobalContext globalContext = leftChildRightTerm instanceof HasGlobalContext ?
                 resolveGlobalContext((HasGlobalContext) leftChildRightTerm) : context.global();
+        
         leftChildRightTerm = KItem.of(KLabelConstant.of("#KSequence", context.definition()), leftChildRightTermList, globalContext,
                 leftChildRightTerm.getSource(), leftChildRightTerm.location());
 
@@ -215,11 +242,6 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         return returnList.build();
     }
 
-    private Term addKSeqToList(Term currChild, Term toBeAddedTerm) {
-        if ((currChild instanceof KItem) && ((KItem) currChild).klabel().equals("KSequence"))
-    }
-
-    @Override
     public ASTNode transform(Token token) {
         return token;
     }
