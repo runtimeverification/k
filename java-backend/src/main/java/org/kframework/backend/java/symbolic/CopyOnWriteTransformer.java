@@ -243,6 +243,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         return returnList.build();
     }
 
+    @Override
     public ASTNode transform(Token token) {
         return token;
     }
