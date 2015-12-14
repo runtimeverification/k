@@ -1,5 +1,5 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
-package org.kframework.kore.compile;
+package org.kframework.kore;
 
 import org.kframework.kore.*;
 
@@ -10,7 +10,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Abstract K to K transformer.
  */
-public class TransformKORE extends AbstractKORETransformer<K> {
+public class TransformK extends AbstractKTransformer<K> {
 
     @Override
     public K apply(KApply k) {

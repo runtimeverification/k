@@ -24,8 +24,8 @@ import static org.kframework.kore.KORE.*;
  * (which this class will allow with arbitrary arity).
  */
 public class IncompleteCellUtils {
-    private final static KApply dots = KApply(KLabel("#dots"));
-    private final static KApply noDots = KApply(KLabel("#noDots"));
+    private final static KApply dots = KApply(KLabel(KLabels.DOTS));
+    private final static KApply noDots = KApply(KLabel(KLabels.NO_DOTS));
 
     private static boolean isOpen(K flag) {
         if (dots.equals(flag)) {

@@ -9,13 +9,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
@@ -109,17 +103,16 @@ public class CloseCells {
     }
 
     void gatherVars(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable v) {
+            public void apply(KVariable v) {
                 vars.add(v);
-                return super.apply(v);
             }
         }.apply(term);
     }
 
     K transform(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 return super.apply(closeCell(k));

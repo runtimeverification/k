@@ -12,14 +12,8 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
+import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -205,7 +199,7 @@ public class SortCells {
     }
 
     private void analyzeVars(K term) {
-        new VisitKORE() {
+        new VisitK() {
             private boolean inRewrite = false;
             private boolean inRhs = false;
 
@@ -229,7 +223,7 @@ public class SortCells {
             }
 
             @Override
-            public Void apply(KApply k) {
+            public void apply(KApply k) {
                 if (cfg.isParentCell(k.klabel())) {
                     if (inRewrite) {
                         processSide(k, inRhs, k.klist().stream()
@@ -245,7 +239,7 @@ public class SortCells {
                                 .collect(Collectors.toList()));
                     }
                 }
-                return super.apply(k);
+                super.apply(k);
             }
 
             private void processSide(KApply parentCell, boolean allowRhs, List<K> items) {
@@ -292,7 +286,7 @@ public class SortCells {
             }
 
             @Override
-            public Void apply(KRewrite k) {
+            public void apply(KRewrite k) {
                 assert !inRewrite;
                 inRewrite = true;
                 apply(k.left());
@@ -300,13 +294,11 @@ public class SortCells {
                 apply(k.right());
                 inRhs = false;
                 inRewrite = false;
-                return null;
             }
 
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                 previousVars.add(k);
-                return null;
             }
         }.apply(term);
     }
@@ -342,7 +334,7 @@ public class SortCells {
      * variables.
      */
     private K processVars(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (!cfg.isParentCell(k.klabel())) {

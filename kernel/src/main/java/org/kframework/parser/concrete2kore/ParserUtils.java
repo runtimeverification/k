@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import com.google.common.collect.SetMultimap;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
