@@ -38,6 +38,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
+import org.kframework.tiny.KSeq;
 import org.kframework.utils.BitSet;
 
 import java.util.ArrayList;
@@ -205,42 +206,30 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KItem kItem) {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
-        if (kList instanceof KList) {
+        if (kLabel.toString().equals("#KSequence") && kList instanceof KList) {
             KList castList = (KList) kList;
-            if (kItem.klabel().name().equals("#KSequence") && castList.size() > 0
-                    && (castList.get(0) instanceof KItem) && ((KItem) castList.get(0)).klabel().name().equals("#KSequence")) {
-                kList = normalizeKSeqList(castList, castList.get(1));
-            }
+            kList = normalizeKSeqList(castList);
         }
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
+
         return kItem;
     }
 
-    private Term normalizeKSeqList(KList kList, Term toBeAdded) {
-        KItem leftChild = (KItem) kList.get(0);
-        Term leftChildRightTerm = ((KList) leftChild.klist()).get(1);
-        Term leftChildRightTermList;
-        if ((leftChildRightTerm instanceof KItem) && ((KItem) leftChildRightTerm).klabel().equals("#KSequence")) {
-            leftChildRightTermList = normalizeKSeqList((KList) ((KItem) leftChildRightTerm).kList(), toBeAdded);
-
-        } else {
-            KList.Builder builder = new KList.Builder();
-            builder.concatenate(leftChildRightTerm);
-            builder.concatenate(toBeAdded);
-            leftChildRightTermList = builder.build();
+    private Term normalizeKSeqList(KList kList) {
+        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && ((KItem) (kList.get(0))).klabel().name().equals("#KSequence")) {
+            KItem kSeq = (KItem) (kList.get(0));
+            if (kSeq.kList() instanceof KList) {
+                KList kSeqList = (KList) kSeq.klist();
+                Term rightNormalizedChild = addRightAssoc(kSeqList.get(1), kList.get(1));
+                KList.Builder builder = KList.builder();
+                builder.concatenate(kSeqList.get(0));
+                builder.concatenate(rightNormalizedChild);
+                return builder.build();
+            }
         }
-        GlobalContext globalContext = leftChildRightTerm instanceof HasGlobalContext ?
-                resolveGlobalContext((HasGlobalContext) leftChildRightTerm) : context.global();
-
-        leftChildRightTerm = KItem.of(KLabelConstant.of("#KSequence", context.definition()), leftChildRightTermList, globalContext,
-                leftChildRightTerm.getSource(), leftChildRightTerm.location());
-
-        KList.Builder returnList = new KList.Builder();
-        returnList.concatenate(((KList) leftChild.klist()).get(0));
-        returnList.concatenate(leftChildRightTerm);
-        return returnList.build();
+        return kList;
     }
 
     private Term addRightAssoc(Term term, Term toBeAdded) {
