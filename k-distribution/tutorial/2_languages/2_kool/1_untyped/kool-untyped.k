@@ -327,6 +327,7 @@ member declarations (\textsf{declarations}).
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
                     .Map
+                    // TODO(KORE): hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
                   </classes>
                 </T>
 
@@ -698,6 +699,7 @@ corresponding cells: */
 
   syntax KItem ::= ClassBody(K, K)
   rule <k> class Class1 extends Class2 { S } => .K ...</k>
+        // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>... `.Map => Class1 |-> ClassBody(Class2, S)`
        ...</classes>  [structural]
 
@@ -773,6 +775,7 @@ members (both fields and methods) of that class. */
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
+       // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>...`Class |-> ClassBody(Class1:Id, S)`...</classes>
        [structural]
 
