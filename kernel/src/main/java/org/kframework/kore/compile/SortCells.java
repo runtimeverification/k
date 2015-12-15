@@ -9,11 +9,15 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
+import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.Seq;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -53,8 +57,14 @@ import static org.kframework.kore.KORE.*;
  */
 public class SortCells {
     private final ConcretizationInfo cfg;
+    private final Module module;
+    public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, Module module) {
+        this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
+        this.module = module;
+    }
     public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
+        this.module = null;
     }
 
     public synchronized K sortCells(K term) {
@@ -69,11 +79,17 @@ public class SortCells {
         analyzeVars(rule.body());
         analyzeVars(rule.requires());
         analyzeVars(rule.ensures());
-        return Rule(
+        rule = Rule(
                 processVars(rule.body()),
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
                 rule.att());
+        rule = Rule(
+                resolveIncompleteCellFragment(rule.body()),
+                resolveIncompleteCellFragment(rule.requires()),
+                resolveIncompleteCellFragment(rule.ensures()),
+                rule.att());
+        return rule;
     }
 
     private Context sortCells(Context context) {
@@ -468,5 +484,386 @@ public class SortCells {
                 }
             }
         }.apply(term);
+    }
+
+
+    /**
+     * processVars handles a cell fragment variable when it appears solely in a normal term, e.g,
+     *   rule <k> run => foo(X) ... </k>
+     *        <x>
+     *          X:XCellFragment
+     *          <c> _ </c>
+     *        </x>
+     * but not when it appears with other cells, e.g.,
+     *   rule <k> run => foo(X <c>C</c>) ... </k>
+     *        <x>
+     *          X:XCellFragment
+     *          <c> C </c>
+     *        </x>
+     * resolveIncompleteCellFragment handles such cases, after processVars is done.
+     * An idea is to fix invalid cell fragment terms. For example, processVars translates the term `foo(X)` into:
+     *   foo(<x>-fragment A B </x>-fragment <c>C</c>)
+     * then resolveIncompleteCellFragment fixes the term as:
+     *   foo(<x>-fragment A B <c>C</c> </x>-fragment)
+     *
+     * Another example:
+     * When a cell fragment term consists of only individual cells, processVars does nothing.
+     *   rule <k> run => foo(B C) ... </k>
+     *        <x>
+     *          <a> _ </a>
+     *          B:BCell
+     *          C:CCell
+     *        </x>
+     * In this case, resolveIncompleteCellFragment fixes the term `foo(B C)` into:
+     *   foo(<x>-fragment noACell B C </x>-fragment)
+     *
+     * Another example:
+     * When a cell fragment variable appears only in a normal term, but never in cells, processVars does nothing.
+     *   rule foo(<b> _ </b> X:XCellFragment) => bar(<b> 2 </b> X)
+     * In this case, the cell fragment term in LHS is temporarily decorated by dummy <x> cell label, before processVars,
+     * which triggers processVars to split the cell fragment variable. Then resolveIncompleteCellFragment comes in.
+     * After resolveIncompleteCellFragment, the dummy cell label is replaced by the corresponding cell fragment label.
+     * The pre-/post-processing is done by preprocess/prostprocess.
+     *
+     * Potential issue:
+     * In the above example, if X has no sort casting, it is considered as XCellFragment by default,
+     * which may be different with an user's intention.
+     *
+     * Another potential issue:
+     * Currently, one cannot represent a fully filled cell fragment term. e.g.,
+     *   rule <k> foo(X) => .K ... </k>
+     *        <x> _ => X </x>
+     * The above rule replaces the entire cell <x> with the cell fragment term X, but doesn't have a side condition
+     * saying that X should be fully decorated. It means that X is given by a partially decorated cell fragment,
+     * <x> cell becomes invalid. e.g.,
+     *   foo(<x>-fragment <a> 1 </a> noBCell noCCell </x>-fragment)
+     * results in an invalid <x> cell:
+     *   <x> <a> 1 </a> noBCell noCCell </x>
+     * Note that this issue is not specifically about resolveIncompleteCellFragment.
+     */
+    private K resolveIncompleteCellFragment(K term) {
+      return new TransformK() {
+        @Override
+        public K apply(KApply k0) {
+            if (!hasCells(k0)) return super.apply(k0);
+
+            ArrayList<K> klist0 = new ArrayList<K>(Collections.nCopies(k0.klist().size(), null));
+            for (int idx = 0; idx < k0.klist().size(); idx++) {
+                K item0 = k0.klist().items().get(idx);
+                klist0.set(idx, item0);
+                if (item0 instanceof KApply) {
+                    KApply k = (KApply) item0;
+
+                    // incomplete cells remain as #cells(...) after processVars
+                    if (k.klabel().name().equals("#cells")) {
+
+                        Sort cellFragmentSort = nthArgSort(k0.klabel(), idx);
+                        if (cellFragmentSort == null) {
+                            throw new IllegalArgumentException("Not found " + idx + "th argument sort of " + k0.klabel());
+                        }
+
+                        // a cell fragment term
+                        if (cellFragmentSort.name().endsWith("Fragment")) {
+
+                            Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
+                            KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+
+                            List<Sort> subcellSorts = cfg.getChildren(cellLabel);
+
+                            /*
+                              fix an invalid cell fragment term, e.g.,
+
+                              Case 1.
+                              from
+                                foo(<x>-fragment A B </x>-fragment <c>C</c>)
+                              into
+                                foo(<x>-fragment A B <c>C</c> </x>-fragment)
+
+                              Case 2.
+                              from
+                                foo(B C)
+                              into
+                                foo(<x>-fragment noACell B C </x>-fragment)
+                            */
+
+                            // fill individual cells first, starting with empty
+                            KApply cellFragment = null;
+                            ArrayList<K> klist = new ArrayList<K>(Collections.nCopies(subcellSorts.size(), null));
+                            for (int i = 0; i < k.klist().size(); i++) {
+                                K item = k.klist().items().get(i);
+                                if (item instanceof KApply) {
+                                    KApply kapp = (KApply) item;
+                                    if (cfg.cfg.isCellLabel(kapp.klabel())) {
+                                        Sort sort = cfg.getCellSort(kapp.klabel());
+                                        if (!subcellSorts.contains(sort)) {
+                                            throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
+                                        }
+                                        klist.set(subcellSorts.indexOf(sort), item);
+                                    } else if (kapp.klabel().name().endsWith("-fragment")) {
+                                        cellFragment = kapp;
+                                        assert cellFragment.klist().size() == subcellSorts.size();
+                                        assert cellFragment.klabel().name().equals(cellLabel.name() + "-fragment");
+                                    } else {
+                                        throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                    }
+                                } else if (item instanceof KVariable) {
+                                    KVariable var = (KVariable) item;
+                                    VarInfo varinfo = null;
+                                    if (variables.containsKey(var)) {
+                                        varinfo = variables.get(var);
+                                    }
+                                    if (!var.att().contains(Attribute.SORT_KEY) && varinfo != null) {
+                                        if (varinfo.var != null)
+                                            var = varinfo.var;
+                                    }
+                                    if (var.att().contains(Attribute.SORT_KEY)) {
+                                        Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                        if (cfg.cfg.isCell(sort)) {
+                                            if (!subcellSorts.contains(sort)) {
+                                                throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
+                                            }
+                                            klist.set(subcellSorts.indexOf(sort), item);
+                                        } else {
+                                            // if the variable is not explicitly sort-casted, then its sort information should be found in other places
+                                            if (varinfo != null && varinfo.remainingCells != null && varinfo.remainingCells.size() == 1) {
+                                                Sort s = Iterables.getOnlyElement(varinfo.remainingCells);
+                                                if (cfg.cfg.isCell(s)) {
+                                                    if (!subcellSorts.contains(s)) {
+                                                        throw new IllegalArgumentException("No such sub-cell " + s + " in the cell " + cellLabel);
+                                                    }
+                                                    klist.set(subcellSorts.indexOf(s), item);
+                                                    continue;
+                                                }
+                                            }
+                                            throw KEMException.compilerError("Unsupported cell fragment element. Not found sort info.", item);
+                                        }
+                                    } else {
+                                        throw KEMException.compilerError("Unsupported cell fragment element. Not found sort info.", item);
+                                    }
+                                } else {
+                                    // TODO: support when item instanceof KRewrite
+                                    throw KEMException.compilerError("Unsupported cell fragment element.", item);
+                                }
+                            }
+
+                            // fill remaining cells, considering a split cell fragment variable if any
+                            for (int i = 0; i < subcellSorts.size(); i++) {
+                                if (klist.get(i) == null) {
+                                    if (cellFragment != null) {
+                                        klist.set(i, cellFragment.klist().items().get(i));
+                                    } else {
+                                        if (cfg.getMultiplicity(subcellSorts.get(i)) == Multiplicity.ONE) {
+                                            klist.set(i, cfg.getCellAbsentTerm(subcellSorts.get(i)));
+                                        } else { // Multiplicity.OPTIONAL || Multiplicity.STAR
+                                            klist.set(i, cfg.cfg.getUnit(subcellSorts.get(i)));
+                                        }
+                                    }
+
+                                }
+                            }
+
+                            klist0.set(idx, KApply(KLabel(cellLabel.name() + "-fragment"), KList(klist)));
+                        }
+                    }
+                }
+            }
+            return KApply(k0.klabel(), KList(klist0), k0.att());
+        }
+      }.apply(term);
+    }
+
+    /**
+     * Pre-process terms before processVar
+     */
+    public synchronized Sentence preprocess(Sentence s) {
+        if (s instanceof Rule) {
+            return preprocess((Rule) s);
+        } else {
+            return s;
+        }
+    }
+
+    /**
+     * Post-process terms after processVar
+     */
+    public synchronized Sentence postprocess(Sentence s) {
+        if (s instanceof Rule) {
+            return postprocess((Rule) s);
+        } else {
+            return s;
+        }
+    }
+
+    private Rule preprocess(Rule rule) {
+        return Rule(
+                preprocess(rule.body()),
+                preprocess(rule.requires()),
+                preprocess(rule.ensures()),
+                rule.att());
+    }
+
+    private Rule postprocess(Rule rule) {
+        return Rule(
+                postprocess(rule.body()),
+                postprocess(rule.requires()),
+                postprocess(rule.ensures()),
+                rule.att());
+    }
+
+    /**
+     * When a cell fragment variable appears only in <k> cell, e.g.,
+     *   rule foo(<b> _ </b> X:XCellFragment) => bar(<b> 2 </b> X)
+     * preprocess temporarily arguments the cell fragment term in LHS using its parent cell label, e.g.,
+     *   rule foo(<x> <b> _ </b> X:XCellFragment </x>) => bar(<b> 2 </b> X)
+     * Now, the cell fragment variable X will be split by processVars.
+     */
+    private K preprocess(K term) {
+        // find all of cell fragment variables
+        HashMap<KVariable, HashSet<K>> cellFragmentVars = new HashMap<>();
+        new VisitK() {
+            @Override
+            public void apply(KApply k) {
+                if (k.klabel().name().equals("#cells")) {
+                    for (int i = 0; i < k.klist().size(); i++) {
+                        K item = k.klist().items().get(i);
+                        if (item instanceof KVariable) {
+                            KVariable var = (KVariable) item;
+                            if (var.att().contains(Attribute.SORT_KEY)) {
+                                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                if (!cfg.cfg.isCell(sort)) {
+                                    if (!cellFragmentVars.containsKey(var)) {
+                                        cellFragmentVars.put(var, new HashSet<>());
+                                    }
+                                    cellFragmentVars.get(var).add(k);
+                                }
+                            } else {
+                                if (!cellFragmentVars.containsKey(var)) {
+                                    cellFragmentVars.put(var, new HashSet<>());
+                                }
+                                cellFragmentVars.get(var).add(k);
+                            }
+                        }
+                    }
+                } else {
+                    super.apply(k);
+                }
+            }
+        }.apply(term);
+
+        if (cellFragmentVars.isEmpty()) {
+            return term;
+        }
+
+        // find cell fragment variables only appear in <k> cell
+        new VisitK() {
+            private boolean inKCell = false;
+            @Override
+            public void apply(KApply k) {
+                if (k.klabel().name().equals("<k>")) {
+                    assert !inKCell;
+                    inKCell = true;
+                    super.apply(k);
+                    inKCell = false;
+                } else {
+                    super.apply(k);
+                }
+            }
+            @Override
+            public void apply(KVariable var) {
+                if (!inKCell && cellFragmentVars.containsKey(var)) {
+                    cellFragmentVars.remove(var);
+                }
+            }
+        }.apply(term);
+
+        if (cellFragmentVars.isEmpty()) {
+            return term;
+        }
+
+        HashSet<K> cellFragmentVarsCell = new HashSet<>();
+        for (HashSet<K> cells : cellFragmentVars.values()) {
+            cellFragmentVarsCell.addAll(cells);
+        }
+
+        // decorate such cell fragment terms with their parent cell label
+        return new TransformK() {
+            @Override
+            public K apply(KApply k0) {
+                if (hasCells(k0)) {
+                    ArrayList<K> klist0 = new ArrayList<K>(Collections.nCopies(k0.klist().size(), null));
+                    for (int idx = 0; idx < k0.klist().size(); idx++) {
+                        K item0 = k0.klist().items().get(idx);
+                        klist0.set(idx, item0);
+                        if (item0 instanceof KApply) {
+                            KApply k = (KApply) item0;
+                            if (k.klabel().name().equals("#cells")) {
+                                if (cellFragmentVarsCell.contains(k)) {
+                                    Sort cellFragmentSort = nthArgSort(k0.klabel(), idx);
+                                    if (cellFragmentSort == null) {
+                                        throw new IllegalArgumentException("Not found " + idx + "th argument sort of " + k0.klabel());
+                                    }
+                                    if (cellFragmentSort.name().endsWith("Fragment")) {
+                                        Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
+                                        KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+                                        klist0.set(idx, KApply(cellLabel, KList(item0), Att(KApply(KLabel("dummy_cell")))));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return KApply(k0.klabel(), KList(klist0), k0.att());
+                }
+                return super.apply(k0);
+            }
+            @Override
+            public K apply(KRewrite k) {
+                K left =  super.apply(k.left());
+                return KRewrite(left, k.right(), k.att());
+            }
+        }.apply(term);
+    }
+
+    // remove the dummy cell decoration introduced by preprocess
+    private K postprocess(K term) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (k.att().contains("dummy_cell")) {
+                    KLabel klabel = KLabel(k.klabel().name() + "-fragment");
+                    return KApply(klabel, k.klist(), k.att());
+                }
+                return super.apply(k);
+            }
+        }.apply(term);
+    }
+
+    private boolean hasCells(KApply k) {
+        for (int i = 0; i < k.klist().size(); i++) {
+            K item = k.klist().items().get(i);
+            if (item instanceof KApply && ((KApply) item).klabel().name().equals("#cells")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // find nth argument sort for a given klabel
+    // if multiple signiture exist, then return arbitrary one of them that is not K
+    private Sort nthArgSort(KLabel klabel, int n) {
+        java.util.Set<Tuple2<Seq<Sort>,Sort>> sigs =
+                mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
+        if (sigs == null) {
+            throw new IllegalArgumentException("Not found signature for label: " + klabel);
+        }
+        Sort sort = null;
+        for (Tuple2<Seq<Sort>,Sort> sig : sigs) {
+            List<Sort> sorts = JavaConversions.seqAsJavaList(sig._1());
+            if (n >= sorts.size()) continue;
+            sort = sorts.get(n);
+            if (!sort.name().equals("K")) {
+                return sort;
+            }
+        }
+        return sort;
     }
 }
