@@ -243,6 +243,30 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         return returnList.build();
     }
 
+    private Term addRightAssoc(Term term, Term toBeAdded) {
+        if (term instanceof KItem && ((KItem) term).klabel().name().equals("#KSequence")) {
+            KItem kItem = (KItem) term;
+            if (kItem.klist() instanceof KList) {
+                KList kList = (KList) kItem.kList();
+                Term rightTerm = addRightAssoc(kList.get(1), toBeAdded);
+                KList.Builder builder = KList.builder();
+                builder.concatenate(kList.get(0));
+                builder.concatenate(rightTerm);
+                return KItem.of((Term) kItem.klabel(), builder.build(), kItem.globalContext(),
+                        kItem.getSource(), kItem.location());
+            }
+            return kItem;
+        }
+        //construct new KSequence Term
+        KList.Builder builder = KList.builder();
+        builder.concatenate(term);
+        builder.concatenate(toBeAdded);
+        GlobalContext globalContext = term instanceof HasGlobalContext ?
+                resolveGlobalContext((HasGlobalContext) term) : context.global();
+        return KItem.of(KLabelConstant.of("#KSequence", context.definition()), builder.build(),
+                globalContext, term.getSource(), term.getLocation());
+    }
+
     @Override
     public ASTNode transform(Token token) {
         return token;
