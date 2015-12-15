@@ -44,16 +44,55 @@ case class Definition(
   assert(modules.contains(mainModule))
   assert(modules.contains(mainSyntaxModule))
 
-  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
+  def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 }
 
-case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) att: Att = Att())
-  extends ModuleToString with KLabelMappings with OuterKORE {
+trait Sorting {
+  def computeSubsortPOSet(sentences: Set[Sentence]) = {
+    val subsortRelations: Set[(Sort, Sort)] = sentences collect {
+      case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
+    }
+
+    POSet(subsortRelations)
+  }
+}
+
+trait GeneratingListSubsortProductions extends Sorting {
+
+  def computeFromSentences(wipSentences: Set[Sentence]): Set[Sentence] = {
+    val userLists = UserList.apply(wipSentences)
+
+    val subsorts = computeSubsortPOSet(wipSentences)
+
+    val listProductions =
+      for (l1 <- userLists;
+           l2 <- userLists
+           if l1 != l2 && l1.klabel == l2.klabel &&
+             subsorts.>(ADT.Sort(l1.childSort), ADT.Sort(l2.childSort))) yield {
+        Production(ADT.Sort(l1.sort), Seq(NonTerminal(ADT.Sort(l2.sort))), Att().add(Att.generatedByListSubsorting))
+      }
+
+    listProductions.toSet
+  }
+}
+
+object Module {
+  def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
+    new Module(name, imports, unresolvedLocalSentences, att)
+  }
+}
+
+class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
+  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions with Serializable {
   assert(att != null)
 
-  val sentences: Set[Sentence] = localSentences | (imports flatMap {
-    _.sentences
-  })
+  private val importedSentences = imports flatMap {_.sentences}
+
+  val listProductions = computeFromSentences(unresolvedLocalSentences | importedSentences)
+
+  val localSentences = unresolvedLocalSentences | listProductions
+
+  val sentences: Set[Sentence] = localSentences | importedSentences
 
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {
@@ -157,9 +196,7 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     srt
   })
 
-  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-    case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
-  }
+  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
@@ -185,8 +222,6 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       }.flatten
   }
 
-  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
-
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
     productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))
       .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
@@ -210,7 +245,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   if (!nonTerminalsWithUndefinedSort.isEmpty)
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Module.this);
+  override lazy val hashCode: Int = name.hashCode
+
+  override def equals(that: Any) = that match {
+    case m: Module => m.name == name && m.sentences == sentences
+  }
 }
 
 // hooked but different from core, Import is a sentence here

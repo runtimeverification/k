@@ -382,7 +382,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
-        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, userList.getListType());
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod3;

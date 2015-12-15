@@ -10,7 +10,6 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
-import org.kframework.kil.UserList;
 import org.kframework.kore.*;
 import org.kframework.definition.*;
 import org.kframework.kore.Sort;
@@ -26,8 +25,6 @@ import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
 public class KOREtoKIL implements Function<Definition, org.kframework.kil.Definition> {
-
-    public static final String USER_LIST_ATTRIBUTE = "userList";
 
     private static AssertionError NOT_IMPLEMENTED() {
         return NOT_IMPLEMENTED("Not implemented");
@@ -47,15 +44,15 @@ public class KOREtoKIL implements Function<Definition, org.kframework.kil.Defini
         }
 
         public Set<Sentence> collectAndRemoveListProds(Set<Sentence> sentences) {
-            List<org.kframework.parser.concrete2kore.generator.UserList> uls = org.kframework.parser.concrete2kore.generator.UserList.getLists(sentences);
-            for (org.kframework.parser.concrete2kore.generator.UserList ul : uls) {
+            List<org.kframework.definition.UserList> uls = org.kframework.definition.UserList.getLists(sentences);
+            for (org.kframework.definition.UserList ul : uls) {
                 userLists.add(makeUserList(ul));
             }
 
-            return sentences.stream().filter(p -> !p.att().contains(USER_LIST_ATTRIBUTE)).collect(Collectors.toSet());
+            return sentences.stream().filter(p -> !p.att().contains(Att.userList())).collect(Collectors.toSet());
         }
 
-        private org.kframework.kil.Syntax makeUserList(org.kframework.parser.concrete2kore.generator.UserList ul) {
+        private org.kframework.kil.Syntax makeUserList(org.kframework.definition.UserList ul) {
 
             org.kframework.kil.UserList userList = new org.kframework.kil.UserList(
                     org.kframework.kil.Sort.of(ul.childSort), ul.separator, ul.nonEmpty ? "+" : "*");

@@ -360,10 +360,9 @@ object and method closures. */
   syntax Val ::= Int | Bool | String
                | array(Int,Int)
   syntax Vals ::= List{Val,","}
-  syntax Exps ::= Vals // TODO(KORE): support implicit subsort #1705
   syntax Exp ::= Val
   syntax KResult ::= Val
-  syntax KResult ::= Vals // TODO(KORE): support implicit subsort #1705
+  syntax KResult ::= Vals
 
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
