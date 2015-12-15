@@ -8,6 +8,10 @@ import scala.collection.mutable.HashMap;
 import scala.collection.mutable.Map;
 import static scala.compat.java8.JFunction.*;
 
+/**
+ * Renames the anonymous variable to a normal form with index numbers starting from 0.
+ * E.g., _1734 + _274 => V0 + V1
+ */
 class RenameAnonymousVariables {
     @SuppressWarnings("unchecked")
     Map<Variable, Variable> renames = new HashMap<>();
