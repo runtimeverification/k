@@ -120,14 +120,6 @@ public class FastRuleMatcher {
                     return theResult;
                 }
             }
-//            assert constraints[i].isSubstitution();
-//            Substitution<Variable, Term> subst = RewriteEngineUtils.evaluateConditions(rule, constraints[i].substitution(), context);
-//            if (subst != null) {
-//                theResult.add(Pair.of(subst, i));
-//                if (computeOne) {
-//                    break;
-//                }
-//            }
         }
         return theResult;
     }
