@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
  */
 public abstract class CopyOnWriteTransformer implements Transformer {
 
+    private static final String KSEQUENCE_KLABEL = "#KSequence";
     protected final TermContext context;
 
     public CopyOnWriteTransformer(TermContext context) {
@@ -206,7 +207,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KItem kItem) {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
-        if (kLabel.toString().equals("#KSequence") && kList instanceof KList) {
+        if (kLabel.toString().equals(KSEQUENCE_KLABEL) && kList instanceof KList) {
             KList castList = (KList) kList;
             kList = normalizeKSeqList(castList);
         }
@@ -218,7 +219,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     }
 
     private Term normalizeKSeqList(KList kList) {
-        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && ((KItem) (kList.get(0))).klabel().name().equals("#KSequence")) {
+        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && ((KItem) (kList.get(0))).klabel().name().equals(KSEQUENCE_KLABEL)) {
             KItem kSeq = (KItem) (kList.get(0));
             if (kSeq.kList() instanceof KList) {
                 KList kSeqList = (KList) kSeq.klist();
@@ -233,7 +234,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     }
 
     private Term addRightAssoc(Term term, Term toBeAdded) {
-        if (term instanceof KItem && ((KItem) term).klabel().name().equals("#KSequence")) {
+        if (term instanceof KItem && ((KItem) term).klabel().name().equals(KSEQUENCE_KLABEL)) {
             KItem kItem = (KItem) term;
             if (kItem.klist() instanceof KList) {
                 KList kList = (KList) kItem.kList();
@@ -252,7 +253,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         builder.concatenate(toBeAdded);
         GlobalContext globalContext = term instanceof HasGlobalContext ?
                 resolveGlobalContext((HasGlobalContext) term) : context.global();
-        return KItem.of(KLabelConstant.of("#KSequence", context.definition()), builder.build(),
+        return KItem.of(KLabelConstant.of(KSEQUENCE_KLABEL, context.definition()), builder.build(),
                 globalContext, term.getSource(), term.getLocation());
     }
 
