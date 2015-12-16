@@ -971,11 +971,12 @@ module BASIC-STRATEGY
 
     syntax Strategy ::= Hole
 
-    syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
+    syntax Strategy ::= "(" Strategy ")"                                    [bracket]
+                        > "if" Strategy "then" Strategy "else" Strategy
                         > Strategy "*"
-                        > Strategy "||" Strategy
-                        > Strategy ";" Strategy
-                        > "(" Strategy ")"                      [bracket]
+                        > Strategy ";" Strategy                             [right]
+                        > Strategy "||" Strategy                            [right]
+
 
     rule <s> S* => if S then S* else true ...</s>
 

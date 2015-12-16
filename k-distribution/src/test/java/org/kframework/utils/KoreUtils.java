@@ -73,6 +73,7 @@ public class KoreUtils {
         KompileOptions kompileOptions = new KompileOptions();
         GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.debug = true;
+        globalOptions.warnings = GlobalOptions.Warnings.ALL;
 
         kompileOptions.experimental.heatCoolStrategies = heatCoolStrategies;
 
