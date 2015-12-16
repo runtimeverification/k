@@ -5,7 +5,7 @@
   <test definition="simple-untyped"
         programs="."
         extension="simple"
-        exclude="dekker exceptions_07.simple"
+        exclude="dekker exceptions_07 threads_07 threads_10 threads_11"
         skip="pdf"
         results="." >
         <all-programs>
