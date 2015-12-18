@@ -1,22 +1,13 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 
 /**
@@ -35,17 +26,21 @@ public class BuiltinList extends Collection implements KItemCollection {
     public final ImmutableList<Term> children;
     private final GlobalContext global;
     public final Sort sort;
+    public final KLabelConstant opKLabel;
+    public final KLabelConstant unitKLabel;
 
     /**
      * Private efficient constructor used by {@link BuiltinList.Builder}.
      */
     private BuiltinList(
             ImmutableList<Term> children,
-            GlobalContext global, Sort sort) {
+            GlobalContext global, Sort sort, KLabelConstant opKLabel, KLabelConstant unitKLabel) {
         super(null, Kind.KITEM);
         this.children = children;
         this.global = global;
         this.sort = sort;
+        this.opKLabel = opKLabel;
+        this.unitKLabel = unitKLabel;
     }
 
     public static Term concatenate(GlobalContext global, Term... lists) {

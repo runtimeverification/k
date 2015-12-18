@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -108,6 +109,10 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
 
     private KItem(Term kLabel, Term kList, GlobalContext global, Stage stage, Source source, Location location, BitSet[] childrenDonCareRuleMask) {
         super(Kind.KITEM, source, location);
+
+        if(kLabel.att().contains(Att.assoc()))
+            throw new AssertionError("Trying to build a KItem instead of a BuiltinList for klabel with assoc attribute");
+
         this.kLabel = kLabel;
         this.kList = kList;
         this.global = global;

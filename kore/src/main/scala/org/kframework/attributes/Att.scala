@@ -114,6 +114,7 @@ object Att {
   val stuck = "#STUCK"
   val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
   val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
+  val assoc = "assoc"
 }
 
 trait AttributesToString {

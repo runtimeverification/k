@@ -10,8 +10,8 @@ import scala.collection.immutable.Iterable
 import collection._
 
 /**
- * Compiler pass for merging the rules as expected by FastRuleMatcher
- */
+  * Compiler pass for merging the rules as expected by FastRuleMatcher
+  */
 class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
   import c._
@@ -37,7 +37,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
 
     if (topRules.nonEmpty) {
 
-      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(r.body), isRulePredicate(r.hashCode)) })
+      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(r.body), isRulePredicate(r.hashCode)) })(m)
       //      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
       //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
       val automatonRule = Rule(newBody, TrueToken, TrueToken, Att().add("automaton"))
@@ -61,8 +61,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
     }
   }
 
-
-  def pushDisjunction(terms: Set[(K, K)]): K = {
+  def pushDisjunction(terms: Set[(K, K)])(implicit m: Module): K = {
     val rwLabel = KLabel(KLabels.KREWRITE)
 
     val removedRewrites = terms.map({
@@ -77,11 +76,15 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       .map { p => (normalizeKSeq(p._1), p._2) }
 
     val disjunctionOfKApplies: Iterable[(K, K)] = normalizedTerms
-      .collect({ case (x: KApply, ruleP) if ! x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
+      .collect({ case (x: KApply, ruleP) if !x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
       .groupBy(_._1.klabel)
       .map {
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
-          val setOfLists: Set[List[(K, K)]] = ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+          val setOfLists: Set[List[(K, K)]] = if (m.attributesFor(klabel).contains(Att.assoc)) {
+            ???
+          } else {
+            ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+          }
           val childrenDisjunctionsOfklabel: IndexedSeq[K] =
             setOfLists.head.indices
               .map(i => setOfLists.map(l => l(i)))
@@ -91,8 +94,8 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
           (klabel(childrenDisjunctionsOfklabel: _*), or(rulePs: _*))
       }
 
-    val disjunctionOfVarKApplies : Iterable[(K, K)] = normalizedTerms
-      .collect({ case (x: KApply, ruleP:K) if x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
+    val disjunctionOfVarKApplies: Iterable[(K, K)] = normalizedTerms
+      .collect({ case (x: KApply, ruleP: K) if x.klabel.isInstanceOf[KVariable] => (x, ruleP) })
       .toIndexedSeq
 
     val disjunctionOfOthers: Iterable[(K, K)] = normalizedTerms.filterNot(_._1.isInstanceOf[KApply])
