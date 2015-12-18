@@ -42,6 +42,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
      * a mapping from Tokens to the rules where they appear in this disjunction
      */
     public final Map<Token, BitSet> tokenDisjunctions;
+
     private final List<Pair<Term, BitSet>> disjunctions;
 
     private final GlobalContext global;
