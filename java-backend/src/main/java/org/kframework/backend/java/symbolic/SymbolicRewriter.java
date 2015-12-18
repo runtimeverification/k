@@ -245,7 +245,7 @@ public class SymbolicRewriter {
             // start the optimized substitution
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(triple.getRight());
+            Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> rewrites = theFastMatcher.getRewrite(triple.getRight());
 
             assert (rewrites.size() > 0);
 
@@ -338,13 +338,13 @@ public class SymbolicRewriter {
      * goes down the path on the subject to find the rewrite place, does the substitution, and reconstructs the term
      * on its way up
      */
-    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, scala.collection.immutable.List<Integer> path, Term rhs, TermContext context) {
+    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, scala.collection.immutable.List<Pair<Integer, Integer>> path, Term rhs, TermContext context) {
         if (path.isEmpty()) {
             return rhs.substituteAndEvaluate(substitution, context);
         } else {
             KItem kItemSubject = (KItem) subject;
             List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
-            newContents.set(path.head(), buildRHS(newContents.get(path.head()), substitution, (scala.collection.immutable.List<Integer>) path.tail(), rhs, context));
+            newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
             return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
         }
     }
@@ -353,22 +353,23 @@ public class SymbolicRewriter {
      * goes down each of the the paths on the subject to find the rewrite place, does the substitution,
      * and reconstructs the term on its way up
      */
-    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, List<Pair<scala.collection.immutable.List<Integer>, Term>> rewrites, TermContext context) {
+    private Term buildRHS(Term subject, Substitution<Variable, Term> substitution, List<Pair<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>> rewrites, TermContext context) {
         if (rewrites.size() == 1 && rewrites.get(0).getLeft().isEmpty()) {
             return rewrites.get(0).getRight().substituteAndEvaluate(substitution, context);
         }
 
         KItem kItemSubject = (KItem) subject;
 
-        Map<Integer, List<Pair<scala.collection.immutable.List<Integer>, Term>>> commonPath = rewrites.stream().collect(Collectors.groupingBy(rw -> rw.getLeft().head()));
+        Map<Pair<Integer, Integer>, List<Pair<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> commonPath = rewrites.stream().collect(Collectors.groupingBy(rw -> rw.getLeft().head()));
 
         List<Term> contents = ((KList) kItemSubject.kList()).getContents();
         List<Term> newContents = new ArrayList<>();
 
         for (int i = 0; i < contents.size(); i++) {
-            if (commonPath.containsKey(i)) {
-                List<Pair<scala.collection.immutable.List<Integer>, Term>> theInnerRewrites = commonPath.get(i).stream().map(p -> Pair.of(
-                        (scala.collection.immutable.List<Integer>) p.getLeft().tail(), p.getRight())).collect(Collectors.toList());
+            Pair<Integer, Integer> pair = Pair.of(i, i + 1);
+            if (commonPath.containsKey(pair)) {
+                List<Pair<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>> theInnerRewrites = commonPath.get(pair).stream().map(p -> Pair.of(
+                        (scala.collection.immutable.List<Pair<Integer, Integer>>) p.getLeft().tail(), p.getRight())).collect(Collectors.toList());
                 newContents.add(buildRHS(contents.get(i), substitution, theInnerRewrites, context));
             } else {
                 newContents.add(contents.get(i));

@@ -2,7 +2,10 @@
 
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
@@ -24,6 +27,7 @@ import org.kframework.utils.BitSet;
 import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +47,14 @@ import com.google.common.collect.Sets;
  */
 public class FastRuleMatcher {
 
-    private final ConjunctiveFormula[] constraints;
-    private Map<scala.collection.immutable.List<Integer>, Term>[] rewrites;
+    private ConjunctiveFormula[] constraints;
+    private Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>[] rewrites;
     private final int ruleCount;
 
     /**
      * @return map from AST path to the corresponding rewrite RHS
      */
-    public Map<scala.collection.immutable.List<Integer>, Term> getRewrite(int index) {
+    public Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> getRewrite(int index) {
         return rewrites[index];
     }
 
@@ -124,7 +128,7 @@ public class FastRuleMatcher {
         return theResult;
     }
 
-    private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
+    private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
         assert !ruleMask.isEmpty();
         if (pattern instanceof RuleAutomatonDisjunction) {
             RuleAutomatonDisjunction automatonDisjunction = (RuleAutomatonDisjunction) pattern;
@@ -225,7 +229,7 @@ public class FastRuleMatcher {
                     continue;
                 }
 
-                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(i));
+                ruleMask = match(subjectKList.get(i), patternKList.get(i), ruleMask, path.$colon$colon(Pair.of(i, i + 1)));
                 if (ruleMask.isEmpty()) {
                     return ruleMask;
                 }
@@ -244,7 +248,7 @@ public class FastRuleMatcher {
         }
     }
 
-    private void checkVarLabelPatterns(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, RuleAutomatonDisjunction automatonDisjunction, BitSet returnSet) {
+    private void checkVarLabelPatterns(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path, RuleAutomatonDisjunction automatonDisjunction, BitSet returnSet) {
         List<Pair<KItem, BitSet>> varLabelPatterns = automatonDisjunction.getKItemPatternByArity(((KItem) subject).klist().size());
         if (!(varLabelPatterns == null)) {
             for (Pair<KItem, BitSet> p : varLabelPatterns) {
@@ -253,7 +257,7 @@ public class FastRuleMatcher {
         }
     }
 
-    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Integer> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
+    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
         if (pSeq != null) {
             if (ruleMask.intersects(pSeq.getRight())) {
                 BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
@@ -263,6 +267,69 @@ public class FastRuleMatcher {
             }
         }
     }
+
+    private BitSet matchAssoc(BuiltinList subject, int subjectIndex, BuiltinList pattern, int patternIndex, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
+        //assert subject.children.stream().allMatch(este element)
+        /* match prefix of elements in subject and pattern */
+        if (subjectIndex == subject.size() && patternIndex == pattern.size()) {
+            /* end of matching */
+            return ruleMask;
+        }
+
+        if (patternIndex == pattern.size()) {
+            // fail
+            return empty;
+        }
+
+        if (subject.isElement(subjectIndex) && pattern.isElement(patternIndex)) {
+            ruleMask = match(subject.get(subjectIndex), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
+            if (ruleMask.isEmpty()) {
+                // fail
+                return ruleMask;
+            }
+
+            return matchAssoc(subject, subjectIndex + 1, pattern, patternIndex + 1, ruleMask, path);
+        }
+
+        ListMultimap<Integer, ConjunctiveFormula> nestedConstraints = ArrayListMultimap.create();
+        for (int i = subjectIndex; i <= subject.size(); i++) {
+            ConjunctiveFormula[] oldConstraints = constraints;
+            constraints = new ConjunctiveFormula[constraints.length];
+            ruleMask.stream().forEach(j -> constraints[j] = ConjunctiveFormula.of(global));
+            BitSet oldRuleMask = ruleMask;
+            ruleMask = oldRuleMask.clone();
+
+            ruleMask = match(subject.range(subjectIndex, i), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, i)));
+            if (ruleMask.isEmpty()) {
+                // fail
+                return ruleMask;
+            }
+
+            ruleMask = matchAssoc(subject, i, pattern, patternIndex + 1, ruleMask, path);
+            ruleMask.stream().forEach(j -> {
+                if (!constraints[j].simplify().isFalse()) {
+                    nestedConstraints.put(j, constraints[j]);
+                }
+            });
+            constraints = oldConstraints;
+            ruleMask = oldRuleMask;
+        }
+
+        ruleMask = BitSet.apply(ruleCount);
+        for (Map.Entry<Integer, Collection<ConjunctiveFormula>> entry : nestedConstraints.asMap().entrySet()) {
+            int i = entry.getKey();
+            Collection<ConjunctiveFormula> conjunctions = entry.getValue();
+            if (conjunctions.size() != 1) {
+                constraints[i] = constraints[i].add(new DisjunctiveFormula(conjunctions, global));
+            } else {
+                constraints[i] = constraints[i].add(conjunctions.iterator().next()).simplify();
+            }
+            ruleMask.set(i);
+        }
+
+        return ruleMask;
+    }
+
 
     private BitSet addSubstitution(Variable variable, Term term, BitSet ruleMask) {
         if (variable.name().equals(KOREtoBackendKIL.THE_VARIABLE)) {
@@ -287,7 +354,7 @@ public class FastRuleMatcher {
         return ruleMask;
     }
 
-    private BitSet addUnification(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
+    private BitSet addUnification(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
         for (int i = ruleMask.nextSetBit(0); i >= 0; i = ruleMask.nextSetBit(i + 1)) {
             Term leftHandSide = getLeftHandSide(pattern, i);
             Term rightHandSide = getRightHandSide(pattern, i);

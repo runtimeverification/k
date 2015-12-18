@@ -49,6 +49,16 @@ public class BuiltinList extends Collection implements KItemCollection {
         return builder.build();
     }
 
+    public boolean isElement(int index) {
+        throw new AssertionError("Unimplemented");
+    }
+
+    public Term range(int beginIndex, int endIndex) {
+        Builder builder = BuiltinList.builder(global);
+        builder.addItems(children.subList(beginIndex, endIndex));
+        return builder.build();
+    }
+
     public boolean contains(Term term) {
         return children.contains(term);
     }
