@@ -299,7 +299,7 @@ public final class BuiltinBitVectorOperations {
             try {
                 // AndreiS: double cast because Java in its infinite wisdom does not allow to cast
                 // List<Term> to List<BitVector>
-                digits = (List<BitVector>) ((List) digitList.elements());
+                digits = (List<BitVector>) ((List) digitList.children);
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(digitList + " is not a list of bitvectors");
             }

@@ -238,14 +238,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         List<org.kframework.kil.Term> elementsLeft = new ArrayList<>();
         List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         List<org.kframework.kil.Term> elementsRight = new ArrayList<>();
-        for (Term entry : builtinList.elementsLeft()) {
+        for (Term entry : builtinList.children) {
             elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
-        }
-        for (Term term : builtinList.baseTerms()) {
-            baseTerms.add((org.kframework.kil.Term) term.accept(this));
-        }
-        for (Term entry : builtinList.elementsRight()) {
-            elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
         ASTNode kil = ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
                 baseTerms, elementsLeft, elementsRight);

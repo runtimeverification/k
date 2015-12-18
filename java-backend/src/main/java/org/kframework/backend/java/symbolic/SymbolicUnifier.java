@@ -87,11 +87,6 @@ public class SymbolicUnifier extends AbstractUnifier {
             unifyMapModuloPatternFolding((BuiltinMap) term, (BuiltinMap) otherTerm);
             return true;
         }
-        // TODO(YilongL): how should I implement BuiltinList#isUnifiableByCurrentAlgorithm?
-        if (BuiltinList.isListUnifiableByCurrentAlgorithm(term, otherTerm)) {
-            unifyList((BuiltinList) term, (BuiltinList) otherTerm);
-            return true;
-        }
 
         if (BuiltinSet.isSetUnifiableByCurrentAlgorithm(term, otherTerm)) {
             unifySet((BuiltinSet) term, (BuiltinSet) otherTerm);
@@ -130,88 +125,89 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     void unifyList(BuiltinList list, BuiltinList otherList) {
-        int size = Math.min(list.elementsLeft().size(), otherList.elementsLeft().size());
-        for (int i = 0; i < size; i++) {
-            addUnificationTask(list.get(i), otherList.get(i));
-        }
-        List<Term> remainingElementsLeft = list.elementsLeft().subList(size, list.elementsLeft().size());
-        List<Term> otherRemainingElementsLeft = otherList.elementsLeft().subList(size, otherList.elementsLeft().size());
-
-        size = Math.min(list.elementsRight().size(), otherList.elementsRight().size());
-        for (int i = 1; i <= size; i++) {
-            addUnificationTask(list.get(-i), otherList.get(-i));
-        }
-        List<Term> remainingElementsRight = list.elementsRight().subList(0, list.elementsRight().size() - size);
-        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, otherList.elementsRight().size() - size);
-
-        List<Term> remainingBaseTerms = list.baseTerms();
-        List<Term> otherRemainingBaseTerms = otherList.baseTerms();
-        if (remainingElementsLeft.isEmpty() && otherRemainingElementsLeft.isEmpty()) {
-            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
-            int left = 0;
-            while (left < size) {
-                // TODO(YilongL): is it too naive to just check equality between base terms?
-                if (list.getBaseTerm(left).equals(otherList.getBaseTerm(left))) {
-                    left++;
-                } else {
-                    break;
-                }
-            }
-
-            remainingBaseTerms = remainingBaseTerms.subList(left, remainingBaseTerms.size());
-            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(left, otherRemainingBaseTerms.size());
-        }
-        if (remainingElementsRight.isEmpty() && otherRemainingElementsRight.isEmpty()) {
-            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
-            int right = 1;
-            while (right <= size) {
-                if (list.getBaseTerm(-right).equals(otherList.getBaseTerm(-right))) {
-                    right++;
-                } else {
-                    break;
-                }
-            }
-
-            remainingBaseTerms = remainingBaseTerms.subList(0, remainingBaseTerms.size() - right + 1);
-            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(0, otherRemainingBaseTerms.size() - right + 1);
-        }
-
-        if (remainingElementsLeft.isEmpty()
-                && remainingBaseTerms.isEmpty()
-                && remainingElementsRight.isEmpty()
-                && (!otherRemainingElementsLeft.isEmpty() || !otherRemainingElementsRight.isEmpty())) {
-            fail(list, otherList);
-            return;
-        }
-
-        if (otherRemainingElementsLeft.isEmpty()
-                && otherRemainingBaseTerms.isEmpty()
-                && otherRemainingElementsRight.isEmpty()
-                && (!remainingElementsLeft.isEmpty() || !remainingElementsRight.isEmpty())) {
-            fail(list, otherList);
-            return;
-        }
-
-        BuiltinList.Builder builder = BuiltinList.builder(global);
-        builder.addItems(remainingElementsLeft);
-        builder.concatenate(remainingBaseTerms);
-        builder.addItems(remainingElementsRight);
-        Term remainingList = builder.build();
-
-        BuiltinList.Builder otherBuilder = BuiltinList.builder(global);
-        otherBuilder.addItems(otherRemainingElementsLeft);
-        otherBuilder.concatenate(otherRemainingBaseTerms);
-        otherBuilder.addItems(otherRemainingElementsRight);
-        Term otherRemainingList = otherBuilder.build();
-
-        if (!(remainingList instanceof BuiltinList && ((BuiltinList) remainingList).isEmpty())
-                || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
-            if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
-                add(remainingList, otherRemainingList);
-            } else {
-                add(list, otherList);
-            }
-        }
+//        int size = Math.min(list.elementsLeft().size(), otherList.elementsLeft().size());
+//        for (int i = 0; i < size; i++) {
+//            addUnificationTask(list.get(i), otherList.get(i));
+//        }
+//        List<Term> remainingElementsLeft = list.elementsLeft().subList(size, list.elementsLeft().size());
+//        List<Term> otherRemainingElementsLeft = otherList.elementsLeft().subList(size, otherList.elementsLeft().size());
+//
+//        size = Math.min(list.elementsRight().size(), otherList.elementsRight().size());
+//        for (int i = 1; i <= size; i++) {
+//            addUnificationTask(list.get(-i), otherList.get(-i));
+//        }
+//        List<Term> remainingElementsRight = list.elementsRight().subList(0, list.elementsRight().size() - size);
+//        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, otherList.elementsRight().size() - size);
+//
+//        List<Term> remainingBaseTerms = list.baseTerms();
+//        List<Term> otherRemainingBaseTerms = otherList.baseTerms();
+//        if (remainingElementsLeft.isEmpty() && otherRemainingElementsLeft.isEmpty()) {
+//            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
+//            int left = 0;
+//            while (left < size) {
+//                // TODO(YilongL): is it too naive to just check equality between base terms?
+//                if (list.getBaseTerm(left).equals(otherList.getBaseTerm(left))) {
+//                    left++;
+//                } else {
+//                    break;
+//                }
+//            }
+//
+//            remainingBaseTerms = remainingBaseTerms.subList(left, remainingBaseTerms.size());
+//            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(left, otherRemainingBaseTerms.size());
+//        }
+//        if (remainingElementsRight.isEmpty() && otherRemainingElementsRight.isEmpty()) {
+//            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
+//            int right = 1;
+//            while (right <= size) {
+//                if (list.getBaseTerm(-right).equals(otherList.getBaseTerm(-right))) {
+//                    right++;
+//                } else {
+//                    break;
+//                }
+//            }
+//
+//            remainingBaseTerms = remainingBaseTerms.subList(0, remainingBaseTerms.size() - right + 1);
+//            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(0, otherRemainingBaseTerms.size() - right + 1);
+//        }
+//
+//        if (remainingElementsLeft.isEmpty()
+//                && remainingBaseTerms.isEmpty()
+//                && remainingElementsRight.isEmpty()
+//                && (!otherRemainingElementsLeft.isEmpty() || !otherRemainingElementsRight.isEmpty())) {
+//            fail(list, otherList);
+//            return;
+//        }
+//
+//        if (otherRemainingElementsLeft.isEmpty()
+//                && otherRemainingBaseTerms.isEmpty()
+//                && otherRemainingElementsRight.isEmpty()
+//                && (!remainingElementsLeft.isEmpty() || !remainingElementsRight.isEmpty())) {
+//            fail(list, otherList);
+//            return;
+//        }
+//
+//        BuiltinList.Builder builder = BuiltinList.builder(global);
+//        builder.addItems(remainingElementsLeft);
+//        builder.concatenate(remainingBaseTerms);
+//        builder.addItems(remainingElementsRight);
+//        Term remainingList = builder.build();
+//
+//        BuiltinList.Builder otherBuilder = BuiltinList.builder(global);
+//        otherBuilder.addItems(otherRemainingElementsLeft);
+//        otherBuilder.concatenate(otherRemainingBaseTerms);
+//        otherBuilder.addItems(otherRemainingElementsRight);
+//        Term otherRemainingList = otherBuilder.build();
+//
+//        if (!(remainingList instanceof BuiltinList && ((BuiltinList) remainingList).isEmpty())
+//                || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
+//            if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
+//                add(remainingList, otherRemainingList);
+//            } else {
+//                add(list, otherList);
+//            }
+//        }
+        throw new AssertionError("should not reach this");
     }
 
     void unifySet(BuiltinSet set, BuiltinSet otherSet) {

@@ -93,9 +93,7 @@ public class BasicVisitor implements Visitor {
 
     @Override
     public void visit(BuiltinList node) {
-        node.elementsLeft().stream().forEach(this::visitNode);
-        node.baseTerms().stream().forEach(this::visitNode);
-        node.elementsRight().stream().forEach(this::visitNode);
+        node.children.stream().forEach(this::visitNode);
     }
 
     @Override

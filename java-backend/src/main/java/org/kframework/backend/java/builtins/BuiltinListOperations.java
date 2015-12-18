@@ -11,6 +11,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 
 /**
@@ -64,44 +65,21 @@ public class BuiltinListOperations {
         if (removeLeft == 0 && removeRight == 0) {
             return list;
         }
-        int pendingRemoveLeft;
-        int pendingRemoveRight;
         if (!(list instanceof BuiltinList)) {
             return null;
         }
         BuiltinList builtinList = (BuiltinList) list;
-        List<Term> elementsLeft = builtinList.elementsLeft();
-        List<Term> elementsRight = builtinList.elementsRight();
-        if (builtinList.isConcreteCollection()) {
-            if (removeLeft + removeRight > elementsLeft.size()) {
-                return Bottom.BOTTOM;
-            }
 
-            pendingRemoveLeft = pendingRemoveRight = 0;
-            elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size() - removeRight);
-            elementsRight = ImmutableList.of();
-        } else {
-            if (removeLeft > elementsLeft.size()) {
-                pendingRemoveLeft = removeLeft - elementsLeft.size();
-                elementsLeft = ImmutableList.of();
-            } else {
-                pendingRemoveLeft = 0;
-                elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size());
-            }
+        int toRemoveFromLeft = IntStream.range(0, removeLeft).filter(i -> builtinList.get(i).sort().equals(builtinList.sort)).findFirst().orElse(removeLeft);
+        int toRemoveFromRight = IntStream.range(0, removeRight).filter(i -> builtinList.get(builtinList.size() - 1 - i).sort().equals(builtinList.sort)).findFirst().orElse(removeRight);
 
-            if (removeRight > elementsRight.size()) {
-                pendingRemoveRight = removeRight - elementsRight.size();
-                elementsRight = ImmutableList.of();
-            } else {
-                pendingRemoveRight = 0;
-                elementsRight = elementsRight.subList(0, elementsRight.size() - removeRight);
-            }
-        }
+        int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
+        int pendingRemoveRight = removeRight - toRemoveFromRight;
+
+        ImmutableList<Term> shortenedList = builtinList.children.subList(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
 
         BuiltinList.Builder builder = BuiltinList.builder(context.global());
-        builder.addItems(elementsLeft);
-        builder.concatenate(builtinList.baseTerms());
-        builder.addItems(elementsRight);
+        builder.concatenate(shortenedList);
 
         return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
                 DataStructures.listRange(
