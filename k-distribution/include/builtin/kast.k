@@ -44,8 +44,8 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax KBott ::= "."       [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
-                 | ".K"      [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
+  syntax KBott ::= ".K"      [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
+                 | "."       [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
