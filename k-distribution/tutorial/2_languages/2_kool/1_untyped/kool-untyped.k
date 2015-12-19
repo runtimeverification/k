@@ -392,7 +392,7 @@ definition. */
   rule <k> var X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
-                          `L +Int 1` ... `L +Int N` |-> undefined ...</store>
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -583,7 +583,7 @@ from SIMPLE unchanged. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K `N +Int 1`...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 
 /*@ \subsection{Changes to the existing untyped SIMPLE semantics}

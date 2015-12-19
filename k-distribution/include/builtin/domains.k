@@ -256,6 +256,8 @@ module INT
   imports BOOL
   imports K-EQUAL
 
+  syntax Int ::= "(" Int ")" [bracket]
+
   syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
                  Int "^Int" Int                 [function, left, latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
