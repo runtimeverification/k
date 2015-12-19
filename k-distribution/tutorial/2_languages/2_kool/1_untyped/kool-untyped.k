@@ -567,6 +567,8 @@ from SIMPLE unchanged. */
   syntax KItem ::= env(Map)
   rule <k> env(Env) => .K ...</k>  <env> _ => Env </env>  [structural]
   rule `env(_) => .K` ~> env(_)  [structural]
+  // TODO: How can we make sure that the second rule above applies before the first one?
+  //       Probably we'll deal with this using strategies, eventually.
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
