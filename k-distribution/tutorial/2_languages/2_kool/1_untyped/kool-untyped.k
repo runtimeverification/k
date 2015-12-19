@@ -523,7 +523,7 @@ interestingly, the other concurrency constructs keep their semantics
 from SIMPLE unchanged. */
 
   // TODO(KORE): ..Bag should be . throughout this definition #1772
-  rule `<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag`
+  rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
   rule `<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .`
   */
@@ -688,12 +688,12 @@ environment. */
          <env> Env </env>
          <crntObj> Obj </crntObj>
        ...</thread>
-       `.Bag => <thread>...
+       (.Bag => <thread>...
                <k> S </k>
                <env> Env </env>
                <id> !T </id>
                <crntObj> Obj </crntObj>
-             ...</thread>`
+             ...</thread>)
 
 
 //@ \subsection{Semantics of the new KOOL constructs}
@@ -708,11 +708,11 @@ corresponding cells: */
        // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>... `.Map => Class1 |-> ClassBody(Class2, S)`
        /*
-       <classes>... `.Bag => <class>
+       <classes>... (.Bag => <class>
                             <className> Class1 </className>
                             <extends> Class2 </extends>
                             <declarations> S </declarations>
-                        </class>`
+                        </class>)
        */
        ...</classes>  [structural]
 
@@ -833,7 +833,7 @@ the location is unnecessary and thus we delete it from the
   syntax KItem ::= "storeObj"
 
   rule <k> storeObj => .K ...</k>
-       <crntObj> Obj `<location> L:Int </location> => .Bag` </crntObj>
+       <crntObj> Obj (<location> L:Int </location> => .Bag) </crntObj>
        <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 
