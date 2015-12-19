@@ -99,6 +99,7 @@ module SET
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, hook(SET.unit), latex(\dotCt{Set})]
                //| "."
+  syntax Set ::= "(" Set ")" [bracket]
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
