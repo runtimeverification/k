@@ -225,6 +225,13 @@ public class SymbolicRewriter {
         throw new UnsupportedOperationException();
     }
 
+    private Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> getRewrites(ConjunctiveFormula constraint) {
+        return constraint.equalities().stream()
+                .filter(e -> e.leftHandSide() instanceof LocalRewriteTerm)
+                .map(Equality::leftHandSide)
+                .map(LocalRewriteTerm.class::cast)
+                .collect(Collectors.toMap(e -> e.path, e -> e.rewriteRHS));
+    }
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
@@ -245,7 +252,7 @@ public class SymbolicRewriter {
             // start the optimized substitution
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-            Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> rewrites = theFastMatcher.getRewrite(triple.getRight());
+            Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> rewrites = getRewrites(triple.getLeft());
 
             assert (rewrites.size() > 0);
 

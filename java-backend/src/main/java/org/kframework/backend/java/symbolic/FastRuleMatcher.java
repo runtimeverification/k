@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -12,6 +13,7 @@ import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.LocalRewriteTerm;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.RuleAutomatonDisjunction;
 import org.kframework.backend.java.kil.Sort;
@@ -48,15 +50,7 @@ import com.google.common.collect.Sets;
 public class FastRuleMatcher {
 
     private ConjunctiveFormula[] constraints;
-    private Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>[] rewrites;
     private final int ruleCount;
-
-    /**
-     * @return map from AST path to the corresponding rewrite RHS
-     */
-    public Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term> getRewrite(int index) {
-        return rewrites[index];
-    }
 
     private BitSet empty;
 
@@ -81,7 +75,6 @@ public class FastRuleMatcher {
 
         this.ruleCount = ruleCount;
         constraints = new ConjunctiveFormula[this.ruleCount];
-        rewrites = new Map[this.ruleCount];
     }
 
     /**
@@ -97,8 +90,6 @@ public class FastRuleMatcher {
             TermContext context) {
 
         ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
-        rewrites = new Map[ruleMask.length()];
-        ruleMask.stream().forEach(i -> rewrites[i] = new HashMap<>());
         empty = BitSet.apply(ruleCount);
 
         BitSet theMatchingRules = match(subject.term(), pattern, ruleMask, List());
@@ -179,7 +170,7 @@ public class FastRuleMatcher {
 
             for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
                 if (innerRHSRewrite.theRHS[i] != null) {
-                    rewrites[i].put(path.reverse(), innerRHSRewrite.theRHS[i]);
+                    constraints[i] = constraints[i].add(new LocalRewriteTerm(path.reverse(), innerRHSRewrite.theRHS[i]), BoolToken.TRUE);
                 }
             }
             return theNewMask;
@@ -299,6 +290,10 @@ public class FastRuleMatcher {
             BitSet oldRuleMask = ruleMask;
             ruleMask = oldRuleMask.clone();
 
+            /* the path indices for the subject.range list may become inaccurate later on;
+            this can only happen when the pattern contains a rewrite with a list pattern in the LHS,
+            which means there are no deep-nested rewrites,
+            which in turn means the inaccurate paths will never be used */
             ruleMask = match(subject.range(subjectIndex, i), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, i)));
             if (ruleMask.isEmpty()) {
                 // fail
@@ -366,7 +361,7 @@ public class FastRuleMatcher {
             }
 
             if (rightHandSide != null) {
-                rewrites[i].put(path.reverse(), rightHandSide);
+                constraints[i] = constraints[i].add(new LocalRewriteTerm(path.reverse(), rightHandSide), BoolToken.TRUE);
             }
         }
 
