@@ -458,7 +458,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
          <fstack> ListItem((Env,K,C)) => .List ...</fstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -512,7 +512,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
          <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
