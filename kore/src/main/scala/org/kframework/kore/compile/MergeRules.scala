@@ -80,11 +80,17 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       .groupBy(_._1.klabel)
       .map {
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
-          val setOfLists: Set[List[(K, K)]] = if (m.attributesFor(klabel).contains(Att.assoc)) {
-            ???
+          val klistPredicatePairs: Set[(Seq[K], K)] = ks map { case (kapply, ruleP) => (kapply.klist.items.asScala.toSeq, ruleP) }
+          val normalizedItemsPredicatePairs = if (m.attributesFor(klabel).contains(Att.assoc)) {
+            val unitKLabel = KLabel(m.attributesFor(klabel).get(Att.unit).get)
+            val unitK = unitKLabel()
+            val flatItemsPredicatePairs: Set[(Seq[K], K)] = klistPredicatePairs map { case (items, ruleP) => (Assoc.flatten(klabel, items, unitKLabel), ruleP) }
+            val maxLength: Int = (flatItemsPredicatePairs map { _._1.size }).max
+            klistPredicatePairs map {  case (items, ruleP) =>  (items.padTo(maxLength, unitK), ruleP) }
           } else {
-            ks map { case (kapply, ruleP) => kapply.klist.items.asScala.map((_, ruleP)).toList }
+            klistPredicatePairs
           }
+          val setOfLists: Set[Seq[(K, K)]] = normalizedItemsPredicatePairs map { case (items, ruleP) => items.map((_, ruleP)) }
           val childrenDisjunctionsOfklabel: IndexedSeq[K] =
             setOfLists.head.indices
               .map(i => setOfLists.map(l => l(i)))

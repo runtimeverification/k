@@ -115,6 +115,7 @@ object Att {
   val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
   val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
   val assoc = "assoc"
+  val unit = "unit"
 }
 
 trait AttributesToString {
