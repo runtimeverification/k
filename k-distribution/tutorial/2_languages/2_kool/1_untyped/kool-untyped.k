@@ -210,7 +210,7 @@ for the KOOL object-oriented constructs.
                > Exp "=" Exp             [strict(2), right]
 
   // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel("_,_::Ids")]
+  syntax Ids  ::= List{Id,","}           [klabel(_,_::Ids)]
   /*
   syntax Ids  ::= List{Id,","}
   */
