@@ -525,7 +525,7 @@ from SIMPLE unchanged. */
   // TODO(KORE): ..Bag should be . throughout this definition #1772
   rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
-  rule `<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
   */
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
