@@ -47,7 +47,7 @@ public class StrategiesTest {
         String syntaxModule = "A";
 
         String pgm = "x";
-        String expected = "<t> <k> zz ~> .::K </k> <s> false ~> .::K </s> </t>";
+        String expected = "<t> <k> zz ~> . </k> <s> false ~> . </s> </t>";
 
         assertSearch(filename, mainModule, syntaxModule, pgm, expected, "if ^xy ; ^xy then ^xy else ^xz ; ^zzz ; ^zzz");
     }
@@ -59,7 +59,7 @@ public class StrategiesTest {
         String syntaxModule = "IMP-SYNTAX";
 
         String pgm = "int s, n; n = 10; while(0<=n) { s = s + n; n = n + -1; }";
-        String expected = "<generatedTop> <k> .::K </k> <state> s |-> 55 n |-> -1 </state> <s> true ~> .::K </s> </generatedTop>";
+        String expected = "<generatedTop> <k> . </k> <state> s |-> 55 n |-> -1 </state> <s> true ~> . </s> </generatedTop>";
 
         assertSearch(filename, mainModule, syntaxModule, pgm, expected, "(^heat* ; ^regular ; (^cool || true))*"); //
     }
