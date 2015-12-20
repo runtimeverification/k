@@ -576,7 +576,14 @@ from SIMPLE unchanged. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K `(N +Int 1)...M |-> K`  when N <=Int M
+  // TODO(KORE):
+  // The additional bracket is required for disambiguity.
+  // Otherwise, this rule is possible to be parsed as:
+  //   rule N...M |-> K => N |-> ( (K(N +Int 1))...M |-> K )  when N <=Int M
+  // since K has no sort casting, thus can be considered as a klabel
+  // Note that backtick is better than parenthesis here,
+  // because parenthesis doesn't eliminate possiblility of K being of a klabel.
 
 
 /*@ \subsection{Changes to the existing untyped SIMPLE semantics}
