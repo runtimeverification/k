@@ -210,7 +210,7 @@ for the KOOL object-oriented constructs.
                > Exp "=" Exp             [strict(2), right]
 
   // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel("'_,_::Ids")]
+  syntax Ids  ::= List{Id,","}           [klabel(_,_::Ids)]
   /*
   syntax Ids  ::= List{Id,","}
   */
@@ -377,11 +377,7 @@ definition. */
 
   syntax KItem ::= "undefined"  [latex(\bot)]
 
-  // TODO(KORE): Change .K back to . throughout this definition #1772
-  rule <k> var X:Id; => .K ...</k>
-  /*
   rule <k> var X:Id; => . ...</k>
-  */
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -389,10 +385,10 @@ definition. */
 
   context var _:Id[HOLE];
 
-  rule <k> var X:Id[N:Int]; => .K ...</k>
+  rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
-                          `L +Int 1` ... `L +Int N` |-> undefined ...</store>
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -458,7 +454,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
          <fstack> ListItem((Env,K,C)) => .List ...</fstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -475,13 +471,13 @@ interestingly, the semantics of return stays unchanged. */
     [assignment]
 
 
-  rule {} => .K  [structural]
+  rule {} => .  [structural]
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 
   rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
 
-  rule _:Val; => .K
+  rule _:Val; => .
 
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
@@ -490,7 +486,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
-  rule print(.Vals); => .K  [structural]
+  rule print(.Vals); => .  [structural]
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
@@ -506,13 +502,13 @@ interestingly, the semantics of return stays unchanged. */
        </control>
        <env> Env </env>
 
-  rule <k> popx => .K ...</k>
+  rule <k> popx => . ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
          <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -523,33 +519,33 @@ interestingly, the other concurrency constructs keep their semantics
 from SIMPLE unchanged. */
 
   // TODO(KORE): ..Bag should be . throughout this definition #1772
-  rule `<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
-  rule `<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
   */
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
 
-  rule <k> join T:Int; => .K ...</k>
+  rule <k> join T:Int; => . ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
-  rule <k> acquire V:Val; => .K ...</k>
+  rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy `.Set => SetItem(V)` </busy>
     when (notBool(V in Busy:Set))  [acquire]
 
-  rule <k> acquire V; => .K ...</k>
+  rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-  rule <k> release V:Val; => .K ...</k>
+  rule <k> release V:Val; => . ...</k>
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
        <busy>... SetItem(V) => .Set ...</busy>
 
-  rule <k> rendezvous V:Val; => .K ...</k>
-       <k> rendezvous V; => .K ...</k>  [rendezvous]
+  rule <k> rendezvous V:Val; => . ...</k>
+       <k> rendezvous V; => . ...</k>  [rendezvous]
 
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
@@ -565,8 +561,10 @@ from SIMPLE unchanged. */
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
   syntax KItem ::= env(Map)
-  rule <k> env(Env) => .K ...</k>  <env> _ => Env </env>  [structural]
-  rule `env(_) => .K` ~> env(_)  [structural]
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule `env(_) => .` ~> env(_)  [structural]
+  // TODO: How can we make sure that the second rule above applies before the first one?
+  //       Probably we'll deal with this using strategies, eventually.
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
@@ -583,7 +581,7 @@ from SIMPLE unchanged. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K `N +Int 1`...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 
 /*@ \subsection{Changes to the existing untyped SIMPLE semantics}
@@ -688,12 +686,12 @@ environment. */
          <env> Env </env>
          <crntObj> Obj </crntObj>
        ...</thread>
-       `.Bag => <thread>...
+       (.Bag => <thread>...
                <k> S </k>
                <env> Env </env>
                <id> !T </id>
                <crntObj> Obj </crntObj>
-             ...</thread>`
+             ...</thread>)
 
 
 //@ \subsection{Semantics of the new KOOL constructs}
@@ -704,15 +702,15 @@ Initially, the classes forming the program are moved into their
 corresponding cells: */
 
   syntax KItem ::= ClassBody(K, K)
-  rule <k> class Class1 extends Class2 { S } => .K ...</k>
+  rule <k> class Class1 extends Class2 { S } => . ...</k>
        // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>... `.Map => Class1 |-> ClassBody(Class2, S)`
        /*
-       <classes>... `.Bag => <class>
+       <classes>... (.Bag => <class>
                             <className> Class1 </className>
                             <extends> Class2 </extends>
                             <declarations> S </declarations>
-                        </class>`
+                        </class>)
        */
        ...</classes>  [structural]
 
@@ -733,7 +731,7 @@ This gives the KOOL programmer a lot of power; one should use this
 power wisely, though, because programs can become easily hard to
 understand and reason about if one overuses these features. */
 
-  rule <k> method F:Id(Xs:Ids) S => .K ...</k>
+  rule <k> method F:Id(Xs:Ids) S => . ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
        <env> Env => Env[F <- L] </env>
@@ -797,7 +795,7 @@ members (both fields and methods) of that class. */
        <declarations> S </declarations>  [structural]
        */
 
-  rule <k> create(Object) => .K ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>  [structural]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
@@ -806,7 +804,7 @@ semantics of method declarations above). */
 
   syntax KItem ::= setCrntClass(Id)
 
-  rule <k> setCrntClass(C) => .K ...</k>
+  rule <k> setCrntClass(C) => . ...</k>
        <crntClass> _ => C </crntClass>  [structural]
 
 /*@ The next operation adds a new tagged environment layer to the
@@ -816,7 +814,7 @@ empty). */
 
   syntax KItem ::= "addEnvLayer"
 
-  rule <k> addEnvLayer => .K ...</k>
+  rule <k> addEnvLayer => . ...</k>
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
        <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
@@ -832,8 +830,8 @@ the location is unnecessary and thus we delete it from the
 
   syntax KItem ::= "storeObj"
 
-  rule <k> storeObj => .K ...</k>
-       <crntObj> Obj `<location> L:Int </location> => .Bag` </crntObj>
+  rule <k> storeObj => . ...</k>
+       <crntObj> Obj (<location> L:Int </location> => .Bag) </crntObj>
        <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 

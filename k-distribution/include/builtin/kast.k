@@ -71,6 +71,7 @@ module KCELLS
                | ".Bag"   [klabel(#cells)]
                | ".::Bag" [klabel(#cells)]
                | Cell
+  syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
   syntax Bag ::= KBott
 endmodule

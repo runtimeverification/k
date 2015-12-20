@@ -99,6 +99,7 @@ module SET
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, hook(SET.unit), latex(\dotCt{Set})]
                //| "."
+  syntax Set ::= "(" Set ")" [bracket]
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
@@ -283,6 +284,7 @@ module INT
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
                | "absInt" "(" Int ")"           [function, smtlib(int_abs), klabel(absInt), hook(INT.abs)]
+  syntax Int ::= "(" Int ")" [bracket]
 
   rule I1:Int divInt I2:Int => `I1 -Int `I1 modInt I2`` /Int I2
   requires I2 =/=Int 0
