@@ -23,6 +23,7 @@ module LAMBDA-COMMON
                | "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]
+  syntax KVariable ::= Id
 endmodule
 
 module LAMBDA
@@ -31,7 +32,6 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax KResult ::= Val
-  syntax Variable ::= Id
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
 
