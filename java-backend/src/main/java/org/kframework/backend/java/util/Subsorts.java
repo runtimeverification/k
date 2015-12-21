@@ -90,53 +90,49 @@ public class Subsorts implements Serializable {
         return bigSort == smallSort || isSubsorted(bigSort, smallSort);
     }
 
+    public Sort getLUBSort(Sort... sorts) {
+        return getLUBSort(Sets.newHashSet(sorts));
+    }
+
+    public Sort getLUBSort(Set<Sort> subset) {
+        return getTopSort(subset, false);
+    }
+
+    public Set<Sort> getUpperBounds(Sort... sorts) {
+        return getUpperBounds(Sets.newHashSet(sorts));
+    }
+
+    public Set<Sort> getUpperBounds(Set<Sort> subset) {
+        return getBounds(subset, false);
+    }
+
     public Sort getGLBSort(Sort... sorts) {
         return getGLBSort(Sets.newHashSet(sorts));
     }
 
     public Sort getGLBSort(Set<Sort> subset) {
-        if (subset == null || subset.size() == 0) {
-            return null;
-        }
-        if (subset.size() == 1) {
-            return subset.iterator().next();
-        }
-
-        Set<Sort> lowerBounds = getLowerBounds(subset);
-        if (lowerBounds.size() == 0) {
-            return null;
-        }
-
-        Sort candidate = null;
-        for (Sort lowerBound2 : lowerBounds) {
-            if (candidate == null) {
-                candidate = lowerBound2;
-            } else {
-                if (isSubsorted(lowerBound2, candidate)) {
-                    candidate = lowerBound2;
-                } else if (!isSubsorted(candidate, lowerBound2)) {
-                    /* no relation between lowerBound and candidate; none of them is the GLB */
-                    candidate = null;
-                }
-            }
-        }
-        /* if there is a GLB, it must be candidate */
-        if (candidate != null) {
-            for (Sort lowerBound1 : lowerBounds) {
-                if (lowerBound1 != candidate && !isSubsorted(candidate, lowerBound1)) {
-                    candidate = null;
-                    break;
-                }
-            }
-        }
-        return candidate;
+        return getTopSort(subset, true);
     }
 
     public Set<Sort> getLowerBounds(Sort... sorts) {
         return getLowerBounds(Sets.newHashSet(sorts));
     }
 
-    private Set<Sort> getLowerBounds(Set<Sort> subset) {
+    public Set<Sort> getLowerBounds(Set<Sort> subset) {
+        return getBounds(subset, true);
+    }
+
+    public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
+        Set<Sort> lowerBounds = getLowerBounds(sort1, sort2);
+        return !lowerBounds.isEmpty() &&
+                !(lowerBounds.size() == 1 && lowerBounds.iterator().next().equals(Sort.BOTTOM));
+    }
+
+    private boolean inRelation(Sort sort1, Sort sort2, boolean direction) {
+        return direction ? isSubsorted(sort2, sort1) : isSubsorted(sort1, sort2);
+    }
+
+    private Set<Sort> getBounds(Set<Sort> subset, boolean direction) {
         if (subset == null || subset.size() == 0) {
             return java.util.Collections.emptySet();
         }
@@ -144,27 +140,59 @@ public class Subsorts implements Serializable {
             return java.util.Collections.singleton(subset.iterator().next());
         }
 
-        Set<Sort> lowerBounds = new HashSet<>();
-        for (Sort elem : sorts) {
-            boolean isLowerBound = true;
-            for (Sort subsetElem : subset) {
-                if (!(isSubsorted(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLowerBound = false;
+        Set<Sort> bounds = new HashSet<>();
+        for (Sort candidate : sorts) {
+            boolean isBound = true;
+            for (Sort sort : subset) {
+                if (!(inRelation(candidate, sort, direction) || candidate.equals(sort))) {
+                    isBound = false;
                     break;
                 }
             }
-            if (isLowerBound) {
-                lowerBounds.add(elem);
+            if (isBound) {
+                bounds.add(candidate);
             }
         }
 
-        return lowerBounds;
+        return bounds;
     }
 
-    public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        Set<Sort> lowerBounds = getLowerBounds(sort1, sort2);
-        return !lowerBounds.isEmpty() &&
-                !(lowerBounds.size() == 1 && lowerBounds.iterator().next().equals(Sort.BOTTOM));
+    public Sort getTopSort(Set<Sort> subset, boolean direction) {
+        if (subset == null || subset.size() == 0) {
+            return null;
+        }
+        if (subset.size() == 1) {
+            return subset.iterator().next();
+        }
+
+        Set<Sort> bounds = getBounds(subset, direction);
+        if (bounds.size() == 0) {
+            return null;
+        }
+
+        Sort candidate = null;
+        for (Sort bound : bounds) {
+            if (candidate == null) {
+                candidate = bound;
+            } else {
+                if (inRelation(candidate, bound, direction)) {
+                    candidate = bound;
+                } else if (!inRelation(bound, candidate, direction)) {
+                    /* no relation between bound and candidate; none of them is the top element */
+                    candidate = null;
+                }
+            }
+        }
+        /* if there is a top element, it must be candidate */
+        if (candidate != null) {
+            for (Sort bound : bounds) {
+                if (bound != candidate && !inRelation(bound, candidate, direction)) {
+                    candidate = null;
+                    break;
+                }
+            }
+        }
+        return candidate;
     }
 
 }
