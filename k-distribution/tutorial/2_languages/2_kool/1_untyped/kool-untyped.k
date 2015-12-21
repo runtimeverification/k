@@ -462,7 +462,11 @@ interestingly, the semantics of return stays unchanged. */
 
   context (HOLE => lvalue(HOLE)) = _
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> `_ => V` ...</store>
+  /*
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
+  */
     [assignment]
 
 
@@ -490,7 +494,11 @@ interestingly, the semantics of return stays unchanged. */
 
   syntax KItem ::= "popx"
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> `try S1 catch(X) {S2} => S1 ~> popx` ~> K </k>
+  /*
+  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
+  */
        <control>
          <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
@@ -526,7 +534,11 @@ from SIMPLE unchanged. */
 
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
+       // TODO(KORE): use parenthesis instead of backtick once #1931 is fixed
        <busy> Busy `.Set => SetItem(V)` </busy>
+       /*
+       <busy> Busy (.Set => SetItem(V)) </busy>
+       */
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -545,7 +557,11 @@ from SIMPLE unchanged. */
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
+  /*
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
+  */
   rule mkDecls(.Ids,.Vals) => {}
 
   // TODO(KORE): clarify sort inferences #1803
@@ -557,7 +573,11 @@ from SIMPLE unchanged. */
 
   syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule `env(_) => .` ~> env(_)  [structural]
+  /*
+  rule (env(_) => .) ~> env(_)  [structural]
+  */
   // TODO: How can we make sure that the second rule above applies before the first one?
   //       Probably we'll deal with this using strategies, eventually.
 
