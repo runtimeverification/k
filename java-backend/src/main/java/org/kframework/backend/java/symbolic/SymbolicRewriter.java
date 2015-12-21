@@ -124,7 +124,7 @@ public class SymbolicRewriter {
                 rules.removeAll(failedRules);
 
                 Map<Rule, List<ConstrainedTerm>> rule2Results;
-                if (computeOne || !transition) {
+                if (computeOne) {
                     rule2Results = Collections.emptyMap();
                     for (Rule rule : rules) {
                         List<ConstrainedTerm> terms = computeRewriteStepByRule(subject, rule);
