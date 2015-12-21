@@ -142,13 +142,13 @@ public class KAbstractRewriteMachine {
                 case BUILTIN_LIST:
                     BuiltinList.Builder builder = BuiltinList.builder(global);
                     for (int i = 0; i < constructor.size1(); i++) {
-                        builder.addItem(stack.pop());
+                        builder.add(stack.pop());
                     }
                     for (int i = 0; i < constructor.size2(); i++) {
-                        builder.concatenate(stack.pop());
+                        builder.addAll(stack.pop());
                     }
                     for (int i = 0; i < constructor.size3(); i++) {
-                        builder.addItem(stack.pop());
+                        builder.add(stack.pop());
                     }
                     stack.push(builder.build());
                     break;

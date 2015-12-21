@@ -111,20 +111,24 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
                     global);
         }
 
-        // we've encountered a regular KApply
-
+        Term convertedKLabel = convert1(klabel);
         KList convertedKList = KList(klist.items());
-        BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
 
-        KItem kItem = KItem.of(convert1(klabel), convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
-        if (AbstractUnifier.isKSeq(kItem)) {
-            return stream(Assoc.flatten(kSeqLabel, Seq(kItem), kDotLabel).reverse())
-                    .map(Term.class::cast)
-                    .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), global))
-                    .get();
-        } else {
-            return kItem;
+        // associative operator
+        if (definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.assoc()))) {
+            // this assumes there are no KLabel variables
+            BuiltinList.Builder builder = BuiltinList.builder(
+                    Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
+                    (KLabelConstant) convertedKLabel,
+                    (KLabelConstant) convert1(module.attributesFor().get(klabel).get().<KLabel>get(Att.unit()).get()),
+                    global);
+            // this assumes there are no KList variables in the KList
+            return builder.addAll(convertedKList.getContents()).build();
         }
+
+        // we've encountered a regular KApply
+        BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
+        return KItem.of(convertedKLabel, convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
     }
 
     /**

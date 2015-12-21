@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -56,23 +57,9 @@ public class FastRuleMatcher {
 
     private final GlobalContext global;
 
-    private final KLabelConstant kSeqLabel;
-    private final KItem kDot;
-
-    private final KLabelConstant threadCellBagLabel;
-    private final KItem dotThreadCellBag;
-
 
     public FastRuleMatcher(GlobalContext global, int ruleCount) {
         this.global = global;
-        kSeqLabel = KLabelConstant.of(KLabels.KSEQ, global.getDefinition());
-        KLabelConstant kDotLabel = KLabelConstant.of(KLabels.DOTK, global.getDefinition());
-        kDot = KItem.of(kDotLabel, KList.concatenate(), global);
-
-        // remove hack when A/AC is properly supported
-        threadCellBagLabel = KLabelConstant.of("_ThreadCellBag_", global.getDefinition());
-        dotThreadCellBag = KItem.of(KLabelConstant.of(".ThreadCellBag", global.getDefinition()), KList.concatenate(), global);
-
         this.ruleCount = ruleCount;
         constraints = new ConjunctiveFormula[this.ruleCount];
     }
@@ -135,14 +122,9 @@ public class FastRuleMatcher {
                 }
             }
 
-            // try to match the subject as-if it is a singleton kseq, i.e. subject ~> .K
-            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == kSeqLabel)) {
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel(kSeqLabel));
-            }
-
-            // TODO: hack for threads to behave like the kseq above; remove once AC works
-            if (!(subject instanceof KItem && ((KItem) subject).kLabel() == threadCellBagLabel) && threadCellBagLabel.ordinal() < automatonDisjunction.getKLabelMaxOrdinal()) {
-                matchInside(subject, ruleMask, path, returnSet, automatonDisjunction.getKItemPatternForKLabel(threadCellBagLabel));
+            // handle associative constructs with identity
+            for (Pair<BuiltinList, BitSet> p : automatonDisjunction.assocDisjunctionArray[subject.sort().ordinal()]) {
+                matchInside(subject, ruleMask, path, returnSet, p);
             }
 
             if (subject instanceof KItem) {
@@ -181,19 +163,15 @@ public class FastRuleMatcher {
             return addSubstitution((Variable) pattern, subject, ruleMask);
         }
 
-        if ((subject.isSymbolic() && !isThreadCellBag(subject) && !subject.equals(dotThreadCellBag))
-                || (pattern.isSymbolic() && !isThreadCellBag(pattern) && !pattern.equals(dotThreadCellBag))) {
+        if (subject.isSymbolic() || pattern.isSymbolic()) {
             return addUnification(subject, pattern, ruleMask, path);
         }
 
-        // normalize KSeq representations
-        if (AbstractUnifier.isKSeq(pattern)) {
-            subject = upKSeq(subject);
-        }
-
-        // TODO: remove the hack below once AC works
-        if (isThreadCellBag(pattern) && !subject.sort().equals(Sort.of("ThreadCellBag")) && !isThreadCellBag(subject)) {
-            subject = KItem.of(threadCellBagLabel, KList.concatenate(subject, dotThreadCellBag), global);
+        // normalize associative representations
+        if (subject instanceof BuiltinList && !(pattern instanceof BuiltinList)) {
+            pattern = ((BuiltinList) subject).upElementToList(subject);
+        } else if (pattern instanceof BuiltinList && !(subject instanceof BuiltinList)) {
+            subject = ((BuiltinList) pattern).upElementToList(subject);
         }
 
         if (subject instanceof KItem && pattern instanceof KItem) {
@@ -229,13 +207,15 @@ public class FastRuleMatcher {
                 addSubstitution((Variable) patternKLabel, ((KItem) subject).kLabel(), ruleMask);
             }
             return ruleMask;
+        } else if (subject instanceof BuiltinList && pattern instanceof BuiltinList) {
+            return matchAssoc((BuiltinList) subject, 0, (BuiltinList) pattern, 0, ruleMask, path);
         } else if (subject instanceof Token && pattern instanceof Token) {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
-        } else if (subject instanceof KItem && pattern instanceof Token || subject instanceof Token && pattern instanceof KItem) {
-            return empty;
         } else {
-            throw new AssertionError("unexpected class at matching: " + subject.getClass());
+            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token : "unexpected class at matching: " + subject.getClass();
+            assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token : "unexpected class at matching: " + pattern.getClass();
+            return empty;
         }
     }
 
@@ -248,7 +228,7 @@ public class FastRuleMatcher {
         }
     }
 
-    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path, BitSet returnSet, Pair<KItem, BitSet> pSeq) {
+    private void matchInside(Term subject, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path, BitSet returnSet, Pair<? extends Term, BitSet> pSeq) {
         if (pSeq != null) {
             if (ruleMask.intersects(pSeq.getRight())) {
                 BitSet localRuleMaskSeq = ((BitSet) ruleMask.clone());
@@ -259,8 +239,10 @@ public class FastRuleMatcher {
         }
     }
 
-    private BitSet matchAssoc(BuiltinList subject, int subjectIndex, BuiltinList pattern, int patternIndex, BitSet ruleMask, scala.collection.immutable.List<Integer> path) {
-        //assert subject.children.stream().allMatch(este element)
+    private BitSet matchAssoc(BuiltinList subject, int subjectIndex, BuiltinList pattern, int patternIndex, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
+        assert subject.sort.equals(pattern.sort);
+        assert IntStream.range(0, subject.children.size()).allMatch(subject::isElement);
+
         /* match prefix of elements in subject and pattern */
         if (subjectIndex == subject.size() && patternIndex == pattern.size()) {
             /* end of matching */
@@ -410,16 +392,6 @@ public class FastRuleMatcher {
                 return ((InnerRHSRewrite) kItem.klist().items().get(1)).theRHS[i];
             }
         });
-    }
-
-    private Term upKSeq(Term otherTerm) {
-        if (!AbstractUnifier.isKSeq(otherTerm) && !AbstractUnifier.isKSeqVar(otherTerm))
-            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), global);
-        return otherTerm;
-    }
-
-    private boolean isThreadCellBag(Term term) {
-        return term instanceof KItem && ((KItem) term).kLabel().equals(threadCellBagLabel);
     }
 
 }

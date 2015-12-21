@@ -291,11 +291,15 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         boolean changed = false;
-        BuiltinList.Builder builder = BuiltinList.builder(resolveGlobalContext(builtinList));
+        BuiltinList.Builder builder = BuiltinList.builder(
+                builtinList.sort,
+                builtinList.operatorKLabel,
+                builtinList.unitKLabel,
+                resolveGlobalContext(builtinList));
         for (Term term : builtinList.children) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
-            builder.addItem(transformedTerm);
+            builder.add(transformedTerm);
         }
         return changed ? builder.build() : builtinList;
     }

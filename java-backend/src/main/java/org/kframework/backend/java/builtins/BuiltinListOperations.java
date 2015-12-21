@@ -33,9 +33,7 @@ public class BuiltinListOperations {
     }
 
     public static Term element(Term element, TermContext context) {
-        BuiltinList.Builder builder = BuiltinList.builder(context.global());
-        builder.addItem(element);
-        return builder.build();
+        throw new UnsupportedOperationException();
     }
 
     public static Term get(BuiltinList list, IntToken index, TermContext context) {
@@ -76,17 +74,14 @@ public class BuiltinListOperations {
         int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
         int pendingRemoveRight = removeRight - toRemoveFromRight;
 
-        ImmutableList<Term> shortenedList = builtinList.children.subList(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
-
-        BuiltinList.Builder builder = BuiltinList.builder(context.global());
-        builder.concatenate(shortenedList);
+        Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
 
         return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
                 DataStructures.listRange(
-                        builder.build(),
+                        subList,
                         pendingRemoveLeft,
                         pendingRemoveLeft, context) :
-                builder.build();
+                subList;
     }
 
 }

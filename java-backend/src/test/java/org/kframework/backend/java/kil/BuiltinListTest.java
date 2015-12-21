@@ -20,9 +20,9 @@ public class BuiltinListTest {
     @Test
     public void testListRange() throws Exception {
         BuiltinList.Builder builder = BuiltinList.builder(termContext.global());
-        builder.addItem(IntToken.of(0));
-        builder.concatenate(new Variable("L", Sort.LIST));
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
+        builder.add(IntToken.of(0));
+        builder.add(new Variable("L", Sort.LIST));
+        builder.addAll(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
         BuiltinList baseBuiltinList = (BuiltinList) BuiltinListOperations.range(
                 (BuiltinList) builder.build(),
                 IntToken.of(1),
@@ -30,9 +30,9 @@ public class BuiltinListTest {
                 termContext);
 
         builder = BuiltinList.builder(termContext.global());
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1)));
-        builder.concatenate(baseBuiltinList);
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
+        builder.addAll(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1)));
+        builder.add(baseBuiltinList);
+        builder.addAll(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
         BuiltinList builtinList = (BuiltinList) BuiltinListOperations.range(
                 (BuiltinList) builder.build(),
                 IntToken.of(2),
