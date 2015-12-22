@@ -115,12 +115,13 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KList convertedKList = KList(klist.items());
 
         // associative operator
-        if (definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.assoc()))) {
+        if (definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.assoc())) &&
+                !definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.comm()))) {
             // this assumes there are no KLabel variables
             BuiltinList.Builder builder = BuiltinList.builder(
                     Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
                     (KLabelConstant) convertedKLabel,
-                    (KLabelConstant) convert1(module.attributesFor().get(klabel).get().<KLabel>get(Att.unit()).get()),
+                    KLabelConstant.of(module.attributesFor().get(klabel).get().<String>get(Att.unit()).get(), global.getDefinition()),
                     global);
             // this assumes there are no KList variables in the KList
             return builder.addAll(convertedKList.getContents()).build();

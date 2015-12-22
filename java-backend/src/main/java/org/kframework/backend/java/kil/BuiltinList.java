@@ -120,7 +120,7 @@ public class BuiltinList extends Collection implements KItemCollection {
 
     @Override
     protected boolean computeMutability() {
-        throw new AssertionError("Unimplemented");
+        return false;
     }
 
     @Override

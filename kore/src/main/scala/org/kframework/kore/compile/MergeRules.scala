@@ -81,7 +81,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
       .map {
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
           val klistPredicatePairs: Set[(Seq[K], K)] = ks map { case (kapply, ruleP) => (kapply.klist.items.asScala.toSeq, ruleP) }
-          val normalizedItemsPredicatePairs = if (m.attributesFor(klabel).contains(Att.assoc)) {
+          val normalizedItemsPredicatePairs = if (m.attributesFor.getOrElse(klabel, Att()).contains(Att.assoc)) {
             val unitKLabel: KLabel = KLabel(m.attributesFor(klabel).get(Att.unit).get)
             val unitK: K = unitKLabel()
             val flatItemsPredicatePairs: Set[(Seq[K], K)] = klistPredicatePairs map { case (items, ruleP) => (Assoc.flatten(klabel, items, unitKLabel), ruleP) }

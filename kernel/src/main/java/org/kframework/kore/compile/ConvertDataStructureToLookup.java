@@ -243,6 +243,8 @@ public class ConvertDataStructureToLookup {
                         }
                     } else {
                         // List
+                        if (!att.contains(Attribute.HOOK_KEY))
+                            return super.apply(k);
                         return convertList(k, collectionLabel, components);
                     }
                 } else {

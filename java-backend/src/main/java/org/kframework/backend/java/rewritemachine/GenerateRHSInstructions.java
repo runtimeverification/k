@@ -20,7 +20,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinList node) {
-       throw new AssertionError("should not reach this place");
+       //throw new AssertionError("should not reach this place");
     }
 
     @Override
