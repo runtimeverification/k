@@ -276,6 +276,8 @@ public class Definition extends JavaSymbolicObject {
             if (prod.sort().equals(Sorts.KList()) || prod.sort().equals(Sorts.KBott()))
                 continue;
             if (assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
+                if (!prod.att().contains(Attribute.HOOK_KEY))
+                    continue;
                 type = org.kframework.kil.Sort.LIST;
             } else if (assoc.isPresent() && comm.isPresent() && idem.isPresent()) {
                 type = org.kframework.kil.Sort.SET;

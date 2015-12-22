@@ -67,6 +67,8 @@ public class BasicVisitor implements Visitor {
             visit((RuleAutomatonDisjunction) node);
         } else if (node instanceof InnerRHSRewrite) {
             visit((InnerRHSRewrite) node);
+        } else if (node instanceof LocalRewriteTerm) {
+            visit((LocalRewriteTerm) node);
         } else {
             assert false : "unexpected class " + node.getClass();
         }
