@@ -178,13 +178,8 @@ for the KOOL object-oriented constructs.
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               // TODO(KORE): drop klabel once parsing issues #1682 are fixed
-               > Exp "[" Exps "]"        [strict,klabel("farray")]
-               > Exp "(" Exps ")"        [strict(2),klabel("fcall")]    // was strict in SIMPLE
-               /*
                > Exp "[" Exps "]"        [strict]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
-               */
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
                | "read" "(" ")"
@@ -467,7 +462,11 @@ interestingly, the semantics of return stays unchanged. */
 
   context (HOLE => lvalue(HOLE)) = _
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> `_ => V` ...</store>
+  /*
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
+  */
     [assignment]
 
 
@@ -495,7 +494,11 @@ interestingly, the semantics of return stays unchanged. */
 
   syntax KItem ::= "popx"
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> `try S1 catch(X) {S2} => S1 ~> popx` ~> K </k>
+  /*
+  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
+  */
        <control>
          <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
@@ -531,7 +534,11 @@ from SIMPLE unchanged. */
 
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
+       // TODO(KORE): use parenthesis instead of backtick once #1931 is fixed
        <busy> Busy `.Set => SetItem(V)` </busy>
+       /*
+       <busy> Busy (.Set => SetItem(V)) </busy>
+       */
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -550,7 +557,11 @@ from SIMPLE unchanged. */
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
+  /*
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
+  */
   rule mkDecls(.Ids,.Vals) => {}
 
   // TODO(KORE): clarify sort inferences #1803
@@ -562,7 +573,11 @@ from SIMPLE unchanged. */
 
   syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule `env(_) => .` ~> env(_)  [structural]
+  /*
+  rule (env(_) => .) ~> env(_)  [structural]
+  */
   // TODO: How can we make sure that the second rule above applies before the first one?
   //       Probably we'll deal with this using strategies, eventually.
 
@@ -581,7 +596,14 @@ from SIMPLE unchanged. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K `(N +Int 1)...M |-> K`  when N <=Int M
+  // TODO(KORE):
+  // The additional bracket is required for disambiguity.
+  // Otherwise, this rule is possible to be parsed as:
+  //   rule N...M |-> K => N |-> ( (K(N +Int 1))...M |-> K )  when N <=Int M
+  // since K has no sort casting, thus can be considered as a klabel
+  // Note that backtick is better than parenthesis here,
+  // because parenthesis doesn't eliminate possiblility of K being of a klabel.
 
 
 /*@ \subsection{Changes to the existing untyped SIMPLE semantics}
@@ -761,7 +783,11 @@ refer to it (see rule above). */
 
   syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
+  // TODO(KORE): drop bracket #1935
+  rule <k> `new Class:Id(Vs:Vals) ~> K`
+  /*
   rule <k> new Class:Id(Vs:Vals) ~> K
+  */
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -952,16 +978,10 @@ method call or the array access.  */
        <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-  // TODO(KORE): drop klabel once parsing issues #1682 are fixed
-  rule fcall(fcall(A:Exp,B:Exps),C:Exps) => fcall(A,B) ~> #freezerFunCall(C)
-  rule fcall(farray(A:Exp,B:Exps),C:Exps) => farray(A,B) ~> #freezerFunCall(C)
-  rule V:Val ~> #freezerFunCall(C:Exps) => fcall(V,C)
-  /*
   // TODO(KORE): fix getKLabel #1801 and context issue #1802
   rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
   rule (A:Exp[B:Exps])(C:Exps) => A[B] ~> #freezerFunCall(C)
   rule V:Val ~> #freezerFunCall(C:Exps) => V(C)
-  */
   syntax KItem ::= "#freezerFunCall" "(" K ")"
   /*
   context HOLE(_:Exps)
