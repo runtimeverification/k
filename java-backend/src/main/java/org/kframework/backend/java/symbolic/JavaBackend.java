@@ -122,7 +122,7 @@ public class JavaBackend implements Backend {
     private static K convertKSeqToKApply(K ruleBody) {
         return new TransformK() {
             public K apply(KSequence kseq) {
-                return ((ADT.KSequence) kseq).kApply();
+                return super.apply(((ADT.KSequence) kseq).kApply());
             }
         }.apply(ruleBody);
     }
