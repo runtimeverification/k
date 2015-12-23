@@ -163,9 +163,9 @@ public class Kompile {
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             kem.print();
+
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
         }
-
     }
 
     public Function<Definition, Definition> defaultSteps() {

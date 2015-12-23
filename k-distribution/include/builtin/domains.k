@@ -474,11 +474,11 @@ module STRING
 
 endmodule
 
-module ID
+module ID-PROGRAM-PARSING
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoReject]
 endmodule
 
-module ID-PROGRAM-PARSING
+module ID
   imports STRING
 
   syntax Id
