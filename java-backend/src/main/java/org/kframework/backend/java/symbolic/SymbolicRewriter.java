@@ -242,7 +242,6 @@ public class SymbolicRewriter {
                 computeOne,
                 subject.termContext());
         for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
-            assert triple.getLeft().isSubstitution();
             Rule rule = definition.ruleTable.get(triple.getRight());
             Substitution<Variable, Term> substitution =
                     rule.containsAttribute(Att.refers_THIS_CONFIGURATION()) ?

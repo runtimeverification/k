@@ -169,7 +169,7 @@ public class FastRuleMatcher {
 
         // normalize associative representations
         if (subject instanceof BuiltinList && !(pattern instanceof BuiltinList)) {
-            pattern = ((BuiltinList) subject).upElementToList(subject);
+            pattern = ((BuiltinList) subject).upElementToList(pattern);
         } else if (pattern instanceof BuiltinList && !(subject instanceof BuiltinList)) {
             subject = ((BuiltinList) pattern).upElementToList(subject);
         }

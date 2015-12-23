@@ -47,4 +47,7 @@ public interface Transformer {
     ASTNode transform(InjectedKLabel injectedKLabel);
     ASTNode transform(RuleAutomatonDisjunction ruleAutomatonDisjunction);
     ASTNode transform(InnerRHSRewrite innerRHSRewrite);
+    default ASTNode transform(SMTLibTerm smtLibTerm) {
+        return smtLibTerm;
+    }
 }

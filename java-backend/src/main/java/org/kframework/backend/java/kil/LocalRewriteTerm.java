@@ -46,4 +46,9 @@ public class LocalRewriteTerm extends SMTLibTerm {
     public int computeHash() {
         return path.hashCode();
     }
+
+    @Override
+    public boolean isNormal() {
+        return false;
+    }
 }

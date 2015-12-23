@@ -8,6 +8,8 @@ import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 /**
@@ -47,8 +49,15 @@ public class BuiltinList extends Collection implements KItemCollection {
     }
 
     public boolean isElement(int index) {
-        assert global.getDefinition().subsorts().isSubsortedEq(sort, children.get(index).sort());
-        return global.getDefinition().subsorts().isSubsorted(sort, children.get(index).sort());
+        if(index >= size())
+            return false;
+        Term e = children.get(index);
+        return isElement(e);
+    }
+
+    private boolean isElement(Term e) {
+        assert global.getDefinition().subsorts().isSubsortedEq(sort, e.sort());
+        return !(e instanceof Variable && e.sort().equals(sort));
     }
 
     public Term range(int beginIndex, int endIndex) {
@@ -71,12 +80,14 @@ public class BuiltinList extends Collection implements KItemCollection {
 
     @Override
     public ImmutableList<Variable> collectionVariables() {
-        throw new AssertionError("Unimplemented");
+        return ImmutableList.copyOf(children.stream().filter(e -> !isElement(e)).map(Variable.class::cast).collect(Collectors.toList()));
     }
 
     @Override
     public int concreteSize() {
-        throw new AssertionError("Unimplemented");
+        int size = 0;
+        for(int i=0;i<this.size();i++) if(isElement(i)) size++;
+        return size;
     }
 
     @Override
@@ -176,7 +187,8 @@ public class BuiltinList extends Collection implements KItemCollection {
                     && unitKLabel.equals(((BuiltinList) term).unitKLabel)) {
                 return addAll(((BuiltinList) term).children);
             } else {
-                childrenBuilder.add(term);
+                if(!(term instanceof KItem && ((KItem) term).klabel().equals(this.unitKLabel))) // do not add the unit
+                    childrenBuilder.add(term);
                 return this;
             }
         }
@@ -205,7 +217,6 @@ public class BuiltinList extends Collection implements KItemCollection {
     }
 
     public BuiltinList upElementToList(Term element) {
-        assert global.getDefinition().subsorts().isSubsorted(sort, element.sort());
         return new SingletonBuiltinList(element, global, sort, operatorKLabel, unitKLabel);
     }
 
