@@ -56,7 +56,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(programParsingModuleForModule(mainSyntaxModuleName()).get(), programStartSymbol, kem);
+        return getParser(generatedProgramParsingModuleFor(mainSyntaxModuleName()).get(), programStartSymbol, kem);
     }
 
     /**
@@ -75,8 +75,8 @@ public class CompiledDefinition implements Serializable {
 
     public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
 
-    public Option<Module> programParsingModuleForModule(String syntaxModuleName) {
-        return kompiledDefinition.getModule(syntaxModuleName + RuleGrammarGenerator.POSTFIX);
+    public Option<Module> generatedProgramParsingModuleFor(String moduleName) {
+        return kompiledDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
     }
 
     public Module languageParsingModule() { return languageParsingModule; }
